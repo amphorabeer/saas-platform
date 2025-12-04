@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import moment from 'moment'
 import { ExtraChargesService } from '../services/ExtraChargesService'
 
@@ -148,6 +148,7 @@ export default function SettingsNew() {
   const [activeSection, setActiveSection] = useState('hotel')
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const isInitialMount = useRef(true)
   
   // Data states
   const [hotelInfo, setHotelInfo] = useState<HotelInfo>({
@@ -284,18 +285,35 @@ export default function SettingsNew() {
     const savedChecklist = localStorage.getItem('housekeepingChecklist')
     if (savedChecklist) {
       try {
-        setChecklist(JSON.parse(savedChecklist))
+        const parsed = JSON.parse(savedChecklist)
+        setChecklist(parsed)
+        console.log('📋 Loaded housekeeping checklist from localStorage:', parsed)
       } catch (e) {
         console.error('Error loading checklist:', e)
+        // If parsing fails, use defaults
+        const defaultItems = [
+          { id: '1', task: 'საწოლის თეთრეულის შეცვლა', category: 'საძინებელი', required: true },
+          { id: '2', task: 'აბაზანის დასუფთავება', category: 'აბაზანა', required: true },
+          { id: '3', task: 'იატაკის მტვერსასრუტით გაწმენდა', category: 'ზოგადი', required: true },
+          { id: '4', task: 'პირსახოცების შეცვლა', category: 'აბაზანა', required: true },
+          { id: '5', task: 'მინიბარის შევსება', category: 'მომსახურება', required: false }
+        ]
+        setChecklist(defaultItems)
+        localStorage.setItem('housekeepingChecklist', JSON.stringify(defaultItems))
+        console.log('💾 Saved default checklist to localStorage')
       }
     } else {
-      setChecklist([
+      // No saved checklist - set defaults and save them
+      const defaultItems = [
         { id: '1', task: 'საწოლის თეთრეულის შეცვლა', category: 'საძინებელი', required: true },
         { id: '2', task: 'აბაზანის დასუფთავება', category: 'აბაზანა', required: true },
         { id: '3', task: 'იატაკის მტვერსასრუტით გაწმენდა', category: 'ზოგადი', required: true },
         { id: '4', task: 'პირსახოცების შეცვლა', category: 'აბაზანა', required: true },
         { id: '5', task: 'მინიბარის შევსება', category: 'მომსახურება', required: false }
-      ])
+      ]
+      setChecklist(defaultItems)
+      localStorage.setItem('housekeepingChecklist', JSON.stringify(defaultItems))
+      console.log('💾 Saved default checklist to localStorage')
     }
     
     // Load System Settings
@@ -353,10 +371,8 @@ export default function SettingsNew() {
         console.error('Error loading staff:', e)
       }
     } else {
-      setStaff([
-        { id: '1', firstName: 'მარიამ', lastName: 'გელაშვილი', position: 'Housekeeper', department: 'housekeeping', phone: '+995555123456', email: 'mariam@hotel.com', active: true, hireDate: '2024-01-15', notes: '' },
-        { id: '2', firstName: 'გიორგი', lastName: 'ბერიძე', position: 'Housekeeper', department: 'housekeeping', phone: '+995555234567', email: 'giorgi@hotel.com', active: true, hireDate: '2024-02-01', notes: '' }
-      ])
+      // No default staff - start with empty array
+      setStaff([])
     }
     
     // NEW: Load Seasons
@@ -445,6 +461,10 @@ export default function SettingsNew() {
   const saveHotelInfo = () => {
     setIsSaving(true)
     localStorage.setItem('hotelInfo', JSON.stringify(hotelInfo))
+    // Dispatch custom event to update header in other components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('hotelInfoUpdated'))
+    }
     setTimeout(() => {
       setIsSaving(false)
       showMessage('success', '✅ სასტუმროს ინფორმაცია შენახულია!')
@@ -472,11 +492,25 @@ export default function SettingsNew() {
   const saveChecklist = () => {
     setIsSaving(true)
     localStorage.setItem('housekeepingChecklist', JSON.stringify(checklist))
+    console.log('✅ Saved housekeeping checklist:', checklist)
     setTimeout(() => {
       setIsSaving(false)
       showMessage('success', '✅ ჩეკლისტი შენახულია!')
     }, 500)
   }
+  
+  // Auto-save checklist when it changes (skip initial mount)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return // Skip saving on initial mount
+    }
+    
+    if (checklist && checklist.length > 0) {
+      localStorage.setItem('housekeepingChecklist', JSON.stringify(checklist))
+      console.log('💾 Auto-saved housekeeping checklist:', checklist)
+    }
+  }, [checklist])
   
   const saveSystemSettings = () => {
     setIsSaving(true)
@@ -5323,6 +5357,14 @@ function HousekeepingSection({ checklist, setChecklist, onSave, isSaving }: {
     onSave()
   }
   
+  const handleEdit = (id: string, currentTask: string) => {
+    const newTask = prompt('შეცვალეთ დავალება:', currentTask)
+    if (newTask && newTask.trim()) {
+      setChecklist(checklist.map(c => c.id === id ? { ...c, task: newTask.trim() } : c))
+      onSave()
+    }
+  }
+  
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border p-6">
@@ -5382,22 +5424,36 @@ function HousekeepingSection({ checklist, setChecklist, onSave, isSaving }: {
               <div className="space-y-2">
                 {tasks.map(task => (
                   <div key={task.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-1">
                       <span className={`w-2 h-2 rounded-full ${task.required ? 'bg-red-500' : 'bg-gray-300'}`} />
-                      <span>{task.task}</span>
+                      <span className="font-medium">{task.task}</span>
                       {task.required && <span className="text-xs text-red-500">*სავალდებულო</span>}
                     </div>
                     <div className="flex gap-1">
+                      {/* Edit Button */}
+                      <button
+                        onClick={() => handleEdit(task.id, task.task)}
+                        className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                        title="რედაქტირება"
+                      >
+                        ✏️
+                      </button>
+                      {/* Toggle Required */}
                       <button
                         onClick={() => toggleRequired(task.id)}
                         className={`px-2 py-1 rounded text-xs ${task.required ? 'bg-red-100 text-red-700' : 'bg-gray-200'}`}
+                        title={task.required ? 'არასავალდებულო' : 'სავალდებულო'}
                       >
                         {task.required ? '⭐' : '☆'}
                       </button>
+                      {/* Delete Button */}
                       <button
                         onClick={() => handleDelete(task.id)}
                         className="px-2 py-1 text-red-600 hover:bg-red-50 rounded text-sm"
-                      >🗑️</button>
+                        title="წაშლა"
+                      >
+                        🗑️
+                      </button>
                     </div>
                   </div>
                 ))}

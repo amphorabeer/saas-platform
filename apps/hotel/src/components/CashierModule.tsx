@@ -19,10 +19,13 @@ interface CashierShift {
   discrepancyReason?: string
   openedAt: string
   closedAt?: string
+  closedDate?: string
   status: 'open' | 'closed'
   withdrawal?: number
   nextDayOpening?: number
   transactionCount?: number
+  transactions?: any[]  // Saved transactions (folio payments + manual income)
+  manualTransactions?: any[]  // All manual transactions for reference
 }
 
 export default function CashierModule() {
@@ -373,10 +376,18 @@ export default function CashierModule() {
     const discrepancy = closeFormData.actualCash - expectedCash
     const withdrawal = closeFormData.actualCash - closeFormData.nextDayBalance
     
+    // Get manual transactions for today before clearing
+    const businessDate = getBusinessDate()
+    const allManualTx = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+    const todayManualTx = allManualTx.filter((t: any) => t.date === businessDate)
+    
     const closedShift = {
       ...currentShift,
       closedAt: new Date().toISOString(),
+      closedDate: businessDate,
       status: 'closed' as const,
+      
+      // Financial totals
       cashCollected: calculatedTotals.cash,
       cardPayments: calculatedTotals.card,
       bankTransfers: calculatedTotals.bank,
@@ -387,6 +398,10 @@ export default function CashierModule() {
       discrepancy: discrepancy,
       withdrawal: withdrawal,
       nextDayOpening: closeFormData.nextDayBalance,
+      
+      // SAVE ALL TRANSACTIONS with the shift!
+      transactions: [...transactions],  // Folio payments + manual income
+      manualTransactions: [...todayManualTx],  // All manual transactions for reference
       transactionCount: transactions.length
     }
     
@@ -399,9 +414,7 @@ export default function CashierModule() {
     localStorage.removeItem('currentCashierShift')
     
     // Clear today's manual transactions
-    const today = getBusinessDate()
-    const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
-    const remainingManual = savedManual.filter((t: any) => t.date !== today)
+    const remainingManual = allManualTx.filter((t: any) => t.date !== businessDate)
     localStorage.setItem('cashierManualTransactions', JSON.stringify(remainingManual))
     
     // Update state
@@ -520,23 +533,73 @@ export default function CashierModule() {
         )}
         
         {selectedShift && (
-          <div className="mt-4 p-4 bg-gray-50 rounded">
-            <h4 className="font-bold mb-2">Shift დეტალები</h4>
-            <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-bold mb-3">Shift დეტალები</h4>
+            
+            <div className="grid grid-cols-2 gap-2 text-sm mb-4">
               <div>გახსნა:</div>
               <div>{moment(selectedShift.openedAt).format('DD/MM/YYYY HH:mm')}</div>
               <div>დახურვა:</div>
               <div>{selectedShift.closedAt ? moment(selectedShift.closedAt).format('DD/MM/YYYY HH:mm') : '-'}</div>
               <div>ნაღდი:</div>
-              <div>₾{selectedShift.cashCollected.toFixed(2)}</div>
+              <div>₾{(selectedShift.cashCollected || 0).toFixed(2)}</div>
               <div>ბარათი:</div>
-              <div>₾{selectedShift.cardPayments.toFixed(2)}</div>
+              <div>₾{(selectedShift.cardPayments || 0).toFixed(2)}</div>
+              <div>ხარჯები:</div>
+              <div>-₾{(selectedShift.expenses || 0).toFixed(2)}</div>
               <div>გასატანი:</div>
               <div>₾{(selectedShift.withdrawal || 0).toFixed(2)}</div>
             </div>
+            
+            {/* Show saved transactions */}
+            {selectedShift.transactions && selectedShift.transactions.length > 0 && (
+              <div className="mt-3">
+                <h5 className="font-medium text-green-700 mb-2">
+                  💰 შემოსავლები ({selectedShift.transactions.length})
+                </h5>
+                <table className="w-full text-sm">
+                  <tbody>
+                    {selectedShift.transactions.map((t: any, idx: number) => (
+                      <tr key={idx} className="border-t">
+                        <td className="py-1">{t.time}</td>
+                        <td>{t.description}</td>
+                        <td className="text-right">
+                          {t.method === 'cash' ? '💵' : t.method === 'card' ? '💳' : '🏦'}
+                        </td>
+                        <td className="text-right text-green-600">+₾{(t.amount || 0).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            {/* Show saved expenses */}
+            {selectedShift.manualTransactions && 
+             selectedShift.manualTransactions.filter((t: any) => t.type === 'expense').length > 0 && (
+              <div className="mt-3">
+                <h5 className="font-medium text-red-700 mb-2">
+                  💸 ხარჯები ({selectedShift.manualTransactions.filter((t: any) => t.type === 'expense').length})
+                </h5>
+                <table className="w-full text-sm">
+                  <tbody>
+                    {selectedShift.manualTransactions
+                      .filter((t: any) => t.type === 'expense')
+                      .map((t: any, idx: number) => (
+                        <tr key={idx} className="border-t">
+                          <td className="py-1">{t.time}</td>
+                          <td>{t.description}</td>
+                          <td className="text-right text-red-600">-₾{(t.amount || 0).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
             <button
               onClick={() => setSelectedShift(null)}
-              className="mt-2 text-sm text-blue-500 hover:underline"
+              className="mt-3 px-4 py-1 bg-gray-200 rounded"
             >
               დახურვა
             </button>
@@ -964,16 +1027,55 @@ export default function CashierModule() {
 // Helper component
 const OpenShiftForm = ({ onOpen }: { onOpen: (balance: number) => void }) => {
   const [openingBalance, setOpeningBalance] = useState(0)
+  const [previousBalance, setPreviousBalance] = useState<number | null>(null)
+  
+  useEffect(() => {
+    // Get last closed shift's nextDayOpening
+    const shifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
+    if (shifts.length > 0) {
+      // Sort by closedAt descending to get most recent
+      const sortedShifts = shifts.sort((a: any, b: any) => 
+        new Date(b.closedAt || 0).getTime() - new Date(a.closedAt || 0).getTime()
+      )
+      const lastShift = sortedShifts[0]
+      
+      if (lastShift && lastShift.nextDayOpening !== undefined) {
+        setPreviousBalance(lastShift.nextDayOpening)
+        setOpeningBalance(lastShift.nextDayOpening) // Auto-fill
+      }
+    }
+  }, [])
   
   return (
     <div className="space-y-4">
-      <input
-        type="number"
-        value={openingBalance}
-        onChange={(e) => setOpeningBalance(Number(e.target.value))}
-        className="w-full border rounded px-3 py-2"
-        placeholder="გახსნის ბალანსი (₾)"
-      />
+      {previousBalance !== null && previousBalance > 0 && (
+        <div className="p-3 bg-blue-50 rounded-lg text-sm">
+          <div className="text-blue-700">
+            💰 წინა დღის ნაშთი: <strong>₾{previousBalance.toFixed(2)}</strong>
+          </div>
+        </div>
+      )}
+      
+      <div>
+        <label className="block text-sm font-medium mb-1">საწყისი ბალანსი (₾)</label>
+        <input
+          type="number"
+          value={openingBalance}
+          onChange={(e) => setOpeningBalance(Number(e.target.value))}
+          className="w-full border rounded px-3 py-2"
+          placeholder="0.00"
+        />
+      </div>
+      
+      {previousBalance !== null && previousBalance > 0 && openingBalance !== previousBalance && (
+        <button
+          onClick={() => setOpeningBalance(previousBalance)}
+          className="w-full py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"
+        >
+          ↩️ წინა დღის ნაშთის გამოყენება (₾{previousBalance.toFixed(2)})
+        </button>
+      )}
+      
       <button
         onClick={() => onOpen(openingBalance)}
         className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"

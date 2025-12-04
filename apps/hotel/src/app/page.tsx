@@ -61,6 +61,7 @@ export default function HotelDashboard() {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
   const [maintenanceRooms, setMaintenanceRooms] = useState<string[]>([])
+  const [hotelInfo, setHotelInfo] = useState<any>({ name: 'Hotel Tbilisi', logo: '' })
   
   // Auth check
   useEffect(() => {
@@ -98,6 +99,43 @@ export default function HotelDashboard() {
       } catch (e) {
         console.error('Error loading maintenance rooms:', e)
       }
+    }
+  }, [])
+  
+  // Load hotel info from localStorage
+  useEffect(() => {
+    const loadHotelInfo = () => {
+      const savedHotelInfo = localStorage.getItem('hotelInfo')
+      if (savedHotelInfo) {
+        try {
+          setHotelInfo(JSON.parse(savedHotelInfo))
+        } catch (e) {
+          console.error('Error loading hotel info:', e)
+        }
+      }
+    }
+    
+    loadHotelInfo()
+    
+    // Listen for changes to hotelInfo
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'hotelInfo') {
+        loadHotelInfo()
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also listen for custom event (for same-tab updates)
+    const handleCustomStorageChange = () => {
+      loadHotelInfo()
+    }
+    
+    window.addEventListener('hotelInfoUpdated', handleCustomStorageChange)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('hotelInfoUpdated', handleCustomStorageChange)
     }
   }, [])
   const [initialCheckInDate, setInitialCheckInDate] = useState<string | undefined>(undefined)
@@ -221,7 +259,7 @@ export default function HotelDashboard() {
       case 'new-night-audit': return '🌙 Night Audit'
       case 'cashier': return '💰 სალარო'
       case 'financial': return '💰 Financial Dashboard'
-      case 'settings-new': return '⚙️ პარამეტრები (ახალი)'
+      case 'settings-new': return '⚙️ პარამეტრები'
       default: return ''
     }
   }
@@ -805,39 +843,20 @@ export default function HotelDashboard() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setActiveTab('dashboard')}
-                className="text-xl md:text-2xl font-bold hover:text-blue-600 transition"
+                className="flex items-center gap-3 text-xl md:text-2xl font-bold hover:text-blue-600 transition"
               >
-                🏨 Hotel Management System
+                {hotelInfo?.logo && (
+                  <img 
+                    src={hotelInfo.logo} 
+                    alt="Logo" 
+                    className="h-8 w-8 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
+                )}
+                {hotelInfo?.name || 'Hotel Dashboard'}
               </button>
-              <span className="text-sm text-gray-500 hidden md:inline">Hotel Tbilisi Dashboard</span>
-              {(() => {
-                const getBusinessDay = () => {
-                  const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
-                  
-                  if (lastAuditDate) {
-                    try {
-                      const lastClosed = JSON.parse(lastAuditDate)
-                      // Business day is NEXT day after audit
-                      return moment(lastClosed).add(1, 'day').format('YYYY-MM-DD')
-                    } catch {
-                      return moment().format('YYYY-MM-DD')
-                    }
-                  }
-                  
-                  // If no audit, use today
-                  return moment().format('YYYY-MM-DD')
-                }
-                
-                const businessDay = getBusinessDay()
-                const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
-                
-                return (
-                  <span className="text-xs md:text-sm text-blue-600 font-medium hidden md:inline">
-                    Business Day: {moment(businessDay).format('DD/MM/YYYY')}
-                  </span>
-                )
-              })()}
-              
               {/* Night Audit button */}
               <button
                 onClick={() => {
@@ -925,7 +944,7 @@ export default function HotelDashboard() {
                         onClick={() => addTabFromMenu('settings-new')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
                       >
-                        ⚙️ პარამეტრები (ახალი)
+                        ⚙️ პარამეტრები
                       </button>
                     </div>
                   )}
@@ -1019,7 +1038,7 @@ export default function HotelDashboard() {
       
       {/* Statistics - ONLY ONCE */}
       <div className="bg-white px-2 md:px-6 py-3 md:py-4 border-b">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-2 md:gap-4">
           <div className="bg-white rounded-lg p-2 border shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -1049,6 +1068,40 @@ export default function HotelDashboard() {
               <span className="w-2 h-2 bg-green-500 rounded-full"></span>
             </div>
           </div>
+          
+          {/* Business Day Card - NEW */}
+          {(() => {
+            const getBusinessDay = () => {
+              const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
+              
+              if (lastAuditDate) {
+                try {
+                  const lastClosed = JSON.parse(lastAuditDate)
+                  // Business day is NEXT day after audit
+                  return moment(lastClosed).add(1, 'day').format('YYYY-MM-DD')
+                } catch {
+                  return moment().format('YYYY-MM-DD')
+                }
+              }
+              
+              // If no audit, use today
+              return moment().format('YYYY-MM-DD')
+            }
+            
+            const businessDay = getBusinessDay()
+            
+            return (
+              <div className="bg-purple-50 rounded-lg p-2 border border-purple-200 shadow-sm col-span-2 md:col-span-1">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500">Business Day</p>
+                    <p className="text-lg font-bold text-purple-600">{moment(businessDay).format('DD/MM/YYYY')}</p>
+                  </div>
+                  <span className="text-lg">📅</span>
+                </div>
+              </div>
+            )
+          })()}
           
           <div className="bg-white rounded-lg p-2 border shadow-sm">
             <div className="flex items-center justify-between">

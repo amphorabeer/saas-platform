@@ -174,36 +174,69 @@ export default function CheckOutModal({
         })
       })
       
-      // Auto-create housekeeping task
+      // Auto-create housekeeping task (only if doesn't exist)
       const savedTasks = typeof window !== 'undefined' 
         ? localStorage.getItem('housekeepingTasks')
         : null
       const existingTasks = savedTasks ? JSON.parse(savedTasks) : []
       
-      const housekeepingTask = {
-        id: `task-${Date.now()}`,
-        roomId: reservation.roomId,
-        roomNumber: reservation.roomNumber || reservation.roomId,
-        type: 'checkout',
-        status: 'pending',
-        priority: 'high',
-        assignedTo: '',
-        scheduledTime: moment().format('HH:mm'),
-        notes: `Check-out cleaning after ${reservation.guestName}`,
-        checklist: [
-          { item: 'ზეწრების შეცვლა', completed: false },
-          { item: 'პირსახოცების შეცვლა', completed: false },
-          { item: 'აბაზანის დასუფთავება', completed: false },
-          { item: 'იატაკის დალაგება', completed: false },
-          { item: 'მინიბარის შემოწმება', completed: false },
-          { item: 'ნაგვის გატანა', completed: false },
-          { item: 'ზედაპირების დასუფთავება', completed: false }
-        ]
-      }
+      // Check if pending task already exists for this room
+      const roomNumber = reservation.roomNumber || reservation.roomId
+      const existingTask = existingTasks.find((t: any) => 
+        (t.roomId === reservation.roomId || t.roomNumber === roomNumber) && 
+        t.type === 'checkout' &&
+        t.status === 'pending'
+      )
       
-      existingTasks.push(housekeepingTask)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('housekeepingTasks', JSON.stringify(existingTasks))
+      if (!existingTask) {
+        // Get floor from room
+        const rooms = typeof window !== 'undefined' 
+          ? JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+          : []
+        const room = rooms.find((r: any) => r.id === reservation.roomId || r.roomNumber === roomNumber)
+        const roomFloor = room?.floor || Math.floor(parseInt(roomNumber) / 100) || 1
+        
+        // Load default checklist
+        // Load checklist from Settings localStorage
+        const loadChecklistFromSettings = (): any[] => {
+          if (typeof window === 'undefined') return []
+          const saved = localStorage.getItem('housekeepingChecklist')
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved)
+              return parsed.map((item: any) => ({
+                item: item.task || item.item || item.name,
+                completed: false,
+                required: item.required || false,
+                category: item.category || 'ზოგადი'
+              }))
+            } catch (e) {
+              console.error('Error loading checklist:', e)
+            }
+          }
+          return []
+        }
+        
+        const defaultChecklist = loadChecklistFromSettings()
+        
+        const housekeepingTask = {
+          id: `task-${Date.now()}-${reservation.roomId}`,
+          roomId: reservation.roomId,
+          roomNumber: roomNumber,
+          floor: roomFloor,
+          type: 'checkout',
+          status: 'pending',
+          priority: 'high',
+          assignedTo: '',
+          scheduledTime: moment().format('HH:mm'),
+          notes: `Check-out cleaning after ${reservation.guestName}`,
+          checklist: defaultChecklist
+        }
+        
+        existingTasks.push(housekeepingTask)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('housekeepingTasks', JSON.stringify(existingTasks))
+        }
       }
       
       // Log activity

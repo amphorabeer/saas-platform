@@ -19,13 +19,8 @@ export default function StaffManager({ onStaffUpdate }: any) {
     if (saved) {
       setStaff(JSON.parse(saved))
     } else {
-      // Default staff
-      setStaff([
-        { id: 1, name: 'მარიამ', position: 'დამლაგებელი', shift: 'დილა', phone: '555123456', active: true },
-        { id: 2, name: 'ნინო', position: 'დამლაგებელი', shift: 'დილა', phone: '555123457', active: true },
-        { id: 3, name: 'სალომე', position: 'სუპერვაიზერი', shift: 'საღამო', phone: '555123458', active: true },
-        { id: 4, name: 'ხატია', position: 'დამლაგებელი', shift: 'საღამო', phone: '555123459', active: true }
-      ])
+      // No default staff - start with empty array
+      setStaff([])
     }
   }, [])
   
