@@ -63,21 +63,21 @@ model Organization {
   phone             String?
   address           String?
   logo              String?
-  
+
   // Multi-tenancy
   tenantId          String             @unique @default(cuid())
   databaseUrl       String?
-  
+
   // Relations
   subscription      Subscription?
   users             User[]
   modules           ModuleAccess[]
   tickets          SupportTicket[]
-  
+
   // Timestamps
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  
+
   @@index([slug])
   @@index([tenantId])
 }
@@ -89,23 +89,23 @@ model User {
   password          String
   avatar            String?
   role              Role               @default(USER)
-  
+
   // Organization
   organizationId    String?
   organization      Organization?      @relation(fields: [organizationId], references: [id])
-  
+
   // Auth
   emailVerified     DateTime?
   sessions          Session[]
   accounts          Account[]
-  
+
   // Activity
   lastLoginAt       DateTime?
   activities        ActivityLog[]
-  
+
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  
+
   @@index([email])
   @@index([organizationId])
 }
@@ -135,7 +135,7 @@ model Session {
   userId            String
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   expires           DateTime
-  
+
   @@index([userId])
 }
 
@@ -151,34 +151,34 @@ model Subscription {
   id                String             @id @default(cuid())
   organizationId    String             @unique
   organization      Organization       @relation(fields: [organizationId], references: [id])
-  
+
   plan              PlanType           @default(STARTER)
   status            SubscriptionStatus @default(TRIAL)
-  
+
   // Pricing
   price             Decimal            @db.Decimal(10, 2)
   currency          String             @default("GEL")
-  
+
   // Billing
   currentPeriodStart DateTime
   currentPeriodEnd   DateTime
   cancelAtPeriodEnd  Boolean           @default(false)
-  
+
   // Trial
   trialStart        DateTime?
   trialEnd          DateTime?
-  
+
   // Payment
   paymentMethod     String?
   lastPaymentDate   DateTime?
   nextBillingDate   DateTime?
-  
+
   // Relations
   invoices          Invoice[]
-  
+
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  
+
   @@index([organizationId])
   @@index([status])
 }
@@ -187,23 +187,23 @@ model ModuleAccess {
   id                String             @id @default(cuid())
   organizationId    String
   organization      Organization       @relation(fields: [organizationId], references: [id])
-  
+
   moduleType        ModuleType
   isActive          Boolean            @default(true)
-  
+
   // Module-specific settings
   settings          Json?
-  
+
   // Module limits
   maxUsers          Int?
   maxRecords        Int?
-  
+
   // Module features
   features          ModuleFeature[]
-  
+
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  
+
   @@unique([organizationId, moduleType])
   @@index([organizationId])
   @@index([moduleType])
@@ -213,10 +213,10 @@ model ModuleFeature {
   id                String             @id @default(cuid())
   moduleAccessId    String
   moduleAccess      ModuleAccess       @relation(fields: [moduleAccessId], references: [id])
-  
+
   name              String
   isEnabled         Boolean            @default(true)
-  
+
   @@index([moduleAccessId])
 }
 
@@ -224,20 +224,20 @@ model Invoice {
   id                String             @id @default(cuid())
   subscriptionId    String
   subscription      Subscription       @relation(fields: [subscriptionId], references: [id])
-  
+
   invoiceNumber     String             @unique @default(cuid())
   amount            Decimal            @db.Decimal(10, 2)
   currency          String             @default("GEL")
   status            String
-  
+
   dueDate           DateTime
   paidAt            DateTime?
-  
+
   invoiceUrl        String?
-  
+
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  
+
   @@index([subscriptionId])
   @@index([status])
 }
@@ -346,22 +346,22 @@ model ActivityLog {
 model HotelRoom {
   id                String             @id @default(cuid())
   tenantId          String
-  
+
   roomNumber        String
   roomType          String
   floor             Int
   status            String
-  
+
   basePrice         Decimal            @db.Decimal(10, 2)
-  
+
   amenities         String[]
   maxOccupancy      Int
-  
+
   reservations      HotelReservation[]
-  
+
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  
+
   @@unique([tenantId, roomNumber])
   @@index([tenantId])
   @@index([status])
@@ -370,30 +370,30 @@ model HotelRoom {
 model HotelReservation {
   id                String             @id @default(cuid())
   tenantId          String
-  
+
   roomId            String
   room              HotelRoom          @relation(fields: [roomId], references: [id])
-  
+
   guestName         String
   guestEmail        String
   guestPhone        String
-  
+
   checkIn           DateTime
   checkOut          DateTime
-  
+
   adults            Int
   children          Int                @default(0)
-  
+
   totalAmount       Decimal            @db.Decimal(10, 2)
   paidAmount        Decimal            @db.Decimal(10, 2) @default(0)
-  
+
   status            String
-  
+
   notes             String?
-  
+
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  
+
   @@index([tenantId])
   @@index([roomId])
   @@index([status])

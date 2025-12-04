@@ -328,8 +328,12 @@ export default function CashierModule() {
     saved.push(transaction)
     localStorage.setItem('cashierManualTransactions', JSON.stringify(saved))
     
-    // Update state
-    setManualTransactions([...manualTransactions, transaction])
+    // Update state - income goes to transactions, expenses go to manualTransactions
+    if (newTransaction.type === 'income') {
+      setTransactions(prev => [...prev, transaction])
+    } else {
+      setManualTransactions(prev => [...prev, transaction])
+    }
     
     // Update shift totals
     const updated = { ...currentShift }

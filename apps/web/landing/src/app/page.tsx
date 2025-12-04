@@ -513,19 +513,19 @@ export default function Home() {
             {modules.map((module, index) => (
               <AnimatedCard key={module.slug} index={index}>
                 <Card className="h-full hover:shadow-lg transition-shadow">
-                  <CardHeader>
+              <CardHeader>
                     <div className="text-4xl mb-4">{module.icon}</div>
                     <CardTitle className="text-xl sm:text-2xl">{module.name}</CardTitle>
                     <CardDescription className="text-sm sm:text-base">{module.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
+              </CardHeader>
+              <CardContent>
                     <Button asChild className="w-full min-h-[44px]">
                       <Link href={`/modules/${module.slug}/pricing`}>გაიგე მეტი</Link>
                     </Button>
-                  </CardContent>
-                </Card>
+              </CardContent>
+            </Card>
               </AnimatedCard>
-            ))}
+          ))}
           </motion.div>
         )}
       </section>
@@ -536,6 +536,6 @@ export default function Home() {
           <p>&copy; 2024 SaaS Platform. ყველა უფლება დაცულია.</p>
         </div>
       </footer>
-    </div>
+      </div>
   );
 }
