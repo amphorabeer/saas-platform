@@ -142,17 +142,11 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
       : 0
     const newBalance = previousBalance - payment.amount
     
-    // Get Business Date
-    const businessDate = typeof window !== 'undefined' 
-      ? (localStorage.getItem('currentBusinessDate') || new Date().toISOString().split('T')[0])
-      : new Date().toISOString().split('T')[0]
-    const now = new Date()
-    
     const transaction: FolioTransaction = {
       id: `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       folioId: folio.id,
-      date: businessDate, // Use Business Date!
-      time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`,
+      date: moment().format('YYYY-MM-DD'),
+      time: moment().format('HH:mm:ss'),
       
       type: 'payment',
       category: 'payment',

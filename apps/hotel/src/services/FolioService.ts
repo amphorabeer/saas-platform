@@ -84,16 +84,10 @@ export class FolioService {
       }
     }
     
-    // Get Business Date for folio number
-    const businessDate = typeof window !== 'undefined' 
-      ? (localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD'))
-      : moment().format('YYYY-MM-DD')
-    const dateStr = businessDate.replace(/-/g, '').slice(2) // YYMMDD
-    
     // Create new folio
     const newFolio: Folio = {
       id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      folioNumber: `F${dateStr}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
+      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
       reservationId: reservation.id,
       guestName: reservation.guestName,
       roomNumber: reservation.roomNumber || reservation.roomId,
@@ -159,15 +153,9 @@ export class FolioService {
     const creditLimit = options?.creditLimit || 5000
     const paymentMethod = options?.paymentMethod || reservation.paymentMethod || 'cash'
     
-    // Get Business Date for folio number
-    const businessDate = typeof window !== 'undefined' 
-      ? (localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD'))
-      : moment().format('YYYY-MM-DD')
-    const dateStr = businessDate.replace(/-/g, '').slice(2) // YYMMDD
-    
     const newFolio: Folio = {
       id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      folioNumber: `F${dateStr}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
+      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
       reservationId: reservation.id,
       guestName: reservation.guestName,
       roomNumber: reservation.roomNumber || reservation.roomId,

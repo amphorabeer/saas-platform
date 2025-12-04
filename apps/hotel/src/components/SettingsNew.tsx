@@ -211,7 +211,6 @@ export default function SettingsNew() {
     showSeasonColors: true
   })
   
-  // Cashier Settings state
   const [cashierSettings, setCashierSettings] = useState({
     cashierEnabled: true,
     defaultOpeningBalance: 0,
@@ -232,7 +231,7 @@ export default function SettingsNew() {
     const savedHotelInfo = localStorage.getItem('hotelInfo')
     if (savedHotelInfo) {
       try {
-        setHotelInfo(prev => ({ ...prev, ...JSON.parse(savedHotelInfo) }))
+        setHotelInfo({ ...hotelInfo, ...JSON.parse(savedHotelInfo) })
       } catch (e) {
         console.error('Error loading hotel info:', e)
       }
@@ -303,9 +302,19 @@ export default function SettingsNew() {
     const savedSystemSettings = localStorage.getItem('systemSettings')
     if (savedSystemSettings) {
       try {
-        setSystemSettings(prev => ({ ...prev, ...JSON.parse(savedSystemSettings) }))
+        setSystemSettings({ ...systemSettings, ...JSON.parse(savedSystemSettings) })
       } catch (e) {
         console.error('Error loading system settings:', e)
+      }
+    }
+    
+    // Load Cashier Settings
+    const savedCashierSettings = localStorage.getItem('cashierSettings')
+    if (savedCashierSettings) {
+      try {
+        setCashierSettings({ ...cashierSettings, ...JSON.parse(savedCashierSettings) })
+      } catch (e) {
+        console.error('Error loading cashier settings:', e)
       }
     }
     
@@ -430,16 +439,6 @@ export default function SettingsNew() {
         console.error('Error loading calendar settings:', e)
       }
     }
-    
-    // Load Cashier Settings
-    const savedCashierSettings = localStorage.getItem('cashierSettings')
-    if (savedCashierSettings) {
-      try {
-        setCashierSettings(prev => ({ ...prev, ...JSON.parse(savedCashierSettings) }))
-      } catch (e) {
-        console.error('Error loading cashier settings:', e)
-      }
-    }
   }
   
   // Save functions
@@ -544,21 +543,6 @@ export default function SettingsNew() {
     }
   }
   
-  // Save Cashier Settings
-  const saveCashierSettings = () => {
-    setIsSaving(true)
-    localStorage.setItem('cashierSettings', JSON.stringify(cashierSettings))
-    setTimeout(() => {
-      setIsSaving(false)
-      showMessage('success', '✅ სალაროს პარამეტრები შენახულია!')
-    }, 500)
-  }
-  
-  // Update Cashier Settings
-  const updateCashierSettings = (updates: Partial<typeof cashierSettings>) => {
-    setCashierSettings(prev => ({ ...prev, ...updates }))
-  }
-  
   const showMessage = (type: 'success' | 'error', text: string) => {
     setSaveMessage({ type, text })
     setTimeout(() => setSaveMessage(null), 3000)
@@ -571,9 +555,9 @@ export default function SettingsNew() {
     { id: 'calendar', label: 'კალენდარი', icon: '📅', description: 'Drag & Drop, Resize' },
     { id: 'room-pricing', label: 'ოთახის ფასები', icon: '💰', description: 'ფასები და გადასახადები' },
     { id: 'services', label: 'სერვისები', icon: '🛎️', description: 'დამატებითი სერვისები' },
-    { id: 'cashier', label: 'სალარო', icon: '💰', description: 'სალაროს პარამეტრები' },
     { id: 'users', label: 'მომხმარებლები', icon: '👥', description: 'წვდომა და უფლებები' },
     { id: 'housekeeping', label: 'დასუფთავება', icon: '🧹', description: 'Housekeeping ჩეკლისტი' },
+    { id: 'cashier', label: 'სალარო', icon: '💰', description: 'სალაროს პარამეტრები' },
     { id: 'system', label: 'სისტემა', icon: '🖥️', description: 'სისტემის პარამეტრები' }
   ]
   
@@ -694,105 +678,6 @@ export default function SettingsNew() {
               />
             )}
             
-            {/* Cashier Section */}
-            {activeSection === 'cashier' && (
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-4">💰 სალაროს პარამეტრები</h3>
-                
-                {/* Enable/Disable Cashier */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-bold">სალაროს მოდული</div>
-                      <div className="text-sm text-gray-500">ჩართეთ ან გამორთეთ სალაროს ფუნქციონალი</div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={cashierSettings.cashierEnabled}
-                        onChange={(e) => updateCashierSettings({ cashierEnabled: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                    </label>
-                  </div>
-                </div>
-                
-                {/* Default Opening Balance */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">ნაგულისხმევი საწყისი ბალანსი</label>
-                  <input
-                    type="number"
-                    value={cashierSettings.defaultOpeningBalance || 0}
-                    onChange={(e) => updateCashierSettings({ defaultOpeningBalance: Number(e.target.value) })}
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="0.00"
-                  />
-                </div>
-                
-                {/* Require Manager Approval for Discrepancy */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">სხვაობის ლიმიტი (მენეჯერის დასტური)</label>
-                  <input
-                    type="number"
-                    value={cashierSettings.discrepancyLimit || 50}
-                    onChange={(e) => updateCashierSettings({ discrepancyLimit: Number(e.target.value) })}
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="50"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">თუ სხვაობა მეტია ამ თანხაზე, საჭიროა მენეჯერის დასტური</p>
-                </div>
-                
-                {/* Auto-close shift warning */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">სალაროს დახურვის შეხსენება (საათი)</label>
-                  <input
-                    type="number"
-                    value={cashierSettings.shiftCloseReminder || 23}
-                    onChange={(e) => updateCashierSettings({ shiftCloseReminder: Number(e.target.value) })}
-                    className="w-full border rounded px-3 py-2"
-                    min="0"
-                    max="23"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">რომელ საათზე გამოჩნდეს შეხსენება სალაროს დახურვის შესახებ</p>
-                </div>
-                
-                {/* Payment Methods */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">გადახდის მეთოდები</label>
-                  <div className="space-y-2">
-                    {['cash', 'card', 'bank'].map(method => (
-                      <label key={method} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={cashierSettings.paymentMethods?.includes(method) ?? true}
-                          onChange={(e) => {
-                            const methods = cashierSettings.paymentMethods || ['cash', 'card', 'bank']
-                            if (e.target.checked) {
-                              updateCashierSettings({ paymentMethods: [...methods, method] })
-                            } else {
-                              updateCashierSettings({ paymentMethods: methods.filter(m => m !== method) })
-                            }
-                          }}
-                          className="mr-2"
-                        />
-                        {method === 'cash' ? '💵 ნაღდი' : method === 'card' ? '💳 ბარათი' : '🏦 ბანკი'}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Save Button */}
-                <button
-                  onClick={saveCashierSettings}
-                  disabled={isSaving}
-                  className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-                >
-                  💾 შენახვა
-                </button>
-              </div>
-            )}
-            
             {/* Users Section */}
             {activeSection === 'users' && (
               <UsersSection 
@@ -810,6 +695,18 @@ export default function SettingsNew() {
                 setChecklist={setChecklist}
                 onSave={saveChecklist}
                 isSaving={isSaving}
+              />
+            )}
+            
+            {/* Cashier Section */}
+            {activeSection === 'cashier' && (
+              <CashierSettingsSection
+                settings={cashierSettings}
+                setSettings={setCashierSettings}
+                onSave={() => {
+                  localStorage.setItem('cashierSettings', JSON.stringify(cashierSettings))
+                  showMessage('success', '✅ სალაროს პარამეტრები შენახულია!')
+                }}
               />
             )}
             
@@ -6045,6 +5942,120 @@ function CalendarSettingsSection({
           </ul>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ==================== CASHIER SETTINGS SECTION ====================
+function CashierSettingsSection({ settings, setSettings, onSave }: {
+  settings: {
+    cashierEnabled: boolean
+    defaultOpeningBalance: number
+    discrepancyLimit: number
+    shiftCloseReminder: number
+    paymentMethods: string[]
+  }
+  setSettings: (settings: any) => void
+  onSave: () => void
+}) {
+  const updateSettings = (updates: Partial<typeof settings>) => {
+    setSettings({ ...settings, ...updates })
+  }
+  
+  return (
+    <div className="p-6">
+      <h3 className="text-xl font-bold mb-4">💰 სალაროს პარამეტრები</h3>
+      
+      {/* Enable/Disable Cashier */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="font-bold">სალაროს მოდული</div>
+            <div className="text-sm text-gray-500">ჩართეთ ან გამორთეთ სალაროს ფუნქციონალი</div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.cashierEnabled}
+              onChange={(e) => updateSettings({ cashierEnabled: e.target.checked })}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+          </label>
+        </div>
+      </div>
+      
+      {/* Default Opening Balance */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">ნაგულისხმევი საწყისი ბალანსი</label>
+        <input
+          type="number"
+          value={settings.defaultOpeningBalance || 0}
+          onChange={(e) => updateSettings({ defaultOpeningBalance: Number(e.target.value) })}
+          className="w-full border rounded px-3 py-2"
+          placeholder="0.00"
+        />
+      </div>
+      
+      {/* Require Manager Approval for Discrepancy */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">სხვაობის ლიმიტი (მენეჯერის დასტური)</label>
+        <input
+          type="number"
+          value={settings.discrepancyLimit || 50}
+          onChange={(e) => updateSettings({ discrepancyLimit: Number(e.target.value) })}
+          className="w-full border rounded px-3 py-2"
+          placeholder="50"
+        />
+        <p className="text-xs text-gray-500 mt-1">თუ სხვაობა მეტია ამ თანხაზე, საჭიროა მენეჯერის დასტური</p>
+      </div>
+      
+      {/* Auto-close shift warning */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">სალაროს დახურვის შეხსენება (საათი)</label>
+        <input
+          type="number"
+          value={settings.shiftCloseReminder || 23}
+          onChange={(e) => updateSettings({ shiftCloseReminder: Number(e.target.value) })}
+          className="w-full border rounded px-3 py-2"
+          min="0"
+          max="23"
+        />
+        <p className="text-xs text-gray-500 mt-1">რომელ საათზე გამოჩნდეს შეხსენება სალაროს დახურვის შესახებ</p>
+      </div>
+      
+      {/* Payment Methods */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">გადახდის მეთოდები</label>
+        <div className="space-y-2">
+          {['cash', 'card', 'bank'].map(method => (
+            <label key={method} className="flex items-center">
+              <input
+                type="checkbox"
+                checked={settings.paymentMethods?.includes(method) ?? true}
+                onChange={(e) => {
+                  const methods = settings.paymentMethods || ['cash', 'card', 'bank']
+                  if (e.target.checked) {
+                    updateSettings({ paymentMethods: [...methods, method] })
+                  } else {
+                    updateSettings({ paymentMethods: methods.filter(m => m !== method) })
+                  }
+                }}
+                className="mr-2"
+              />
+              {method === 'cash' ? '💵 ნაღდი' : method === 'card' ? '💳 ბარათი' : '🏦 ბანკი'}
+            </label>
+          ))}
+        </div>
+      </div>
+      
+      {/* Save Button */}
+      <button
+        onClick={onSave}
+        className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        💾 შენახვა
+      </button>
     </div>
   )
 }

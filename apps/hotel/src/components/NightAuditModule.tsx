@@ -2086,115 +2086,6 @@ This is an automated report from Night Audit System.
   }
   
   // ============================================
-  // NEW FEATURE: Z-Report Generation
-  // ============================================
-  const generateZReport = (auditDate?: string): any => {
-    const businessDate = auditDate || localStorage.getItem('currentBusinessDate') || selectedDate
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-    const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
-    const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
-    const cashierShift = JSON.parse(localStorage.getItem('currentCashierShift') || 'null')
-    const manualTx = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
-    
-    // Calculate revenues from folios
-    let roomRevenue = 0
-    let serviceRevenue = 0
-    let cashPayments = 0
-    let cardPayments = 0
-    let bankTransfers = 0
-    
-    folios.forEach((folio: any) => {
-      folio.transactions?.forEach((t: any) => {
-        if (t.date === businessDate) {
-          // Charges (debits) - check for room charges
-          if (t.debit > 0) {
-            if (t.type === 'room_charge' || t.type === 'ROOM_CHARGE' || t.category === 'room') {
-              roomRevenue += t.debit
-            } else {
-              serviceRevenue += t.debit
-            }
-          }
-          // Payments (credits)
-          if (t.credit > 0) {
-            const method = (t.paymentMethod || 'cash').toLowerCase()
-            if (method === 'cash') cashPayments += t.credit
-            else if (method === 'card' || method === 'credit_card') cardPayments += t.credit
-            else if (method === 'bank' || method === 'bank_transfer') bankTransfers += t.credit
-          }
-        }
-      })
-    })
-    
-    // Add manual transactions
-    manualTx.forEach((t: any) => {
-      if (t.date === businessDate && t.type === 'income') {
-        if (t.method === 'cash') cashPayments += t.amount
-        else if (t.method === 'card') cardPayments += t.amount
-        else if (t.method === 'bank') bankTransfers += t.amount
-      }
-    })
-    
-    // Calculate expenses
-    const expenses = manualTx
-      .filter((t: any) => t.date === businessDate && t.type === 'expense')
-      .reduce((sum: number, t: any) => sum + t.amount, 0)
-    
-    // Occupancy stats - count occupied rooms for this date
-    const totalRooms = rooms.length
-    const occupiedRooms = reservations.filter((r: any) => {
-      const checkIn = r.checkInDate || moment(r.checkIn).format('YYYY-MM-DD')
-      const checkOut = r.checkOutDate || moment(r.checkOut).format('YYYY-MM-DD')
-      return (r.status === 'checked-in' || r.status === 'CHECKED_IN') &&
-             checkIn <= businessDate &&
-             checkOut > businessDate
-    }).length
-    const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0
-    const adr = occupiedRooms > 0 ? roomRevenue / occupiedRooms : 0
-    const revPar = totalRooms > 0 ? roomRevenue / totalRooms : 0
-    
-    // Check-in/out counts
-    const checkIns = reservations.filter((r: any) => {
-      const checkInDate = r.checkInDate || moment(r.checkIn).format('YYYY-MM-DD')
-      return checkInDate === businessDate && (r.status === 'checked-in' || r.status === 'CHECKED_IN')
-    }).length
-    const checkOuts = reservations.filter((r: any) => {
-      const checkOutDate = r.checkOutDate || moment(r.checkOut).format('YYYY-MM-DD')
-      return checkOutDate === businessDate && (r.status === 'checked-out' || r.status === 'CHECKED_OUT')
-    }).length
-    const stayOvers = occupiedRooms - checkIns
-    
-    return {
-      businessDate,
-      generatedAt: new Date().toISOString(),
-      generatedBy: 'ადმინისტრატორი',
-      
-      roomRevenue,
-      serviceRevenue,
-      totalRevenue: roomRevenue + serviceRevenue,
-      
-      cashPayments,
-      cardPayments,
-      bankTransfers,
-      totalPayments: cashPayments + cardPayments + bankTransfers,
-      
-      roomsSold: occupiedRooms,
-      totalRooms,
-      occupancyRate,
-      adr,
-      revPar,
-      
-      checkIns,
-      checkOuts,
-      stayOvers,
-      
-      openingBalance: cashierShift?.openingBalance || 0,
-      closingBalance: cashPayments - expenses,
-      expenses,
-      netCash: cashPayments - expenses
-    }
-  }
-  
-  // ============================================
   // NEW FEATURE 4: Payment Reconciliation
   // ============================================
   const getPaymentReconciliation = (date: string) => {
@@ -2238,6 +2129,113 @@ This is an automated report from Night Audit System.
       totalAmount: payments.reduce((s, p) => s + (p.credit || 0), 0),
       byMethod,
       payments
+    }
+  }
+  
+  // ============================================
+  // NEW FEATURE 6: Z-Report Generation
+  // ============================================
+  const generateZReport = (): any => {
+    const businessDate = localStorage.getItem('currentBusinessDate') || selectedDate
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+    const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
+    const cashierShift = JSON.parse(localStorage.getItem('currentCashierShift') || 'null')
+    const manualTx = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+    
+    // Calculate revenues from folios
+    let roomRevenue = 0
+    let serviceRevenue = 0
+    let cashPayments = 0
+    let cardPayments = 0
+    let bankTransfers = 0
+    
+    folios.forEach((folio: any) => {
+      folio.transactions?.forEach((t: any) => {
+        if (t.date === businessDate) {
+          // Charges (debits)
+          if (t.debit > 0) {
+            if (t.type === 'room_charge' || t.category === 'room') {
+              roomRevenue += t.debit
+            } else {
+              serviceRevenue += t.debit
+            }
+          }
+          // Payments (credits)
+          if (t.credit > 0) {
+            const method = t.paymentMethod || 'cash'
+            if (method === 'cash') cashPayments += t.credit
+            else if (method === 'card') cardPayments += t.credit
+            else if (method === 'bank') bankTransfers += t.credit
+          }
+        }
+      })
+    })
+    
+    // Add manual transactions
+    manualTx.forEach((t: any) => {
+      if (t.date === businessDate && t.type === 'income') {
+        if (t.method === 'cash') cashPayments += t.amount
+        else if (t.method === 'card') cardPayments += t.amount
+        else if (t.method === 'bank') bankTransfers += t.amount
+      }
+    })
+    
+    // Calculate expenses
+    const expenses = manualTx
+      .filter((t: any) => t.date === businessDate && t.type === 'expense')
+      .reduce((sum: number, t: any) => sum + t.amount, 0)
+    
+    // Occupancy stats
+    const totalRooms = rooms.length
+    const occupiedRooms = rooms.filter((r: any) => r.status === 'occupied' || r.status === 'OCCUPIED').length
+    const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0
+    const adr = occupiedRooms > 0 ? roomRevenue / occupiedRooms : 0
+    const revPar = totalRooms > 0 ? roomRevenue / totalRooms : 0
+    
+    // Check-in/out counts
+    const checkIns = reservations.filter((r: any) => {
+      const checkInDate = moment(r.checkIn).format('YYYY-MM-DD')
+      return checkInDate === businessDate && (r.status === 'CHECKED_IN' || r.status === 'checked_in')
+    }).length
+    
+    const checkOuts = reservations.filter((r: any) => {
+      const checkOutDate = moment(r.checkOut).format('YYYY-MM-DD')
+      return checkOutDate === businessDate && (r.status === 'CHECKED_OUT' || r.status === 'checked_out')
+    }).length
+    
+    const stayOvers = occupiedRooms - checkIns
+    
+    const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('currentUser') || '{}') : {}
+    
+    return {
+      businessDate,
+      generatedAt: new Date().toISOString(),
+      generatedBy: user.name || 'ადმინისტრატორი',
+      
+      roomRevenue,
+      serviceRevenue,
+      totalRevenue: roomRevenue + serviceRevenue,
+      
+      cashPayments,
+      cardPayments,
+      bankTransfers,
+      totalPayments: cashPayments + cardPayments + bankTransfers,
+      
+      roomsSold: occupiedRooms,
+      totalRooms,
+      occupancyRate,
+      adr,
+      revPar,
+      
+      checkIns,
+      checkOuts,
+      stayOvers,
+      
+      openingBalance: cashierShift?.openingBalance || 0,
+      closingBalance: cashPayments - expenses,
+      expenses,
+      netCash: cashPayments - expenses
     }
   }
   
@@ -2647,6 +2645,7 @@ This is an automated report from Night Audit System.
       {/* ============================================ */}
       {showPaymentReconciliation && (
         <PaymentReconciliationModal
+          date={selectedDate}
           onClose={() => setShowPaymentReconciliation(false)}
           getData={getPaymentReconciliation}
         />
@@ -2667,73 +2666,73 @@ This is an automated report from Night Audit System.
       {/* NEW: Z-Report Modal */}
       {/* ============================================ */}
       {showZReport && zReport && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">📊 Z-REPORT</h2>
-              <button
-                onClick={() => setShowZReport(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold">📊 Z-REPORT</h2>
+              <button onClick={() => setShowZReport(false)} className="text-2xl hover:opacity-75">×</button>
             </div>
             
-            {/* Z-Report Section */}
-            <div className="mt-6 p-4 bg-gray-900 text-white rounded-lg">
-              <h3 className="text-xl font-bold mb-4 text-center">📊 Z-REPORT</h3>
-              <div className="text-center text-sm text-gray-400 mb-4">
+            <div className="p-6">
+              <div className="text-center text-sm text-gray-500 mb-6">
                 {moment(zReport.businessDate).format('DD/MM/YYYY')} | {moment(zReport.generatedAt).format('HH:mm:ss')}
               </div>
               
-              <div className="space-y-3 text-sm">
-                {/* Revenue */}
-                <div className="border-b border-gray-700 pb-2">
-                  <div className="font-bold text-yellow-400 mb-1">შემოსავალი</div>
-                  <div className="flex justify-between"><span>ოთახები:</span><span>₾{zReport.roomRevenue.toFixed(2)}</span></div>
-                  <div className="flex justify-between"><span>სერვისები:</span><span>₾{zReport.serviceRevenue.toFixed(2)}</span></div>
-                  <div className="flex justify-between font-bold"><span>სულ:</span><span>₾{zReport.totalRevenue.toFixed(2)}</span></div>
+              <div className="mt-6 p-4 bg-gray-900 text-white rounded-lg">
+                <h3 className="text-xl font-bold mb-4 text-center">📊 Z-REPORT</h3>
+                <div className="text-center text-sm text-gray-400 mb-4">
+                  {moment(zReport.businessDate).format('DD/MM/YYYY')} | {moment(zReport.generatedAt).format('HH:mm:ss')}
                 </div>
                 
-                {/* Payments */}
-                <div className="border-b border-gray-700 pb-2">
-                  <div className="font-bold text-green-400 mb-1">გადახდები</div>
-                  <div className="flex justify-between"><span>💵 ნაღდი:</span><span>₾{zReport.cashPayments.toFixed(2)}</span></div>
-                  <div className="flex justify-between"><span>💳 ბარათი:</span><span>₾{zReport.cardPayments.toFixed(2)}</span></div>
-                  <div className="flex justify-between"><span>🏦 ბანკი:</span><span>₾{zReport.bankTransfers.toFixed(2)}</span></div>
-                  <div className="flex justify-between font-bold"><span>სულ:</span><span>₾{zReport.totalPayments.toFixed(2)}</span></div>
+                <div className="space-y-3 text-sm">
+                  {/* Revenue */}
+                  <div className="border-b border-gray-700 pb-2">
+                    <div className="font-bold text-yellow-400 mb-1">შემოსავალი</div>
+                    <div className="flex justify-between"><span>ოთახები:</span><span>₾{zReport.roomRevenue.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>სერვისები:</span><span>₾{zReport.serviceRevenue.toFixed(2)}</span></div>
+                    <div className="flex justify-between font-bold"><span>სულ:</span><span>₾{zReport.totalRevenue.toFixed(2)}</span></div>
+                  </div>
+                  
+                  {/* Payments */}
+                  <div className="border-b border-gray-700 pb-2">
+                    <div className="font-bold text-green-400 mb-1">გადახდები</div>
+                    <div className="flex justify-between"><span>💵 ნაღდი:</span><span>₾{zReport.cashPayments.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>💳 ბარათი:</span><span>₾{zReport.cardPayments.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>🏦 ბანკი:</span><span>₾{zReport.bankTransfers.toFixed(2)}</span></div>
+                    <div className="flex justify-between font-bold"><span>სულ:</span><span>₾{zReport.totalPayments.toFixed(2)}</span></div>
+                  </div>
+                  
+                  {/* Statistics */}
+                  <div className="border-b border-gray-700 pb-2">
+                    <div className="font-bold text-blue-400 mb-1">სტატისტიკა</div>
+                    <div className="flex justify-between"><span>დატვირთვა:</span><span>{zReport.occupancyRate.toFixed(1)}%</span></div>
+                    <div className="flex justify-between"><span>ADR:</span><span>₾{zReport.adr.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>RevPAR:</span><span>₾{zReport.revPar.toFixed(2)}</span></div>
+                  </div>
+                  
+                  {/* Movements */}
+                  <div className="border-b border-gray-700 pb-2">
+                    <div className="font-bold text-purple-400 mb-1">მოძრაობა</div>
+                    <div className="flex justify-between"><span>Check-in:</span><span>{zReport.checkIns}</span></div>
+                    <div className="flex justify-between"><span>Check-out:</span><span>{zReport.checkOuts}</span></div>
+                    <div className="flex justify-between"><span>Stay-over:</span><span>{zReport.stayOvers}</span></div>
+                  </div>
+                  
+                  {/* Cash */}
+                  <div>
+                    <div className="font-bold text-red-400 mb-1">სალარო</div>
+                    <div className="flex justify-between"><span>ხარჯები:</span><span>-₾{zReport.expenses.toFixed(2)}</span></div>
+                    <div className="flex justify-between font-bold text-lg"><span>წმინდა ნაღდი:</span><span>₾{zReport.netCash.toFixed(2)}</span></div>
+                  </div>
                 </div>
                 
-                {/* Statistics */}
-                <div className="border-b border-gray-700 pb-2">
-                  <div className="font-bold text-blue-400 mb-1">სტატისტიკა</div>
-                  <div className="flex justify-between"><span>დატვირთვა:</span><span>{zReport.occupancyRate.toFixed(1)}%</span></div>
-                  <div className="flex justify-between"><span>ADR:</span><span>₾{zReport.adr.toFixed(2)}</span></div>
-                  <div className="flex justify-between"><span>RevPAR:</span><span>₾{zReport.revPar.toFixed(2)}</span></div>
-                </div>
-                
-                {/* Movements */}
-                <div className="border-b border-gray-700 pb-2">
-                  <div className="font-bold text-purple-400 mb-1">მოძრაობა</div>
-                  <div className="flex justify-between"><span>Check-in:</span><span>{zReport.checkIns}</span></div>
-                  <div className="flex justify-between"><span>Check-out:</span><span>{zReport.checkOuts}</span></div>
-                  <div className="flex justify-between"><span>Stay-over:</span><span>{zReport.stayOvers}</span></div>
-                </div>
-                
-                {/* Cash */}
-                <div>
-                  <div className="font-bold text-red-400 mb-1">სალარო</div>
-                  <div className="flex justify-between"><span>ხარჯები:</span><span>-₾{zReport.expenses.toFixed(2)}</span></div>
-                  <div className="flex justify-between font-bold text-lg"><span>წმინდა ნაღდი:</span><span>₾{zReport.netCash.toFixed(2)}</span></div>
-                </div>
+                <button
+                  onClick={() => window.print()}
+                  className="mt-4 w-full py-2 bg-white text-gray-900 rounded font-bold hover:bg-gray-200"
+                >
+                  🖨️ ბეჭდვა
+                </button>
               </div>
-              
-              <button
-                onClick={() => window.print()}
-                className="mt-4 w-full py-2 bg-white text-gray-900 rounded font-bold hover:bg-gray-200"
-              >
-                🖨️ ბეჭდვა
-              </button>
             </div>
           </div>
         </div>
@@ -2774,11 +2773,11 @@ This is an automated report from Night Audit System.
               </button>
               <button
                 onClick={() => {
-                  const report = generateZReport(selectedDate)
+                  const report = generateZReport()
                   setZReport(report)
                   setShowZReport(true)
                 }}
-                className="px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 text-sm font-medium"
+                className="px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 text-sm font-medium"
                 title="Z-Report"
               >
                 📊 Z-Report
@@ -3018,27 +3017,6 @@ This is an automated report from Night Audit System.
           <p className="text-gray-500">ჯერ არ არის დახურვები</p>
         )}
       </div>
-      
-      {/* Debug Date Selector - only show in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 right-4 bg-yellow-100 border border-yellow-400 rounded-lg p-3 shadow-lg z-50">
-          <div className="text-xs font-bold text-yellow-800 mb-1">🧪 Test Mode</div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs">Business Date:</span>
-            <input
-              type="date"
-              value={typeof window !== 'undefined' ? (localStorage.getItem('currentBusinessDate') || '') : ''}
-              onChange={(e) => {
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem('currentBusinessDate', e.target.value)
-                  window.location.reload()
-                }
-              }}
-              className="text-xs border rounded px-1"
-            />
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -3544,23 +3522,8 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
 // ============================================
 // Payment Reconciliation Modal Component
 // ============================================
-function PaymentReconciliationModal({ onClose, getData }: { onClose: () => void; getData: (date: string) => any }) {
-  // Use Business Date by default, not audit date
-  const [paymentsDate, setPaymentsDate] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('currentBusinessDate') || new Date().toISOString().split('T')[0]
-    }
-    return new Date().toISOString().split('T')[0]
-  })
-  
-  const [currentBusinessDate, setCurrentBusinessDate] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('currentBusinessDate') || 'N/A'
-    }
-    return 'N/A'
-  })
-  
-  const data = getData(paymentsDate)
+function PaymentReconciliationModal({ date, onClose, getData }: { date: string; onClose: () => void; getData: (date: string) => any }) {
+  const data = getData(date)
   
   const methodLabels: Record<string, string> = {
     cash: '💵 ნაღდი',
@@ -3574,25 +3537,11 @@ function PaymentReconciliationModal({ onClose, getData }: { onClose: () => void;
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
         <div className="sticky top-0 p-4 border-b bg-green-600 text-white rounded-t-lg flex justify-between items-center">
-          <h2 className="text-xl font-bold">💳 Payment Reconciliation</h2>
+          <h2 className="text-xl font-bold">💳 Payment Reconciliation - {moment(date).format('DD/MM/YYYY')}</h2>
           <button onClick={onClose} className="text-2xl hover:opacity-75">×</button>
         </div>
         
         <div className="p-6">
-          {/* Date Selector */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">თარიღი:</label>
-            <input 
-              type="date" 
-              value={paymentsDate}
-              onChange={(e) => setPaymentsDate(e.target.value)}
-              className="border rounded px-3 py-2 w-full"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              ნაგულისხმევად გამოიყენება Business Date: {currentBusinessDate}
-            </p>
-          </div>
-          
           {/* Summary */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-gray-50 p-4 rounded-lg text-center">

@@ -50,19 +50,17 @@ export default function CashierModule() {
   })
   
   // Get business date from localStorage (falls back to real date)
-  const getBusinessDate = (): string => {
+  const getBusinessDate = () => {
     const stored = localStorage.getItem('currentBusinessDate')
     if (stored) return stored
-    return new Date().toISOString().split('T')[0]
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   }
   
   // Load cashier transactions from all folios
   const loadCashierTransactions = () => {
     const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-    
-    // Use business date
     const today = getBusinessDate()
-    console.log('Loading cashier for Business Date:', today)
     
     const todayTransactions: any[] = []
     
@@ -102,7 +100,6 @@ export default function CashierModule() {
   const loadManualTransactions = () => {
     const saved = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
     const today = getBusinessDate()
-    
     return saved.filter((t: any) => t.date === today)
   }
   
@@ -206,7 +203,7 @@ export default function CashierModule() {
     const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
     const today = getBusinessDate()
     
-    console.log('Refreshing cashier for Business Date:', today)
+    console.log('Refreshing for date:', today)
     
     const todayTx: any[] = []
     
@@ -328,12 +325,8 @@ export default function CashierModule() {
     saved.push(transaction)
     localStorage.setItem('cashierManualTransactions', JSON.stringify(saved))
     
-    // Update state - income goes to transactions, expenses go to manualTransactions
-    if (newTransaction.type === 'income') {
-      setTransactions(prev => [...prev, transaction])
-    } else {
-      setManualTransactions(prev => [...prev, transaction])
-    }
+    // Update state
+    setManualTransactions([...manualTransactions, transaction])
     
     // Update shift totals
     const updated = { ...currentShift }
