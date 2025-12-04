@@ -325,29 +325,14 @@ export default function CashierModule() {
     saved.push(transaction)
     localStorage.setItem('cashierManualTransactions', JSON.stringify(saved))
     
-    // Update state
-    setManualTransactions([...manualTransactions, transaction])
-    
-    // Update shift totals
-    const updated = { ...currentShift }
+    // Update state based on type - THIS IS THE KEY FIX!
     if (newTransaction.type === 'income') {
-      if (newTransaction.method === 'cash') {
-        updated.cashCollected = (updated.cashCollected || 0) + newTransaction.amount
-      } else if (newTransaction.method === 'card') {
-        updated.cardPayments = (updated.cardPayments || 0) + newTransaction.amount
-      } else if (newTransaction.method === 'bank') {
-        updated.bankTransfers = (updated.bankTransfers || 0) + newTransaction.amount
-      }
-      updated.totalCollected = (updated.totalCollected || 0) + newTransaction.amount
-      updated.expectedAmount = (updated.expectedAmount || 0) + newTransaction.amount
+      // Add income to transactions array (so it's counted in cash/card/bank totals)
+      setTransactions(prev => [...prev, transaction])
     } else {
-      updated.expenses = (updated.expenses || 0) + newTransaction.amount
-      updated.expectedAmount = (updated.expectedAmount || 0) - newTransaction.amount
+      // Add expense to manualTransactions array
+      setManualTransactions(prev => [...prev, transaction])
     }
-    updated.transactionCount = (updated.transactionCount || 0) + 1
-    
-    setCurrentShift(updated)
-    localStorage.setItem('currentCashierShift', JSON.stringify(updated))
     
     // Reset form
     setNewTransaction({ type: 'income', category: '', description: '', amount: 0, method: 'cash' })

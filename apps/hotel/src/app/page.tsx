@@ -936,7 +936,7 @@ export default function HotelDashboard() {
               {process.env.NODE_ENV === 'development' && (
                 <button
                   onClick={async () => {
-                    if (confirm('⚠️ წაიშალოს ყველა ჯავშანი, Night Audit მონაცემები, ტესტ მონაცემი, გადახდების ისტორია და Financial Dashboard მონაცემები?\n\nეს ოპერაცია შეუქცევადია!')) {
+                    if (confirm('⚠️ წაიშალოს ყველა ჯავშანი, Night Audit მონაცემები, სალაროს მონაცემები, ტესტ მონაცემი, გადახდების ისტორია და Financial Dashboard მონაცემები?\n\nეს ოპერაცია შეუქცევადია!')) {
                       try {
                         // Delete all reservations via API
                         const deleteRes = await fetch('/api/hotel/reservations', {
@@ -972,6 +972,8 @@ export default function HotelDashboard() {
                         localStorage.removeItem('cashierSession')
                         localStorage.removeItem('cashierShifts')
                         localStorage.removeItem('currentCashierShift')
+                        localStorage.removeItem('cashierManualTransactions')
+                        localStorage.removeItem('cashierSettings')
                         
                         // Clear folios
                         localStorage.removeItem('hotelFolios')
@@ -987,7 +989,7 @@ export default function HotelDashboard() {
                         localStorage.removeItem('managerReports')
                         
                         // Keep settings but clear data
-                        alert('✅ ყველა ჯავშანი, Night Audit მონაცემები, ტესტ მონაცემი, გადახდების ისტორია და Financial Dashboard მონაცემები წაშლილია!')
+                        alert('✅ ყველა ჯავშანი, Night Audit მონაცემები, სალაროს მონაცემები, ტესტ მონაცემი, გადახდების ისტორია და Financial Dashboard მონაცემები წაშლილია!')
                         await loadReservations() // Reload to show empty state
                         location.reload()
                       } catch (error) {
