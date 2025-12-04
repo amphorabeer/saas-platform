@@ -1,0 +1,30 @@
+/* Add to existing globals.css or create if doesn't exist */
+
+/* Settings Hub Styles */
+.settings-hub-container {
+  padding-top: 80px; /* Header-ის სიმაღლე */
+}
+
+.settings-hub-header {
+  position: fixed;
+  top: 60px; /* Main header-ის შემდეგ */
+  z-index: 30;
+  width: 100%;
+  background: white;
+}
+
+/* Animation for fade in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}

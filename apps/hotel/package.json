@@ -1,5 +1,5 @@
 {
-  "name": "@saas-platform/hotel-dashboard",
+  "name": "hotel",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -10,19 +10,31 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@saas-platform/ui": "workspace:*",
-    "@saas-platform/types": "workspace:*",
     "@saas-platform/auth": "workspace:*",
     "@saas-platform/database": "workspace:*",
+    "@saas-platform/types": "workspace:*",
+    "@saas-platform/ui": "workspace:*",
     "@saas-platform/utils": "workspace:*",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
+    "moment": "^2.30.1",
     "next": "^14.0.4",
     "next-auth": "^4.24.5",
+    "nodemailer": "^6.10.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-big-calendar": "^1.19.4",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^18.2.0",
+    "recharts": "^3.5.0"
   },
   "devDependencies": {
+    "@types/jspdf": "^2.0.0",
     "@types/node": "^20.10.6",
+    "@types/nodemailer": "^7.0.4",
     "@types/react": "^18.2.46",
+    "@types/react-big-calendar": "^1.16.3",
     "@types/react-dom": "^18.2.18",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.56.0",
@@ -32,4 +44,3 @@
     "typescript": "^5.3.3"
   }
 }
-

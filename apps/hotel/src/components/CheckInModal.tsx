@@ -1,0 +1,769 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import moment from 'moment'
+import { ActivityLogger } from '../lib/activityLogger'
+
+interface Room {
+  id: string
+  roomNumber: string
+  floor: number
+  status: string
+  basePrice: number
+  roomType?: string
+}
+
+interface CheckInModalProps {
+  room?: Room
+  rooms?: Room[]
+  initialCheckIn?: string
+  reservations?: any[] // ✅ დაემატა
+  onClose: () => void
+  onSubmit: (data: any) => void
+}
+
+export default function CheckInModal({ 
+  room, 
+  rooms = [], 
+  initialCheckIn, 
+  reservations = [], // ✅ დაემატა
+  onClose, 
+  onSubmit 
+}: CheckInModalProps) {
+  // Popular countries list
+  const countries = [
+    { code: 'GE', name: 'საქართველო' },
+    { code: 'TR', name: 'თურქეთი' },
+    { code: 'RU', name: 'რუსეთი' },
+    { code: 'AZ', name: 'აზერბაიჯანი' },
+    { code: 'AM', name: 'სომხეთი' },
+    { code: 'UA', name: 'უკრაინა' },
+    { code: 'IL', name: 'ისრაელი' },
+    { code: 'DE', name: 'გერმანია' },
+    { code: 'US', name: 'აშშ' },
+    { code: 'GB', name: 'დიდი ბრიტანეთი' },
+    { code: 'FR', name: 'საფრანგეთი' },
+    { code: 'IT', name: 'იტალია' },
+    { code: 'ES', name: 'ესპანეთი' },
+    { code: 'PL', name: 'პოლონეთი' },
+    { code: 'KZ', name: 'ყაზახეთი' },
+    { code: 'IR', name: 'ირანი' },
+    { code: 'SA', name: 'საუდის არაბეთი' },
+    { code: 'AE', name: 'არაბეთის გაერთ. საამიროები' },
+    { code: 'CN', name: 'ჩინეთი' },
+    { code: 'JP', name: 'იაპონია' },
+    { code: 'OTHER', name: 'სხვა' }
+  ]
+  
+  const [formData, setFormData] = useState({
+    guestName: '',
+    guestEmail: '',
+    guestPhone: '',
+    guestCountry: '',
+    roomId: room?.id || '',
+    roomNumber: room?.roomNumber || '',
+    checkIn: initialCheckIn || new Date().toISOString().split('T')[0],
+    checkOut: '',
+    adults: 1,
+    children: 0,
+    totalAmount: room?.basePrice || 150,
+    notes: ''
+  })
+  
+  const [overlapError, setOverlapError] = useState<string | null>(null) // ✅ დაემატა
+
+  // Room rates from Settings
+  const [roomRates, setRoomRates] = useState<{ id: string; type: string; weekday: number; weekend: number }[]>([])
+  
+  // Seasons from Settings
+  const [seasons, setSeasons] = useState<{ id: string; name: string; startDate: string; endDate: string; priceModifier: number; active: boolean; roomTypes?: string[] }[]>([])
+  
+  // Weekday Prices from Settings
+  const [weekdayPrices, setWeekdayPrices] = useState<{ dayOfWeek: number; dayName: string; priceModifier: number; enabled: boolean }[]>([])
+  
+  // Special Dates from Settings
+  const [specialDates, setSpecialDates] = useState<{ id: string; date: string; name: string; priceModifier: number; roomTypes?: string[]; active: boolean }[]>([])
+
+  // Load room rates and seasons on mount
+  useEffect(() => {
+    const loadRates = () => {
+      const saved = localStorage.getItem('roomRates')
+      if (saved) {
+        try {
+          const rates = JSON.parse(saved)
+          console.log('Loaded roomRates:', rates)
+          setRoomRates(rates)
+        } catch (e) {
+          console.error('Error loading room rates:', e)
+        }
+      }
+      
+      // Load seasons
+      const savedSeasons = localStorage.getItem('hotelSeasons')
+      if (savedSeasons) {
+        try {
+          const loadedSeasons = JSON.parse(savedSeasons)
+          console.log('Loaded seasons:', loadedSeasons)
+          setSeasons(loadedSeasons)
+          
+          // === სრული debug ===
+          console.log('=== SEASON DEBUG ===')
+          console.log('Seasons count:', loadedSeasons.length)
+          loadedSeasons.forEach((s: any, i: number) => {
+            console.log(`\nSeason ${i + 1}: "${s.name}"`)
+            console.log('  startDate:', s.startDate)
+            console.log('  endDate:', s.endDate)
+            console.log('  active:', s.active)
+            console.log('  priceModifier:', s.priceModifier)
+            console.log('  roomTypes:', s.roomTypes)
+          })
+        } catch (e) {
+          console.error('Error loading seasons:', e)
+        }
+      }
+      
+      // Load Weekday Prices
+      const savedWeekdays = localStorage.getItem('hotelWeekdayPrices')
+      if (savedWeekdays) {
+        try {
+          const parsed = JSON.parse(savedWeekdays)
+          // Handle both formats: array or {all: array}
+          const weekdays = Array.isArray(parsed) ? parsed : (parsed.all || [])
+          console.log('Loaded weekday prices:', weekdays)
+          setWeekdayPrices(weekdays)
+        } catch (e) {
+          console.error('Error loading weekday prices:', e)
+        }
+      }
+      
+      // Load Special Dates
+      const savedSpecialDates = localStorage.getItem('hotelSpecialDates')
+      if (savedSpecialDates) {
+        try {
+          const parsed = JSON.parse(savedSpecialDates)
+          console.log('Loaded special dates:', parsed)
+          setSpecialDates(parsed || [])
+        } catch (e) {
+          console.error('Error loading special dates:', e)
+        }
+      }
+    }
+    loadRates()
+  }, [])
+
+  // Update formData when room or initialCheckIn changes
+  useEffect(() => {
+    if (room) {
+      setFormData(prev => ({
+        ...prev,
+        roomId: room.id,
+        roomNumber: room.roomNumber,
+        totalAmount: room.basePrice || prev.totalAmount
+      }))
+    }
+    if (initialCheckIn) {
+      setFormData(prev => ({
+        ...prev,
+        checkIn: initialCheckIn
+      }))
+    }
+  }, [room, initialCheckIn])
+
+  const selectedRoom = room || rooms.find(r => r.id === formData.roomId)
+
+  const calculateNights = () => {
+    if (formData.checkIn && formData.checkOut) {
+      const start = new Date(formData.checkIn)
+      const end = new Date(formData.checkOut)
+      const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+      return nights > 0 ? nights : 1
+    }
+    return 1
+  }
+
+  // Get room type name (check both 'type' and 'roomType' fields)
+  const getRoomTypeName = (): string => {
+    if (!selectedRoom) return 'Standard'
+    return selectedRoom.type || selectedRoom.roomType || 'Standard'
+  }
+
+  // Get season modifier for a specific date
+  const getSeasonModifier = (date: string): number => {
+    if (!seasons || seasons.length === 0) {
+      console.log('=== SEASON MODIFIER DEBUG ===')
+      console.log('Test date:', date)
+      console.log('No seasons loaded')
+      return 0
+    }
+    
+    const checkDate = moment(date)
+    
+    console.log('=== SEASON MODIFIER DEBUG ===')
+    console.log('Test date:', date)
+    console.log('Seasons count:', seasons.length)
+    console.log('Current room type:', getRoomTypeName())
+    
+    for (const season of seasons) {
+      console.log(`\nChecking Season: "${season.name}"`)
+      console.log('  startDate:', season.startDate)
+      console.log('  endDate:', season.endDate)
+      console.log('  active:', season.active)
+      console.log('  priceModifier:', season.priceModifier)
+      console.log('  roomTypes:', season.roomTypes)
+      
+      if (!season.active) {
+        console.log('  ❌ Season is not active')
+        continue
+      }
+      
+      const startDate = moment(season.startDate)
+      const endDate = moment(season.endDate)
+      
+      // Check if date is within season range
+      const inRange = checkDate.isSameOrAfter(startDate, 'day') && checkDate.isSameOrBefore(endDate, 'day')
+      console.log('  Date in range:', inRange)
+      console.log('  Date check:', {
+        checkDate: checkDate.format('YYYY-MM-DD'),
+        startDate: startDate.format('YYYY-MM-DD'),
+        endDate: endDate.format('YYYY-MM-DD'),
+        isAfter: checkDate.isSameOrAfter(startDate, 'day'),
+        isBefore: checkDate.isSameOrBefore(endDate, 'day')
+      })
+      
+      if (inRange) {
+        // If season has specific room types, check if current room type matches
+        if (season.roomTypes && season.roomTypes.length > 0) {
+          const roomTypeName = getRoomTypeName()
+          const roomTypeMatches = season.roomTypes.includes(roomTypeName)
+          console.log('  Room type check:', {
+            roomTypeName,
+            seasonRoomTypes: season.roomTypes,
+            matches: roomTypeMatches
+          })
+          if (!roomTypeMatches) {
+            console.log('  ❌ Room type does not match')
+            continue // This season doesn't apply to this room type
+          }
+        }
+        
+        console.log(`  ✅ Season "${season.name}" applies: ${season.priceModifier}%`)
+        return season.priceModifier
+      } else {
+        console.log('  ❌ Date is not in range')
+      }
+    }
+    
+    console.log('  ❌ No season applies')
+    return 0 // No season applies
+  }
+
+  // Get weekday modifier for a specific date
+  const getWeekdayModifier = (date: string): { modifier: number; dayName: string } | null => {
+    if (!weekdayPrices || weekdayPrices.length === 0) return null
+    
+    const dayOfWeek = moment(date).day()
+    const weekdayPrice = weekdayPrices.find(w => w.dayOfWeek === dayOfWeek && w.enabled)
+    
+    if (weekdayPrice && weekdayPrice.priceModifier !== 0) {
+      console.log(`Weekday "${weekdayPrice.dayName}" modifier: ${weekdayPrice.priceModifier}%`)
+      return { modifier: weekdayPrice.priceModifier, dayName: weekdayPrice.dayName }
+    }
+    
+    return null
+  }
+
+  // Get special date modifier
+  const getSpecialDateModifier = (date: string): { modifier: number; name: string } | null => {
+    if (!specialDates || specialDates.length === 0) return null
+    
+    const formattedDate = moment(date).format('YYYY-MM-DD')
+    const special = specialDates.find(sd => {
+      if (!sd.active) return false
+      return sd.date === formattedDate
+    })
+    
+    if (special) {
+      // Check room type restriction
+      if (special.roomTypes && special.roomTypes.length > 0) {
+        const roomTypeName = getRoomTypeName()
+        if (!special.roomTypes.includes(roomTypeName)) {
+          return null
+        }
+      }
+      console.log(`Special date "${special.name}" modifier: ${special.priceModifier}%`)
+      return { modifier: special.priceModifier, name: special.name }
+    }
+    
+    return null
+  }
+
+  // Calculate price per night based on room type, date, season, weekday, and special dates
+  const calculatePricePerNight = (date: string): number => {
+    if (!selectedRoom) return 150
+
+    const roomTypeName = getRoomTypeName()
+    const rate = roomRates.find(r => r.type === roomTypeName)
+
+    console.log('calculatePricePerNight:', { date, roomTypeName, rate, roomRates })
+
+    let basePrice = selectedRoom.basePrice || 150
+
+    if (rate) {
+      // Check if weekend (Friday=5, Saturday=6, Sunday=0)
+      const dayOfWeek = moment(date).day()
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6
+      basePrice = isWeekend ? rate.weekend : rate.weekday
+    }
+
+    // Priority order: Special Date > Season > Weekday
+    // Special dates override everything
+    const specialDate = getSpecialDateModifier(date)
+    if (specialDate) {
+      const adjustment = basePrice * (specialDate.modifier / 100)
+      const finalPrice = basePrice + adjustment
+      console.log(`Price for ${date}: base=${basePrice}, special="${specialDate.name}" ${specialDate.modifier}%, final=${finalPrice}`)
+      return finalPrice
+    }
+
+    // Apply seasonal modifier
+    const seasonModifier = getSeasonModifier(date)
+    if (seasonModifier !== 0) {
+      const adjustment = basePrice * (seasonModifier / 100)
+      basePrice = basePrice + adjustment
+    }
+
+    // Apply weekday modifier (on top of season)
+    const weekdayMod = getWeekdayModifier(date)
+    if (weekdayMod) {
+      const adjustment = basePrice * (weekdayMod.modifier / 100)
+      basePrice = basePrice + adjustment
+      console.log(`Price for ${date}: after weekday "${weekdayMod.dayName}" ${weekdayMod.modifier}%, final=${basePrice}`)
+    }
+
+    return basePrice
+  }
+
+  // Calculate total for date range with weekday/weekend rates
+  const calculateTotalWithRates = (): number => {
+    if (!formData.checkIn || !formData.checkOut) return 0
+
+    let total = 0
+    let currentDate = moment(formData.checkIn)
+    const endDate = moment(formData.checkOut)
+
+    while (currentDate.isBefore(endDate)) {
+      total += calculatePricePerNight(currentDate.format('YYYY-MM-DD'))
+      currentDate.add(1, 'day')
+    }
+
+    return total
+  }
+
+  // Get price per night for display (first night's price or average)
+  const getDisplayPricePerNight = (): number => {
+    if (!formData.checkIn) {
+      // No date selected, show rate for today
+      return calculatePricePerNight(moment().format('YYYY-MM-DD'))
+    }
+    return calculatePricePerNight(formData.checkIn)
+  }
+
+  // Main calculate total function
+  const calculateTotal = (): number => {
+    // If no checkout date, return 0
+    if (!formData.checkIn || !formData.checkOut) {
+      return 0
+    }
+
+    // If roomRates loaded, use detailed calculation
+    if (roomRates.length > 0) {
+      return calculateTotalWithRates()
+    }
+
+    // Fallback to old logic
+    const nights = calculateNights()
+    const basePrice = selectedRoom?.basePrice || 150
+    return nights * basePrice
+  }
+
+  // Get rate info for display
+  const getRateInfo = () => {
+    const roomTypeName = getRoomTypeName()
+    const rate = roomRates.find(r => r.type === roomTypeName)
+    return rate
+  }
+
+  // Reset checkOut if it becomes invalid when checkIn changes
+  useEffect(() => {
+    if (formData.checkIn && formData.checkOut) {
+      const minCheckOut = moment(formData.checkIn).add(1, 'day')
+      const currentCheckOut = moment(formData.checkOut)
+      
+      // If checkOut is same day or before checkIn, reset it
+      if (currentCheckOut.isSameOrBefore(moment(formData.checkIn))) {
+        setFormData(prev => ({
+          ...prev,
+          checkOut: minCheckOut.format('YYYY-MM-DD')
+        }))
+      }
+    }
+  }, [formData.checkIn])
+  
+  useEffect(() => {
+    if (formData.checkIn && formData.checkOut && selectedRoom) {
+      const total = calculateTotal()
+      console.log('Updating totalAmount:', total)
+      setFormData(prev => ({ ...prev, totalAmount: total }))
+    }
+  }, [formData.checkIn, formData.checkOut, formData.roomId, selectedRoom, roomRates])
+
+  // ✅ Check for overlapping reservations
+  const checkOverlap = (): { hasOverlap: boolean; conflictingReservation?: any } => {
+    if (!formData.checkIn || !formData.checkOut || !formData.roomId) {
+      return { hasOverlap: false }
+    }
+    
+    const checkIn = moment(formData.checkIn)
+    const checkOut = moment(formData.checkOut)
+    const roomId = formData.roomId
+    
+    // Find conflicting reservation
+    const conflicting = reservations.find((res: any) => {
+      // Skip cancelled and no-show reservations
+      if (res.status === 'CANCELLED' || res.status === 'NO_SHOW') return false
+      
+      // Must be same room
+      if (res.roomId !== roomId) return false
+      
+      const resCheckIn = moment(res.checkIn)
+      const resCheckOut = moment(res.checkOut)
+      
+      // Check overlap: new reservation overlaps if:
+      // - new checkIn is before existing checkOut AND
+      // - new checkOut is after existing checkIn
+      const overlaps = checkIn.isBefore(resCheckOut) && checkOut.isAfter(resCheckIn)
+      
+      return overlaps
+    })
+    
+    return {
+      hasOverlap: !!conflicting,
+      conflictingReservation: conflicting
+    }
+  }
+  
+  // ✅ Check overlap when dates change
+  useEffect(() => {
+    if (formData.checkIn && formData.checkOut && formData.roomId) {
+      const { hasOverlap, conflictingReservation } = checkOverlap()
+      if (hasOverlap && conflictingReservation) {
+        setOverlapError(
+          `⚠️ ოთახი დაკავებულია! სტუმარი: ${conflictingReservation.guestName} ` +
+          `(${moment(conflictingReservation.checkIn).format('DD/MM')} - ${moment(conflictingReservation.checkOut).format('DD/MM')})`
+        )
+      } else {
+        setOverlapError(null)
+      }
+    } else {
+      setOverlapError(null)
+    }
+  }, [formData.checkIn, formData.checkOut, formData.roomId, reservations])
+
+  // Generate unique reservation number
+  const generateReservationNumber = () => {
+    return Math.floor(10000 + Math.random() * 90000).toString()
+  }
+  
+  // Get minimum booking date based on last closed audit
+  const getMinimumBookingDate = () => {
+    const lastAuditDate = localStorage.getItem('lastAuditDate')
+    
+    if (lastAuditDate) {
+      try {
+        const lastClosed = JSON.parse(lastAuditDate)
+        return moment(lastClosed).add(1, 'day').format('YYYY-MM-DD')
+      } catch {
+        return moment().format('YYYY-MM-DD')
+      }
+    }
+    
+    return moment().format('YYYY-MM-DD')
+  }
+  
+  const handleSubmit = () => {
+    if (!formData.guestName || !formData.checkOut) {
+      alert('გთხოვთ შეავსოთ სტუმრის სახელი და Check-out თარიღი')
+      return
+    }
+    
+    // ✅ Check for overlapping reservations
+    const { hasOverlap, conflictingReservation } = checkOverlap()
+    
+    if (hasOverlap) {
+      alert(
+        `❌ ოთახი დაკავებულია!\n\n` +
+        `სტუმარი: ${conflictingReservation.guestName}\n` +
+        `Check-in: ${moment(conflictingReservation.checkIn).format('DD/MM/YYYY')}\n` +
+        `Check-out: ${moment(conflictingReservation.checkOut).format('DD/MM/YYYY')}\n\n` +
+        `გთხოვთ აირჩიოთ სხვა თარიღები ან სხვა ოთახი.`
+      )
+      return
+    }
+    
+    const reservation = {
+      ...formData,
+      totalAmount: calculateTotal(),
+      status: 'CONFIRMED',
+      nights: calculateNights(),
+      reservationNumber: generateReservationNumber()
+    }
+    
+    ActivityLogger.log('RESERVATION_CREATE', {
+      guest: formData.guestName,
+      room: formData.roomNumber,
+      checkIn: formData.checkIn,
+      checkOut: formData.checkOut,
+      amount: formData.totalAmount,
+      reservationNumber: reservation.reservationNumber
+    })
+    
+    onSubmit(reservation)
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-start mb-4">
+          <h2 className="text-xl font-bold">
+            ახალი ჯავშანი - ოთახი {room?.roomNumber || formData.roomNumber || 'აირჩიეთ'}
+          </h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl leading-none">✕</button>
+        </div>
+        
+        {/* ✅ Overlap Warning */}
+        {overlapError && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {overlapError}
+          </div>
+        )}
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">სტუმრის სახელი *</label>
+            <input
+              type="text"
+              value={formData.guestName}
+              onChange={(e) => setFormData({...formData, guestName: e.target.value})}
+              className="w-full border rounded-lg px-3 py-2"
+              placeholder="სახელი გვარი"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">📞 ტელეფონი</label>
+            <input
+              type="tel"
+              value={formData.guestPhone}
+              onChange={(e) => setFormData({...formData, guestPhone: e.target.value})}
+              className="w-full border rounded-lg px-3 py-2"
+              placeholder="+995..."
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">📧 Email</label>
+            <input
+              type="email"
+              value={formData.guestEmail}
+              onChange={(e) => setFormData({...formData, guestEmail: e.target.value})}
+              className="w-full border rounded-lg px-3 py-2"
+              placeholder="email@example.com"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">🌍 ქვეყანა</label>
+            <select
+              value={formData.guestCountry}
+              onChange={(e) => setFormData({...formData, guestCountry: e.target.value})}
+              className="w-full border rounded-lg px-3 py-2"
+            >
+              <option value="">აირჩიეთ ქვეყანა</option>
+              {countries.map(country => (
+                <option key={country.code} value={country.code}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Check-in *</label>
+            <input
+              type="date"
+              value={formData.checkIn}
+              min={getMinimumBookingDate()}
+              onChange={(e) => setFormData({...formData, checkIn: e.target.value})}
+              className="w-full border rounded-lg px-3 py-2"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Check-out *</label>
+            <input
+              type="date"
+              value={formData.checkOut}
+              min={formData.checkIn 
+                ? moment(formData.checkIn).add(1, 'day').format('YYYY-MM-DD')
+                : moment(getMinimumBookingDate()).add(1, 'day').format('YYYY-MM-DD')
+              }
+              onChange={(e) => setFormData({...formData, checkOut: e.target.value})}
+              className={`w-full border rounded-lg px-3 py-2 ${overlapError ? 'border-red-500' : ''}`}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">მოზრდილები</label>
+            <input
+              type="number"
+              min="1"
+              value={formData.adults}
+              onChange={(e) => setFormData({...formData, adults: parseInt(e.target.value) || 1})}
+              className="w-full border rounded-lg px-3 py-2"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">ბავშვები</label>
+            <input
+              type="number"
+              min="0"
+              value={formData.children}
+              onChange={(e) => setFormData({...formData, children: parseInt(e.target.value) || 0})}
+              className="w-full border rounded-lg px-3 py-2"
+            />
+          </div>
+        </div>
+        
+        {/* Summary */}
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <div className="flex justify-between mb-2">
+            <span>ღამეების რაოდენობა:</span>
+            <span className="font-medium">{calculateNights()}</span>
+          </div>
+          <div className="flex justify-between mb-2">
+            <span>ფასი ღამეში:</span>
+            <span>₾{getDisplayPricePerNight()}</span>
+          </div>
+          
+          {/* Show weekday/weekend breakdown */}
+          {(() => {
+            const rate = getRateInfo()
+            if (rate && rate.weekday !== rate.weekend) {
+              return (
+                <div className="text-xs text-gray-500 mb-2">
+                  🎁 სამუშაო: ₾{rate.weekday} | 🎉 შაბ-კვი: ₾{rate.weekend}
+                </div>
+              )
+            }
+            return null
+          })()}
+          
+          {/* Show all price modifiers */}
+          {(() => {
+            if (!formData.checkIn) return null
+            
+            const modifiers = []
+            
+            // Season
+            const seasonMod = getSeasonModifier(formData.checkIn)
+            if (seasonMod !== 0) {
+              const activeSeason = seasons.find(s => {
+                if (!s.active) return false
+                return moment(formData.checkIn).isBetween(moment(s.startDate), moment(s.endDate), 'day', '[]')
+              })
+              modifiers.push({
+                icon: '🌞',
+                label: `სეზონი: ${activeSeason?.name}`,
+                value: `${seasonMod > 0 ? '+' : ''}${seasonMod}%`,
+                positive: seasonMod < 0
+              })
+            }
+            
+            // Special Date
+            const specialDate = getSpecialDateModifier(formData.checkIn)
+            if (specialDate) {
+              modifiers.push({
+                icon: '🎉',
+                label: specialDate.name,
+                value: `${specialDate.modifier > 0 ? '+' : ''}${specialDate.modifier}%`,
+                positive: specialDate.modifier < 0
+              })
+            }
+            
+            // Weekday
+            const weekdayMod = getWeekdayModifier(formData.checkIn)
+            if (weekdayMod) {
+              modifiers.push({
+                icon: '📅',
+                label: weekdayMod.dayName,
+                value: `${weekdayMod.modifier > 0 ? '+' : ''}${weekdayMod.modifier}%`,
+                positive: weekdayMod.modifier < 0
+              })
+            }
+            
+            if (modifiers.length === 0) return null
+            
+            return (
+              <div className="text-xs space-y-1 mb-2">
+                {modifiers.map((mod, i) => (
+                  <div key={i} className={mod.positive ? 'text-green-500' : 'text-orange-500'}>
+                    {mod.icon} {mod.label} ({mod.value})
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
+
+          <div className="flex justify-between text-lg font-bold border-t pt-2">
+            <span>სულ:</span>
+            <span>₾{calculateTotal()}</span>
+          </div>
+        </div>
+        
+        {/* Notes */}
+        <div className="mt-4">
+          <label className="block text-sm font-medium mb-1">შენიშვნები</label>
+          <textarea
+            value={formData.notes}
+            onChange={(e) => setFormData({...formData, notes: e.target.value})}
+            className="w-full border rounded-lg px-3 py-2"
+            rows={2}
+            placeholder="დამატებითი ინფორმაცია..."
+          />
+        </div>
+        
+        {/* Actions */}
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            გაუქმება
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!formData.guestName || !formData.checkOut || !!overlapError}
+            className={`flex-1 px-4 py-2 rounded-lg text-white ${
+              !formData.guestName || !formData.checkOut || overlapError
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-green-600 hover:bg-green-700'
+            }`}
+          >
+            ✅ შექმნა
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

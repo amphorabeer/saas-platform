@@ -1,0 +1,630 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import moment from 'moment'
+
+interface Task {
+  id: string
+  roomId: string
+  roomNumber: string
+  floor: number
+  type: 'checkout' | 'daily' | 'deep' | 'checkin'
+  status: 'pending' | 'in_progress' | 'completed' | 'verified'
+  priority: 'low' | 'normal' | 'high' | 'urgent'
+  assignedTo: string
+  scheduledTime: string
+  startedAt?: string
+  completedAt?: string
+  notes?: string
+  checklist?: ChecklistItem[]
+}
+
+interface ChecklistItem {
+  item: string
+  completed: boolean
+}
+
+export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [selectedFloor, setSelectedFloor] = useState('all')
+  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [showAddTask, setShowAddTask] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [showAssignModal, setShowAssignModal] = useState(false)
+  
+  // Load staff from localStorage
+  const [staff, setStaff] = useState<any[]>([])
+  const [defaultChecklist, setDefaultChecklist] = useState<any[]>([])
+  
+  useEffect(() => {
+    // Load staff
+    const savedStaff = localStorage.getItem('hotelStaff')
+    if (savedStaff) {
+      const parsedStaff = JSON.parse(savedStaff)
+      setStaff(parsedStaff.filter((s: any) => s.active))
+    } else {
+      // Default staff
+      setStaff([
+        { id: 1, name: 'მარიამ', shift: 'დილა' },
+        { id: 2, name: 'ნინო', shift: 'დილა' },
+        { id: 3, name: 'სალომე', shift: 'საღამო' },
+        { id: 4, name: 'ხატია', shift: 'საღამო' }
+      ])
+    }
+    
+    // Load checklist
+    const savedChecklist = localStorage.getItem('housekeepingChecklist')
+    if (savedChecklist) {
+      const parsedChecklist = JSON.parse(savedChecklist)
+      setDefaultChecklist(parsedChecklist.map((item: any) => ({
+        item: item.item,
+        completed: false
+      })))
+    } else {
+      // Default checklist
+      setDefaultChecklist([
+        { item: 'ზეწრების შეცვლა', completed: false },
+        { item: 'პირსახოცების შეცვლა', completed: false },
+        { item: 'აბაზანის დასუფთავება', completed: false },
+        { item: 'იატაკის დალაგება', completed: false },
+        { item: 'მინიბარის შემოწმება', completed: false },
+        { item: 'ნაგვის გატანა', completed: false },
+        { item: 'ზედაპირების დასუფთავება', completed: false }
+      ])
+    }
+  }, [])
+  
+  // Load tasks on mount
+  useEffect(() => {
+    loadTasks()
+    archiveOldTasks()
+  }, [])
+  
+  // Auto-create tasks for checkout rooms
+  useEffect(() => {
+    checkForCheckouts()
+  }, [rooms, tasks])
+  
+  // Add this function to auto-archive old tasks
+  const archiveOldTasks = () => {
+    const twoDaysAgo = moment().subtract(2, 'days').toISOString()
+    
+    const activeTasks = tasks.filter(task => {
+      // Keep if not verified or created within 2 days
+      if (task.status !== 'verified') return true
+      if (task.completedAt && task.completedAt > twoDaysAgo) return true
+      return false
+    })
+    
+    const archivedTasks = tasks.filter(task => {
+      return task.status === 'verified' && 
+             task.completedAt && 
+             task.completedAt <= twoDaysAgo
+    })
+    
+    // Save archived tasks to separate storage
+    if (archivedTasks.length > 0) {
+      const existingArchive = JSON.parse(localStorage.getItem('housekeepingArchive') || '[]')
+      localStorage.setItem('housekeepingArchive', JSON.stringify([...existingArchive, ...archivedTasks]))
+    }
+    
+    // Update active tasks
+    if (archivedTasks.length > 0) {
+      saveTasks(activeTasks)
+    }
+  }
+  
+  const loadTasks = () => {
+    const savedTasks = localStorage.getItem('housekeepingTasks')
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks))
+    }
+  }
+  
+  const saveTasks = (newTasks: Task[]) => {
+    setTasks(newTasks)
+    localStorage.setItem('housekeepingTasks', JSON.stringify(newTasks))
+  }
+  
+  // Auto-create tasks for checkouts
+  const checkForCheckouts = () => {
+    const checkoutRooms = rooms.filter((r: any) => r.status === 'CHECKOUT')
+    const newTasks: Task[] = []
+    
+    checkoutRooms.forEach((room: any) => {
+      const existingTask = tasks.find(t => t.roomId === room.id && t.type === 'checkout')
+      if (!existingTask) {
+        newTasks.push({
+          id: `task-${Date.now()}-${room.id}`,
+          roomId: room.id,
+          roomNumber: room.roomNumber,
+          floor: room.floor,
+          type: 'checkout',
+          status: 'pending',
+          priority: 'high',
+          assignedTo: '',
+          scheduledTime: moment().format('HH:mm'),
+          checklist: defaultChecklist.length > 0 ? [...defaultChecklist] : [
+            { item: 'ზეწრების შეცვლა', completed: false },
+            { item: 'პირსახოცების შეცვლა', completed: false },
+            { item: 'აბაზანის დასუფთავება', completed: false },
+            { item: 'იატაკის დალაგება', completed: false },
+            { item: 'მინიბარის შემოწმება', completed: false },
+            { item: 'ნაგვის გატანა', completed: false },
+            { item: 'ზედაპირების დასუფთავება', completed: false }
+          ]
+        })
+      }
+    })
+    
+    if (newTasks.length > 0) {
+      saveTasks([...tasks, ...newTasks])
+    }
+  }
+  
+  // Start task
+  const startTask = (taskId: string) => {
+    const updated = tasks.map(t => 
+      t.id === taskId 
+        ? { ...t, status: 'in_progress' as const, startedAt: moment().toISOString() }
+        : t
+    )
+    saveTasks(updated)
+    
+    // Update room status to CLEANING
+    const task = tasks.find(t => t.id === taskId)
+    if (task && onRoomStatusUpdate) {
+      onRoomStatusUpdate(task.roomId, 'CLEANING')
+    }
+  }
+  
+  // Complete task
+  const completeTask = (taskId: string) => {
+    const updated = tasks.map(t => 
+      t.id === taskId 
+        ? { ...t, status: 'completed' as const, completedAt: moment().toISOString() }
+        : t
+    )
+    saveTasks(updated)
+  }
+  
+  // Verify task
+  const verifyTask = async (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId)
+    if (!task) return
+    
+    // Update task status
+    const updated = tasks.map(t => 
+      t.id === taskId ? { ...t, status: 'verified' as const } : t
+    )
+    saveTasks(updated)
+    
+    // Update room status to VACANT (ready for new guest)
+    try {
+      await fetch('/api/hotel/rooms/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomId: task.roomId,
+          status: 'VACANT'
+        })
+      })
+      
+      alert('✅ დასუფთავება შემოწმებულია!\n🟢 ოთახი მზადაა ახალი სტუმრისთვის.')
+      
+      // Reload rooms to update UI
+      if (onRoomStatusUpdate) {
+        onRoomStatusUpdate(task.roomId, 'VACANT')
+      }
+    } catch (error) {
+      console.error('Failed to update room status:', error)
+      alert('შეცდომა ოთახის სტატუსის განახლებისას')
+    }
+  }
+  
+  // Assign task to staff
+  const assignTask = (taskId: string, staffName: string) => {
+    const updated = tasks.map(t => 
+      t.id === taskId ? { ...t, assignedTo: staffName } : t
+    )
+    saveTasks(updated)
+    setShowAssignModal(false)
+  }
+  
+  // Update checklist
+  const updateChecklist = (taskId: string, itemIndex: number) => {
+    const updated = tasks.map(t => {
+      if (t.id === taskId && t.checklist) {
+        const newChecklist = [...t.checklist]
+        newChecklist[itemIndex].completed = !newChecklist[itemIndex].completed
+        return { ...t, checklist: newChecklist }
+      }
+      return t
+    })
+    saveTasks(updated)
+  }
+  
+  // Filter tasks
+  const filteredTasks = tasks.filter(task => {
+    if (selectedFloor !== 'all' && task.floor !== parseInt(selectedFloor)) return false
+    if (selectedStatus !== 'all' && task.status !== selectedStatus) return false
+    return true
+  })
+  
+  // Sort tasks - newest first, pending tasks first
+  const sortedTasks = filteredTasks.sort((a, b) => {
+    // Pending tasks first
+    if (a.status === 'pending' && b.status !== 'pending') return -1
+    if (b.status === 'pending' && a.status !== 'pending') return 1
+    
+    // Then by creation time (newest first)
+    return b.id.localeCompare(a.id)
+  })
+  
+  // Get task color
+  const getTaskColor = (task: Task) => {
+    if (task.status === 'completed') return 'bg-green-100 border-green-500'
+    if (task.status === 'verified') return 'bg-gray-100 border-gray-500'
+    if (task.status === 'in_progress') return 'bg-yellow-100 border-yellow-500'
+    if (task.priority === 'urgent') return 'bg-red-100 border-red-500'
+    if (task.priority === 'high') return 'bg-orange-100 border-orange-500'
+    return 'bg-blue-100 border-blue-500'
+  }
+  
+  // Calculate stats
+  const stats = {
+    total: tasks.length,
+    pending: tasks.filter(t => t.status === 'pending').length,
+    inProgress: tasks.filter(t => t.status === 'in_progress').length,
+    completed: tasks.filter(t => t.status === 'completed').length,
+    verified: tasks.filter(t => t.status === 'verified').length
+  }
+  
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">🧹 დასუფთავების განრიგი</h2>
+        <button
+          onClick={() => setShowAddTask(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          + ახალი დავალება
+        </button>
+      </div>
+      
+      {/* Statistics */}
+      <div className="grid grid-cols-5 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-4 text-center">
+          <div className="text-2xl font-bold">{stats.total}</div>
+          <div className="text-gray-500 text-sm">სულ დავალებები</div>
+        </div>
+        <div className="bg-blue-50 rounded-lg shadow p-4 text-center">
+          <div className="text-2xl font-bold text-blue-600">{stats.pending}</div>
+          <div className="text-gray-500 text-sm">მოლოდინში</div>
+        </div>
+        <div className="bg-yellow-50 rounded-lg shadow p-4 text-center">
+          <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
+          <div className="text-gray-500 text-sm">მიმდინარე</div>
+        </div>
+        <div className="bg-green-50 rounded-lg shadow p-4 text-center">
+          <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+          <div className="text-gray-500 text-sm">დასრულებული</div>
+        </div>
+        <div className="bg-gray-50 rounded-lg shadow p-4 text-center">
+          <div className="text-2xl font-bold text-gray-600">{stats.verified}</div>
+          <div className="text-gray-500 text-sm">შემოწმებული</div>
+        </div>
+      </div>
+      
+      {/* Filters */}
+      <div className="flex gap-4 mb-4">
+        <select
+          value={selectedFloor}
+          onChange={(e) => setSelectedFloor(e.target.value)}
+          className="border rounded px-3 py-2"
+        >
+          <option value="all">ყველა სართული</option>
+          <option value="1">სართული 1</option>
+          <option value="2">სართული 2</option>
+          <option value="3">სართული 3</option>
+        </select>
+        
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="border rounded px-3 py-2"
+        >
+          <option value="all">ყველა სტატუსი</option>
+          <option value="pending">მოლოდინში</option>
+          <option value="in_progress">მიმდინარე</option>
+          <option value="completed">დასრულებული</option>
+          <option value="verified">შემოწმებული</option>
+        </select>
+      </div>
+      
+      {/* Tasks Grid */}
+      <div className="grid grid-cols-3 gap-4">
+        {sortedTasks.length === 0 ? (
+          <div className="col-span-full text-center py-12 text-gray-500">
+            დავალებები არ მოიძებნა
+          </div>
+        ) : (
+          sortedTasks.map(task => (
+            <div
+              key={task.id}
+              className={`border-2 rounded-lg p-4 ${getTaskColor(task)}`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <div className="font-bold text-lg">ნომერი {task.roomNumber}</div>
+                  <div className="text-sm text-gray-600">სართული {task.floor}</div>
+                </div>
+                <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                  task.priority === 'urgent' ? 'bg-red-500 text-white' :
+                  task.priority === 'high' ? 'bg-orange-500 text-white' :
+                  task.priority === 'normal' ? 'bg-blue-500 text-white' :
+                  'bg-gray-500 text-white'
+                }`}>
+                  {task.priority === 'urgent' ? 'სასწრაფო' :
+                   task.priority === 'high' ? 'მაღალი' :
+                   task.priority === 'normal' ? 'ჩვეულებრივი' :
+                   'დაბალი'}
+                </span>
+              </div>
+              
+              <div className="text-sm mb-3">
+                <div>ტიპი: {
+                  task.type === 'checkout' ? 'Check-out' :
+                  task.type === 'daily' ? 'ყოველდღიური' :
+                  task.type === 'deep' ? 'ღრმა დასუფთავება' :
+                  'Check-in'
+                }</div>
+                <div>
+                  მომსახურე: {task.assignedTo || 
+                    <button
+                      onClick={() => {
+                        setSelectedTask(task)
+                        setShowAssignModal(true)
+                      }}
+                      className="text-blue-600 underline"
+                    >
+                      დანიშვნა
+                    </button>
+                  }
+                </div>
+                <div>დრო: {task.scheduledTime}</div>
+                {task.startedAt && (
+                  <div>დაწყება: {moment(task.startedAt).format('HH:mm')}</div>
+                )}
+                {task.completedAt && (
+                  <div>დასრულება: {moment(task.completedAt).format('HH:mm')}</div>
+                )}
+              </div>
+              
+              {/* Checklist Progress */}
+              {task.checklist && (
+                <div className="mb-3">
+                  <div className="text-sm font-semibold mb-1">Checklist:</div>
+                  <div className="bg-white bg-opacity-50 rounded p-2 max-h-32 overflow-y-auto">
+                    {task.checklist.map((item, idx) => (
+                      <label key={idx} className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={item.completed}
+                          onChange={() => updateChecklist(task.id, idx)}
+                          disabled={task.status === 'verified'}
+                          className="w-3 h-3"
+                        />
+                        <span className={item.completed ? 'line-through' : ''}>
+                          {item.item}
+                        </span>
+                      </label>
+                    ))}
+                    <div className="text-xs text-gray-500 mt-1 font-semibold">
+                      {task.checklist.filter(i => i.completed).length}/{task.checklist.length} შესრულებული
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Actions */}
+              <div className="flex gap-2">
+                {task.status === 'pending' && (
+                  <button
+                    onClick={() => startTask(task.id)}
+                    className="flex-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                  >
+                    დაწყება
+                  </button>
+                )}
+                {task.status === 'in_progress' && (
+                  <button
+                    onClick={() => completeTask(task.id)}
+                    className="flex-1 bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                  >
+                    დასრულება
+                  </button>
+                )}
+                {task.status === 'completed' && (
+                  <button
+                    onClick={() => verifyTask(task.id)}
+                    className="flex-1 bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700"
+                  >
+                    შემოწმება
+                  </button>
+                )}
+                {task.status === 'verified' && (
+                  <div className="flex-1 text-center text-green-600 font-semibold">
+                    ✓ შემოწმებული
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      
+      {/* Assign Staff Modal */}
+      {showAssignModal && selectedTask && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h3 className="text-lg font-bold mb-4">თანამშრომლის დანიშვნა</h3>
+            <p className="mb-4">ოთახი {selectedTask.roomNumber}</p>
+            <div className="space-y-2">
+              {staff.map(member => (
+                <button
+                  key={member.id}
+                  onClick={() => assignTask(selectedTask.id, member.name)}
+                  className="w-full text-left p-3 border rounded hover:bg-blue-50"
+                >
+                  <div className="font-medium">{member.name}</div>
+                  <div className="text-sm text-gray-500">ცვლა: {member.shift}</div>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowAssignModal(false)}
+              className="mt-4 w-full px-4 py-2 border rounded hover:bg-gray-50"
+            >
+              გაუქმება
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Add Task Modal */}
+      {showAddTask && (
+        <AddTaskModal
+          rooms={rooms}
+          onClose={() => setShowAddTask(false)}
+          onAdd={(newTask: any) => {
+            const task: Task = {
+              ...newTask,
+              id: `task-${Date.now()}`,
+              status: 'pending',
+              checklist: (newTask.type === 'checkout' || newTask.type === 'checkin') && defaultChecklist.length > 0 
+                ? [...defaultChecklist] 
+                : undefined
+            }
+            saveTasks([...tasks, task])
+            setShowAddTask(false)
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+function AddTaskModal({ rooms, onClose, onAdd }: any) {
+  const [formData, setFormData] = useState({
+    roomId: '',
+    roomNumber: '',
+    floor: 1,
+    type: 'daily' as 'checkout' | 'daily' | 'deep' | 'checkin',
+    priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent',
+    scheduledTime: '',
+    notes: ''
+  })
+  
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white rounded-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-xl font-bold">ახალი დავალება</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl leading-none">✕</button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">ნომერი</label>
+            <select 
+              className="w-full border rounded px-3 py-2"
+              value={formData.roomId}
+              onChange={(e) => {
+                const room = rooms.find((r: any) => r.id === e.target.value)
+                setFormData({
+                  ...formData, 
+                  roomId: e.target.value,
+                  roomNumber: room?.roomNumber || '',
+                  floor: room?.floor || 1
+                })
+              }}
+            >
+              <option value="">აირჩიეთ ნომერი</option>
+              {rooms.map((room: any) => (
+                <option key={room.id} value={room.id}>
+                  {room.roomNumber} - {room.roomType}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">დავალების ტიპი</label>
+            <select 
+              className="w-full border rounded px-3 py-2"
+              value={formData.type}
+              onChange={(e) => setFormData({...formData, type: e.target.value as any})}
+            >
+              <option value="daily">ყოველდღიური</option>
+              <option value="deep">ღრმა დასუფთავება</option>
+              <option value="checkout">Check-out</option>
+              <option value="checkin">Check-in</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">პრიორიტეტი</label>
+            <select 
+              className="w-full border rounded px-3 py-2"
+              value={formData.priority}
+              onChange={(e) => setFormData({...formData, priority: e.target.value as any})}
+            >
+              <option value="low">დაბალი</option>
+              <option value="normal">ჩვეულებრივი</option>
+              <option value="high">მაღალი</option>
+              <option value="urgent">სასწრაფო</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">დაგეგმილი დრო</label>
+            <input
+              type="time"
+              className="w-full border rounded px-3 py-2"
+              value={formData.scheduledTime}
+              onChange={(e) => setFormData({...formData, scheduledTime: e.target.value})}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">შენიშვნა</label>
+            <textarea
+              className="w-full border rounded px-3 py-2"
+              rows={3}
+              value={formData.notes}
+              onChange={(e) => setFormData({...formData, notes: e.target.value})}
+              placeholder="დამატებითი ინფორმაცია..."
+            />
+          </div>
+        </div>
+        
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 border rounded hover:bg-gray-50"
+          >
+            გაუქმება
+          </button>
+          <button
+            onClick={() => onAdd(formData)}
+            disabled={!formData.roomId}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            დამატება
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
