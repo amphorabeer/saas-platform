@@ -11,23 +11,23 @@ import EnhancedCalendar from '../components/EnhancedCalendar'
 import RoomCalendar from '../components/RoomCalendar'
 import RoomGridView from '../components/RoomGridView'
 import HousekeepingView from '../components/HousekeepingView'
-import SettingsModal from '../components/SettingsModal'
 import CheckInModal from '../components/CheckInModal'
 import CheckOutModal from '../components/CheckOutModal'
 import PaymentModal from '../components/PaymentModal'
 import Reports from '../components/Reports'
-import NightAuditView from '../components/NightAuditView'
 import NightAuditModule from '../components/NightAuditModule'
 import SystemLockOverlay from '../components/SystemLockOverlay'
+import NightAuditWarningBanner from '../components/NightAuditWarningBanner'
 import ReservationsView from '../components/ReservationsView'
-import CashierManagement from '../components/CashierManagement'
+import FolioSystem from '../components/FolioSystem'
+import CashierManagement from '../components/CashierModule'
 import FinancialDashboard from '../components/FinancialDashboard'
-import PaymentHistory from '../components/PaymentHistory'
-import ChargesSettings from '../components/ChargesSettings'
-import SettingsHub from '../components/SettingsHub'
+import SettingsNew from '../components/SettingsNew'
 import QuickSettingsMenu from '../components/QuickSettingsMenu'
 import { SystemLockService } from '../lib/systemLockService'
 import { ActivityLogger } from '../lib/activityLogger'
+import { FolioService } from '../services/FolioService'
+import { RESERVATION_STATUS, ROOM_STATUS } from '../constants/statusConstants'
 
 interface Room {
   id: string
@@ -56,12 +56,12 @@ export default function HotelDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeTabs, setActiveTabs] = useState<string[]>(['dashboard', 'calendar']) // Start with dashboard
   const [activeTab, setActiveTab] = useState('dashboard')
-  const [showDebug, setShowDebug] = useState(false)
   const [showQuickMenu, setShowQuickMenu] = useState(false)
   const [rooms, setRooms] = useState<Room[]>([])
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
   const [maintenanceRooms, setMaintenanceRooms] = useState<string[]>([])
+  const [hotelInfo, setHotelInfo] = useState<any>({ name: 'Hotel Tbilisi', logo: '' })
   
   // Auth check
   useEffect(() => {
@@ -101,9 +101,45 @@ export default function HotelDashboard() {
       }
     }
   }, [])
+  
+  // Load hotel info from localStorage
+  useEffect(() => {
+    const loadHotelInfo = () => {
+      const savedHotelInfo = localStorage.getItem('hotelInfo')
+      if (savedHotelInfo) {
+        try {
+          setHotelInfo(JSON.parse(savedHotelInfo))
+        } catch (e) {
+          console.error('Error loading hotel info:', e)
+        }
+      }
+    }
+    
+    loadHotelInfo()
+    
+    // Listen for changes to hotelInfo
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'hotelInfo') {
+        loadHotelInfo()
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also listen for custom event (for same-tab updates)
+    const handleCustomStorageChange = () => {
+      loadHotelInfo()
+    }
+    
+    window.addEventListener('hotelInfoUpdated', handleCustomStorageChange)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('hotelInfoUpdated', handleCustomStorageChange)
+    }
+  }, [])
   const [initialCheckInDate, setInitialCheckInDate] = useState<string | undefined>(undefined)
   const [showCheckInModal, setShowCheckInModal] = useState(false)
-  const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [selectedReservation, setSelectedReservation] = useState<any>(null)
   const [showArrivalsModal, setShowArrivalsModal] = useState(false)
@@ -112,6 +148,61 @@ export default function HotelDashboard() {
   const [checkOutReservation, setCheckOutReservation] = useState<any>(null)
   const [showCheckInProcessModal, setShowCheckInProcessModal] = useState(false)
   const [checkInReservation, setCheckInReservation] = useState<any>(null)
+  const [showAuditBanner, setShowAuditBanner] = useState(false)
+
+  // Track banner visibility for padding
+  useEffect(() => {
+    const checkBannerVisibility = () => {
+      const lastAuditDate = localStorage.getItem('lastNightAuditDate') || localStorage.getItem('lastAuditDate')
+      const today = moment().format('YYYY-MM-DD')
+      
+      if (!lastAuditDate) {
+        // Check if there's activity but no audits
+        const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
+        const audits = JSON.parse(localStorage.getItem('nightAudits') || '[]')
+        const hasCompletedAudits = audits.some((a: any) => a.status === 'completed' && !a.reversed)
+        const hasActivity = reservations.length > 0 || audits.length > 0
+        setShowAuditBanner(hasActivity && !hasCompletedAudits)
+        return
+      }
+      
+      let lastAudit: moment.Moment
+      try {
+        lastAudit = moment(JSON.parse(lastAuditDate))
+      } catch {
+        lastAudit = moment(lastAuditDate)
+      }
+      
+      if (!lastAudit.isValid()) {
+        const audits = JSON.parse(localStorage.getItem('nightAudits') || '[]')
+        const completedAudits = audits
+          .filter((a: any) => a.status === 'completed' && !a.reversed)
+          .sort((a: any, b: any) => moment(b.date).valueOf() - moment(a.date).valueOf())
+        if (completedAudits.length > 0) {
+          lastAudit = moment(completedAudits[0].date)
+        } else {
+          setShowAuditBanner(false)
+          return
+        }
+      }
+      
+      const daysSince = moment(today).diff(lastAudit, 'days')
+      setShowAuditBanner(daysSince > 1)
+    }
+    
+    checkBannerVisibility()
+    
+    // Check on storage change
+    window.addEventListener('storage', checkBannerVisibility)
+    
+    // Check periodically
+    const interval = setInterval(checkBannerVisibility, 60000)
+    
+    return () => {
+      window.removeEventListener('storage', checkBannerVisibility)
+      clearInterval(interval)
+    }
+  }, [])
   
   // Add tab from dropdown
   const addTabFromMenu = (tabId: string) => {
@@ -121,6 +212,26 @@ export default function HotelDashboard() {
     setActiveTab(tabId)
     setShowQuickMenu(false)
   }
+
+  // Listen for openNightAudit event
+  useEffect(() => {
+    const handleOpenAudit = (e: Event) => {
+      const customEvent = e as CustomEvent
+      // Open Night Audit tab
+      addTabFromMenu('new-night-audit')
+      
+      // If date is provided, we could set it here if NightAuditModule supports it
+      if (customEvent.detail?.date) {
+        // NightAuditModule will handle the date from localStorage or props
+        console.log('Opening Night Audit for date:', customEvent.detail.date)
+      }
+    }
+    
+    window.addEventListener('openNightAudit', handleOpenAudit as EventListener)
+    return () => {
+      window.removeEventListener('openNightAudit', handleOpenAudit as EventListener)
+    }
+  }, [])
   
   // Close tab
   const closeTab = (tabId: string) => {
@@ -141,15 +252,14 @@ export default function HotelDashboard() {
       case 'calendar': return '📅 კალენდარი'
       case 'rooms': return '🏨 ნომრები'
       case 'reservations': return '📋 ჯავშნები'
+      case 'folios': return '💰 Folios'
       case 'housekeeping': return '🧹 დასუფთავება'
       case 'roomgrid': return '🏨 ოთახები'
       case 'reports': return '📊 რეპორტები'
-      case 'nightaudit': return '🌙 დღის დახურვა'
-      case 'new-night-audit': return '🌙 Night Audit (New)'
+      case 'new-night-audit': return '🌙 Night Audit'
       case 'cashier': return '💰 სალარო'
       case 'financial': return '💰 Financial Dashboard'
-      case 'charges-settings': return '⚙️ Charges Settings'
-      case 'settings-hub': return '⚙️ Settings Hub'
+      case 'settings-new': return '⚙️ პარამეტრები'
       default: return ''
     }
   }
@@ -582,81 +692,11 @@ export default function HotelDashboard() {
 
   // Helper function to create folio for reservation with room charges
   const createFolioForReservation = (reservation: any) => {
-    if (typeof window === 'undefined') return null
-    
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-    
-    // Check if folio already exists
-    const existingFolio = folios.find((f: any) => f.reservationId === reservation.id)
-    if (existingFolio) {
-      return existingFolio
-    }
-    
-    // Calculate room charges
-    const nights = Math.max(1, moment(reservation.checkOut).diff(moment(reservation.checkIn), 'days'))
-    const totalAmount = reservation.totalAmount || 0
-    const ratePerNight = totalAmount / nights
-    
-    // Create room charge transactions for EACH night
-    const transactions: any[] = []
-    let runningBalance = 0
-    
-    for (let i = 0; i < nights; i++) {
-      const chargeDate = moment(reservation.checkIn).add(i, 'days').format('YYYY-MM-DD')
-      runningBalance += ratePerNight
-      
-      transactions.push({
-        id: `CHG-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 9)}`,
-        date: chargeDate,
-        time: '23:59:59',
-        type: 'charge',
-        category: 'room',
-        description: `ოთახის ღირებულება - ღამე ${i + 1}`,
-        debit: ratePerNight,
-        credit: 0,
-        balance: runningBalance,
-        postedBy: 'System (Reservation)',
-        postedAt: moment().format(),
-        referenceId: `ROOM-${reservation.id}-${chargeDate}`,
-        nightAuditDate: chargeDate, // ✅ Night Audit-ის თარიღი - duplicate prevention
-        prePosted: true // ✅ Flag for pre-posted charges
-      })
-    }
-    
-    // Create new folio with all room charges
-    const newFolio = {
-      id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
-      reservationId: reservation.id,
-      guestName: reservation.guestName,
-      roomNumber: reservation.roomNumber || reservation.roomId,
-      balance: totalAmount, // ✅ სრული თანხა
-      creditLimit: 5000,
-      paymentMethod: reservation.paymentMethod || 'cash',
-      status: 'open',
-      openDate: moment().format('YYYY-MM-DD'),
-      transactions: transactions, // ✅ ყველა ღამის charges
-      initialRoomCharge: {
-        rate: ratePerNight,
-        totalAmount: totalAmount,
-        nights: nights,
-        allNightsPosted: true // ✅ ყველა ღამე უკვე დარიცხულია
-      }
-    }
-    
-    folios.push(newFolio)
-    localStorage.setItem('hotelFolios', JSON.stringify(folios))
-    
-    ActivityLogger.log('FOLIO_CREATED', {
-      folioNumber: newFolio.folioNumber,
-      guest: newFolio.guestName,
-      room: newFolio.roomNumber,
-      reservationId: reservation.id,
-      initialBalance: totalAmount,
-      nights: nights
+    // Use centralized FolioService
+    return FolioService.createFolioForReservation(reservation, {
+      prePostCharges: true,
+      paymentMethod: reservation.paymentMethod
     })
-    
-    return newFolio
   }
 
   async function checkInGuest(data: any) {
@@ -676,8 +716,9 @@ export default function HotelDashboard() {
         body: JSON.stringify({
           ...data,
           reservationNumber,
-          status: 'CONFIRMED',
-          createdAt: new Date().toISOString()
+          status: RESERVATION_STATUS.CONFIRMED,
+          createdAt: new Date().toISOString(),
+          checkedInAt: new Date().toISOString() // Set check-in timestamp
         })
       })
       
@@ -712,7 +753,7 @@ export default function HotelDashboard() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             roomId: data.roomId, 
-            status: 'OCCUPIED' 
+            status: ROOM_STATUS.OCCUPIED 
           })
         })
         
@@ -784,6 +825,9 @@ export default function HotelDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Global Night Audit Warning Banner */}
+      <NightAuditWarningBanner />
+      
       {/* Mobile Menu Toggle */}
       <button 
         className="md:hidden fixed bottom-4 right-4 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg"
@@ -799,48 +843,21 @@ export default function HotelDashboard() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setActiveTab('dashboard')}
-                className="text-xl md:text-2xl font-bold hover:text-blue-600 transition"
+                className="flex items-center gap-3 text-xl md:text-2xl font-bold hover:text-blue-600 transition"
               >
-                🏨 Hotel Management System
+                {hotelInfo?.logo && (
+                  <img 
+                    src={hotelInfo.logo} 
+                    alt="Logo" 
+                    className="h-8 w-8 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
+                )}
+                {hotelInfo?.name || 'Hotel Dashboard'}
               </button>
-              <span className="text-sm text-gray-500 hidden md:inline">Hotel Tbilisi Dashboard</span>
-              {(() => {
-                const getBusinessDay = () => {
-                  const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
-                  
-                  if (lastAuditDate) {
-                    try {
-                      const lastClosed = JSON.parse(lastAuditDate)
-                      // Business day is NEXT day after audit
-                      return moment(lastClosed).add(1, 'day').format('YYYY-MM-DD')
-                    } catch {
-                      return moment().format('YYYY-MM-DD')
-                    }
-                  }
-                  
-                  // If no audit, use today
-                  return moment().format('YYYY-MM-DD')
-                }
-                
-                const businessDay = getBusinessDay()
-                const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
-                
-                return (
-                  <span className="text-xs md:text-sm text-blue-600 font-medium hidden md:inline">
-                    Business Day: {moment(businessDay).format('DD/MM/YYYY')}
-                  </span>
-                )
-              })()}
-              
-              {/* Debug button */}
-              <button
-                onClick={() => setShowDebug(!showDebug)}
-                className="px-3 py-2 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-              >
-                🐛 Debug
-              </button>
-              
-              {/* Night Audit v2 button */}
+              {/* Night Audit button */}
               <button
                 onClick={() => {
                   if (canCloseDay) {
@@ -851,79 +868,8 @@ export default function HotelDashboard() {
                 }}
                 className="px-3 py-2 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 ml-2"
               >
-                🌙 Night Audit v2
+                🌙 Night Audit
               </button>
-              
-              {/* Debug Info Panel */}
-              {showDebug && (
-                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border p-4 z-50 min-w-[400px] max-h-[600px] overflow-y-auto">
-                  <h3 className="font-bold mb-2">🐛 Debug Info</h3>
-                  <div className="text-xs space-y-1 mb-4">
-                    <div>Today: {moment().format('YYYY-MM-DD')}</div>
-                    <div>Last Audit: {(() => {
-                      const lastAudit = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
-                      return lastAudit ? JSON.parse(lastAudit) : 'None'
-                    })()}</div>
-                    <div>Business Day: {(() => {
-                      const lastAudit = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
-                      const parsed = lastAudit ? JSON.parse(lastAudit) : null
-                      return parsed ? moment(parsed).add(1, 'day').format('YYYY-MM-DD') : moment().format('YYYY-MM-DD')
-                    })()}</div>
-                    <div>Current User: {currentUser?.name || 'None'}</div>
-                    <div>User Role: {currentUser?.role || 'None'}</div>
-                    <div>Can Close Day: {canCloseDay ? 'Yes' : 'No'}</div>
-                    <div>System Locked: {SystemLockService.isLocked() ? 'Yes' : 'No'}</div>
-                  </div>
-                  
-                  {/* Dashboard Stats */}
-                  <div className="border-t pt-3 mt-3">
-                    <h4 className="font-bold mb-2 text-sm">📊 Dashboard Stats</h4>
-                    <div className="text-xs space-y-1">
-                      <div>Total Rooms: {rooms.length}</div>
-                      <div>Total Reservations: {reservations.length}</div>
-                      <div>Occupied: {stats.occupied}</div>
-                      <div>Vacant: {stats.vacant}</div>
-                      <div>Cleaning: {stats.cleaning}</div>
-                      <div>Occupancy Rate: {stats.occupancyRate}%</div>
-                      <div className="mt-2">
-                        <strong>By Status:</strong>
-                        {(() => {
-                          const statusCounts: Record<string, number> = {}
-                          reservations.forEach((r: any) => {
-                            statusCounts[r.status] = (statusCounts[r.status] || 0) + 1
-                          })
-                          return Object.entries(statusCounts).map(([status, count]) => (
-                            <div key={status} className="ml-2">- {status}: {count}</div>
-                          ))
-                        })()}
-                      </div>
-                      <div className="mt-2">
-                        <strong>Today ({moment().format('YYYY-MM-DD')}):</strong>
-                        <div className="ml-2">Check-ins: {reservations.filter((r: any) => r.checkIn && moment(r.checkIn).format('YYYY-MM-DD') === moment().format('YYYY-MM-DD')).length}</div>
-                        <div className="ml-2">Check-outs: {reservations.filter((r: any) => r.checkOut && moment(r.checkOut).format('YYYY-MM-DD') === moment().format('YYYY-MM-DD')).length}</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => {
-                      // Call global debug function
-                      if (typeof (window as any).checkDashboardStats === 'function') {
-                        (window as any).checkDashboardStats()
-                      }
-                    }}
-                    className="mt-3 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
-                  >
-                    📊 Log Stats to Console
-                  </button>
-                  <button
-                    onClick={() => setShowDebug(false)}
-                    className="mt-2 px-2 py-1 bg-gray-300 text-gray-700 rounded text-xs hover:bg-gray-400 block w-full"
-                  >
-                    Close
-                  </button>
-                </div>
-              )}
             </div>
             
             <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
@@ -995,48 +941,21 @@ export default function HotelDashboard() {
                         💰 Financial Dashboard
                       </button>
                       <button
-                        onClick={() => addTabFromMenu('charges-settings')}
+                        onClick={() => addTabFromMenu('settings-new')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
                       >
-                        ⚙️ Charges Settings
+                        ⚙️ პარამეტრები
                       </button>
-                      <button
-                        onClick={() => addTabFromMenu('settings-hub')}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
-                      >
-                        ⚙️ Settings Hub
-                      </button>
-                      {canCloseDay && (
-                        <button
-                          onClick={() => addTabFromMenu('nightaudit')}
-                          className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
-                        >
-                          🌙 დღის დახურვა
-                        </button>
-                      )}
                     </div>
                   )}
                 </div>
               </div>
               
-              {/* Settings Button - Only for admins/managers */}
-              {canEdit && (
-                <button
-                  onClick={() => {
-                    setShowSettingsModal(true)
-                    ActivityLogger.log('OPEN_SETTINGS', {})
-                  }}
-                  className="px-3 md:px-4 py-2 bg-gray-100 border rounded hover:bg-gray-200 text-sm md:text-base order-2 md:order-3"
-                >
-                  ⚙️ პარამეტრები
-                </button>
-              )}
-              
               {/* Clear Test Data - Development Only */}
               {process.env.NODE_ENV === 'development' && (
                 <button
                   onClick={async () => {
-                    if (confirm('⚠️ წაიშალოს ყველა ჯავშანი, ტესტ მონაცემი, გადახდების ისტორია და Financial Dashboard მონაცემები?\n\nეს ოპერაცია შეუქცევადია!')) {
+                    if (confirm('⚠️ წაიშალოს ყველა ჯავშანი, Night Audit მონაცემები, სალაროს მონაცემები, ტესტ მონაცემი, გადახდების ისტორია და Financial Dashboard მონაცემები?\n\nეს ოპერაცია შეუქცევადია!')) {
                       try {
                         // Delete all reservations via API
                         const deleteRes = await fetch('/api/hotel/reservations', {
@@ -1049,11 +968,17 @@ export default function HotelDashboard() {
                           console.error('Failed to delete reservations via API')
                         }
                         
-                        // Clear all night audits
+                        // Clear all night audit data
                         localStorage.removeItem('nightAudits')
                         localStorage.removeItem('lastAuditDate')
+                        localStorage.removeItem('lastNightAuditDate')
+                        localStorage.removeItem('currentBusinessDate')
                         localStorage.removeItem('tempChecklist')
                         localStorage.removeItem('nightAuditHistory')
+                        localStorage.removeItem('systemLocked')
+                        localStorage.removeItem('lockedBy')
+                        localStorage.removeItem('lockedAt')
+                        localStorage.removeItem('nightAuditInProgress')
                         
                         // Clear housekeeping
                         localStorage.removeItem('housekeepingTasks')
@@ -1066,6 +991,8 @@ export default function HotelDashboard() {
                         localStorage.removeItem('cashierSession')
                         localStorage.removeItem('cashierShifts')
                         localStorage.removeItem('currentCashierShift')
+                        localStorage.removeItem('cashierManualTransactions')
+                        localStorage.removeItem('cashierSettings')
                         
                         // Clear folios
                         localStorage.removeItem('hotelFolios')
@@ -1081,7 +1008,7 @@ export default function HotelDashboard() {
                         localStorage.removeItem('managerReports')
                         
                         // Keep settings but clear data
-                        alert('✅ ყველა ჯავშანი, ტესტ მონაცემი, გადახდების ისტორია და Financial Dashboard მონაცემები წაშლილია!')
+                        alert('✅ ყველა ჯავშანი, Night Audit მონაცემები, სალაროს მონაცემები, ტესტ მონაცემი, გადახდების ისტორია და Financial Dashboard მონაცემები წაშლილია!')
                         await loadReservations() // Reload to show empty state
                         location.reload()
                       } catch (error) {
@@ -1111,67 +1038,99 @@ export default function HotelDashboard() {
       
       {/* Statistics - ONLY ONCE */}
       <div className="bg-white px-2 md:px-6 py-3 md:py-4 border-b">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-4">
-          <div className="bg-white rounded-lg p-3 md:p-4 border shadow-sm">
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-2 md:gap-4">
+          <div className="bg-white rounded-lg p-2 border shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm text-gray-500">სულ ნომრები</p>
-                <p className="text-xl md:text-2xl font-bold">{stats.total}</p>
+                <p className="text-xs text-gray-500">სულ ნომრები</p>
+                <p className="text-lg font-bold">{stats.total}</p>
               </div>
-              <span className="text-2xl md:text-3xl">🏨</span>
+              <span className="text-lg">🏨</span>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg p-3 md:p-4 border border-red-200 shadow-sm">
+          <div className="bg-white rounded-lg p-2 border border-red-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm text-gray-500">დაკავებული</p>
-                <p className="text-xl md:text-2xl font-bold text-red-600">{stats.occupied}</p>
+                <p className="text-xs text-gray-500">დაკავებული</p>
+                <p className="text-lg font-bold text-red-600">{stats.occupied}</p>
               </div>
-              <span className="w-2 h-2 md:w-3 md:h-3 bg-red-500 rounded-full"></span>
+              <span className="w-2 h-2 bg-red-500 rounded-full"></span>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg p-3 md:p-4 border border-green-200 shadow-sm">
+          <div className="bg-white rounded-lg p-2 border border-green-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm text-gray-500">თავისუფალი</p>
-                <p className="text-xl md:text-2xl font-bold text-green-600">{stats.vacant}</p>
+                <p className="text-xs text-gray-500">თავისუფალი</p>
+                <p className="text-lg font-bold text-green-600">{stats.vacant}</p>
               </div>
-              <span className="w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full"></span>
+              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg p-3 md:p-4 border shadow-sm">
+          {/* Business Day Card - NEW */}
+          {(() => {
+            const getBusinessDay = () => {
+              const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
+              
+              if (lastAuditDate) {
+                try {
+                  const lastClosed = JSON.parse(lastAuditDate)
+                  // Business day is NEXT day after audit
+                  return moment(lastClosed).add(1, 'day').format('YYYY-MM-DD')
+                } catch {
+                  return moment().format('YYYY-MM-DD')
+                }
+              }
+              
+              // If no audit, use today
+              return moment().format('YYYY-MM-DD')
+            }
+            
+            const businessDay = getBusinessDay()
+            
+            return (
+              <div className="bg-purple-50 rounded-lg p-2 border border-purple-200 shadow-sm col-span-2 md:col-span-1">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500">Business Day</p>
+                    <p className="text-lg font-bold text-purple-600">{moment(businessDay).format('DD/MM/YYYY')}</p>
+                  </div>
+                  <span className="text-lg">📅</span>
+                </div>
+              </div>
+            )
+          })()}
+          
+          <div className="bg-white rounded-lg p-2 border shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm text-gray-500">დასუფთავება</p>
-                <p className="text-xl md:text-2xl font-bold">{stats.cleaning}</p>
+                <p className="text-xs text-gray-500">დასუფთავება</p>
+                <p className="text-lg font-bold">{stats.cleaning}</p>
               </div>
-              <span className="text-xl md:text-2xl">✓</span>
+              <span className="text-lg">✓</span>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg p-3 md:p-4 border shadow-sm col-span-2 md:col-span-1">
+          <div className="bg-white rounded-lg p-2 border shadow-sm col-span-2 md:col-span-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm text-gray-500">დატვირთულობა</p>
-                <p className="text-xl md:text-2xl font-bold text-blue-600">{stats.occupancyRate}%</p>
+                <p className="text-xs text-gray-500">დატვირთულობა</p>
+                <p className="text-lg font-bold text-blue-600">{stats.occupancyRate}%</p>
               </div>
-              <span className="text-xl md:text-2xl">📊</span>
+              <span className="text-lg">📊</span>
             </div>
           </div>
           
           {/* Today's Arrivals Card */}
-          <div className="bg-blue-50 rounded-lg p-3 md:p-4 border border-blue-200 shadow-sm col-span-2 md:col-span-1">
+          <div className="bg-blue-50 rounded-lg p-2 border border-blue-200 shadow-sm col-span-2 md:col-span-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm text-gray-600">დღის ჯავშნები</p>
-                <p className="text-xl md:text-2xl font-bold text-blue-600">{todayArrivals.count}</p>
-                <p className="text-xs mt-1 text-blue-700">₾{todayArrivals.totalAmount.toFixed(2)}</p>
-                <p className="text-xs mt-1 text-gray-500">CONFIRMED სტატუსით</p>
+                <p className="text-xs text-gray-600">დღის ჯავშნები</p>
+                <p className="text-lg font-bold text-blue-600">{todayArrivals.count}</p>
               </div>
-              <span className="text-xl md:text-2xl">📅</span>
+              <span className="text-lg">📅</span>
             </div>
           </div>
         </div>
@@ -1262,7 +1221,7 @@ export default function HotelDashboard() {
               </button>
               
               <button
-                onClick={() => addTabFromMenu('reservations')}
+                onClick={() => addTabFromMenu('folios')}
                 className="bg-purple-500 text-white p-6 rounded-lg hover:bg-purple-600 transition-all transform hover:scale-105 shadow-lg text-left"
               >
                 <div className="text-4xl mb-2">💰</div>
@@ -1293,6 +1252,86 @@ export default function HotelDashboard() {
                 <div className="text-xl font-bold">Night Audit</div>
                 <div className="text-sm opacity-75">Close business day</div>
               </button>
+              
+              {/* Cashier Card */}
+              {(() => {
+                const cashierSettings = typeof window !== 'undefined' 
+                  ? JSON.parse(localStorage.getItem('cashierSettings') || '{"cashierEnabled": true}')
+                  : { cashierEnabled: true }
+                const currentCashierShift = typeof window !== 'undefined'
+                  ? JSON.parse(localStorage.getItem('currentCashierShift') || 'null')
+                  : null
+                const folios = typeof window !== 'undefined'
+                  ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+                  : []
+                const manualTx = typeof window !== 'undefined'
+                  ? JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+                  : []
+                
+                const businessDate = typeof window !== 'undefined'
+                  ? (localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD'))
+                  : moment().format('YYYY-MM-DD')
+                
+                let cash = 0, card = 0, total = 0
+                
+                if (currentCashierShift) {
+                  folios.forEach((folio: any) => {
+                    folio.transactions?.forEach((t: any) => {
+                      if (t.credit > 0 && t.date === businessDate) {
+                        const amount = t.credit
+                        if (t.paymentMethod === 'cash') cash += amount
+                        else if (t.paymentMethod === 'card') card += amount
+                        total += amount
+                      }
+                    })
+                  })
+                  
+                  manualTx.forEach((t: any) => {
+                    if (t.date === businessDate && t.type === 'income') {
+                      const amount = t.amount || 0
+                      if (t.method === 'cash') cash += amount
+                      else if (t.method === 'card') card += amount
+                      total += amount
+                    }
+                  })
+                }
+                
+                const cashierTotals = { cash, card, total }
+                
+                if (!cashierSettings?.cashierEnabled) return null
+                
+                return (
+                  <button
+                    onClick={() => addTabFromMenu('cashier')}
+                    className="bg-gradient-to-br from-yellow-500 to-orange-600 text-white p-6 rounded-lg hover:from-yellow-600 hover:to-orange-700 transition-all transform hover:scale-105 shadow-lg text-left"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-3xl">💰</span>
+                      <h3 className="text-xl font-bold">სალარო</h3>
+                    </div>
+                    
+                    {currentCashierShift ? (
+                      <>
+                        <div className="text-3xl font-bold mb-2">
+                          ₾{cashierTotals.total.toFixed(2)}
+                        </div>
+                        <div className="text-sm opacity-80">
+                          <div>💵 ნაღდი: ₾{cashierTotals.cash.toFixed(2)}</div>
+                          <div>💳 ბარათი: ₾{cashierTotals.card.toFixed(2)}</div>
+                        </div>
+                        <div className="mt-3 text-xs bg-white bg-opacity-20 rounded px-2 py-1 inline-block">
+                          🟢 სალარო ღიაა
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-sm opacity-80">
+                        <div>🔴 სალარო დახურულია</div>
+                        <div className="mt-2">დააჭირეთ გასახსნელად</div>
+                      </div>
+                    )}
+                  </button>
+                )
+              })()}
             </div>
             
             {/* Statistics Cards */}
@@ -1413,6 +1452,10 @@ export default function HotelDashboard() {
           <ReservationsView reservations={reservations} rooms={rooms} />
         )}
         
+        {activeTab === 'folios' && (
+          <FolioSystem />
+        )}
+        
         {activeTab === 'housekeeping' && (
           <HousekeepingView rooms={rooms} onRoomStatusUpdate={updateRoomStatus} />
         )}
@@ -1432,19 +1475,6 @@ export default function HotelDashboard() {
           <Reports reservations={reservations} rooms={rooms} />
         )}
         
-        {activeTab === 'nightaudit' && canCloseDay && (
-          <NightAuditView 
-            rooms={rooms}
-            reservations={reservations}
-            onAuditComplete={(action: string, id: string) => {
-              if (action === 'cancelNoShow') {
-                // Handle no-show cancellation
-                updateReservation(id, { status: 'CANCELLED' })
-              }
-            }}
-          />
-        )}
-        
         {activeTab === 'new-night-audit' && (
           <NightAuditModule />
         )}
@@ -1454,18 +1484,11 @@ export default function HotelDashboard() {
         )}
         
         {activeTab === 'financial' && (
-          <div className="space-y-6">
-            <FinancialDashboard />
-            <PaymentHistory />
-          </div>
+          <FinancialDashboard />
         )}
         
-        {activeTab === 'charges-settings' && (
-          <ChargesSettings />
-        )}
-        
-        {activeTab === 'settings-hub' && (
-          <SettingsHub />
+        {activeTab === 'settings-new' && (
+          <SettingsNew />
         )}
       </div>
 
@@ -1489,16 +1512,6 @@ export default function HotelDashboard() {
         </div>
       )}
 
-      {/* Settings Modal */}
-      {showSettingsModal && canEdit && (
-        <SettingsModal 
-          onClose={() => setShowSettingsModal(false)}
-          rooms={rooms}
-          onRoomsUpdate={() => {
-            loadRooms() // Reload rooms after update
-          }}
-        />
-      )}
       
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
@@ -1599,53 +1612,6 @@ export default function HotelDashboard() {
                 >
                   💰 Financial Dashboard
                 </button>
-                <button 
-                  onClick={() => {
-                    addTabFromMenu('charges-settings')
-                    setMobileMenuOpen(false)
-                  }} 
-                  className={`w-full text-left p-3 hover:bg-gray-100 rounded ${
-                    activeTab === 'charges-settings' ? 'bg-blue-50 text-blue-600' : ''
-                  }`}
-                >
-                  ⚙️ Charges Settings
-                </button>
-                <button 
-                  onClick={() => {
-                    addTabFromMenu('settings-hub')
-                    setMobileMenuOpen(false)
-                  }} 
-                  className={`w-full text-left p-3 hover:bg-gray-100 rounded ${
-                    activeTab === 'settings-hub' ? 'bg-blue-50 text-blue-600' : ''
-                  }`}
-                >
-                  ⚙️ Settings Hub
-                </button>
-              {canCloseDay && (
-                <button 
-                  onClick={() => {
-                    addTabFromMenu('nightaudit')
-                    setMobileMenuOpen(false)
-                  }} 
-                  className={`w-full text-left p-3 hover:bg-gray-100 rounded ${
-                    activeTab === 'nightaudit' ? 'bg-blue-50 text-blue-600' : ''
-                  }`}
-                >
-                  🌙 დღის დახურვა
-                </button>
-              )}
-              {canEdit && (
-                <button 
-                  onClick={() => {
-                    setShowSettingsModal(true)
-                    setMobileMenuOpen(false)
-                    ActivityLogger.log('OPEN_SETTINGS', {})
-                  }} 
-                  className="w-full text-left p-3 hover:bg-gray-100 rounded"
-                >
-                  ⚙️ პარამეტრები
-                </button>
-              )}
               <div className="border-t pt-2 mt-4">
                 <div className="px-3 py-2 text-sm text-gray-600">
                   <div className="font-medium">{currentUser?.name}</div>
@@ -1992,7 +1958,7 @@ function RoomCard({ room, onClick, onStatusChange }: {
         <span className="text-lg">{config.icon}</span>
       </div>
       <div className="text-sm font-medium mb-1">
-        {room.roomType || (room.floor === 3 ? 'Suite' : room.floor === 2 ? 'Deluxe' : 'Standard')}
+        {room.type || room.roomType || 'Standard'}
       </div>
       <div className="text-xs font-medium mb-2">
         {config.label}

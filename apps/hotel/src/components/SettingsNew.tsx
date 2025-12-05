@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import moment from 'moment'
 import { ExtraChargesService } from '../services/ExtraChargesService'
 
@@ -148,7 +148,6 @@ export default function SettingsNew() {
   const [activeSection, setActiveSection] = useState('hotel')
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const isInitialMount = useRef(true)
   
   // Data states
   const [hotelInfo, setHotelInfo] = useState<HotelInfo>({
@@ -285,35 +284,18 @@ export default function SettingsNew() {
     const savedChecklist = localStorage.getItem('housekeepingChecklist')
     if (savedChecklist) {
       try {
-        const parsed = JSON.parse(savedChecklist)
-        setChecklist(parsed)
-        console.log('📋 Loaded housekeeping checklist from localStorage:', parsed)
+        setChecklist(JSON.parse(savedChecklist))
       } catch (e) {
         console.error('Error loading checklist:', e)
-        // If parsing fails, use defaults
-        const defaultItems = [
-          { id: '1', task: 'საწოლის თეთრეულის შეცვლა', category: 'საძინებელი', required: true },
-          { id: '2', task: 'აბაზანის დასუფთავება', category: 'აბაზანა', required: true },
-          { id: '3', task: 'იატაკის მტვერსასრუტით გაწმენდა', category: 'ზოგადი', required: true },
-          { id: '4', task: 'პირსახოცების შეცვლა', category: 'აბაზანა', required: true },
-          { id: '5', task: 'მინიბარის შევსება', category: 'მომსახურება', required: false }
-        ]
-        setChecklist(defaultItems)
-        localStorage.setItem('housekeepingChecklist', JSON.stringify(defaultItems))
-        console.log('💾 Saved default checklist to localStorage')
       }
     } else {
-      // No saved checklist - set defaults and save them
-      const defaultItems = [
+      setChecklist([
         { id: '1', task: 'საწოლის თეთრეულის შეცვლა', category: 'საძინებელი', required: true },
         { id: '2', task: 'აბაზანის დასუფთავება', category: 'აბაზანა', required: true },
         { id: '3', task: 'იატაკის მტვერსასრუტით გაწმენდა', category: 'ზოგადი', required: true },
         { id: '4', task: 'პირსახოცების შეცვლა', category: 'აბაზანა', required: true },
         { id: '5', task: 'მინიბარის შევსება', category: 'მომსახურება', required: false }
-      ]
-      setChecklist(defaultItems)
-      localStorage.setItem('housekeepingChecklist', JSON.stringify(defaultItems))
-      console.log('💾 Saved default checklist to localStorage')
+      ])
     }
     
     // Load System Settings
@@ -371,8 +353,10 @@ export default function SettingsNew() {
         console.error('Error loading staff:', e)
       }
     } else {
-      // No default staff - start with empty array
-      setStaff([])
+      setStaff([
+        { id: '1', firstName: 'მარიამ', lastName: 'გელაშვილი', position: 'Housekeeper', department: 'housekeeping', phone: '+995555123456', email: 'mariam@hotel.com', active: true, hireDate: '2024-01-15', notes: '' },
+        { id: '2', firstName: 'გიორგი', lastName: 'ბერიძე', position: 'Housekeeper', department: 'housekeeping', phone: '+995555234567', email: 'giorgi@hotel.com', active: true, hireDate: '2024-02-01', notes: '' }
+      ])
     }
     
     // NEW: Load Seasons
@@ -492,25 +476,11 @@ export default function SettingsNew() {
   const saveChecklist = () => {
     setIsSaving(true)
     localStorage.setItem('housekeepingChecklist', JSON.stringify(checklist))
-    console.log('✅ Saved housekeeping checklist:', checklist)
     setTimeout(() => {
       setIsSaving(false)
       showMessage('success', '✅ ჩეკლისტი შენახულია!')
     }, 500)
   }
-  
-  // Auto-save checklist when it changes (skip initial mount)
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false
-      return // Skip saving on initial mount
-    }
-    
-    if (checklist && checklist.length > 0) {
-      localStorage.setItem('housekeepingChecklist', JSON.stringify(checklist))
-      console.log('💾 Auto-saved housekeeping checklist:', checklist)
-    }
-  }, [checklist])
   
   const saveSystemSettings = () => {
     setIsSaving(true)
@@ -1388,11 +1358,11 @@ function RoomTypesEditor({ roomTypes, setRoomTypes, onSave, isSaving }: {
   const [newType, setNewType] = useState<RoomType>({
     id: '',
     name: '',
-      basePrice: 100,
-      description: '',
-      maxGuests: 2,
+    basePrice: 100,
+    description: '',
+    maxGuests: 2,
     beds: 1,
-      icon: '🛏️'
+    icon: '🛏️'
   })
   
   const handleSaveType = () => {
@@ -1472,7 +1442,7 @@ function RoomTypesEditor({ roomTypes, setRoomTypes, onSave, isSaving }: {
             className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 disabled:opacity-50 flex items-center gap-2 shadow-sm"
           >
             {isSaving ? '⏳' : '💾'} შენახვა
-        </button>
+          </button>
         </div>
       </div>
       
@@ -1597,8 +1567,8 @@ function RoomTypesEditor({ roomTypes, setRoomTypes, onSave, isSaving }: {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">ბაზისური ფასი (₾)</label>
-                <input
-                  type="number"
+                  <input
+                    type="number"
                     value={newType.basePrice}
                     onChange={(e) => setNewType({ ...newType, basePrice: parseInt(e.target.value) || 0 })}
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -1606,8 +1576,8 @@ function RoomTypesEditor({ roomTypes, setRoomTypes, onSave, isSaving }: {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">მაქს. სტუმარი</label>
-                <input
-                  type="number"
+                  <input
+                    type="number"
                     value={newType.maxGuests}
                     onChange={(e) => setNewType({ ...newType, maxGuests: parseInt(e.target.value) || 1 })}
                     min={1}
@@ -1895,17 +1865,17 @@ function RoomsListEditor({ rooms, setRooms, roomTypes, floors, onSave }: {
       <div className="flex flex-wrap gap-3 mb-6 p-4 bg-gray-50 rounded-xl">
         <div>
           <label className="block text-xs text-gray-500 mb-1">სართული</label>
-                <select
+          <select
             value={filterFloor}
             onChange={(e) => setFilterFloor(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
             className="px-3 py-2 border rounded-lg text-sm bg-white"
-                >
+          >
             <option value="all">ყველა სართული</option>
             {floors.filter(f => f.active).map(f => (
               <option key={f.id} value={f.number}>{f.name || `სართული ${f.number}`}</option>
             ))}
-                </select>
-              </div>
+          </select>
+        </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">ტიპი</label>
           <select
@@ -1992,9 +1962,9 @@ function RoomsListEditor({ rooms, setRooms, roomTypes, floors, onSave }: {
                 </div>
               )
             })}
-            </div>
           </div>
-        ))}
+        </div>
+      ))}
 
       {/* Add New Card */}
       {filteredRooms.length === 0 && (
@@ -2007,7 +1977,7 @@ function RoomsListEditor({ rooms, setRooms, roomTypes, floors, onSave }: {
           >
             ➕ დაამატე პირველი ოთახი
           </button>
-      </div>
+        </div>
       )}
 
       {/* Add/Edit Modal */}
@@ -2091,9 +2061,9 @@ function RoomsListEditor({ rooms, setRooms, roomTypes, floors, onSave }: {
                         }`}
                       >
                         {label}
-        </button>
+                      </button>
                     ))}
-      </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -2131,7 +2101,7 @@ function FloorsEditor({ floors, setFloors, onSave, isSaving }: {
   const [showModal, setShowModal] = useState(false)
   const [editingFloor, setEditingFloor] = useState<Floor | null>(null)
   const [newFloor, setNewFloor] = useState({ number: 1, name: '', description: '' })
-  
+
   const handleSave = () => {
     if (editingFloor) {
       setFloors(floors.map(f => f.id === editingFloor.id 
@@ -2151,22 +2121,22 @@ function FloorsEditor({ floors, setFloors, onSave, isSaving }: {
     closeModal()
     onSave()
   }
-  
+
   const handleDelete = (floorId: string) => {
     if (!confirm('ნამდვილად გსურთ სართულის წაშლა?')) return
     setFloors(floors.filter(f => f.id !== floorId))
     onSave()
   }
-  
+
   const handleToggleActive = (floorId: string) => {
     setFloors(floors.map(f => f.id === floorId ? { ...f, active: !f.active } : f))
     onSave()
   }
-  
+
   const openAddModal = () => {
-            setEditingFloor(null)
-            const maxFloor = floors.length > 0 ? Math.max(...floors.map(f => f.number)) : 0
-            setNewFloor({ number: maxFloor + 1, name: '', description: '' })
+    setEditingFloor(null)
+    const maxFloor = floors.length > 0 ? Math.max(...floors.map(f => f.number)) : 0
+    setNewFloor({ number: maxFloor + 1, name: '', description: '' })
     setShowModal(true)
   }
 
@@ -2201,9 +2171,9 @@ function FloorsEditor({ floors, setFloors, onSave, isSaving }: {
             onClick={onSave}
             disabled={isSaving}
             className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 disabled:opacity-50 flex items-center gap-2 shadow-sm"
-        >
+          >
             {isSaving ? '⏳' : '💾'} შენახვა
-        </button>
+          </button>
         </div>
       </div>
       
@@ -2236,7 +2206,7 @@ function FloorsEditor({ floors, setFloors, onSave, isSaving }: {
               <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
                 <span className="text-3xl font-bold">{floor.number}</span>
               </div>
-            <div>
+              <div>
                 <h4 className="font-bold text-gray-800 text-lg">{floor.name}</h4>
                 <p className="text-sm text-gray-500">{floor.description || 'აღწერა არ არის'}</p>
               </div>
@@ -2309,60 +2279,60 @@ function FloorsEditor({ floors, setFloors, onSave, isSaving }: {
               {/* Floor Number */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">სართულის ნომერი *</label>
-              <input
-                type="number"
-                value={newFloor.number}
-                onChange={(e) => setNewFloor({ ...newFloor, number: parseInt(e.target.value) || 1 })}
-                min={-2}
-                max={100}
+                <input
+                  type="number"
+                  value={newFloor.number}
+                  onChange={(e) => setNewFloor({ ...newFloor, number: parseInt(e.target.value) || 1 })}
+                  min={-2}
+                  max={100}
                   className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-2xl font-bold text-center"
-              />
+                />
                 <p className="text-xs text-gray-500 mt-1 text-center">
                   -2 = სარდაფი, 0 = მიწისა, 1+ = სართულები
                 </p>
-            </div>
+              </div>
               
               {/* Floor Name */}
-            <div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">სახელი</label>
-              <input
-                type="text"
-                value={newFloor.name}
-                onChange={(e) => setNewFloor({ ...newFloor, name: e.target.value })}
-                placeholder={`სართული ${newFloor.number}`}
+                <input
+                  type="text"
+                  value={newFloor.name}
+                  onChange={(e) => setNewFloor({ ...newFloor, name: e.target.value })}
+                  placeholder={`სართული ${newFloor.number}`}
                   className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              />
-            </div>
+                />
+              </div>
               
               {/* Description */}
-            <div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">აღწერა</label>
                 <textarea
-                value={newFloor.description}
-                onChange={(e) => setNewFloor({ ...newFloor, description: e.target.value })}
+                  value={newFloor.description}
+                  onChange={(e) => setNewFloor({ ...newFloor, description: e.target.value })}
                   placeholder="მაგ: დელუქს ოთახები, პანორამული ხედით..."
                   rows={2}
                   className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              />
+                />
+              </div>
             </div>
-          </div>
             
             {/* Modal Footer */}
             <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-                <button
+              <button
                 onClick={closeModal}
                 className="px-5 py-2 text-gray-700 bg-gray-200 rounded-lg font-medium hover:bg-gray-300 transition"
-                >
+              >
                 გაუქმება
-                </button>
-                <button
+              </button>
+              <button
                 onClick={handleSave}
                 className="px-5 py-2 bg-emerald-500 text-white rounded-lg font-medium hover:bg-emerald-600 transition"
               >
                 {editingFloor ? '💾 განახლება' : '➕ დამატება'}
               </button>
-              </div>
             </div>
+          </div>
         </div>
       )}
     </div>
@@ -3708,7 +3678,7 @@ function RoomRatesEditor({ roomTypes }: { roomTypes: RoomType[] }) {
     const percent = weekday > 0 ? Math.round((diff / weekday) * 100) : 0
     return { diff, percent }
   }
-  
+
   return (
     <div>
       {/* Header */}
@@ -3718,7 +3688,7 @@ function RoomRatesEditor({ roomTypes }: { roomTypes: RoomType[] }) {
           <p className="text-sm text-gray-500">
             ოთახის ტიპების ფასები • {roomTypes.length} ტიპი
           </p>
-      </div>
+        </div>
         <button 
           onClick={handleSave}
           disabled={isSaving}
@@ -3780,14 +3750,14 @@ function RoomRatesEditor({ roomTypes }: { roomTypes: RoomType[] }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xl text-gray-500">₾</span>
-                    <input 
-                      type="number" 
+                      <input
+                        type="number"
                         value={rate.weekday}
                         onChange={(e) => updateRate(rate.id, 'weekday', parseFloat(e.target.value) || 0)}
                         className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-2xl font-bold text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
-                    />
+                      />
+                    </div>
                   </div>
-                </div>
                   
                   {/* Weekend Price */}
                   <div className="bg-orange-50 rounded-xl p-4">
@@ -3795,9 +3765,9 @@ function RoomRatesEditor({ roomTypes }: { roomTypes: RoomType[] }) {
                       <div className="flex items-center gap-2">
                         <span className="text-lg">🎉</span>
                         <span className="font-medium text-gray-700">შაბათ-კვირა</span>
-            </div>
+                      </div>
                       <span className="text-xs text-gray-400">პარ - კვი</span>
-          </div>
+                    </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xl text-gray-500">₾</span>
                       <input
@@ -5357,14 +5327,6 @@ function HousekeepingSection({ checklist, setChecklist, onSave, isSaving }: {
     onSave()
   }
   
-  const handleEdit = (id: string, currentTask: string) => {
-    const newTask = prompt('შეცვალეთ დავალება:', currentTask)
-    if (newTask && newTask.trim()) {
-      setChecklist(checklist.map(c => c.id === id ? { ...c, task: newTask.trim() } : c))
-      onSave()
-    }
-  }
-  
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border p-6">
@@ -5424,36 +5386,22 @@ function HousekeepingSection({ checklist, setChecklist, onSave, isSaving }: {
               <div className="space-y-2">
                 {tasks.map(task => (
                   <div key={task.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-3 flex-1">
+                    <div className="flex items-center gap-3">
                       <span className={`w-2 h-2 rounded-full ${task.required ? 'bg-red-500' : 'bg-gray-300'}`} />
-                      <span className="font-medium">{task.task}</span>
+                      <span>{task.task}</span>
                       {task.required && <span className="text-xs text-red-500">*სავალდებულო</span>}
                     </div>
                     <div className="flex gap-1">
-                      {/* Edit Button */}
-                      <button
-                        onClick={() => handleEdit(task.id, task.task)}
-                        className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                        title="რედაქტირება"
-                      >
-                        ✏️
-                      </button>
-                      {/* Toggle Required */}
                       <button
                         onClick={() => toggleRequired(task.id)}
                         className={`px-2 py-1 rounded text-xs ${task.required ? 'bg-red-100 text-red-700' : 'bg-gray-200'}`}
-                        title={task.required ? 'არასავალდებულო' : 'სავალდებულო'}
                       >
                         {task.required ? '⭐' : '☆'}
                       </button>
-                      {/* Delete Button */}
                       <button
                         onClick={() => handleDelete(task.id)}
                         className="px-2 py-1 text-red-600 hover:bg-red-50 rounded text-sm"
-                        title="წაშლა"
-                      >
-                        🗑️
-                      </button>
+                      >🗑️</button>
                     </div>
                   </div>
                 ))}

@@ -442,34 +442,10 @@ export default function NightAuditModule() {
 
       const todayRevenue = checkoutRevenue + noShowRevenue
       
-      // Get dirty rooms - check cleaningStatus field from localStorage
-      const savedRooms = typeof window !== 'undefined' 
-        ? JSON.parse(localStorage.getItem('hotelRooms') || '[]')
-        : []
-      
-      // Merge cleaningStatus from localStorage with API rooms
-      const roomsWithCleaningStatus = rooms.map((room: any) => {
-        const savedRoom = savedRooms.find((r: any) => 
-          r.id === room.id || r.roomNumber === room.roomNumber
-        )
-        return {
-          ...room,
-          cleaningStatus: savedRoom?.cleaningStatus || room.cleaningStatus
-        }
-      })
-      
-      // Count rooms that are VACANT but dirty or cleaning
-      const dirtyRooms = roomsWithCleaningStatus.filter((r: any) => {
-        const isVacant = r.status === 'VACANT'
-        const isDirty = r.cleaningStatus === 'dirty' || r.cleaningStatus === 'cleaning'
-        return isVacant && isDirty
-      })
-      
-      console.log('🧹 Dirty rooms found:', dirtyRooms.length, dirtyRooms.map((r: any) => ({
-        roomNumber: r.roomNumber,
-        status: r.status,
-        cleaningStatus: r.cleaningStatus
-      })))
+      // Get dirty rooms
+      const dirtyRooms = rooms.filter((r: any) => 
+        r.status === 'DIRTY' || r.status === 'dirty' || r.status === 'Dirty' || r.status === 'cleaning'
+      )
       
       setRealStats({
         pendingCheckIns,
@@ -757,7 +733,7 @@ export default function NightAuditModule() {
     if (realStats.dirtyRooms.length > 0) {
       checks.push({
         passed: false,
-        message: `🔴 ${realStats.dirtyRooms.length} ოთახი დასალაგებელია: ${realStats.dirtyRooms.map((r: any) => r.roomNumber || r.number || r.id).filter(Boolean).join(', ')}. გთხოვთ დაასრულოთ დასუფთავება Housekeeping-ში.`,
+        message: `🧹 ${realStats.dirtyRooms.length} ოთახი დასუფთავებაში: ${realStats.dirtyRooms.map((r: any) => r.roomNumber || r.number || r.id).join(', ')}`,
         canOverride: true
       })
     } else {
@@ -2864,21 +2840,9 @@ This is an automated report from Night Audit System.
               <div className="text-xs text-gray-600">Pending Check-outs</div>
               <div className="text-xl font-bold">{realStats.pendingCheckOuts.length}</div>
             </div>
-            <div className={`p-3 rounded ${realStats.dirtyRooms.length > 0 ? 'bg-red-50 border-2 border-red-300' : 'bg-green-50'}`}>
+            <div className="bg-yellow-50 p-3 rounded">
               <div className="text-xs text-gray-600">Dirty Rooms</div>
-              <div className={`text-xl font-bold ${realStats.dirtyRooms.length > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                {realStats.dirtyRooms.length}
-              </div>
-              {realStats.dirtyRooms.length > 0 && (
-                <div className="text-xs text-red-600 mt-1 font-medium">
-                  🔴 {realStats.dirtyRooms.map((r: any) => r.roomNumber || r.number || r.id).filter(Boolean).join(', ')}
-                </div>
-              )}
-              {realStats.dirtyRooms.length === 0 && (
-                <div className="text-xs text-green-600 mt-1">
-                  ✅ ყველა სუფთაა
-                </div>
-              )}
+              <div className="text-xl font-bold">{realStats.dirtyRooms.length}</div>
             </div>
             <div className="bg-green-50 p-3 rounded">
               <div className="text-xs text-gray-600">Today Revenue</div>

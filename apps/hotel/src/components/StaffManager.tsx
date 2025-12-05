@@ -20,6 +20,7 @@ export default function StaffManager({ onStaffUpdate }: any) {
       setStaff(JSON.parse(saved))
     } else {
       // No default staff - start with empty array
+      // Staff must be added through Settings
       setStaff([])
     }
   }, [])

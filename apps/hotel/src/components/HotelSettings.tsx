@@ -563,11 +563,11 @@ const RoomCard = ({ room, roomType, onEdit, onDelete }: {
         <div className="flex justify-between">
           <span className="text-gray-600">Status:</span>
           <span className={`px-2 py-0.5 rounded text-xs ${
-            room.status === 'VACANT' 
+            room.status === 'VACANT' || room.status === 'available' 
               ? 'bg-green-100 text-green-700' 
               : 'bg-gray-100 text-gray-700'
           }`}>
-            {room.status || 'VACANT'}
+            {room.status || 'available'}
           </span>
         </div>
         <div className="flex justify-between">

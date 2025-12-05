@@ -12,58 +12,6 @@ interface EditReservationModalProps {
   onDelete: (id: string) => void
 }
 
-// Helper to check if reservation can be edited
-const isReservationEditable = (reservation: any): boolean => {
-  // If not checked out, always editable
-  if (reservation.status !== 'CHECKED_OUT' && reservation.status !== 'checked-out') {
-    return true
-  }
-  
-  // If checked out, check if Night Audit has closed that day
-  const checkOutDate = reservation.checkOutDate || reservation.checkOut || reservation.actualCheckOut
-  if (!checkOutDate) return true // If no checkout date, allow editing
-  
-  // Get checkout date as string (YYYY-MM-DD)
-  const checkOutDateStr = typeof checkOutDate === 'string' 
-    ? checkOutDate.split('T')[0] 
-    : moment(checkOutDate).format('YYYY-MM-DD')
-  
-  // Get closed audit dates from localStorage
-  if (typeof window === 'undefined') return true
-  
-  // Check nightAudits array
-  const nightAudits = JSON.parse(localStorage.getItem('nightAudits') || '[]')
-  const lastNightAuditDate = localStorage.getItem('lastNightAuditDate')
-  
-  // Check if checkout date has been audited
-  const isAudited = nightAudits.some((audit: any) => {
-    const auditDate = audit.date || audit.businessDate
-    if (!auditDate) return false
-    const auditDateStr = typeof auditDate === 'string' 
-      ? auditDate.split('T')[0] 
-      : moment(auditDate).format('YYYY-MM-DD')
-    return auditDateStr === checkOutDateStr
-  })
-  
-  // Also check if lastNightAuditDate is after checkout date
-  if (lastNightAuditDate) {
-    const lastAuditDateStr = lastNightAuditDate.split('T')[0]
-    if (moment(lastAuditDateStr).isSameOrAfter(checkOutDateStr, 'day')) {
-      return false // Checkout date has been audited
-    }
-  }
-  
-  // If audited, not editable
-  return !isAudited
-}
-
-// Helper to get reason why not editable
-const getNotEditableReason = (reservation: any): string | null => {
-  if (isReservationEditable(reservation)) return null
-  
-  return 'ეს რეზერვაცია დახურულია Night Audit-ით და ვერ რედაქტირდება'
-}
-
 export default function EditReservationModal({ 
   reservation, 
   rooms,
@@ -72,22 +20,6 @@ export default function EditReservationModal({
   onSave,
   onDelete 
 }: EditReservationModalProps) {
-  const [isEditable, setIsEditable] = useState(true)
-  const [notEditableReason, setNotEditableReason] = useState<string | null>(null)
-  
-  // Check if reservation is editable on mount and when reservation changes
-  useEffect(() => {
-    if (reservation) {
-      const editable = isReservationEditable(reservation)
-      setIsEditable(editable)
-      if (!editable) {
-        setNotEditableReason(getNotEditableReason(reservation))
-      } else {
-        setNotEditableReason(null)
-      }
-    }
-  }, [reservation])
-  
   const [formData, setFormData] = useState({
     guestName: reservation.guestName,
     guestEmail: reservation.guestEmail || '',
@@ -223,12 +155,6 @@ export default function EditReservationModal({
   }
   
   const handleSave = () => {
-    // Check if reservation is editable
-    if (!isEditable) {
-      alert('ეს რეზერვაცია დახურულია Night Audit-ით და ვერ რედაქტირდება')
-      return
-    }
-    
     // Validation
     if (!formData.guestName.trim()) {
       alert('შეიყვანეთ სტუმრის სახელი')
@@ -295,16 +221,6 @@ export default function EditReservationModal({
         
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-4">
-          {/* Not Editable Warning */}
-          {!isEditable && notEditableReason && (
-            <div className="mb-4 bg-yellow-100 border-l-4 border-yellow-500 p-3">
-              <div className="flex items-center">
-                <span className="text-yellow-700 font-medium">⚠️ {notEditableReason}</span>
-              </div>
-              <p className="text-sm text-yellow-600 mt-1">მხოლოდ ნახვაა შესაძლებელი</p>
-            </div>
-          )}
-          
           {/* Date Error Alert */}
           {dateError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -328,40 +244,36 @@ export default function EditReservationModal({
                 <label className="block text-xs text-gray-500 mb-1">სახელი *</label>
                 <input
                   type="text"
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   value={formData.guestName}
                   onChange={(e) => setFormData({...formData, guestName: e.target.value})}
-                  disabled={!isEditable}
                 />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">📞 ტელეფონი</label>
                 <input
                   type="tel"
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   value={formData.guestPhone}
                   onChange={(e) => setFormData({...formData, guestPhone: e.target.value})}
                   placeholder="+995..."
-                  disabled={!isEditable}
                 />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">📧 Email</label>
                 <input
                   type="email"
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   value={formData.guestEmail}
                   onChange={(e) => setFormData({...formData, guestEmail: e.target.value})}
-                  disabled={!isEditable}
                 />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">🌍 ქვეყანა</label>
                 <select
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   value={formData.guestCountry}
                   onChange={(e) => setFormData({...formData, guestCountry: e.target.value})}
-                  disabled={!isEditable}
                 >
                   <option value="">აირჩიეთ</option>
                   {countries.map(c => (
@@ -374,15 +286,14 @@ export default function EditReservationModal({
           
           {/* Company Toggle */}
           <div className="mb-4">
-            <label className={`flex items-center gap-2 ${!isEditable ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={showCompany}
                 onChange={(e) => setShowCompany(e.target.checked)}
                 className="w-4 h-4"
-                disabled={!isEditable}
               />
-              <span className={`text-sm font-medium ${!isEditable ? 'text-gray-400' : ''}`}>🏢 კომპანია</span>
+              <span className="text-sm font-medium">🏢 კომპანია</span>
             </label>
             
             {showCompany && (
@@ -391,50 +302,45 @@ export default function EditReservationModal({
                   <label className="block text-xs text-gray-500 mb-1">კომპანიის სახელი</label>
                   <input
                     type="text"
-                    className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                     value={formData.companyName}
                     onChange={(e) => setFormData({...formData, companyName: e.target.value})}
-                    disabled={!isEditable}
                   />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">საიდენტიფიკაციო</label>
                   <input
                     type="text"
-                    className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                     value={formData.companyTaxId}
                     onChange={(e) => setFormData({...formData, companyTaxId: e.target.value})}
-                    disabled={!isEditable}
                   />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs text-gray-500 mb-1">მისამართი</label>
                   <input
                     type="text"
-                    className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                     value={formData.companyAddress}
                     onChange={(e) => setFormData({...formData, companyAddress: e.target.value})}
-                    disabled={!isEditable}
                   />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">ბანკი</label>
                   <input
                     type="text"
-                    className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                     value={formData.companyBank}
                     onChange={(e) => setFormData({...formData, companyBank: e.target.value})}
-                    disabled={!isEditable}
                   />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">ანგარიში</label>
                   <input
                     type="text"
-                    className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                     value={formData.companyBankAccount}
                     onChange={(e) => setFormData({...formData, companyBankAccount: e.target.value})}
-                    disabled={!isEditable}
                   />
                 </div>
               </div>
@@ -491,10 +397,9 @@ export default function EditReservationModal({
               <div>
                 <label className="block text-xs text-gray-500 mb-1">სტატუსი</label>
                 <select
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   value={formData.status}
                   onChange={(e) => setFormData({...formData, status: e.target.value})}
-                  disabled={!isEditable}
                 >
                   <option value="CONFIRMED">📅 დადასტურებული</option>
                   <option value="CHECKED_IN">✅ შემოსული</option>
@@ -508,13 +413,11 @@ export default function EditReservationModal({
                 <input
                   type="date"
                   className={`w-full border rounded-lg px-3 py-2 text-sm ${
-                    !isEditable ? 'bg-gray-100 cursor-not-allowed' :
                     formData.checkIn < minCheckInDate ? 'border-red-500 bg-red-50' : ''
                   }`}
                   value={formData.checkIn}
                   min={minCheckInDate}
                   onChange={(e) => handleCheckInChange(e.target.value)}
-                  disabled={!isEditable}
                 />
                 {formData.checkIn < minCheckInDate && (
                   <p className="text-xs text-red-500 mt-1">⚠️ დახურული პერიოდი</p>
@@ -524,11 +427,10 @@ export default function EditReservationModal({
                 <label className="block text-xs text-gray-500 mb-1">Check-Out *</label>
                 <input
                   type="date"
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   value={formData.checkOut}
                   min={moment(formData.checkIn).add(1, 'day').format('YYYY-MM-DD')}
                   onChange={(e) => handleCheckOutChange(e.target.value)}
-                  disabled={!isEditable}
                 />
               </div>
             </div>
@@ -543,10 +445,9 @@ export default function EditReservationModal({
                 <input
                   type="number"
                   min="1"
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   value={formData.adults}
                   onChange={(e) => setFormData({...formData, adults: parseInt(e.target.value) || 1})}
-                  disabled={!isEditable}
                 />
               </div>
               <div>
@@ -554,20 +455,18 @@ export default function EditReservationModal({
                 <input
                   type="number"
                   min="0"
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   value={formData.children}
                   onChange={(e) => setFormData({...formData, children: parseInt(e.target.value) || 0})}
-                  disabled={!isEditable}
                 />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">თანხა (₾)</label>
                 <input
                   type="number"
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   value={formData.totalAmount}
                   onChange={(e) => setFormData({...formData, totalAmount: parseInt(e.target.value) || 0})}
-                  disabled={!isEditable}
                 />
               </div>
             </div>
@@ -581,12 +480,11 @@ export default function EditReservationModal({
           <div className="mb-4">
             <label className="block text-xs text-gray-500 mb-1">📝 შენიშვნები</label>
             <textarea
-              className={`w-full border rounded-lg px-3 py-2 text-sm ${!isEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
               rows={2}
               value={formData.notes}
               onChange={(e) => setFormData({...formData, notes: e.target.value})}
               placeholder="დამატებითი ინფორმაცია..."
-              disabled={!isEditable}
             />
           </div>
         </div>
@@ -607,22 +505,13 @@ export default function EditReservationModal({
             >
               გაუქმება
             </button>
-            {isEditable ? (
-              <button 
-                onClick={handleSave}
-                disabled={!!dateError || formData.checkIn < minCheckInDate}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                💾 შენახვა
-              </button>
-            ) : (
-              <button
-                disabled
-                className="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed text-sm"
-              >
-                🔒 მხოლოდ ნახვა
-              </button>
-            )}
+            <button 
+              onClick={handleSave}
+              disabled={!!dateError || formData.checkIn < minCheckInDate}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              💾 შენახვა
+            </button>
           </div>
         </div>
       </div>

@@ -125,33 +125,25 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     
     window.addEventListener('storage', handleStorageChange)
     
-    // Load checklist from Settings localStorage
-    const loadChecklistFromSettings = (): any[] => {
-      const saved = localStorage.getItem('housekeepingChecklist')
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved)
-          return parsed.map((item: any) => ({
-            item: item.task || item.item || item.name,
-            completed: false,
-            required: item.required || false,
-            category: item.category || 'ზოგადი'
-          }))
-        } catch (e) {
-          console.error('Error loading checklist:', e)
-        }
-      }
-      return []
-    }
-    
-    const checklist = loadChecklistFromSettings()
-    if (checklist.length > 0) {
-      setDefaultChecklist(checklist)
-      console.log('📋 Loaded checklist from Settings:', checklist)
+    // Load checklist
+    const savedChecklist = localStorage.getItem('housekeepingChecklist')
+    if (savedChecklist) {
+      const parsedChecklist = JSON.parse(savedChecklist)
+      setDefaultChecklist(parsedChecklist.map((item: any) => ({
+        item: item.task || item.item || item,
+        completed: false
+      })))
     } else {
-      // No checklist in Settings - set empty array (no hardcoded defaults)
-      setDefaultChecklist([])
-      console.warn('⚠️ No checklist found in Settings. Please add checklist items in Settings → Housekeeping.')
+      // Default checklist
+      setDefaultChecklist([
+        { item: 'ზეწრების შეცვლა', completed: false },
+        { item: 'პირსახოცების შეცვლა', completed: false },
+        { item: 'აბაზანის დასუფთავება', completed: false },
+        { item: 'იატაკის დალაგება', completed: false },
+        { item: 'მინიბარის შემოწმება', completed: false },
+        { item: 'ნაგვის გატანა', completed: false },
+        { item: 'ზედაპირების დასუფთავება', completed: false }
+      ])
     }
   }, [])
   
@@ -222,32 +214,10 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     return 1
   }
   
-  // Load checklist from Settings localStorage
-  const loadChecklistFromSettings = (): any[] => {
-    const saved = localStorage.getItem('housekeepingChecklist')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        return parsed.map((item: any) => ({
-          item: item.task || item.item || item.name,
-          completed: false,
-          required: item.required || false,
-          category: item.category || 'ზოგადი'
-        }))
-      } catch (e) {
-        console.error('Error loading checklist:', e)
-      }
-    }
-    return []
-  }
-  
   // Auto-create tasks for checkouts
   const checkForCheckouts = () => {
     const checkoutRooms = rooms.filter((r: any) => r.status === 'CHECKOUT')
     const newTasks: Task[] = []
-    
-    // Always use Settings checklist
-    const checklist = loadChecklistFromSettings()
     
     checkoutRooms.forEach((room: any) => {
       // Check if pending task already exists for this room and type
@@ -269,8 +239,15 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
           priority: 'high',
           assignedTo: '',
           scheduledTime: moment().format('HH:mm'),
-          // Always use Settings checklist (or empty if not set)
-          checklist: checklist.length > 0 ? [...checklist] : defaultChecklist.length > 0 ? [...defaultChecklist] : []
+          checklist: defaultChecklist.length > 0 ? [...defaultChecklist] : [
+            { item: 'ზეწრების შეცვლა', completed: false },
+            { item: 'პირსახოცების შეცვლა', completed: false },
+            { item: 'აბაზანის დასუფთავება', completed: false },
+            { item: 'იატაკის დალაგება', completed: false },
+            { item: 'მინიბარის შემოწმება', completed: false },
+            { item: 'ნაგვის გატანა', completed: false },
+            { item: 'ზედაპირების დასუფთავება', completed: false }
+          ]
         })
       }
     })
@@ -308,50 +285,6 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     }
   }
   
-  // Sync checklist from Settings to all pending tasks
-  const syncChecklistFromSettings = () => {
-    const saved = localStorage.getItem('housekeepingChecklist')
-    if (!saved) {
-      alert('პარამეტრებში ჩეკლისტი არ არის!\n\nგადადით: პარამეტრები → დასუფთავება')
-      return
-    }
-    
-    try {
-      const parsed = JSON.parse(saved)
-      const newChecklist = parsed.map((item: any) => ({
-        item: item.task || item.item || item.name,
-        completed: false,
-        required: item.required || false,
-        category: item.category || 'ზოგადი'
-      }))
-      
-      if (newChecklist.length === 0) {
-        alert('პარამეტრებში ჩეკლისტი ცარიელია!')
-        return
-      }
-      
-      // Update pending and in_progress tasks
-      const updatedTasks = tasks.map(task => {
-        if (task.status === 'pending' || task.status === 'in_progress') {
-          return { 
-            ...task, 
-            checklist: newChecklist.map((c: any) => ({ ...c, completed: false }))
-          }
-        }
-        return task
-      })
-      
-      saveTasks(updatedTasks)
-      setDefaultChecklist(newChecklist)
-      
-      const count = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress').length
-      alert(`✅ ჩეკლისტი განახლდა!\n\n${newChecklist.length} დავალება\n${count} task განახლდა`)
-    } catch (e) {
-      console.error('Error syncing checklist:', e)
-      alert('შეცდომა!')
-    }
-  }
-  
   // Start task
   const startTask = (taskId: string) => {
     const updated = tasks.map(t => 
@@ -361,22 +294,10 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     )
     saveTasks(updated)
     
-    // Update room cleaningStatus to 'cleaning'
+    // Update room status to CLEANING
     const task = tasks.find(t => t.id === taskId)
-    if (task) {
-      const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
-      const updatedRooms = rooms.map((r: any) => {
-        if (r.roomNumber === task.roomNumber || r.id === task.roomId) {
-          return { ...r, cleaningStatus: 'cleaning' }
-        }
-        return r
-      })
-      localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
-      
-      // Also update via callback if available
-      if (onRoomStatusUpdate) {
-        onRoomStatusUpdate(task.roomId, 'CLEANING')
-      }
+    if (task && onRoomStatusUpdate) {
+      onRoomStatusUpdate(task.roomId, 'CLEANING')
     }
   }
   
@@ -397,25 +318,11 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     
     // Update task status
     const updated = tasks.map(t => 
-      t.id === taskId ? { ...t, status: 'verified' as const, verifiedAt: moment().toISOString() } : t
+      t.id === taskId ? { ...t, status: 'verified' as const } : t
     )
     saveTasks(updated)
     
-    // Update room cleaningStatus to 'clean' and status to 'VACANT'
-    const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
-    const updatedRooms = rooms.map((r: any) => {
-      if (r.roomNumber === task.roomNumber || r.id === task.roomId) {
-        return {
-          ...r,
-          cleaningStatus: 'clean', // Room is clean and ready
-          status: 'VACANT'
-        }
-      }
-      return r
-    })
-    localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
-    
-    // Update room status to VACANT (ready for new guest) via API
+    // Update room status to VACANT (ready for new guest)
     try {
       await fetch('/api/hotel/rooms/status', {
         method: 'POST',
@@ -500,21 +407,12 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">🧹 დასუფთავების განრიგი</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={syncChecklistFromSettings}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            title="სინქრონიზაცია პარამეტრებიდან"
-          >
-            🔄 ჩეკლისტის სინქრო
-          </button>
-          <button
-            onClick={() => setShowAddTask(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            + ახალი დავალება
-          </button>
-        </div>
+        <button
+          onClick={() => setShowAddTask(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          + ახალი დავალება
+        </button>
       </div>
       
       {/* Statistics */}

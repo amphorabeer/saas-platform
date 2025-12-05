@@ -164,35 +164,15 @@ export default function CheckOutModal({
         : 'User'
       FolioService.closeFolio(folio.id, closedBy)
       
-      // Update room status to VACANT but dirty (needs cleaning)
-      if (typeof window !== 'undefined') {
-        const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
-        const updatedRooms = rooms.map((r: any) => {
-          if (r.id === reservation.roomId || r.roomNumber === reservation.roomNumber) {
-            return {
-              ...r,
-              status: 'VACANT', // Room is VACANT but...
-              cleaningStatus: 'dirty' // ...needs cleaning!
-            }
-          }
-          return r
+      // Update room status to CLEANING
+      await fetch('/api/hotel/rooms/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomId: reservation.roomId,
+          status: ROOM_STATUS.CLEANING
         })
-        localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
-      }
-      
-      // Also update via API if available
-      try {
-        await fetch('/api/hotel/rooms/status', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            roomId: reservation.roomId,
-            status: ROOM_STATUS.CLEANING
-          })
-        })
-      } catch (e) {
-        console.warn('API update failed, using localStorage only:', e)
-      }
+      })
       
       // Auto-create housekeeping task (only if doesn't exist)
       const savedTasks = typeof window !== 'undefined' 
@@ -217,27 +197,23 @@ export default function CheckOutModal({
         const roomFloor = room?.floor || Math.floor(parseInt(roomNumber) / 100) || 1
         
         // Load default checklist
-        // Load checklist from Settings localStorage
-        const loadChecklistFromSettings = (): any[] => {
-          if (typeof window === 'undefined') return []
-          const saved = localStorage.getItem('housekeepingChecklist')
-          if (saved) {
-            try {
-              const parsed = JSON.parse(saved)
-              return parsed.map((item: any) => ({
-                item: item.task || item.item || item.name,
-                completed: false,
-                required: item.required || false,
-                category: item.category || 'ზოგადი'
-              }))
-            } catch (e) {
-              console.error('Error loading checklist:', e)
-            }
-          }
-          return []
-        }
-        
-        const defaultChecklist = loadChecklistFromSettings()
+        const savedChecklist = typeof window !== 'undefined'
+          ? localStorage.getItem('housekeepingChecklist')
+          : null
+        const defaultChecklist = savedChecklist 
+          ? JSON.parse(savedChecklist).map((item: any) => ({
+              item: item.task || item.item || item,
+              completed: false
+            }))
+          : [
+              { item: 'ზეწრების შეცვლა', completed: false },
+              { item: 'პირსახოცების შეცვლა', completed: false },
+              { item: 'აბაზანის დასუფთავება', completed: false },
+              { item: 'იატაკის დალაგება', completed: false },
+              { item: 'მინიბარის შემოწმება', completed: false },
+              { item: 'ნაგვის გატანა', completed: false },
+              { item: 'ზედაპირების დასუფთავება', completed: false }
+            ]
         
         const housekeepingTask = {
           id: `task-${Date.now()}-${reservation.roomId}`,
