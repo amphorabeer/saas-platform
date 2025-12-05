@@ -361,10 +361,22 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     )
     saveTasks(updated)
     
-    // Update room status to CLEANING
+    // Update room cleaningStatus to 'cleaning'
     const task = tasks.find(t => t.id === taskId)
-    if (task && onRoomStatusUpdate) {
-      onRoomStatusUpdate(task.roomId, 'CLEANING')
+    if (task) {
+      const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+      const updatedRooms = rooms.map((r: any) => {
+        if (r.roomNumber === task.roomNumber || r.id === task.roomId) {
+          return { ...r, cleaningStatus: 'cleaning' }
+        }
+        return r
+      })
+      localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
+      
+      // Also update via callback if available
+      if (onRoomStatusUpdate) {
+        onRoomStatusUpdate(task.roomId, 'CLEANING')
+      }
     }
   }
   
@@ -385,11 +397,25 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     
     // Update task status
     const updated = tasks.map(t => 
-      t.id === taskId ? { ...t, status: 'verified' as const } : t
+      t.id === taskId ? { ...t, status: 'verified' as const, verifiedAt: moment().toISOString() } : t
     )
     saveTasks(updated)
     
-    // Update room status to VACANT (ready for new guest)
+    // Update room cleaningStatus to 'clean' and status to 'VACANT'
+    const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+    const updatedRooms = rooms.map((r: any) => {
+      if (r.roomNumber === task.roomNumber || r.id === task.roomId) {
+        return {
+          ...r,
+          cleaningStatus: 'clean', // Room is clean and ready
+          status: 'VACANT'
+        }
+      }
+      return r
+    })
+    localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
+    
+    // Update room status to VACANT (ready for new guest) via API
     try {
       await fetch('/api/hotel/rooms/status', {
         method: 'POST',

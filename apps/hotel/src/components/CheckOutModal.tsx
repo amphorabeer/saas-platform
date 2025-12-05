@@ -164,15 +164,35 @@ export default function CheckOutModal({
         : 'User'
       FolioService.closeFolio(folio.id, closedBy)
       
-      // Update room status to CLEANING
-      await fetch('/api/hotel/rooms/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          roomId: reservation.roomId,
-          status: ROOM_STATUS.CLEANING
+      // Update room status to VACANT but dirty (needs cleaning)
+      if (typeof window !== 'undefined') {
+        const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+        const updatedRooms = rooms.map((r: any) => {
+          if (r.id === reservation.roomId || r.roomNumber === reservation.roomNumber) {
+            return {
+              ...r,
+              status: 'VACANT', // Room is VACANT but...
+              cleaningStatus: 'dirty' // ...needs cleaning!
+            }
+          }
+          return r
         })
-      })
+        localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
+      }
+      
+      // Also update via API if available
+      try {
+        await fetch('/api/hotel/rooms/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roomId: reservation.roomId,
+            status: ROOM_STATUS.CLEANING
+          })
+        })
+      } catch (e) {
+        console.warn('API update failed, using localStorage only:', e)
+      }
       
       // Auto-create housekeeping task (only if doesn't exist)
       const savedTasks = typeof window !== 'undefined' 

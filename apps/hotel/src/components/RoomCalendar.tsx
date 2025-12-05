@@ -1709,9 +1709,57 @@ export default function RoomCalendar({
     }
   }
 
+  // Helper function to check if No-show is allowed (EXACT Business Day match required)
+  const canMarkAsNoShow = (reservation: any): { allowed: boolean; reason?: string } => {
+    if (!reservation) {
+      return { allowed: false, reason: 'Reservation not found' }
+    }
+    
+    // Rule 1: Status must be CONFIRMED or PENDING
+    if (reservation.status !== 'CONFIRMED' && reservation.status !== 'PENDING' && 
+        reservation.status !== 'confirmed' && reservation.status !== 'pending') {
+      return { 
+        allowed: false, 
+        reason: `სტატუსი "${reservation.status}" - No-show შეუძლებელია` 
+      }
+    }
+    
+    // Get current business date
+    const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastNightAuditDate') : null
+    const businessDate = lastAuditDate 
+      ? moment(lastAuditDate).add(1, 'day').format('YYYY-MM-DD')
+      : moment().format('YYYY-MM-DD')
+    
+    const checkInDate = moment(reservation.checkIn || reservation.checkInDate).format('YYYY-MM-DD')
+    
+    // Rule 2: Check-in must be EXACTLY on business date (not past, not future)
+    if (checkInDate < businessDate) {
+      return { 
+        allowed: false, 
+        reason: `Check-in თარიღი (${checkInDate}) უკვე დახურულია Night Audit-ით` 
+      }
+    }
+    
+    if (checkInDate > businessDate) {
+      return { 
+        allowed: false, 
+        reason: `Check-in თარიღი (${checkInDate}) მომავალშია - No-show შეუძლებელია` 
+      }
+    }
+    
+    // Check-in === businessDate - allowed!
+    return { allowed: true }
+  }
+
   // Check if action is allowed on closed dates
   const getAllowedActionsForClosedDate = (action: string, reservation: any): boolean => {
     if (!reservation) return false
+    
+    // Special handling for No-show: requires EXACT Business Day match
+    if (action === 'no-show') {
+      const noShowCheck = canMarkAsNoShow(reservation)
+      return noShowCheck.allowed
+    }
     
     const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastNightAuditDate') : null
     if (!lastAuditDate) return true // No audit date means all dates are editable
@@ -1753,11 +1801,18 @@ export default function RoomCalendar({
   const handleReservationAction = (action: string, reservation: any): boolean => {
     // Check if action is allowed
     if (!getAllowedActionsForClosedDate(action, reservation)) {
+      // Special message for No-show with detailed reason
+      if (action === 'no-show') {
+        const noShowCheck = canMarkAsNoShow(reservation)
+        alert(`❌ No-show შეუძლებელია\n\n${noShowCheck.reason || 'უცნობი მიზეზი'}`)
+        return false
+      }
+      
       const blockedActions: { [key: string]: string } = {
         'check-in': '❌ Check-in აღარ შეიძლება დახურულ დღეზე',
         'edit': '❌ რედაქტირება აღარ შეიძლება დახურულ დღეზე',
         'cancel': '❌ გაუქმება აღარ შეიძლება დახურულ დღეზე',
-        'no-show': '❌ NO-SHOW მარკირება აღარ შეიძლება დახურულ დღეზე',
+        'no-show': '❌ NO-SHOW მარკირება აღარ შეიძლება',
         'new-reservation': '❌ ახალი ჯავშანი აღარ შეიძლება დახურულ დღეზე'
       }
       
@@ -2520,6 +2575,51 @@ export default function RoomCalendar({
     )
   }
   
+  // Helper to check if reservation can be edited
+  const isReservationEditable = (reservation: any): boolean => {
+    // If not checked out, always editable
+    if (reservation.status !== 'CHECKED_OUT' && reservation.status !== 'checked-out') {
+      return true
+    }
+    
+    // If checked out, check if Night Audit has closed that day
+    const checkOutDate = reservation.checkOutDate || reservation.checkOut || reservation.actualCheckOut
+    if (!checkOutDate) return true // If no checkout date, allow editing
+    
+    // Get checkout date as string (YYYY-MM-DD)
+    const checkOutDateStr = typeof checkOutDate === 'string' 
+      ? checkOutDate.split('T')[0] 
+      : moment(checkOutDate).format('YYYY-MM-DD')
+    
+    // Get closed audit dates from localStorage
+    if (typeof window === 'undefined') return true
+    
+    // Check nightAudits array
+    const nightAudits = JSON.parse(localStorage.getItem('nightAudits') || '[]')
+    const lastNightAuditDate = localStorage.getItem('lastNightAuditDate')
+    
+    // Check if checkout date has been audited
+    const isAudited = nightAudits.some((audit: any) => {
+      const auditDate = audit.date || audit.businessDate
+      if (!auditDate) return false
+      const auditDateStr = typeof auditDate === 'string' 
+        ? auditDate.split('T')[0] 
+        : moment(auditDate).format('YYYY-MM-DD')
+      return auditDateStr === checkOutDateStr
+    })
+    
+    // Also check if lastNightAuditDate is after checkout date
+    if (lastNightAuditDate) {
+      const lastAuditDateStr = lastNightAuditDate.split('T')[0]
+      if (moment(lastAuditDateStr).isSameOrAfter(checkOutDateStr, 'day')) {
+        return false // Checkout date has been audited
+      }
+    }
+    
+    // If audited, not editable
+    return !isAudited
+  }
+
   // Handle reservation click
   const handleReservationClick = (reservation: any) => {
     // Check if reservation date is in closed period
@@ -2541,12 +2641,51 @@ export default function RoomCalendar({
       }
     }
     
+    // Check if checked-out reservation has been audited
+    if (!isReservationEditable(reservation)) {
+      // Show view-only modal for audited checked-out reservations
+      setViewOnlyReservation(reservation)
+      setShowViewOnlyModal(true)
+      return
+    }
+    
     // Normal edit for future reservations
     setSelectedReservation(reservation)
     setShowDetails(true)
   }
   
   // Check if room should be OCCUPIED today
+  // Helper function to get cleaning status indicator
+  const getRoomCleaningIndicator = (room: any) => {
+    // Only show for available rooms
+    if (room.status === 'OCCUPIED' || room.status === 'occupied') {
+      return null // Don't show cleaning status for occupied rooms
+    }
+    
+    // Get cleaningStatus from room object or from localStorage
+    let cleaningStatus = room.cleaningStatus
+    if (!cleaningStatus && typeof window !== 'undefined') {
+      // Try to get from localStorage
+      const savedRooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+      const savedRoom = savedRooms.find((r: any) => 
+        r.id === room.id || r.roomNumber === room.roomNumber
+      )
+      cleaningStatus = savedRoom?.cleaningStatus
+    }
+    
+    switch (cleaningStatus) {
+      case 'dirty':
+        return { icon: '🔴', text: 'დასალაგებელი', color: 'bg-orange-200' }
+      case 'cleaning':
+        return { icon: '🧹', text: 'იწმინდება', color: 'bg-yellow-200' }
+      case 'clean':
+      case 'inspected':
+        return { icon: '✅', text: 'სუფთა', color: 'bg-green-200' }
+      default:
+        return null
+    }
+  }
+
   const getRoomCurrentStatus = (room: any) => {
     // If room is in maintenance (from localStorage), return MAINTENANCE
     if (isRoomInMaintenance(room.id)) {
@@ -3198,13 +3337,21 @@ export default function RoomCalendar({
                       {/* Room Number Badge */}
                       {(() => {
                         const roomTypeValue = room.type || room.roomType || 'Standard'
+                        const cleaningIndicator = getRoomCleaningIndicator(room)
                         return (
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold shadow-md ${
-                            roomTypeValue === 'Suite' ? 'bg-gradient-to-br from-amber-400 to-amber-600' :
-                            roomTypeValue === 'Deluxe' ? 'bg-gradient-to-br from-purple-400 to-purple-600' :
-                            'bg-gradient-to-br from-blue-400 to-blue-600'
-                          }`}>
-                            {room.roomNumber}
+                          <div className="flex items-center gap-2">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold shadow-md ${
+                              roomTypeValue === 'Suite' ? 'bg-gradient-to-br from-amber-400 to-amber-600' :
+                              roomTypeValue === 'Deluxe' ? 'bg-gradient-to-br from-purple-400 to-purple-600' :
+                              'bg-gradient-to-br from-blue-400 to-blue-600'
+                            }`}>
+                              {room.roomNumber}
+                            </div>
+                            {cleaningIndicator && (
+                              <span className="text-lg" title={cleaningIndicator.text}>
+                                {cleaningIndicator.icon}
+                              </span>
+                            )}
                           </div>
                         )
                       })()}
@@ -3216,6 +3363,36 @@ export default function RoomCalendar({
                         </span>
                         {(() => {
                           const displayStatus = getRoomCurrentStatus(room)
+                          const cleaningIndicator = getRoomCleaningIndicator(room)
+                          
+                          // Get cleaningStatus directly (check localStorage if not in room object)
+                          let cleaningStatus = room.cleaningStatus
+                          if (!cleaningStatus && typeof window !== 'undefined') {
+                            const savedRooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+                            const savedRoom = savedRooms.find((r: any) => 
+                              r.id === room.id || r.roomNumber === room.roomNumber
+                            )
+                            cleaningStatus = savedRoom?.cleaningStatus
+                          }
+                          
+                          // If room is VACANT, show cleaning status instead of just "VACANT"
+                          if (displayStatus === 'VACANT' && cleaningIndicator && cleaningStatus) {
+                            // Map cleaning status colors
+                            const cleaningColors: any = {
+                              'dirty': 'bg-orange-500/80',
+                              'cleaning': 'bg-yellow-500/80',
+                              'clean': 'bg-green-500/80',
+                              'inspected': 'bg-green-500/80'
+                            }
+                            const color = cleaningColors[cleaningStatus] || 'bg-green-500/80'
+                            
+                            return (
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium mt-1 ${color} text-white`}>
+                                {cleaningIndicator.icon} {cleaningIndicator.text}
+                              </span>
+                            )
+                          }
+                          
                           const statusColors: any = {
                             'OCCUPIED': 'bg-red-500/80',
                             'VACANT': 'bg-green-500/80',

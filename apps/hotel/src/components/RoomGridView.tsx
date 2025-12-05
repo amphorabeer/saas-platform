@@ -212,7 +212,36 @@ export default function RoomGridView({ rooms, onRoomClick, onStatusChange, loadR
 
 // Room Card Component
 function RoomCard({ room, onClick, onQuickAction }: any) {
-  const getStatusColor = (status: string) => {
+  // Helper function to get cleaning status indicator
+  const getRoomCleaningIndicator = (room: any) => {
+    if (room.status === 'OCCUPIED' || room.status === 'occupied') {
+      return null // Don't show cleaning status for occupied rooms
+    }
+    
+    switch (room.cleaningStatus) {
+      case 'dirty':
+        return { icon: '🔴', text: 'დასალაგებელი', color: 'bg-orange-200' }
+      case 'cleaning':
+        return { icon: '🧹', text: 'იწმინდება', color: 'bg-yellow-200' }
+      case 'clean':
+      case 'inspected':
+        return { icon: '✅', text: 'სუფთა', color: 'bg-green-200' }
+      default:
+        return null
+    }
+  }
+
+  const getStatusColor = (status: string, cleaningStatus?: string) => {
+    // If room is VACANT, check cleaning status
+    if (status === 'VACANT') {
+      switch (cleaningStatus) {
+        case 'dirty': return 'border-orange-500 bg-orange-50'
+        case 'cleaning': return 'border-yellow-500 bg-yellow-50'
+        case 'clean': return 'border-green-500 bg-green-50'
+        default: return 'border-green-500 bg-green-50'
+      }
+    }
+    
     switch(status) {
       case 'VACANT': return 'border-green-500 bg-green-50'
       case 'OCCUPIED': return 'border-red-500 bg-red-50'
@@ -223,7 +252,13 @@ function RoomCard({ room, onClick, onQuickAction }: any) {
     }
   }
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string, cleaningStatus?: string) => {
+    // If room is VACANT, show cleaning status icon
+    if (status === 'VACANT' && cleaningStatus) {
+      const cleaning = getRoomCleaningIndicator({ status, cleaningStatus })
+      if (cleaning) return cleaning.icon
+    }
+    
     switch(status) {
       case 'VACANT': return '✅'
       case 'OCCUPIED': return '🔴'
@@ -234,7 +269,13 @@ function RoomCard({ room, onClick, onQuickAction }: any) {
     }
   }
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string, cleaningStatus?: string) => {
+    // If room is VACANT, show cleaning status label
+    if (status === 'VACANT' && cleaningStatus) {
+      const cleaning = getRoomCleaningIndicator({ status, cleaningStatus })
+      if (cleaning) return cleaning.text
+    }
+    
     switch(status) {
       case 'VACANT': return 'თავისუფალი'
       case 'OCCUPIED': return 'დაკავებული'
@@ -245,32 +286,45 @@ function RoomCard({ room, onClick, onQuickAction }: any) {
     }
   }
 
+  const cleaningIndicator = getRoomCleaningIndicator(room)
+  
   return (
     <div 
-      className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${getStatusColor(room.status)} room-card-hover`}
+      className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${getStatusColor(room.status, room.cleaningStatus)} room-card-hover`}
       onClick={onClick}
     >
       {/* Room Number & Type */}
       <div className="flex justify-between items-start mb-2">
         <div>
-          <span className="text-xl font-bold text-gray-800">{room.roomNumber}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-gray-800">{room.roomNumber}</span>
+            {cleaningIndicator && (
+              <span className="text-sm" title={cleaningIndicator.text}>
+                {cleaningIndicator.icon}
+              </span>
+            )}
+          </div>
           <div className="text-xs text-gray-600 mt-1">
             {room.roomType || 'Standard'}
           </div>
         </div>
-        <span className="text-2xl">{getStatusIcon(room.status)}</span>
+        <span className="text-2xl">{getStatusIcon(room.status, room.cleaningStatus)}</span>
       </div>
 
       {/* Status Badge */}
       <div className="mb-3">
         <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-          room.status === 'VACANT' ? 'bg-green-500 text-white' :
+          room.status === 'VACANT' ? 
+            (room.cleaningStatus === 'dirty' ? 'bg-orange-500 text-white' :
+             room.cleaningStatus === 'cleaning' ? 'bg-yellow-500 text-white' :
+             room.cleaningStatus === 'clean' ? 'bg-green-500 text-white' :
+             'bg-green-500 text-white') :
           room.status === 'OCCUPIED' ? 'bg-red-500 text-white' :
           room.status === 'CLEANING' ? 'bg-yellow-500 text-white' :
           room.status === 'RESERVED' ? 'bg-blue-500 text-white' :
           'bg-gray-500 text-white'
         }`}>
-          {getStatusLabel(room.status)}
+          {getStatusLabel(room.status, room.cleaningStatus)}
         </span>
       </div>
 
