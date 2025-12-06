@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
 import { ActivityLogger } from '../lib/activityLogger'
+import { calculateTaxBreakdown } from '../utils/taxCalculator'
 
 interface FolioViewModalProps {
   reservation: any
@@ -14,6 +15,26 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
   const [showPostCharge, setShowPostCharge] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [hotelInfo, setHotelInfo] = useState({
+    name: 'Hotel',
+    logo: '',
+    address: '',
+    phone: '',
+    email: ''
+  })
+  
+  useEffect(() => {
+    // Load hotel info from Settings
+    const savedInfo = localStorage.getItem('hotelInfo')
+    if (savedInfo) {
+      try {
+        const info = JSON.parse(savedInfo)
+        setHotelInfo(info)
+      } catch (e) {
+        console.error('Error loading hotel info:', e)
+      }
+    }
+  }, [])
   
   useEffect(() => {
     loadOrCreateFolio()
@@ -31,7 +52,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
         // Create new folio
         existingFolio = {
           id: `FOLIO-${Date.now()}`,
-          folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
+          folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
           reservationId: reservation.id,
           guestName: reservation.guestName,
           roomNumber: reservation.roomNumber || reservation.roomId,
@@ -152,6 +173,17 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     })
     
     setFolio(updatedFolio)
+    
+    // Dispatch folioUpdated event to refresh other components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('folioUpdated', {
+        detail: { 
+          reservationId: reservation.id, 
+          folio: updatedFolio 
+        }
+      }))
+    }
+    
     setShowPayment(false)
   }
   
@@ -252,13 +284,31 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
       <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center">
         <div className="bg-white rounded-lg w-[900px] max-w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
           
-          {/* Header */}
+          {/* Hotel Header */}
           <div className="bg-blue-600 text-white p-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-bold">Folio #{folio.folioNumber}</h2>
-                <p className="text-blue-100">
-                  {reservation.guestName} | Room {reservation.roomNumber || reservation.roomId}
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                {/* Logo and Hotel Name */}
+                <div className="flex items-center gap-3 mb-2">
+                  {hotelInfo.logo ? (
+                    <img 
+                      src={hotelInfo.logo} 
+                      alt={hotelInfo.name} 
+                      className="h-12"
+                    />
+                  ) : (
+                    <div className="text-3xl">🏨</div>
+                  )}
+                  <div>
+                    <h1 className="text-xl font-bold">{hotelInfo.name || 'Hotel'}</h1>
+                    {hotelInfo.address && (
+                      <p className="text-blue-100 text-xs">{hotelInfo.address}</p>
+                    )}
+                  </div>
+                </div>
+                <h2 className="text-lg font-medium mb-1">FOLIO / ანგარიშფაქტურა</h2>
+                <p className="text-blue-100 text-sm">
+                  Folio #{folio.folioNumber} | {reservation.guestName} | Room {reservation.roomNumber || reservation.roomId}
                 </p>
               </div>
               <button
@@ -353,6 +403,42 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
               </tbody>
             </table>
           </div>
+          
+          {/* Tax Summary */}
+          {(() => {
+            const totalCharges = folio.transactions.reduce((sum: number, t: any) => sum + t.debit, 0)
+            if (totalCharges > 0) {
+              const taxData = calculateTaxBreakdown(totalCharges)
+              if (taxData.totalTax > 0) {
+                return (
+                  <div className="bg-gray-50 rounded-lg p-3 mx-4 mt-4 mb-4">
+                    <h4 className="font-medium text-gray-700 mb-2">🧾 Tax Breakdown (ჩათვლით)</h4>
+                    <div className="text-sm space-y-1">
+                      <div className="flex justify-between">
+                        <span>წმინდა თანხა:</span>
+                        <span>₾{taxData.net.toFixed(2)}</span>
+                      </div>
+                      {taxData.taxes.map((tax, idx) => (
+                        <div key={idx} className="flex justify-between text-gray-600">
+                          <span>{tax.name} ({tax.rate}%):</span>
+                          <span>₾{tax.amount.toFixed(2)}</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between font-medium border-t pt-1 mt-1">
+                        <span>სულ გადასახადი:</span>
+                        <span>₾{taxData.totalTax.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-gray-900">
+                        <span>სულ დარიცხვა:</span>
+                        <span>₾{taxData.gross.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+            }
+            return null
+          })()}
           
           {/* Footer Summary */}
           <div className="bg-gray-100 p-4 border-t">

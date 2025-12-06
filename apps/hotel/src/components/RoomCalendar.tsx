@@ -19,6 +19,7 @@ interface RoomCalendarProps {
   onReservationUpdate?: (id: string, updates: any) => Promise<void>
   onReservationDelete?: (id: string) => Promise<void>
   loadReservations?: () => void
+  loadRooms?: () => void
 }
 
 export default function RoomCalendar({ 
@@ -27,7 +28,8 @@ export default function RoomCalendar({
   onSlotClick,
   onReservationUpdate,
   onReservationDelete,
-  loadReservations
+  loadReservations,
+  loadRooms
 }: RoomCalendarProps) {
   // Start with current date (November 2025)
   const [currentDate, setCurrentDate] = useState(() => {
@@ -458,10 +460,82 @@ export default function RoomCalendar({
   }
   
   // Group rooms by floor
+  // Filter rooms based on search, room type, and occupancy
+  const filteredRooms = useMemo(() => {
+    let result = rooms
+    
+    // Search filter
+    if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase().trim()
+      
+      // Get reservations that match search
+      const matchingReservationRoomIds = reservations
+        .filter((r: any) => {
+          const guestName = (r.guestName || '').toLowerCase()
+          const roomNumber = String(r.roomNumber || '').toLowerCase()
+          const resId = String(r.id || '').toLowerCase()
+          const phone = (r.phone || r.guestPhone || '').toLowerCase()
+          const email = (r.email || r.guestEmail || '').toLowerCase()
+          
+          return guestName.includes(search) ||
+                 roomNumber.includes(search) ||
+                 resId.includes(search) ||
+                 phone.includes(search) ||
+                 email.includes(search)
+        })
+        .map((r: any) => r.roomId || r.roomNumber)
+      
+      // Filter rooms that have matching reservations OR room number matches
+      result = result.filter((room: any) => {
+        const roomNum = String(room.roomNumber || '').toLowerCase()
+        const roomId = room.id
+        const roomType = (room.roomType || room.type || '').toLowerCase()
+        
+        return roomNum.includes(search) ||
+               roomType.includes(search) ||
+               matchingReservationRoomIds.includes(roomId) ||
+               matchingReservationRoomIds.includes(room.roomNumber)
+      })
+    }
+    
+    // Room type filter
+    if (selectedRoomType !== 'all') {
+      result = result.filter((room: any) => {
+        const roomType = room.type || room.roomType || 'Standard'
+        return roomType === selectedRoomType
+      })
+    }
+    
+    // Occupancy filter - show only rooms with current reservations
+    if (showOccupancy) {
+      const today = moment().format('YYYY-MM-DD')
+      
+      // Get rooms that have active reservations today
+      const occupiedRoomIds = reservations
+        .filter((r: any) => {
+          const checkIn = (r.checkInDate || r.checkIn || '').split('T')[0]
+          const checkOut = (r.checkOutDate || r.checkOut || '').split('T')[0]
+          const isActive = r.status === 'CHECKED_IN' || r.status === 'CONFIRMED' || r.status === 'OCCUPIED'
+          const isToday = checkIn <= today && checkOut > today
+          
+          return isActive && isToday
+        })
+        .map((r: any) => r.roomId || r.roomNumber)
+      
+      result = result.filter((room: any) => {
+        return room.status === 'OCCUPIED' ||
+               occupiedRoomIds.includes(room.id) ||
+               occupiedRoomIds.includes(room.roomNumber)
+      })
+    }
+    
+    return result
+  }, [rooms, reservations, searchTerm, selectedRoomType, showOccupancy])
+  
   const roomsByFloor = useMemo(() => {
     const grouped: { [floor: string]: any[] } = {}
     
-    rooms.forEach(room => {
+    filteredRooms.forEach(room => {
       const floor = getFloor(room)
       if (!grouped[floor]) {
         grouped[floor] = []
@@ -498,7 +572,7 @@ export default function RoomCalendar({
     })
     
     return result
-  }, [rooms, settingsFloors])
+  }, [filteredRooms, settingsFloors])
   
   // Toggle floor collapse
   const toggleFloor = (floor: string) => {
@@ -1702,6 +1776,12 @@ export default function RoomCalendar({
         return moment(reservation.checkOut).format('YYYY-MM-DD')
       case 'edit':
       case 'cancel':
+        // For CHECKED_OUT reservations, check checkOut date
+        // For other statuses, check checkIn date
+        if (reservation.status === 'CHECKED_OUT') {
+          return moment(reservation.checkOut).format('YYYY-MM-DD')
+        }
+        return moment(reservation.checkIn).format('YYYY-MM-DD')
       case 'new-reservation':
         return moment(reservation.checkIn).format('YYYY-MM-DD')
       default:
@@ -1720,6 +1800,19 @@ export default function RoomCalendar({
     const alwaysAllowedActions = ['check-out', 'payment', 'view-details']
     if (alwaysAllowedActions.includes(action)) {
       return true
+    }
+    
+    // Special handling for check-in
+    if (action === 'check-in') {
+      const checkInDate = moment(reservation.checkIn).format('YYYY-MM-DD')
+      const businessDay = moment(lastAuditDate).add(1, 'day').format('YYYY-MM-DD')
+      
+      // Check-in is ONLY blocked if check-in date is BEFORE business day (truly closed)
+      // Check-in on business day or future is ALLOWED
+      if (checkInDate < businessDay) {
+        return false  // Past date - blocked
+      }
+      return true  // Business day or future - allowed (early check-in handled separately)
     }
     
     // Block other actions on closed dates
@@ -1810,7 +1903,7 @@ export default function RoomCalendar({
     if (!existingFolio) {
       const newFolio = {
         id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
+        folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
         reservationId: reservation.id,
         guestName: reservation.guestName,
         roomNumber: reservation.roomNumber || reservation.roomId,
@@ -1842,7 +1935,42 @@ export default function RoomCalendar({
       return
     }
     
-    // Open Check-in Process Modal instead of direct check-in
+    // ========================================
+    // STEP 1: BLOCK IF ROOM IS OCCUPIED
+    // Use `rooms` state, NOT localStorage!
+    // ========================================
+    const room = rooms.find((r: any) => 
+      r.id === selectedReservation.roomId || 
+      String(r.roomNumber) === String(selectedReservation.roomNumber)
+    )
+    
+    if (room?.status?.toUpperCase() === 'OCCUPIED') {
+      alert(`❌ Check-in შეუძლებელია!\n\nოთახი ${selectedReservation.roomNumber} უკვე დაკავებულია!\n\nჯერ გააკეთეთ Check-out.`)
+      setContextMenu(null)
+      setSelectedReservation(null)
+      return
+    }
+    
+    // ========================================
+    // STEP 2: Check for other CHECKED_IN reservations
+    // Use `reservations` state, NOT localStorage!
+    // ========================================
+    const activeRes = reservations.find((r: any) => {
+      const sameRoom = r.roomId === selectedReservation.roomId || 
+                       String(r.roomNumber) === String(selectedReservation.roomNumber)
+      const isCheckedIn = r.status?.toUpperCase() === 'CHECKED_IN'
+      const isDifferent = r.id !== selectedReservation.id
+      return sameRoom && isCheckedIn && isDifferent
+    })
+    
+    if (activeRes) {
+      alert(`❌ Check-in შეუძლებელია!\n\nოთახზე შემოსულია: ${activeRes.guestName}`)
+      setContextMenu(null)
+      setSelectedReservation(null)
+      return
+    }
+    
+    // Now safe to open check-in modal
     setContextMenu(null)
     setShowCheckInModal(true)
   }
@@ -1851,18 +1979,63 @@ export default function RoomCalendar({
   const processCheckIn = async () => {
     if (!selectedReservation || !onReservationUpdate) return
     
-    const now = new Date()
-    const checkInDate = new Date(selectedReservation.checkIn)
+    // ========================================
+    // STEP 1: BLOCK IF ROOM IS OCCUPIED
+    // Use `rooms` state, NOT localStorage!
+    // ========================================
+    const room = rooms.find((r: any) => 
+      r.id === selectedReservation.roomId || 
+      String(r.roomNumber) === String(selectedReservation.roomNumber)
+    )
     
-    // Check-in rules
-    if (now < checkInDate) {
-      if (!confirm('⚠️ Check-in თარიღი ჯერ არ დამდგარა. გსურთ ადრე Check-in?')) {
-        return
+    if (room?.status?.toUpperCase() === 'OCCUPIED') {
+      alert(`❌ Check-in შეუძლებელია!\n\nოთახი ${selectedReservation.roomNumber} უკვე დაკავებულია!`)
+      setShowCheckInModal(false)
+      setSelectedReservation(null)
+      return
+    }
+    
+    // ========================================
+    // STEP 2: Check CHECKED_IN reservations
+    // Use `reservations` state!
+    // ========================================
+    const activeRes = reservations.find((r: any) => {
+      const sameRoom = r.roomId === selectedReservation.roomId || 
+                       String(r.roomNumber) === String(selectedReservation.roomNumber)
+      const isCheckedIn = r.status?.toUpperCase() === 'CHECKED_IN'
+      const isDifferent = r.id !== selectedReservation.id
+      return sameRoom && isCheckedIn && isDifferent
+    })
+    
+    if (activeRes) {
+      alert(`❌ Check-in შეუძლებელია!\n\nოთახზე შემოსულია: ${activeRes.guestName}`)
+      setShowCheckInModal(false)
+      setSelectedReservation(null)
+      return
+    }
+    
+    // ========================================
+    // STEP 3: Early check-in
+    // ========================================
+    const lastAuditDate = localStorage.getItem('lastNightAuditDate')
+    const businessDay = lastAuditDate 
+      ? moment(lastAuditDate).add(1, 'day').format('YYYY-MM-DD')
+      : moment().format('YYYY-MM-DD')
+    const checkInDate = moment(selectedReservation.checkIn).format('YYYY-MM-DD')
+    
+    if (checkInDate > businessDay) {
+      const confirmEarly = window.confirm('⚠️ Check-in თარიღი ჯერ არ დამდგარა. გსურთ ადრე Check-in?')
+      if (!confirmEarly) {
+        return // User cancelled
       }
     }
     
+    // ========================================
+    // STEP 4: Process check-in
+    // ========================================
+    const now = new Date()
+    
     try {
-      // Create folio before check-in
       await createFolioOnCheckIn(selectedReservation)
       
       await onReservationUpdate(selectedReservation.id, {
@@ -1870,7 +2043,7 @@ export default function RoomCalendar({
         actualCheckIn: now.toISOString()
       })
       
-      // Update room status to OCCUPIED
+      // Update room status via API
       await fetch('/api/hotel/rooms/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1886,13 +2059,18 @@ export default function RoomCalendar({
         reservationId: selectedReservation.id
       })
       
+      // ✅ CRITICAL: Reload both reservations AND rooms to update state!
+      // This ensures the next check-in attempt sees the updated OCCUPIED status
+      if (loadRooms) {
+        await loadRooms() // Wait for rooms to reload
+      }
+      if (loadReservations) {
+        await loadReservations() // Wait for reservations to reload
+      }
+      
       alert('✅ Check-in წარმატებით დასრულდა!')
       setShowCheckInModal(false)
       setSelectedReservation(null)
-      
-      if (loadReservations) {
-        loadReservations()
-      }
     } catch (error) {
       console.error('Failed to check in:', error)
       alert('შეცდომა Check-in-ისას')
@@ -1962,10 +2140,45 @@ export default function RoomCalendar({
   }
   
   // Mark reservation as NO-SHOW - opens modal
+  // Check if no-show is allowed
+  const canMarkAsNoShow = (reservation: any): { allowed: boolean; reason?: string } => {
+    const lastAuditDate = localStorage.getItem('lastNightAuditDate')
+    const businessDate = lastAuditDate 
+      ? moment(lastAuditDate).add(1, 'day').format('YYYY-MM-DD')
+      : moment().format('YYYY-MM-DD')
+    
+    const checkInDate = (reservation.checkInDate || reservation.checkIn || '').split('T')[0]
+    
+    // Status must be CONFIRMED or PENDING
+    if (reservation.status !== 'CONFIRMED' && reservation.status !== 'PENDING') {
+      return { allowed: false, reason: `სტატუსი "${reservation.status}" - No-show შეუძლებელია` }
+    }
+    
+    // Check-in must be EXACTLY on business date (NOT past, NOT future!)
+    if (checkInDate < businessDate) {
+      return { allowed: false, reason: `Check-in (${checkInDate}) უკვე დახურულია` }
+    }
+    
+    if (checkInDate > businessDate) {
+      return { allowed: false, reason: `Check-in (${checkInDate}) მომავალშია` }
+    }
+    
+    return { allowed: true }
+  }
+
   const handleMarkAsNoShow = () => {
     if (!selectedReservation) return
     
     if (!canEditReservation(selectedReservation, 'NO-SHOW მონიშვნა')) {
+      setContextMenu(null)
+      setSelectedReservation(null)
+      return
+    }
+    
+    // Check if no-show is allowed
+    const noShowCheck = canMarkAsNoShow(selectedReservation)
+    if (!noShowCheck.allowed) {
+      alert(`❌ No-show შეუძლებელია\n\n${noShowCheck.reason}`)
       setContextMenu(null)
       setSelectedReservation(null)
       return
@@ -2802,13 +3015,24 @@ export default function RoomCalendar({
         <div className="flex justify-between items-center gap-4">
           {/* Left - Search & Filters */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <input
-              type="text"
-              placeholder="🔍 ძებნა..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-3 py-1.5 border rounded-lg bg-white w-32 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="🔍 ძებნა... (სტუმარი, ოთახი, ჯავშანი)"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="px-3 py-1.5 border rounded-lg bg-white w-48 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+                  title="გასუფთავება"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
             
             <select
               value={selectedRoomType}
@@ -2816,21 +3040,29 @@ export default function RoomCalendar({
               className="px-3 py-1.5 border rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">🏠 ყველა ტიპი</option>
-              {Array.from(new Set(rooms.map(r => r.roomType).filter(Boolean))).map(type => (
+              {Array.from(new Set(rooms.map(r => r.roomType || r.type).filter(Boolean))).map(type => (
                 <option key={type} value={type}>{type}</option>
               ))}
             </select>
             
             <button
               onClick={() => setShowOccupancy(!showOccupancy)}
-              className={`px-3 py-1.5 border rounded-lg transition text-sm ${
+              className={`px-3 py-1.5 border rounded-lg transition text-sm flex items-center gap-2 ${
                 showOccupancy 
-                  ? 'bg-blue-500 text-white' 
+                  ? 'bg-blue-500 text-white border-blue-600' 
                   : 'bg-white hover:bg-gray-50'
               }`}
             >
               📊 დაკავებულობა
+              {showOccupancy && <span className="text-xs">✓</span>}
             </button>
+            
+            {/* Filter results count */}
+            {(searchTerm || selectedRoomType !== 'all' || showOccupancy) && (
+              <div className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded">
+                {filteredRooms.length} ოთახი
+              </div>
+            )}
           </div>
           
           {/* Center - Date Picker */}
@@ -3084,7 +3316,12 @@ export default function RoomCalendar({
                   <span className="text-lg">🏨</span>
                   <div>
                     <div className="font-bold text-gray-700">ოთახები</div>
-                    <div className="text-[10px] text-gray-400 font-normal">{rooms.length} ოთახი</div>
+                    <div className="text-[10px] text-gray-400 font-normal">
+                      {filteredRooms.length} {filteredRooms.length !== rooms.length ? `/${rooms.length} ` : ''}ოთახი
+                      {(searchTerm || selectedRoomType !== 'all' || showOccupancy) && (
+                        <span className="text-blue-500 ml-1">(ფილტრი)</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </th>
@@ -4380,6 +4617,15 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
     logo: ''
   })
   
+  const [folio, setFolio] = useState<any>(null)
+  const [folioData, setFolioData] = useState<any>({
+    charges: [],
+    payments: [],
+    totalCharges: 0,
+    totalPayments: 0,
+    balance: 0
+  })
+  
   useEffect(() => {
     const saved = localStorage.getItem('hotelInfo')
     if (saved) {
@@ -4393,12 +4639,104 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
   
   const nights = moment(reservation.checkOut).diff(moment(reservation.checkIn), 'days')
   
-  // Get folio for this reservation
-  const folios = typeof window !== 'undefined' 
-    ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-    : []
-  const folio = folios.find((f: any) => f.reservationId === reservation.id)
-  const balance = folio?.balance || 0
+  // Load folio data
+  const loadFolioData = () => {
+    if (typeof window === 'undefined') return
+    
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    
+    // Find folio by reservationId ONLY (each reservation has its own folio)
+    const foundFolio = folios.find((f: any) => f.reservationId === reservation.id)
+    
+    console.log('ReservationDetails: Loading folio data', {
+      reservationId: reservation.id,
+      roomNumber: reservation.roomNumber,
+      allFolios: folios.length,
+      foundFolio: foundFolio ? foundFolio.folioNumber : 'NOT FOUND',
+      transactions: foundFolio?.transactions?.length || 0
+    })
+    
+    setFolio(foundFolio)
+    
+    if (foundFolio) {
+      // Extract charges and payments from transactions
+      const transactions = foundFolio.transactions || []
+      
+      // Get charges from transactions (type === 'charge' or debit > 0)
+      const charges = transactions.filter((t: any) => 
+        t.type === 'charge' || (t.debit && t.debit > 0)
+      ).map((t: any) => ({
+        date: t.date || moment().format('YYYY-MM-DD'),
+        description: t.description || 'Charge',
+        amount: t.amount || t.debit || 0
+      }))
+      
+      // If no charges found, add room charge as default
+      if (charges.length === 0) {
+        charges.push({
+          date: reservation.checkIn || moment().format('YYYY-MM-DD'),
+          description: `ოთახის ღირებულება (${nights} ღამე)`,
+          amount: reservation.totalAmount || 0
+        })
+      }
+      
+      // Get payments from transactions (type === 'payment' or credit > 0)
+      const payments = transactions.filter((t: any) => 
+        t.type === 'payment' || t.type === 'refund' || (t.credit && t.credit > 0)
+      ).map((t: any) => ({
+        date: t.date || moment().format('YYYY-MM-DD'),
+        description: t.description || 'Payment',
+        amount: t.amount || t.credit || 0,
+        method: t.paymentMethod || t.method || 'cash'
+      }))
+      
+      // Calculate totals
+      const totalCharges = charges.reduce((sum: number, t: any) => sum + (t.amount || 0), 0)
+      const totalPayments = payments.reduce((sum: number, t: any) => sum + (t.amount || 0), 0)
+      const balance = totalCharges - totalPayments
+      
+      setFolioData({ charges, payments, totalCharges, totalPayments, balance })
+    } else {
+      // No folio found, use reservation data
+      const charges = [{
+        date: reservation.checkIn || moment().format('YYYY-MM-DD'),
+        description: `ოთახის ღირებულება (${nights} ღამე)`,
+        amount: reservation.totalAmount || 0
+      }]
+      const totalCharges = reservation.totalAmount || 0
+      const totalPayments = 0
+      const balance = totalCharges - totalPayments
+      
+      setFolioData({ charges, payments: [], totalCharges, totalPayments, balance })
+    }
+  }
+  
+  // Load folio data when reservation changes or component mounts
+  useEffect(() => {
+    loadFolioData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reservation.id, reservation.roomNumber, reservation.checkIn, reservation.checkOut, reservation.totalAmount])
+  
+  // Listen for folio updates
+  useEffect(() => {
+    const handleFolioUpdate = (event: CustomEvent) => {
+      console.log('ReservationDetails: Received folioUpdated event', event.detail)
+      // Check if this event is for our reservation
+      const eventReservationId = event.detail?.reservationId
+      if (!eventReservationId || eventReservationId === reservation.id) {
+        // Reload folio data when folio is updated
+        loadFolioData()
+      }
+    }
+    
+    window.addEventListener('folioUpdated', handleFolioUpdate as EventListener)
+    
+    return () => {
+      window.removeEventListener('folioUpdated', handleFolioUpdate as EventListener)
+    }
+  }, [reservation.id])
+  
+  const balance = folioData.balance || folio?.balance || 0
   const isPaid = balance <= 0
   
   // Country names mapping
@@ -4541,7 +4879,7 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
                 </div>
                 <div className="flex justify-between font-medium">
                   <span className="text-gray-500">სულ თანხა:</span>
-                  <span className="text-lg">₾{reservation.totalAmount || 0}</span>
+                  <span className="text-lg">₾{folioData.totalCharges?.toFixed(2) || reservation.totalAmount || 0}</span>
                 </div>
               </div>
             </div>
@@ -4594,76 +4932,56 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
             </div>
           )}
           
-          {/* Folio / Payments */}
-          <div className="border rounded-lg p-4">
+          {/* 💰 Folio / ხარჯები section */}
+          <div className="border rounded-lg p-4 mb-6">
             <h3 className="font-semibold mb-3 text-gray-800 flex items-center gap-2">
-              💰 Folio / გადახდები
+              💰 ხარჯები და გადახდები
               {folio && (
                 <span className="text-xs font-normal text-gray-500">
                   (Folio #{folio.folioNumber})
                 </span>
               )}
             </h3>
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="p-2 text-left">თარიღი</th>
-                  <th className="p-2 text-left">აღწერა</th>
-                  <th className="p-2 text-right">თანხა</th>
-                  <th className="p-2 text-center">სტატუსი</th>
-                </tr>
-              </thead>
-              <tbody>
-                {folio?.charges?.map((charge: any, idx: number) => (
-                  <tr key={idx} className="border-t">
-                    <td className="p-2">{moment(charge.date).format('DD/MM')}</td>
-                    <td className="p-2">{charge.description}</td>
-                    <td className="p-2 text-right">₾{charge.amount?.toFixed(2)}</td>
-                    <td className="p-2 text-center">
-                      <span className="text-orange-500">ჩარჯი</span>
-                    </td>
-                  </tr>
-                )) || (
-                  <tr className="border-t">
-                    <td className="p-2">{moment(reservation.checkIn).format('DD/MM')}</td>
-                    <td className="p-2">ოთახის ღირებულება ({nights} ღამე)</td>
-                    <td className="p-2 text-right">₾{reservation.totalAmount || 0}</td>
-                    <td className="p-2 text-center">
-                      {isPaid ? (
-                        <span className="text-green-600">✓ გადახდილი</span>
-                      ) : (
-                        <span className="text-orange-500">მოლოდინში</span>
-                      )}
-                    </td>
-                  </tr>
-                )}
-                {folio?.payments?.map((payment: any, idx: number) => (
-                  <tr key={`p-${idx}`} className="border-t bg-green-50">
-                    <td className="p-2">{moment(payment.date).format('DD/MM')}</td>
-                    <td className="p-2">💳 გადახდა ({payment.method || 'cash'})</td>
-                    <td className="p-2 text-right text-green-600">-₾{payment.amount?.toFixed(2)}</td>
-                    <td className="p-2 text-center">
-                      <span className="text-green-600">✓ გადახდილი</span>
-                    </td>
-                  </tr>
+            
+            {/* Charges */}
+            <div className="space-y-1 mb-3">
+              <div className="text-sm font-medium text-gray-600 mb-2">ხარჯები:</div>
+              {folioData.charges.map((charge: any, idx: number) => (
+                <div key={idx} className="flex justify-between text-sm">
+                  <span>{charge.description}</span>
+                  <span className="font-medium">₾{charge.amount?.toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between font-bold border-t pt-1 mt-2">
+                <span>სულ ხარჯები:</span>
+                <span>₾{folioData.totalCharges?.toFixed(2)}</span>
+              </div>
+            </div>
+            
+            {/* Payments */}
+            {folioData.payments.length > 0 && (
+              <div className="space-y-1 mb-3">
+                <div className="text-sm font-medium text-gray-600 mb-2">გადახდები:</div>
+                {folioData.payments.map((payment: any, idx: number) => (
+                  <div key={idx} className="flex justify-between text-sm text-green-600">
+                    <span>{payment.description} ({payment.method})</span>
+                    <span>-₾{payment.amount?.toFixed(2)}</span>
+                  </div>
                 ))}
-              </tbody>
-              <tfoot className="border-t-2 font-bold bg-gray-50">
-                <tr>
-                  <td colSpan={2} className="p-2">ბალანსი:</td>
-                  <td className={`p-2 text-right text-lg ${balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    ₾{balance.toFixed(2)}
-                  </td>
-                  <td className="p-2 text-center">
-                    {isPaid ? (
-                      <span className="text-green-600 font-semibold">✓ დაფარულია</span>
-                    ) : (
-                      <span className="text-red-500 font-semibold">გადასახდელი</span>
-                    )}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+                <div className="flex justify-between font-bold border-t pt-1 mt-2">
+                  <span>სულ გადახდილი:</span>
+                  <span className="text-green-600">₾{folioData.totalPayments?.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+            
+            {/* Balance */}
+            <div className={`flex justify-between font-bold text-lg p-2 rounded mt-3 ${
+              folioData.balance > 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+            }`}>
+              <span>ბალანსი:</span>
+              <span>₾{folioData.balance?.toFixed(2)}</span>
+            </div>
           </div>
           
           {/* Invoice Section */}

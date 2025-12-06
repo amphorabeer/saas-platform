@@ -8,6 +8,7 @@ import { FolioAutoCloseService } from '../services/FolioAutoCloseService'
 import { FinancialReportsService } from '../services/FinancialReportsService'
 import NightAuditPostingSummary from './NightAuditPostingSummary'
 import CheckOutModal from './CheckOutModal'
+import { calculateTaxBreakdown } from '../utils/taxCalculator'
 
 // Helper function to get next audit date
 const getNextAuditDate = (): string => {
@@ -281,6 +282,30 @@ export default function NightAuditModule() {
           </tbody>
         </table>
         
+        ${(() => {
+          const totalRevenue = roomChargesTotal + (noShows * 50)
+          const taxData = calculateTaxBreakdown(totalRevenue)
+          if (taxData.totalTax > 0) {
+            return `
+              <h2>🧾 Tax Summary</h2>
+              <table>
+                <thead>
+                  <tr><th>კატეგორია</th><th>თანხა</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Net Revenue</td><td>₾${taxData.net.toFixed(2)}</td></tr>
+                  ${taxData.taxes.map((tax: any) => `
+                    <tr><td>${tax.name} (${tax.rate}%)</td><td>₾${tax.amount.toFixed(2)}</td></tr>
+                  `).join('')}
+                  <tr><td><strong>Total Tax</strong></td><td><strong>₾${taxData.totalTax.toFixed(2)}</strong></td></tr>
+                  <tr><td><strong>Gross Revenue (Tax Inclusive)</strong></td><td><strong>₾${taxData.gross.toFixed(2)}</strong></td></tr>
+                </tbody>
+              </table>
+            `
+          }
+          return ''
+        })()}
+        
         ${operationsHtml}
         
         ${postingHtml}
@@ -442,10 +467,25 @@ export default function NightAuditModule() {
 
       const todayRevenue = checkoutRevenue + noShowRevenue
       
-      // Get dirty rooms
-      const dirtyRooms = rooms.filter((r: any) => 
-        r.status === 'DIRTY' || r.status === 'dirty' || r.status === 'Dirty' || r.status === 'cleaning'
-      )
+      // Count dirty rooms - rooms that are VACANT but have cleaningStatus = 'dirty' or 'cleaning'
+      const countDirtyRooms = (): number => {
+        return rooms.filter((r: any) => {
+          const isAvailable = r.status === 'VACANT'
+          const isDirty = r.cleaningStatus === 'dirty' || r.cleaningStatus === 'cleaning'
+          return isAvailable && isDirty
+        }).length
+      }
+      
+      const dirtyRooms = rooms.filter((r: any) => {
+        const isAvailable = r.status === 'VACANT'
+        const isDirty = r.cleaningStatus === 'dirty' || r.cleaningStatus === 'cleaning'
+        return isAvailable && isDirty
+      })
+      
+      const dirtyCount = countDirtyRooms()
+      if (dirtyCount > 0) {
+        console.log(`⚠️ ${dirtyCount} ოთახი დასალაგებელია`)
+      }
       
       setRealStats({
         pendingCheckIns,
@@ -1077,7 +1117,13 @@ export default function NightAuditModule() {
           
           addToLog(`💼 Financial Summary:`)
           addToLog(`  Revenue: ₾${revenueReport.revenue.total.toFixed(2)}`)
-          addToLog(`  Taxes: ₾${revenueReport.taxes.total.toFixed(2)}`)
+          addToLog(`  Net Revenue: ₾${revenueReport.taxes.netRevenue.toFixed(2)}`)
+          addToLog(`  Taxes: ₾${revenueReport.taxes.totalTax.toFixed(2)}`)
+          if (revenueReport.taxes.taxes && Object.keys(revenueReport.taxes.taxes).length > 0) {
+            Object.entries(revenueReport.taxes.taxes).forEach(([name, amount]: [string, any]) => {
+              addToLog(`    ${name}: ₾${amount.toFixed(2)}`)
+            })
+          }
           addToLog(`  Payments: ₾${revenueReport.payments.total.toFixed(2)}`)
           addToLog(`  Outstanding: ₾${managerReport.financial.outstandingBalances.toFixed(2)}`)
           addToLog(`  ADR: ₾${managerReport.kpis.adr}`)
@@ -1974,6 +2020,130 @@ This is an automated report from Night Audit System.
   }
   
   // ============================================
+  // UNIFIED DATA LOADER: Load all audit data from same sources
+  // ============================================
+  const loadAuditDataForDate = (targetDate: string) => {
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
+    const manualTx = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+    
+    let roomCharges = 0
+    let serviceCharges = 0
+    let payments = { cash: 0, card: 0, bank: 0, total: 0 }
+    const paymentsList: any[] = []
+    const chargesList: any[] = []
+    
+    // 1. Get charges and payments from folios
+    folios.forEach((folio: any) => {
+      folio.transactions?.forEach((t: any) => {
+        const txDate = moment(t.date || t.nightAuditDate || t.postedAt).format('YYYY-MM-DD')
+        if (txDate !== targetDate) return
+        
+        // Charges
+        if (t.type === 'charge' || t.debit > 0) {
+          const amount = t.amount || t.debit || 0
+          chargesList.push({
+            ...t,
+            guestName: folio.guestName,
+            roomNumber: folio.roomNumber
+          })
+          
+          if (t.category === 'room' || t.description?.toLowerCase().includes('ოთახ') || t.description?.toLowerCase().includes('room')) {
+            roomCharges += amount
+          } else {
+            serviceCharges += amount
+          }
+        }
+        
+        // Payments
+        if (t.type === 'payment' || t.credit > 0) {
+          const amount = t.amount || t.credit || 0
+          const method = (t.paymentMethod || t.method || 'cash').toLowerCase()
+          
+          paymentsList.push({
+            ...t,
+            guestName: folio.guestName,
+            roomNumber: folio.roomNumber,
+            method: method
+          })
+          
+          if (method.includes('cash') || method.includes('ნაღდ')) {
+            payments.cash += amount
+          } else if (method.includes('card') || method.includes('ბარათ') || method.includes('credit')) {
+            payments.card += amount
+          } else if (method.includes('bank') || method.includes('ბანკ') || method.includes('transfer')) {
+            payments.bank += amount
+          } else {
+            payments.cash += amount
+          }
+          payments.total += amount
+        }
+      })
+    })
+    
+    // 2. If no room charges found, check for staying guests (room charge posting)
+    if (roomCharges === 0) {
+      reservations.forEach((r: any) => {
+        if (r.status === 'CHECKED_IN' || r.status === 'CHECKED_OUT') {
+          const checkIn = moment(r.checkIn).format('YYYY-MM-DD')
+          const checkOut = moment(r.checkOut).format('YYYY-MM-DD')
+          
+          // If target date is during stay
+          if (targetDate >= checkIn && targetDate < checkOut) {
+            const nights = moment(r.checkOut).diff(moment(r.checkIn), 'days') || 1
+            const perNight = (r.totalAmount || 0) / nights
+            roomCharges += perNight
+            
+            chargesList.push({
+              date: targetDate,
+              description: `Room Charge: ${r.guestName} - Room ${r.roomNumber}`,
+              amount: perNight,
+              category: 'room',
+              guestName: r.guestName,
+              roomNumber: r.roomNumber
+            })
+          }
+        }
+      })
+    }
+    
+    // 3. Add manual cashier transactions
+    manualTx.forEach((t: any) => {
+      const txDate = moment(t.date).format('YYYY-MM-DD')
+      if (txDate !== targetDate) return
+      
+      if (t.type === 'income') {
+        const method = (t.method || 'cash').toLowerCase()
+        paymentsList.push({
+          ...t,
+          guestName: t.description || 'Manual',
+          roomNumber: '-'
+        })
+        
+        if (method === 'cash') payments.cash += t.amount
+        else if (method === 'card') payments.card += t.amount
+        else if (method === 'bank') payments.bank += t.amount
+        payments.total += t.amount
+      }
+    })
+    
+    const totalRevenue = roomCharges + serviceCharges
+    
+    // Calculate tax breakdown
+    const taxData = calculateTaxBreakdown(totalRevenue)
+    
+    return {
+      roomCharges,
+      serviceCharges,
+      totalRevenue,
+      payments,
+      paymentsList,
+      chargesList,
+      taxData
+    }
+  }
+  
+  // ============================================
   // NEW FEATURE 3: Generate Manager's Daily Report
   // ============================================
   const generateManagerReport = async (date: string) => {
@@ -2089,46 +2259,26 @@ This is an automated report from Night Audit System.
   // NEW FEATURE 4: Payment Reconciliation
   // ============================================
   const getPaymentReconciliation = (date: string) => {
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-    
-    // Get all payments for this date
-    const payments: any[] = []
-    folios.forEach((folio: any) => {
-      (folio.transactions || []).forEach((t: any) => {
-        // Check payment date - use t.date or fallback to postedAt
-        const txDate = t.date || moment(t.postedAt).format('YYYY-MM-DD')
-        if ((t.type === 'payment' || t.credit > 0) && txDate === date) {
-          payments.push({
-            ...t,
-            folioNumber: folio.folioNumber,
-            guestName: folio.guestName,
-            roomNumber: folio.roomNumber,
-            amount: t.credit || t.amount || 0,
-            method: t.paymentMethod || t.method || 'cash',
-            time: t.time || moment(t.postedAt).format('HH:mm:ss')
-          })
-        }
-      })
-    })
+    const auditData = loadAuditDataForDate(date)
     
     // Group by payment method
     const byMethod: Record<string, { count: number; total: number; payments: any[] }> = {}
-    payments.forEach(p => {
-      const method = p.paymentMethod || 'unknown'
+    auditData.paymentsList.forEach((p: any) => {
+      const method = p.method || p.paymentMethod || 'cash'
       if (!byMethod[method]) {
         byMethod[method] = { count: 0, total: 0, payments: [] }
       }
       byMethod[method].count++
-      byMethod[method].total += p.credit || 0
+      byMethod[method].total += p.amount || p.credit || 0
       byMethod[method].payments.push(p)
     })
     
     return {
       date,
-      totalPayments: payments.length,
-      totalAmount: payments.reduce((s, p) => s + (p.credit || 0), 0),
+      totalPayments: auditData.paymentsList.length,
+      totalAmount: auditData.payments.total,
       byMethod,
-      payments
+      payments: auditData.paymentsList
     }
   }
   
@@ -2137,61 +2287,25 @@ This is an automated report from Night Audit System.
   // ============================================
   const generateZReport = (): any => {
     const businessDate = localStorage.getItem('currentBusinessDate') || selectedDate
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
     const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
     const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
     const cashierShift = JSON.parse(localStorage.getItem('currentCashierShift') || 'null')
     const manualTx = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
     
-    // Calculate revenues from folios
-    let roomRevenue = 0
-    let serviceRevenue = 0
-    let cashPayments = 0
-    let cardPayments = 0
-    let bankTransfers = 0
-    
-    folios.forEach((folio: any) => {
-      folio.transactions?.forEach((t: any) => {
-        if (t.date === businessDate) {
-          // Charges (debits)
-          if (t.debit > 0) {
-            if (t.type === 'room_charge' || t.category === 'room') {
-              roomRevenue += t.debit
-            } else {
-              serviceRevenue += t.debit
-            }
-          }
-          // Payments (credits)
-          if (t.credit > 0) {
-            const method = t.paymentMethod || 'cash'
-            if (method === 'cash') cashPayments += t.credit
-            else if (method === 'card') cardPayments += t.credit
-            else if (method === 'bank') bankTransfers += t.credit
-          }
-        }
-      })
-    })
-    
-    // Add manual transactions
-    manualTx.forEach((t: any) => {
-      if (t.date === businessDate && t.type === 'income') {
-        if (t.method === 'cash') cashPayments += t.amount
-        else if (t.method === 'card') cardPayments += t.amount
-        else if (t.method === 'bank') bankTransfers += t.amount
-      }
-    })
+    // Use unified data loader
+    const auditData = loadAuditDataForDate(businessDate)
     
     // Calculate expenses
     const expenses = manualTx
-      .filter((t: any) => t.date === businessDate && t.type === 'expense')
+      .filter((t: any) => moment(t.date).format('YYYY-MM-DD') === businessDate && t.type === 'expense')
       .reduce((sum: number, t: any) => sum + t.amount, 0)
     
     // Occupancy stats
-    const totalRooms = rooms.length
+    const totalRooms = rooms.length || 15
     const occupiedRooms = rooms.filter((r: any) => r.status === 'occupied' || r.status === 'OCCUPIED').length
     const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0
-    const adr = occupiedRooms > 0 ? roomRevenue / occupiedRooms : 0
-    const revPar = totalRooms > 0 ? roomRevenue / totalRooms : 0
+    const adr = occupiedRooms > 0 ? auditData.roomCharges / occupiedRooms : 0
+    const revPar = totalRooms > 0 ? auditData.roomCharges / totalRooms : 0
     
     // Check-in/out counts
     const checkIns = reservations.filter((r: any) => {
@@ -2213,14 +2327,22 @@ This is an automated report from Night Audit System.
       generatedAt: new Date().toISOString(),
       generatedBy: user.name || 'ადმინისტრატორი',
       
-      roomRevenue,
-      serviceRevenue,
-      totalRevenue: roomRevenue + serviceRevenue,
+      roomRevenue: auditData.roomCharges,
+      serviceRevenue: auditData.serviceCharges,
+      totalRevenue: auditData.totalRevenue,
       
-      cashPayments,
-      cardPayments,
-      bankTransfers,
-      totalPayments: cashPayments + cardPayments + bankTransfers,
+      // Tax breakdown
+      taxBreakdown: {
+        gross: auditData.taxData.gross,
+        net: auditData.taxData.net,
+        taxes: auditData.taxData.taxes,
+        totalTax: auditData.taxData.totalTax
+      },
+      
+      cashPayments: auditData.payments.cash,
+      cardPayments: auditData.payments.card,
+      bankTransfers: auditData.payments.bank,
+      totalPayments: auditData.payments.total,
       
       roomsSold: occupiedRooms,
       totalRooms,
@@ -2233,9 +2355,9 @@ This is an automated report from Night Audit System.
       stayOvers,
       
       openingBalance: cashierShift?.openingBalance || 0,
-      closingBalance: cashPayments - expenses,
+      closingBalance: auditData.payments.cash - expenses,
       expenses,
-      netCash: cashPayments - expenses
+      netCash: auditData.payments.cash - expenses
     }
   }
   
@@ -2243,8 +2365,8 @@ This is an automated report from Night Audit System.
   // NEW FEATURE 5: Tax Breakdown Report
   // ============================================
   const getTaxBreakdown = async (date: string) => {
-    const reservations = await fetch('/api/hotel/reservations').then(r => r.json()).catch(() => [])
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const auditData = loadAuditDataForDate(date)
+    const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
     
     // Get completed stays (check-outs) for this date
     const completedStays = reservations.filter((r: any) => 
@@ -2252,51 +2374,30 @@ This is an automated report from Night Audit System.
       r.status === 'CHECKED_OUT'
     )
     
-    const grossRevenue = completedStays.reduce((s: number, r: any) => s + (r.totalAmount || 0), 0)
+    // Use unified data
+    const grossRevenue = auditData.totalRevenue
+    const roomCharges = auditData.chargesList.filter((c: any) => c.category === 'room')
+    const otherCharges = auditData.chargesList.filter((c: any) => c.category !== 'room')
     
-    // Tax rates (Georgian standards)
-    const VAT_RATE = 0.18  // 18% VAT
-    const CITY_TAX = 0 // City tax if applicable
-    const TOURISM_TAX = 0 // Tourism tax if applicable
-    
-    // Calculate taxes
-    const vatAmount = grossRevenue * VAT_RATE / (1 + VAT_RATE) // VAT is included in price
-    const netRevenue = grossRevenue - vatAmount
-    const cityTaxAmount = completedStays.length * CITY_TAX
-    const tourismTaxAmount = completedStays.length * TOURISM_TAX
-    
-    // Room charges breakdown
-    const roomCharges = folios.flatMap((f: any) => 
-      (f.transactions || []).filter((t: any) => 
-        t.type === 'charge' && 
-        t.category === 'room' &&
-        moment(t.date).format('YYYY-MM-DD') === date
-      )
-    )
-    
-    // Other charges
-    const otherCharges = folios.flatMap((f: any) => 
-      (f.transactions || []).filter((t: any) => 
-        t.type === 'charge' && 
-        t.category !== 'room' &&
-        moment(t.date).format('YYYY-MM-DD') === date
-      )
-    )
+    // Extract tax breakdown from unified data
+    const vatTax = auditData.taxData.taxes.find((t: any) => t.name === 'VAT' || t.name === 'დღგ')
+    const vatAmount = vatTax?.amount || 0
+    const vatRate = vatTax?.rate || 18
     
     return {
       date,
       grossRevenue,
-      netRevenue,
+      netRevenue: auditData.taxData.net,
       taxes: {
-        vat: { rate: VAT_RATE * 100, amount: vatAmount },
-        cityTax: { rate: CITY_TAX, amount: cityTaxAmount, perNight: CITY_TAX },
-        tourismTax: { rate: TOURISM_TAX, amount: tourismTaxAmount, perNight: TOURISM_TAX }
+        vat: { rate: vatRate, amount: vatAmount },
+        cityTax: { rate: 0, amount: 0, perNight: 0 },
+        tourismTax: { rate: 0, amount: 0, perNight: 0 }
       },
-      totalTax: vatAmount + cityTaxAmount + tourismTaxAmount,
+      totalTax: auditData.taxData.totalTax,
       roomChargesCount: roomCharges.length,
-      roomChargesTotal: roomCharges.reduce((s: number, c: any) => s + (c.debit || 0), 0),
+      roomChargesTotal: auditData.roomCharges,
       otherChargesCount: otherCharges.length,
-      otherChargesTotal: otherCharges.reduce((s: number, c: any) => s + (c.debit || 0), 0),
+      otherChargesTotal: auditData.serviceCharges,
       completedStaysCount: completedStays.length
     }
   }
@@ -2693,6 +2794,28 @@ This is an automated report from Night Audit System.
                     <div className="flex justify-between font-bold"><span>სულ:</span><span>₾{zReport.totalRevenue.toFixed(2)}</span></div>
                   </div>
                   
+                  {/* Tax Breakdown */}
+                  {zReport.taxBreakdown && zReport.taxBreakdown.totalTax > 0 && (
+                    <div className="border-b border-gray-700 pb-2 border-t-2 border-dashed pt-2 mt-2">
+                      <div className="font-bold text-purple-400 mb-1">TAX BREAKDOWN</div>
+                      <div className="flex justify-between"><span>Net Sales:</span><span>₾{zReport.taxBreakdown.net.toFixed(2)}</span></div>
+                      {zReport.taxBreakdown.taxes.map((tax: any, idx: number) => (
+                        <div key={idx} className="flex justify-between">
+                          <span>{tax.name} ({tax.rate}%):</span>
+                          <span>₾{tax.amount.toFixed(2)}</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between font-bold border-t border-gray-600 pt-1 mt-1">
+                        <span>TOTAL TAX:</span>
+                        <span>₾{zReport.taxBreakdown.totalTax.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold">
+                        <span>GROSS SALES:</span>
+                        <span>₾{zReport.taxBreakdown.gross.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Payments */}
                   <div className="border-b border-gray-700 pb-2">
                     <div className="font-bold text-green-400 mb-1">გადახდები</div>
@@ -3080,7 +3203,7 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
         
         newFolio = {
           id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
+          folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
           reservationId: reservation.id,
           guestName: reservation.guestName,
           roomNumber: reservation.roomNumber || reservation.roomId,
@@ -3456,7 +3579,7 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
                 <div className="flex justify-between"><span>Room Revenue:</span><span className="font-bold">₾{report.roomRevenue.toFixed(2)}</span></div>
                 <div className="flex justify-between"><span>No-Show Charges:</span><span className="font-bold">₾{report.noShowRevenue.toFixed(2)}</span></div>
                 <div className="flex justify-between border-t pt-2"><span>Gross Revenue:</span><span className="font-bold">₾{report.totalRevenue.toFixed(2)}</span></div>
-                <div className="flex justify-between"><span>VAT (18%):</span><span className="text-red-600">-₾{report.vatAmount.toFixed(2)}</span></div>
+                <div className="flex justify-between text-gray-600"><span>VAT (18%):</span><span>₾{Math.abs(report.vatAmount).toFixed(2)}</span></div>
                 <div className="flex justify-between border-t pt-2"><span>Net Revenue:</span><span className="font-bold text-green-600">₾{report.netRevenue.toFixed(2)}</span></div>
               </div>
             </div>
@@ -3645,9 +3768,9 @@ function TaxReportModal({ date, onClose, getData }: { date: string; onClose: () 
                 <span>Gross Revenue:</span>
                 <span className="font-bold">₾{data.grossRevenue.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-red-600">
+              <div className="flex justify-between text-gray-600">
                 <span>VAT ({data.taxes.vat.rate}%):</span>
-                <span>-₾{data.taxes.vat.amount.toFixed(2)}</span>
+                <span>₾{data.taxes.vat.amount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between border-t pt-2">
                 <span className="font-bold">Net Revenue:</span>

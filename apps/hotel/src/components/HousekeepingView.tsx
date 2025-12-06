@@ -36,114 +36,88 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
   const [staff, setStaff] = useState<any[]>([])
   const [defaultChecklist, setDefaultChecklist] = useState<any[]>([])
   
+  // Load checklist from Settings
+  const loadChecklistFromSettings = (): any[] => {
+    const saved = localStorage.getItem('housekeepingChecklist')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        const formatted = parsed.map((item: any) => ({
+          item: item.task || item.item || item.name || item,
+          completed: false,
+          required: item.required || false,
+          category: item.category || 'ზოგადი'
+        }))
+        console.log('📋 Loaded checklist from Settings:', formatted)
+        return formatted
+      } catch (e) {
+        console.error('Error loading checklist:', e)
+        return []
+      }
+    } else {
+      console.warn('⚠️ No checklist in Settings - using empty')
+      return []
+    }
+  }
+
   useEffect(() => {
-    // Load staff from hotelStaff localStorage (same as Settings)
+    // Load staff from hotelStaff localStorage ONLY
     const loadStaff = () => {
       const savedStaff = JSON.parse(localStorage.getItem('hotelStaff') || '[]')
       
-      console.log('🔍 All staff from localStorage:', savedStaff)
-      
-      // Filter housekeeping department staff - very lenient filter
       const housekeepingStaff = savedStaff.filter((s: any) => {
-        // Check if active (include if active is true, undefined, or missing)
-        const isActive = s.active !== false && s.active !== 'false' && s.active !== 0
-        
-        // Check department (case-insensitive, handle various formats)
-        const dept = String(s.department || '').toLowerCase().trim()
-        const isHousekeepingDept = dept === 'housekeeping' || dept === 'hsk' || dept === 'დასუფთავება'
-        
-        // Check position (case-insensitive, handle various formats)
-        const pos = String(s.position || '').toLowerCase().trim()
-        const isHousekeeperPos = 
-          pos.includes('housekeeper') || 
-          pos === 'housekeeper' || 
-          pos === 'დამლაგებელი' ||
-          pos === 'დამლაგებელი' ||
-          pos.includes('დამლაგებელი')
-        
-        // Also check if role matches
-        const role = String(s.role || '').toLowerCase().trim()
-        const isHousekeeperRole = role.includes('housekeeper') || role === 'housekeeper'
-        
-        const matches = isActive && (isHousekeepingDept || isHousekeeperPos || isHousekeeperRole)
-        
-        console.log('👤 Staff member check:', {
-          id: s.id,
-          firstName: s.firstName,
-          lastName: s.lastName,
-          name: s.name,
-          department: s.department,
-          position: s.position,
-          role: s.role,
-          active: s.active,
-          isActive,
-          isHousekeepingDept,
-          isHousekeeperPos,
-          isHousekeeperRole,
-          matches
-        })
-        
-        return matches
+        const dept = String(s.department || '').toLowerCase()
+        const pos = String(s.position || '').toLowerCase()
+        return dept === 'housekeeping' || pos.includes('housekeeper')
       })
       
-      console.log('✅ Filtered housekeeping staff:', housekeepingStaff)
+      const staffToUse = housekeepingStaff.length > 0 ? housekeepingStaff : savedStaff
       
-      // If no housekeeping staff found, show all active staff as fallback
-      const staffToUse = housekeepingStaff.length > 0 
-        ? housekeepingStaff 
-        : savedStaff.filter((s: any) => s.active !== false && s.active !== 'false')
-      
-      if (housekeepingStaff.length === 0 && staffToUse.length > 0) {
-        console.warn('⚠️ No housekeeping staff found, showing all active staff as fallback')
-      }
-      
-      // Format staff data
       const formattedStaff = staffToUse.map((s: any) => ({
         id: s.id,
-        firstName: s.firstName || '',
-        lastName: s.lastName || '',
-        name: s.firstName && s.lastName 
-          ? `${s.firstName} ${s.lastName}` 
-          : s.name || s.fullName || 'Unknown',
-        position: s.position || 'Housekeeper',
-        department: s.department || 'housekeeping',
-        shift: s.shift || 'დილა'
+        name: s.firstName && s.lastName ? `${s.firstName} ${s.lastName}` : s.name || 'Unknown',
+        position: s.position || 'Housekeeper'
       }))
       
-      console.log('📋 Formatted staff for display:', formattedStaff)
       setStaff(formattedStaff)
     }
     
     loadStaff()
     
-    // Also reload when localStorage changes (in case staff is added/updated)
+    // Reload when localStorage changes
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'hotelStaff') {
         loadStaff()
+      }
+      if (e.key === 'housekeepingChecklist') {
+        const updatedChecklist = loadChecklistFromSettings()
+        setDefaultChecklist(updatedChecklist)
+        console.log('🔄 Checklist updated from Settings:', updatedChecklist)
       }
     }
     
     window.addEventListener('storage', handleStorageChange)
     
-    // Load checklist
-    const savedChecklist = localStorage.getItem('housekeepingChecklist')
-    if (savedChecklist) {
-      const parsedChecklist = JSON.parse(savedChecklist)
-      setDefaultChecklist(parsedChecklist.map((item: any) => ({
-        item: item.task || item.item || item,
-        completed: false
-      })))
+    // Also listen for custom event (for same-tab updates)
+    const handleChecklistUpdate = () => {
+      const updatedChecklist = loadChecklistFromSettings()
+      setDefaultChecklist(updatedChecklist)
+      console.log('🔄 Checklist updated (custom event):', updatedChecklist)
+    }
+    
+    window.addEventListener('housekeepingChecklistUpdated', handleChecklistUpdate)
+    
+    // Load checklist from Settings
+    const checklist = loadChecklistFromSettings()
+    if (checklist.length > 0) {
+      setDefaultChecklist(checklist)
     } else {
-      // Default checklist
-      setDefaultChecklist([
-        { item: 'ზეწრების შეცვლა', completed: false },
-        { item: 'პირსახოცების შეცვლა', completed: false },
-        { item: 'აბაზანის დასუფთავება', completed: false },
-        { item: 'იატაკის დალაგება', completed: false },
-        { item: 'მინიბარის შემოწმება', completed: false },
-        { item: 'ნაგვის გატანა', completed: false },
-        { item: 'ზედაპირების დასუფთავება', completed: false }
-      ])
+      setDefaultChecklist([])
+    }
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('housekeepingChecklistUpdated', handleChecklistUpdate)
     }
   }, [])
   
@@ -239,15 +213,7 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
           priority: 'high',
           assignedTo: '',
           scheduledTime: moment().format('HH:mm'),
-          checklist: defaultChecklist.length > 0 ? [...defaultChecklist] : [
-            { item: 'ზეწრების შეცვლა', completed: false },
-            { item: 'პირსახოცების შეცვლა', completed: false },
-            { item: 'აბაზანის დასუფთავება', completed: false },
-            { item: 'იატაკის დალაგება', completed: false },
-            { item: 'მინიბარის შემოწმება', completed: false },
-            { item: 'ნაგვის გატანა', completed: false },
-            { item: 'ზედაპირების დასუფთავება', completed: false }
-          ]
+          checklist: defaultChecklist.length > 0 ? [...defaultChecklist] : loadChecklistFromSettings()
         })
       }
     })
@@ -285,6 +251,47 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     }
   }
   
+  // Sync checklist from Settings
+  const syncChecklistFromSettings = () => {
+    const saved = localStorage.getItem('housekeepingChecklist')
+    if (!saved) {
+      alert('პარამეტრებში ჩეკლისტი არ არის!\n\nგადადით: პარამეტრები → დასუფთავება')
+      return
+    }
+    
+    try {
+      const parsed = JSON.parse(saved)
+      const newChecklist = parsed.map((item: any) => ({
+        item: item.task || item.item || item.name || item,
+        completed: false,
+        required: item.required || false,
+        category: item.category || 'ზოგადი'
+      }))
+      
+      if (newChecklist.length === 0) {
+        alert('პარამეტრებში ჩეკლისტი ცარიელია!')
+        return
+      }
+      
+      // Update ALL pending and in_progress tasks
+      const updatedTasks = tasks.map(task => {
+        if (task.status === 'pending' || task.status === 'in_progress') {
+          return { ...task, checklist: newChecklist }
+        }
+        return task
+      })
+      
+      saveTasks(updatedTasks)
+      setDefaultChecklist(newChecklist)
+      
+      const count = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress').length
+      alert(`✅ ჩეკლისტი განახლდა!\n\n${newChecklist.length} დავალება\n${count} task განახლდა`)
+    } catch (e) {
+      console.error('Error syncing checklist:', e)
+      alert('შეცდომა!')
+    }
+  }
+
   // Start task
   const startTask = (taskId: string) => {
     const updated = tasks.map(t => 
@@ -294,10 +301,21 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     )
     saveTasks(updated)
     
-    // Update room status to CLEANING
+    // Update room status to CLEANING and set cleaningStatus
     const task = tasks.find(t => t.id === taskId)
-    if (task && onRoomStatusUpdate) {
-      onRoomStatusUpdate(task.roomId, 'CLEANING')
+    if (task) {
+      const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+      const updatedRooms = rooms.map((r: any) => {
+        if (r.id === task.roomId) {
+          return { ...r, cleaningStatus: 'cleaning' }
+        }
+        return r
+      })
+      localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
+      
+      if (onRoomStatusUpdate) {
+        onRoomStatusUpdate(task.roomId, 'CLEANING')
+      }
     }
   }
   
@@ -322,26 +340,21 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     )
     saveTasks(updated)
     
-    // Update room status to VACANT (ready for new guest)
-    try {
-      await fetch('/api/hotel/rooms/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          roomId: task.roomId,
-          status: 'VACANT'
-        })
-      })
-      
-      alert('✅ დასუფთავება შემოწმებულია!\n🟢 ოთახი მზადაა ახალი სტუმრისთვის.')
-      
-      // Reload rooms to update UI
-      if (onRoomStatusUpdate) {
-        onRoomStatusUpdate(task.roomId, 'VACANT')
+    // Update room status to VACANT and set cleaningStatus to clean
+    const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+    const updatedRooms = rooms.map((r: any) => {
+      if (r.id === task.roomId) {
+        return { ...r, status: 'VACANT', cleaningStatus: 'clean' }
       }
-    } catch (error) {
-      console.error('Failed to update room status:', error)
-      alert('შეცდომა ოთახის სტატუსის განახლებისას')
+      return r
+    })
+    localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
+    
+    alert('✅ დასუფთავება შემოწმებულია!\n🟢 ოთახი მზადაა ახალი სტუმრისთვის.')
+    
+    // Reload rooms to update UI
+    if (onRoomStatusUpdate) {
+      onRoomStatusUpdate(task.roomId, 'VACANT')
     }
   }
   
@@ -407,12 +420,20 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">🧹 დასუფთავების განრიგი</h2>
-        <button
-          onClick={() => setShowAddTask(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          + ახალი დავალება
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={syncChecklistFromSettings}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            🔄 ჩეკლისტის სინქრო
+          </button>
+          <button
+            onClick={() => setShowAddTask(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            + ახალი დავალება
+          </button>
+        </div>
       </div>
       
       {/* Statistics */}

@@ -1535,7 +1535,7 @@ function PendingOperationsSection({ auditDate, reservations, rooms, onRefresh }:
     
     const newFolio = {
       id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId}`,
+      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId}-${reservation.id}`,
       reservationId: reservation.id,
       guestName: reservation.guestName,
       roomNumber: reservation.roomNumber || reservation.roomId,

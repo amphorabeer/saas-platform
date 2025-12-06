@@ -182,6 +182,13 @@ export class PostingService {
         nightAuditDate: auditDate,
         
         taxDetails: rateBreakdown.taxes,
+        // Store tax breakdown for reporting (tax inclusive)
+        taxBreakdown: {
+          gross: rateBreakdown.grossRate,
+          net: rateBreakdown.netRate,
+          totalTax: rateBreakdown.totalTax,
+          taxInclusive: true
+        },
         
         referenceId: `ROOM-${reservation.id}-${auditDate}`
       }
@@ -251,27 +258,29 @@ export class PostingService {
       discount = Math.max(discount, reservation.discountAmount / nights)
     }
     
-    const netRate = adjustedRate - discount
+    // Gross rate (taxes included) - this is what customer pays
+    const grossRate = adjustedRate - discount
     
-    // Calculate taxes
-    const taxes = this.calculateTaxes(netRate)
+    // Calculate taxes INCLUSIVELY (taxes included in gross rate)
+    const taxes = this.calculateTaxesInclusive(grossRate)
     
-    // Total with taxes
-    const total = netRate + taxes.totalTax
+    // Total is the gross rate (taxes included)
+    const total = grossRate
     
     return {
       baseRate: baseRatePerNight,
       adjustedRate: adjustedRate,
       discount: discount,
-      netRate: netRate,
+      grossRate: grossRate, // Gross rate (taxes included)
+      netRate: taxes.net, // Net rate (before taxes)
       taxes: taxes.breakdown,
       totalTax: taxes.totalTax,
-      total: total
+      total: total // Same as grossRate (taxes included)
     }
   }
   
-  // Calculate taxes
-  static calculateTaxes(amount: number) {
+  // Calculate taxes INCLUSIVELY (taxes included in gross amount)
+  static calculateTaxesInclusive(grossAmount: number) {
     // Load tax rates from settings, fallback to defaults
     let taxRates = {
       VAT: 18,          // 18% VAT
@@ -280,41 +289,85 @@ export class PostingService {
     }
     
     if (typeof window !== 'undefined') {
-      const savedTaxes = localStorage.getItem('taxSettings')
-      if (savedTaxes) {
+      // Try hotelTaxes first (unified key)
+      const savedHotelTaxes = localStorage.getItem('hotelTaxes')
+      if (savedHotelTaxes) {
         try {
-          const settings = JSON.parse(savedTaxes)
-          taxRates = {
-            VAT: settings.VAT || taxRates.VAT,
-            CITY_TAX: settings.CITY_TAX || taxRates.CITY_TAX,
-            TOURISM_TAX: settings.TOURISM_TAX || taxRates.TOURISM_TAX
+          const taxes = JSON.parse(savedHotelTaxes)
+          let taxArray: any[] = []
+          if (Array.isArray(taxes)) {
+            taxArray = taxes
+          } else {
+            taxArray = Object.entries(taxes).map(([key, value]) => ({
+              key,
+              rate: typeof value === 'number' ? value : 0
+            }))
           }
+          
+          const vatTax = taxArray.find((t: any) => t.key === 'VAT' || t.name?.includes('VAT') || t.name?.includes('დღგ'))
+          const cityTax = taxArray.find((t: any) => t.key === 'CITY_TAX' || t.name?.includes('CITY'))
+          const tourismTax = taxArray.find((t: any) => t.key === 'TOURISM_TAX' || t.name?.includes('TOURISM'))
+          
+          if (vatTax) taxRates.VAT = vatTax.rate ?? vatTax.value ?? 18
+          if (cityTax) taxRates.CITY_TAX = cityTax.rate ?? cityTax.value ?? 3
+          if (tourismTax) taxRates.TOURISM_TAX = tourismTax.rate ?? tourismTax.value ?? 1
         } catch (e) {
-          console.error('Error loading tax settings:', e)
+          console.error('Error loading hotelTaxes:', e)
+        }
+      } else {
+        // Fallback to taxSettings
+        const savedTaxes = localStorage.getItem('taxSettings')
+        if (savedTaxes) {
+          try {
+            const settings = JSON.parse(savedTaxes)
+            taxRates = {
+              VAT: settings.VAT || taxRates.VAT,
+              CITY_TAX: settings.CITY_TAX || taxRates.CITY_TAX,
+              TOURISM_TAX: settings.TOURISM_TAX || taxRates.TOURISM_TAX
+            }
+          } catch (e) {
+            console.error('Error loading tax settings:', e)
+          }
         }
       }
     }
     
+    // Calculate total tax rate (sum of all tax rates)
+    const totalTaxRate = 1 + (taxRates.VAT / 100) + (taxRates.CITY_TAX / 100) + (taxRates.TOURISM_TAX / 100)
+    
+    // Calculate net amount (before taxes)
+    const netAmount = grossAmount / totalTaxRate
+    
+    // Calculate tax breakdown
     const breakdown: TaxBreakdown[] = []
     let totalTax = 0
     
-    // Calculate each tax
+    // Calculate each tax from net amount
     for (const [taxType, rate] of Object.entries(taxRates)) {
-      const taxAmount = amount * (rate / 100)
+      const taxAmount = netAmount * (rate / 100)
       totalTax += taxAmount
       
       breakdown.push({
         taxType: taxType as any,
         rate: rate,
-        base: amount,
+        base: netAmount,
         amount: taxAmount
       })
     }
     
     return {
+      net: netAmount, // Net amount before taxes
+      gross: grossAmount, // Gross amount (taxes included)
       breakdown,
-      totalTax
+      totalTax,
+      taxInclusive: true
     }
+  }
+  
+  // Legacy method for backward compatibility (kept for reference)
+  static calculateTaxes(amount: number) {
+    // This is now deprecated - use calculateTaxesInclusive instead
+    return this.calculateTaxesInclusive(amount)
   }
   
   // Create new folio (deprecated - use FolioService instead)

@@ -186,32 +186,58 @@ export default function FinancialDashboard() {
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-lg font-bold mb-4">Tax Summary</h2>
           <div className="space-y-2">
-            {revenueReport.taxes.VAT > 0 && (
-              <div className="flex justify-between">
-                <span>VAT (18%)</span>
-                <span>₾{revenueReport.taxes.VAT.toFixed(2)}</span>
-              </div>
-            )}
-            {revenueReport.taxes.CITY_TAX > 0 && (
-              <div className="flex justify-between">
-                <span>City Tax (3%)</span>
-                <span>₾{revenueReport.taxes.CITY_TAX.toFixed(2)}</span>
-              </div>
-            )}
-            {revenueReport.taxes.TOURISM_TAX > 0 && (
-              <div className="flex justify-between">
-                <span>Tourism Tax (1%)</span>
-                <span>₾{revenueReport.taxes.TOURISM_TAX.toFixed(2)}</span>
-              </div>
-            )}
-            {revenueReport.taxes.total === 0 && (
+            {Object.entries(revenueReport.taxes.taxes || {})
+              .filter(([_, amount]: any) => amount > 0)
+              .map(([name, amount]: any) => {
+                // Get tax rate from Settings for display
+                let rate = 0
+                if (typeof window !== 'undefined') {
+                  try {
+                    const savedTaxesStr = localStorage.getItem('hotelTaxes')
+                    if (savedTaxesStr) {
+                      const savedTaxes = JSON.parse(savedTaxesStr)
+                      // Handle both array and object formats
+                      if (Array.isArray(savedTaxes)) {
+                        const taxInfo = savedTaxes.find((t: any) => 
+                          (t.name || t.type) === name
+                        )
+                        rate = taxInfo?.rate || taxInfo?.value || 0
+                      } else if (typeof savedTaxes === 'object' && savedTaxes !== null) {
+                        // Object format: { "VAT": 18, "Service": 10 } or { "VAT": { rate: 18 } }
+                        const taxValue = savedTaxes[name]
+                        if (typeof taxValue === 'number') {
+                          rate = taxValue
+                        } else if (taxValue && typeof taxValue === 'object') {
+                          rate = taxValue.rate || taxValue.value || 0
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    console.error('Error loading tax rates for display:', e)
+                  }
+                }
+                
+                return (
+                  <div key={name} className="flex justify-between">
+                    <span>{name} {rate > 0 ? `(${rate}%)` : ''}</span>
+                    <span>₾{amount.toFixed(2)}</span>
+                  </div>
+                )
+              })}
+            {(!revenueReport.taxes.taxes || Object.keys(revenueReport.taxes.taxes).length === 0) && (
               <p className="text-gray-500 text-center py-2">No tax data for this date</p>
             )}
-            {revenueReport.taxes.total > 0 && (
-              <div className="border-t pt-2 font-bold flex justify-between">
-                <span>Total Tax</span>
-                <span>₾{revenueReport.taxes.total.toFixed(2)}</span>
-              </div>
+            {revenueReport.taxes.totalTax > 0 && (
+              <>
+                <div className="border-t pt-2 font-bold flex justify-between">
+                  <span>Total Tax</span>
+                  <span>₾{revenueReport.taxes.totalTax.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <span>Net Revenue</span>
+                  <span>₾{revenueReport.taxes.netRevenue.toFixed(2)}</span>
+                </div>
+              </>
             )}
           </div>
         </div>

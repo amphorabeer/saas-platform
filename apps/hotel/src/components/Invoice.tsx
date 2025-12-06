@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import moment from 'moment'
 import { ActivityLogger } from '../lib/activityLogger'
+import { calculateTaxBreakdown } from '../utils/taxCalculator'
 
 export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: any) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
@@ -14,6 +15,78 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
   const hasCompany = reservation.companyName && reservation.companyName.trim() !== ''
   
   const invoiceNumber = reservation.reservationNumber || reservation.id
+  
+  // Load ALL charges from folio
+  const getInvoiceData = () => {
+    if (typeof window === 'undefined') return null
+    
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folio = folios.find((f: any) => f.reservationId === reservation.id)
+    
+    if (!folio) {
+      // No folio found, use reservation data as fallback
+      return {
+        folioNumber: null,
+        charges: [{
+          description: `ოთახი ${reservation.roomNumber || 'N/A'}`,
+          quantity: nights,
+          price: pricePerNight,
+          amount: reservation.totalAmount || 0
+        }],
+        payments: [],
+        totalCharges: reservation.totalAmount || 0,
+        totalPayments: 0,
+        balance: reservation.totalAmount || 0
+      }
+    }
+    
+    const transactions = folio.transactions || []
+    
+    // Get charges from transactions (type === 'charge' or debit > 0)
+    const charges = transactions.filter((t: any) => 
+      t.type === 'charge' || (t.debit && t.debit > 0)
+    ).map((t: any) => ({
+      description: t.description || 'Charge',
+      quantity: 1,
+      price: t.amount || t.debit || 0,
+      amount: t.amount || t.debit || 0
+    }))
+    
+    // If no charges found, add room charge as default
+    if (charges.length === 0) {
+      charges.push({
+        description: `ოთახი ${reservation.roomNumber || 'N/A'}`,
+        quantity: nights,
+        price: pricePerNight,
+        amount: reservation.totalAmount || 0
+      })
+    }
+    
+    // Get payments from transactions (type === 'payment' or credit > 0)
+    const payments = transactions.filter((t: any) => 
+      t.type === 'payment' || t.type === 'refund' || (t.credit && t.credit > 0)
+    ).map((t: any) => ({
+      description: t.description || 'Payment',
+      amount: t.amount || t.credit || 0,
+      method: t.paymentMethod || t.method || 'cash'
+    }))
+    
+    // Calculate totals
+    const totalCharges = charges.reduce((sum: number, c: any) => sum + (c.amount || 0), 0)
+    const totalPayments = payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
+    const balance = totalCharges - totalPayments
+    
+    return {
+      folioNumber: folio.folioNumber,
+      charges,
+      payments,
+      totalCharges,
+      totalPayments,
+      balance
+    }
+  }
+  
+  const invoiceData = getInvoiceData()
   
   const generateInvoiceHTML = () => {
     return `
@@ -115,20 +188,83 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
               </tr>
             </thead>
             <tbody>
+              ${invoiceData?.charges.map((charge: any) => `
+              <tr>
+                <td>${charge.description}</td>
+                <td>${charge.quantity || 1}</td>
+                <td>₾${charge.price?.toFixed(2) || '0.00'}</td>
+                <td>₾${charge.amount?.toFixed(2) || '0.00'}</td>
+              </tr>
+              `).join('') || `
               <tr>
                 <td>ოთახი ${reservation.roomNumber || 'N/A'}</td>
                 <td>${nights} ღამე</td>
                 <td>₾${pricePerNight.toFixed(2)}</td>
                 <td>₾${reservation.totalAmount}</td>
               </tr>
+              `}
             </tbody>
             <tfoot>
               <tr class="total-row">
-                <td colspan="3"><strong>სულ გადასახდელი:</strong></td>
-                <td class="amount">₾${reservation.totalAmount}</td>
+                <td colspan="3"><strong>სულ ხარჯები:</strong></td>
+                <td class="amount">₾${invoiceData?.totalCharges?.toFixed(2) || reservation.totalAmount}</td>
               </tr>
             </tfoot>
           </table>
+          
+          ${(() => {
+            const totalAmount = invoiceData?.totalCharges || reservation.totalAmount || 0
+            const taxData = calculateTaxBreakdown(totalAmount)
+            if (taxData.totalTax > 0) {
+              return `
+                <div style="margin-top: 20px; padding: 12px; background: #f9fafb; border-radius: 6px; border-top: 2px solid #e5e7eb;">
+                  <h4 style="color: #374151; margin-bottom: 10px; font-size: 13px; font-weight: 600;">🧾 გადასახადის დეტალები:</h4>
+                  <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                      <span>წმინდა თანხა:</span>
+                      <span>₾${taxData.net.toFixed(2)}</span>
+                    </div>
+                    ${taxData.taxes.map((tax: any) => `
+                      <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                        <span>${tax.name} (${tax.rate}%):</span>
+                        <span>₾${tax.amount.toFixed(2)}</span>
+                      </div>
+                    `).join('')}
+                    <div style="display: flex; justify-content: space-between; padding: 6px 0; margin-top: 6px; border-top: 1px solid #d1d5db; font-weight: 600; color: #111827;">
+                      <span>სულ გადასახადი:</span>
+                      <span>₾${taxData.totalTax.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 6px 0; margin-top: 4px; font-weight: bold; font-size: 14px; color: #111827;">
+                      <span>სულ (გადასახადების ჩათვლით):</span>
+                      <span>₾${taxData.gross.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              `
+            }
+            return ''
+          })()}
+          
+          ${invoiceData?.payments && invoiceData.payments.length > 0 ? `
+          <div style="margin-top: 20px; padding: 12px; background: #f0fdf4; border-radius: 6px;">
+            <h4 style="color: #166534; margin-bottom: 10px; font-size: 13px;">💳 გადახდები:</h4>
+            ${invoiceData.payments.map((payment: any) => `
+            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #d1fae5;">
+              <span style="font-size: 12px;">${payment.description} (${payment.method})</span>
+              <span style="font-size: 12px; color: #166534; font-weight: 500;">-₾${payment.amount?.toFixed(2)}</span>
+            </div>
+            `).join('')}
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 8px; padding-top: 8px; border-top: 2px solid #86efac;">
+              <span style="font-size: 13px;">სულ გადახდილი:</span>
+              <span style="font-size: 13px; color: #166534;">₾${invoiceData.totalPayments?.toFixed(2)}</span>
+            </div>
+          </div>
+          ` : ''}
+          
+          <div style="margin-top: 20px; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 16px; ${invoiceData?.balance > 0 ? 'background: #fef2f2; color: #991b1b;' : 'background: #f0fdf4; color: #166534;'}">
+            <span>ბალანსი: </span>
+            <span>₾${invoiceData?.balance?.toFixed(2) || reservation.totalAmount}</span>
+          </div>
           
           ${hotelInfo?.bank || hotelInfo?.account ? `
           <div class="footer">
@@ -250,7 +386,7 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
 
 - Check-out: ${moment(reservation.checkOut).format('DD/MM/YYYY')}
 
-- თანხა: ₾${reservation.totalAmount}
+- თანხა: ₾${invoiceData?.totalCharges?.toFixed(2) || reservation.totalAmount}
 
 
 
@@ -312,7 +448,7 @@ ${hotelInfo?.name || 'Hotel'}-დან გიგზავნით ინვო
 
 📅 ${moment(reservation.checkIn).format('DD/MM/YYYY')} - ${moment(reservation.checkOut).format('DD/MM/YYYY')}
 
-💰 თანხა: ₾${reservation.totalAmount}
+💰 თანხა: ₾${invoiceData?.totalCharges?.toFixed(2) || reservation.totalAmount}
 
 
 

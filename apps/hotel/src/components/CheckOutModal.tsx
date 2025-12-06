@@ -124,6 +124,16 @@ export default function CheckOutModal({
     setCanCheckOut(updatedFolio.balance <= 0)
     setPaymentAmount(updatedFolio.balance > 0 ? updatedFolio.balance : 0)
     
+    // Dispatch folioUpdated event to refresh other components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('folioUpdated', {
+        detail: { 
+          reservationId: reservation.id, 
+          folio: updatedFolio 
+        }
+      }))
+    }
+    
     alert(`✅ Payment processed: ₾${paymentAmount.toFixed(2)}`)
   }
   
@@ -164,7 +174,24 @@ export default function CheckOutModal({
         : 'User'
       FolioService.closeFolio(folio.id, closedBy)
       
-      // Update room status to CLEANING
+      // Update room status to VACANT and set cleaningStatus = 'dirty'
+      const rooms = typeof window !== 'undefined' 
+        ? JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+        : []
+      const updatedRooms = rooms.map((r: any) => {
+        if (r.id === reservation.roomId) {
+          return {
+            ...r,
+            status: 'VACANT',
+            cleaningStatus: 'dirty'
+          }
+        }
+        return r
+      })
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
+      }
+      
       await fetch('/api/hotel/rooms/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -196,24 +223,18 @@ export default function CheckOutModal({
         const room = rooms.find((r: any) => r.id === reservation.roomId || r.roomNumber === roomNumber)
         const roomFloor = room?.floor || Math.floor(parseInt(roomNumber) / 100) || 1
         
-        // Load default checklist
+        // Load checklist from Settings (NO hardcoded fallback)
         const savedChecklist = typeof window !== 'undefined'
           ? localStorage.getItem('housekeepingChecklist')
           : null
         const defaultChecklist = savedChecklist 
           ? JSON.parse(savedChecklist).map((item: any) => ({
-              item: item.task || item.item || item,
-              completed: false
+              item: item.task || item.item || item.name || item,
+              completed: false,
+              required: item.required || false,
+              category: item.category || 'ზოგადი'
             }))
-          : [
-              { item: 'ზეწრების შეცვლა', completed: false },
-              { item: 'პირსახოცების შეცვლა', completed: false },
-              { item: 'აბაზანის დასუფთავება', completed: false },
-              { item: 'იატაკის დალაგება', completed: false },
-              { item: 'მინიბარის შემოწმება', completed: false },
-              { item: 'ნაგვის გატანა', completed: false },
-              { item: 'ზედაპირების დასუფთავება', completed: false }
-            ]
+          : [] // Empty if no checklist in Settings
         
         const housekeepingTask = {
           id: `task-${Date.now()}-${reservation.roomId}`,

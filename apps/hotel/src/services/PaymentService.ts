@@ -46,7 +46,7 @@ export class PaymentService {
         // Create folio
         folio = {
           id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
+          folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${params.reservationId}`,
           reservationId: params.reservationId,
           guestName: reservation.guestName,
           roomNumber: reservation.roomNumber || reservation.roomId,

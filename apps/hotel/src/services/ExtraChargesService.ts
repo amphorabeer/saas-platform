@@ -276,14 +276,78 @@ export class ExtraChargesService {
         }
       }
       
-      // Calculate amounts
-      const subtotal = item.unitPrice * params.quantity
-      const serviceCharge = category.serviceChargeRate 
-        ? subtotal * (category.serviceChargeRate / 100) 
-        : 0
-      const taxableAmount = subtotal + serviceCharge
-      const taxAmount = taxableAmount * (category.taxRate / 100)
-      const totalAmount = taxableAmount + taxAmount
+      // Load tax rates from localStorage (override hardcoded values)
+      let vatRate = category.taxRate // Default to category's hardcoded rate
+      let serviceChargeRate = category.serviceChargeRate // Default to category's hardcoded rate
+      
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('hotelTaxes')
+        if (saved) {
+          try {
+            const taxes = JSON.parse(saved)
+            
+            // Handle both array format (taxList) and object format (taxes)
+            let taxArray: any[] = []
+            if (Array.isArray(taxes)) {
+              taxArray = taxes
+            } else {
+              // Convert object to array format
+              taxArray = Object.entries(taxes).map(([key, value]) => ({
+                key,
+                name: key,
+                rate: typeof value === 'number' ? value : 0,
+                value: typeof value === 'number' ? value : 0
+              }))
+            }
+            
+            // Find VAT tax
+            const vatTax = taxArray.find((t: any) => 
+              t.key === 'VAT' || 
+              t.name?.toLowerCase().includes('vat') || 
+              t.name?.includes('დღგ') ||
+              t.label?.toLowerCase().includes('vat') ||
+              t.label?.includes('დღგ')
+            )
+            
+            // Find Service Charge tax
+            const serviceTax = taxArray.find((t: any) => 
+              t.key === 'SERVICE_CHARGE' ||
+              t.name?.toLowerCase().includes('service') || 
+              t.name?.includes('სერვის') ||
+              t.label?.toLowerCase().includes('service') ||
+              t.label?.includes('სერვის')
+            )
+            
+            // Override with loaded rates
+            if (vatTax) {
+              vatRate = vatTax.rate ?? vatTax.value ?? category.taxRate
+            }
+            if (serviceTax && category.serviceChargeRate) {
+              serviceChargeRate = serviceTax.rate ?? serviceTax.value ?? category.serviceChargeRate
+            }
+          } catch (e) {
+            console.error('Error loading tax rates in ExtraChargesService:', e)
+          }
+        }
+      }
+      
+      // Calculate amounts with TAX INCLUSIVE (taxes included in price)
+      // Gross price is what customer pays (taxes included)
+      const grossPrice = item.unitPrice * params.quantity
+      
+      // Calculate tax inclusive breakdown
+      // Total tax multiplier: 1 + vatRate/100 + serviceChargeRate/100
+      const totalTaxRate = 1 + (vatRate / 100) + (serviceChargeRate / 100)
+      const netPrice = grossPrice / totalTaxRate
+      
+      const serviceChargeAmount = netPrice * (serviceChargeRate / 100)
+      const vatAmount = netPrice * (vatRate / 100)
+      
+      // Total tax amount (sum of all taxes)
+      const taxAmount = vatAmount + serviceChargeAmount
+      
+      // Total amount is the gross price (taxes included)
+      const totalAmount = grossPrice
       
       // Get or create folio
       const folios = typeof window !== 'undefined' 
@@ -300,7 +364,7 @@ export class ExtraChargesService {
         
         folio = {
           id: `FOLIO-${Date.now()}`,
-          folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
+          folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${params.reservationId}`,
           reservationId: params.reservationId,
           guestName: reservation.guestName,
           roomNumber: reservation.roomNumber || reservation.roomId,
@@ -339,10 +403,21 @@ export class ExtraChargesService {
         
         taxDetails: [{
           taxType: 'VAT',
-          rate: category.taxRate,
-          amount: taxAmount,
-          base: taxableAmount
-        }]
+          rate: vatRate, // Use dynamic rate instead of hardcoded category.taxRate
+          amount: vatAmount, // Tax amount (inclusive breakdown)
+          base: netPrice, // Net amount before taxes
+          taxInclusive: true // Flag indicating taxes are included in gross price
+        }],
+        // Store tax breakdown for reporting
+        taxBreakdown: {
+          gross: grossPrice, // Total amount (taxes included)
+          net: netPrice, // Net amount before taxes
+          serviceCharge: serviceChargeAmount, // Service charge amount
+          serviceRate: serviceChargeRate, // Service charge rate
+          vat: vatAmount, // VAT amount
+          vatRate: vatRate, // VAT rate
+          taxInclusive: true
+        }
       }
       
       // Add to folio
@@ -380,8 +455,8 @@ export class ExtraChargesService {
         quantity: params.quantity,
         unitPrice: item.unitPrice,
         grossAmount: totalAmount,
-        taxAmount: taxAmount,
-        netAmount: subtotal,
+        taxAmount: taxAmount, // Total tax amount (vat + service charge)
+        netAmount: netPrice, // Net amount before taxes
         
         postedDate: moment().format('YYYY-MM-DD'),
         postedTime: moment().format('HH:mm:ss'),

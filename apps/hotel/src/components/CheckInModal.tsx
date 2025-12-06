@@ -18,6 +18,7 @@ interface CheckInModalProps {
   rooms?: Room[]
   initialCheckIn?: string
   reservations?: any[] // ✅ დაემატა
+  reservation?: any // Optional: for editing existing reservation
   onClose: () => void
   onSubmit: (data: any) => void
 }
@@ -27,6 +28,7 @@ export default function CheckInModal({
   rooms = [], 
   initialCheckIn, 
   reservations = [], // ✅ დაემატა
+  reservation, // Optional: for editing existing reservation
   onClose, 
   onSubmit 
 }: CheckInModalProps) {
@@ -375,15 +377,23 @@ export default function CheckInModal({
       return 0
     }
 
-    // If roomRates loaded, use detailed calculation
+    // Always use calculateTotalWithRates which properly handles seasons, special dates, and weekday modifiers
+    // This ensures season prices are always included
     if (roomRates.length > 0) {
       return calculateTotalWithRates()
     }
 
-    // Fallback to old logic
-    const nights = calculateNights()
-    const basePrice = selectedRoom?.basePrice || 150
-    return nights * basePrice
+    // Fallback: calculate day by day using calculatePricePerNight (includes season modifiers)
+    let total = 0
+    let currentDate = moment(formData.checkIn)
+    const endDate = moment(formData.checkOut)
+
+    while (currentDate.isBefore(endDate)) {
+      total += calculatePricePerNight(currentDate.format('YYYY-MM-DD'))
+      currentDate.add(1, 'day')
+    }
+
+    return total
   }
 
   // Get rate info for display
@@ -431,6 +441,9 @@ export default function CheckInModal({
     const conflicting = reservations.find((res: any) => {
       // Skip cancelled and no-show reservations
       if (res.status === 'CANCELLED' || res.status === 'NO_SHOW') return false
+      
+      // Skip the current reservation if editing (don't conflict with itself)
+      if (reservation && res.id === reservation.id) return false
       
       // Must be same room
       if (res.roomId !== roomId) return false
@@ -490,27 +503,100 @@ export default function CheckInModal({
     return moment().format('YYYY-MM-DD')
   }
   
+  // Check if check-in is allowed
+  const canCheckIn = (): { allowed: boolean; reason?: string } => {
+    const roomId = formData.roomId || reservation?.roomId
+    const roomNumber = formData.roomNumber || reservation?.roomNumber
+    
+    if (!roomId && !roomNumber) {
+      return { allowed: false, reason: 'ოთახი არ არის არჩეული' }
+    }
+    
+    // ========================================
+    // For NEW RESERVATIONS: Only check overlap, NOT occupied status!
+    // ========================================
+    if (!reservation) {
+      // This is a NEW reservation - only check date overlap
+      // OCCUPIED status doesn't matter because reservation is for FUTURE dates
+      const { hasOverlap, conflictingReservation } = checkOverlap()
+      
+      if (hasOverlap) {
+        return { 
+          allowed: false, 
+          reason: `თარიღები დაკავებულია: ${conflictingReservation?.guestName}` 
+        }
+      }
+      
+      return { allowed: true }
+    }
+    
+    // ========================================
+    // For CHECK-IN (existing reservation): Check OCCUPIED status
+    // ========================================
+    const roomData = rooms.find((r: any) => 
+      r.id === roomId || String(r.roomNumber) === String(roomNumber)
+    )
+    
+    if (roomData?.status?.toUpperCase() === 'OCCUPIED') {
+      return { 
+        allowed: false, 
+        reason: `ოთახი ${roomNumber || roomId} უკვე დაკავებულია!\nჯერ გააკეთეთ Check-out.` 
+      }
+    }
+    
+    // ✅ USE `reservations` PROP instead of localStorage!
+    const activeRes = reservations.find((r: any) => {
+      const isSameRoom = r.roomId === roomId || String(r.roomNumber) === String(roomNumber)
+      const isCheckedIn = r.status?.toUpperCase() === 'CHECKED_IN'
+      const isDifferent = r.id !== reservation?.id
+      return isSameRoom && isCheckedIn && isDifferent
+    })
+    
+    if (activeRes) {
+      return { 
+        allowed: false, 
+        reason: `ოთახზე შემოსულია: ${activeRes.guestName}` 
+      }
+    }
+    
+    return { allowed: true }
+  }
+
   const handleSubmit = () => {
     if (!formData.guestName || !formData.checkOut) {
       alert('გთხოვთ შეავსოთ სტუმრის სახელი და Check-out თარიღი')
       return
     }
     
-    // ✅ Check for overlapping reservations
-    const { hasOverlap, conflictingReservation } = checkOverlap()
-    
-    if (hasOverlap) {
-      alert(
-        `❌ ოთახი დაკავებულია!\n\n` +
-        `სტუმარი: ${conflictingReservation.guestName}\n` +
-        `Check-in: ${moment(conflictingReservation.checkIn).format('DD/MM/YYYY')}\n` +
-        `Check-out: ${moment(conflictingReservation.checkOut).format('DD/MM/YYYY')}\n\n` +
-        `გთხოვთ აირჩიოთ სხვა თარიღები ან სხვა ოთახი.`
-      )
-      return
+    // ========================================
+    // For NEW reservations: Only check overlap
+    // ========================================
+    if (!reservation) {
+      const { hasOverlap, conflictingReservation } = checkOverlap()
+      
+      if (hasOverlap) {
+        alert(
+          `❌ ოთახი დაკავებულია!\n\n` +
+          `სტუმარი: ${conflictingReservation?.guestName}\n` +
+          `Check-in: ${moment(conflictingReservation?.checkIn).format('DD/MM/YYYY')}\n` +
+          `Check-out: ${moment(conflictingReservation?.checkOut).format('DD/MM/YYYY')}`
+        )
+        return
+      }
+    } else {
+      // For CHECK-IN: Also check occupied status
+      const checkInCheck = canCheckIn()
+      if (!checkInCheck.allowed) {
+        alert(`❌ Check-in შეუძლებელია\n\n${checkInCheck.reason}`)
+        return
+      }
     }
     
-    const reservation = {
+    // Note: Room status update should be handled by parent component via API
+    // Don't update localStorage here since rooms are managed by API/state
+    
+    // ✅ Use different variable name to avoid conflict with `reservation` prop!
+    const newReservation = {
       ...formData,
       totalAmount: calculateTotal(),
       status: 'CONFIRMED',
@@ -524,10 +610,10 @@ export default function CheckInModal({
       checkIn: formData.checkIn,
       checkOut: formData.checkOut,
       amount: formData.totalAmount,
-      reservationNumber: reservation.reservationNumber
+      reservationNumber: newReservation.reservationNumber
     })
     
-    onSubmit(reservation)
+    onSubmit(newReservation)
   }
 
   return (

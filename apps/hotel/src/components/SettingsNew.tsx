@@ -191,7 +191,7 @@ export default function SettingsNew() {
   const [seasons, setSeasons] = useState<Season[]>([])
   const [extraServices, setExtraServices] = useState<ExtraService[]>([])
   const [packages, setPackages] = useState<Package[]>([])
-  const [taxes, setTaxes] = useState({ VAT: 18, CITY_TAX: 0, TOURISM_TAX: 0, SERVICE_CHARGE: 0 })
+  const [taxes, setTaxes] = useState({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 })
   const [quickCharges, setQuickCharges] = useState<string[]>([])
   
   // Calendar settings state
@@ -287,15 +287,28 @@ export default function SettingsNew() {
         setChecklist(JSON.parse(savedChecklist))
       } catch (e) {
         console.error('Error loading checklist:', e)
+        // If parse fails, use defaults and save them
+        const defaults = [
+          { id: '1', task: 'საწოლის თეთრეულის შეცვლა', category: 'საძინებელი', required: true },
+          { id: '2', task: 'აბაზანის დასუფთავება', category: 'აბაზანა', required: true },
+          { id: '3', task: 'იატაკის მტვერსასრუტით გაწმენდა', category: 'ზოგადი', required: true },
+          { id: '4', task: 'პირსახოცების შეცვლა', category: 'აბაზანა', required: true },
+          { id: '5', task: 'მინიბარის შევსება', category: 'მომსახურება', required: false }
+        ]
+        setChecklist(defaults)
+        localStorage.setItem('housekeepingChecklist', JSON.stringify(defaults))
       }
     } else {
-      setChecklist([
+      // Default items - save them immediately
+      const defaults = [
         { id: '1', task: 'საწოლის თეთრეულის შეცვლა', category: 'საძინებელი', required: true },
         { id: '2', task: 'აბაზანის დასუფთავება', category: 'აბაზანა', required: true },
         { id: '3', task: 'იატაკის მტვერსასრუტით გაწმენდა', category: 'ზოგადი', required: true },
         { id: '4', task: 'პირსახოცების შეცვლა', category: 'აბაზანა', required: true },
         { id: '5', task: 'მინიბარის შევსება', category: 'მომსახურება', required: false }
-      ])
+      ]
+      setChecklist(defaults)
+      localStorage.setItem('housekeepingChecklist', JSON.stringify(defaults))
     }
     
     // Load System Settings
@@ -412,10 +425,24 @@ export default function SettingsNew() {
     const savedTaxes = localStorage.getItem('hotelTaxes')
     if (savedTaxes) {
       try {
-        setTaxes(JSON.parse(savedTaxes))
+        const parsed = JSON.parse(savedTaxes)
+        // Ensure all tax values are numbers, not undefined/null
+        const validated = {
+          VAT: parsed.VAT ?? 18,
+          CITY_TAX: parsed.CITY_TAX ?? 2,
+          TOURISM_TAX: parsed.TOURISM_TAX ?? 1,
+          SERVICE_CHARGE: parsed.SERVICE_CHARGE ?? 10
+        }
+        setTaxes(validated)
       } catch (e) {
         console.error('Error loading taxes:', e)
+        // Set defaults on error
+        setTaxes({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 })
       }
+    } else {
+      // No saved taxes, use defaults
+      setTaxes({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 })
+      localStorage.setItem('hotelTaxes', JSON.stringify({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 }))
     }
     
     // NEW: Load Quick Charges
@@ -481,6 +508,17 @@ export default function SettingsNew() {
       showMessage('success', '✅ ჩეკლისტი შენახულია!')
     }, 500)
   }
+  
+  // Auto-save checklist when it changes
+  // CRITICAL: Auto-save checklist whenever it changes
+  useEffect(() => {
+    if (checklist.length > 0) {
+      localStorage.setItem('housekeepingChecklist', JSON.stringify(checklist))
+      console.log('✅ Housekeeping checklist auto-saved:', checklist)
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event('housekeepingChecklistUpdated'))
+    }
+  }, [checklist])
   
   const saveSystemSettings = () => {
     setIsSaving(true)
@@ -2451,7 +2489,7 @@ function RoomPricingSection({ roomTypes, seasons, setSeasons, extraServices, set
             <TaxesEditor 
               taxes={taxes} 
               setTaxes={setTaxes}
-              onSave={savePricing}
+              onSave={onSave}
             />
           )}
         </div>
@@ -2742,7 +2780,7 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
             <TaxesEditor 
               taxes={taxes} 
               setTaxes={setTaxes}
-              onSave={savePricing}
+              onSave={onSave}
             />
           )}
           
@@ -4767,10 +4805,63 @@ function TaxesEditor({ taxes, setTaxes, onSave }: {
   
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedTaxList = localStorage.getItem('taxList')
+      // Try to load from hotelTaxes first (unified key)
+      let savedTaxList = localStorage.getItem('taxList')
+      let savedHotelTaxes = localStorage.getItem('hotelTaxes')
+      
+      // If hotelTaxes exists, use it to initialize taxList
+      if (savedHotelTaxes) {
+        try {
+          const parsed = JSON.parse(savedHotelTaxes)
+          // Check if it's an array (taxList format) or object (taxes format)
+          if (Array.isArray(parsed)) {
+            // Already in taxList format
+            const validated = parsed.map((tax: any) => ({
+              ...tax,
+              value: tax.value ?? tax.rate ?? tax.percentage ?? 0
+            }))
+            setTaxList(validated)
+            return
+          } else {
+            // Convert from taxes object format to taxList array format
+            const list = Object.entries(parsed).map(([key, value], index) => ({
+              id: `tax-${index}`,
+              key,
+              label: defaultTaxLabels[key]?.label || key,
+              description: defaultTaxLabels[key]?.description || '',
+              value: typeof value === 'number' ? value : 0
+            }))
+            setTaxList(list)
+            // Save in taxList format for future use
+            localStorage.setItem('taxList', JSON.stringify(list))
+            // Also save to hotelTaxes in array format with rate property
+            const taxesArray = list.map(tax => ({
+              id: tax.id,
+              key: tax.key,
+              name: tax.label,
+              label: tax.label,
+              description: tax.description,
+              rate: tax.value,
+              value: tax.value
+            }))
+            localStorage.setItem('hotelTaxes', JSON.stringify(taxesArray))
+            return
+          }
+        } catch (e) {
+          console.error('Error loading hotelTaxes:', e)
+        }
+      }
+      
+      // Fallback to taxList if hotelTaxes doesn't exist
       if (savedTaxList) {
         try {
-          setTaxList(JSON.parse(savedTaxList))
+          const parsed = JSON.parse(savedTaxList)
+          // Ensure all taxes have valid values
+          const validated = parsed.map((tax: any) => ({
+            ...tax,
+            value: tax.value ?? tax.rate ?? tax.percentage ?? 0
+          }))
+          setTaxList(validated)
         } catch (e) {
           console.error('Error loading tax list:', e)
           // Initialize from default taxes
@@ -4779,20 +4870,45 @@ function TaxesEditor({ taxes, setTaxes, onSave }: {
             key,
             label: defaultTaxLabels[key]?.label || key,
             description: defaultTaxLabels[key]?.description || '',
-            value
+            value: value ?? 0
           }))
           setTaxList(list)
         }
       } else {
-        // Initialize from default taxes
+        // Initialize from default taxes with proper defaults
+        const defaultTaxValues: Record<string, number> = {
+          VAT: 18,
+          CITY_TAX: 2,
+          TOURISM_TAX: 1,
+          SERVICE_CHARGE: 10
+        }
         const list = Object.entries(taxes).map(([key, value], index) => ({
           id: `tax-${index}`,
           key,
           label: defaultTaxLabels[key]?.label || key,
           description: defaultTaxLabels[key]?.description || '',
-          value
+          value: value ?? defaultTaxValues[key] ?? 0
         }))
         setTaxList(list)
+        // Save initial tax list to both keys for compatibility
+        localStorage.setItem('taxList', JSON.stringify(list))
+        // Also save to hotelTaxes in array format with rate property (for ExtraChargesPanel)
+        const taxesArray = list.map(tax => ({
+          id: tax.id,
+          key: tax.key,
+          name: tax.label,
+          label: tax.label,
+          description: tax.description,
+          rate: tax.value, // Use 'rate' property for compatibility
+          value: tax.value
+        }))
+        localStorage.setItem('hotelTaxes', JSON.stringify(taxesArray))
+        // Also save to hotelTaxesObject in object format for parent component
+        const taxesObj: any = {}
+        list.forEach(tax => {
+          taxesObj[tax.key] = tax.value
+        })
+        localStorage.setItem('hotelTaxesObject', JSON.stringify(taxesObj))
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -4800,13 +4916,35 @@ function TaxesEditor({ taxes, setTaxes, onSave }: {
   
   const saveTaxList = (newList: typeof taxList) => {
     setTaxList(newList)
+    // Save to taxList for this component
     localStorage.setItem('taxList', JSON.stringify(newList))
-    // Also update the taxes object
+    
+    // Also update the taxes object and save to hotelTaxes (unified key)
+    // Save in BOTH formats for compatibility:
+    // 1. Object format (for parent component)
     const taxesObj: any = {}
     newList.forEach(tax => {
-      taxesObj[tax.key] = tax.value
+      taxesObj[tax.key] = tax.value ?? 0
     })
     setTaxes(taxesObj)
+    
+    // 2. Array format with 'rate' property (for ExtraChargesPanel and other components)
+    const taxesArray = newList.map(tax => ({
+      id: tax.id,
+      key: tax.key,
+      name: tax.label,
+      label: tax.label,
+      description: tax.description,
+      rate: tax.value ?? 0, // Use 'rate' property for compatibility
+      value: tax.value ?? 0
+    }))
+    
+    // Save to hotelTaxes in array format (with rate property)
+    localStorage.setItem('hotelTaxes', JSON.stringify(taxesArray))
+    
+    // Also save object format to hotelTaxesObject for backward compatibility
+    localStorage.setItem('hotelTaxesObject', JSON.stringify(taxesObj))
+    
     // Auto-save to parent's localStorage
     if (onSave) {
       setTimeout(() => {
@@ -4881,7 +5019,7 @@ function TaxesEditor({ taxes, setTaxes, onSave }: {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  value={tax.value}
+                  value={tax.value ?? 0}
                   onChange={(e) => {
                     const updated = taxList.map(t => 
                       t.id === tax.id ? { ...t, value: parseFloat(e.target.value) || 0 } : t

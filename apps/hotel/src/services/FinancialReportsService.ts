@@ -8,7 +8,7 @@ export class FinancialReportsService {
       return {
         date,
         revenue: { byCategory: {}, byDepartment: {}, total: 0 },
-        taxes: { VAT: 0, CITY_TAX: 0, TOURISM_TAX: 0, total: 0 },
+        taxes: { taxes: {}, totalTax: 0, netRevenue: 0 },
         payments: { methods: {}, total: 0, count: 0 },
         statistics: { transactionCount: 0, averageTransaction: 0 }
       }
@@ -54,8 +54,8 @@ export class FinancialReportsService {
       return sum + numVal
     }, 0)
     
-    // Tax summary
-    const taxSummary = this.calculateTaxSummary(dayTransactions)
+    // Tax summary - calculate from total revenue (TAX INCLUSIVE)
+    const taxSummary = this.calculateTaxSummary(totalRevenue)
     
     // Payment methods
     const paymentSummary = await this.getPaymentSummary(date)
@@ -141,32 +141,78 @@ export class FinancialReportsService {
     return departments
   }
   
-  // Calculate tax summary
-  static calculateTaxSummary(transactions: any[]) {
-    const taxes = {
-      VAT: 0,
-      CITY_TAX: 0,
-      TOURISM_TAX: 0,
-      total: 0
+  // Calculate tax summary from revenue (TAX INCLUSIVE - taxes are in the price)
+  static calculateTaxSummary(revenue: number) {
+    // Load tax rates from Settings
+    let taxes: { name: string; rate: number }[] = [
+      { name: 'VAT', rate: 18 },
+      { name: 'Service', rate: 10 }
+    ]
+    
+    if (typeof window !== 'undefined') {
+      const savedTaxes = localStorage.getItem('hotelTaxes')
+      if (savedTaxes) {
+        try {
+          const parsed = JSON.parse(savedTaxes)
+          // Handle both array and object formats
+          if (Array.isArray(parsed)) {
+            taxes = parsed.map((t: any) => ({
+              name: t.name || t.type || 'Tax',
+              rate: t.rate || t.value || 0
+            }))
+          } else if (typeof parsed === 'object' && parsed !== null) {
+            // Convert object to array format
+            taxes = Object.entries(parsed).map(([key, value]: [string, any]) => ({
+              name: key,
+              rate: typeof value === 'number' ? value : (value?.rate || value?.value || 0)
+            }))
+          }
+        } catch (e) {
+          console.error('Error loading taxes:', e)
+        }
+      }
     }
     
-    transactions.forEach(t => {
-      if (t.taxDetails && Array.isArray(t.taxDetails)) {
-        t.taxDetails.forEach((tax: any) => {
-          const taxAmount = Number(tax.amount) || 0
-          if (tax.taxType === 'VAT') {
-            taxes.VAT += taxAmount
-          } else if (tax.taxType === 'CITY_TAX') {
-            taxes.CITY_TAX += taxAmount
-          } else if (tax.taxType === 'TOURISM_TAX') {
-            taxes.TOURISM_TAX += taxAmount
-          }
-          taxes.total += taxAmount
-        })
+    const taxSummary: { [key: string]: number } = {}
+    let totalTaxRate = 0
+    
+    // Calculate total tax rate
+    taxes.forEach(tax => {
+      if (tax.rate > 0) {
+        totalTaxRate += tax.rate
       }
     })
     
-    return taxes
+    // Tax Inclusive calculation
+    // If revenue is ₾680 and total tax rate is 28% (18% VAT + 10% Service)
+    // Net = 680 / 1.28 = ₾531.25
+    // Each tax = Net * (rate / 100)
+    
+    if (revenue === 0 || totalTaxRate === 0) {
+      return {
+        taxes: taxSummary,
+        totalTax: 0,
+        netRevenue: revenue
+      }
+    }
+    
+    const divisor = 1 + (totalTaxRate / 100)
+    const netRevenue = revenue / divisor
+    
+    taxes.forEach(tax => {
+      if (tax.rate > 0) {
+        const taxAmount = netRevenue * (tax.rate / 100)
+        taxSummary[tax.name] = Math.round(taxAmount * 100) / 100
+      }
+    })
+    
+    const totalTax = Object.values(taxSummary).reduce((sum, val) => sum + val, 0)
+    
+    return {
+      taxes: taxSummary,
+      totalTax: Math.round(totalTax * 100) / 100,
+      netRevenue: Math.round(netRevenue * 100) / 100
+    }
   }
   
   // Get payment summary
@@ -337,7 +383,7 @@ export class FinancialReportsService {
       month,
       totalRevenue: dailyReports.reduce((sum, r) => sum + (r.revenue.total || 0), 0),
       totalPayments: dailyReports.reduce((sum, r) => sum + (r.payments.total || 0), 0),
-      totalTaxes: dailyReports.reduce((sum, r) => sum + (r.taxes.total || 0), 0),
+      totalTaxes: dailyReports.reduce((sum, r) => sum + (r.taxes.totalTax || 0), 0),
       dailyBreakdown: dailyReports
     }
   }

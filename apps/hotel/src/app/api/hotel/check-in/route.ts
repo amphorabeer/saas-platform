@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Calculate total amount based on room price and nights
+    // Get room for validation
     const room = await prisma.hotelRoom.findUnique({
       where: { id: data.roomId }
     })
@@ -27,10 +27,14 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    // Use totalAmount from request (already calculated with season modifiers on frontend)
+    // If not provided, fallback to base price calculation (for backward compatibility)
     const checkIn = new Date(data.checkIn)
     const checkOut = new Date(data.checkOut)
     const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
-    const totalAmount = Number(room.basePrice) * nights
+    const totalAmount = data.totalAmount !== undefined 
+      ? Number(data.totalAmount)  // Use frontend-calculated amount (includes season modifiers)
+      : Number(room.basePrice) * nights  // Fallback for backward compatibility
     
     // Create reservation
     const reservation = await prisma.hotelReservation.create({

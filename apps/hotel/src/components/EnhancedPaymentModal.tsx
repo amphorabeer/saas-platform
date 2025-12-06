@@ -67,7 +67,7 @@ export default function EnhancedPaymentModal({
         if (res) {
           const newFolio = {
             id: `FOLIO-${Date.now()}`,
-            folioNumber: `F${moment().format('YYMMDD')}-${res.roomNumber || res.roomId || Math.floor(Math.random() * 1000)}`,
+            folioNumber: `F${moment().format('YYMMDD')}-${res.roomNumber || res.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
             reservationId: reservation.id,
             guestName: res.guestName,
             roomNumber: res.roomNumber || res.roomId,
@@ -159,8 +159,22 @@ export default function EnhancedPaymentModal({
         // Reload folio after all splits
         await loadFolio()
         
+        // Get updated folio from localStorage
+        const folios = typeof window !== 'undefined' 
+          ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+          : []
+        const updatedFolio = folios.find((f: any) => f.reservationId === reservation.id)
+        
+        // Dispatch folioUpdated event to refresh other components
+        window.dispatchEvent(new CustomEvent('folioUpdated', {
+          detail: { 
+            reservationId: reservation.id, 
+            folio: updatedFolio 
+          }
+        }))
+        
         alert(`✅ ${splits.length} split ${paymentType === 'refund' ? 'refunds' : 'payments'} processed successfully!`)
-        onSuccess({ success: true, results, folio })
+        onSuccess({ success: true, results, folio: updatedFolio })
       } else {
         // Process single payment
         const result = await PaymentService.processPayment({
@@ -177,6 +191,12 @@ export default function EnhancedPaymentModal({
           // Reload folio
           await loadFolio()
           
+          // Get updated folio from localStorage (in case result.folio is not available)
+          const folios = typeof window !== 'undefined' 
+            ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+            : []
+          const updatedFolio = folios.find((f: any) => f.reservationId === reservation.id) || result.folio
+          
           // Log activity
           ActivityLogger.log('PAYMENT_PROCESSED', {
             reservationId: reservation.id,
@@ -185,6 +205,14 @@ export default function EnhancedPaymentModal({
             type: paymentType,
             guestName: reservation.guestName
           })
+          
+          // Dispatch folioUpdated event to refresh other components
+          window.dispatchEvent(new CustomEvent('folioUpdated', {
+            detail: { 
+              reservationId: reservation.id, 
+              folio: updatedFolio 
+            }
+          }))
           
           alert(`✅ ${paymentType === 'refund' ? 'Refund' : 'Payment'} processed successfully!`)
           onSuccess(result)

@@ -2,17 +2,18 @@
 
 import React, { useState, useMemo, useEffect } from 'react'
 import moment from 'moment'
+import { calculateTaxBreakdown } from '../utils/taxCalculator'
 
 interface ReportsProps {
   reservations: any[]
   rooms: any[]
 }
 
-type ReportType = 'revenue' | 'occupancy' | 'guests' | 'rooms' | 'payments' | 'cancellations' | 'sources'
+type ReportType = 'reservations' | 'revenue' | 'occupancy' | 'guests' | 'rooms' | 'payments' | 'cancellations' | 'sources' | 'tax'
 type DateRange = 'today' | 'week' | 'month' | 'quarter' | 'year' | 'custom'
 
 export default function Reports({ reservations, rooms }: ReportsProps) {
-  const [activeReport, setActiveReport] = useState<ReportType>('revenue')
+  const [activeReport, setActiveReport] = useState<ReportType>('reservations')
   const [dateRange, setDateRange] = useState<DateRange>('month')
   const [customStartDate, setCustomStartDate] = useState(moment().subtract(30, 'days').format('YYYY-MM-DD'))
   const [customEndDate, setCustomEndDate] = useState(moment().format('YYYY-MM-DD'))
@@ -326,6 +327,15 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
           csvContent += `${method},${data.count},${data.amount}\n`
         })
         break
+      case 'tax':
+        csvContent = 'Tax Name,Rate,Amount\n'
+        taxData.taxBreakdown.forEach((tax: any) => {
+          csvContent += `${tax.name},${tax.rate}%,${tax.amount}\n`
+        })
+        csvContent += `Total Tax,,${taxData.totalTax}\n`
+        csvContent += `Gross Revenue,,${taxData.grossRevenue}\n`
+        csvContent += `Net Revenue,,${taxData.netRevenue}\n`
+        break
       default:
         csvContent = 'No data'
     }
@@ -341,6 +351,192 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
   
   const printReport = () => {
     window.print()
+  }
+  
+  // =============== RESERVATIONS REPORT ===============
+  const ReservationsReport = ({ reservations: allReservations, rooms, dateRange, startDate, endDate }: { reservations: any[]; rooms: any[]; dateRange: DateRange; startDate: moment.Moment; endDate: moment.Moment }) => {
+    const [filter, setFilter] = useState('all')
+    const [searchTerm, setSearchTerm] = useState('')
+    
+    // Filter reservations by date range and other filters
+    const filteredReservations = useMemo(() => {
+      let result = allReservations.filter((r: any) => {
+        const checkIn = moment(r.checkIn)
+        const checkOut = moment(r.checkOut)
+        return checkIn.isSameOrBefore(endDate) && checkOut.isSameOrAfter(startDate)
+      })
+      
+      // Status filter
+      if (filter === 'today') {
+        const today = moment().format('YYYY-MM-DD')
+        result = result.filter((r: any) => 
+          moment(r.checkIn).format('YYYY-MM-DD') === today ||
+          moment(r.checkOut).format('YYYY-MM-DD') === today
+        )
+      } else if (filter === 'upcoming') {
+        const today = moment().format('YYYY-MM-DD')
+        result = result.filter((r: any) => 
+          moment(r.checkIn).format('YYYY-MM-DD') > today &&
+          (r.status === 'CONFIRMED' || r.status === 'PENDING')
+        )
+      } else if (filter === 'checked-in') {
+        result = result.filter((r: any) => r.status === 'CHECKED_IN')
+      } else if (filter === 'checked-out') {
+        result = result.filter((r: any) => r.status === 'CHECKED_OUT')
+      }
+      
+      // Search filter
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase()
+        result = result.filter((r: any) =>
+          r.guestName?.toLowerCase().includes(search) ||
+          r.roomNumber?.toString().includes(search) ||
+          r.id?.toLowerCase().includes(search) ||
+          r.guestPhone?.includes(search) ||
+          r.guestEmail?.toLowerCase().includes(search)
+        )
+      }
+      
+      // Sort by check-in date (newest first)
+      result.sort((a: any, b: any) => moment(b.checkIn).valueOf() - moment(a.checkIn).valueOf())
+      
+      return result
+    }, [allReservations, filter, searchTerm, startDate, endDate])
+    
+    const getStatusBadge = (status: string) => {
+      const badges: { [key: string]: string } = {
+        'CONFIRMED': 'bg-blue-100 text-blue-800',
+        'PENDING': 'bg-yellow-100 text-yellow-800',
+        'CHECKED_IN': 'bg-green-100 text-green-800',
+        'CHECKED_OUT': 'bg-gray-100 text-gray-800',
+        'CANCELLED': 'bg-red-100 text-red-800',
+        'NO_SHOW': 'bg-orange-100 text-orange-800'
+      }
+      return badges[status] || 'bg-gray-100 text-gray-800'
+    }
+    
+    const getStatusLabel = (status: string) => {
+      const labels: { [key: string]: string } = {
+        'CONFIRMED': 'დადასტურებული',
+        'PENDING': 'მოლოდინში',
+        'CHECKED_IN': 'შემოსული',
+        'CHECKED_OUT': 'გასული',
+        'CANCELLED': 'გაუქმებული',
+        'NO_SHOW': 'არ გამოცხადდა'
+      }
+      return labels[status] || status
+    }
+    
+    return (
+      <div>
+        {/* Filters */}
+        <div className="flex gap-4 mb-4 flex-wrap">
+          <div className="flex gap-2">
+            {[
+              { id: 'all', label: 'ყველა' },
+              { id: 'today', label: 'დღევანდელი' },
+              { id: 'upcoming', label: 'მომავალი' },
+              { id: 'checked-in', label: 'შემოსული' },
+              { id: 'checked-out', label: 'გასული' }
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setFilter(f.id)}
+                className={`px-3 py-1 rounded-lg text-sm ${
+                  filter === f.id
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          
+          <input
+            type="text"
+            placeholder="🔍 ძებნა..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-3 py-1 border rounded-lg"
+          />
+        </div>
+        
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          <div className="bg-blue-50 rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-blue-600">
+              {allReservations.filter((r: any) => r.status === 'CONFIRMED').length}
+            </p>
+            <p className="text-sm text-blue-500">დადასტურებული</p>
+          </div>
+          <div className="bg-green-50 rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-green-600">
+              {allReservations.filter((r: any) => r.status === 'CHECKED_IN').length}
+            </p>
+            <p className="text-sm text-green-500">შემოსული</p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-gray-600">
+              {allReservations.filter((r: any) => r.status === 'CHECKED_OUT').length}
+            </p>
+            <p className="text-sm text-gray-500">გასული</p>
+          </div>
+          <div className="bg-orange-50 rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-orange-600">
+              {allReservations.filter((r: any) => r.status === 'NO_SHOW' || r.status === 'CANCELLED').length}
+            </p>
+            <p className="text-sm text-orange-500">გაუქმებული</p>
+          </div>
+        </div>
+        
+        {/* Reservations Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="text-left p-3">სტუმარი</th>
+                <th className="text-left p-3">ოთახი</th>
+                <th className="text-left p-3">Check-in</th>
+                <th className="text-left p-3">Check-out</th>
+                <th className="text-right p-3">თანხა</th>
+                <th className="text-center p-3">სტატუსი</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredReservations.map((res, idx) => (
+                <tr key={res.id || idx} className="border-t hover:bg-gray-50">
+                  <td className="p-3">
+                    <div className="font-medium">{res.guestName}</div>
+                    <div className="text-sm text-gray-500">{res.guestPhone || res.guestEmail}</div>
+                  </td>
+                  <td className="p-3">{res.roomNumber}</td>
+                  <td className="p-3">{moment(res.checkIn).format('DD/MM/YYYY')}</td>
+                  <td className="p-3">{moment(res.checkOut).format('DD/MM/YYYY')}</td>
+                  <td className="p-3 text-right">₾{(res.totalAmount || 0).toFixed(2)}</td>
+                  <td className="p-3 text-center">
+                    <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadge(res.status)}`}>
+                      {getStatusLabel(res.status)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {filteredReservations.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-gray-500">
+                    ჯავშნები არ მოიძებნა
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        <p className="text-center text-gray-400 text-sm mt-4">
+          სულ: {filteredReservations.length} ჯავშანი
+        </p>
+      </div>
+    )
   }
   
   // =============== SIMPLE BAR CHART ===============
@@ -363,15 +559,99 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
     </div>
   )
   
+  // =============== TAX SUMMARY REPORT ===============
+  const taxData = useMemo(() => {
+    // Load tax rates from Settings
+    const loadTaxRates = () => {
+      const saved = localStorage.getItem('hotelTaxes')
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed)) {
+            return parsed.map((t: any) => ({
+              name: t.name || t.type || 'Tax',
+              rate: t.rate || t.value || 0
+            }))
+          } else if (typeof parsed === 'object' && parsed !== null) {
+            return Object.entries(parsed).map(([key, value]: [string, any]) => ({
+              name: key,
+              rate: typeof value === 'number' ? value : (value?.rate || value?.value || 0)
+            }))
+          }
+        } catch (e) {
+          console.error('Error loading taxes:', e)
+        }
+      }
+      return [
+        { name: 'VAT', rate: 18 },
+        { name: 'Service', rate: 10 }
+      ]
+    }
+
+    const taxes = loadTaxRates()
+    
+    // Get all charges in date range from folios
+    let totalRevenue = 0
+    const revenueByCategory: { [key: string]: number } = {}
+    
+    folios.forEach((folio: any) => {
+      folio.transactions?.forEach((t: any) => {
+        const txDate = moment(t.date).format('YYYY-MM-DD')
+        const dateMoment = moment(txDate)
+        if (
+          dateMoment.isSameOrAfter(startDate, 'day') && 
+          dateMoment.isSameOrBefore(endDate, 'day') && 
+          t.type === 'charge' && 
+          (t.debit > 0 || t.amount > 0)
+        ) {
+          const amount = t.debit || t.amount || 0
+          totalRevenue += amount
+          const category = t.category || 'other'
+          revenueByCategory[category] = (revenueByCategory[category] || 0) + amount
+        }
+      })
+    })
+    
+    // Calculate tax breakdown (Tax Inclusive)
+    const taxBreakdownData = calculateTaxBreakdown(totalRevenue)
+    
+    // Calculate by category
+    const taxByCategory = Object.entries(revenueByCategory).map(([category, amount]) => {
+      const catTaxData = calculateTaxBreakdown(amount)
+      return {
+        category,
+        gross: amount,
+        net: catTaxData.net,
+        taxes: catTaxData.taxes,
+        totalTax: catTaxData.totalTax
+      }
+    })
+    
+    return {
+      dateRange: {
+        from: startDate.format('YYYY-MM-DD'),
+        to: endDate.format('YYYY-MM-DD')
+      },
+      grossRevenue: totalRevenue,
+      netRevenue: taxBreakdownData.net,
+      taxBreakdown: taxBreakdownData.taxes,
+      totalTax: taxBreakdownData.totalTax,
+      byCategory: taxByCategory,
+      generatedAt: moment().format('DD/MM/YYYY HH:mm')
+    }
+  }, [folios, startDate, endDate])
+  
   // Report tabs
   const reportTabs: { id: ReportType; label: string; icon: string }[] = [
+    { id: 'reservations', label: 'ჯავშნები', icon: '📋' },
     { id: 'revenue', label: 'შემოსავალი', icon: '💰' },
     { id: 'occupancy', label: 'დაკავებულობა', icon: '🏨' },
     { id: 'guests', label: 'სტუმრები', icon: '👥' },
     { id: 'rooms', label: 'ოთახები', icon: '🚪' },
     { id: 'payments', label: 'გადახდები', icon: '💳' },
     { id: 'cancellations', label: 'გაუქმებები', icon: '❌' },
-    { id: 'sources', label: 'წყაროები', icon: '📊' }
+    { id: 'sources', label: 'წყაროები', icon: '📊' },
+    { id: 'tax', label: 'Tax Summary', icon: '🧾' }
   ]
   
   return (
@@ -474,6 +754,11 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
         
         {/* Report Content */}
         <div className="p-6">
+          {/* RESERVATIONS REPORT */}
+          {activeReport === 'reservations' && (
+            <ReservationsReport reservations={reservations} rooms={rooms} dateRange={dateRange} startDate={startDate} endDate={endDate} />
+          )}
+          
           {/* REVENUE REPORT */}
           {activeReport === 'revenue' && (
             <div>
@@ -780,6 +1065,91 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
                     </div>
                   )
                 })}
+              </div>
+            </div>
+          )}
+          
+          {/* TAX SUMMARY REPORT */}
+          {activeReport === 'tax' && (
+            <div>
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
+                  <p className="text-blue-600 text-sm font-medium">მთლიანი შემოსავალი</p>
+                  <p className="text-3xl font-bold text-blue-700 mt-1">₾{taxData.grossRevenue.toFixed(2)}</p>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
+                  <p className="text-green-600 text-sm font-medium">წმინდა შემოსავალი</p>
+                  <p className="text-3xl font-bold text-green-700 mt-1">₾{taxData.netRevenue.toFixed(2)}</p>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
+                  <p className="text-purple-600 text-sm font-medium">გადასახადები სულ</p>
+                  <p className="text-3xl font-bold text-purple-700 mt-1">₾{taxData.totalTax.toFixed(2)}</p>
+                </div>
+              </div>
+              
+              {/* Tax Breakdown */}
+              <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                <h3 className="font-bold text-lg mb-4">🧾 გადასახადების დეტალები</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="text-left p-3 text-sm font-medium text-gray-600">გადასახადი</th>
+                        <th className="text-right p-3 text-sm font-medium text-gray-600">განაკვეთი</th>
+                        <th className="text-right p-3 text-sm font-medium text-gray-600">თანხა</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {taxData.taxBreakdown.map((tax: any, idx: number) => (
+                        <tr key={idx} className="border-t">
+                          <td className="p-3 font-medium">{tax.name}</td>
+                          <td className="text-right p-3">{tax.rate}%</td>
+                          <td className="text-right p-3 font-bold text-gray-800">₾{tax.amount.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                      <tr className="border-t-2 font-bold bg-gray-50">
+                        <td className="p-3">სულ გადასახადი</td>
+                        <td className="p-3"></td>
+                        <td className="text-right p-3 text-purple-700">₾{taxData.totalTax.toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* By Category */}
+              {taxData.byCategory.length > 0 && (
+                <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                  <h3 className="font-bold text-lg mb-4">📊 კატეგორიების მიხედვით</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="text-left p-3 text-sm font-medium text-gray-600">კატეგორია</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-600">მთლიანი</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-600">წმინდა</th>
+                          <th className="text-right p-3 text-sm font-medium text-gray-600">გადასახადი</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {taxData.byCategory.map((cat: any, idx: number) => (
+                          <tr key={idx} className="border-t">
+                            <td className="p-3 font-medium capitalize">{cat.category}</td>
+                            <td className="text-right p-3">₾{cat.gross.toFixed(2)}</td>
+                            <td className="text-right p-3 text-gray-600">₾{cat.net.toFixed(2)}</td>
+                            <td className="text-right p-3 font-bold text-purple-600">₾{cat.totalTax.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+              
+              {/* Info Footer */}
+              <div className="text-center text-gray-400 text-sm">
+                გენერირებულია: {taxData.generatedAt} | პერიოდი: {taxData.dateRange.from} - {taxData.dateRange.to}
               </div>
             </div>
           )}

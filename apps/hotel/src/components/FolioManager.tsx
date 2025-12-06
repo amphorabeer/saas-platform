@@ -8,6 +8,7 @@ import { FolioService } from '../services/FolioService'
 import ExtraChargesPanel from './ExtraChargesPanel'
 import QuickChargeButtons from './QuickChargeButtons'
 import FolioRoutingManager from './FolioRoutingManager'
+import { calculateTaxBreakdown } from '../utils/taxCalculator'
 
 interface FolioManagerProps {
   reservationId: string
@@ -21,6 +22,26 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
   const [showExtraCharges, setShowExtraCharges] = useState(false)
   const [showRouting, setShowRouting] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [hotelInfo, setHotelInfo] = useState({
+    name: 'Hotel',
+    logo: '',
+    address: '',
+    phone: '',
+    email: ''
+  })
+  
+  // Load hotel info from Settings
+  useEffect(() => {
+    const savedInfo = localStorage.getItem('hotelInfo')
+    if (savedInfo) {
+      try {
+        const info = JSON.parse(savedInfo)
+        setHotelInfo(info)
+      } catch (e) {
+        console.error('Error loading hotel info:', e)
+      }
+    }
+  }, [])
   
   // Load or create folio
   useEffect(() => {
@@ -249,6 +270,42 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
               `).join('')}
             </tbody>
           </table>
+          ${(() => {
+            const totalCharges = folio.transactions.reduce((sum: number, t: any) => sum + (t.debit || 0), 0)
+            if (totalCharges > 0) {
+              const taxData = calculateTaxBreakdown(totalCharges)
+              if (taxData.totalTax > 0) {
+                return `
+                  <div class="tax-breakdown">
+                    <h4>🧾 Tax Breakdown (ჩათვლით)</h4>
+                    <div class="tax-row">
+                      <span>წმინდა თანხა:</span>
+                      <span>₾${taxData.net.toFixed(2)}</span>
+                    </div>
+                    ${taxData.taxes.map((tax: any) => `
+                      <div class="tax-row">
+                        <span>${tax.name} (${tax.rate}%):</span>
+                        <span>₾${tax.amount.toFixed(2)}</span>
+                      </div>
+                    `).join('')}
+                    <div class="tax-row tax-total">
+                      <span>სულ გადასახადი:</span>
+                      <span>₾${taxData.totalTax.toFixed(2)}</span>
+                    </div>
+                    <div class="tax-row tax-total">
+                      <span>სულ დარიცხვა:</span>
+                      <span>₾${taxData.gross.toFixed(2)}</span>
+                    </div>
+                  </div>
+                `
+              }
+            }
+            return ''
+          })()}
+          <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 10px;">
+            <p>გენერირებულია: ${moment().format('DD/MM/YYYY HH:mm')}</p>
+            <p>${hotelInfo.name || 'Hotel'}</p>
+          </div>
         </body>
       </html>
     `
@@ -281,13 +338,45 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
   
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
-      {/* Folio Header */}
+      {/* Hotel Header */}
+      <div className="text-center border-b pb-4 mb-4">
+        {/* Logo */}
+        {hotelInfo.logo ? (
+          <img 
+            src={hotelInfo.logo} 
+            alt={hotelInfo.name} 
+            className="h-16 mx-auto mb-2"
+          />
+        ) : (
+          <div className="text-4xl mb-2">🏨</div>
+        )}
+        
+        {/* Hotel Name */}
+        <h1 className="text-2xl font-bold">{hotelInfo.name || 'Hotel'}</h1>
+        
+        {/* Hotel Contact */}
+        {hotelInfo.address && (
+          <p className="text-sm text-gray-500">{hotelInfo.address}</p>
+        )}
+        {(hotelInfo.phone || hotelInfo.email) && (
+          <p className="text-sm text-gray-500">
+            {hotelInfo.phone && `📞 ${hotelInfo.phone}`}
+            {hotelInfo.phone && hotelInfo.email && ' | '}
+            {hotelInfo.email && `✉️ ${hotelInfo.email}`}
+          </p>
+        )}
+        
+        {/* Folio Title */}
+        <h2 className="text-lg font-medium mt-3">FOLIO / ანგარიშფაქტურა</h2>
+      </div>
+      
+      {/* Folio Info */}
       <div className="border-b pb-4 mb-4">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-2xl font-bold">Folio #{folio.folioNumber}</h2>
-            <p className="text-gray-600">{folio.guestName} - Room {folio.roomNumber}</p>
-            <p className="text-sm text-gray-500">Status: <span className={`font-medium ${
+            <p className="text-gray-500 text-sm">Folio #{folio.folioNumber}</p>
+            <p className="text-gray-600 font-medium mt-1">{folio.guestName} - Room {folio.roomNumber}</p>
+            <p className="text-sm text-gray-500 mt-1">Status: <span className={`font-medium ${
               folio.status === 'open' ? 'text-green-600' :
               folio.status === 'closed' ? 'text-gray-600' :
               folio.status === 'suspended' ? 'text-yellow-600' :
@@ -424,9 +513,32 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
                       <span>{trx.description}</span>
                     </div>
                     {trx.taxDetails && trx.taxDetails.length > 0 && (
-                      <span className="text-xs text-gray-500 block mt-1">
-                        (incl. VAT {trx.taxDetails[0].rate}%)
-                      </span>
+                      <div className="text-xs text-gray-500 block mt-1 ml-4 border-l-2 border-gray-300 pl-2">
+                        <div className="font-medium mb-0.5">Taxes included:</div>
+                        {trx.taxBreakdown && trx.taxBreakdown.taxInclusive ? (
+                          <>
+                            <div className="text-gray-600">
+                              Net: ₾{trx.taxBreakdown.net?.toFixed(2) || (trx.debit - (trx.taxDetails.reduce((sum: number, t: any) => sum + t.amount, 0))).toFixed(2)}
+                            </div>
+                            {trx.taxDetails.map((tax: any, idx: number) => (
+                              <div key={idx} className="text-gray-600">
+                                {tax.taxType} ({tax.rate}%): ₾{tax.amount.toFixed(2)}
+                              </div>
+                            ))}
+                            <div className="text-gray-700 font-medium mt-0.5">
+                              Total: ₾{trx.debit.toFixed(2)} (taxes included)
+                            </div>
+                          </>
+                        ) : (
+                          <div>
+                            {trx.taxDetails.map((tax: any, idx: number) => (
+                              <span key={idx} className="mr-2">
+                                {tax.taxType} {tax.rate}%
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     )}
                     {trx.referenceId && (
                       <span className="text-xs text-gray-400 block">Ref: {trx.referenceId}</span>
@@ -463,6 +575,42 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
               </tr>
             </tfoot>
           </table>
+          
+          {/* Tax Summary */}
+          {(() => {
+            const totalCharges = folio.transactions.reduce((sum, t) => sum + t.debit, 0)
+            if (totalCharges > 0) {
+              const taxData = calculateTaxBreakdown(totalCharges)
+              if (taxData.totalTax > 0) {
+                return (
+                  <div className="bg-gray-50 rounded-lg p-3 mt-4 mb-4 border border-gray-200">
+                    <h4 className="font-medium text-sm mb-2 text-gray-700">🧾 Tax Breakdown (ჩათვლით)</h4>
+                    <div className="text-sm space-y-1">
+                      <div className="flex justify-between">
+                        <span>წმინდა თანხა:</span>
+                        <span>₾{taxData.net.toFixed(2)}</span>
+                      </div>
+                      {taxData.taxes.map((tax, idx) => (
+                        <div key={idx} className="flex justify-between text-gray-600">
+                          <span>{tax.name} ({tax.rate}%):</span>
+                          <span>₾{tax.amount.toFixed(2)}</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between font-medium border-t pt-1 mt-1">
+                        <span>სულ გადასახადი:</span>
+                        <span>₾{taxData.totalTax.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-gray-900">
+                        <span>სულ დარიცხვა:</span>
+                        <span>₾{taxData.gross.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+            }
+            return null
+          })()}
         </div>
       ) : (
         <div className="text-center py-8 text-gray-500">

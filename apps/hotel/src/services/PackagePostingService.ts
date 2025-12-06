@@ -491,7 +491,7 @@ export class PackagePostingService {
   static async createFolio(reservation: any): Promise<Folio> {
     return {
       id: `FOLIO-${Date.now()}`,
-      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}`,
+      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
       reservationId: reservation.id,
       guestName: reservation.guestName,
       roomNumber: reservation.roomNumber || reservation.roomId,

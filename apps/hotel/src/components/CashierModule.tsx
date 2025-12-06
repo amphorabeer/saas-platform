@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import moment from 'moment'
+import { calculateTaxBreakdown } from '../utils/taxCalculator'
 
 interface CashierShift {
   id: string
@@ -381,6 +382,9 @@ export default function CashierModule() {
     const allManualTx = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
     const todayManualTx = allManualTx.filter((t: any) => t.date === businessDate)
     
+    // Calculate tax breakdown for Z-Report
+    const taxData = calculateTaxBreakdown(calculatedTotals.total)
+    
     const closedShift = {
       ...currentShift,
       closedAt: new Date().toISOString(),
@@ -398,6 +402,11 @@ export default function CashierModule() {
       discrepancy: discrepancy,
       withdrawal: withdrawal,
       nextDayOpening: closeFormData.nextDayBalance,
+      
+      // Tax breakdown for Z-Report
+      netSales: taxData.net,
+      taxes: taxData.taxes,
+      totalTax: taxData.totalTax,
       
       // SAVE ALL TRANSACTIONS with the shift!
       transactions: [...transactions],  // Folio payments + manual income
@@ -458,6 +467,36 @@ export default function CashierModule() {
               <div className="flex justify-between"><span>ბანკი:</span><span>₾{report.bankTransfers.toFixed(2)}</span></div>
               <div className="border-t my-2"></div>
               <div className="flex justify-between font-bold"><span>სულ გაყიდვები:</span><span>₾{report.totalSales.toFixed(2)}</span></div>
+              
+              {/* Tax Breakdown Section */}
+              {report.totalSales > 0 && (() => {
+                const taxData = calculateTaxBreakdown(report.totalSales)
+                if (taxData.totalTax > 0) {
+                  return (
+                    <>
+                      <div className="border-t-2 border-dashed border-gray-400 my-2 pt-2"></div>
+                      <div className="text-center font-bold text-purple-700 mb-1">🧾 TAX BREAKDOWN</div>
+                      <div className="flex justify-between text-gray-600"><span>Net Sales:</span><span>₾{taxData.net.toFixed(2)}</span></div>
+                      {taxData.taxes.map((tax: any, idx: number) => (
+                        <div key={idx} className="flex justify-between pl-2">
+                          <span>{tax.name} ({tax.rate}%):</span>
+                          <span>₾{tax.amount.toFixed(2)}</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between font-bold border-t pt-1 mt-1">
+                        <span>TOTAL TAX:</span>
+                        <span>₾{taxData.totalTax.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold">
+                        <span>GROSS SALES:</span>
+                        <span>₾{taxData.gross.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )
+                }
+                return null
+              })()}
+              
               <div className="flex justify-between text-red-600"><span>ხარჯები:</span><span>-₾{report.expenses.toFixed(2)}</span></div>
               <div className="border-t my-2"></div>
               <div className="flex justify-between font-bold text-lg"><span>მოსალოდნელი ნაღდი:</span><span>₾{report.expectedCash.toFixed(2)}</span></div>
@@ -550,6 +589,38 @@ export default function CashierModule() {
               <div>გასატანი:</div>
               <div>₾{(selectedShift.withdrawal || 0).toFixed(2)}</div>
             </div>
+            
+            {/* Z-Report Tax Breakdown */}
+            {selectedShift.totalCollected > 0 && selectedShift.totalTax !== undefined && selectedShift.totalTax > 0 && (
+              <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                <h5 className="font-bold text-purple-800 mb-2">🧾 Z-Report Tax Breakdown</h5>
+                <div className="text-sm space-y-1">
+                  <div className="flex justify-between">
+                    <span>Gross Sales:</span>
+                    <span className="font-medium">₾{(selectedShift.totalCollected || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Net Sales:</span>
+                    <span>₾{(selectedShift.netSales || 0).toFixed(2)}</span>
+                  </div>
+                  {selectedShift.taxes && selectedShift.taxes.length > 0 && (
+                    <div className="border-t pt-1 mt-1">
+                      <p className="text-xs text-gray-500 mb-1">Taxes Collected:</p>
+                      {selectedShift.taxes.map((tax: any, idx: number) => (
+                        <div key={idx} className="flex justify-between pl-2">
+                          <span>{tax.name} ({tax.rate}%):</span>
+                          <span>₾{tax.amount.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-lg border-t-2 pt-1 mt-1 text-purple-700">
+                    <span>TOTAL TAX:</span>
+                    <span>₾{(selectedShift.totalTax || 0).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Show saved transactions */}
             {selectedShift.transactions && selectedShift.transactions.length > 0 && (

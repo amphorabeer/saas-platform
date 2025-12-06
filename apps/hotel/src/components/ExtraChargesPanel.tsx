@@ -20,13 +20,81 @@ export default function ExtraChargesPanel({
   const [notes, setNotes] = useState('')
   const [posting, setPosting] = useState(false)
   const [recentCharges, setRecentCharges] = useState<any[]>([])
+  const [taxRates, setTaxRates] = useState({
+    vat: 18,
+    serviceCharge: 10
+  })
   
-  const categories = ExtraChargesService.CATEGORIES
+  const baseCategories = ExtraChargesService.CATEGORIES
   const items = ExtraChargesService.ITEMS
+  
+  // Override categories with dynamic tax rates from localStorage
+  const categories = baseCategories.map(cat => ({
+    ...cat,
+    taxRate: taxRates.vat, // Use loaded VAT rate
+    serviceChargeRate: cat.serviceChargeRate ? taxRates.serviceCharge : undefined // Use loaded service charge rate if category has it
+  }))
   
   useEffect(() => {
     loadRecentCharges()
+    loadTaxRates()
   }, [reservationId])
+  
+  const loadTaxRates = () => {
+    if (typeof window === 'undefined') return
+    
+    // Try to load from hotelTaxes (unified key)
+    const saved = localStorage.getItem('hotelTaxes')
+    if (saved) {
+      try {
+        const taxes = JSON.parse(saved)
+        
+        // Handle both array format (taxList) and object format (taxes)
+        let taxArray: any[] = []
+        if (Array.isArray(taxes)) {
+          taxArray = taxes
+        } else {
+          // Convert object to array format
+          taxArray = Object.entries(taxes).map(([key, value]) => ({
+            key,
+            name: key,
+            rate: typeof value === 'number' ? value : 0,
+            value: typeof value === 'number' ? value : 0
+          }))
+        }
+        
+        // Find VAT tax
+        const vatTax = taxArray.find((t: any) => 
+          t.key === 'VAT' || 
+          t.name?.toLowerCase().includes('vat') || 
+          t.name?.includes('დღგ') ||
+          t.label?.toLowerCase().includes('vat') ||
+          t.label?.includes('დღგ')
+        )
+        
+        // Find Service Charge tax
+        const serviceTax = taxArray.find((t: any) => 
+          t.key === 'SERVICE_CHARGE' ||
+          t.name?.toLowerCase().includes('service') || 
+          t.name?.includes('სერვის') ||
+          t.label?.toLowerCase().includes('service') ||
+          t.label?.includes('სერვის')
+        )
+        
+        setTaxRates({
+          vat: vatTax?.rate ?? vatTax?.value ?? 18,
+          serviceCharge: serviceTax?.rate ?? serviceTax?.value ?? 10
+        })
+        
+        console.log('Loaded tax rates from hotelTaxes:', {
+          vat: vatTax?.rate ?? vatTax?.value ?? 18,
+          service: serviceTax?.rate ?? serviceTax?.value ?? 10
+        })
+      } catch (e) {
+        console.error('Error loading tax rates:', e)
+      }
+    }
+  }
   
   const loadRecentCharges = () => {
     if (typeof window === 'undefined') return
@@ -49,21 +117,59 @@ export default function ExtraChargesPanel({
     return items.find(i => i.id === selectedItem)
   }
   
-  const calculateAmount = () => {
+  // Calculate tax inclusive breakdown
+  const calculateTaxInclusive = () => {
     const item = getItemDetails()
-    if (!item) return 0
+    if (!item) return {
+      gross: 0,
+      net: 0,
+      serviceCharge: 0,
+      serviceRate: 0,
+      vat: 0,
+      vatRate: 0,
+      total: 0
+    }
     
     const category = categories.find(c => c.id === item.categoryId)
-    if (!category) return 0
+    if (!category) return {
+      gross: 0,
+      net: 0,
+      serviceCharge: 0,
+      serviceRate: 0,
+      vat: 0,
+      vatRate: 0,
+      total: 0
+    }
     
-    const subtotal = item.unitPrice * quantity
-    const serviceCharge = category.serviceChargeRate 
-      ? subtotal * (category.serviceChargeRate / 100) 
-      : 0
-    const taxableAmount = subtotal + serviceCharge
-    const tax = taxableAmount * (category.taxRate / 100)
+    // Gross price (taxes included) - this is what customer pays
+    const grossPrice = item.unitPrice * quantity
     
-    return taxableAmount + tax
+    // Get tax rates (from loaded settings, not hardcoded)
+    const vatRate = taxRates.vat
+    const serviceRate = category.serviceChargeRate ? taxRates.serviceCharge : 0
+    
+    // Calculate tax inclusive breakdown
+    // Total tax multiplier: 1 + vatRate/100 + serviceRate/100
+    const totalTaxRate = 1 + (vatRate / 100) + (serviceRate / 100)
+    const netPrice = grossPrice / totalTaxRate
+    
+    const serviceChargeAmount = netPrice * (serviceRate / 100)
+    const vatAmount = netPrice * (vatRate / 100)
+    
+    return {
+      gross: grossPrice,        // ₾35 (what customer pays - taxes included)
+      net: netPrice,            // ₾27.34 (before taxes)
+      serviceCharge: serviceChargeAmount,  // ₾2.73
+      serviceRate: serviceRate,      // 10%
+      vat: vatAmount,               // ₾4.92
+      vatRate: vatRate,             // 18%
+      total: grossPrice             // ₾35 (same as gross - taxes included!)
+    }
+  }
+  
+  const calculateAmount = () => {
+    // Return gross price (taxes included)
+    return calculateTaxInclusive().gross
   }
   
   const handlePost = async () => {
@@ -114,11 +220,8 @@ export default function ExtraChargesPanel({
   
   const item = getItemDetails()
   const category = item ? categories.find(c => c.id === item.categoryId) : null
-  const subtotal = item ? item.unitPrice * quantity : 0
-  const serviceCharge = category?.serviceChargeRate ? subtotal * (category.serviceChargeRate / 100) : 0
-  const taxableAmount = subtotal + serviceCharge
-  const taxAmount = taxableAmount * (category?.taxRate || 18) / 100
-  const totalAmount = calculateAmount()
+  const taxBreakdown = calculateTaxInclusive()
+  const totalAmount = taxBreakdown.gross
   
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -196,27 +299,33 @@ export default function ExtraChargesPanel({
             />
           </div>
           
-          {/* Amount Breakdown */}
+          {/* Amount Breakdown - Tax Inclusive */}
           {item && category && (
             <div className="bg-gray-50 p-4 rounded mb-4 border border-gray-200">
               <div className="text-sm space-y-1">
-                <div className="flex justify-between">
-                  <span>Subtotal ({quantity} × ₾{item.unitPrice}):</span>
-                  <span>₾{subtotal.toFixed(2)}</span>
+                <div className="flex justify-between font-medium">
+                  <span>Price ({quantity} × ₾{item.unitPrice}):</span>
+                  <span>₾{taxBreakdown.gross.toFixed(2)}</span>
                 </div>
-                {serviceCharge > 0 && (
+                <div className="text-xs text-gray-500 ml-4 space-y-0.5 border-l-2 border-gray-300 pl-2 mt-1">
                   <div className="flex justify-between">
-                    <span>Service Charge ({category.serviceChargeRate}%):</span>
-                    <span>₾{serviceCharge.toFixed(2)}</span>
+                    <span>Net amount:</span>
+                    <span>₾{taxBreakdown.net.toFixed(2)}</span>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span>VAT ({category.taxRate}%):</span>
-                  <span>₾{taxAmount.toFixed(2)}</span>
+                  {taxBreakdown.serviceCharge > 0 && (
+                    <div className="flex justify-between">
+                      <span>Service Charge ({taxBreakdown.serviceRate}%):</span>
+                      <span>₾{taxBreakdown.serviceCharge.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>VAT ({taxBreakdown.vatRate}%):</span>
+                    <span>₾{taxBreakdown.vat.toFixed(2)}</span>
+                  </div>
                 </div>
                 <div className="flex justify-between font-bold border-t pt-1 mt-1">
-                  <span>Total:</span>
-                  <span className="text-blue-600">₾{totalAmount.toFixed(2)}</span>
+                  <span>Total (taxes included):</span>
+                  <span className="text-blue-600">₾{taxBreakdown.total.toFixed(2)}</span>
                 </div>
               </div>
             </div>

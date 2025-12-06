@@ -18,7 +18,6 @@ import Reports from '../components/Reports'
 import NightAuditModule from '../components/NightAuditModule'
 import SystemLockOverlay from '../components/SystemLockOverlay'
 import NightAuditWarningBanner from '../components/NightAuditWarningBanner'
-import ReservationsView from '../components/ReservationsView'
 import FolioSystem from '../components/FolioSystem'
 import CashierManagement from '../components/CashierModule'
 import FinancialDashboard from '../components/FinancialDashboard'
@@ -251,7 +250,6 @@ export default function HotelDashboard() {
       case 'dashboard': return '🏠 Dashboard'
       case 'calendar': return '📅 კალენდარი'
       case 'rooms': return '🏨 ნომრები'
-      case 'reservations': return '📋 ჯავშნები'
       case 'folios': return '💰 Folios'
       case 'housekeeping': return '🧹 დასუფთავება'
       case 'roomgrid': return '🏨 ოთახები'
@@ -903,12 +901,6 @@ export default function HotelDashboard() {
                   {showQuickMenu && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border z-50">
                       <button
-                        onClick={() => addTabFromMenu('reservations')}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
-                      >
-                        📋 ჯავშნები
-                      </button>
-                      <button
                         onClick={() => addTabFromMenu('housekeeping')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
                       >
@@ -1374,6 +1366,7 @@ export default function HotelDashboard() {
                 onReservationUpdate={updateReservation}
                 onReservationDelete={deleteReservation}
                 loadReservations={loadReservations}
+                loadRooms={loadRooms}
               />
             </div>
           </div>
@@ -1448,9 +1441,6 @@ export default function HotelDashboard() {
           </div>
         )}
         
-        {activeTab === 'reservations' && (
-          <ReservationsView reservations={reservations} rooms={rooms} />
-        )}
         
         {activeTab === 'folios' && (
           <FolioSystem />
@@ -1498,7 +1488,7 @@ export default function HotelDashboard() {
           <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <CheckInModal 
               room={selectedRoom || undefined}
-              rooms={rooms.filter(r => r.status === 'VACANT')}
+              rooms={rooms}
               initialCheckIn={initialCheckInDate}
               reservations={reservations}
               onClose={() => {
@@ -1543,17 +1533,6 @@ export default function HotelDashboard() {
                 }`}
               >
                 📅 კალენდარი
-              </button>
-              <button 
-                onClick={() => {
-                  addTabFromMenu('reservations')
-                  setMobileMenuOpen(false)
-                }} 
-                className={`w-full text-left p-3 hover:bg-gray-100 rounded ${
-                  activeTab === 'reservations' ? 'bg-blue-50 text-blue-600' : ''
-                }`}
-              >
-                📋 ჯავშნები
               </button>
               <button 
                 onClick={() => {
