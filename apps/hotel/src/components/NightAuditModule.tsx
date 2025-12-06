@@ -211,6 +211,55 @@ export default function NightAuditModule() {
     loadHotelInfo()
   }, [])
 
+  // Calculate check-ins and check-outs from folios
+  const getCheckInOutCounts = (auditDate: string) => {
+    if (typeof window === 'undefined') {
+      return { checkIns: 0, checkOuts: 0 }
+    }
+    
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    
+    let checkIns = 0
+    let checkOuts = 0
+    
+    folios.forEach((folio: any) => {
+      // Check-in = folio openDate matches audit date
+      const openDate = (folio.openDate || '').split('T')[0]
+      if (openDate === auditDate) {
+        checkIns++
+      }
+      
+      // Check-out = folio closedDate matches audit date
+      const closedDate = (folio.closedDate || '').split('T')[0]
+      if (closedDate === auditDate) {
+        checkOuts++
+      }
+    })
+    
+    return { checkIns, checkOuts }
+  }
+
+  // Calculate revenue from folios for a specific date
+  const getRevenueFromFolios = (auditDate: string) => {
+    if (typeof window === 'undefined') {
+      return 0
+    }
+    
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    let revenue = 0
+    
+    folios.forEach((folio: any) => {
+      folio.transactions?.forEach((t: any) => {
+        const txDate = (t.date || t.nightAuditDate || t.postedAt || '').split('T')[0]
+        if (txDate === auditDate && t.type === 'charge' && t.category === 'room') {
+          revenue += (t.debit || t.amount || 0)
+        }
+      })
+    })
+    
+    return revenue
+  }
+
   // Enrich posting results with amounts from folios when amount is 0
   const enrichPostingResultsWithAmounts = (postingResults: any[], auditDate: string) => {
     if (typeof window === 'undefined') return postingResults
@@ -256,10 +305,13 @@ export default function NightAuditModule() {
   // ========== UNIFIED PDF GENERATOR ==========
   const generateAuditPDF = (auditData: any) => {
     const date = auditData.date || selectedDate
-    const checkIns = auditData.checkIns || 0
-    const checkOuts = auditData.checkOuts || 0
+    // Calculate check-ins/check-outs from folios if not provided
+    const counts = getCheckInOutCounts(date)
+    const checkIns = auditData.checkIns || counts.checkIns || 0
+    const checkOuts = auditData.checkOuts || counts.checkOuts || 0
     const noShows = auditData.noShows || 0
-    const revenue = auditData.revenue || 0
+    // Calculate revenue from folios if not provided
+    const revenue = auditData.revenue || auditData.totalRevenue || getRevenueFromFolios(date) || 0
     const occupancy = auditData.occupancy || 0
     const totalRooms = auditData.totalRooms || 15
     const occupiedRooms = auditData.occupiedRooms || Math.round((occupancy / 100) * totalRooms)
@@ -2018,24 +2070,27 @@ This is an automated report from Night Audit System.
         }
       })
       
-      // Add check-in/check-out operations
-      const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
-      reservations.forEach((r: any) => {
-        if (moment(r.checkIn).format('YYYY-MM-DD') === auditResult.date && 
-            (r.status === 'CHECKED_IN' || r.status === 'CHECKED_OUT')) {
+      // Add check-in/check-out operations from folios (using existing folios variable)
+      folios.forEach((folio: any) => {
+        const openDate = (folio.openDate || '').split('T')[0]
+        const closedDate = (folio.closedDate || '').split('T')[0]
+        
+        // Check-in operation
+        if (openDate === auditResult.date) {
           operations.push({
-            time: r.checkedInAt ? moment(r.checkedInAt).format('HH:mm') : '14:00',
+            time: folio.openTime || moment(folio.openDate).format('HH:mm') || '14:00',
             type: 'CHECK_IN',
-            description: `Check-in: ${r.guestName} → Room ${r.roomNumber || r.roomId}`,
+            description: `Check-in: ${folio.guestName} → Room ${folio.roomNumber || '-'}`,
             amount: 0
           })
         }
-        if (moment(r.checkOut).format('YYYY-MM-DD') === auditResult.date && 
-            r.status === 'CHECKED_OUT') {
+        
+        // Check-out operation
+        if (closedDate === auditResult.date) {
           operations.push({
-            time: r.checkedOutAt ? moment(r.checkedOutAt).format('HH:mm') : '12:00',
+            time: folio.closeTime || moment(folio.closedDate).format('HH:mm') || '12:00',
             type: 'CHECK_OUT',
-            description: `Check-out: ${r.guestName} ← Room ${r.roomNumber || r.roomId}`,
+            description: `Check-out: ${folio.guestName} ← Room ${folio.roomNumber || '-'}`,
             amount: 0
           })
         }
@@ -2044,15 +2099,15 @@ This is an automated report from Night Audit System.
       // Sort by time
       operations.sort((a, b) => a.time.localeCompare(b.time))
       
-      // Calculate actual check-ins count from operations
-      const actualCheckIns = operations.filter((op: any) => op.type === 'CHECK_IN').length
+      // Calculate check-ins/check-outs from folios
+      const counts = getCheckInOutCounts(auditResult.date)
       
       history.push({
         id: Date.now(),
         ...auditResult,
-        // Fix: Use correct field names - actual check-ins from operations
-        checkIns: actualCheckIns || 0,
-        checkOuts: auditResult.checkOuts || 0,
+        // Fix: Use check-ins/check-outs from folios
+        checkIns: counts.checkIns || 0,
+        checkOuts: counts.checkOuts || 0,
         noShows: auditResult.noShows || 0,
         paymentsTotal: paymentsTotal,
         roomChargesTotal: roomChargesTotal || auditResult.roomChargeTotal || 0,
@@ -2791,18 +2846,39 @@ This is an automated report from Night Audit System.
         </div>
         
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-blue-50 p-4 rounded">
-            <div className="text-sm text-gray-600">Check-ins / No-Shows</div>
-            <div className="text-2xl font-bold text-blue-600">{report.noShows || 0}</div>
-          </div>
-          <div className="bg-green-50 p-4 rounded">
-            <div className="text-sm text-gray-600">Check-outs</div>
-            <div className="text-2xl font-bold text-green-600">{report.checkOuts || 0}</div>
-          </div>
-          <div className="bg-purple-50 p-4 rounded">
-            <div className="text-sm text-gray-600">შემოსავალი</div>
-            <div className="text-2xl font-bold text-purple-600">₾{report.revenue || 0}</div>
-          </div>
+          {(() => {
+            // Calculate check-ins/check-outs from folios if report has 0
+            const counts = getCheckInOutCounts(report.date)
+            const displayCheckIns = report.checkIns || counts.checkIns || 0
+            const displayCheckOuts = report.checkOuts || counts.checkOuts || 0
+            
+            return (
+              <>
+                <div className="bg-blue-50 p-4 rounded">
+                  <div className="text-sm text-gray-600">Check-ins</div>
+                  <div className="text-2xl font-bold text-blue-600">{displayCheckIns}</div>
+                </div>
+                <div className="bg-green-50 p-4 rounded">
+                  <div className="text-sm text-gray-600">Check-outs</div>
+                  <div className="text-2xl font-bold text-green-600">{displayCheckOuts}</div>
+                </div>
+                <div className="bg-orange-50 p-4 rounded">
+                  <div className="text-sm text-gray-600">No-Shows</div>
+                  <div className="text-2xl font-bold text-orange-600">{report.noShows || 0}</div>
+                </div>
+              </>
+            )
+          })()}
+          {(() => {
+            // Calculate revenue from folios if report has 0
+            const displayRevenue = report.revenue || report.totalRevenue || getRevenueFromFolios(report.date) || 0
+            return (
+              <div className="bg-purple-50 p-4 rounded">
+                <div className="text-sm text-gray-600">შემოსავალი</div>
+                <div className="text-2xl font-bold text-purple-600">₾{displayRevenue}</div>
+              </div>
+            )
+          })()}
           <div className="bg-yellow-50 p-4 rounded">
             <div className="text-sm text-gray-600">Occupancy</div>
             <div className="text-2xl font-bold text-yellow-600">{report.occupancy || 0}%</div>
