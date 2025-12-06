@@ -3608,17 +3608,26 @@ This is an automated report from Night Audit System.
                 </tr>
               </thead>
               <tbody>
-                {auditHistory.map((audit: any, i: number) => (
+                {auditHistory.map((audit: any, i: number) => {
+                  // Calculate check-ins/check-outs from folios if saved values are 0
+                  const counts = (audit.checkIns === 0 && audit.checkOuts === 0) 
+                    ? getCheckInOutCounts(audit.date) 
+                    : { checkIns: audit.checkIns || 0, checkOuts: audit.checkOuts || 0 }
+                  
+                  // Calculate revenue from folios if saved value is 0
+                  const displayRevenue = audit.revenue || audit.totalRevenue || getRevenueFromFolios(audit.date) || 0
+                  
+                  return (
                   <tr key={i} className={`border-t hover:bg-gray-50 ${audit.reversed ? 'bg-red-50 opacity-60' : ''}`}>
                     <td className="p-2">{moment(audit.date).format('DD/MM/YYYY')}</td>
                     <td className="p-2 text-center">
-                      <span className="text-green-600">{audit.checkIns || 0}</span> / 
-                      <span className="text-orange-600"> {audit.checkOuts || 0}</span>
+                      <span className="text-green-600">{counts.checkIns}</span> / 
+                      <span className="text-orange-600"> {counts.checkOuts}</span>
                       {(audit.noShows || 0) > 0 && (
                         <span className="text-red-600 ml-1">({audit.noShows} NS)</span>
                       )}
                     </td>
-                    <td className="p-2 text-right font-bold">₾{audit.revenue || 0}</td>
+                    <td className="p-2 text-right font-bold">₾{displayRevenue}</td>
                     <td className="p-2 text-center">{audit.occupancy || 0}%</td>
                     <td className="p-2 text-center">
                       {audit.reversed ? (
@@ -3659,7 +3668,8 @@ This is an automated report from Night Audit System.
                       )}
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           </div>
