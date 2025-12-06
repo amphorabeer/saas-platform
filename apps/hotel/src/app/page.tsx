@@ -27,6 +27,7 @@ import { SystemLockService } from '../lib/systemLockService'
 import { ActivityLogger } from '../lib/activityLogger'
 import { FolioService } from '../services/FolioService'
 import { RESERVATION_STATUS, ROOM_STATUS } from '../constants/statusConstants'
+import { calculateCashBalance } from '../utils/cashierCalculations'
 
 interface Room {
   id: string
@@ -61,6 +62,38 @@ export default function HotelDashboard() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
   const [maintenanceRooms, setMaintenanceRooms] = useState<string[]>([])
   const [hotelInfo, setHotelInfo] = useState<any>({ name: 'Hotel Tbilisi', logo: '' })
+  const [cashierBalance, setCashierBalance] = useState({ cash: 0, card: 0, bank: 0, total: 0 })
+  const [cashierRefreshKey, setCashierRefreshKey] = useState(0)
+  
+  // Update cashier balance periodically and on storage changes
+  useEffect(() => {
+    const updateCashierBalance = () => {
+      const balance = calculateCashBalance()
+      setCashierBalance(balance)
+    }
+    
+    // Initial load
+    updateCashierBalance()
+    
+    // Update every 5 seconds
+    const interval = setInterval(updateCashierBalance, 5000)
+    
+    // Listen for storage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'currentCashierShift' || 
+          e.key === 'hotelFolios' || 
+          e.key === 'cashierManualTransactions') {
+        updateCashierBalance()
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [cashierRefreshKey])
   
   // Auth check
   useEffect(() => {
@@ -1253,42 +1286,9 @@ export default function HotelDashboard() {
                 const currentCashierShift = typeof window !== 'undefined'
                   ? JSON.parse(localStorage.getItem('currentCashierShift') || 'null')
                   : null
-                const folios = typeof window !== 'undefined'
-                  ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-                  : []
-                const manualTx = typeof window !== 'undefined'
-                  ? JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
-                  : []
                 
-                const businessDate = typeof window !== 'undefined'
-                  ? (localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD'))
-                  : moment().format('YYYY-MM-DD')
-                
-                let cash = 0, card = 0, total = 0
-                
-                if (currentCashierShift) {
-                  folios.forEach((folio: any) => {
-                    folio.transactions?.forEach((t: any) => {
-                      if (t.credit > 0 && t.date === businessDate) {
-                        const amount = t.credit
-                        if (t.paymentMethod === 'cash') cash += amount
-                        else if (t.paymentMethod === 'card') card += amount
-                        total += amount
-                      }
-                    })
-                  })
-                  
-                  manualTx.forEach((t: any) => {
-                    if (t.date === businessDate && t.type === 'income') {
-                      const amount = t.amount || 0
-                      if (t.method === 'cash') cash += amount
-                      else if (t.method === 'card') card += amount
-                      total += amount
-                    }
-                  })
-                }
-                
-                const cashierTotals = { cash, card, total }
+                // Use state value (updated by useEffect)
+                const cashierTotals = currentCashierShift ? cashierBalance : { cash: 0, card: 0, bank: 0, total: 0 }
                 
                 if (!cashierSettings?.cashierEnabled) return null
                 
