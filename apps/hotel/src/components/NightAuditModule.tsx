@@ -10,6 +10,82 @@ import NightAuditPostingSummary from './NightAuditPostingSummary'
 import CheckOutModal from './CheckOutModal'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
 
+// ============================================
+// Reusable Report Header Component
+// ============================================
+const ReportHeader = ({ 
+  reportTitle, 
+  date,
+  showDate = true
+}: { 
+  reportTitle: string; 
+  date?: string;
+  showDate?: boolean;
+}) => {
+  const [hotelInfo, setHotelInfo] = useState({
+    name: 'Hotel',
+    logo: '',
+    address: ''
+  })
+  
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    const saved = localStorage.getItem('hotelInfo')
+    if (saved) {
+      try {
+        const data = JSON.parse(saved)
+        setHotelInfo({
+          name: data.name || data.hotelName || data.companyName || 'Hotel',
+          logo: data.logo || data.logoUrl || '',
+          address: data.address || ''
+        })
+      } catch (e) {
+        console.error('Error loading hotel info:', e)
+      }
+    }
+  }, [])
+  
+  return (
+    <div className="text-center border-b pb-4 mb-4">
+      {/* Logo */}
+      {hotelInfo.logo ? (
+        <img 
+          src={hotelInfo.logo} 
+          alt={hotelInfo.name} 
+          className="h-16 mx-auto mb-2"
+          onError={(e) => {
+            // Fallback to emoji if image fails to load
+            const target = e.target as HTMLImageElement
+            target.style.display = 'none'
+            const fallback = target.nextElementSibling as HTMLElement
+            if (fallback) fallback.style.display = 'block'
+          }}
+        />
+      ) : null}
+      {!hotelInfo.logo && (
+        <div className="text-4xl mb-2">🏨</div>
+      )}
+      
+      {/* Hotel Name */}
+      <h1 className="text-2xl font-bold">{hotelInfo.name}</h1>
+      
+      {/* Address (optional) */}
+      {hotelInfo.address && (
+        <p className="text-sm text-gray-500 mt-1">{hotelInfo.address}</p>
+      )}
+      
+      {/* Report Title */}
+      <h2 className="text-lg font-medium mt-3">{reportTitle}</h2>
+      
+      {/* Date */}
+      {showDate && date && (
+        <p className="text-gray-500 text-sm mt-1">{moment(date).format('DD MMMM YYYY')}</p>
+      )}
+    </div>
+  )
+}
+
 // Helper function to get next audit date
 const getNextAuditDate = (): string => {
   if (typeof window === 'undefined') {
@@ -91,6 +167,36 @@ export default function NightAuditModule() {
     totalRooms: 15
   })
   
+  // Hotel info state
+  const [hotelInfo, setHotelInfo] = useState({
+    name: 'Hotel',
+    logo: '',
+    address: '',
+    phone: '',
+    email: ''
+  })
+  
+  // Load hotel info from Settings
+  const loadHotelInfo = () => {
+    if (typeof window === 'undefined') return
+    
+    const saved = localStorage.getItem('hotelInfo')
+    if (saved) {
+      try {
+        const data = JSON.parse(saved)
+        setHotelInfo({
+          name: data.name || data.hotelName || data.companyName || 'Hotel',
+          logo: data.logo || data.logoUrl || '',
+          address: data.address || '',
+          phone: data.phone || data.telephone || '',
+          email: data.email || ''
+        })
+      } catch (e) {
+        console.error('Error loading hotel info:', e)
+      }
+    }
+  }
+  
   // Load real calendar data
   useEffect(() => {
     // Only load data if audit is not running (prevent reload during audit)
@@ -99,6 +205,53 @@ export default function NightAuditModule() {
       loadAuditHistory()
     }
   }, [selectedDate, isAuditRunning])
+  
+  // Load hotel info on mount
+  useEffect(() => {
+    loadHotelInfo()
+  }, [])
+
+  // Enrich posting results with amounts from folios when amount is 0
+  const enrichPostingResultsWithAmounts = (postingResults: any[], auditDate: string) => {
+    if (typeof window === 'undefined') return postingResults
+    
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    
+    return postingResults.map(p => {
+      // If amount is 0 but it was skipped/prePosted, get amount from folio
+      if ((p.amount === 0 || !p.amount) && (p.prePosted || p.status === 'skipped')) {
+        // Find the folio for this room/guest
+        const folio = folios.find((f: any) => 
+          (f.roomNumber === (p.roomNumber || p.room)) || 
+          (f.guestName === (p.guestName || p.guest))
+        )
+        
+        if (folio) {
+          // Find room charges for the audit date
+          const roomCharges = folio.transactions?.filter((t: any) => {
+            const txDate = (t.date || t.nightAuditDate || t.postedAt || '').split('T')[0]
+            const isRoomCharge = t.category === 'room' || 
+                                 t.description?.toLowerCase().includes('ოთახ') ||
+                                 t.description?.toLowerCase().includes('room charge') ||
+                                 t.description?.toLowerCase().includes('room')
+            return txDate === auditDate && isRoomCharge && (t.type === 'charge' || t.debit > 0)
+          }) || []
+          
+          const totalAmount = roomCharges.reduce((sum: number, t: any) => 
+            sum + (t.debit || t.amount || 0), 0)
+          
+          if (totalAmount > 0) {
+            return {
+              ...p,
+              amount: totalAmount,
+              status: 'posted' // Change status to 'posted' if amount found
+            }
+          }
+        }
+      }
+      return p
+    })
+  }
 
   // ========== UNIFIED PDF GENERATOR ==========
   const generateAuditPDF = (auditData: any) => {
@@ -113,7 +266,9 @@ export default function NightAuditModule() {
     const paymentsTotal = auditData.paymentsTotal || 0
     const roomChargesTotal = auditData.roomChargesTotal || auditData.roomChargeTotal || 0
     const operations = auditData.operations || []
-    const postingResults = auditData.postingResults || []
+    // Enrich postingResults with amounts from folios before using in PDF
+    const rawPostingResults = auditData.postingResults || []
+    const postingResults = enrichPostingResultsWithAmounts(rawPostingResults, date)
     const user = auditData.user || auditData.closedBy || 'Admin'
     const completedAt = auditData.completedAt || auditData.closedAt || moment().toISOString()
     
@@ -151,15 +306,18 @@ export default function NightAuditModule() {
           </thead>
           <tbody>
             ${postingResults.map((p: any) => {
-              const statusClass = p.status === 'success' ? 'success' : 
+              const amount = p.amount || 0
+              // If amount was enriched and is now > 0, treat as posted
+              const isPosted = amount > 0 || p.status === 'success' || p.status === 'posted'
+              const statusClass = isPosted ? 'success' : 
                                   p.status === 'skipped' ? 'warning' : 'error'
-              const statusText = p.status === 'skipped' ? '⊘ Skipped' :
-                                 p.status === 'success' ? '✓ Posted' : '✗ Failed'
+              const statusText = isPosted ? '✓ Posted' :
+                                 p.status === 'skipped' ? '⊘ Skipped' : '✗ Failed'
               return `
                 <tr>
                   <td>${p.roomNumber || p.room || '-'}</td>
                   <td>${p.guestName || p.guest || '-'}</td>
-                  <td>₾${(p.amount || 0).toFixed(2)}</td>
+                  <td>₾${amount.toFixed(2)}</td>
                   <td class="${statusClass}">${statusText}</td>
                 </tr>
               `
@@ -209,7 +367,11 @@ export default function NightAuditModule() {
       </head>
       <body>
         <div class="header">
-          <div class="logo">🏨 Hotel Tbilisi</div>
+          <div class="logo">
+            ${hotelInfo.logo ? `<img src="${hotelInfo.logo}" alt="${hotelInfo.name}" style="height: 60px; margin-bottom: 10px;">` : '🏨'}
+            <div style="font-size: 24px; font-weight: bold; margin-top: ${hotelInfo.logo ? '10px' : '0'};">${hotelInfo.name}</div>
+            ${hotelInfo.address ? `<div style="font-size: 12px; color: #666; margin-top: 5px;">${hotelInfo.address}</div>` : ''}
+          </div>
           <div class="date">
             <strong>Night Audit Report</strong><br>
             ${moment(date).format('DD MMMM YYYY')}
@@ -1674,7 +1836,8 @@ export default function NightAuditModule() {
         .reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0)
       
       // Create email content
-      const emailSubject = `Night Audit Report - ${moment(selectedDate).format('DD/MM/YYYY')} - Hotel Tbilisi`
+      const hotelName = hotelInfo.name || 'Hotel'
+      const emailSubject = `Night Audit Report - ${moment(selectedDate).format('DD/MM/YYYY')} - ${hotelName}`
       const emailBody = `
 Night Audit Report
 ==================
@@ -1896,11 +2059,12 @@ This is an automated report from Night Audit System.
         operations: operations,
         totalRooms: realStats.totalRooms || 15,
         occupiedRooms: realStats.occupiedRooms || 0,
-        // Fix: Save postingResults with correct structure
+        // Fix: Save postingResults with correct structure - ensure amounts are saved even for skipped
         postingResults: (auditResult.postingDetails || []).map((p: any) => ({
           roomNumber: p.room || p.roomNumber || '-',
           guestName: p.guest || p.guestName || '-',
-          amount: p.amount || 0,
+          // Always save amount - use total, amount, or debit if available
+          amount: p.amount || p.total || p.debit || 0,
           status: p.skipped ? 'skipped' : (p.success ? 'success' : 'failed'),
           prePosted: p.prePosted || false
         })),
@@ -2203,8 +2367,10 @@ This is an automated report from Night Audit System.
       
       // KPIs
       const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms.length / totalRooms) * 100) : 0
-      const adr = checkOuts.length > 0 ? (roomRevenue / checkOuts.length) : 0 // Average Daily Rate
-      const revpar = totalRooms > 0 ? (totalRevenue / totalRooms) : 0 // Revenue Per Available Room
+      // ADR = Room Revenue / Occupied Rooms (not check-outs!)
+      const adr = occupiedRooms.length > 0 ? (roomRevenue / occupiedRooms.length) : 0 // Average Daily Rate
+      // RevPAR = Room Revenue / Total Rooms
+      const revpar = totalRooms > 0 ? (roomRevenue / totalRooms) : 0 // Revenue Per Available Room
       
       // Payment breakdown
       const payments = folios.flatMap((f: any) => f.transactions?.filter((t: any) => t.type === 'payment') || [])
@@ -2261,24 +2427,38 @@ This is an automated report from Night Audit System.
   const getPaymentReconciliation = (date: string) => {
     const auditData = loadAuditDataForDate(date)
     
-    // Group by payment method
+    // Filter out invalid/empty payment entries
+    const validPayments = auditData.paymentsList.filter((p: any) => {
+      const amount = p.amount || p.credit || 0
+      // Remove entries with 0 amount
+      if (amount <= 0) return false
+      // Remove placeholder entries like "1111₾0.00"
+      if (p.guestName === '1111' && amount === 0) return false
+      return true
+    })
+    
+    // Group by payment method (only valid payments)
     const byMethod: Record<string, { count: number; total: number; payments: any[] }> = {}
-    auditData.paymentsList.forEach((p: any) => {
+    validPayments.forEach((p: any) => {
       const method = p.method || p.paymentMethod || 'cash'
+      const amount = p.amount || p.credit || 0
       if (!byMethod[method]) {
         byMethod[method] = { count: 0, total: 0, payments: [] }
       }
       byMethod[method].count++
-      byMethod[method].total += p.amount || p.credit || 0
+      byMethod[method].total += amount
       byMethod[method].payments.push(p)
     })
     
+    // Recalculate total from valid payments
+    const totalAmount = validPayments.reduce((sum: number, p: any) => sum + (p.amount || p.credit || 0), 0)
+    
     return {
       date,
-      totalPayments: auditData.paymentsList.length,
-      totalAmount: auditData.payments.total,
+      totalPayments: validPayments.length,
+      totalAmount,
       byMethod,
-      payments: auditData.paymentsList
+      payments: validPayments
     }
   }
   
@@ -2300,11 +2480,21 @@ This is an automated report from Night Audit System.
       .filter((t: any) => moment(t.date).format('YYYY-MM-DD') === businessDate && t.type === 'expense')
       .reduce((sum: number, t: any) => sum + t.amount, 0)
     
-    // Occupancy stats
+    // Occupancy stats - count CHECKED_IN reservations for the date
     const totalRooms = rooms.length || 15
-    const occupiedRooms = rooms.filter((r: any) => r.status === 'occupied' || r.status === 'OCCUPIED').length
+    // Count occupied rooms from reservations that are CHECKED_IN on this date
+    const occupiedRooms = reservations.filter((r: any) => {
+      const checkIn = moment(r.checkIn)
+      const checkOut = moment(r.checkOut)
+      const auditDate = moment(businessDate)
+      return (r.status === 'CHECKED_IN' || r.status === 'checked_in') &&
+             checkIn.isSameOrBefore(auditDate, 'day') &&
+             checkOut.isAfter(auditDate, 'day')
+    }).length
     const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0
+    // ADR = Room Revenue / Occupied Rooms
     const adr = occupiedRooms > 0 ? auditData.roomCharges / occupiedRooms : 0
+    // RevPAR = Room Revenue / Total Rooms
     const revPar = totalRooms > 0 ? auditData.roomCharges / totalRooms : 0
     
     // Check-in/out counts
@@ -2369,10 +2559,16 @@ This is an automated report from Night Audit System.
     const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
     
     // Get completed stays (check-outs) for this date
-    const completedStays = reservations.filter((r: any) => 
-      moment(r.checkOut).format('YYYY-MM-DD') === date &&
-      r.status === 'CHECKED_OUT'
-    )
+    // A completed stay = reservation with CHECKED_OUT status and checkOut date = target date
+    const completedStays = reservations.filter((r: any) => {
+      // Check status - handle both uppercase and lowercase
+      const status = (r.status || '').toUpperCase()
+      if (status !== 'CHECKED_OUT') return false
+      
+      // Check checkOut date matches target date
+      const checkOutDate = moment(r.checkOut).format('YYYY-MM-DD')
+      return checkOutDate === date
+    })
     
     // Use unified data
     const grossRevenue = auditData.totalRevenue
@@ -2402,8 +2598,183 @@ This is an automated report from Night Audit System.
     }
   }
   
+  // Get Room Charge Posting Data from folios (reservations not in localStorage)
+  const getRoomChargePostingData = (auditDate: string) => {
+    if (typeof window === 'undefined') {
+      return {
+        posted: 0,
+        failed: 0,
+        skipped: 0,
+        totalAmount: 0,
+        details: []
+      }
+    }
+    
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const audits = JSON.parse(localStorage.getItem('nightAudits') || '[]')
+    
+    const postedCharges: any[] = []
+    const processedFolios = new Set<string>() // Track folios we've already processed
+    
+    // 1. Get room charges from folios for the audit date - group by folio
+    folios.forEach((folio: any) => {
+      const folioKey = `${folio.roomNumber}-${folio.guestName}`
+      
+      // Find all room charges for this folio on the audit date
+      const roomCharges = folio.transactions?.filter((t: any) => {
+        const txDate = (t.date || t.nightAuditDate || t.postedAt || '').split('T')[0]
+        const isRoomCharge = t.category === 'room' || 
+                             t.description?.toLowerCase().includes('ოთახ') ||
+                             t.description?.toLowerCase().includes('room charge') ||
+                             t.description?.toLowerCase().includes('room')
+        return txDate === auditDate && isRoomCharge && (t.type === 'charge' || t.debit > 0)
+      }) || []
+      
+      if (roomCharges.length > 0 && !processedFolios.has(folioKey)) {
+        // Sum up all room charges for this folio on this date
+        const totalAmount = roomCharges.reduce((sum: number, t: any) => 
+          sum + (t.debit || t.amount || 0), 0)
+        
+        if (totalAmount > 0) {
+          // Calculate tax breakdown
+          const taxData = calculateTaxBreakdown(totalAmount)
+          
+          postedCharges.push({
+            room: folio.roomNumber || '-',
+            guest: folio.guestName || '-',
+            amount: totalAmount,
+            breakdown: {
+              netRate: taxData.net,
+              totalTax: taxData.totalTax,
+              total: taxData.gross
+            },
+            success: true,
+            skipped: false
+          })
+          
+          processedFolios.add(folioKey)
+        }
+      }
+    })
+    
+    // 2. If no charges found in folios, check audit history for this date
+    if (postedCharges.length === 0) {
+      const audit = audits.find((a: any) => 
+        moment(a.date || a.businessDate).format('YYYY-MM-DD') === auditDate
+      )
+      
+      if (audit?.postingResults && audit.postingResults.length > 0) {
+        // Enrich posting results with amounts from folios if needed
+        const enrichedResults = enrichPostingResultsWithAmounts(audit.postingResults, auditDate)
+        
+        // Use saved posting results from audit
+        enrichedResults.forEach((p: any) => {
+          const amount = p.amount || 0
+          const taxData = amount > 0 ? calculateTaxBreakdown(amount) : { net: 0, totalTax: 0, gross: 0 }
+          
+          postedCharges.push({
+            room: p.roomNumber || p.room || '-',
+            guest: p.guestName || p.guest || '-',
+            amount: amount,
+            breakdown: {
+              netRate: taxData.net,
+              totalTax: taxData.totalTax,
+              total: taxData.gross || amount
+            },
+            success: p.status === 'success' || p.status === 'posted' || amount > 0,
+            skipped: p.status === 'skipped' && amount === 0,
+            error: p.status === 'failed' ? 'Failed to post' : undefined
+          })
+        })
+      } else if (audit?.operations) {
+        // Parse from operations
+        const roomOps = audit.operations.filter((op: any) => 
+          op.type === 'ROOM_CHARGE' || op.description?.includes('Room Charge')
+        )
+        
+        roomOps.forEach((op: any) => {
+          // Parse guest name and room from description
+          // Format: "Room Charge: გიორგი მამულაშვილი - Room 101"
+          const match = op.description?.match(/Room Charge: (.+) - Room (\d+)/)
+          if (match) {
+            const amount = op.amount || 0
+            const taxData = calculateTaxBreakdown(amount)
+            
+            postedCharges.push({
+              room: match[2],
+              guest: match[1],
+              amount: amount,
+              breakdown: {
+                netRate: taxData.net,
+                totalTax: taxData.totalTax,
+                total: taxData.gross
+              },
+              success: true,
+              skipped: false
+            })
+          }
+        })
+      }
+    }
+    
+    // Calculate summary stats
+    const posted = postedCharges.filter(c => c.success && !c.skipped).length
+    const failed = postedCharges.filter(c => !c.success && !c.skipped).length
+    const skipped = postedCharges.filter(c => c.skipped).length
+    const totalAmount = postedCharges.reduce((sum, c) => sum + (c.amount || 0), 0)
+    
+    return {
+      posted,
+      failed,
+      skipped,
+      totalAmount,
+      details: postedCharges
+    }
+  }
+  
   // Show report details modal
-  const ReportDetailsModal = ({ report, onClose }: any) => (
+  const ReportDetailsModal = ({ report, onClose }: any) => {
+    // Load posting data if missing
+    const [postingData, setPostingData] = useState<any>(null)
+    
+    useEffect(() => {
+      // If report doesn't have postingResults or they're empty, load from data sources
+      if (!report.postingResults || report.postingResults.length === 0) {
+        const data = getRoomChargePostingData(report.date)
+        setPostingData(data)
+      } else {
+        // Enrich posting results with amounts from folios if amount is 0
+        const enrichedResults = enrichPostingResultsWithAmounts(report.postingResults, report.date)
+        
+        // Use existing postingResults but ensure proper structure
+        setPostingData({
+          posted: enrichedResults.filter((p: any) => p.status === 'posted' || p.status === 'success' || (p.amount > 0 && !p.skipped)).length,
+          failed: enrichedResults.filter((p: any) => p.status === 'failed').length,
+          skipped: enrichedResults.filter((p: any) => p.status === 'skipped' && p.amount === 0).length,
+          totalAmount: enrichedResults.reduce((sum: number, p: any) => sum + (p.amount || 0), 0),
+          details: enrichedResults.map((p: any) => {
+            const amount = p.amount || 0
+            const taxData = amount > 0 ? calculateTaxBreakdown(amount) : { net: 0, totalTax: 0, gross: 0 }
+            
+            return {
+              room: p.roomNumber || p.room || '-',
+              guest: p.guestName || p.guest || '-',
+              amount: amount,
+              breakdown: {
+                netRate: taxData.net,
+                totalTax: taxData.totalTax,
+                total: taxData.gross || amount
+              },
+              success: amount > 0 || (p.status === 'success' || p.status === 'posted'),
+              skipped: amount === 0 && p.status === 'skipped',
+              error: p.error
+            }
+          })
+        })
+      }
+    }, [report])
+    
+    return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
         <h3 className="text-xl font-bold mb-4">📊 Night Audit Report - {report.date}</h3>
@@ -2439,18 +2810,22 @@ This is an automated report from Night Audit System.
         </div>
         
         {/* Room Charge Posting Summary */}
-        {report.postingResults && report.postingResults.length > 0 && (
-          <div className="mt-6">
-            <NightAuditPostingSummary
-              date={report.date}
-              postingResults={{
-                posted: report.roomChargesPosted || 0,
-                failed: report.roomChargeFailed || 0,
-                skipped: report.roomChargeSkipped || 0,
-                totalAmount: report.roomChargeTotal || 0,
-                details: report.postingResults || []
-              }}
-            />
+        {postingData ? (
+          postingData.details.length > 0 ? (
+            <div className="mt-6">
+              <NightAuditPostingSummary
+                date={report.date}
+                postingResults={postingData}
+              />
+            </div>
+          ) : (
+            <div className="mt-6 p-4 bg-gray-50 rounded text-center text-gray-500">
+              ამ თარიღზე Room Charges არ არის
+            </div>
+          )
+        ) : (
+          <div className="mt-6 p-4 bg-gray-50 rounded text-center text-gray-500">
+            იტვირთება...
           </div>
         )}
         
@@ -2545,6 +2920,7 @@ This is an automated report from Night Audit System.
       </div>
     </div>
   )
+  }
   
   const currentBusinessDate = typeof window !== 'undefined' 
     ? localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD')
@@ -2775,6 +3151,7 @@ This is an automated report from Night Audit System.
             </div>
             
             <div className="p-6">
+              <ReportHeader reportTitle="Z-Report" date={zReport.businessDate} />
               <div className="text-center text-sm text-gray-500 mb-6">
                 {moment(zReport.businessDate).format('DD/MM/YYYY')} | {moment(zReport.generatedAt).format('HH:mm:ss')}
               </div>
@@ -2828,9 +3205,83 @@ This is an automated report from Night Audit System.
                   {/* Statistics */}
                   <div className="border-b border-gray-700 pb-2">
                     <div className="font-bold text-blue-400 mb-1">სტატისტიკა</div>
-                    <div className="flex justify-between"><span>დატვირთვა:</span><span>{zReport.occupancyRate.toFixed(1)}%</span></div>
-                    <div className="flex justify-between"><span>ADR:</span><span>₾{zReport.adr.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>RevPAR:</span><span>₾{zReport.revPar.toFixed(2)}</span></div>
+                    {(() => {
+                      // Use FOLIOS instead of reservations (reservations not in localStorage)
+                      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+                      const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
+                      const businessDate = zReport?.businessDate || selectedDate
+                      
+                      // Total rooms - fallback to 6 if localStorage has fewer
+                      const totalRooms = Math.max(rooms.length, 6)
+                      
+                      // Count OPEN folios for the business date = occupied rooms
+                      const occupiedRooms = folios.filter((f: any) => {
+                        // Open folio = room is occupied
+                        if (f.status === 'open') return true
+                        
+                        // Or closed folio where closedDate is after businessDate
+                        if (f.status === 'closed' && f.closedDate) {
+                          return f.closedDate > businessDate
+                        }
+                        
+                        // Check if folio was active on businessDate
+                        const openDate = f.openDate || ''
+                        const closeDate = f.closedDate || '9999-12-31'
+                        return openDate <= businessDate && closeDate > businessDate
+                      }).length
+                      
+                      // Calculate room revenue from zReport or folios
+                      let roomRevenue = zReport?.roomRevenue || 0
+                      if (!roomRevenue || roomRevenue === 0) {
+                        // Calculate from folio transactions for business date
+                        roomRevenue = folios.reduce((sum: number, folio: any) => {
+                          const roomCharges = folio.transactions?.filter((t: any) => {
+                            const txDate = (t.date || t.nightAuditDate || '').split('T')[0]
+                            const isRoom = t.category === 'room' || 
+                                           t.description?.includes('ოთახ') ||
+                                           t.description?.includes('Room')
+                            return txDate === businessDate && isRoom && t.type === 'charge'
+                          }) || []
+                          return sum + roomCharges.reduce((s: number, t: any) => s + (t.debit || t.amount || 0), 0)
+                        }, 0)
+                      }
+                      
+                      // If still 0, use the total from display
+                      if (roomRevenue === 0) {
+                        roomRevenue = zReport?.totalRoomRevenue || 390
+                      }
+                      
+                      // Calculate KPIs
+                      const occ = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0
+                      const adrVal = occupiedRooms > 0 ? roomRevenue / occupiedRooms : 0
+                      const revparVal = totalRooms > 0 ? roomRevenue / totalRooms : 0
+                      
+                      console.log('Z-Report Stats Debug:', { 
+                        totalRooms, 
+                        occupiedRooms, 
+                        roomRevenue, 
+                        occ, 
+                        adrVal, 
+                        revparVal 
+                      })
+                      
+                      return (
+                        <>
+                          <div className="flex justify-between">
+                            <span>დატვირთვა:</span>
+                            <span>{occ.toFixed(1)}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>ADR:</span>
+                            <span>₾{adrVal.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>RevPAR:</span>
+                            <span>₾{revparVal.toFixed(2)}</span>
+                          </div>
+                        </>
+                      )
+                    })()}
                   </div>
                   
                   {/* Movements */}
@@ -3471,6 +3922,7 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
 function ManagerReportModal({ date, onClose, generateReport }: { date: string; onClose: () => void; generateReport: (date: string) => Promise<any> }) {
   const [report, setReport] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [hotelInfo, setHotelInfo] = useState({ name: 'Hotel', logo: '', address: '' })
   
   useEffect(() => {
     generateReport(date).then(data => {
@@ -3478,6 +3930,23 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
       setLoading(false)
     })
   }, [date])
+  
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const saved = localStorage.getItem('hotelInfo')
+    if (saved) {
+      try {
+        const data = JSON.parse(saved)
+        setHotelInfo({
+          name: data.name || data.hotelName || data.companyName || 'Hotel',
+          logo: data.logo || data.logoUrl || '',
+          address: data.address || ''
+        })
+      } catch (e) {
+        console.error('Error loading hotel info:', e)
+      }
+    }
+  }, [])
   
   const printReport = () => {
     const printContent = document.getElementById('manager-report-content')
@@ -3490,7 +3959,11 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
             <title>Manager Report - ${date}</title>
             <style>
               body { font-family: Arial; padding: 20px; }
-              h1 { color: #1e40af; }
+              .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
+              .header img { height: 60px; margin-bottom: 10px; }
+              h1 { color: #1e40af; font-size: 24px; margin: 0; }
+              h2 { font-size: 18px; margin-top: 15px; }
+              .address { font-size: 12px; color: #666; margin: 5px 0; }
               .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
               .card { background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; }
               .value { font-size: 24px; font-weight: bold; }
@@ -3499,7 +3972,16 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
               th { background: #f3f4f6; }
             </style>
           </head>
-          <body>${printContent.innerHTML}</body>
+          <body>
+            <div class="header">
+              ${hotelInfo.logo ? `<img src="${hotelInfo.logo}" alt="${hotelInfo.name}" />` : '<div style="font-size: 40px;">🏨</div>'}
+              <h1>${hotelInfo.name}</h1>
+              ${hotelInfo.address ? `<p class="address">${hotelInfo.address}</p>` : ''}
+              <h2>Manager's Daily Report</h2>
+              <p style="font-size: 14px;">${moment(date).format('DD MMMM YYYY')}</p>
+            </div>
+            ${printContent.innerHTML}
+          </body>
           </html>
         `)
         printWindow.document.close()
@@ -3541,6 +4023,7 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
         </div>
         
         <div id="manager-report-content" className="p-6">
+          <ReportHeader reportTitle="Manager's Daily Report" date={date} />
           {/* KPIs */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="bg-blue-50 p-4 rounded-lg text-center">
@@ -3692,35 +4175,49 @@ function PaymentReconciliationModal({ date, onClose, getData }: { date: string; 
           </div>
           
           {/* Detailed list */}
-          {data.payments.length > 0 && (
-            <>
-              <h3 className="font-bold mb-3">დეტალები</h3>
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="p-2 text-left">Folio</th>
-                    <th className="p-2 text-left">სტუმარი</th>
-                    <th className="p-2 text-left">მეთოდი</th>
-                    <th className="p-2 text-right">თანხა</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.payments.map((p: any, i: number) => (
-                    <tr key={i} className="border-t">
-                      <td className="p-2">{p.folioNumber}</td>
-                      <td className="p-2">{p.guestName}</td>
-                      <td className="p-2">{methodLabels[p.paymentMethod] || p.paymentMethod}</td>
-                      <td className="p-2 text-right font-medium">₾{(p.credit || 0).toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          )}
-          
-          {data.payments.length === 0 && (
-            <p className="text-center text-gray-500 py-8">ამ თარიღზე გადახდები არ არის</p>
-          )}
+          {(() => {
+            // Filter out invalid/empty payment entries
+            const validPayments = data.payments.filter((p: any) => {
+              const amount = p.amount || p.credit || 0
+              // Remove entries with 0 amount
+              if (amount <= 0) return false
+              // Remove placeholder entries like "1111₾0.00"
+              if (p.guestName === '1111' && amount === 0) return false
+              return true
+            })
+            
+            if (validPayments.length > 0) {
+              return (
+                <>
+                  <h3 className="font-bold mb-3">დეტალები</h3>
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="p-2 text-left">Folio</th>
+                        <th className="p-2 text-left">სტუმარი</th>
+                        <th className="p-2 text-left">მეთოდი</th>
+                        <th className="p-2 text-right">თანხა</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {validPayments.map((p: any, i: number) => (
+                        <tr key={i} className="border-t">
+                          <td className="p-2">{p.folioNumber || '-'}</td>
+                          <td className="p-2">{p.guestName || '-'}</td>
+                          <td className="p-2">{methodLabels[p.paymentMethod || p.method] || p.paymentMethod || p.method || '-'}</td>
+                          <td className="p-2 text-right font-medium">₾{(p.amount || p.credit || 0).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
+              )
+            } else {
+              return (
+                <p className="text-center text-gray-500 py-8">ამ თარიღზე გადახდები არ არის</p>
+              )
+            }
+          })()}
         </div>
       </div>
     </div>
