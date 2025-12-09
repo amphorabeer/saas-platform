@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import moment from 'moment'
 import { ActivityLogger } from '../lib/activityLogger'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
@@ -14,7 +14,55 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
   // Check if reservation has company data
   const hasCompany = reservation.companyName && reservation.companyName.trim() !== ''
   
-  const invoiceNumber = reservation.reservationNumber || reservation.id
+  // Generate human-readable invoice number (consistent for same reservation)
+  const generateInvoiceNumber = (reservation: any): string => {
+    // Priority 1: Use existing invoiceNumber if saved in reservation
+    if (reservation.invoiceNumber) {
+      return reservation.invoiceNumber
+    }
+    
+    // Priority 2: Check localStorage for saved invoice number
+    if (typeof window !== 'undefined') {
+      const savedInvoiceNumbers = JSON.parse(localStorage.getItem('invoiceNumbers') || '{}')
+      if (savedInvoiceNumbers[reservation.id]) {
+        return savedInvoiceNumbers[reservation.id]
+      }
+      
+      // Priority 3: Use folio number (convert F to INV-)
+      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      const folio = folios.find((f: any) => f.reservationId === reservation.id)
+      if (folio?.folioNumber) {
+        // Convert F251210-102-abc4 → INV-251210-102-abc4
+        const invoiceNum = folio.folioNumber.replace(/^F/, 'INV-')
+        // Save for consistency
+        savedInvoiceNumbers[reservation.id] = invoiceNum
+        localStorage.setItem('invoiceNumbers', JSON.stringify(savedInvoiceNumbers))
+        return invoiceNum
+      }
+      
+      // Priority 4: Generate new invoice number
+      const date = moment().format('YYMMDD')
+      const roomNumber = reservation.roomNumber || reservation.room?.roomNumber || '000'
+      const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase()
+      const invoiceNum = `INV-${date}-${roomNumber}-${randomSuffix}`
+      
+      // Save for consistency
+      savedInvoiceNumbers[reservation.id] = invoiceNum
+      localStorage.setItem('invoiceNumbers', JSON.stringify(savedInvoiceNumbers))
+      return invoiceNum
+    }
+    
+    // Fallback (server-side or no localStorage)
+    const date = moment().format('YYMMDD')
+    const roomNumber = reservation.roomNumber || reservation.room?.roomNumber || '000'
+    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase()
+    return `INV-${date}-${roomNumber}-${randomSuffix}`
+  }
+  
+  // Get invoice number (memoized to keep it consistent)
+  const invoiceNumber = useMemo(() => {
+    return generateInvoiceNumber(reservation)
+  }, [reservation.id, reservation.invoiceNumber, reservation.roomNumber])
   
   // Load ALL charges from folio
   const getInvoiceData = () => {

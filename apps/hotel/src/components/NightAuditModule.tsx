@@ -211,6 +211,32 @@ export default function NightAuditModule() {
     loadHotelInfo()
   }, [])
 
+  // Helper: Get last audit date with correct priority (same as getBusinessDay)
+  const getLastAuditDate = (): string | null => {
+    if (typeof window === 'undefined') return null
+    
+    // Priority 1: lastNightAuditDate (plain string YYYY-MM-DD)
+    const lastNightAudit = localStorage.getItem('lastNightAuditDate')
+    if (lastNightAudit) {
+      return lastNightAudit
+    }
+    
+    // Priority 2: lastAuditDate (may be JSON stringified)
+    const legacyAudit = localStorage.getItem('lastAuditDate')
+    if (legacyAudit) {
+      try {
+        // Try to parse if it's JSON
+        const parsed = JSON.parse(legacyAudit)
+        return typeof parsed === 'string' ? parsed : null
+      } catch {
+        // If not JSON, use as-is
+        return legacyAudit
+      }
+    }
+    
+    return null
+  }
+
   // Calculate check-ins and check-outs from folios
   const getCheckInOutCounts = (auditDate: string) => {
     if (typeof window === 'undefined') {
@@ -252,7 +278,7 @@ export default function NightAuditModule() {
       folio.transactions?.forEach((t: any) => {
         const txDate = (t.date || t.nightAuditDate || t.postedAt || '').split('T')[0]
         if (txDate === auditDate && t.type === 'charge' && t.category === 'room') {
-          revenue += (t.debit || t.amount || 0)
+          revenue += Number(t.debit || t.amount || 0)
         }
       })
     })
@@ -339,7 +365,7 @@ export default function NightAuditModule() {
                 <td>${op.time || '-'}</td>
                 <td>${op.type || '-'}</td>
                 <td>${op.description || '-'}</td>
-                <td>${op.amount > 0 ? '₾' + op.amount.toFixed(2) : '-'}</td>
+                <td>${op.amount > 0 ? '₾' + Number(op.amount || 0).toFixed(2) : '-'}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -369,7 +395,7 @@ export default function NightAuditModule() {
                 <tr>
                   <td>${p.roomNumber || p.room || '-'}</td>
                   <td>${p.guestName || p.guest || '-'}</td>
-                  <td>₾${amount.toFixed(2)}</td>
+                  <td>₾${Number(amount || 0).toFixed(2)}</td>
                   <td class="${statusClass}">${statusText}</td>
                 </tr>
               `
@@ -446,7 +472,7 @@ export default function NightAuditModule() {
             <div class="stat-label">Check-outs</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value">₾${revenue.toFixed ? revenue.toFixed(0) : revenue}</div>
+            <div class="stat-value">₾${Number(revenue || 0).toFixed(0)}</div>
             <div class="stat-label">შემოსავალი</div>
           </div>
           <div class="stat-card">
@@ -475,11 +501,11 @@ export default function NightAuditModule() {
         <h2>💰 Financial Summary</h2>
         <div class="financial-grid">
           <div class="financial-card blue">
-            <div style="font-size: 24px; font-weight: bold; color: #1d4ed8;">₾${roomChargesTotal.toFixed ? roomChargesTotal.toFixed(2) : roomChargesTotal}</div>
+            <div style="font-size: 24px; font-weight: bold; color: #1d4ed8;">₾${Number(roomChargesTotal || 0).toFixed(2)}</div>
             <div style="color: #6b7280; font-size: 12px;">Room Charges Posted</div>
           </div>
           <div class="financial-card green">
-            <div style="font-size: 24px; font-weight: bold; color: #16a34a;">₾${paymentsTotal.toFixed ? paymentsTotal.toFixed(2) : paymentsTotal}</div>
+            <div style="font-size: 24px; font-weight: bold; color: #16a34a;">₾${Number(paymentsTotal || 0).toFixed(2)}</div>
             <div style="color: #6b7280; font-size: 12px;">Payments Received</div>
           </div>
         </div>
@@ -489,10 +515,10 @@ export default function NightAuditModule() {
             <tr><th>კატეგორია</th><th>თანხა</th></tr>
           </thead>
           <tbody>
-            <tr><td>Room Revenue</td><td>₾${roomChargesTotal.toFixed ? roomChargesTotal.toFixed(2) : roomChargesTotal}</td></tr>
-            <tr><td>Room Charges Posted</td><td>₾${roomChargesTotal.toFixed ? roomChargesTotal.toFixed(2) : roomChargesTotal}</td></tr>
-            <tr><td>Payments Received</td><td>₾${paymentsTotal.toFixed ? paymentsTotal.toFixed(2) : paymentsTotal}</td></tr>
-            <tr><td><strong>Total Revenue</strong></td><td><strong>₾${(roomChargesTotal + (noShows * 50)).toFixed ? (roomChargesTotal + (noShows * 50)).toFixed(2) : roomChargesTotal}</strong></td></tr>
+            <tr><td>Room Revenue</td><td>₾${Number(roomChargesTotal || 0).toFixed(2)}</td></tr>
+            <tr><td>Room Charges Posted</td><td>₾${Number(roomChargesTotal || 0).toFixed(2)}</td></tr>
+            <tr><td>Payments Received</td><td>₾${Number(paymentsTotal || 0).toFixed(2)}</td></tr>
+            <tr><td><strong>Total Revenue</strong></td><td><strong>₾${Number((roomChargesTotal || 0) + ((noShows || 0) * 50)).toFixed(2)}</strong></td></tr>
           </tbody>
         </table>
         
@@ -507,12 +533,12 @@ export default function NightAuditModule() {
                   <tr><th>კატეგორია</th><th>თანხა</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>Net Revenue</td><td>₾${taxData.net.toFixed(2)}</td></tr>
+                  <tr><td>Net Revenue</td><td>₾${Number(taxData.net || 0).toFixed(2)}</td></tr>
                   ${taxData.taxes.map((tax: any) => `
-                    <tr><td>${tax.name} (${tax.rate}%)</td><td>₾${tax.amount.toFixed(2)}</td></tr>
+                    <tr><td>${tax.name} (${tax.rate}%)</td><td>₾${Number(tax.amount || 0).toFixed(2)}</td></tr>
                   `).join('')}
-                  <tr><td><strong>Total Tax</strong></td><td><strong>₾${taxData.totalTax.toFixed(2)}</strong></td></tr>
-                  <tr><td><strong>Gross Revenue (Tax Inclusive)</strong></td><td><strong>₾${taxData.gross.toFixed(2)}</strong></td></tr>
+                  <tr><td><strong>Total Tax</strong></td><td><strong>₾${Number(taxData.totalTax || 0).toFixed(2)}</strong></td></tr>
+                  <tr><td><strong>Gross Revenue (Tax Inclusive)</strong></td><td><strong>₾${Number(taxData.gross || 0).toFixed(2)}</strong></td></tr>
                 </tbody>
               </table>
             `
@@ -670,16 +696,16 @@ export default function NightAuditModule() {
                  (r.status === 'CHECKED_OUT' || r.autoCheckOut) &&
                  r.status !== 'CANCELLED'
         })
-        .reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0)
+        .reduce((sum: number, r: any) => sum + Number(r.totalAmount || 0), 0)
 
       const noShowRevenue = reservations
         .filter((r: any) => {
           const checkIn = moment(r.checkIn).format('YYYY-MM-DD')
           return checkIn === selectedDate && r.status === 'NO_SHOW'
         })
-        .reduce((sum: number, r: any) => sum + (r.noShowCharge || 0), 0)
+        .reduce((sum: number, r: any) => sum + Number(r.noShowCharge || 0), 0)
 
-      const todayRevenue = checkoutRevenue + noShowRevenue
+      const todayRevenue = Number(checkoutRevenue || 0) + Number(noShowRevenue || 0)
       
       // Count dirty rooms - rooms that are VACANT but have cleaningStatus = 'dirty' or 'cleaning'
       const countDirtyRooms = (): number => {
@@ -772,14 +798,14 @@ export default function NightAuditModule() {
           (r.status === 'CHECKED_OUT' || r.status === 'checked_out' || r.autoCheckOut) &&
           r.status !== 'CANCELLED'
         )
-        .reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0)
+        .reduce((sum: number, r: any) => sum + Number(r.totalAmount || 0), 0)
 
       const noShowRevenue = reservations
         .filter((r: any) => 
           moment(r.checkIn).format('YYYY-MM-DD') === date &&
           (r.status === 'NO_SHOW' || r.status === 'no_show')
         )
-        .reduce((sum: number, r: any) => sum + (r.noShowCharge || 0), 0)
+        .reduce((sum: number, r: any) => sum + Number(r.noShowCharge || 0), 0)
 
       const revenue = checkoutRevenue + noShowRevenue
       const occupancy = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0
@@ -938,31 +964,34 @@ export default function NightAuditModule() {
     }
     
     // 3. CHECK SEQUENTIAL CLOSING (NO GAPS)
-    const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
-    if (lastAuditDate) {
-      try {
-        const lastClosed = JSON.parse(lastAuditDate)
-        const daysBetween = moment(selectedDate).diff(moment(lastClosed), 'days')
-        
-        if (daysBetween > 1) {
-          checks.push({
-            passed: false,
-            critical: true,
-            canOverride: false,
-            message: `❌ დღის გამოტოვება! ჯერ დახურეთ ${moment(lastClosed).add(1, 'day').format('YYYY-MM-DD')}`,
-          })
-        } else if (daysBetween === 1) {
-          checks.push({
-            passed: true,
-            message: '✅ Sequential closing შემოწმებულია',
-            canOverride: false
-          })
-        } else if (daysBetween === 0) {
-          // This case is already handled by the "already done" check at the beginning
-          // No need to add duplicate check here
-        }
-      } catch (error) {
-        console.error('Error parsing lastAuditDate:', error)
+    const lastClosed = getLastAuditDate()
+    if (lastClosed) {
+      const daysBetween = moment(selectedDate).diff(moment(lastClosed), 'days')
+      
+      if (daysBetween > 1) {
+        checks.push({
+          passed: false,
+          critical: true,
+          canOverride: false,
+          message: `❌ დღის გამოტოვება! ჯერ დახურეთ ${moment(lastClosed).add(1, 'day').format('YYYY-MM-DD')}`,
+        })
+      } else if (daysBetween < 0) {
+        // Already closed or past date
+        checks.push({
+          passed: false,
+          critical: true,
+          canOverride: false,
+          message: `❌ ${selectedDate} უკვე დახურულია ან წარსულშია (ბოლო დახურვა: ${moment(lastClosed).format('DD/MM/YYYY')})`,
+        })
+      } else if (daysBetween === 0) {
+        // This case is already handled by the "already done" check at the beginning
+        // No need to add duplicate check here
+      } else if (daysBetween === 1) {
+        checks.push({
+          passed: true,
+          message: '✅ Sequential closing შემოწმებულია',
+          canOverride: false
+        })
       }
     } else {
       // No previous audit - this is the first one
@@ -1243,7 +1272,7 @@ export default function NightAuditModule() {
           auditResult.postingDetails = postingResult.details
           
           addToLog(`💰 Room Charges Posted: ${postingResult.posted}`)
-          addToLog(`   Total Amount: ₾${postingResult.totalAmount.toFixed(2)}`)
+          addToLog(`   Total Amount: ₾${Number(postingResult.totalAmount || 0).toFixed(2)}`)
           
           if (postingResult.failed > 0) {
             addToLog(`⚠️ Failed Postings: ${postingResult.failed}`)
@@ -1255,7 +1284,7 @@ export default function NightAuditModule() {
           // Show details for successful postings
           postingResult.details.forEach((detail: any) => {
             if (detail.success) {
-              addToLog(`  ✓ ${detail.room} - ${detail.guest}: ₾${detail.amount.toFixed(2)}`)
+              addToLog(`  ✓ ${detail.room} - ${detail.guest}: ₾${Number(detail.amount || 0).toFixed(2)}`)
             } else if (detail.skipped) {
               addToLog(`  ⊘ ${detail.room} - ${detail.guest}: Already posted`)
             } else {
@@ -1274,7 +1303,7 @@ export default function NightAuditModule() {
           auditResult.packageDetails = packageResult.details
           
           addToLog(`📦 Packages Posted: ${packageResult.posted}`)
-          addToLog(`   Total Amount: ₾${packageResult.totalAmount.toFixed(2)}`)
+          addToLog(`   Total Amount: ₾${Number(packageResult.totalAmount || 0).toFixed(2)}`)
           
           if (packageResult.failed > 0) {
             addToLog(`⚠️ Failed Postings: ${packageResult.failed}`)
@@ -1286,9 +1315,9 @@ export default function NightAuditModule() {
           // Show details for successful postings
           packageResult.details.forEach((detail: any) => {
             if (detail.success) {
-              addToLog(`  ✓ ${detail.room} - ${detail.package}: ₾${detail.totalAmount.toFixed(2)}`)
+              addToLog(`  ✓ ${detail.room} - ${detail.package}: ₾${Number(detail.totalAmount || 0).toFixed(2)}`)
               detail.components?.forEach((comp: any) => {
-                addToLog(`    • ${comp.component}: ₾${comp.amount.toFixed(2)}`)
+                addToLog(`    • ${comp.component}: ₾${Number(comp.amount || 0).toFixed(2)}`)
               })
             } else if (detail.skipped) {
               addToLog(`  ⊘ ${detail.room} - ${detail.guest}: Already posted`)
@@ -1324,22 +1353,22 @@ export default function NightAuditModule() {
           
           auditResult.financialSummary = {
             revenue: revenueReport.revenue.total,
-            taxes: revenueReport.taxes.total,
+            taxes: revenueReport.taxes.totalTax,
             payments: revenueReport.payments.total,
             outstanding: managerReport.financial.outstandingBalances
           }
           
           addToLog(`💼 Financial Summary:`)
-          addToLog(`  Revenue: ₾${revenueReport.revenue.total.toFixed(2)}`)
-          addToLog(`  Net Revenue: ₾${revenueReport.taxes.netRevenue.toFixed(2)}`)
-          addToLog(`  Taxes: ₾${revenueReport.taxes.totalTax.toFixed(2)}`)
+          addToLog(`  Revenue: ₾${Number(revenueReport.revenue.total || 0).toFixed(2)}`)
+          addToLog(`  Net Revenue: ₾${Number(revenueReport.taxes.netRevenue || 0).toFixed(2)}`)
+          addToLog(`  Taxes: ₾${Number(revenueReport.taxes.totalTax || 0).toFixed(2)}`)
           if (revenueReport.taxes.taxes && Object.keys(revenueReport.taxes.taxes).length > 0) {
             Object.entries(revenueReport.taxes.taxes).forEach(([name, amount]: [string, any]) => {
-              addToLog(`    ${name}: ₾${amount.toFixed(2)}`)
+              addToLog(`    ${name}: ₾${Number(amount || 0).toFixed(2)}`)
             })
           }
-          addToLog(`  Payments: ₾${revenueReport.payments.total.toFixed(2)}`)
-          addToLog(`  Outstanding: ₾${managerReport.financial.outstandingBalances.toFixed(2)}`)
+          addToLog(`  Payments: ₾${Number(revenueReport.payments.total || 0).toFixed(2)}`)
+          addToLog(`  Outstanding: ₾${Number(managerReport.financial.outstandingBalances || 0).toFixed(2)}`)
           addToLog(`  ADR: ₾${managerReport.kpis.adr}`)
           addToLog(`  RevPAR: ₾${managerReport.kpis.revpar}`)
           addToLog(`  Occupancy: ${managerReport.kpis.occupancyRate}`)
@@ -1439,7 +1468,7 @@ export default function NightAuditModule() {
         )
         
         addToLog(`🔍 Detected ${expectedArrivals.length} NO-SHOWS for ${selectedDate}`)
-        addToLog(`💰 Total charge: ₾${totalCharge.toFixed(2)}`)
+        addToLog(`💰 Total charge: ₾${Number(totalCharge || 0).toFixed(2)}`)
         
         // Process each NO-SHOW
         const updatePromises = expectedArrivals.map(async (r: any) => {
@@ -1472,7 +1501,7 @@ export default function NightAuditModule() {
             }
             
             noShows++
-            addToLog(`❌ No-Show: ${r.guestName} - Room ${r.roomNumber || r.roomId} (₾${charge.toFixed(2)})`)
+            addToLog(`❌ No-Show: ${r.guestName} - Room ${r.roomNumber || r.roomId} (₾${Number(charge || 0).toFixed(2)})`)
           } catch (error) {
             console.error(`Failed to process NO-SHOW for ${r.id}:`, error)
             addToLog(`❌ Error processing NO-SHOW: ${r.guestName}`)
@@ -1595,7 +1624,7 @@ export default function NightAuditModule() {
                  r.status !== 'CANCELLED' && 
                  r.status !== 'NO_SHOW'
         })
-        .reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0)
+        .reduce((sum: number, r: any) => sum + Number(r.totalAmount || 0), 0)
       
       // Also include NO-SHOW charges for this date
       const noShowRevenue = reservations
@@ -1603,9 +1632,9 @@ export default function NightAuditModule() {
           const checkIn = moment(r.checkIn).format('YYYY-MM-DD')
           return checkIn === selectedDate && r.status === 'NO_SHOW'
         })
-        .reduce((sum: number, r: any) => sum + (r.noShowCharge || 0), 0)
+        .reduce((sum: number, r: any) => sum + Number(r.noShowCharge || 0), 0)
       
-      const totalRevenue = checkoutRevenue + noShowRevenue
+      const totalRevenue = Number(checkoutRevenue || 0) + Number(noShowRevenue || 0)
       
       addToLog(`💰 დღიური შემოსავალი: ₾${totalRevenue}`)
       addToLog(`   └─ Check-out Revenue: ₾${checkoutRevenue}`)
@@ -1885,7 +1914,7 @@ export default function NightAuditModule() {
       
       const revenue = reservations
         .filter((r: any) => moment(r.checkOut).format('YYYY-MM-DD') === selectedDate && r.status === 'CHECKED_OUT')
-        .reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0)
+        .reduce((sum: number, r: any) => sum + Number(r.totalAmount || 0), 0)
       
       // Create email content
       const hotelName = hotelInfo.name || 'Hotel'
@@ -1899,7 +1928,7 @@ Time: ${moment().format('HH:mm:ss')}
 Summary:
 - Check-ins: ${checkIns}
 - Check-outs: ${checkOuts}
-- Revenue: ₾${revenue.toFixed(2)}
+- Revenue: ₾${Number(revenue || 0).toFixed(2)}
 
 This is an automated report from Night Audit System.
       `.trim()
@@ -1983,6 +2012,8 @@ This is an automated report from Night Audit System.
   const changeBusinessDay = () => {
     const nextDay = moment(selectedDate).add(1, 'day').format('YYYY-MM-DD')
     localStorage.setItem('currentBusinessDate', nextDay)
+    // Set both: lastNightAuditDate (preferred) and lastAuditDate (legacy for backward compatibility)
+    localStorage.setItem('lastNightAuditDate', selectedDate)
     localStorage.setItem('lastAuditDate', JSON.stringify(selectedDate))
     addToLog(`📅 Business Day: ${selectedDate} → ${nextDay}`)
   }
@@ -2124,8 +2155,8 @@ This is an automated report from Night Audit System.
           prePosted: p.prePosted || false
         })),
         stats: {
-          totalCheckIns: actualCheckIns || 0,
-          totalCheckOuts: auditResult.checkOuts || 0,
+          totalCheckIns: counts.checkIns || 0,
+          totalCheckOuts: counts.checkOuts || auditResult.checkOuts || 0,
           totalRevenue: auditResult.revenue || 0,
           occupancyRate: auditResult.occupancy || 0,
           roomChargesPosted: auditResult.roomChargesPosted || 0,
@@ -2239,6 +2270,123 @@ This is an automated report from Night Audit System.
   }
   
   // ============================================
+  // UNIFIED PAYMENT CALCULATOR: Same logic as CashierModule
+  // ============================================
+  const getZReportPayments = (businessDate: string) => {
+    const payments = {
+      cash: 0,
+      card: 0,
+      bank: 0,
+      total: 0
+    }
+    
+    // Source 1: Folio payment transactions for this date (exact date match like Cashier)
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    folios.forEach((folio: any) => {
+      (folio.transactions || []).forEach((t: any) => {
+        if (t.type === 'payment' || t.credit > 0) {
+          // Use exact date match like CashierModule (t.date === today)
+          const paymentDate = t.date || moment(t.postedAt).format('YYYY-MM-DD')
+          if (paymentDate === businessDate) {
+            const amount = Number(t.credit || t.amount || 0)
+            const method = (t.paymentMethod || t.method || 'cash').toLowerCase()
+            
+            // Match CashierModule logic exactly
+            if (method === 'cash' || method === 'ნაღდი') {
+              payments.cash += amount
+            } else if (method === 'card' || method === 'credit_card' || method === 'ბარათი') {
+              payments.card += amount
+            } else if (method === 'bank' || method === 'bank_transfer' || method === 'ბანკი') {
+              payments.bank += amount
+            } else {
+              payments.cash += amount // Default to cash
+            }
+            payments.total += amount
+          }
+        }
+      })
+    })
+    
+    // Source 2: Cashier manual income transactions for this date
+    const manualTransactions = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+    manualTransactions.forEach((t: any) => {
+      if (t.type === 'income' && t.date === businessDate) {
+        const amount = Number(t.amount || 0)
+        const method = (t.method || 'cash').toLowerCase()
+        
+        // Match CashierModule logic exactly
+        if (method === 'cash' || method === 'ნაღდი') {
+          payments.cash += amount
+        } else if (method === 'card' || method === 'credit_card' || method === 'ბარათი') {
+          payments.card += amount
+        } else if (method === 'bank' || method === 'bank_transfer' || method === 'ბანკი') {
+          payments.bank += amount
+        } else {
+          payments.cash += amount // Default to cash
+        }
+        payments.total += amount
+      }
+    })
+    
+    return payments
+  }
+  
+  // ============================================
+  // UNIFIED MOVEMENT CALCULATOR: Check-in/Check-out/Stay-over
+  // ============================================
+  const calculateMovement = (businessDate: string, reservations?: any[]) => {
+    // Use passed reservations, or try localStorage as fallback
+    let reservationsList = reservations || []
+    
+    // If no reservations passed and localStorage is empty, return zeros
+    if (reservationsList.length === 0) {
+      const localStorageReservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
+      if (localStorageReservations.length > 0) {
+        reservationsList = localStorageReservations
+      } else {
+        // No reservations available - return zeros
+        return { checkIns: 0, checkOuts: 0, stayOver: 0 }
+      }
+    }
+    
+    // Check-ins: reservations that actually checked in on this date
+    // Try actualCheckIn first, then fall back to scheduled checkIn with CHECKED_IN status
+    const checkIns = reservationsList.filter((r: any) => {
+      const actualCheckIn = r.actualCheckIn || r.checkedInAt
+      if (actualCheckIn) {
+        return moment(actualCheckIn).format('YYYY-MM-DD') === businessDate
+      }
+      // Fallback: scheduled check-in on this date AND status is CHECKED_IN or CHECKED_OUT
+      const scheduledCheckIn = moment(r.checkIn).format('YYYY-MM-DD')
+      const isProcessed = ['CHECKED_IN', 'CHECKED_OUT'].includes(r.status)
+      return scheduledCheckIn === businessDate && isProcessed
+    }).length
+    
+    // Check-outs: reservations that actually checked out on this date
+    // Try actualCheckOut first, then fall back to scheduled checkOut with CHECKED_OUT status
+    const checkOuts = reservationsList.filter((r: any) => {
+      const actualCheckOut = r.actualCheckOut || r.checkedOutAt
+      if (actualCheckOut) {
+        return moment(actualCheckOut).format('YYYY-MM-DD') === businessDate
+      }
+      // Fallback: scheduled check-out on this date AND status is CHECKED_OUT
+      const scheduledCheckOut = moment(r.checkOut).format('YYYY-MM-DD')
+      return scheduledCheckOut === businessDate && r.status === 'CHECKED_OUT'
+    }).length
+    
+    // Stay-over: guests in-house at end of day (checked in before/on this day, checking out after this day)
+    const stayOver = reservationsList.filter((r: any) => {
+      if (r.status !== 'CHECKED_IN') return false
+      const checkIn = moment(r.checkIn).format('YYYY-MM-DD')
+      const checkOut = moment(r.checkOut).format('YYYY-MM-DD')
+      // In-house: checkIn <= businessDate < checkOut
+      return checkIn <= businessDate && checkOut > businessDate
+    }).length
+    
+    return { checkIns, checkOuts, stayOver }
+  }
+  
+  // ============================================
   // UNIFIED DATA LOADER: Load all audit data from same sources
   // ============================================
   const loadAuditDataForDate = (targetDate: string) => {
@@ -2248,11 +2396,10 @@ This is an automated report from Night Audit System.
     
     let roomCharges = 0
     let serviceCharges = 0
-    let payments = { cash: 0, card: 0, bank: 0, total: 0 }
     const paymentsList: any[] = []
     const chargesList: any[] = []
     
-    // 1. Get charges and payments from folios
+    // 1. Get charges from folios
     folios.forEach((folio: any) => {
       folio.transactions?.forEach((t: any) => {
         const txDate = moment(t.date || t.nightAuditDate || t.postedAt).format('YYYY-MM-DD')
@@ -2260,7 +2407,7 @@ This is an automated report from Night Audit System.
         
         // Charges
         if (t.type === 'charge' || t.debit > 0) {
-          const amount = t.amount || t.debit || 0
+          const amount = Number(t.amount || t.debit || 0)
           chargesList.push({
             ...t,
             guestName: folio.guestName,
@@ -2274,28 +2421,14 @@ This is an automated report from Night Audit System.
           }
         }
         
-        // Payments
+        // Payments - collect for list only, totals come from unified function
         if (t.type === 'payment' || t.credit > 0) {
-          const amount = t.amount || t.credit || 0
-          const method = (t.paymentMethod || t.method || 'cash').toLowerCase()
-          
           paymentsList.push({
             ...t,
             guestName: folio.guestName,
             roomNumber: folio.roomNumber,
-            method: method
+            method: t.paymentMethod || t.method || 'cash'
           })
-          
-          if (method.includes('cash') || method.includes('ნაღდ')) {
-            payments.cash += amount
-          } else if (method.includes('card') || method.includes('ბარათ') || method.includes('credit')) {
-            payments.card += amount
-          } else if (method.includes('bank') || method.includes('ბანკ') || method.includes('transfer')) {
-            payments.bank += amount
-          } else {
-            payments.cash += amount
-          }
-          payments.total += amount
         }
       })
     })
@@ -2310,7 +2443,7 @@ This is an automated report from Night Audit System.
           // If target date is during stay
           if (targetDate >= checkIn && targetDate < checkOut) {
             const nights = moment(r.checkOut).diff(moment(r.checkIn), 'days') || 1
-            const perNight = (r.totalAmount || 0) / nights
+            const perNight = Number(r.totalAmount || 0) / nights
             roomCharges += perNight
             
             chargesList.push({
@@ -2326,25 +2459,23 @@ This is an automated report from Night Audit System.
       })
     }
     
-    // 3. Add manual cashier transactions
+    // 3. Add manual cashier income transactions to payments list
     manualTx.forEach((t: any) => {
       const txDate = moment(t.date).format('YYYY-MM-DD')
       if (txDate !== targetDate) return
       
       if (t.type === 'income') {
-        const method = (t.method || 'cash').toLowerCase()
         paymentsList.push({
           ...t,
           guestName: t.description || 'Manual',
-          roomNumber: '-'
+          roomNumber: '-',
+          method: t.method || 'cash'
         })
-        
-        if (method === 'cash') payments.cash += t.amount
-        else if (method === 'card') payments.card += t.amount
-        else if (method === 'bank') payments.bank += t.amount
-        payments.total += t.amount
       }
     })
+    
+    // 4. Use unified payment calculator (same as CashierModule)
+    const payments = getZReportPayments(targetDate)
     
     const totalRevenue = roomCharges + serviceCharges
     
@@ -2411,13 +2542,13 @@ This is an automated report from Night Audit System.
               // Check either date or nightAuditDate
               const chargeDate = t.date || t.nightAuditDate || moment(t.postedAt).format('YYYY-MM-DD')
               if (chargeDate === date) {
-                roomRevenue += (t.debit || t.amount || 0)
+                roomRevenue += Number(t.debit || t.amount || 0)
               }
             }
           })
         }
       })
-      const noShowRevenue = noShows.reduce((sum: number, r: any) => sum + (r.noShowCharge || 0), 0)
+      const noShowRevenue = noShows.reduce((sum: number, r: any) => sum + Number(r.noShowCharge || 0), 0)
       const totalRevenue = roomRevenue + noShowRevenue
       
       // KPIs
@@ -2429,17 +2560,24 @@ This is an automated report from Night Audit System.
       
       // Payment breakdown
       const payments = folios.flatMap((f: any) => f.transactions?.filter((t: any) => t.type === 'payment') || [])
-      const cashPayments = payments.filter((p: any) => p.paymentMethod === 'cash').reduce((s: number, p: any) => s + (p.credit || 0), 0)
-      const cardPayments = payments.filter((p: any) => p.paymentMethod === 'card' || p.paymentMethod === 'credit_card').reduce((s: number, p: any) => s + (p.credit || 0), 0)
-      const bankPayments = payments.filter((p: any) => p.paymentMethod === 'bank_transfer').reduce((s: number, p: any) => s + (p.credit || 0), 0)
+      const cashPayments = payments.filter((p: any) => p.paymentMethod === 'cash').reduce((s: number, p: any) => s + Number(p.credit || 0), 0)
+      const cardPayments = payments.filter((p: any) => p.paymentMethod === 'card' || p.paymentMethod === 'credit_card').reduce((s: number, p: any) => s + Number(p.credit || 0), 0)
+      const bankPayments = payments.filter((p: any) => p.paymentMethod === 'bank_transfer').reduce((s: number, p: any) => s + Number(p.credit || 0), 0)
       
       // Outstanding balances
-      const outstandingBalance = folios.filter((f: any) => f.status === 'open').reduce((s: number, f: any) => s + (f.balance || 0), 0)
+      const outstandingBalance = folios.filter((f: any) => f.status === 'open').reduce((s: number, f: any) => s + Number(f.balance || 0), 0)
       
-      // Tax calculations (assuming 18% VAT)
-      const vatRate = 0.18
-      const vatAmount = totalRevenue * vatRate / (1 + vatRate)
-      const netRevenue = totalRevenue - vatAmount
+      // Tax calculations - use unified taxCalculator
+      const taxBreakdown = calculateTaxBreakdown(totalRevenue)
+      const netRevenue = taxBreakdown.net
+      // Find VAT tax (or first tax if no VAT)
+      const vatTax = taxBreakdown.taxes.find((t: any) => 
+        t.name.toLowerCase().includes('vat') || 
+        t.name.toLowerCase().includes('დღგ') ||
+        t.name === 'VAT'
+      ) || taxBreakdown.taxes[0] || { name: 'VAT', rate: 18, amount: 0 }
+      const vatAmount = vatTax.amount
+      const vatRate = vatTax.rate
       
       return {
         date,
@@ -2460,6 +2598,8 @@ This is an automated report from Night Audit System.
         totalRevenue,
         netRevenue,
         vatAmount,
+        vatRate,
+        taxBreakdown, // Include full tax breakdown for display
         // Payments
         cashPayments,
         cardPayments,
@@ -2496,7 +2636,7 @@ This is an automated report from Night Audit System.
     const byMethod: Record<string, { count: number; total: number; payments: any[] }> = {}
     validPayments.forEach((p: any) => {
       const method = p.method || p.paymentMethod || 'cash'
-      const amount = p.amount || p.credit || 0
+      const amount = Number(p.amount || p.credit || 0)
       if (!byMethod[method]) {
         byMethod[method] = { count: 0, total: 0, payments: [] }
       }
@@ -2506,7 +2646,7 @@ This is an automated report from Night Audit System.
     })
     
     // Recalculate total from valid payments
-    const totalAmount = validPayments.reduce((sum: number, p: any) => sum + (p.amount || p.credit || 0), 0)
+    const totalAmount = validPayments.reduce((sum: number, p: any) => sum + Number(p.amount || p.credit || 0), 0)
     
     return {
       date,
@@ -2520,12 +2660,28 @@ This is an automated report from Night Audit System.
   // ============================================
   // NEW FEATURE 6: Z-Report Generation
   // ============================================
-  const generateZReport = (): any => {
+  const generateZReport = async (): Promise<any> => {
     const businessDate = localStorage.getItem('currentBusinessDate') || selectedDate
     const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
-    const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
     const cashierShift = JSON.parse(localStorage.getItem('currentCashierShift') || 'null')
     const manualTx = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+    
+    // Load reservations - try localStorage first, then API
+    let reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
+    
+    // If localStorage is empty, fetch from API
+    if (reservations.length === 0) {
+      try {
+        const response = await fetch('/api/hotel/reservations')
+        if (response.ok) {
+          const data = await response.json()
+          reservations = Array.isArray(data) ? data : (data.reservations || [])
+          console.log('Z-REPORT: Loaded reservations from API:', reservations.length)
+        }
+      } catch (error) {
+        console.error('Z-REPORT: Failed to fetch reservations from API:', error)
+      }
+    }
     
     // Use unified data loader
     const auditData = loadAuditDataForDate(businessDate)
@@ -2533,7 +2689,7 @@ This is an automated report from Night Audit System.
     // Calculate expenses
     const expenses = manualTx
       .filter((t: any) => moment(t.date).format('YYYY-MM-DD') === businessDate && t.type === 'expense')
-      .reduce((sum: number, t: any) => sum + t.amount, 0)
+      .reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0)
     
     // Occupancy stats - count CHECKED_IN reservations for the date
     const totalRooms = rooms.length || 15
@@ -2552,18 +2708,11 @@ This is an automated report from Night Audit System.
     // RevPAR = Room Revenue / Total Rooms
     const revPar = totalRooms > 0 ? auditData.roomCharges / totalRooms : 0
     
-    // Check-in/out counts
-    const checkIns = reservations.filter((r: any) => {
-      const checkInDate = moment(r.checkIn).format('YYYY-MM-DD')
-      return checkInDate === businessDate && (r.status === 'CHECKED_IN' || r.status === 'checked_in')
-    }).length
-    
-    const checkOuts = reservations.filter((r: any) => {
-      const checkOutDate = moment(r.checkOut).format('YYYY-MM-DD')
-      return checkOutDate === businessDate && (r.status === 'CHECKED_OUT' || r.status === 'checked_out')
-    }).length
-    
-    const stayOvers = occupiedRooms - checkIns
+    // Movement statistics - use unified calculator with reservations from API/localStorage
+    const movement = calculateMovement(businessDate, reservations)
+    const checkIns = movement.checkIns
+    const checkOuts = movement.checkOuts
+    const stayOvers = movement.stayOver
     
     const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('currentUser') || '{}') : {}
     
@@ -2776,7 +2925,7 @@ This is an automated report from Night Audit System.
     const posted = postedCharges.filter(c => c.success && !c.skipped).length
     const failed = postedCharges.filter(c => !c.success && !c.skipped).length
     const skipped = postedCharges.filter(c => c.skipped).length
-    const totalAmount = postedCharges.reduce((sum, c) => sum + (c.amount || 0), 0)
+    const totalAmount = postedCharges.reduce((sum, c) => sum + Number(c.amount || 0), 0)
     
     return {
       posted,
@@ -2875,7 +3024,7 @@ This is an automated report from Night Audit System.
             return (
               <div className="bg-purple-50 p-4 rounded">
                 <div className="text-sm text-gray-600">შემოსავალი</div>
-                <div className="text-2xl font-bold text-purple-600">₾{displayRevenue}</div>
+                <div className="text-2xl font-bold text-purple-600">₾{Number(displayRevenue || 0).toFixed(2)}</div>
               </div>
             )
           })()}
@@ -3242,29 +3391,29 @@ This is an automated report from Night Audit System.
                   {/* Revenue */}
                   <div className="border-b border-gray-700 pb-2">
                     <div className="font-bold text-yellow-400 mb-1">შემოსავალი</div>
-                    <div className="flex justify-between"><span>ოთახები:</span><span>₾{zReport.roomRevenue.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>სერვისები:</span><span>₾{zReport.serviceRevenue.toFixed(2)}</span></div>
-                    <div className="flex justify-between font-bold"><span>სულ:</span><span>₾{zReport.totalRevenue.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>ოთახები:</span><span>₾{Number(zReport.roomRevenue || 0).toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>სერვისები:</span><span>₾{Number(zReport.serviceRevenue || 0).toFixed(2)}</span></div>
+                    <div className="flex justify-between font-bold"><span>სულ:</span><span>₾{Number(zReport.totalRevenue || 0).toFixed(2)}</span></div>
                   </div>
                   
                   {/* Tax Breakdown */}
                   {zReport.taxBreakdown && zReport.taxBreakdown.totalTax > 0 && (
                     <div className="border-b border-gray-700 pb-2 border-t-2 border-dashed pt-2 mt-2">
                       <div className="font-bold text-purple-400 mb-1">TAX BREAKDOWN</div>
-                      <div className="flex justify-between"><span>Net Sales:</span><span>₾{zReport.taxBreakdown.net.toFixed(2)}</span></div>
+                      <div className="flex justify-between"><span>Net Sales:</span><span>₾{Number(zReport.taxBreakdown.net || 0).toFixed(2)}</span></div>
                       {zReport.taxBreakdown.taxes.map((tax: any, idx: number) => (
                         <div key={idx} className="flex justify-between">
                           <span>{tax.name} ({tax.rate}%):</span>
-                          <span>₾{tax.amount.toFixed(2)}</span>
+                          <span>₾{Number(tax.amount || 0).toFixed(2)}</span>
                         </div>
                       ))}
                       <div className="flex justify-between font-bold border-t border-gray-600 pt-1 mt-1">
                         <span>TOTAL TAX:</span>
-                        <span>₾{zReport.taxBreakdown.totalTax.toFixed(2)}</span>
+                        <span>₾{Number(zReport.taxBreakdown.totalTax || 0).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between font-bold">
                         <span>GROSS SALES:</span>
-                        <span>₾{zReport.taxBreakdown.gross.toFixed(2)}</span>
+                        <span>₾{Number(zReport.taxBreakdown.gross || 0).toFixed(2)}</span>
                       </div>
                     </div>
                   )}
@@ -3272,10 +3421,10 @@ This is an automated report from Night Audit System.
                   {/* Payments */}
                   <div className="border-b border-gray-700 pb-2">
                     <div className="font-bold text-green-400 mb-1">გადახდები</div>
-                    <div className="flex justify-between"><span>💵 ნაღდი:</span><span>₾{zReport.cashPayments.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>💳 ბარათი:</span><span>₾{zReport.cardPayments.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>🏦 ბანკი:</span><span>₾{zReport.bankTransfers.toFixed(2)}</span></div>
-                    <div className="flex justify-between font-bold"><span>სულ:</span><span>₾{zReport.totalPayments.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>💵 ნაღდი:</span><span>₾{Number(zReport.cashPayments || 0).toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>💳 ბარათი:</span><span>₾{Number(zReport.cardPayments || 0).toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>🏦 ბანკი:</span><span>₾{Number(zReport.bankTransfers || 0).toFixed(2)}</span></div>
+                    <div className="flex justify-between font-bold"><span>სულ:</span><span>₾{Number(zReport.totalPayments || 0).toFixed(2)}</span></div>
                   </div>
                   
                   {/* Statistics */}
@@ -3345,15 +3494,15 @@ This is an automated report from Night Audit System.
                         <>
                           <div className="flex justify-between">
                             <span>დატვირთვა:</span>
-                            <span>{occ.toFixed(1)}%</span>
+                            <span>{Number(occ || 0).toFixed(1)}%</span>
                           </div>
                           <div className="flex justify-between">
                             <span>ADR:</span>
-                            <span>₾{adrVal.toFixed(2)}</span>
+                            <span>₾{Number(adrVal || 0).toFixed(2)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span>RevPAR:</span>
-                            <span>₾{revparVal.toFixed(2)}</span>
+                            <span>₾{Number(revparVal || 0).toFixed(2)}</span>
                           </div>
                         </>
                       )
@@ -3371,8 +3520,8 @@ This is an automated report from Night Audit System.
                   {/* Cash */}
                   <div>
                     <div className="font-bold text-red-400 mb-1">სალარო</div>
-                    <div className="flex justify-between"><span>ხარჯები:</span><span>-₾{zReport.expenses.toFixed(2)}</span></div>
-                    <div className="flex justify-between font-bold text-lg"><span>წმინდა ნაღდი:</span><span>₾{zReport.netCash.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>ხარჯები:</span><span>-₾{Number(zReport.expenses || 0).toFixed(2)}</span></div>
+                    <div className="flex justify-between font-bold text-lg"><span>წმინდა ნაღდი:</span><span>₾{Number(zReport.netCash || 0).toFixed(2)}</span></div>
                   </div>
                 </div>
                 
@@ -3422,8 +3571,8 @@ This is an automated report from Night Audit System.
                 📈 Tax
               </button>
               <button
-                onClick={() => {
-                  const report = generateZReport()
+                onClick={async () => {
+                  const report = await generateZReport()
                   setZReport(report)
                   setShowZReport(true)
                 }}
@@ -3496,7 +3645,7 @@ This is an automated report from Night Audit System.
             </div>
             <div className="bg-green-50 p-3 rounded">
               <div className="text-xs text-gray-600">Today Revenue</div>
-              <div className="text-xl font-bold">₾{realStats.totalRevenue}</div>
+              <div className="text-xl font-bold">₾{Number(realStats.totalRevenue || 0).toFixed(2)}</div>
             </div>
           </div>
           
@@ -3627,7 +3776,7 @@ This is an automated report from Night Audit System.
                         <span className="text-red-600 ml-1">({audit.noShows} NS)</span>
                       )}
                     </td>
-                    <td className="p-2 text-right font-bold">₾{displayRevenue}</td>
+                    <td className="p-2 text-right font-bold">₾{Number(displayRevenue || 0).toFixed(2)}</td>
                     <td className="p-2 text-center">{audit.occupancy || 0}%</td>
                     <td className="p-2 text-center">
                       {audit.reversed ? (
@@ -3872,7 +4021,7 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
                             {check.type === 'checkout' ? (
                               <>
                                 Check-out: {moment(res.checkOut).format('DD/MM')}
-                                {balance > 0 && <span className="text-red-600 ml-2">₾{balance.toFixed(0)} გადასახდელი</span>}
+                                {balance > 0 && <span className="text-red-600 ml-2">₾{Number(balance || 0).toFixed(0)} გადასახდელი</span>}
                                 {balance === 0 && <span className="text-green-600 ml-2">✅ გადახდილია</span>}
                               </>
                             ) : (
@@ -3943,7 +4092,7 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
       {/* Check-In Process Modal */}
       {showCheckInModal && checkInReservation && (() => {
         const nights = moment(checkInReservation.checkOut).diff(moment(checkInReservation.checkIn), 'days') || 1
-        const roomCharge = checkInReservation.totalAmount || (nights * 150)
+        const roomCharge = Number(checkInReservation.totalAmount || (nights * 150))
         
         return (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -3968,8 +4117,8 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
               <div className="p-4 border-b">
                 <h3 className="font-medium mb-3">📋 Folio შეიქმნება</h3>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="flex justify-between mb-2"><span>ოთახის ღირებულება ({nights} ღამე)</span><span>₾{roomCharge.toFixed(2)}</span></div>
-                  <div className="flex justify-between font-bold border-t pt-2"><span>სულ</span><span>₾{roomCharge.toFixed(2)}</span></div>
+                  <div className="flex justify-between mb-2"><span>ოთახის ღირებულება ({nights} ღამე)</span><span>₾{Number(roomCharge || 0).toFixed(2)}</span></div>
+                  <div className="flex justify-between font-bold border-t pt-2"><span>სულ</span><span>₾{Number(roomCharge || 0).toFixed(2)}</span></div>
                 </div>
               </div>
               
@@ -4117,15 +4266,15 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
               <div className="text-sm text-gray-600">Occupancy</div>
             </div>
             <div className="bg-green-50 p-4 rounded-lg text-center">
-              <div className="text-3xl font-bold text-green-600">₾{report.adr.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-green-600">₾{Number(report.adr || 0).toFixed(0)}</div>
               <div className="text-sm text-gray-600">ADR</div>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg text-center">
-              <div className="text-3xl font-bold text-purple-600">₾{report.revpar.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-purple-600">₾{Number(report.revpar || 0).toFixed(0)}</div>
               <div className="text-sm text-gray-600">RevPAR</div>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg text-center">
-              <div className="text-3xl font-bold text-yellow-600">₾{report.totalRevenue.toFixed(0)}</div>
+              <div className="text-3xl font-bold text-yellow-600">₾{Number(report.totalRevenue || 0).toFixed(0)}</div>
               <div className="text-sm text-gray-600">Total Revenue</div>
             </div>
           </div>
@@ -4145,11 +4294,32 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="font-bold mb-3">💰 Revenue Breakdown</h3>
               <div className="space-y-2">
-                <div className="flex justify-between"><span>Room Revenue:</span><span className="font-bold">₾{report.roomRevenue.toFixed(2)}</span></div>
-                <div className="flex justify-between"><span>No-Show Charges:</span><span className="font-bold">₾{report.noShowRevenue.toFixed(2)}</span></div>
-                <div className="flex justify-between border-t pt-2"><span>Gross Revenue:</span><span className="font-bold">₾{report.totalRevenue.toFixed(2)}</span></div>
-                <div className="flex justify-between text-gray-600"><span>VAT (18%):</span><span>₾{Math.abs(report.vatAmount).toFixed(2)}</span></div>
-                <div className="flex justify-between border-t pt-2"><span>Net Revenue:</span><span className="font-bold text-green-600">₾{report.netRevenue.toFixed(2)}</span></div>
+                <div className="flex justify-between"><span>Room Revenue:</span><span className="font-bold">₾{Number(report.roomRevenue || 0).toFixed(2)}</span></div>
+                <div className="flex justify-between"><span>No-Show Charges:</span><span className="font-bold">₾{Number(report.noShowRevenue || 0).toFixed(2)}</span></div>
+                <div className="flex justify-between border-t pt-2"><span>Gross Revenue:</span><span className="font-bold">₾{Number(report.totalRevenue || 0).toFixed(2)}</span></div>
+                {/* Dynamic tax display from settings */}
+                {report.taxBreakdown && report.taxBreakdown.taxes && report.taxBreakdown.taxes.length > 0 ? (
+                  <>
+                    {report.taxBreakdown.taxes.map((tax: any, index: number) => (
+                      <div key={index} className="flex justify-between text-gray-600">
+                        <span>{tax.name} ({tax.rate}%):</span>
+                        <span>₾{Number(tax.amount || 0).toFixed(2)}</span>
+                      </div>
+                    ))}
+                    {report.taxBreakdown.totalTax !== undefined && (
+                      <div className="flex justify-between border-t pt-2 text-gray-700">
+                        <span>Total Tax:</span>
+                        <span>₾{Number(report.taxBreakdown.totalTax || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex justify-between text-gray-600">
+                    <span>VAT ({report.vatRate || 18}%):</span>
+                    <span>₾{Number(Math.abs(report.vatAmount || 0)).toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between border-t pt-2"><span>Net Revenue:</span><span className="font-bold text-green-600">₾{Number(report.netRevenue || 0).toFixed(2)}</span></div>
               </div>
             </div>
           </div>
@@ -4159,19 +4329,19 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
             <h3 className="font-bold mb-3">💳 Payments Received</h3>
             <div className="grid grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-xl font-bold">₾{report.cashPayments.toFixed(0)}</div>
+                <div className="text-xl font-bold">₾{Number(report.cashPayments || 0).toFixed(0)}</div>
                 <div className="text-sm text-gray-600">💵 Cash</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold">₾{report.cardPayments.toFixed(0)}</div>
+                <div className="text-xl font-bold">₾{Number(report.cardPayments || 0).toFixed(0)}</div>
                 <div className="text-sm text-gray-600">💳 Card</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold">₾{report.bankPayments.toFixed(0)}</div>
+                <div className="text-xl font-bold">₾{Number(report.bankPayments || 0).toFixed(0)}</div>
                 <div className="text-sm text-gray-600">🏦 Bank</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-orange-600">₾{report.outstandingBalance.toFixed(0)}</div>
+                <div className="text-xl font-bold text-orange-600">₾{Number(report.outstandingBalance || 0).toFixed(0)}</div>
                 <div className="text-sm text-gray-600">⚠️ Outstanding</div>
               </div>
             </div>
@@ -4194,7 +4364,7 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
                     <tr key={i} className="border-t">
                       <td className="p-2">{d.guest}</td>
                       <td className="p-2">{d.room}</td>
-                      <td className="p-2 text-right">₾{d.amount?.toFixed(2) || 0}</td>
+                      <td className="p-2 text-right">₾{Number(d.amount || 0).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -4203,7 +4373,7 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
           )}
           
           <div className="text-xs text-gray-500 text-center mt-4 border-t pt-4">
-            Generated: {moment().format('DD/MM/YYYY HH:mm:ss')}
+            Generated: {moment(date || localStorage.getItem('currentBusinessDate') || moment()).format('DD/MM/YYYY HH:mm:ss')}
           </div>
         </div>
       </div>
@@ -4241,7 +4411,7 @@ function PaymentReconciliationModal({ date, onClose, getData }: { date: string; 
               <div className="text-sm text-gray-600">ტრანზაქციები</div>
             </div>
             <div className="bg-green-50 p-4 rounded-lg text-center">
-              <div className="text-3xl font-bold text-green-600">₾{data.totalAmount.toFixed(2)}</div>
+              <div className="text-3xl font-bold text-green-600">₾{Number(data.totalAmount || 0).toFixed(2)}</div>
               <div className="text-sm text-gray-600">სულ</div>
             </div>
           </div>
@@ -4255,7 +4425,7 @@ function PaymentReconciliationModal({ date, onClose, getData }: { date: string; 
                   <span className="font-medium">{methodLabels[method] || method}</span>
                   <span className="text-sm text-gray-500 ml-2">({info.count} ტრანზაქცია)</span>
                 </div>
-                <span className="font-bold text-lg">₾{info.total.toFixed(2)}</span>
+                <span className="font-bold text-lg">₾{Number(info.total || 0).toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -4291,7 +4461,7 @@ function PaymentReconciliationModal({ date, onClose, getData }: { date: string; 
                           <td className="p-2">{p.folioNumber || '-'}</td>
                           <td className="p-2">{p.guestName || '-'}</td>
                           <td className="p-2">{methodLabels[p.paymentMethod || p.method] || p.paymentMethod || p.method || '-'}</td>
-                          <td className="p-2 text-right font-medium">₾{(p.amount || p.credit || 0).toFixed(2)}</td>
+                          <td className="p-2 text-right font-medium">₾{Number(p.amount || p.credit || 0).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -4349,15 +4519,15 @@ function TaxReportModal({ date, onClose, getData }: { date: string; onClose: () 
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Gross Revenue:</span>
-                <span className="font-bold">₾{data.grossRevenue.toFixed(2)}</span>
+                <span className="font-bold">₾{Number(data.grossRevenue || 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>VAT ({data.taxes.vat.rate}%):</span>
-                <span>₾{data.taxes.vat.amount.toFixed(2)}</span>
+                <span>₾{Number(data.taxes.vat.amount || 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between border-t pt-2">
                 <span className="font-bold">Net Revenue:</span>
-                <span className="font-bold text-green-600">₾{data.netRevenue.toFixed(2)}</span>
+                <span className="font-bold text-green-600">₾{Number(data.netRevenue || 0).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -4377,26 +4547,26 @@ function TaxReportModal({ date, onClose, getData }: { date: string; onClose: () 
                 <tr className="border-t">
                   <td className="py-2">დღგ (VAT)</td>
                   <td className="py-2 text-right">{data.taxes.vat.rate}%</td>
-                  <td className="py-2 text-right font-bold">₾{data.taxes.vat.amount.toFixed(2)}</td>
+                  <td className="py-2 text-right font-bold">₾{Number(data.taxes.vat.amount || 0).toFixed(2)}</td>
                 </tr>
                 {data.taxes.cityTax.amount > 0 && (
                   <tr className="border-t">
                     <td className="py-2">City Tax</td>
                     <td className="py-2 text-right">₾{data.taxes.cityTax.perNight}/ღამე</td>
-                    <td className="py-2 text-right font-bold">₾{data.taxes.cityTax.amount.toFixed(2)}</td>
+                    <td className="py-2 text-right font-bold">₾{Number(data.taxes.cityTax.amount || 0).toFixed(2)}</td>
                   </tr>
                 )}
                 {data.taxes.tourismTax.amount > 0 && (
                   <tr className="border-t">
                     <td className="py-2">Tourism Tax</td>
                     <td className="py-2 text-right">₾{data.taxes.tourismTax.perNight}/ღამე</td>
-                    <td className="py-2 text-right font-bold">₾{data.taxes.tourismTax.amount.toFixed(2)}</td>
+                    <td className="py-2 text-right font-bold">₾{Number(data.taxes.tourismTax.amount || 0).toFixed(2)}</td>
                   </tr>
                 )}
                 <tr className="border-t bg-purple-100">
                   <td className="py-2 font-bold">სულ გადასახადები</td>
                   <td className="py-2"></td>
-                  <td className="py-2 text-right font-bold text-purple-700">₾{data.totalTax.toFixed(2)}</td>
+                  <td className="py-2 text-right font-bold text-purple-700">₾{Number(data.totalTax || 0).toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>
@@ -4409,12 +4579,12 @@ function TaxReportModal({ date, onClose, getData }: { date: string; onClose: () 
               <div>
                 <div className="text-2xl font-bold">{data.roomChargesCount}</div>
                 <div className="text-sm text-gray-600">Room Charges</div>
-                <div className="text-sm font-medium">₾{data.roomChargesTotal.toFixed(2)}</div>
+                <div className="text-sm font-medium">₾{Number(data.roomChargesTotal || 0).toFixed(2)}</div>
               </div>
               <div>
                 <div className="text-2xl font-bold">{data.otherChargesCount}</div>
                 <div className="text-sm text-gray-600">Other Charges</div>
-                <div className="text-sm font-medium">₾{data.otherChargesTotal.toFixed(2)}</div>
+                <div className="text-sm font-medium">₾{Number(data.otherChargesTotal || 0).toFixed(2)}</div>
               </div>
             </div>
           </div>

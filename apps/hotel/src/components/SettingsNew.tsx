@@ -227,13 +227,37 @@ export default function SettingsNew() {
   const loadAllData = async () => {
     if (typeof window === 'undefined') return
     
-    // Load Hotel Info
-    const savedHotelInfo = localStorage.getItem('hotelInfo')
-    if (savedHotelInfo) {
-      try {
-        setHotelInfo({ ...hotelInfo, ...JSON.parse(savedHotelInfo) })
-      } catch (e) {
-        console.error('Error loading hotel info:', e)
+    // Load Hotel Info from API
+    try {
+      const orgRes = await fetch('/api/hotel/organization')
+      if (orgRes.ok) {
+        const orgData = await orgRes.json()
+        setHotelInfo({
+          name: orgData.name || '',
+          company: orgData.company || '',
+          taxId: orgData.taxId || '',
+          address: orgData.address || '',
+          city: orgData.city || '',
+          country: orgData.country || 'Georgia',
+          phone: orgData.phone || '',
+          email: orgData.email || '',
+          website: orgData.website || '',
+          bankName: orgData.bankName || '',
+          bankAccount: orgData.bankAccount || '',
+          logo: orgData.logo || ''
+        })
+        console.log('✅ Loaded hotel info from API:', orgData)
+      }
+    } catch (e) {
+      console.error('Error loading hotel info from API:', e)
+      // Fallback to localStorage
+      const savedHotelInfo = localStorage.getItem('hotelInfo')
+      if (savedHotelInfo) {
+        try {
+          setHotelInfo({ ...hotelInfo, ...JSON.parse(savedHotelInfo) })
+        } catch (e2) {
+          console.error('Error loading hotel info from localStorage:', e2)
+        }
       }
     }
     
@@ -264,20 +288,42 @@ export default function SettingsNew() {
       ])
     }
     
-    // Load Users
-    const savedUsers = localStorage.getItem('hotelUsers')
-    if (savedUsers) {
-      try {
-        setUsers(JSON.parse(savedUsers))
-      } catch (e) {
-        console.error('Error loading users:', e)
+    // Load Users from API
+    try {
+      const usersRes = await fetch('/api/hotel/users')
+      if (usersRes.ok) {
+        const apiUsers = await usersRes.json()
+        const mappedUsers = apiUsers.map((u: any) => ({
+          id: u.id,
+          username: u.email?.split('@')[0] || '',
+          fullName: u.name || '',
+          email: u.email || '',
+          role: u.role === 'ORGANIZATION_OWNER' || u.role === 'MODULE_ADMIN' ? 'admin' : 
+                u.role === 'MANAGER' ? 'manager' : 'receptionist',
+          active: true,
+          createdAt: u.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0]
+        }))
+        setUsers(mappedUsers)
+        console.log('✅ Loaded users from API:', mappedUsers.length)
+      } else {
+        console.error('Error loading users from API, falling back to localStorage')
+        // Fallback to localStorage
+        const savedUsers = localStorage.getItem('hotelUsers')
+        if (savedUsers) {
+          setUsers(JSON.parse(savedUsers))
+        }
       }
-    } else {
-      setUsers([
-        { id: '1', username: 'admin', fullName: 'Administrator', email: 'admin@hotel.com', role: 'admin', active: true, createdAt: '2024-01-01' },
-        { id: '2', username: 'manager', fullName: 'Manager', email: 'manager@hotel.com', role: 'manager', active: true, createdAt: '2024-01-01' },
-        { id: '3', username: 'reception', fullName: 'Receptionist', email: 'reception@hotel.com', role: 'receptionist', active: true, createdAt: '2024-01-01' }
-      ])
+    } catch (e) {
+      console.error('Error loading users:', e)
+      // Fallback to localStorage
+      const savedUsers = localStorage.getItem('hotelUsers')
+      if (savedUsers) {
+        try {
+          setUsers(JSON.parse(savedUsers))
+        } catch (e2) {
+          console.error('Error parsing localStorage users:', e2)
+        }
+      }
     }
     
     // Load Checklist
@@ -469,17 +515,37 @@ export default function SettingsNew() {
   }
   
   // Save functions
-  const saveHotelInfo = () => {
+  const saveHotelInfo = async () => {
     setIsSaving(true)
-    localStorage.setItem('hotelInfo', JSON.stringify(hotelInfo))
-    // Dispatch custom event to update header in other components
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('hotelInfoUpdated'))
-    }
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/hotel/organization', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(hotelInfo)
+      })
+      if (res.ok) {
+        // Also save to localStorage as backup
+        localStorage.setItem('hotelInfo', JSON.stringify(hotelInfo))
+        // Dispatch custom event to update header in other components
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('hotelInfoUpdated'))
+        }
+        showMessage('success', '✅ სასტუმროს ინფორმაცია შენახულია!')
+      } else {
+        const error = await res.json()
+        showMessage('error', '❌ შეცდომა: ' + (error.error || 'Unknown error'))
+      }
+    } catch (e) {
+      console.error('Error saving hotel info:', e)
+      // Fallback to localStorage
+      localStorage.setItem('hotelInfo', JSON.stringify(hotelInfo))
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('hotelInfoUpdated'))
+      }
+      showMessage('success', '✅ სასტუმროს ინფორმაცია შენახულია (ლოკალურად)')
+    } finally {
       setIsSaving(false)
-      showMessage('success', '✅ სასტუმროს ინფორმაცია შენახულია!')
-    }, 500)
+    }
   }
   
   const saveRoomTypes = () => {
@@ -491,13 +557,18 @@ export default function SettingsNew() {
     }, 500)
   }
   
-  const saveUsers = () => {
+  const saveUsers = async () => {
     setIsSaving(true)
-    localStorage.setItem('hotelUsers', JSON.stringify(users))
-    setTimeout(() => {
-      setIsSaving(false)
+    try {
+      // Users are saved individually via API when created/updated
+      // This just shows success message
       showMessage('success', '✅ მომხმარებლები შენახულია!')
-    }, 500)
+    } catch (error) {
+      console.error('Error saving users:', error)
+      showMessage('error', '❌ შეცდომა შენახვისას')
+    } finally {
+      setIsSaving(false)
+    }
   }
   
   const saveChecklist = () => {
@@ -5240,44 +5311,123 @@ function UsersSection({ users, setUsers, onSave, isSaving }: {
     receptionist: { label: 'რეცეფციონისტი', color: 'bg-green-100 text-green-700', icon: '👤' }
   }
   
-  const handleSaveUser = () => {
-    if (!newUser.username || !newUser.fullName) {
+  const handleSaveUser = async () => {
+    if (!newUser.fullName || !newUser.email) {
       alert('შეავსეთ ყველა სავალდებულო ველი')
       return
     }
     
-    if (editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? { ...editingUser, ...newUser, role: newUser.role as User['role'] } : u))
-    } else {
-      if (!newUser.password) {
-        alert('შეიყვანეთ პაროლი')
-        return
+    try {
+      if (editingUser) {
+        // Update existing user via API
+        const res = await fetch('/api/hotel/users', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: editingUser.id,
+            name: newUser.fullName,
+            email: newUser.email,
+            role: newUser.role,
+            ...(newUser.password ? { password: newUser.password } : {})
+          })
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          alert(err.error || 'შეცდომა განახლებისას')
+          return
+        }
+        // Refresh users list
+        const usersRes = await fetch('/api/hotel/users')
+        if (usersRes.ok) {
+          const apiUsers = await usersRes.json()
+          const mappedUsers = apiUsers.map((u: any) => ({
+            id: u.id,
+            username: u.email.split('@')[0],
+            fullName: u.name,
+            email: u.email,
+            role: u.role === 'ORGANIZATION_OWNER' || u.role === 'MODULE_ADMIN' ? 'admin' : 
+                  u.role === 'MANAGER' ? 'manager' : 'receptionist',
+            active: true,
+            createdAt: u.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0]
+          }))
+          setUsers(mappedUsers)
+        }
+      } else {
+        // Create new user via API
+        if (!newUser.password) {
+          alert('შეიყვანეთ პაროლი')
+          return
+        }
+        const res = await fetch('/api/hotel/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: newUser.fullName,
+            email: newUser.email,
+            password: newUser.password,
+            role: newUser.role
+          })
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          alert(err.error || 'შეცდომა შექმნისას')
+          return
+        }
+        // Refresh users list
+        const usersRes = await fetch('/api/hotel/users')
+        if (usersRes.ok) {
+          const apiUsers = await usersRes.json()
+          const mappedUsers = apiUsers.map((u: any) => ({
+            id: u.id,
+            username: u.email.split('@')[0],
+            fullName: u.name,
+            email: u.email,
+            role: u.role === 'ORGANIZATION_OWNER' || u.role === 'MODULE_ADMIN' ? 'admin' : 
+                  u.role === 'MANAGER' ? 'manager' : 'receptionist',
+            active: true,
+            createdAt: u.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0]
+          }))
+          setUsers(mappedUsers)
+        }
       }
-      const user: User = {
-        id: `user-${Date.now()}`,
-        username: newUser.username,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        role: newUser.role as User['role'],
-        active: true,
-        createdAt: new Date().toISOString()
-      }
-      const passwords = JSON.parse(localStorage.getItem('userPasswords') || '{}')
-      passwords[user.username] = newUser.password
-      localStorage.setItem('userPasswords', JSON.stringify(passwords))
-      
-      setUsers([...users, user])
+      setShowAddUser(false)
+      setEditingUser(null)
+      setNewUser({ username: '', fullName: '', email: '', role: 'receptionist', password: '' })
+    } catch (error) {
+      console.error('Error saving user:', error)
+      alert('შეცდომა შენახვისას')
     }
-    setShowAddUser(false)
-    setEditingUser(null)
-    setNewUser({ username: '', fullName: '', email: '', role: 'receptionist', password: '' })
-    onSave()
   }
   
-  const handleDeleteUser = (userId: string) => {
+  const handleDeleteUser = async (userId: string) => {
     if (!confirm('ნამდვილად გსურთ მომხმარებლის წაშლა?')) return
-    setUsers(users.filter(u => u.id !== userId))
-    onSave()
+    try {
+      const res = await fetch(`/api/hotel/users?id=${userId}`, { method: 'DELETE' })
+      if (res.ok) {
+        // Refresh users list from API
+        const usersRes = await fetch('/api/hotel/users')
+        if (usersRes.ok) {
+          const apiUsers = await usersRes.json()
+          const mappedUsers = apiUsers.map((u: any) => ({
+            id: u.id,
+            username: u.email?.split('@')[0] || '',
+            fullName: u.name || '',
+            email: u.email || '',
+            role: u.role === 'ORGANIZATION_OWNER' || u.role === 'MODULE_ADMIN' ? 'admin' : 
+                  u.role === 'MANAGER' ? 'manager' : 'receptionist',
+            active: true,
+            createdAt: u.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0]
+          }))
+          setUsers(mappedUsers)
+        }
+      } else {
+        const err = await res.json()
+        alert(err.error || 'შეცდომა წაშლისას')
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      alert('შეცდომა წაშლისას')
+    }
   }
   
   const handleToggleActive = (userId: string) => {

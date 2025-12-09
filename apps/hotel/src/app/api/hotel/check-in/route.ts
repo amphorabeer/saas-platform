@@ -1,23 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@saas-platform/database'
+import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json()
+    const tenantId = await getTenantId()
     
-    // Get first organization's tenant ID (in production, get from auth/session)
-    const org = await prisma.organization.findFirst()
-    
-    if (!org) {
-      return NextResponse.json(
-        { error: 'No organization found' },
-        { status: 404 }
-      )
+    if (!tenantId) {
+      return unauthorizedResponse()
     }
+    
+    const data = await request.json()
     
     // Get room for validation
     const room = await prisma.hotelRoom.findUnique({
-      where: { id: data.roomId }
+      where: { 
+        id: data.roomId,
+        tenantId, // Ensure tenant isolation
+      }
     })
     
     if (!room) {
@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
     // Create reservation
     const reservation = await prisma.hotelReservation.create({
       data: {
-        tenantId: org.tenantId,
+        tenantId,
         roomId: data.roomId,
         guestName: data.guestName,
-        guestEmail: data.guestEmail,
+        guestEmail: data.guestEmail || '',
         guestPhone: data.guestPhone || '',
         checkIn: checkIn,
         checkOut: checkOut,
@@ -50,17 +50,34 @@ export async function POST(request: NextRequest) {
         children: data.children || 0,
         totalAmount: totalAmount,
         paidAmount: 0,
-        status: 'CONFIRMED'
-      }
+        status: 'CHECKED_IN',
+        source: data.source || 'direct',
+        companyName: data.companyName || null,
+        companyTaxId: data.companyTaxId || null,
+        companyAddress: data.companyAddress || null,
+        companyBank: data.companyBank || null,
+        companyBankAccount: data.companyBankAccount || null,
+        notes: data.notes,
+      },
+      include: { room: true },
     })
     
     // Update room status to OCCUPIED
     await prisma.hotelRoom.update({
-      where: { id: data.roomId },
+      where: { 
+        id: data.roomId,
+        tenantId, // Ensure tenant isolation
+      },
       data: { status: 'OCCUPIED' }
     })
     
-    return NextResponse.json(reservation)
+    // Return reservation with roomNumber
+    return NextResponse.json({
+      ...reservation,
+      roomNumber: room.roomNumber,
+      roomType: room.roomType || null,
+      roomPrice: room.basePrice
+    })
   } catch (error: any) {
     console.error('Error creating reservation:', error)
     return NextResponse.json(

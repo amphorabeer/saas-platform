@@ -29,6 +29,59 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
     phone: '',
     email: ''
   })
+  const [rooms, setRooms] = useState<any[]>([])
+  
+  // Load rooms from localStorage
+  useEffect(() => {
+    const savedRooms = localStorage.getItem('rooms') || 
+                       localStorage.getItem('simpleRooms') || 
+                       localStorage.getItem('hotelRooms')
+    if (savedRooms) {
+      try {
+        setRooms(JSON.parse(savedRooms))
+      } catch (e) {
+        console.error('Error loading rooms:', e)
+      }
+    }
+  }, [])
+  
+  // Helper function to get room number from roomId
+  const getRoomNumber = (roomIdOrNumber: string | undefined): string => {
+    if (!roomIdOrNumber) return '-'
+    
+    // If it's already a short room number (like "101", "202"), return it
+    if (roomIdOrNumber.length <= 4 && /^\d+$/.test(roomIdOrNumber)) {
+      return roomIdOrNumber
+    }
+    
+    // Try to find room in rooms state first
+    let roomsToSearch = rooms
+    
+    // If rooms state is empty, try loading directly from localStorage
+    if (!roomsToSearch || roomsToSearch.length === 0) {
+      try {
+        const savedRooms = localStorage.getItem('rooms') || 
+                           localStorage.getItem('simpleRooms') || 
+                           localStorage.getItem('hotelRooms')
+        if (savedRooms) {
+          roomsToSearch = JSON.parse(savedRooms)
+        }
+      } catch (e) {
+        console.error('Error loading rooms in getRoomNumber:', e)
+      }
+    }
+    
+    // Try to find room by ID
+    if (roomsToSearch && roomsToSearch.length > 0) {
+      const room = roomsToSearch.find((r: any) => r.id === roomIdOrNumber)
+      if (room) {
+        return room.roomNumber || room.number || roomIdOrNumber
+      }
+    }
+    
+    // Return truncated CUID as fallback
+    return roomIdOrNumber.length > 10 ? roomIdOrNumber.slice(0, 6) + '...' : roomIdOrNumber
+  }
   
   // Load hotel info from Settings
   useEffect(() => {
@@ -166,7 +219,7 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
     const transaction: FolioTransaction = {
       id: `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       folioId: folio.id,
-      date: moment().format('YYYY-MM-DD'),
+      date: typeof window !== 'undefined' ? (localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD')) : moment().format('YYYY-MM-DD'),
       time: moment().format('HH:mm:ss'),
       
       type: 'payment',
@@ -240,7 +293,7 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
             <div class="folio-info">
               <div>
                 <p><strong>Guest:</strong> ${folio.guestName}</p>
-                <p><strong>Room:</strong> ${folio.roomNumber}</p>
+                <p><strong>Room:</strong> ${getRoomNumber(folio.roomNumber)}</p>
                 <p><strong>Date:</strong> ${moment().format('DD/MM/YYYY HH:mm')}</p>
               </div>
               <div class="balance">
@@ -375,7 +428,7 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
         <div className="flex justify-between items-start">
           <div>
             <p className="text-gray-500 text-sm">Folio #{folio.folioNumber}</p>
-            <p className="text-gray-600 font-medium mt-1">{folio.guestName} - Room {folio.roomNumber}</p>
+            <p className="text-gray-600 font-medium mt-1">{folio.guestName} - Room {getRoomNumber(folio.roomNumber)}</p>
             <p className="text-sm text-gray-500 mt-1">Status: <span className={`font-medium ${
               folio.status === 'open' ? 'text-green-600' :
               folio.status === 'closed' ? 'text-gray-600' :
@@ -862,4 +915,3 @@ const PaymentModal = ({ amount, onPost, onCancel }: { amount: number; onPost: (p
     </div>
   )
 }
-

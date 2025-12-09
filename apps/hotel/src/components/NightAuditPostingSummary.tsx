@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import moment from 'moment'
 
 interface PostingResult {
@@ -32,6 +32,61 @@ export default function NightAuditPostingSummary({
   date, 
   postingResults 
 }: NightAuditPostingSummaryProps) {
+  
+  // Load rooms for room number lookup
+  const [rooms, setRooms] = useState<any[]>([])
+  
+  useEffect(() => {
+    // Try multiple localStorage keys for rooms
+    const savedRooms = localStorage.getItem('rooms') || 
+                       localStorage.getItem('simpleRooms') || 
+                       localStorage.getItem('hotelRooms')
+    if (savedRooms) {
+      try {
+        setRooms(JSON.parse(savedRooms))
+      } catch (e) {
+        console.error('Error loading rooms:', e)
+      }
+    }
+  }, [])
+  
+  // Helper function to get room number from roomId
+  const getRoomNumber = (roomIdOrNumber: string | undefined): string => {
+    if (!roomIdOrNumber) return '-'
+    
+    // If it's already a short room number (like "101", "202"), return it
+    if (roomIdOrNumber.length <= 4 && /^\d+$/.test(roomIdOrNumber)) {
+      return roomIdOrNumber
+    }
+    
+    // Try to find room in rooms state first
+    let roomsToSearch = rooms
+    
+    // If rooms state is empty, try loading directly from localStorage
+    if (!roomsToSearch || roomsToSearch.length === 0) {
+      try {
+        const savedRooms = localStorage.getItem('rooms') || 
+                           localStorage.getItem('simpleRooms') || 
+                           localStorage.getItem('hotelRooms')
+        if (savedRooms) {
+          roomsToSearch = JSON.parse(savedRooms)
+        }
+      } catch (e) {
+        console.error('Error loading rooms in getRoomNumber:', e)
+      }
+    }
+    
+    // Try to find room by ID
+    if (roomsToSearch && roomsToSearch.length > 0) {
+      const room = roomsToSearch.find((r: any) => r.id === roomIdOrNumber)
+      if (room) {
+        return room.roomNumber || room.number || roomIdOrNumber
+      }
+    }
+    
+    // Return truncated CUID as fallback
+    return roomIdOrNumber.length > 10 ? roomIdOrNumber.slice(0, 6) + '...' : roomIdOrNumber
+  }
   
   // Calculate tax breakdown from all successful postings
   const calculateTaxSummary = () => {
@@ -119,7 +174,7 @@ export default function NightAuditPostingSummary({
             <tbody>
               {postingResults.details.map((detail: any, i: number) => (
                 <tr key={i} className={`border-t hover:bg-gray-50 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                  <td className="px-4 py-2">{detail.room || '-'}</td>
+                  <td className="px-4 py-2">{getRoomNumber(detail.room)}</td>
                   <td className="px-4 py-2">{detail.guest || '-'}</td>
                   <td className="px-4 py-2 text-right">
                     {detail.breakdown?.netRate ? `₾${detail.breakdown.netRate.toFixed(2)}` : '-'}
@@ -191,6 +246,3 @@ export default function NightAuditPostingSummary({
     </div>
   )
 }
-
-
-

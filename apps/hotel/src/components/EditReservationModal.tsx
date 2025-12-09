@@ -31,6 +31,7 @@ export default function EditReservationModal({
     adults: reservation.adults || 1,
     children: reservation.children || 0,
     totalAmount: reservation.totalAmount,
+    source: reservation.source || 'direct',
     notes: reservation.notes || '',
     status: reservation.status,
     // Company fields
@@ -128,8 +129,8 @@ export default function EditReservationModal({
   
   // Check if room is available for given dates (excluding current reservation)
   const isRoomAvailable = (roomId: string, checkIn: string, checkOut: string): boolean => {
-    const checkInDate = moment(checkIn)
-    const checkOutDate = moment(checkOut)
+    const checkInDate = moment(checkIn).clone().startOf('day')
+    const checkOutDate = moment(checkOut).clone().startOf('day')
     
     return !reservations.some(res => {
       // Skip current reservation
@@ -138,15 +139,28 @@ export default function EditReservationModal({
       // Skip cancelled/no-show
       if (['CANCELLED', 'NO_SHOW'].includes(res.status)) return false
       
-      // Check if same room
-      if (res.roomId !== roomId) return false
+      // ✅ FIX: Check if same room - handle both roomId and room.id
+      const resRoomId = res.roomId || res.room?.id
+      if (!resRoomId || resRoomId !== roomId) return false
       
-      // Check date overlap
-      const resCheckIn = moment(res.checkIn)
-      const resCheckOut = moment(res.checkOut)
+      // Check date overlap - use clone() to avoid mutation!
+      const resCheckIn = moment(res.checkIn).clone().startOf('day')
+      const resCheckOut = moment(res.checkOut).clone().startOf('day')
       
-      // Overlap exists if: checkIn < resCheckOut AND checkOut > resCheckIn
-      return checkInDate.isBefore(resCheckOut) && checkOutDate.isAfter(resCheckIn)
+      // ✅ FIX: Overlap exists only if: checkIn < resCheckOut AND checkOut > resCheckIn
+      // Same day checkout/checkin is NOT overlap (checkout day is free for new checkin)
+      const overlaps = checkInDate.isBefore(resCheckOut) && checkOutDate.isAfter(resCheckIn)
+      
+      console.log('EditModal overlap check:', {
+        newCheckIn: checkInDate.format('YYYY-MM-DD'),
+        newCheckOut: checkOutDate.format('YYYY-MM-DD'),
+        existingGuest: res.guestName,
+        existingCheckIn: resCheckIn.format('YYYY-MM-DD'),
+        existingCheckOut: resCheckOut.format('YYYY-MM-DD'),
+        overlaps
+      })
+      
+      return overlaps
     })
   }
   
@@ -155,13 +169,20 @@ export default function EditReservationModal({
     return rooms.map(room => ({
       ...room,
       available: isRoomAvailable(room.id, formData.checkIn, formData.checkOut),
-      conflictingReservation: reservations.find(res => 
-        res.id !== reservation.id &&
-        res.roomId === room.id &&
-        !['CANCELLED', 'NO_SHOW'].includes(res.status) &&
-        moment(formData.checkIn).isBefore(moment(res.checkOut)) &&
-        moment(formData.checkOut).isAfter(moment(res.checkIn))
-      )
+      conflictingReservation: reservations.find(res => {
+        if (res.id === reservation.id) return false
+        const resRoomId = res.roomId || res.room?.id
+        if (resRoomId !== room.id) return false
+        if (['CANCELLED', 'NO_SHOW'].includes(res.status)) return false
+        
+        // Use clone() to avoid mutation
+        const checkIn = moment(formData.checkIn).clone().startOf('day')
+        const checkOut = moment(formData.checkOut).clone().startOf('day')
+        const resCheckIn = moment(res.checkIn).clone().startOf('day')
+        const resCheckOut = moment(res.checkOut).clone().startOf('day')
+        
+        return checkIn.isBefore(resCheckOut) && checkOut.isAfter(resCheckIn)
+      })
     }))
   }
   
@@ -244,12 +265,18 @@ export default function EditReservationModal({
     }
     
     onSave({
-      ...formData,
-      companyName: showCompany ? formData.companyName : '',
-      companyTaxId: showCompany ? formData.companyTaxId : '',
-      companyAddress: showCompany ? formData.companyAddress : '',
-      companyBank: showCompany ? formData.companyBank : '',
-      companyBankAccount: showCompany ? formData.companyBankAccount : ''
+      guestName: formData.guestName,
+      guestEmail: formData.guestEmail || '',  // ✅ empty string
+      guestPhone: formData.guestPhone || '',
+      roomId: formData.roomId,
+      checkIn: formData.checkIn,
+      checkOut: formData.checkOut,
+      adults: formData.adults,
+      children: formData.children,
+      totalAmount: formData.totalAmount,
+      status: formData.status,
+      source: formData.source || 'direct',
+      notes: formData.notes || ''  // ✅ empty string
     })
   }
   
@@ -601,6 +628,29 @@ export default function EditReservationModal({
             </div>
           </div>
           
+          {/* Booking Source */}
+          <div className="mb-4">
+            <label className="block text-xs text-gray-500 mb-1">📊 ჯავშნის წყარო</label>
+            <select
+              className={`w-full border rounded-lg px-3 py-2 text-sm ${
+                !isEditable ? 'bg-gray-100 cursor-not-allowed' : ''
+              }`}
+              value={formData.source}
+              onChange={(e) => setFormData({...formData, source: e.target.value})}
+              disabled={!isEditable}
+            >
+              <option value="direct">🏨 Direct (პირდაპირი)</option>
+              <option value="booking">🅱️ Booking.com</option>
+              <option value="airbnb">🏠 Airbnb</option>
+              <option value="expedia">🌐 Expedia</option>
+              <option value="phone">📞 ტელეფონით</option>
+              <option value="tour_company">🚌 ტურისტული კომპანია</option>
+              <option value="corporate">🏢 კორპორატიული</option>
+              <option value="travel_agent">✈️ ტურ. სააგენტო</option>
+              <option value="other">📋 სხვა</option>
+            </select>
+          </div>
+
           {/* Notes */}
           <div className="mb-4">
             <label className="block text-xs text-gray-500 mb-1">📝 შენიშვნები</label>

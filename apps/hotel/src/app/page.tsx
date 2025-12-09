@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import moment from 'moment'
@@ -22,12 +23,10 @@ import FolioSystem from '../components/FolioSystem'
 import CashierManagement from '../components/CashierModule'
 import FinancialDashboard from '../components/FinancialDashboard'
 import SettingsNew from '../components/SettingsNew'
-import QuickSettingsMenu from '../components/QuickSettingsMenu'
 import { SystemLockService } from '../lib/systemLockService'
 import { ActivityLogger } from '../lib/activityLogger'
 import { FolioService } from '../services/FolioService'
 import { RESERVATION_STATUS, ROOM_STATUS } from '../constants/statusConstants'
-import { calculateCashBalance } from '../utils/cashierCalculations'
 
 interface Room {
   id: string
@@ -56,70 +55,55 @@ export default function HotelDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeTabs, setActiveTabs] = useState<string[]>(['dashboard', 'calendar']) // Start with dashboard
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>('trial')
   const [showQuickMenu, setShowQuickMenu] = useState(false)
   const [rooms, setRooms] = useState<Room[]>([])
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
   const [maintenanceRooms, setMaintenanceRooms] = useState<string[]>([])
   const [hotelInfo, setHotelInfo] = useState<any>({ name: 'Hotel Tbilisi', logo: '' })
-  const [cashierBalance, setCashierBalance] = useState({ cash: 0, card: 0, bank: 0, total: 0 })
-  const [cashierRefreshKey, setCashierRefreshKey] = useState(0)
   
-  // Update cashier balance periodically and on storage changes
-  useEffect(() => {
-    const updateCashierBalance = () => {
-      const balance = calculateCashBalance()
-      setCashierBalance(balance)
-    }
-    
-    // Initial load
-    updateCashierBalance()
-    
-    // Update every 5 seconds
-    const interval = setInterval(updateCashierBalance, 5000)
-    
-    // Listen for storage changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'currentCashierShift' || 
-          e.key === 'hotelFolios' || 
-          e.key === 'cashierManualTransactions') {
-        updateCashierBalance()
-      }
-    }
-    
-    window.addEventListener('storage', handleStorageChange)
-    
-    return () => {
-      clearInterval(interval)
-      window.removeEventListener('storage', handleStorageChange)
-    }
-  }, [cashierRefreshKey])
+  // Auth check - NextAuth
+  const { data: session, status } = useSession()
   
-  // Auth check
   useEffect(() => {
-    const user = localStorage.getItem('currentUser')
-    if (!user) {
+    if (status === 'unauthenticated') {
       router.push('/login')
-    } else {
+    } else if (status === 'authenticated' && session?.user) {
+      setCurrentUser({
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role || 'admin',
+        tenantId: session.user.tenantId
+      })
+    }
+  }, [status, session, router])
+  
+  // Fetch subscription status
+  useEffect(() => {
+    const fetchSubscriptionStatus = async () => {
       try {
-        setCurrentUser(JSON.parse(user))
-        // Login is already logged in login page
-      } catch (e) {
-        console.error('Failed to parse user:', e)
-        router.push('/login')
+        const res = await fetch('/api/auth/subscription')
+        if (res.ok) {
+          const data = await res.json()
+          setSubscriptionStatus(data.status || 'trial')
+        }
+      } catch (error) {
+        console.log('Could not fetch subscription status')
       }
     }
-  }, [router])
+    fetchSubscriptionStatus()
+  }, [])
   
   // Role-based permissions
   const canEdit = currentUser?.role === 'admin' || currentUser?.role === 'manager'
   const canViewReports = currentUser?.role !== 'receptionist'
-  const canCloseDay = currentUser?.role === 'admin'
+  const canCloseDay = currentUser?.role === 'admin' || currentUser?.role === 'MODULE_ADMIN' || currentUser?.role === 'ORGANIZATION_OWNER'
   
-  const handleLogout = () => {
-    ActivityLogger.log('LOGOUT', { username: currentUser?.username })
-    localStorage.removeItem('currentUser')
-    router.push('/login')
+  const handleLogout = async () => {
+    ActivityLogger.log('LOGOUT', { username: currentUser?.name })
+    await signOut({ callbackUrl: '/login' })
   }
 
   // Load maintenance rooms from localStorage
@@ -621,6 +605,11 @@ export default function HotelDashboard() {
       if (res.ok) {
         const data = await res.json()
         setRooms(data)
+        // CRITICAL: Save to localStorage for FolioSystem, NightAudit, etc.
+        if (data && data.length > 0) {
+          localStorage.setItem('rooms', JSON.stringify(data))
+          sessionStorage.setItem('apiRooms', JSON.stringify(data))
+        }
       }
     } catch (error) {
       console.error('Failed to load rooms:', error)
@@ -723,8 +712,26 @@ export default function HotelDashboard() {
 
   // Helper function to create folio for reservation with room charges
   const createFolioForReservation = (reservation: any) => {
+    // Ensure reservation has real roomNumber, not just roomId
+    const reservationWithRoomNumber = {
+      ...reservation,
+      roomNumber: (() => {
+        // If already has valid roomNumber, use it
+        if (reservation.roomNumber && reservation.roomNumber.length <= 4 && /^\d+$/.test(reservation.roomNumber)) {
+          return reservation.roomNumber
+        }
+        // Find room by roomId and get roomNumber
+        const room = rooms.find(r => r.id === reservation.roomId || r.id === reservation.roomNumber)
+        if (room) {
+          return room.roomNumber || room.number
+        }
+        // Fallback
+        return reservation.roomNumber || reservation.roomId
+      })()
+    }
+    
     // Use centralized FolioService
-    return FolioService.createFolioForReservation(reservation, {
+    return FolioService.createFolioForReservation(reservationWithRoomNumber, {
       prePostCharges: true,
       paymentMethod: reservation.paymentMethod
     })
@@ -976,8 +983,8 @@ export default function HotelDashboard() {
                 </div>
               </div>
               
-              {/* Clear Test Data - Development Only */}
-              {process.env.NODE_ENV === 'development' && (
+              {/* Clear Test Data - Trial Only */}
+              {subscriptionStatus === 'trial' && (
                 <button
                   onClick={async () => {
                     if (confirm('⚠️ წაიშალოს ყველა ჯავშანი, Night Audit მონაცემები, სალაროს მონაცემები, ტესტ მონაცემი, გადახდების ისტორია და Financial Dashboard მონაცემები?\n\nეს ოპერაცია შეუქცევადია!')) {
@@ -1278,6 +1285,28 @@ export default function HotelDashboard() {
                 <div className="text-sm opacity-75">Close business day</div>
               </button>
               
+              {/* Housekeeping */}
+              <button
+                onClick={() => addTabFromMenu('housekeeping')}
+                className="bg-teal-500 text-white p-6 rounded-lg hover:bg-teal-600 transition-all transform hover:scale-105 shadow-lg text-left"
+              >
+                <div className="text-4xl mb-2">🧹</div>
+                <div className="text-xl font-bold">დასუფთავება</div>
+                <div className="text-sm opacity-75">Housekeeping tasks</div>
+              </button>
+              
+              {/* Reports */}
+              {canViewReports && (
+                <button
+                  onClick={() => addTabFromMenu('reports')}
+                  className="bg-pink-500 text-white p-6 rounded-lg hover:bg-pink-600 transition-all transform hover:scale-105 shadow-lg text-left"
+                >
+                  <div className="text-4xl mb-2">📈</div>
+                  <div className="text-xl font-bold">რეპორტები</div>
+                  <div className="text-sm opacity-75">Reports & Analytics</div>
+                </button>
+              )}
+              
               {/* Cashier Card */}
               {(() => {
                 const cashierSettings = typeof window !== 'undefined' 
@@ -1286,9 +1315,42 @@ export default function HotelDashboard() {
                 const currentCashierShift = typeof window !== 'undefined'
                   ? JSON.parse(localStorage.getItem('currentCashierShift') || 'null')
                   : null
+                const folios = typeof window !== 'undefined'
+                  ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+                  : []
+                const manualTx = typeof window !== 'undefined'
+                  ? JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+                  : []
                 
-                // Use state value (updated by useEffect)
-                const cashierTotals = currentCashierShift ? cashierBalance : { cash: 0, card: 0, bank: 0, total: 0 }
+                const businessDate = typeof window !== 'undefined'
+                  ? (localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD'))
+                  : moment().format('YYYY-MM-DD')
+                
+                let cash = 0, card = 0, total = 0
+                
+                if (currentCashierShift) {
+                  folios.forEach((folio: any) => {
+                    folio.transactions?.forEach((t: any) => {
+                      if (t.credit > 0 && t.date === businessDate) {
+                        const amount = t.credit
+                        if (t.paymentMethod === 'cash') cash += amount
+                        else if (t.paymentMethod === 'card') card += amount
+                        total += amount
+                      }
+                    })
+                  })
+                  
+                  manualTx.forEach((t: any) => {
+                    if (t.date === businessDate && t.type === 'income') {
+                      const amount = t.amount || 0
+                      if (t.method === 'cash') cash += amount
+                      else if (t.method === 'card') card += amount
+                      total += amount
+                    }
+                  })
+                }
+                
+                const cashierTotals = { cash, card, total }
                 
                 if (!cashierSettings?.cashierEnabled) return null
                 
@@ -1443,7 +1505,7 @@ export default function HotelDashboard() {
         
         
         {activeTab === 'folios' && (
-          <FolioSystem />
+          <FolioSystem rooms={rooms} />
         )}
         
         {activeTab === 'housekeeping' && (
@@ -1466,7 +1528,7 @@ export default function HotelDashboard() {
         )}
         
         {activeTab === 'new-night-audit' && (
-          <NightAuditModule />
+          <NightAuditModule rooms={rooms} />
         )}
         
         {activeTab === 'cashier' && (
@@ -1614,8 +1676,6 @@ export default function HotelDashboard() {
       {/* System Lock Overlay - Always at the end */}
       <SystemLockOverlay />
       
-      {/* Quick Settings Menu (Floating) */}
-      <QuickSettingsMenu />
 
       {/* Arrivals Modal - Today's Check-ins */}
       {showArrivalsModal && (
@@ -1786,8 +1846,20 @@ export default function HotelDashboard() {
                 <button
                   onClick={async () => {
                     try {
+                      // Before creating folio, ensure checkInReservation has real roomNumber
+                      const reservationForFolio = {
+                        ...checkInReservation,
+                        roomNumber: (() => {
+                          if (checkInReservation.roomNumber && checkInReservation.roomNumber.length <= 4 && /^\d+$/.test(checkInReservation.roomNumber)) {
+                            return checkInReservation.roomNumber
+                          }
+                          const room = rooms.find(r => r.id === checkInReservation.roomId || r.id === checkInReservation.roomNumber)
+                          return room?.roomNumber || room?.number || checkInReservation.roomNumber
+                        })()
+                      }
+                      
                       // Create folio using the existing function
-                      const newFolio = createFolioForReservation(checkInReservation)
+                      const newFolio = createFolioForReservation(reservationForFolio)
                       
                       // Update reservation status
                       await updateReservation(checkInReservation.id, {
@@ -1942,9 +2014,9 @@ function RoomCard({ room, onClick, onStatusChange }: {
       <div className="text-xs font-medium mb-2">
         {config.label}
       </div>
-      <div className="text-xs text-gray-600">
+      {/* <div className="text-xs text-gray-600">
         ₾{room.basePrice}/ღამე
-      </div>
+      </div> */}
       
       {room.status === 'VACANT' && (
         <button 

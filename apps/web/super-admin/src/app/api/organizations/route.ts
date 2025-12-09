@@ -1,11 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@saas-platform/database'
 
+// Generate unique 4-digit hotel code
+async function generateHotelCode(): Promise<string> {
+  let code: string
+  let exists = true
+  
+  while (exists) {
+    code = Math.floor(1000 + Math.random() * 9000).toString()
+    const existing = await prisma.organization.findFirst({
+      where: { hotelCode: code }
+    })
+    exists = !!existing
+  }
+  
+  return code!
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
+    const limit = parseInt(searchParams.get('limit') || '100')
     const skip = (page - 1) * limit
 
     const [organizations, total] = await Promise.all([
@@ -14,7 +30,7 @@ export async function GET(request: NextRequest) {
         take: limit,
         include: {
           subscription: true,
-          modules: true, // ModuleAccess relation
+          modules: true,
           _count: {
             select: { users: true }
           }
@@ -30,11 +46,12 @@ export async function GET(request: NextRequest) {
       name: org.name,
       email: org.email,
       slug: org.slug,
+      hotelCode: org.hotelCode || '',
       status: org.subscription?.status?.toLowerCase() || 'trial',
       plan: org.subscription?.plan || 'STARTER',
       users: org._count.users,
-      modules: org.modules.map(m => m.moduleType), // ModuleAccess has moduleType
-      revenue: org.subscription ? Number(org.subscription.price) * 12 : 0, // Annual estimate
+      modules: org.modules.map(m => m.moduleType),
+      revenue: org.subscription ? Number(org.subscription.price) * 12 : 0,
       createdAt: org.createdAt.toISOString().split('T')[0]
     }))
 
@@ -46,51 +63,58 @@ export async function GET(request: NextRequest) {
     })
   } catch (error: any) {
     console.error('Failed to fetch organizations:', error)
-    
-    // Fallback to static data if database fails
     return NextResponse.json({
-      organizations: [
-        {
-          id: "1",
-          name: "Hotel Tbilisi",
-          email: "info@hoteltbilisi.ge",
-          slug: "hotel-tbilisi",
-          status: "active",
-          plan: "PROFESSIONAL",
-          users: 12,
-          modules: ["HOTEL"],
-          revenue: 2340,
-          createdAt: "2024-01-15",
-        },
-        {
-          id: "2",
-          name: "Beauty House",
-          email: "hello@beautyhouse.ge",
-          slug: "beauty-house",
-          status: "active",
-          plan: "ENTERPRISE",
-          users: 8,
-          modules: ["BEAUTY"],
-          revenue: 3200,
-          createdAt: "2024-02-20",
-        },
-        {
-          id: "3",
-          name: "Restaurant Plaza",
-          email: "contact@restaurantplaza.ge",
-          slug: "restaurant-plaza",
-          status: "trial",
-          plan: "STARTER",
-          users: 3,
-          modules: ["RESTAURANT"],
-          revenue: 0,
-          createdAt: "2024-03-10",
-        }
-      ],
-      total: 3,
+      organizations: [],
+      total: 0,
       page: 1,
-      totalPages: 1
+      totalPages: 0,
+      error: error.message
     })
   }
 }
 
+// CREATE new organization
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { name, email, slug, plan, status, modules } = body
+
+    if (!name || !email || !slug) {
+      return NextResponse.json({ error: 'Name, email, and slug are required' }, { status: 400 })
+    }
+
+    const existingOrg = await prisma.organization.findFirst({ where: { slug } })
+    if (existingOrg) {
+      return NextResponse.json({ error: 'Slug already exists' }, { status: 409 })
+    }
+
+    const hotelCode = await generateHotelCode()
+
+    const organization = await prisma.organization.create({
+      data: { name, email, slug, hotelCode }
+    })
+
+    await prisma.subscription.create({
+      data: {
+        organizationId: organization.id,
+        plan: plan || 'STARTER',
+        status: (status || 'trial').toUpperCase(),
+        price: 0,
+        startDate: new Date(),
+      }
+    })
+
+    if (modules && Array.isArray(modules)) {
+      for (const moduleType of modules) {
+        await prisma.moduleAccess.create({
+          data: { organizationId: organization.id, moduleType, isActive: true }
+        })
+      }
+    }
+
+    return NextResponse.json({ success: true, organization: { ...organization, hotelCode } })
+  } catch (error: any) {
+    console.error('Failed to create organization:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}

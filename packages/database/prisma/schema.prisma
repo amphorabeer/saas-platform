@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -63,9 +64,19 @@ model Organization {
   phone             String?
   address           String?
   logo              String?
+  
+  // Hotel Info
+  company           String?
+  taxId             String?
+  city              String?
+  country           String?            @default("Georgia")
+  website           String?
+  bankName          String?
+  bankAccount       String?
 
   // Multi-tenancy
   tenantId          String             @unique @default(cuid())
+  hotelCode         String             @unique
   databaseUrl       String?
 
   // Relations
@@ -375,8 +386,9 @@ model HotelReservation {
   room              HotelRoom          @relation(fields: [roomId], references: [id])
 
   guestName         String
-  guestEmail        String
-  guestPhone        String
+  guestEmail        String?
+  guestPhone        String?
+  guestCountry      String?
 
   checkIn           DateTime
   checkOut          DateTime
@@ -388,6 +400,16 @@ model HotelReservation {
   paidAmount        Decimal            @db.Decimal(10, 2) @default(0)
 
   status            String
+
+  // Booking source
+  source            String?            @default("Direct")
+
+  // Company fields
+  companyName       String?
+  companyTaxId      String?
+  companyAddress    String?
+  companyBank       String?
+  companyBankAccount String?
 
   notes             String?
 

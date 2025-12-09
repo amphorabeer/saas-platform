@@ -18,6 +18,45 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
   const [customStartDate, setCustomStartDate] = useState(moment().subtract(30, 'days').format('YYYY-MM-DD'))
   const [customEndDate, setCustomEndDate] = useState(moment().format('YYYY-MM-DD'))
   const [isExporting, setIsExporting] = useState(false)
+  const [selectedSource, setSelectedSource] = useState<string | null>(null)
+  
+  // Helper function to get room number from roomId
+  const getRoomNumber = (roomIdOrNumber: string | undefined): string => {
+    if (!roomIdOrNumber) return '-'
+    
+    // If it's already a short room number (like "101", "202"), return it
+    if (roomIdOrNumber.length <= 4 && /^\d+$/.test(roomIdOrNumber)) {
+      return roomIdOrNumber
+    }
+    
+    // Try to find room in rooms prop first
+    let roomsToSearch = rooms
+    
+    // If rooms prop is empty, try loading directly from localStorage
+    if (!roomsToSearch || roomsToSearch.length === 0) {
+      try {
+        const savedRooms = localStorage.getItem('rooms') || 
+                           localStorage.getItem('simpleRooms') || 
+                           localStorage.getItem('hotelRooms')
+        if (savedRooms) {
+          roomsToSearch = JSON.parse(savedRooms)
+        }
+      } catch (e) {
+        console.error('Error loading rooms in getRoomNumber:', e)
+      }
+    }
+    
+    // Try to find room by ID
+    if (roomsToSearch && roomsToSearch.length > 0) {
+      const room = roomsToSearch.find((r: any) => r.id === roomIdOrNumber)
+      if (room) {
+        return room.roomNumber || room.number || roomIdOrNumber
+      }
+    }
+    
+    // Return truncated CUID as fallback
+    return roomIdOrNumber.length > 10 ? roomIdOrNumber.slice(0, 6) + '...' : roomIdOrNumber
+  }
   
   // Calculate date range
   const { startDate, endDate } = useMemo(() => {
@@ -69,29 +108,27 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
       dailyRevenue[date] = 0
     }
     
-    // Calculate revenue from checked-out reservations
-    filteredReservations.forEach(res => {
-      if (res.status === 'CHECKED_OUT') {
-        const checkOutDate = moment(res.checkOut).format('YYYY-MM-DD')
-        if (dailyRevenue[checkOutDate] !== undefined) {
-          dailyRevenue[checkOutDate] += res.totalAmount || 0
-        }
-      }
-    })
-    
-    // Also add from folios
-    folios.forEach(folio => {
+    // Revenue = Charges ONLY from folios (NOT payments, NOT reservation.totalAmount)
+    folios.forEach((folio: any) => {
       (folio.transactions || []).forEach((t: any) => {
-        if (t.type === 'payment') {
-          const date = moment(t.date).format('YYYY-MM-DD')
-          if (dailyRevenue[date] !== undefined) {
-            dailyRevenue[date] += t.credit || 0
+        // ONLY charges, NOT payments
+        if (t.type === 'charge') {
+          // Use date, nightAuditDate, or postedAt as fallback
+          const chargeDate = t.date || t.nightAuditDate || moment(t.postedAt).format('YYYY-MM-DD')
+          const dateStr = moment(chargeDate).format('YYYY-MM-DD')
+          
+          // Check if date is in range
+          if (dailyRevenue.hasOwnProperty(dateStr)) {
+            // Exclude adjustment transactions (from resize operations)
+            if (t.id && t.id.startsWith('adj-')) return
+            
+            dailyRevenue[dateStr] += Number(t.debit || t.amount || 0)
           }
         }
       })
     })
     
-    const totalRevenue = Object.values(dailyRevenue).reduce((sum, val) => sum + val, 0)
+    const totalRevenue = Object.values(dailyRevenue).reduce((sum, val) => sum + Number(val || 0), 0)
     const avgDaily = days > 0 ? totalRevenue / days : 0
     
     return {
@@ -100,7 +137,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
       avgDaily,
       days
     }
-  }, [filteredReservations, folios, startDate, endDate])
+  }, [folios, startDate, endDate])
   
   // =============== OCCUPANCY REPORT ===============
   const occupancyData = useMemo(() => {
@@ -146,7 +183,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
       const existing = guests.get(email)
       if (existing) {
         existing.visits++
-        existing.totalSpent += res.totalAmount || 0
+        existing.totalSpent += Number(res.totalAmount || 0)
         if (moment(res.checkIn).isAfter(existing.lastVisit)) {
           existing.lastVisit = res.checkIn
         }
@@ -154,7 +191,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
         guests.set(email, {
           name: res.guestName,
           visits: 1,
-          totalSpent: res.totalAmount || 0,
+          totalSpent: Number(res.totalAmount || 0),
           lastVisit: res.checkIn
         })
       }
@@ -187,12 +224,44 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
       }
     })
     
+    // Count bookings and nights from reservations
     filteredReservations.forEach(res => {
       if (roomStats[res.roomId]) {
         roomStats[res.roomId].bookings++
-        roomStats[res.roomId].revenue += res.totalAmount || 0
         roomStats[res.roomId].nights += moment(res.checkOut).diff(moment(res.checkIn), 'days')
       }
+    })
+    
+    // Calculate revenue from folio charges ONLY (not reservation.totalAmount)
+    folios.forEach((folio: any) => {
+      // Find room by matching folio.roomNumber to room.roomNumber, then get room.id
+      const folioRoomNumber = folio.roomNumber
+      if (!folioRoomNumber) return
+      
+      // Find room by roomNumber
+      const matchedRoom = rooms.find((r: any) => 
+        r.roomNumber === folioRoomNumber || 
+        r.number === folioRoomNumber ||
+        r.id === folio.roomId
+      )
+      
+      if (!matchedRoom || !roomStats[matchedRoom.id]) return
+      
+      // Sum charges for this room within date range
+      (folio.transactions || []).forEach((t: any) => {
+        if (t.type === 'charge' && t.category === 'room') {
+          const chargeDate = t.date || t.nightAuditDate || moment(t.postedAt).format('YYYY-MM-DD')
+          const dateMoment = moment(chargeDate)
+          
+          // Check if charge date is within report range
+          if (dateMoment.isSameOrAfter(startDate, 'day') && dateMoment.isSameOrBefore(endDate, 'day')) {
+            // Exclude adjustment transactions
+            if (t.id && t.id.startsWith('adj-')) return
+            
+            roomStats[matchedRoom.id].revenue += Number(t.debit || t.amount || 0)
+          }
+        }
+      })
     })
     
     // Group by room type
@@ -202,7 +271,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
         byType[room.type] = { bookings: 0, revenue: 0, rooms: 0 }
       }
       byType[room.type].bookings += room.bookings
-      byType[room.type].revenue += room.revenue
+      byType[room.type].revenue += Number(room.revenue || 0)
       byType[room.type].rooms++
     })
     
@@ -210,7 +279,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
       rooms: Object.values(roomStats).sort((a, b) => b.revenue - a.revenue),
       byType
     }
-  }, [filteredReservations, rooms])
+  }, [filteredReservations, rooms, folios, startDate, endDate])
   
   // =============== PAYMENT REPORT ===============
   const paymentData = useMemo(() => {
@@ -237,17 +306,17 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
           
           if (byMethod[method]) {
             byMethod[method].count++
-            byMethod[method].amount += t.credit || 0
+            byMethod[method].amount += Number(t.credit || 0)
           }
           
           if (dailyPayments[date] !== undefined) {
-            dailyPayments[date] += t.credit || 0
+            dailyPayments[date] += Number(t.credit || 0)
           }
         }
       })
     })
     
-    const totalAmount = Object.values(byMethod).reduce((sum, m) => sum + m.amount, 0)
+    const totalAmount = Object.values(byMethod).reduce((sum, m) => sum + Number(m.amount || 0), 0)
     const totalCount = Object.values(byMethod).reduce((sum, m) => sum + m.count, 0)
     
     return {
@@ -264,7 +333,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
     const noShows = filteredReservations.filter(r => r.status === 'NO_SHOW')
     const total = filteredReservations.length
     
-    const lostRevenue = [...cancelled, ...noShows].reduce((sum, r) => sum + (r.totalAmount || 0), 0)
+    const lostRevenue = [...cancelled, ...noShows].reduce((sum, r) => sum + Number(r.totalAmount || 0), 0)
     
     return {
       cancelled: cancelled.length,
@@ -281,20 +350,46 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
   const sourceData = useMemo(() => {
     const bySource: { [source: string]: { count: number; revenue: number } } = {}
     
+    // Count reservations by source
     filteredReservations.forEach(res => {
       const source = res.source || res.bookingSource || 'Direct'
       if (!bySource[source]) {
         bySource[source] = { count: 0, revenue: 0 }
       }
       bySource[source].count++
-      bySource[source].revenue += res.totalAmount || 0
+    })
+    
+    // Calculate revenue from folio charges (not reservation.totalAmount)
+    folios.forEach((folio: any) => {
+      // Find reservation for this folio to get source
+      const reservation = filteredReservations.find((r: any) => r.id === folio.reservationId)
+      if (!reservation) return
+      
+      const source = reservation.source || reservation.bookingSource || 'Direct'
+      if (!bySource[source]) return
+      
+      // Sum charges for this folio within date range
+      (folio.transactions || []).forEach((t: any) => {
+        if (t.type === 'charge') {
+          const chargeDate = t.date || t.nightAuditDate || moment(t.postedAt).format('YYYY-MM-DD')
+          const dateMoment = moment(chargeDate)
+          
+          // Check if charge date is within report range
+          if (dateMoment.isSameOrAfter(startDate, 'day') && dateMoment.isSameOrBefore(endDate, 'day')) {
+            // Exclude adjustment transactions
+            if (t.id && t.id.startsWith('adj-')) return
+            
+            bySource[source].revenue += Number(t.debit || t.amount || 0)
+          }
+        }
+      })
     })
     
     return {
       bySource,
       total: filteredReservations.length
     }
-  }, [filteredReservations])
+  }, [filteredReservations, folios, startDate, endDate])
   
   // =============== EXPORT FUNCTIONS ===============
   const exportToCSV = () => {
@@ -510,10 +605,10 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
                     <div className="font-medium">{res.guestName}</div>
                     <div className="text-sm text-gray-500">{res.guestPhone || res.guestEmail}</div>
                   </td>
-                  <td className="p-3">{res.roomNumber}</td>
+                  <td className="p-3">{getRoomNumber(res.roomNumber || res.roomId)}</td>
                   <td className="p-3">{moment(res.checkIn).format('DD/MM/YYYY')}</td>
                   <td className="p-3">{moment(res.checkOut).format('DD/MM/YYYY')}</td>
-                  <td className="p-3 text-right">₾{(res.totalAmount || 0).toFixed(2)}</td>
+                  <td className="p-3 text-right">₾{Number(res.totalAmount || 0).toFixed(2)}</td>
                   <td className="p-3 text-center">
                     <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadge(res.status)}`}>
                       {getStatusLabel(res.status)}
@@ -769,7 +864,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
                 </div>
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
                   <div className="text-sm text-blue-600 font-medium">📊 საშუალო დღიური</div>
-                  <div className="text-3xl font-bold text-blue-700 mt-1">₾{revenueData.avgDaily.toFixed(0)}</div>
+                  <div className="text-3xl font-bold text-blue-700 mt-1">₾{Number(revenueData.avgDaily || 0).toFixed(0)}</div>
                 </div>
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
                   <div className="text-sm text-purple-600 font-medium">📅 დღეები</div>
@@ -1011,7 +1106,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
                         {cancellationData.list.slice(0, 10).map((res, i) => (
                           <tr key={i} className="border-t">
                             <td className="p-3 font-medium">{res.guestName}</td>
-                            <td className="p-3 text-center">{res.roomNumber || res.roomId}</td>
+                            <td className="p-3 text-center">{getRoomNumber(res.roomNumber || res.roomId)}</td>
                             <td className="p-3 text-center text-sm">{moment(res.checkIn).format('DD/MM/YY')}</td>
                             <td className="p-3 text-center">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -1035,37 +1130,103 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
           {activeReport === 'sources' && (
             <div>
               <h3 className="font-bold text-gray-700 mb-3">📊 ჯავშნების წყაროები</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                {Object.entries(sourceData.bySource).map(([source, data]) => {
-                  const percentage = sourceData.total > 0 ? Math.round((data.count / sourceData.total) * 100) : 0
-                  const icons: { [key: string]: string } = {
-                    'Direct': '🏨',
-                    'Booking.com': '🅱️',
-                    'Airbnb': '🏠',
-                    'Expedia': '✈️',
-                    'Phone': '📞',
-                    'Email': '📧',
-                    'Walk-in': '🚶'
-                  }
+              
+              {selectedSource ? (
+                <div>
+                  <button
+                    onClick={() => setSelectedSource(null)}
+                    className="mb-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm flex items-center gap-2"
+                  >
+                    ← უკან
+                  </button>
                   
-                  return (
-                    <div key={source} className="bg-white border rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-2xl">{icons[source] || '📋'}</span>
-                        <span className="font-medium text-gray-700">{source}</span>
+                  <h4 className="font-semibold text-gray-700 mb-3">
+                    {selectedSource} - {filteredReservations.filter((r: any) => (r.source || 'Direct') === selectedSource).length} ჯავშანი
+                  </h4>
+                  
+                  <div className="bg-white border rounded-lg overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="p-3 text-left text-xs font-medium text-gray-500">სტუმარი</th>
+                          <th className="p-3 text-left text-xs font-medium text-gray-500">ოთახი</th>
+                          <th className="p-3 text-left text-xs font-medium text-gray-500">Check-In</th>
+                          <th className="p-3 text-left text-xs font-medium text-gray-500">Check-Out</th>
+                          <th className="p-3 text-right text-xs font-medium text-gray-500">თანხა</th>
+                          <th className="p-3 text-center text-xs font-medium text-gray-500">სტატუსი</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredReservations
+                          .filter((r: any) => (r.source || 'Direct') === selectedSource)
+                          .map((res: any) => (
+                            <tr key={res.id} className="border-t hover:bg-gray-50">
+                              <td className="p-3">{res.guestName}</td>
+                              <td className="p-3">{getRoomNumber(res.roomNumber || res.roomId)}</td>
+                              <td className="p-3">{moment(res.checkIn).format('DD/MM/YYYY')}</td>
+                              <td className="p-3">{moment(res.checkOut).format('DD/MM/YYYY')}</td>
+                              <td className="p-3 text-right font-medium">₾{Number(res.totalAmount || 0).toFixed(2)}</td>
+                              <td className="p-3 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  res.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
+                                  res.status === 'CHECKED_IN' ? 'bg-blue-100 text-blue-700' :
+                                  res.status === 'CHECKED_OUT' ? 'bg-gray-100 text-gray-700' :
+                                  res.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
+                                  'bg-gray-100'
+                                }`}>
+                                  {res.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                    
+                    {filteredReservations.filter((r: any) => (r.source || 'Direct') === selectedSource).length === 0 && (
+                      <div className="p-8 text-center text-gray-500">
+                        ჯავშნები არ მოიძებნა
                       </div>
-                      <div className="text-2xl font-bold text-gray-800">{data.count} ჯავშანი</div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <div className="flex-1 bg-gray-100 rounded-full h-2">
-                          <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${percentage}%` }} />
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {Object.entries(sourceData.bySource).map(([source, data]) => {
+                    const percentage = sourceData.total > 0 ? Math.round((data.count / sourceData.total) * 100) : 0
+                    const icons: { [key: string]: string } = {
+                      'Direct': '🏨',
+                      'Booking.com': '🅱️',
+                      'Airbnb': '🏠',
+                      'Expedia': '✈️',
+                      'Phone': '📞',
+                      'Email': '📧',
+                      'Walk-in': '🚶'
+                    }
+                    
+                    return (
+                      <div 
+                        key={source} 
+                        className="bg-white border rounded-xl p-4 cursor-pointer hover:shadow-lg transition-shadow"
+                        onClick={() => setSelectedSource(source)}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">{icons[source] || '📋'}</span>
+                          <span className="font-medium text-gray-700">{source}</span>
                         </div>
-                        <span className="text-sm text-gray-500">{percentage}%</span>
+                        <div className="text-2xl font-bold text-gray-800">{data.count} ჯავშანი</div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <div className="flex-1 bg-gray-100 rounded-full h-2">
+                            <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${percentage}%` }} />
+                          </div>
+                          <span className="text-sm text-gray-500">{percentage}%</span>
+                        </div>
+                        <div className="text-sm text-green-600 mt-1">₾{data.revenue.toLocaleString()}</div>
+                        <div className="text-xs text-gray-400 mt-2 text-center">დააკლიკეთ დეტალებისთვის</div>
                       </div>
-                      <div className="text-sm text-green-600 mt-1">₾{data.revenue.toLocaleString()}</div>
-                    </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
           
@@ -1076,15 +1237,15 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
                   <p className="text-blue-600 text-sm font-medium">მთლიანი შემოსავალი</p>
-                  <p className="text-3xl font-bold text-blue-700 mt-1">₾{taxData.grossRevenue.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-blue-700 mt-1">₾{Number(taxData.grossRevenue || 0).toFixed(2)}</p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
                   <p className="text-green-600 text-sm font-medium">წმინდა შემოსავალი</p>
-                  <p className="text-3xl font-bold text-green-700 mt-1">₾{taxData.netRevenue.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-green-700 mt-1">₾{Number(taxData.netRevenue || 0).toFixed(2)}</p>
                 </div>
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
                   <p className="text-purple-600 text-sm font-medium">გადასახადები სულ</p>
-                  <p className="text-3xl font-bold text-purple-700 mt-1">₾{taxData.totalTax.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-purple-700 mt-1">₾{Number(taxData.totalTax || 0).toFixed(2)}</p>
                 </div>
               </div>
               
@@ -1105,13 +1266,13 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
                         <tr key={idx} className="border-t">
                           <td className="p-3 font-medium">{tax.name}</td>
                           <td className="text-right p-3">{tax.rate}%</td>
-                          <td className="text-right p-3 font-bold text-gray-800">₾{tax.amount.toFixed(2)}</td>
+                          <td className="text-right p-3 font-bold text-gray-800">₾{Number(tax.amount || 0).toFixed(2)}</td>
                         </tr>
                       ))}
                       <tr className="border-t-2 font-bold bg-gray-50">
                         <td className="p-3">სულ გადასახადი</td>
                         <td className="p-3"></td>
-                        <td className="text-right p-3 text-purple-700">₾{taxData.totalTax.toFixed(2)}</td>
+                        <td className="text-right p-3 text-purple-700">₾{Number(taxData.totalTax || 0).toFixed(2)}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1136,9 +1297,9 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
                         {taxData.byCategory.map((cat: any, idx: number) => (
                           <tr key={idx} className="border-t">
                             <td className="p-3 font-medium capitalize">{cat.category}</td>
-                            <td className="text-right p-3">₾{cat.gross.toFixed(2)}</td>
-                            <td className="text-right p-3 text-gray-600">₾{cat.net.toFixed(2)}</td>
-                            <td className="text-right p-3 font-bold text-purple-600">₾{cat.totalTax.toFixed(2)}</td>
+                            <td className="text-right p-3">₾{Number(cat.gross || 0).toFixed(2)}</td>
+                            <td className="text-right p-3 text-gray-600">₾{Number(cat.net || 0).toFixed(2)}</td>
+                            <td className="text-right p-3 font-bold text-purple-600">₾{Number(cat.totalTax || 0).toFixed(2)}</td>
                           </tr>
                         ))}
                       </tbody>

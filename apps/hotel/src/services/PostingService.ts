@@ -98,6 +98,46 @@ export class PostingService {
     return results
   }
   
+  // Helper function to get room number from roomId
+  static getRoomNumber(roomIdOrNumber: string | undefined, rooms?: any[]): string {
+    if (!roomIdOrNumber) return '-'
+    
+    // Already a room number?
+    if (roomIdOrNumber.length <= 4 && /^\d+$/.test(roomIdOrNumber)) {
+      return roomIdOrNumber
+    }
+    
+    // Try provided rooms first
+    let roomsToSearch = rooms
+    
+    // If empty, load from localStorage directly
+    if (!roomsToSearch || roomsToSearch.length === 0) {
+      if (typeof window !== 'undefined') {
+        try {
+          const savedRooms = localStorage.getItem('rooms') || 
+                             localStorage.getItem('simpleRooms') || 
+                             localStorage.getItem('hotelRooms')
+          if (savedRooms) {
+            roomsToSearch = JSON.parse(savedRooms)
+          }
+        } catch (e) {
+          console.error('Error parsing rooms from localStorage:', e)
+        }
+      }
+    }
+    
+    // Find room by ID
+    if (roomsToSearch && roomsToSearch.length > 0) {
+      const room = roomsToSearch.find((r: any) => r.id === roomIdOrNumber)
+      if (room) {
+        return room.roomNumber || room.number || roomIdOrNumber
+      }
+    }
+    
+    // Fallback: truncated CUID
+    return roomIdOrNumber.slice(0, 6) + '...'
+  }
+
   // Post room charge for single reservation
   static async postRoomChargeForReservation(reservation: any, auditDate: string) {
     try {
@@ -128,7 +168,7 @@ export class PostingService {
             skipped: true,
             message: 'Room charge pre-posted on reservation creation',
             reservation: reservation.id,
-            room: reservation.roomNumber || reservation.roomId,
+            room: this.getRoomNumber(reservation.roomNumber || reservation.roomId),
             guest: reservation.guestName,
             prePosted: true
           }
@@ -145,10 +185,10 @@ export class PostingService {
         return {
           success: false,
           skipped: true,
-          message: 'Room charge already posted for this date',
-          reservation: reservation.id,
-          room: reservation.roomNumber || reservation.roomId,
-          guest: reservation.guestName
+            message: 'Room charge already posted for this date',
+            reservation: reservation.id,
+            room: this.getRoomNumber(reservation.roomNumber || reservation.roomId),
+            guest: reservation.guestName
         }
       }
       
@@ -171,7 +211,7 @@ export class PostingService {
         
         type: 'charge',
         category: 'room',
-        description: `Room Charge - ${reservation.roomNumber || reservation.roomId}`,
+        description: `Room Charge - Room ${this.getRoomNumber(reservation.roomNumber || reservation.roomId)}`,
         
         debit: rateBreakdown.total,
         credit: 0,

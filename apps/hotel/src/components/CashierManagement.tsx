@@ -27,8 +27,22 @@ interface Transaction {
 }
 
 export default function CashierManagement() {
+  // Get previous day's closing balance for default opening balance
+  const getPreviousClosingBalance = () => {
+    if (typeof window === 'undefined') return 0
+    const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
+    if (history.length > 0) {
+      const lastSession = history[history.length - 1]
+      return lastSession?.closingBalance || 0
+    }
+    return 0
+  }
+
   const [currentSession, setCurrentSession] = useState<CashierSession | null>(null)
-  const [openingBalance, setOpeningBalance] = useState('')
+  const [openingBalance, setOpeningBalance] = useState(() => {
+    const prevBalance = getPreviousClosingBalance()
+    return prevBalance > 0 ? prevBalance.toString() : ''
+  })
   const [showAddTransaction, setShowAddTransaction] = useState(false)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   
@@ -50,7 +64,13 @@ export default function CashierManagement() {
   }
   
   const openCashier = () => {
-    const balance = parseFloat(openingBalance) || 0
+    // Get previous day's closing balance
+    const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
+    const lastSession = history.length > 0 ? history[history.length - 1] : null
+    const previousClosingBalance = Number(lastSession?.closingBalance || 0)
+    
+    // Use provided opening balance, or fall back to previous closing balance
+    const balance = parseFloat(openingBalance) || previousClosingBalance
     const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('currentUser') || '{}') : {}
     
     const newSession: CashierSession = {
@@ -73,15 +93,15 @@ export default function CashierManagement() {
     
     const totalIncome = transactions
       .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
     
     const totalExpense = transactions
       .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
     
     const totalRefund = transactions
       .filter(t => t.type === 'refund')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
     
     const expectedBalance = currentSession.openingBalance + totalIncome - totalExpense - totalRefund
     
@@ -156,26 +176,26 @@ export default function CashierManagement() {
   const calculateTotals = () => {
     const income = transactions
       .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
     
     const expense = transactions
       .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
     
     const refund = transactions
       .filter(t => t.type === 'refund')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
     
     const cash = transactions
       .filter(t => t.paymentMethod === 'cash')
       .reduce((sum, t) => {
-        if (t.type === 'income') return sum + t.amount
-        return sum - t.amount
-      }, currentSession?.openingBalance || 0)
+        if (t.type === 'income') return sum + Number(t.amount || 0)
+        return sum - Number(t.amount || 0)
+      }, Number(currentSession?.openingBalance || 0))
     
     const card = transactions
       .filter(t => t.paymentMethod === 'card' && t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
     
     return { income, expense, refund, cash, card }
   }

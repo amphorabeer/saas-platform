@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import moment from 'moment'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
-import { calculateCashBalance } from '../utils/cashierCalculations'
 
 interface CashierShift {
   id: string
@@ -25,7 +24,6 @@ interface CashierShift {
   status: 'open' | 'closed'
   withdrawal?: number
   nextDayOpening?: number
-  cashRemoved?: boolean  // Whether cash was removed from register when closing
   transactionCount?: number
   transactions?: any[]  // Saved transactions (folio payments + manual income)
   manualTransactions?: any[]  // All manual transactions for reference
@@ -52,8 +50,7 @@ export default function CashierModule() {
   })
   const [closeFormData, setCloseFormData] = useState({
     actualCash: 0,
-    nextDayBalance: 0,
-    cashRemoved: false
+    nextDayBalance: 0
   })
   
   // Get business date from localStorage (falls back to real date)
@@ -125,68 +122,7 @@ export default function CashierModule() {
     return { cash, card, bank, total: cash + card + bank }
   }
   
-  // Load payments from folios and manual transactions since shift opened
-  const loadShiftPayments = () => {
-    const shift = JSON.parse(localStorage.getItem('currentCashierShift') || '{}')
-    
-    // Get shift open date (not today!)
-    const shiftOpenDate = shift.openedAt 
-      ? moment(shift.openedAt).format('YYYY-MM-DD')
-      : getBusinessDate()
-    
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-    const payments: any[] = []
-    
-    folios.forEach((folio: any) => {
-      folio.transactions?.forEach((t: any) => {
-        // Check for payments (credit > 0 or type === 'payment')
-        const isPayment = (t.credit > 0) || (t.type === 'payment')
-        const txDate = (t.date || '').split('T')[0]
-        
-        // Include ALL payments since shift opened (not just today!)
-        if (isPayment && txDate >= shiftOpenDate) {
-          payments.push({
-            id: t.id || `tx-${Date.now()}-${Math.random()}`,
-            time: t.time || moment(t.postedAt || t.date).format('HH:mm:ss'),
-            date: txDate,
-            description: `${folio.guestName} - Room ${folio.roomNumber || ''}`,
-            amount: t.credit || t.amount || 0,
-            method: (t.paymentMethod || 'cash').toLowerCase(),
-            type: 'income',
-            manual: false,
-            reference: folio.folioNumber,
-            guestName: folio.guestName,
-            roomNumber: folio.roomNumber
-          })
-        }
-      })
-    })
-    
-    // Add manual income transactions since shift opened
-    const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
-    savedManual.forEach((t: any) => {
-      const txDate = (t.date || '').split('T')[0]
-      if (txDate >= shiftOpenDate && t.type === 'income') {
-        payments.push({
-          id: t.id || `manual-${Date.now()}-${Math.random()}`,
-          time: t.time || '00:00:00',
-          date: txDate,
-          description: t.description || 'Manual Income',
-          amount: t.amount || 0,
-          method: (t.method || 'cash').toLowerCase(),
-          type: 'income',
-          manual: true
-        })
-      }
-    })
-    
-    // Sort by date and time (newest first)
-    payments.sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`))
-    
-    return payments
-  }
-  
-  // SINGLE useEffect - Load data on mount and when refreshKey changes
+  // SINGLE useEffect - Load data on mount ONLY
   useEffect(() => {
     // Load shift
     const savedShift = localStorage.getItem('currentCashierShift')
@@ -198,55 +134,76 @@ export default function CashierModule() {
     const allShifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
     setShifts(allShifts)
     
-    // Load payments since shift opened
-    const allIncomes = loadShiftPayments()
+    // Load folio transactions
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const today = getBusinessDate()
     
-    // Load manual expenses since shift opened
-    const shift = JSON.parse(localStorage.getItem('currentCashierShift') || '{}')
-    const shiftOpenDate = shift.openedAt 
-      ? moment(shift.openedAt).format('YYYY-MM-DD')
-      : getBusinessDate()
-    
-    const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
-    const shiftExpenses = savedManual.filter((t: any) => {
-      const txDate = (t.date || '').split('T')[0]
-      return txDate >= shiftOpenDate && t.type === 'expense'
+    const todayTx: any[] = []
+    folios.forEach((folio: any) => {
+      folio.transactions?.forEach((t: any) => {
+        if (t.credit > 0 && t.date === today) {
+          todayTx.push({
+            id: t.id || Math.random().toString(),
+            time: t.time || '00:00',
+            description: `${folio.guestName} - Room ${folio.roomNumber}`,
+            amount: t.credit,
+            method: t.paymentMethod || 'cash',
+            type: 'income',
+            manual: false
+          })
+        }
+      })
     })
     
-    setTransactions(allIncomes)
-    setManualTransactions(shiftExpenses)
+    // Load manual transactions
+    const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+    const todayManual = savedManual.filter((t: any) => t.date === today)
     
-  }, [refreshKey])
+    // Add manual INCOME transactions to main list
+    const manualIncomes = todayManual.filter((t: any) => t.type === 'income')
+    const allIncomes = [...todayTx, ...manualIncomes]
+    
+    // Set expenses separately
+    const manualExpenses = todayManual.filter((t: any) => t.type === 'expense')
+    
+    setTransactions(allIncomes)
+    setManualTransactions(manualExpenses)
+    
+  }, [])
 
   // REMOVED: Real-time updates useEffect - was conflicting and clearing transactions
   // All updates should be done through handleRefresh button instead
 
-  // Calculate totals from loaded transactions - use shared utility
+  // Calculate totals from loaded transactions
   const calculatedTotals = useMemo(() => {
-    // Use shared calculation function which includes opening balance and all payments since shift opened
-    // This reads directly from localStorage, so it always has the latest data
-    const balance = calculateCashBalance()
+    let cash = 0, card = 0, bank = 0
+    
+    transactions.forEach(t => {
+      const amount = t.amount || 0
+      if (t.method === 'cash' || t.method === 'CASH') cash += amount
+      else if (t.method === 'card' || t.method === 'credit_card' || t.method === 'CARD') card += amount
+      else if (t.method === 'bank' || t.method === 'bank_transfer' || t.method === 'BANK') bank += amount
+    })
+    
+    const totalExpenses = manualTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + (t.amount || 0), 0)
     
     return { 
-      opening: balance.opening,
-      cash: balance.cash,  // Opening + collected - expenses
-      cashCollected: balance.cashCollected,  // Just the collected amount
-      card: balance.card, 
-      bank: balance.bank, 
-      total: balance.total,
-      expenses: balance.expenses,
-      net: balance.total
+      cash, 
+      card, 
+      bank, 
+      total: cash + card + bank,
+      expenses: totalExpenses,
+      net: cash + card + bank - totalExpenses
     }
-  }, [currentShift, refreshKey, transactions.length, manualTransactions.length])
+  }, [transactions, manualTransactions])
 
   // Manual refresh function
   const handleRefresh = () => {
     console.log('=== MANUAL REFRESH ===')
     
-    // Reload all data by updating refreshKey
-    setRefreshKey(Date.now())
-    
-    // Also reload folio transactions
+    // Load folio transactions
     const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
     const today = getBusinessDate()
     
@@ -418,13 +375,7 @@ export default function CashierModule() {
     
     const expectedCash = (currentShift.openingBalance || 0) + calculatedTotals.cash - calculatedTotals.expenses
     const discrepancy = closeFormData.actualCash - expectedCash
-    
-    // Auto-calculate nextDayBalance if cash wasn't removed
-    const nextDayBalance = closeFormData.cashRemoved 
-      ? closeFormData.nextDayBalance 
-      : closeFormData.actualCash
-    
-    const withdrawal = closeFormData.actualCash - nextDayBalance
+    const withdrawal = closeFormData.actualCash - closeFormData.nextDayBalance
     
     // Get manual transactions for today before clearing
     const businessDate = getBusinessDate()
@@ -450,8 +401,7 @@ export default function CashierModule() {
       actualAmount: closeFormData.actualCash,
       discrepancy: discrepancy,
       withdrawal: withdrawal,
-      nextDayOpening: nextDayBalance,
-      cashRemoved: closeFormData.cashRemoved,
+      nextDayOpening: closeFormData.nextDayBalance,
       
       // Tax breakdown for Z-Report
       netSales: taxData.net,
@@ -480,11 +430,11 @@ export default function CashierModule() {
     setShifts(history)
     setCurrentShift(null)
     setShowCloseModal(false)
-    setCloseFormData({ actualCash: 0, nextDayBalance: 0, cashRemoved: false })
+    setCloseFormData({ actualCash: 0, nextDayBalance: 0 })
     setTransactions([])
     setManualTransactions([])
     
-    alert(`სალარო დაიხურა!\n\nგანაღდებული: ₾${withdrawal.toFixed(2)}\nშემდეგი დღისთვის: ₾${nextDayBalance.toFixed(2)}`)
+    alert(`სალარო დაიხურა!\n\nგანაღდებული: ₾${withdrawal.toFixed(2)}\nშემდეგი დღისთვის: ₾${closeFormData.nextDayBalance.toFixed(2)}`)
   }
 
   // X-Report Modal
@@ -773,22 +723,10 @@ export default function CashierModule() {
       <div className="p-6">
         {/* Totals - Show Always */}
         <div className="mb-6">
-          {calculatedTotals.opening > 0 && (
-            <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="text-sm text-blue-700">
-                💰 საწყისი ნაშთი: <strong>₾{calculatedTotals.opening.toFixed(2)}</strong>
-              </div>
-            </div>
-          )}
           <div className="grid grid-cols-4 gap-4">
             <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
               <div className="text-3xl font-bold text-green-600">₾{calculatedTotals.cash.toFixed(2)}</div>
               <div className="text-sm text-gray-600 mt-1">💵 ნაღდი</div>
-              {calculatedTotals.cashCollected > 0 && (
-                <div className="text-xs text-gray-500 mt-1">
-                  (+₾{calculatedTotals.cashCollected.toFixed(2)} შემოსავალი)
-                </div>
-              )}
             </div>
             <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="text-3xl font-bold text-blue-600">₾{calculatedTotals.card.toFixed(2)}</div>
@@ -803,13 +741,6 @@ export default function CashierModule() {
               <div className="text-sm text-gray-600 mt-1">📊 სულ</div>
             </div>
           </div>
-          {calculatedTotals.expenses > 0 && (
-            <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
-              <div className="text-sm text-red-700">
-                💸 ხარჯები: <strong>₾{calculatedTotals.expenses.toFixed(2)}</strong>
-              </div>
-            </div>
-          )}
         </div>
 
         {currentShift ? (
@@ -818,17 +749,6 @@ export default function CashierModule() {
               <p className="font-bold">სალარო ღიაა</p>
               <p className="text-sm">მოლარე: {currentShift.userName}</p>
               <p className="text-sm">გახსნის დრო: {moment(currentShift.openedAt).format('DD/MM/YYYY HH:mm')}</p>
-              {(() => {
-                const daysSinceOpen = moment().diff(moment(currentShift.openedAt), 'days')
-                if (daysSinceOpen > 0) {
-                  return (
-                    <p className="text-sm text-yellow-600 mt-1">
-                      ⚠️ Shift ღიაა {daysSinceOpen} დღეა - ნაჩვენებია ყველა გადახდა გახსნის დღიდან
-                    </p>
-                  )
-                }
-                return null
-              })()}
             </div>
             
             {/* Expenses display */}
@@ -1003,15 +923,7 @@ export default function CashierModule() {
               <input
                 type="number"
                 value={closeFormData.actualCash}
-                onChange={(e) => {
-                  const actualCash = Number(e.target.value)
-                  const expectedCash = (currentShift?.openingBalance || 0) + calculatedTotals.cash - calculatedTotals.expenses
-                  // Auto-update nextDayBalance if cash wasn't removed
-                  const nextDayBalance = closeFormData.cashRemoved 
-                    ? closeFormData.nextDayBalance 
-                    : actualCash
-                  setCloseFormData({...closeFormData, actualCash, nextDayBalance})
-                }}
+                onChange={(e) => setCloseFormData({...closeFormData, actualCash: Number(e.target.value)})}
                 className="w-full border rounded px-3 py-2 text-lg"
                 placeholder="0.00"
               />
@@ -1030,46 +942,16 @@ export default function CashierModule() {
               </div>
             )}
             
-            {/* Cash Removed Checkbox */}
-            <div className="mb-4">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={closeFormData.cashRemoved}
-                  onChange={(e) => {
-                    const cashRemoved = e.target.checked
-                    const expectedCash = (currentShift?.openingBalance || 0) + calculatedTotals.cash - calculatedTotals.expenses
-                    // If cash was removed, nextDayBalance is 0, otherwise it's the actualCash
-                    setCloseFormData({
-                      ...closeFormData,
-                      cashRemoved,
-                      nextDayBalance: cashRemoved ? 0 : (closeFormData.actualCash || expectedCash)
-                    })
-                  }}
-                  className="w-4 h-4"
-                />
-                <span className="text-sm">ნაღდი ფული გამოიტანეთ სალაროდან</span>
-              </label>
-            </div>
-            
             {/* Next Day Balance */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                დატოვეთ შემდეგი დღისთვის {!closeFormData.cashRemoved && <span className="text-blue-600">(ავტომატურად)</span>}
-              </label>
+              <label className="block text-sm font-medium mb-1">დატოვეთ შემდეგი დღისთვის</label>
               <input
                 type="number"
                 value={closeFormData.nextDayBalance}
                 onChange={(e) => setCloseFormData({...closeFormData, nextDayBalance: Number(e.target.value)})}
                 className="w-full border rounded px-3 py-2"
                 placeholder="0.00"
-                disabled={!closeFormData.cashRemoved && closeFormData.actualCash > 0}
               />
-              {!closeFormData.cashRemoved && closeFormData.actualCash > 0 && (
-                <p className="text-xs text-gray-500 mt-1">
-                  ნაღდი ფული არ გამოიტანეთ, ამიტომ მთელი თანხა გადადის შემდეგ დღეზე
-                </p>
-              )}
             </div>
             
             {/* Withdrawal Amount */}
@@ -1228,20 +1110,9 @@ const OpenShiftForm = ({ onOpen }: { onOpen: (balance: number) => void }) => {
       )
       const lastShift = sortedShifts[0]
       
-      // Use nextDayOpening if available, or calculate from ending cash if cash wasn't removed
-      if (lastShift) {
-        let previousBalance = 0
-        if (lastShift.nextDayOpening !== undefined) {
-          previousBalance = lastShift.nextDayOpening
-        } else if (!lastShift.cashRemoved && lastShift.actualAmount !== undefined) {
-          // If cash wasn't removed, use actualAmount as opening balance
-          previousBalance = lastShift.actualAmount
-        }
-        
-        if (previousBalance > 0) {
-          setPreviousBalance(previousBalance)
-          setOpeningBalance(previousBalance) // Auto-fill
-        }
+      if (lastShift && lastShift.nextDayOpening !== undefined) {
+        setPreviousBalance(lastShift.nextDayOpening)
+        setOpeningBalance(lastShift.nextDayOpening) // Auto-fill
       }
     }
   }, [])

@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRooms, addRoom, updateRoom, deleteRoom } from '../../../../lib/dataStore'
+import { prisma } from '@saas-platform/database'
+import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
 export async function GET() {
   try {
-    const rooms = await getRooms()
+    const tenantId = await getTenantId()
+    
+    if (!tenantId) {
+      return unauthorizedResponse()
+    }
+    
+    const rooms = await prisma.hotelRoom.findMany({
+      where: { tenantId },
+      orderBy: { roomNumber: 'asc' },
+    })
+    
     return NextResponse.json(rooms)
   } catch (error: any) {
     console.error('Error loading rooms:', error)
@@ -13,41 +24,86 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const tenantId = await getTenantId()
+    
+    if (!tenantId) {
+      return unauthorizedResponse()
+    }
+    
     const body = await request.json()
+    console.log('📥 POST /api/hotel/rooms - Body:', JSON.stringify(body, null, 2))
     
     // Check if it's a status update (has roomId and status)
-    if (body.roomId && body.status) {
-      const updatedRoom = await updateRoom(body.roomId, { status: body.status })
+    if (body.roomId && body.status && !body.roomNumber) {
+      const updatedRoom = await prisma.hotelRoom.update({
+        where: { 
+          id: body.roomId,
+          tenantId,
+        },
+        data: { status: body.status },
+      })
       return NextResponse.json(updatedRoom)
     }
     
-    // Otherwise, it's a new room creation
-    const newRoom = await addRoom(body)
+    // Extract only valid fields for room creation
+    const roomData = {
+      tenantId,
+      roomNumber: body.roomNumber,
+      roomType: body.roomType || body.type || 'STANDARD', // Support both field names
+      floor: typeof body.floor === 'number' ? body.floor : parseInt(body.floor) || 1,
+      status: body.status || 'VACANT',
+      basePrice: typeof body.basePrice === 'number' ? body.basePrice : parseFloat(body.basePrice) || 0,
+      amenities: Array.isArray(body.amenities) ? body.amenities : [],
+      maxOccupancy: typeof body.maxOccupancy === 'number' ? body.maxOccupancy : parseInt(body.maxOccupancy) || 2,
+    }
+    
+    console.log('📥 Creating room with data:', JSON.stringify(roomData, null, 2))
+    
+    const newRoom = await prisma.hotelRoom.create({
+      data: roomData,
+    })
+    
     return NextResponse.json(newRoom)
   } catch (error: any) {
-    console.error('Error adding room:', error)
+    console.error('❌ Error adding room:', error.message)
+    console.error('❌ Full error:', error)
     return NextResponse.json({ error: 'Failed to add room', details: error.message }, { status: 500 })
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
+    const tenantId = await getTenantId()
+    
+    if (!tenantId) {
+      return unauthorizedResponse()
+    }
+    
     const body = await request.json()
-    const { id, ...updates } = body
+    const { id, type, ...updates } = body // Remove 'type' field
     
     if (!id) {
       return NextResponse.json({ error: 'Room ID required' }, { status: 400 })
     }
     
-    // Use updateRoom function from dataStore
-    const updatedRoom = await updateRoom(id, updates)
-    
-    if (!updatedRoom) {
-      return NextResponse.json({ error: 'Room not found' }, { status: 404 })
+    // Map type to roomType if needed
+    if (type && !updates.roomType) {
+      updates.roomType = type
     }
+    
+    const updatedRoom = await prisma.hotelRoom.update({
+      where: { 
+        id,
+        tenantId,
+      },
+      data: updates,
+    })
     
     return NextResponse.json({ success: true, room: updatedRoom })
   } catch (error: any) {
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: 'Room not found' }, { status: 404 })
+    }
     console.error('Error updating room:', error)
     return NextResponse.json({ error: 'Failed to update room', details: error.message }, { status: 500 })
   }
@@ -55,23 +111,47 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const tenantId = await getTenantId()
+    
+    if (!tenantId) {
+      return unauthorizedResponse()
+    }
+    
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
     
     if (!id) {
-      // Try to get ID from path
-      const pathParts = url.pathname.split('/')
-      const pathId = pathParts[pathParts.length - 1]
-      if (pathId && pathId !== 'rooms') {
-        await deleteRoom(pathId)
-        return NextResponse.json({ success: true })
-      }
       return NextResponse.json({ error: 'Room ID required' }, { status: 400 })
     }
     
-    await deleteRoom(id)
+    // Check if room has active reservations
+    const activeReservations = await prisma.hotelReservation.findMany({
+      where: {
+        roomId: id,
+        tenantId,
+        status: { in: ['CONFIRMED', 'CHECKED_IN', 'PENDING'] },
+      },
+    })
+    
+    if (activeReservations.length > 0) {
+      return NextResponse.json(
+        { error: `Cannot delete room - ${activeReservations.length} active reservation(s) exist` },
+        { status: 400 }
+      )
+    }
+    
+    await prisma.hotelRoom.delete({
+      where: {
+        id,
+        tenantId,
+      },
+    })
+    
     return NextResponse.json({ success: true })
   } catch (error: any) {
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: 'Room not found' }, { status: 404 })
+    }
     console.error('Error deleting room:', error)
     return NextResponse.json({ error: 'Failed to delete room', details: error.message }, { status: 500 })
   }

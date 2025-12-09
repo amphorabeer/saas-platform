@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import moment from 'moment'
 import { ActivityLogger } from '../lib/activityLogger'
+import { validateCheckInDate, validateReservationDates } from '../utils/dateValidation'
 
 interface Room {
   id: string
@@ -69,6 +70,7 @@ export default function CheckInModal({
     adults: 1,
     children: 0,
     totalAmount: room?.basePrice || 150,
+    source: 'direct',
     notes: ''
   })
   
@@ -308,13 +310,13 @@ export default function CheckInModal({
 
     console.log('calculatePricePerNight:', { date, roomTypeName, rate, roomRates })
 
-    let basePrice = selectedRoom.basePrice || 150
+    let basePrice = Number(selectedRoom.basePrice) || 150
 
     if (rate) {
       // Check if weekend (Friday=5, Saturday=6, Sunday=0)
       const dayOfWeek = moment(date).day()
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6
-      basePrice = isWeekend ? rate.weekend : rate.weekday
+      basePrice = isWeekend ? Number(rate.weekend) : Number(rate.weekday)
     }
 
     // Priority order: Special Date > Season > Weekday
@@ -342,7 +344,7 @@ export default function CheckInModal({
       console.log(`Price for ${date}: after weekday "${weekdayMod.dayName}" ${weekdayMod.modifier}%, final=${basePrice}`)
     }
 
-    return basePrice
+    return Math.round(basePrice)
   }
 
   // Calculate total for date range with weekday/weekend rates
@@ -358,7 +360,7 @@ export default function CheckInModal({
       currentDate.add(1, 'day')
     }
 
-    return total
+    return Math.round(total)
   }
 
   // Get price per night for display (first night's price or average)
@@ -445,16 +447,33 @@ export default function CheckInModal({
       // Skip the current reservation if editing (don't conflict with itself)
       if (reservation && res.id === reservation.id) return false
       
-      // Must be same room
-      if (res.roomId !== roomId) return false
+      // ✅ FIX: Must be same room - check both roomId and room.id
+      const resRoomId = res.roomId || res.room?.id
+      if (!resRoomId || resRoomId !== roomId) return false
       
       const resCheckIn = moment(res.checkIn)
       const resCheckOut = moment(res.checkOut)
       
       // Check overlap: new reservation overlaps if:
-      // - new checkIn is before existing checkOut AND
-      // - new checkOut is after existing checkIn
-      const overlaps = checkIn.isBefore(resCheckOut) && checkOut.isAfter(resCheckIn)
+      // - new checkIn is STRICTLY BEFORE existing checkOut (same day = no overlap, because checkout day is free)
+      // - new checkOut is STRICTLY AFTER existing checkIn
+      // ✅ FIX: Use clone() to avoid mutating original moment objects!
+      const checkInDate = checkIn.clone().startOf('day')
+      const checkOutDate = checkOut.clone().startOf('day')
+      const resCheckInDate = resCheckIn.clone().startOf('day')
+      const resCheckOutDate = resCheckOut.clone().startOf('day')
+      
+      // Overlap exists only if: newCheckIn < existingCheckOut AND newCheckOut > existingCheckIn
+      // On checkout day (newCheckIn === existingCheckOut), there's NO overlap - new guest can check in
+      const overlaps = checkInDate.isBefore(resCheckOutDate) && checkOutDate.isAfter(resCheckInDate)
+      
+      console.log('Overlap check:', { 
+        newCheckIn: checkInDate.format('YYYY-MM-DD'), 
+        newCheckOut: checkOutDate.format('YYYY-MM-DD'),
+        existingCheckIn: resCheckInDate.format('YYYY-MM-DD'),
+        existingCheckOut: resCheckOutDate.format('YYYY-MM-DD'),
+        overlaps 
+      })
       
       return overlaps
     })
@@ -512,12 +531,37 @@ export default function CheckInModal({
       return { allowed: false, reason: 'ოთახი არ არის არჩეული' }
     }
     
+    // Get check-in date from form
+    const checkInDate = formData.checkIn || reservation?.checkIn
+    
     // ========================================
-    // For NEW RESERVATIONS: Only check overlap, NOT occupied status!
+    // NEW CHECK 1: Closed Day and Business Day validation
+    // ========================================
+    if (checkInDate) {
+      const dateValidation = validateCheckInDate(checkInDate)
+      if (!dateValidation.valid) {
+        return {
+          allowed: false,
+          reason: dateValidation.reason
+        }
+      }
+    }
+    
+    // ========================================
+    // For NEW RESERVATIONS: Check dates and overlap
     // ========================================
     if (!reservation) {
-      // This is a NEW reservation - only check date overlap
-      // OCCUPIED status doesn't matter because reservation is for FUTURE dates
+      // This is a NEW reservation - check date validation and overlap
+      if (formData.checkIn && formData.checkOut) {
+        const dateValidation = validateReservationDates(formData.checkIn, formData.checkOut)
+        if (!dateValidation.valid) {
+          return {
+            allowed: false,
+            reason: dateValidation.reason
+          }
+        }
+      }
+      
       const { hasOverlap, conflictingReservation } = checkOverlap()
       
       if (hasOverlap) {
@@ -533,9 +577,15 @@ export default function CheckInModal({
     // ========================================
     // For CHECK-IN (existing reservation): Check OCCUPIED status
     // ========================================
-    const roomData = rooms.find((r: any) => 
-      r.id === roomId || String(r.roomNumber) === String(roomNumber)
-    )
+    // ✅ FIX: Only match room if we have valid IDs
+    const roomData = rooms.find((r: any) => {
+      if (roomId && r.id && r.id === roomId) return true
+      if (roomNumber && r.roomNumber && 
+          String(roomNumber).trim() !== '' && 
+          String(r.roomNumber).trim() !== '' &&
+          String(r.roomNumber) === String(roomNumber)) return true
+      return false
+    })
     
     if (roomData?.status?.toUpperCase() === 'OCCUPIED') {
       return { 
@@ -545,8 +595,22 @@ export default function CheckInModal({
     }
     
     // ✅ USE `reservations` PROP instead of localStorage!
+    // ✅ FIX: Only compare if both values exist and are not empty
     const activeRes = reservations.find((r: any) => {
-      const isSameRoom = r.roomId === roomId || String(r.roomNumber) === String(roomNumber)
+      let isSameRoom = false
+      
+      // First try roomId comparison (more reliable)
+      if (roomId && r.roomId && roomId === r.roomId) {
+        isSameRoom = true
+      }
+      // Fallback to roomNumber only if both exist and are not empty
+      else if (roomNumber && r.roomNumber && 
+               String(roomNumber).trim() !== '' && 
+               String(r.roomNumber).trim() !== '' &&
+               String(roomNumber) === String(r.roomNumber)) {
+        isSameRoom = true
+      }
+      
       const isCheckedIn = r.status?.toUpperCase() === 'CHECKED_IN'
       const isDifferent = r.id !== reservation?.id
       return isSameRoom && isCheckedIn && isDifferent
@@ -569,7 +633,18 @@ export default function CheckInModal({
     }
     
     // ========================================
-    // For NEW reservations: Only check overlap
+    // NEW: Validate dates first (for both new and existing reservations)
+    // ========================================
+    if (formData.checkIn && formData.checkOut) {
+      const dateValidation = validateReservationDates(formData.checkIn, formData.checkOut)
+      if (!dateValidation.valid) {
+        alert(`❌ ${dateValidation.reason}`)
+        return
+      }
+    }
+    
+    // ========================================
+    // For NEW reservations: Check overlap
     // ========================================
     if (!reservation) {
       const { hasOverlap, conflictingReservation } = checkOverlap()
@@ -584,7 +659,7 @@ export default function CheckInModal({
         return
       }
     } else {
-      // For CHECK-IN: Also check occupied status
+      // For CHECK-IN: Also check occupied status (includes date validation)
       const checkInCheck = canCheckIn()
       if (!checkInCheck.allowed) {
         alert(`❌ Check-in შეუძლებელია\n\n${checkInCheck.reason}`)
@@ -597,11 +672,18 @@ export default function CheckInModal({
     
     // ✅ Use different variable name to avoid conflict with `reservation` prop!
     const newReservation = {
-      ...formData,
+      guestName: formData.guestName,
+      guestEmail: formData.guestEmail || '',  // ✅ empty string
+      guestPhone: formData.guestPhone || '',
+      roomId: formData.roomId,
+      checkIn: formData.checkIn,
+      checkOut: formData.checkOut,
+      adults: formData.adults,
+      children: formData.children,
       totalAmount: calculateTotal(),
       status: 'CONFIRMED',
-      nights: calculateNights(),
-      reservationNumber: generateReservationNumber()
+      source: formData.source || 'direct',
+      notes: formData.notes || ''  // ✅ empty string
     }
     
     ActivityLogger.log('RESERVATION_CREATE', {
@@ -817,6 +899,27 @@ export default function CheckInModal({
           </div>
         </div>
         
+        {/* Booking Source */}
+        <div className="mt-4">
+          <label className="block text-sm font-medium mb-1">ჯავშნის წყარო *</label>
+          <select
+            value={formData.source}
+            onChange={(e) => setFormData({...formData, source: e.target.value})}
+            className="w-full border rounded-lg px-3 py-2"
+            required
+          >
+            <option value="direct">🏨 Direct (პირდაპირი)</option>
+            <option value="booking">🅱️ Booking.com</option>
+            <option value="airbnb">🏠 Airbnb</option>
+            <option value="expedia">🌐 Expedia</option>
+            <option value="phone">📞 ტელეფონით</option>
+            <option value="tour_company">🚌 ტურისტული კომპანია</option>
+            <option value="corporate">🏢 კორპორატიული</option>
+            <option value="travel_agent">✈️ ტურ. სააგენტო</option>
+            <option value="other">📋 სხვა</option>
+          </select>
+        </div>
+
         {/* Notes */}
         <div className="mt-4">
           <label className="block text-sm font-medium mb-1">შენიშვნები</label>

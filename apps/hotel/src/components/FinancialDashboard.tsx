@@ -293,12 +293,13 @@ const PaymentHistory = ({ selectedDate }: { selectedDate: string }) => {
     
     const targetDate = moment(dateFilter).format('YYYY-MM-DD')
     const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const paymentHistory = JSON.parse(localStorage.getItem('paymentHistory') || '[]')
     
     // Get all payment transactions from folios for the selected date
-    const allPayments = folios.flatMap((f: any) => 
+    const folioPayments = folios.flatMap((f: any) => 
       (f.transactions || [])
         .filter((t: any) => {
-          if (t.type !== 'payment') return false
+          if (t.type !== 'payment' && t.type !== 'refund') return false
           const txDate = moment(t.date).format('YYYY-MM-DD')
           return txDate === targetDate
         })
@@ -309,6 +310,44 @@ const PaymentHistory = ({ selectedDate }: { selectedDate: string }) => {
           folioNumber: f.folioNumber
         }))
     )
+    
+    // Get payments from paymentHistory localStorage for the selected date
+    const historyPayments = paymentHistory
+      .filter((p: any) => {
+        const paymentDate = moment(p.date).format('YYYY-MM-DD')
+        return paymentDate === targetDate
+      })
+      .map((p: any) => ({
+        ...p,
+        // Ensure consistent structure
+        type: p.type || (p.credit > 0 ? 'payment' : 'refund'),
+        credit: p.credit || (p.amount && p.type !== 'refund' ? p.amount : 0),
+        debit: p.debit || (p.amount && p.type === 'refund' ? p.amount : 0),
+        time: p.time || moment(p.date).format('HH:mm:ss')
+      }))
+    
+    // Combine and deduplicate by id
+    const allPaymentsMap = new Map()
+    
+    // Add folio payments
+    folioPayments.forEach((p: any) => {
+      if (p.id) {
+        allPaymentsMap.set(p.id, p)
+      }
+    })
+    
+    // Add history payments (override if same id, or add if new)
+    historyPayments.forEach((p: any) => {
+      if (p.id) {
+        allPaymentsMap.set(p.id, p)
+      } else {
+        // If no id, generate one and add
+        const newId = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        allPaymentsMap.set(newId, { ...p, id: newId })
+      }
+    })
+    
+    const allPayments = Array.from(allPaymentsMap.values())
     
     // Sort by time descending
     allPayments.sort((a: any, b: any) => {

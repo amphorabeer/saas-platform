@@ -11,6 +11,7 @@ import ExtraChargesPanel from './ExtraChargesPanel'
 import PaymentHistory from './PaymentHistory'
 import Invoice from './Invoice'
 import { ActivityLogger } from '../lib/activityLogger'
+import { validateReservationDates, isClosedDay as isClosedDayHelper, getBusinessDay as getBusinessDayHelper } from '../utils/dateValidation'
 
 interface RoomCalendarProps {
   rooms: any[]
@@ -286,33 +287,9 @@ export default function RoomCalendar({
     }
   }, [reservations])
   
-  // Get business day (last closed audit + 1)
+  // Get business day (last closed audit + 1) - use unified helper
   const getBusinessDay = () => {
-    // Check both lastAuditDate and lastNightAuditDate (prefer lastNightAuditDate)
-    const lastNightAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastNightAuditDate') : null
-    const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
-    
-    // Prefer lastNightAuditDate (more accurate)
-    let lastClosed: string | null = null
-    
-    if (lastNightAuditDate) {
-      lastClosed = lastNightAuditDate
-    } else if (lastAuditDate) {
-      try {
-        lastClosed = JSON.parse(lastAuditDate)
-      } catch {
-        lastClosed = lastAuditDate
-      }
-    }
-    
-    if (!lastClosed) {
-      // No audit yet - Business Day is today
-      return moment().format('YYYY-MM-DD')
-    }
-    
-    // Business Day is the day after last audit
-    const businessDay = moment(lastClosed).add(1, 'day')
-    return businessDay.format('YYYY-MM-DD')
+    return getBusinessDayHelper()
   }
   
   // Check if date can be booked
@@ -610,6 +587,12 @@ export default function RoomCalendar({
   
   // Check if date is a closed day (before or on last audit date, or in the past if no audit)
   const isClosedDay = (date: Date | string): boolean => {
+    // Use unified helper
+    return isClosedDayHelper(date)
+  }
+  
+  // Keep old implementation for reference (will be removed)
+  const isClosedDay_OLD = (date: Date | string): boolean => {
     const dateStr = typeof date === 'string' ? date : moment(date).format('YYYY-MM-DD')
     // Check both lastAuditDate and lastNightAuditDate (prefer lastNightAuditDate)
     const lastNightAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastNightAuditDate') : null
@@ -772,12 +755,19 @@ export default function RoomCalendar({
     }
     
     // Check for existing reservation
-    const hasReservation = reservations.some((r: any) => 
-      r.roomId === roomId && 
-      moment(dateStr).isBetween(moment(r.checkIn), moment(r.checkOut), 'day', '[)') &&
-      r.status !== 'CANCELLED' &&
-      r.status !== 'NO_SHOW'
-    )
+    const hasReservation = reservations.some((r: any) => {
+      if (r.roomId !== roomId) return false
+      if (r.status === 'CANCELLED' || r.status === 'NO_SHOW') return false
+      
+      const resCheckIn = moment(r.checkIn).format('YYYY-MM-DD')
+      const resCheckOut = moment(r.checkOut).format('YYYY-MM-DD')
+      
+      // Date is occupied if: checkIn <= date < checkOut
+      const isOccupied = dateStr >= resCheckIn && dateStr < resCheckOut
+      
+      console.log('Overlap check:', { dateStr, resCheckIn, resCheckOut, isOccupied, status: r.status })
+      return isOccupied
+    })
     
     if (hasReservation) {
       canBook = false
@@ -1338,15 +1328,52 @@ export default function RoomCalendar({
       const newCheckIn = currentDropTarget.date
       const newCheckOut = moment(newCheckIn).add(nights, 'days').format('YYYY-MM-DD')
       
-      // Calculate new total amount using roomRates
+      // Get source and target rooms
+      const sourceRoom = rooms.find(r => String(r.id) === String(currentDraggedReservation.roomId))
       const targetRoom = rooms.find(r => String(r.id) === String(currentDropTarget.roomId))
-      const newTotalAmount = calculateTotalAmount(targetRoom, newCheckIn, newCheckOut)
       
-      // Update reservation - INCLUDING roomNumber!
+      if (!targetRoom) {
+        alert('❌ ოთახი ვერ მოიძებნა')
+        return
+      }
+      
+      // Calculate new total amount using NEW room's price
+      const newTotalAmount = calculateTotalAmount(targetRoom, newCheckIn, newCheckOut)
+      const newRoomPrice = targetRoom.basePrice || 0
+      
+      // Check if room changed (not just date)
+      const roomChanged = String(currentDraggedReservation.roomId) !== String(currentDropTarget.roomId)
+      
+      // Optional: Confirm price change if room changed and price is different
+      if (roomChanged && sourceRoom && sourceRoom.basePrice !== targetRoom.basePrice) {
+        const oldPrice = currentDraggedReservation.totalAmount || 0
+        const priceDiff = newTotalAmount - oldPrice
+        const confirmed = confirm(
+          `ოთახის ფასი შეიცვლება:\n\n` +
+          `ძველი: ${sourceRoom.roomNumber} (${sourceRoom.roomType || 'Standard'}) - ₾${oldPrice.toFixed(2)}\n` +
+          `ახალი: ${targetRoom.roomNumber} (${targetRoom.roomType || 'Standard'}) - ₾${newTotalAmount.toFixed(2)}\n` +
+          `სხვაობა: ${priceDiff >= 0 ? '+' : ''}₾${priceDiff.toFixed(2)}\n\n` +
+          `გსურთ გაგრძელება?`
+        )
+        
+        if (!confirmed) {
+          // Reset drag state
+          setIsDragging(false)
+          isDraggingRef.current = false
+          setDraggedReservation(null)
+          draggedReservationRef.current = null
+          setDropTarget(null)
+          dropTargetRef.current = null
+          return
+        }
+      }
+      
+      // Update reservation - INCLUDING roomNumber and roomPrice!
       if (onReservationUpdate) {
         await onReservationUpdate(currentDraggedReservation.id, {
           roomId: currentDropTarget.roomId,
-          roomNumber: targetRoom?.roomNumber || currentDraggedReservation.roomNumber, // ← დაამატე ეს!
+          roomNumber: targetRoom.roomNumber,
+          roomPrice: newRoomPrice, // Update room price
           checkIn: newCheckIn,
           checkOut: newCheckOut,
           totalAmount: newTotalAmount
@@ -1357,11 +1384,97 @@ export default function RoomCalendar({
           setSelectedReservation({
             ...selectedReservation,
             roomId: currentDropTarget.roomId,
-            roomNumber: targetRoom?.roomNumber || selectedReservation.roomNumber,
+            roomNumber: targetRoom.roomNumber,
+            roomPrice: newRoomPrice,
             checkIn: newCheckIn,
             checkOut: newCheckOut,
             totalAmount: newTotalAmount
           })
+        }
+      }
+      
+      // ==========================================
+      // UPDATE FOLIO IF ROOM CHANGED
+      // ==========================================
+      if (roomChanged) {
+        try {
+          const foliosData = localStorage.getItem('hotelFolios')
+          if (foliosData) {
+            const folios = JSON.parse(foliosData)
+            const folioIndex = folios.findIndex((f: any) => f.reservationId === currentDraggedReservation.id)
+            
+            if (folioIndex !== -1) {
+              const folio = folios[folioIndex]
+              
+              // Update room info in folio
+              folio.roomId = targetRoom.id
+              folio.roomNumber = targetRoom.roomNumber
+              
+              // Update room charges in folio transactions
+              // Calculate price per night for each night (considering seasons/special dates)
+              const roomChargeTransactions = folio.transactions.filter((t: any) => 
+                t.type === 'charge' && t.category === 'room'
+              )
+              
+              // Calculate price for each night
+              let currentDate = moment(newCheckIn)
+              const endDate = moment(newCheckOut)
+              const nightPrices: { date: string; price: number }[] = []
+              
+              while (currentDate.isBefore(endDate)) {
+                const dateStr = currentDate.format('YYYY-MM-DD')
+                const price = calculatePricePerNight(targetRoom, dateStr)
+                nightPrices.push({ date: dateStr, price })
+                currentDate.add(1, 'day')
+              }
+              
+              // Update each room charge transaction
+              // Try to match by date first, then by index
+              folio.transactions = folio.transactions.map((t: any) => {
+                if (t.type === 'charge' && t.category === 'room') {
+                  // Try to find matching night by date
+                  const transactionDate = t.date || t.nightAuditDate
+                  const matchingNight = transactionDate 
+                    ? nightPrices.find(np => np.date === moment(transactionDate).format('YYYY-MM-DD'))
+                    : null
+                  
+                  // Use matching night price, or average per night
+                  const price = matchingNight 
+                    ? matchingNight.price 
+                    : (newTotalAmount / nights)
+                  
+                  return {
+                    ...t,
+                    debit: price,
+                    amount: price,
+                    description: `ოთახის ღირებულება - ${targetRoom.roomNumber}`,
+                    // Keep original date if it exists
+                    date: transactionDate || t.date
+                  }
+                }
+                return t
+              })
+              
+              // Recalculate folio balance
+              folio.balance = folio.transactions.reduce((sum: number, t: any) => {
+                return sum + Number(t.debit || 0) - Number(t.credit || 0)
+              }, 0)
+              
+              // Save updated folio
+              folios[folioIndex] = folio
+              localStorage.setItem('hotelFolios', JSON.stringify(folios))
+              
+              console.log('✅ Folio updated after room change:', {
+                reservationId: currentDraggedReservation.id,
+                oldRoom: sourceRoom?.roomNumber,
+                newRoom: targetRoom.roomNumber,
+                newTotalAmount,
+                newBalance: folio.balance
+              })
+            }
+          }
+        } catch (error) {
+          console.error('Error updating folio after room change:', error)
         }
       }
     } else if (currentDropTarget) {
@@ -1901,12 +2014,42 @@ export default function RoomCalendar({
     const existingFolio = folios.find((f: any) => f.reservationId === reservation.id)
     
     if (!existingFolio) {
+      // Get room number (convert roomId to roomNumber if needed)
+      const roomIdOrNumber = reservation.roomNumber || reservation.roomId
+      let roomNumberForFolio = roomIdOrNumber
+      if (roomIdOrNumber && roomIdOrNumber.length > 4) {
+        // Try to find room in rooms array
+        const foundRoom = rooms.find((r: any) => r.id === roomIdOrNumber)
+        if (foundRoom) {
+          roomNumberForFolio = foundRoom.roomNumber || foundRoom.number || roomIdOrNumber
+        } else {
+          // Try localStorage
+          try {
+            const savedRooms = localStorage.getItem('rooms') || 
+                               localStorage.getItem('simpleRooms') || 
+                               localStorage.getItem('hotelRooms')
+            if (savedRooms) {
+              const parsedRooms = JSON.parse(savedRooms)
+              const foundRoom = parsedRooms.find((r: any) => r.id === roomIdOrNumber)
+              if (foundRoom) {
+                roomNumberForFolio = foundRoom.roomNumber || foundRoom.number || roomIdOrNumber
+              }
+            }
+          } catch (e) {
+            console.error('Error loading rooms:', e)
+          }
+        }
+      }
+      const roomNumberForFolioNumber = roomNumberForFolio.length <= 4 && /^\d+$/.test(roomNumberForFolio) 
+        ? roomNumberForFolio 
+        : Math.floor(Math.random() * 1000).toString()
+      
       const newFolio = {
         id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
+        folioNumber: `F${moment().format('YYMMDD')}-${roomNumberForFolioNumber}-${reservation.id}`,
         reservationId: reservation.id,
         guestName: reservation.guestName,
-        roomNumber: reservation.roomNumber || reservation.roomId,
+        roomNumber: roomNumberForFolio,
         balance: 0,
         creditLimit: 5000,
         paymentMethod: 'cash',
@@ -1939,10 +2082,14 @@ export default function RoomCalendar({
     // STEP 1: BLOCK IF ROOM IS OCCUPIED
     // Use `rooms` state, NOT localStorage!
     // ========================================
-    const room = rooms.find((r: any) => 
-      r.id === selectedReservation.roomId || 
-      String(r.roomNumber) === String(selectedReservation.roomNumber)
-    )
+    const room = rooms.find((r: any) => {
+      if (selectedReservation.roomId && r.id && r.id === selectedReservation.roomId) return true
+      if (selectedReservation.roomNumber && r.roomNumber && 
+          String(selectedReservation.roomNumber).trim() !== '' &&
+          String(r.roomNumber).trim() !== '' &&
+          String(r.roomNumber) === String(selectedReservation.roomNumber)) return true
+      return false
+    })
     
     if (room?.status?.toUpperCase() === 'OCCUPIED') {
       alert(`❌ Check-in შეუძლებელია!\n\nოთახი ${selectedReservation.roomNumber} უკვე დაკავებულია!\n\nჯერ გააკეთეთ Check-out.`)
@@ -1956,8 +2103,16 @@ export default function RoomCalendar({
     // Use `reservations` state, NOT localStorage!
     // ========================================
     const activeRes = reservations.find((r: any) => {
-      const sameRoom = r.roomId === selectedReservation.roomId || 
-                       String(r.roomNumber) === String(selectedReservation.roomNumber)
+      // ✅ FIX: Only compare if both values exist
+      let sameRoom = false
+      if (selectedReservation.roomId && r.roomId && selectedReservation.roomId === r.roomId) {
+        sameRoom = true
+      } else if (selectedReservation.roomNumber && r.roomNumber && 
+                 String(selectedReservation.roomNumber).trim() !== '' &&
+                 String(r.roomNumber).trim() !== '' &&
+                 String(r.roomNumber) === String(selectedReservation.roomNumber)) {
+        sameRoom = true
+      }
       const isCheckedIn = r.status?.toUpperCase() === 'CHECKED_IN'
       const isDifferent = r.id !== selectedReservation.id
       return sameRoom && isCheckedIn && isDifferent
@@ -1983,10 +2138,14 @@ export default function RoomCalendar({
     // STEP 1: BLOCK IF ROOM IS OCCUPIED
     // Use `rooms` state, NOT localStorage!
     // ========================================
-    const room = rooms.find((r: any) => 
-      r.id === selectedReservation.roomId || 
-      String(r.roomNumber) === String(selectedReservation.roomNumber)
-    )
+    const room = rooms.find((r: any) => {
+      if (selectedReservation.roomId && r.id && r.id === selectedReservation.roomId) return true
+      if (selectedReservation.roomNumber && r.roomNumber && 
+          String(selectedReservation.roomNumber).trim() !== '' &&
+          String(r.roomNumber).trim() !== '' &&
+          String(r.roomNumber) === String(selectedReservation.roomNumber)) return true
+      return false
+    })
     
     if (room?.status?.toUpperCase() === 'OCCUPIED') {
       alert(`❌ Check-in შეუძლებელია!\n\nოთახი ${selectedReservation.roomNumber} უკვე დაკავებულია!`)
@@ -2000,8 +2159,16 @@ export default function RoomCalendar({
     // Use `reservations` state!
     // ========================================
     const activeRes = reservations.find((r: any) => {
-      const sameRoom = r.roomId === selectedReservation.roomId || 
-                       String(r.roomNumber) === String(selectedReservation.roomNumber)
+      // ✅ FIX: Only compare if both values exist
+      let sameRoom = false
+      if (selectedReservation.roomId && r.roomId && selectedReservation.roomId === r.roomId) {
+        sameRoom = true
+      } else if (selectedReservation.roomNumber && r.roomNumber && 
+                 String(selectedReservation.roomNumber).trim() !== '' &&
+                 String(r.roomNumber).trim() !== '' &&
+                 String(r.roomNumber) === String(selectedReservation.roomNumber)) {
+        sameRoom = true
+      }
       const isCheckedIn = r.status?.toUpperCase() === 'CHECKED_IN'
       const isDifferent = r.id !== selectedReservation.id
       return sameRoom && isCheckedIn && isDifferent
@@ -2285,7 +2452,7 @@ export default function RoomCalendar({
       setSelectedReservation(null)
       
       alert(`✅ ${reservation.guestName} - NO-SHOW\n` +
-            `Charge: ₾${charge.toFixed(2)}\n` +
+            `Charge: ₾${Number(charge || 0).toFixed(2)}\n` +
             (freeRoom ? `✅ ოთახი ${reservation.roomNumber} გათავისუფლდა` : ''))
       
     } catch (error) {
@@ -2655,7 +2822,7 @@ export default function RoomCalendar({
             e.stopPropagation()
             handleDoubleClick(reservation)
           }}
-          title={`${reservation.guestName} - ${nights} ღამე${isNoShow ? ' (NO-SHOW)' : ''}${folio ? ` | Balance: ₾${folio.balance.toFixed(2)}` : ''}${canDragResize ? ' | Drag to move, resize edges to change dates' : ''}`}
+          title={`${reservation.guestName} - ${nights} ღამე${isNoShow ? ' (NO-SHOW)' : ''}${folio ? ` | Balance: ₾${Number(folio.balance || 0).toFixed(2)}` : ''}${canDragResize ? ' | Drag to move, resize edges to change dates' : ''}`}
         >
         {/* Status Icon */}
         <div className="w-8 h-full flex items-center justify-center bg-black/10 rounded-l-lg">
@@ -2681,7 +2848,7 @@ export default function RoomCalendar({
               <span>👥 {reservation.guestCount}</span>
             )}
             {calendarSettings.showPrices && reservation.totalAmount && (
-              <span className="font-bold">₾{reservation.totalAmount.toFixed(0)}</span>
+              <span className="font-bold">₾{Number(reservation.totalAmount || 0).toFixed(0)}</span>
             )}
           </div>
         </div>
@@ -2689,7 +2856,7 @@ export default function RoomCalendar({
         {/* Balance Badge */}
         {calendarSettings.showPrices && folio && folio.balance > 0 && (
           <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-lg balance-badge border-2 border-white">
-            ₾{Math.abs(folio.balance).toFixed(0)}
+            ₾{Math.abs(Number(folio.balance || 0)).toFixed(0)}
           </div>
         )}
         
@@ -3471,11 +3638,11 @@ export default function RoomCalendar({
                             </span>
                           )
                         })()}
-                        {room.basePrice && (
+                        {/* {room.basePrice && (
                           <span className="text-[10px] text-green-300 mt-0.5">
                             ₾{room.basePrice}/ღამე
                           </span>
-                        )}
+                        )} */}
                       </div>
                     </div>
                   </td>
@@ -3810,6 +3977,7 @@ export default function RoomCalendar({
       {showDetails && selectedReservation && (
         <ReservationDetails
           reservation={selectedReservation}
+          rooms={rooms}
           onClose={() => {
             setShowDetails(false)
             setSelectedReservation(null)
@@ -3821,6 +3989,10 @@ export default function RoomCalendar({
           onEdit={() => {
             setShowDetails(false)
             setShowEditModal(true)
+          }}
+          onCheckIn={() => {
+            setShowDetails(false)
+            handleCheckIn()
           }}
         />
       )}
@@ -3844,7 +4016,7 @@ export default function RoomCalendar({
             
             // Show success message
             if (result.folio) {
-              alert(`✅ Payment processed! New balance: ₾${result.folio.balance.toFixed(2)}`)
+              alert(`✅ Payment processed! New balance: ₾${Number(result.folio.balance || 0).toFixed(2)}`)
             } else {
               alert('✅ Payment processed successfully!')
             }
@@ -4182,11 +4354,11 @@ export default function RoomCalendar({
                 <div className="bg-gray-50 rounded-lg p-3">
                   <div className="flex justify-between mb-2">
                     <span>ოთახის ღირებულება ({nights} ღამე)</span>
-                    <span>₾{roomCharge.toFixed(2)}</span>
+                    <span>₾{Number(roomCharge || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-bold border-t pt-2">
                     <span>სულ</span>
-                    <span>₾{roomCharge.toFixed(2)}</span>
+                    <span>₾{Number(roomCharge || 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -4354,6 +4526,7 @@ export default function RoomCalendar({
           reservation={showNoShowModal}
           onConfirm={processNoShow}
           onCancel={() => setShowNoShowModal(null)}
+          rooms={rooms}
         />
       )}
       
@@ -4424,7 +4597,7 @@ export default function RoomCalendar({
 }
 
 // NO-SHOW Confirmation Modal Component
-function NoShowConfirmationModal({ reservation, onConfirm, onCancel }: any) {
+function NoShowConfirmationModal({ reservation, onConfirm, onCancel, rooms }: any) {
   const [chargePolicy, setChargePolicy] = useState('first')
   const [reason, setReason] = useState('არ გამოცხადდა...')
   const [sendNotification, setSendNotification] = useState(true)
@@ -4447,7 +4620,31 @@ function NoShowConfirmationModal({ reservation, onConfirm, onCancel }: any) {
         
         <div className="bg-gray-50 rounded p-4 mb-4">
           <p><strong>სტუმარი:</strong> {reservation.guestName}</p>
-          <p><strong>ოთახი:</strong> {reservation.roomNumber || reservation.roomId}</p>
+          <p><strong>ოთახი:</strong> {(() => {
+            const roomIdOrNumber = reservation.roomNumber || reservation.roomId;
+            if (!roomIdOrNumber) return '-';
+            if (roomIdOrNumber.length <= 4 && /^\d+$/.test(roomIdOrNumber)) return roomIdOrNumber;
+            const foundRoom = rooms?.find((r: any) => r.id === roomIdOrNumber);
+            if (foundRoom) {
+              return foundRoom.roomNumber || foundRoom.number || roomIdOrNumber;
+            }
+            // Try localStorage as fallback
+            try {
+              const savedRooms = localStorage.getItem('rooms') || 
+                                 localStorage.getItem('simpleRooms') || 
+                                 localStorage.getItem('hotelRooms');
+              if (savedRooms) {
+                const parsedRooms = JSON.parse(savedRooms);
+                const foundRoom = parsedRooms.find((r: any) => r.id === roomIdOrNumber);
+                if (foundRoom) {
+                  return foundRoom.roomNumber || foundRoom.number || roomIdOrNumber;
+                }
+              }
+            } catch (e) {
+              // Ignore
+            }
+            return roomIdOrNumber.length > 10 ? roomIdOrNumber.slice(0, 6) + '...' : roomIdOrNumber;
+          })()}</p>
           <p><strong>Check-in:</strong> {moment(reservation.checkIn).format('DD/MM/YYYY')}</p>
           <p><strong>ღამეები:</strong> {nights}</p>
           <p><strong>სრული თანხა:</strong> ₾{reservation.totalAmount}</p>
@@ -4460,7 +4657,7 @@ function NoShowConfirmationModal({ reservation, onConfirm, onCancel }: any) {
             value={chargePolicy}
             onChange={(e) => setChargePolicy(e.target.value)}
           >
-            <option value="first">პირველი ღამე (₾{perNight.toFixed(2)})</option>
+            <option value="first">პირველი ღამე (₾{Number(perNight || 0).toFixed(2)})</option>
             <option value="full">სრული თანხა (₾{reservation.totalAmount})</option>
             <option value="none">არ დაერიცხოს</option>
             <option value="custom">სხვა თანხა</option>
@@ -4604,7 +4801,7 @@ function ViewOnlyReservationModal({ reservation, onClose }: any) {
   )
 }
 
-function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
+function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, onCheckIn }: any) {
   const [hotelInfo, setHotelInfo] = useState<any>({
     name: 'Hotel Tbilisi',
     companyName: '',
@@ -4625,6 +4822,23 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
     totalPayments: 0,
     balance: 0
   })
+  
+  // Find room number from rooms array
+  const roomData = useMemo(() => {
+    if (reservation.roomNumber) {
+      return { roomNumber: reservation.roomNumber, roomType: reservation.roomType }
+    }
+    if (rooms && reservation.roomId) {
+      const room = rooms.find((r: any) => r.id === reservation.roomId)
+      if (room) {
+        return { 
+          roomNumber: room.roomNumber || room.number || reservation.roomId,
+          roomType: room.type || room.roomType || reservation.roomType || 'Standard'
+        }
+      }
+    }
+    return { roomNumber: reservation.roomId || 'N/A', roomType: reservation.roomType || 'Standard' }
+  }, [reservation, rooms])
   
   useEffect(() => {
     const saved = localStorage.getItem('hotelInfo')
@@ -4785,7 +4999,7 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
                 ? 'bg-green-500 text-white' 
                 : 'bg-red-500 text-white'
             }`}>
-              {isPaid ? '✓ გადახდილი' : `₾${balance.toFixed(0)} გადასახდელი`}
+              {isPaid ? '✓ გადახდილი' : `₾${Number(balance || 0).toFixed(0)} გადასახდელი`}
             </span>
             <button onClick={onClose} className="text-2xl text-white hover:text-blue-200">×</button>
           </div>
@@ -4867,19 +5081,19 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">ოთახი:</span>
-                  <span className="font-medium">Room {reservation.roomNumber}</span>
+                  <span className="font-medium">{roomData.roomNumber}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">ტიპი:</span>
-                  <span>{reservation.roomType || 'Standard'}</span>
+                  <span>{roomData.roomType}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">ფასი/ღამე:</span>
-                  <span>₾{((reservation.totalAmount || 0) / nights).toFixed(0)}</span>
+                  <span>₾{((Number(reservation.totalAmount) || 0) / nights).toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between font-medium">
                   <span className="text-gray-500">სულ თანხა:</span>
-                  <span className="text-lg">₾{folioData.totalCharges?.toFixed(2) || reservation.totalAmount || 0}</span>
+                  <span className="text-lg">₾{Number(folioData.totalCharges || 0).toFixed(2) || reservation.totalAmount || 0}</span>
                 </div>
               </div>
             </div>
@@ -4949,12 +5163,12 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
               {folioData.charges.map((charge: any, idx: number) => (
                 <div key={idx} className="flex justify-between text-sm">
                   <span>{charge.description}</span>
-                  <span className="font-medium">₾{charge.amount?.toFixed(2)}</span>
+                  <span className="font-medium">₾{Number(charge.amount || 0).toFixed(2)}</span>
                 </div>
               ))}
               <div className="flex justify-between font-bold border-t pt-1 mt-2">
                 <span>სულ ხარჯები:</span>
-                <span>₾{folioData.totalCharges?.toFixed(2)}</span>
+                <span>₾{Number(folioData.totalCharges || 0).toFixed(2)}</span>
               </div>
             </div>
             
@@ -4965,12 +5179,12 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
                 {folioData.payments.map((payment: any, idx: number) => (
                   <div key={idx} className="flex justify-between text-sm text-green-600">
                     <span>{payment.description} ({payment.method})</span>
-                    <span>-₾{payment.amount?.toFixed(2)}</span>
+                    <span>-₾{Number(payment.amount || 0).toFixed(2)}</span>
                   </div>
                 ))}
                 <div className="flex justify-between font-bold border-t pt-1 mt-2">
                   <span>სულ გადახდილი:</span>
-                  <span className="text-green-600">₾{folioData.totalPayments?.toFixed(2)}</span>
+                  <span className="text-green-600">₾{Number(folioData.totalPayments || 0).toFixed(2)}</span>
                 </div>
               </div>
             )}
@@ -4980,7 +5194,7 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
               folioData.balance > 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
             }`}>
               <span>ბალანსი:</span>
-              <span>₾{folioData.balance?.toFixed(2)}</span>
+              <span>₾{Number(folioData.balance || 0).toFixed(2)}</span>
             </div>
           </div>
           
@@ -4996,12 +5210,23 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
         
         {/* Footer Actions */}
         <div className="border-t p-4 bg-gray-50 flex justify-between">
-          <button 
-            onClick={onEdit}
-            className="px-4 py-2 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 flex items-center gap-2"
-          >
-            ✏️ რედაქტირება
-          </button>
+          <div className="flex gap-2">
+            {/* Check-in button - only for CONFIRMED reservations */}
+            {reservation.status === 'CONFIRMED' && onCheckIn && (
+              <button 
+                onClick={onCheckIn}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              >
+                ✅ Check-in
+              </button>
+            )}
+            <button 
+              onClick={onEdit}
+              className="px-4 py-2 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 flex items-center gap-2"
+            >
+              ✏️ რედაქტირება
+            </button>
+          </div>
           
           <div className="flex gap-3">
             <button onClick={onClose} className="px-4 py-2 border rounded-lg hover:bg-gray-100">
@@ -5012,7 +5237,7 @@ function ReservationDetails({ reservation, onClose, onPayment, onEdit }: any) {
                 onClick={onPayment}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
               >
-                💳 გადახდა (₾{balance.toFixed(0)})
+                💳 გადახდა (₾{Number(balance || 0).toFixed(0)})
               </button>
             )}
           </div>

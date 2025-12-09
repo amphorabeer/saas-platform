@@ -78,7 +78,7 @@ export default function CheckOutModal({
     const payment = {
       id: `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       folioId: folio.id,
-      date: moment().format('YYYY-MM-DD'),
+      date: typeof window !== 'undefined' ? (localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD')) : moment().format('YYYY-MM-DD'),
       time: moment().format('HH:mm:ss'),
       type: 'payment',
       category: 'payment',

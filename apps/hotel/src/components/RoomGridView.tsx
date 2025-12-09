@@ -285,9 +285,9 @@ function RoomCard({ room, onClick, onQuickAction }: any) {
       )}
 
       {/* Price */}
-      <div className="text-sm font-medium text-gray-700">
+      {/* <div className="text-sm font-medium text-gray-700">
         ₾{room.basePrice}/ღამე
-      </div>
+      </div> */}
 
       {/* Quick Actions */}
       <div className="absolute bottom-2 right-2 flex gap-1">
@@ -358,10 +358,10 @@ function RoomDetailsModal({ room, onClose, onStatusChange, onRoomUpdate, loadRoo
               <p className="text-sm text-gray-500">სტატუსი</p>
               <p className="font-medium">{room.status}</p>
             </div>
-            <div>
+            {/* <div>
               <p className="text-sm text-gray-500">ფასი</p>
               <p className="font-medium">₾{room.basePrice}/ღამე</p>
-            </div>
+            </div> */}
           </div>
 
           {/* Action Buttons */}

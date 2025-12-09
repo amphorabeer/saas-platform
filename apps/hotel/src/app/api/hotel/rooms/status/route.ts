@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRooms, saveRooms } from '../../../../../lib/dataStore'
+import { prisma } from '@saas-platform/database'
+import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
 export async function POST(request: NextRequest) {
   try {
+    const tenantId = await getTenantId()
+    
+    if (!tenantId) {
+      return unauthorizedResponse()
+    }
+    
     const { roomId, status } = await request.json()
     
     if (!roomId || !status) {
@@ -18,40 +25,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
     
-    // Get all rooms
-    const rooms = await getRooms()
+    // Try to find room by ID first, then by roomNumber
+    let room = await prisma.hotelRoom.findFirst({
+      where: {
+        tenantId,
+        OR: [
+          { id: roomId },
+          { roomNumber: roomId },
+        ],
+      },
+    })
     
-    // Check if room exists (by id OR roomNumber)
-    const roomExists = rooms.some((room: any) => 
-      room.id === roomId || room.roomNumber === roomId
-    )
-    
-    if (!roomExists) {
+    if (!room) {
       return NextResponse.json(
         { error: `Room not found: ${roomId}` },
         { status: 404 }
       )
     }
     
-    // Update room status - search by id OR roomNumber
-    const updatedRooms = rooms.map((room: any) => 
-      (room.id === roomId || room.roomNumber === roomId)
-        ? { ...room, status, maintenanceDate: status === 'MAINTENANCE' ? new Date().toISOString() : null } 
-        : room
-    )
-    
-    // Save updated rooms
-    await saveRooms(updatedRooms)
+    // Update room status
+    const updatedRoom = await prisma.hotelRoom.update({
+      where: { id: room.id },
+      data: { status },
+    })
     
     // Log status change
     console.log(`Room ${roomId} status changed to ${status}`)
     
     return NextResponse.json({ 
       success: true, 
-      roomId, 
+      roomId: updatedRoom.id,
       newStatus: status 
     })
   } catch (error: any) {
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: 'Room not found' }, { status: 404 })
+    }
     console.error('Error updating room status:', error)
     return NextResponse.json(
       { error: 'Failed to update room status', details: error.message },

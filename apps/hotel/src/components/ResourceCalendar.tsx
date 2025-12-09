@@ -145,7 +145,7 @@ export default function ResourceCalendar({ rooms, reservations, onSlotSelect }: 
                 <td className="border p-3 bg-gray-50 sticky left-0 z-10 font-medium">
                   <div className="font-semibold">Room {room.roomNumber}</div>
                   <div className="text-xs text-gray-500 mt-1">{room.roomType || 'Standard'}</div>
-                  <div className="text-xs text-gray-400 mt-1">₾{room.basePrice}/ღამე</div>
+                  {/* <div className="text-xs text-gray-400 mt-1">₾{room.basePrice}/ღამე</div> */}
                 </td>
                 {dates.map((date, dateIndex) => {
                   const reservation = getReservation(room.id, date)

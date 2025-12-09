@@ -456,7 +456,7 @@ export default function FolioSystem({ onSelectFolio, onClose }: FolioSystemProps
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-medium">{folio.guestName}</div>
-                      <div className="text-xs text-gray-500">{folio.reservationId?.slice(0, 15)}...</div>
+                      {/* <div className="text-xs text-gray-500">{folio.reservationId?.slice(0, 15)}...</div> */}
                     </td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium">

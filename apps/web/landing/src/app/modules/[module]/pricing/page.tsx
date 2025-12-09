@@ -195,7 +195,7 @@ export default function ModulePricingPage({ params }: { params: { module: string
                   ))}
                 </ul>
                 <Button className="w-full min-h-[44px]" variant="outline" asChild>
-                  <Link href="/auth/signup">დაწყება</Link>
+                  <Link href={`/auth/signup?module=${params.module}&plan=STARTER`}>დაწყება</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -225,7 +225,7 @@ export default function ModulePricingPage({ params }: { params: { module: string
                   ))}
                 </ul>
                 <Button className="w-full min-h-[44px]" asChild>
-                  <Link href="/auth/signup">არჩევა</Link>
+                  <Link href={`/auth/signup?module=${params.module}&plan=PROFESSIONAL`}>არჩევა</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -250,7 +250,7 @@ export default function ModulePricingPage({ params }: { params: { module: string
                   ))}
                 </ul>
                 <Button className="w-full min-h-[44px]" variant="outline" asChild>
-                  <Link href="/contact">დაგვიკავშირდით</Link>
+                  <Link href={`/auth/signup?module=${params.module}&plan=ENTERPRISE`}>არჩევა</Link>
                 </Button>
               </CardContent>
             </Card>

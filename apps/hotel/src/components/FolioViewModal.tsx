@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
+import { PostingService } from '../services/PostingService'
 import { ActivityLogger } from '../lib/activityLogger'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
 
@@ -23,39 +24,17 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     email: ''
   })
   
-  // Load hotel info from Settings
-  const loadHotelInfo = () => {
-    if (typeof window === 'undefined') return
-    
-    const possibleKeys = ['hotelInfo', 'hotelSettings', 'settings']
-    
-    for (const key of possibleKeys) {
-      const saved = localStorage.getItem(key)
-      if (saved) {
-        try {
-          const data = JSON.parse(saved)
-          // Check if it's nested under hotelInfo
-          const info = data.hotelInfo || data
-          
-          if (info.name || info.hotelName || info.companyName) {
-            setHotelInfo({
-              name: info.name || info.hotelName || info.companyName || 'Hotel',
-              logo: info.logo || info.logoUrl || '',
-              address: info.address || '',
-              phone: info.phone || info.telephone || '',
-              email: info.email || ''
-            })
-            return
-          }
-        } catch (e) {
-          console.error('Error loading hotel info:', e)
-        }
+  useEffect(() => {
+    // Load hotel info from Settings
+    const savedInfo = localStorage.getItem('hotelInfo')
+    if (savedInfo) {
+      try {
+        const info = JSON.parse(savedInfo)
+        setHotelInfo(info)
+      } catch (e) {
+        console.error('Error loading hotel info:', e)
       }
     }
-  }
-  
-  useEffect(() => {
-    loadHotelInfo()
   }, [])
   
   useEffect(() => {
@@ -72,12 +51,18 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
       
       if (!existingFolio) {
         // Create new folio
+        // Get room number (convert roomId to roomNumber if needed)
+        const roomNumberForFolio = PostingService.getRoomNumber(reservation.roomNumber || reservation.roomId)
+        const roomNumberForFolioNumber = roomNumberForFolio.length <= 4 && /^\d+$/.test(roomNumberForFolio) 
+          ? roomNumberForFolio 
+          : Math.floor(Math.random() * 1000).toString()
+        
         existingFolio = {
           id: `FOLIO-${Date.now()}`,
-          folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
+          folioNumber: `F${moment().format('YYMMDD')}-${roomNumberForFolioNumber}-${reservation.id}`,
           reservationId: reservation.id,
           guestName: reservation.guestName,
-          roomNumber: reservation.roomNumber || reservation.roomId,
+          roomNumber: roomNumberForFolio,
           balance: 0,
           creditLimit: 5000,
           paymentMethod: 'cash',
@@ -154,7 +139,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     const transaction = {
       id: `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       folioId: folio.id,
-      date: moment().format('YYYY-MM-DD'),
+      date: typeof window !== 'undefined' ? (localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD')) : moment().format('YYYY-MM-DD'),
       time: moment().format('HH:mm:ss'),
       type: 'payment',
       category: 'payment',
@@ -222,13 +207,8 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
           <title>Folio ${folio.folioNumber}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
-            .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
-            .header img { height: 50px; margin-bottom: 10px; }
-            .hotel-name { font-size: 20px; font-weight: bold; margin: 5px 0; }
-            .hotel-details { font-size: 11px; color: #666; margin: 3px 0; }
-            .folio-title { font-size: 16px; margin-top: 10px; font-weight: bold; }
-            .folio-number { font-family: monospace; font-size: 14px; margin-top: 5px; }
-            .folio-info { display: flex; justify-content: space-between; margin-top: 15px; }
+            .header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+            .folio-info { display: flex; justify-content: space-between; }
             .balance { font-size: 24px; font-weight: bold; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -239,13 +219,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
         </head>
         <body>
           <div class="header">
-            ${hotelInfo.logo ? `<img src="${hotelInfo.logo}" alt="${hotelInfo.name}" />` : '<div style="font-size: 40px; margin-bottom: 10px;">🏨</div>'}
-            <div class="hotel-name">${hotelInfo.name || 'Hotel'}</div>
-            ${hotelInfo.address ? `<div class="hotel-details">${hotelInfo.address}</div>` : ''}
-            ${hotelInfo.phone ? `<div class="hotel-details">📞 ${hotelInfo.phone}</div>` : ''}
-            ${hotelInfo.email ? `<div class="hotel-details">✉️ ${hotelInfo.email}</div>` : ''}
-            <div class="folio-title">FOLIO / ანგარიშფაქტურა</div>
-            <div class="folio-number">${folio.folioNumber}</div>
+            <h1>Folio #${folio.folioNumber}</h1>
             <div class="folio-info">
               <div>
                 <p><strong>Guest:</strong> ${folio.guestName}</p>
@@ -328,29 +302,14 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
                       src={hotelInfo.logo} 
                       alt={hotelInfo.name} 
                       className="h-12"
-                      onError={(e) => {
-                        // Fallback to emoji if image fails to load
-                        const target = e.target as HTMLImageElement
-                        target.style.display = 'none'
-                        const fallback = target.nextElementSibling as HTMLElement
-                        if (fallback) fallback.style.display = 'block'
-                      }}
                     />
-                  ) : null}
-                  {!hotelInfo.logo && (
+                  ) : (
                     <div className="text-3xl">🏨</div>
                   )}
                   <div>
                     <h1 className="text-xl font-bold">{hotelInfo.name || 'Hotel'}</h1>
                     {hotelInfo.address && (
                       <p className="text-blue-100 text-xs">{hotelInfo.address}</p>
-                    )}
-                    {(hotelInfo.phone || hotelInfo.email) && (
-                      <p className="text-blue-100 text-xs">
-                        {hotelInfo.phone && `📞 ${hotelInfo.phone}`}
-                        {hotelInfo.phone && hotelInfo.email && ' | '}
-                        {hotelInfo.email && `✉️ ${hotelInfo.email}`}
-                      </p>
                     )}
                   </div>
                 </div>

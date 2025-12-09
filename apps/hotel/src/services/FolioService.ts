@@ -87,7 +87,7 @@ export class FolioService {
     // Create new folio
     const newFolio: Folio = {
       id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
+      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${Math.random().toString(36).substring(2, 6)}`,
       reservationId: reservation.id,
       guestName: reservation.guestName,
       roomNumber: reservation.roomNumber || reservation.roomId,
@@ -155,7 +155,7 @@ export class FolioService {
     
     const newFolio: Folio = {
       id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
+      folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${Math.random().toString(36).substring(2, 6)}`,
       reservationId: reservation.id,
       guestName: reservation.guestName,
       roomNumber: reservation.roomNumber || reservation.roomId,
