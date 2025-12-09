@@ -132,7 +132,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>არ გაქვთ ანგარიში?</p>
           <a 
-            href="http://localhost:3000/auth/signup?module=hotel" 
+            href="/auth/signup?module=hotel" 
             className="text-blue-600 hover:underline font-medium"
           >
             დარეგისტრირდით აქ

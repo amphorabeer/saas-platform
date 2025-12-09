@@ -616,7 +616,6 @@ export default function NightAuditModule() {
         // Clear stale locks (older than 5 minutes)
         if (Date.now() - lock.timestamp > AUDIT_LOCK_TIMEOUT) {
           localStorage.removeItem(AUDIT_LOCK_KEY)
-          console.log('Cleared stale audit lock')
         }
       } catch {
         localStorage.removeItem(AUDIT_LOCK_KEY)
@@ -640,15 +639,6 @@ export default function NightAuditModule() {
       const resRooms = await fetch('/api/hotel/rooms')
       const rooms = resRooms.ok ? await resRooms.json() : []
       
-      console.log('Night Audit - Selected Date:', selectedDate)
-      console.log('Night Audit - All Reservations:', reservations.map((r: any) => ({
-        id: r.id,
-        guest: r.guestName,
-        checkIn: moment(r.checkIn).format('YYYY-MM-DD'),
-        status: r.status,
-        actualCheckIn: r.actualCheckIn
-      })))
-      
       // Get REAL pending check-ins for selected date
       // Include CONFIRMED, PENDING, and any status that isn't CHECKED_IN, CHECKED_OUT, NO_SHOW, or CANCELLED
       const pendingCheckIns = reservations.filter((r: any) => {
@@ -667,9 +657,6 @@ export default function NightAuditModule() {
         
         return checkInDate === selectedDate && isConfirmed && notCheckedIn && notCancelled
       })
-      
-      console.log('Night Audit - Pending Check-ins:', pendingCheckIns.length, pendingCheckIns.map((r: any) => r.guestName))
-      console.log('Night Audit - Unmarked Arrivals:', unmarkedArrivals.length, unmarkedArrivals.map((r: any) => r.guestName))
       
       // Get REAL pending check-outs for selected date
       const pendingCheckOuts = reservations.filter((r: any) => {
@@ -723,9 +710,6 @@ export default function NightAuditModule() {
       })
       
       const dirtyCount = countDirtyRooms()
-      if (dirtyCount > 0) {
-        console.log(`⚠️ ${dirtyCount} ოთახი დასალაგებელია`)
-      }
       
       setRealStats({
         pendingCheckIns,
@@ -809,8 +793,6 @@ export default function NightAuditModule() {
 
       const revenue = checkoutRevenue + noShowRevenue
       const occupancy = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0
-      
-      console.log(`Stats for ${date}:`, { checkIns, checkOuts, noShows, occupiedRooms, occupancy, revenue })
       
       return {
         checkIns,
@@ -1145,8 +1127,6 @@ export default function NightAuditModule() {
     
     // Release lock
     localStorage.removeItem(AUDIT_LOCK_KEY)
-    
-    console.log('Audit countdown cancelled')
   }
   
   const skipCountdown = () => {
@@ -2676,7 +2656,6 @@ This is an automated report from Night Audit System.
         if (response.ok) {
           const data = await response.json()
           reservations = Array.isArray(data) ? data : (data.reservations || [])
-          console.log('Z-REPORT: Loaded reservations from API:', reservations.length)
         }
       } catch (error) {
         console.error('Z-REPORT: Failed to fetch reservations from API:', error)
@@ -3480,15 +3459,6 @@ This is an automated report from Night Audit System.
                       const occ = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0
                       const adrVal = occupiedRooms > 0 ? roomRevenue / occupiedRooms : 0
                       const revparVal = totalRooms > 0 ? roomRevenue / totalRooms : 0
-                      
-                      console.log('Z-Report Stats Debug:', { 
-                        totalRooms, 
-                        occupiedRooms, 
-                        roomRevenue, 
-                        occ, 
-                        adrVal, 
-                        revparVal 
-                      })
                       
                       return (
                         <>

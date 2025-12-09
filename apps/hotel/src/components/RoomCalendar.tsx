@@ -719,8 +719,6 @@ export default function RoomCalendar({
   
   // Handle empty slot click
   const handleSlotClick = (roomId: string, date: Date) => {
-    console.log('Clicking on date:', date) // Debug log
-    
     const room = rooms.find(r => r.id === roomId)
     const dateStr = moment(date).format('YYYY-MM-DD')
     const key = `${roomId}_${dateStr}`
@@ -764,8 +762,6 @@ export default function RoomCalendar({
       
       // Date is occupied if: checkIn <= date < checkOut
       const isOccupied = dateStr >= resCheckIn && dateStr < resCheckOut
-      
-      console.log('Overlap check:', { dateStr, resCheckIn, resCheckOut, isOccupied, status: r.status })
       return isOccupied
     })
     
@@ -773,8 +769,6 @@ export default function RoomCalendar({
       canBook = false
       blockReason = 'უკვე დაკავებულია'
     }
-    
-    console.log('Can book:', canBook, 'Reason:', blockReason) // Debug
     
     if (!canBook) {
       if (blockReason) {
@@ -816,8 +810,6 @@ export default function RoomCalendar({
     }
     
     // Date is valid - open modal
-    console.log('Opening modal for:', dateStr) // Debug
-    
     // Make sure onSlotClick is called
     if (onSlotClick) {
       onSlotClick(roomId, date, room)
@@ -1143,31 +1135,24 @@ export default function RoomCalendar({
   
   // Validate if drop is allowed
   const validateDrop = (target: { roomId: string; date: string }, reservation: any): boolean => {
-    console.log('🔍 validateDrop called:', { target, reservationId: reservation?.id })
-    
     if (!target || !reservation) {
-      console.log('❌ FAIL: target or reservation is null')
       return false
     }
     
     // Check if target date is closed
     if (isClosedDay(target.date)) {
-      console.log('❌ FAIL: target date is closed:', target.date)
       return false
     }
     
     // Check if room exists (convert to string for comparison)
     const targetRoom = rooms.find(r => String(r.id) === String(target.roomId))
-    console.log('🏠 Target room lookup:', { targetRoomId: target.roomId, found: !!targetRoom, roomIds: rooms.map(r => ({id: r.id, type: typeof r.id})) })
     
     if (!targetRoom) {
-      console.log('❌ FAIL: room not found')
       return false
     }
     
     // Check if room is in maintenance
     if (isRoomInMaintenance(target.roomId) || targetRoom.status === 'MAINTENANCE') {
-      console.log('❌ FAIL: room is in maintenance')
       return false
     }
     
@@ -1176,11 +1161,8 @@ export default function RoomCalendar({
     const newCheckIn = moment(target.date)
     const newCheckOut = moment(newCheckIn).add(nights, 'days')
     
-    console.log('📅 Date calculation:', { nights, newCheckIn: newCheckIn.format('YYYY-MM-DD'), newCheckOut: newCheckOut.format('YYYY-MM-DD') })
-    
     // Minimum 1 night stay
     if (nights < 1) {
-      console.log('❌ FAIL: nights < 1')
       return false
     }
     
@@ -1190,7 +1172,6 @@ export default function RoomCalendar({
       
       // Check if date is closed
       if (isClosedDay(dateStr)) {
-        console.log('❌ FAIL: date in range is closed:', dateStr)
         return false
       }
       
@@ -1206,20 +1187,14 @@ export default function RoomCalendar({
                dateStr >= rCheckIn && 
                dateStr < rCheckOut
         
-        if (isConflict) {
-          console.log('⚠️ Conflict found:', { dateStr, conflictReservation: r.id, rCheckIn, rCheckOut })
-        }
-        
         return isConflict
       })
       
       if (hasConflict) {
-        console.log('❌ FAIL: has conflict on date:', dateStr)
         return false
       }
     }
     
-    console.log('✅ validateDrop PASSED!')
     return true
   }
   
@@ -1308,8 +1283,6 @@ export default function RoomCalendar({
     const currentIsDragging = isDraggingRef.current
     const currentDraggedReservation = draggedReservationRef.current
     const currentDropTarget = dropTargetRef.current
-    
-    console.log('🔚 handleDragEnd:', { currentIsDragging, hasRes: !!currentDraggedReservation, currentDropTarget })
     
     if (!currentIsDragging || !currentDraggedReservation) {
       // Clean up
@@ -1464,13 +1437,6 @@ export default function RoomCalendar({
               folios[folioIndex] = folio
               localStorage.setItem('hotelFolios', JSON.stringify(folios))
               
-              console.log('✅ Folio updated after room change:', {
-                reservationId: currentDraggedReservation.id,
-                oldRoom: sourceRoom?.roomNumber,
-                newRoom: targetRoom.roomNumber,
-                newTotalAmount,
-                newBalance: folio.balance
-              })
             }
           }
         } catch (error) {
@@ -1548,7 +1514,6 @@ export default function RoomCalendar({
     
     if (isResizingRef.current === 'left') {
       // Resizing check-in date
-      console.log('Left resize:', { dateStr, currentCheckIn, currentCheckOut })
       if (moment(dateStr).isBefore(currentCheckOut, 'day')) {
         const preview = { checkIn: dateStr }
         setResizePreview(preview)
@@ -1572,7 +1537,6 @@ export default function RoomCalendar({
           const preview = { checkOut: newCheckOut }
           setResizePreview(preview)
           resizePreviewRef.current = preview
-          console.log('Right resize preview:', { dateStr, newCheckOut, currentCheckIn })
         } else {
           setResizePreview(null)
           resizePreviewRef.current = null
@@ -1702,9 +1666,7 @@ export default function RoomCalendar({
       // ==========================================
       try {
         const foliosData = localStorage.getItem('hotelFolios')
-        if (!foliosData) {
-          console.log('No folios in localStorage')
-        } else {
+        if (foliosData) {
           const folios = JSON.parse(foliosData)
           const folioIndex = folios.findIndex((f: any) => f.reservationId === currentDraggedReservation.id)
           
@@ -1714,19 +1676,11 @@ export default function RoomCalendar({
               moment(updates.checkIn || currentCheckIn), 'days'
             )
             
-            console.log('Updating folio after resize:', {
-              reservationId: currentDraggedReservation.id,
-              newNights,
-              newTotalAmount: updates.totalAmount,
-              folioStructure: Object.keys(folio)
-            })
-            
             // Update initialRoomCharge if exists
             if (folio.initialRoomCharge) {
               const rate = folio.initialRoomCharge.rate || (updates.totalAmount / newNights)
               folio.initialRoomCharge.nights = newNights
               folio.initialRoomCharge.totalAmount = updates.totalAmount
-              console.log('Updated initialRoomCharge:', folio.initialRoomCharge)
             }
             
             // Update transactions if exists
@@ -1741,7 +1695,6 @@ export default function RoomCalendar({
               if (roomChargeTransaction) {
                 roomChargeTransaction.amount = updates.totalAmount
                 roomChargeTransaction.description = `ოთახის ღირებულება (${newNights} ღამე)`
-                console.log('Updated transaction:', roomChargeTransaction)
               }
             }
             
@@ -1764,12 +1717,6 @@ export default function RoomCalendar({
             const totalPayments = (folio.payments || []).reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
             folio.balance = totalRoomCharge - totalPayments
             
-            console.log('Folio recalculated:', {
-              totalRoomCharge,
-              totalPayments,
-              newBalance: folio.balance
-            })
-            
             // Save folio
             folios[folioIndex] = folio
             localStorage.setItem('hotelFolios', JSON.stringify(folios))
@@ -1781,8 +1728,6 @@ export default function RoomCalendar({
             
             // Force re-render
             setFolioUpdateKey(prev => prev + 1)
-          } else {
-            console.log('No folio found for reservation:', currentDraggedReservation.id)
           }
         }
       } catch (e) {
@@ -1819,12 +1764,6 @@ export default function RoomCalendar({
     }
     
     const handleMouseUp = () => {
-      console.log('🖱️ mouseUp:', { 
-        isDraggingRef: isDraggingRef.current, 
-        isResizingRef: isResizingRef.current,
-        hasDraggedRes: !!draggedReservationRef.current 
-      })
-      
       // Use REFS instead of state values! (stale closure fix)
       if (draggedReservationRef.current) {
         if (isDraggingRef.current) {
@@ -2441,7 +2380,7 @@ export default function RoomCalendar({
       
       // TODO: Send notification if requested
       if (sendNotification) {
-        console.log('Notification would be sent to:', reservation.guestEmail)
+        // TODO: Send notification if requested
       }
       
       if (loadReservations) {
@@ -3696,21 +3635,14 @@ export default function RoomCalendar({
                             onClick={(e) => {
                               e.stopPropagation()
                               const dateStr = moment(date).format('YYYY-MM-DD')
-                              console.log('Cell clicked:', dateStr) // Debug
-                              
                               // Check if date is closed (before or on last audit)
                               const isClosed = isClosedDay(date)
                               
                               if (canBookOnDate(date) && !isClosed) {
                                 const hasReservation = getReservationsForRoomAndDate(room.id, date).length > 0
                                 if (!hasReservation && !isBlocked) {
-                                  console.log('Calling handleSlotClick for:', dateStr) // Debug
                                   handleSlotClick(room.id, date)
-                                } else {
-                                  console.log('Click blocked:', { hasReservation, isBlocked, isClosed }) // Debug
                                 }
-                              } else {
-                                console.log('Date not bookable or closed:', dateStr, { canBook: canBookOnDate(date), isClosed }) // Debug
                               }
                             }}
                             onContextMenu={(e) => {
@@ -4862,14 +4794,6 @@ function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, on
     // Find folio by reservationId ONLY (each reservation has its own folio)
     const foundFolio = folios.find((f: any) => f.reservationId === reservation.id)
     
-    console.log('ReservationDetails: Loading folio data', {
-      reservationId: reservation.id,
-      roomNumber: reservation.roomNumber,
-      allFolios: folios.length,
-      foundFolio: foundFolio ? foundFolio.folioNumber : 'NOT FOUND',
-      transactions: foundFolio?.transactions?.length || 0
-    })
-    
     setFolio(foundFolio)
     
     if (foundFolio) {
@@ -4934,7 +4858,6 @@ function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, on
   // Listen for folio updates
   useEffect(() => {
     const handleFolioUpdate = (event: CustomEvent) => {
-      console.log('ReservationDetails: Received folioUpdated event', event.detail)
       // Check if this event is for our reservation
       const eventReservationId = event.detail?.reservationId
       if (!eventReservationId || eventReservationId === reservation.id) {

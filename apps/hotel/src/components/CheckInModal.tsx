@@ -95,7 +95,6 @@ export default function CheckInModal({
       if (saved) {
         try {
           const rates = JSON.parse(saved)
-          console.log('Loaded roomRates:', rates)
           setRoomRates(rates)
         } catch (e) {
           console.error('Error loading room rates:', e)
@@ -107,20 +106,7 @@ export default function CheckInModal({
       if (savedSeasons) {
         try {
           const loadedSeasons = JSON.parse(savedSeasons)
-          console.log('Loaded seasons:', loadedSeasons)
           setSeasons(loadedSeasons)
-          
-          // === სრული debug ===
-          console.log('=== SEASON DEBUG ===')
-          console.log('Seasons count:', loadedSeasons.length)
-          loadedSeasons.forEach((s: any, i: number) => {
-            console.log(`\nSeason ${i + 1}: "${s.name}"`)
-            console.log('  startDate:', s.startDate)
-            console.log('  endDate:', s.endDate)
-            console.log('  active:', s.active)
-            console.log('  priceModifier:', s.priceModifier)
-            console.log('  roomTypes:', s.roomTypes)
-          })
         } catch (e) {
           console.error('Error loading seasons:', e)
         }
@@ -133,7 +119,6 @@ export default function CheckInModal({
           const parsed = JSON.parse(savedWeekdays)
           // Handle both formats: array or {all: array}
           const weekdays = Array.isArray(parsed) ? parsed : (parsed.all || [])
-          console.log('Loaded weekday prices:', weekdays)
           setWeekdayPrices(weekdays)
         } catch (e) {
           console.error('Error loading weekday prices:', e)
@@ -145,7 +130,6 @@ export default function CheckInModal({
       if (savedSpecialDates) {
         try {
           const parsed = JSON.parse(savedSpecialDates)
-          console.log('Loaded special dates:', parsed)
           setSpecialDates(parsed || [])
         } catch (e) {
           console.error('Error loading special dates:', e)
@@ -194,29 +178,13 @@ export default function CheckInModal({
   // Get season modifier for a specific date
   const getSeasonModifier = (date: string): number => {
     if (!seasons || seasons.length === 0) {
-      console.log('=== SEASON MODIFIER DEBUG ===')
-      console.log('Test date:', date)
-      console.log('No seasons loaded')
       return 0
     }
     
     const checkDate = moment(date)
     
-    console.log('=== SEASON MODIFIER DEBUG ===')
-    console.log('Test date:', date)
-    console.log('Seasons count:', seasons.length)
-    console.log('Current room type:', getRoomTypeName())
-    
     for (const season of seasons) {
-      console.log(`\nChecking Season: "${season.name}"`)
-      console.log('  startDate:', season.startDate)
-      console.log('  endDate:', season.endDate)
-      console.log('  active:', season.active)
-      console.log('  priceModifier:', season.priceModifier)
-      console.log('  roomTypes:', season.roomTypes)
-      
       if (!season.active) {
-        console.log('  ❌ Season is not active')
         continue
       }
       
@@ -225,39 +193,21 @@ export default function CheckInModal({
       
       // Check if date is within season range
       const inRange = checkDate.isSameOrAfter(startDate, 'day') && checkDate.isSameOrBefore(endDate, 'day')
-      console.log('  Date in range:', inRange)
-      console.log('  Date check:', {
-        checkDate: checkDate.format('YYYY-MM-DD'),
-        startDate: startDate.format('YYYY-MM-DD'),
-        endDate: endDate.format('YYYY-MM-DD'),
-        isAfter: checkDate.isSameOrAfter(startDate, 'day'),
-        isBefore: checkDate.isSameOrBefore(endDate, 'day')
-      })
       
       if (inRange) {
         // If season has specific room types, check if current room type matches
         if (season.roomTypes && season.roomTypes.length > 0) {
           const roomTypeName = getRoomTypeName()
           const roomTypeMatches = season.roomTypes.includes(roomTypeName)
-          console.log('  Room type check:', {
-            roomTypeName,
-            seasonRoomTypes: season.roomTypes,
-            matches: roomTypeMatches
-          })
           if (!roomTypeMatches) {
-            console.log('  ❌ Room type does not match')
             continue // This season doesn't apply to this room type
           }
         }
         
-        console.log(`  ✅ Season "${season.name}" applies: ${season.priceModifier}%`)
         return season.priceModifier
-      } else {
-        console.log('  ❌ Date is not in range')
       }
     }
     
-    console.log('  ❌ No season applies')
     return 0 // No season applies
   }
 
@@ -269,7 +219,6 @@ export default function CheckInModal({
     const weekdayPrice = weekdayPrices.find(w => w.dayOfWeek === dayOfWeek && w.enabled)
     
     if (weekdayPrice && weekdayPrice.priceModifier !== 0) {
-      console.log(`Weekday "${weekdayPrice.dayName}" modifier: ${weekdayPrice.priceModifier}%`)
       return { modifier: weekdayPrice.priceModifier, dayName: weekdayPrice.dayName }
     }
     
@@ -294,7 +243,6 @@ export default function CheckInModal({
           return null
         }
       }
-      console.log(`Special date "${special.name}" modifier: ${special.priceModifier}%`)
       return { modifier: special.priceModifier, name: special.name }
     }
     
@@ -307,8 +255,6 @@ export default function CheckInModal({
 
     const roomTypeName = getRoomTypeName()
     const rate = roomRates.find(r => r.type === roomTypeName)
-
-    console.log('calculatePricePerNight:', { date, roomTypeName, rate, roomRates })
 
     let basePrice = Number(selectedRoom.basePrice) || 150
 
@@ -325,7 +271,6 @@ export default function CheckInModal({
     if (specialDate) {
       const adjustment = basePrice * (specialDate.modifier / 100)
       const finalPrice = basePrice + adjustment
-      console.log(`Price for ${date}: base=${basePrice}, special="${specialDate.name}" ${specialDate.modifier}%, final=${finalPrice}`)
       return finalPrice
     }
 
@@ -341,7 +286,6 @@ export default function CheckInModal({
     if (weekdayMod) {
       const adjustment = basePrice * (weekdayMod.modifier / 100)
       basePrice = basePrice + adjustment
-      console.log(`Price for ${date}: after weekday "${weekdayMod.dayName}" ${weekdayMod.modifier}%, final=${basePrice}`)
     }
 
     return Math.round(basePrice)
@@ -424,7 +368,6 @@ export default function CheckInModal({
   useEffect(() => {
     if (formData.checkIn && formData.checkOut && selectedRoom) {
       const total = calculateTotal()
-      console.log('Updating totalAmount:', total)
       setFormData(prev => ({ ...prev, totalAmount: total }))
     }
   }, [formData.checkIn, formData.checkOut, formData.roomId, selectedRoom, roomRates])
@@ -466,14 +409,6 @@ export default function CheckInModal({
       // Overlap exists only if: newCheckIn < existingCheckOut AND newCheckOut > existingCheckIn
       // On checkout day (newCheckIn === existingCheckOut), there's NO overlap - new guest can check in
       const overlaps = checkInDate.isBefore(resCheckOutDate) && checkOutDate.isAfter(resCheckInDate)
-      
-      console.log('Overlap check:', { 
-        newCheckIn: checkInDate.format('YYYY-MM-DD'), 
-        newCheckOut: checkOutDate.format('YYYY-MM-DD'),
-        existingCheckIn: resCheckInDate.format('YYYY-MM-DD'),
-        existingCheckOut: resCheckOutDate.format('YYYY-MM-DD'),
-        overlaps 
-      })
       
       return overlaps
     })

@@ -239,7 +239,6 @@ export async function PUT(request: NextRequest) {
     }
     
     // Validate updateData before attempting update
-    console.log('Updating reservation with data:', JSON.stringify(updateData, null, 2))
     
     const updatedReservation = await prisma.hotelReservation.update({
       where: { id },

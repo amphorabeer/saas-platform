@@ -541,7 +541,6 @@ export default function HotelDashboard() {
           console.log('\n💡 Data Source Analysis:')
           console.log('  - Main Storage: JSON files (data/rooms.json, data/reservations.json)')
           console.log('  - API reads from: dataStore.ts → JSON files')
-          console.log('  - localStorage: Used for caching/debugging (not synchronized)')
           
           return {
             localStorage: {
