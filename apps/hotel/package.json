@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "cd ../../packages/database && npx prisma generate",
     "dev": "next dev -p 3010",
-    "build": "prisma generate --schema=../../packages/database/prisma/schema.prisma && next build --no-lint",
+    "build": "cd ../../packages/database && npx prisma generate && cd ../../apps/hotel && next build --no-lint",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
