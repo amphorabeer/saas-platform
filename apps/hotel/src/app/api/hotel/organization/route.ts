@@ -2,8 +2,13 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@saas-platform/database'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
+
+// Lazy load prisma to avoid build-time initialization
+async function getPrisma() {
+  const { prisma } = await import('@saas-platform/database')
+  return prisma
+}
 
 export async function GET() {
   try {
@@ -13,6 +18,7 @@ export async function GET() {
       return unauthorizedResponse()
     }
     
+    const prisma = await getPrisma()
     // Get organization by tenantId
     const organization = await prisma.organization.findUnique({
       where: { tenantId },
@@ -60,6 +66,7 @@ export async function PUT(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    const prisma = await getPrisma()
     const body = await request.json()
     
     // Update organization

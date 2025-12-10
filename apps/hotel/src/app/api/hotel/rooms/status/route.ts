@@ -2,8 +2,13 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@saas-platform/database'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
+
+// Lazy load prisma to avoid build-time initialization
+async function getPrisma() {
+  const { prisma } = await import('@saas-platform/database')
+  return prisma
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +18,7 @@ export async function POST(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    const prisma = await getPrisma()
     const { roomId, status } = await request.json()
     
     if (!roomId || !status) {
