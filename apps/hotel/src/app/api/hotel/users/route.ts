@@ -2,12 +2,13 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 import { getServerSession } from 'next-auth'
 import bcrypt from 'bcryptjs'
 
 export async function GET() {
   try {
+    // Lazy import to prevent build-time evaluation
+    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
     if (!tenantId) {
