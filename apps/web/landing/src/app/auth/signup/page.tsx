@@ -1,13 +1,23 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function SignupPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const module = searchParams.get('module') || 'hotel'
-  const plan = searchParams.get('plan') || 'STARTER'
+  const [module, setModule] = useState('hotel')
+  const [plan, setPlan] = useState('STARTER')
+  
+  // Get module and plan from URL on client side only
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const mod = params.get('module')
+      const planParam = params.get('plan')
+      if (mod) setModule(mod)
+      if (planParam) setPlan(planParam)
+    }
+  }, [])
   
   const [formData, setFormData] = useState({
     name: '',
