@@ -1,39 +1,71 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { prisma } from "@saas-platform/database";
 import bcrypt from "bcryptjs";
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  providers: [
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        hotelCode: { label: "Hotel Code", type: "text" },
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        console.log('🔐 Login attempt:', { 
-          hotelCode: credentials?.hotelCode, 
-          email: credentials?.email 
-        });
+// Lazy load Prisma to avoid build-time initialization
+async function getPrisma() {
+  const { prisma } = await import("@saas-platform/database");
+  return prisma;
+}
 
-        if (!credentials?.email || !credentials?.password) {
-          console.log('❌ Missing email or password');
-          throw new Error("Invalid credentials");
+// Create a lazy adapter that only initializes when used
+function createLazyAdapter() {
+  let adapterPromise: Promise<any> | null = null;
+  
+  return new Proxy({} as any, {
+    get(target, prop) {
+      if (!adapterPromise) {
+        adapterPromise = (async () => {
+          const { PrismaAdapter } = await import("@auth/prisma-adapter");
+          const prisma = await getPrisma();
+          return PrismaAdapter(prisma) as any;
+        })();
+      }
+      return async (...args: any[]) => {
+        const adapter = await adapterPromise;
+        const method = adapter[prop];
+        if (typeof method === 'function') {
+          return method.apply(adapter, args);
         }
+        return method;
+      };
+    }
+  });
+}
 
-        // Find user by email
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          include: { organization: true },
-        });
+export const authOptions: NextAuthOptions = {
+  adapter: createLazyAdapter() as any,
+    session: {
+      strategy: "jwt",
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    },
+    providers: [
+      CredentialsProvider({
+        name: "credentials",
+        credentials: {
+          hotelCode: { label: "Hotel Code", type: "text" },
+          email: { label: "Email", type: "email" },
+          password: { label: "Password", type: "password" },
+        },
+        async authorize(credentials) {
+          console.log('🔐 Login attempt:', { 
+            hotelCode: credentials?.hotelCode, 
+            email: credentials?.email 
+          });
+
+          if (!credentials?.email || !credentials?.password) {
+            console.log('❌ Missing email or password');
+            throw new Error("Invalid credentials");
+          }
+
+          // Lazy load Prisma inside authorize function
+          const prisma = await getPrisma();
+          
+          // Find user by email
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+            include: { organization: true },
+          });
 
         if (!user) {
           console.log('❌ User not found:', credentials.email);
