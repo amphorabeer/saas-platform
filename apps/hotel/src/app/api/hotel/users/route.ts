@@ -2,8 +2,6 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import bcrypt from 'bcryptjs'
 
 export async function GET() {
   try {
@@ -16,6 +14,7 @@ export async function GET() {
     }
     
     // Lazy import to prevent build-time evaluation
+    const { getServerSession } = await import('next-auth')
     const { getAuthOptions } = await import('@/lib/auth')
     const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
@@ -47,6 +46,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Lazy import to prevent build-time evaluation
+    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
     if (!tenantId) {
@@ -54,6 +55,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Lazy import to prevent build-time evaluation
+    const { getServerSession } = await import('next-auth')
+    const bcrypt = (await import('bcryptjs')).default
     const { getAuthOptions } = await import('@/lib/auth')
     const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
@@ -122,6 +125,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // Lazy import to prevent build-time evaluation
+    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
     if (!tenantId) {
@@ -129,6 +134,8 @@ export async function PUT(request: NextRequest) {
     }
     
     // Lazy import to prevent build-time evaluation
+    const { getServerSession } = await import('next-auth')
+    const bcrypt = (await import('bcryptjs')).default
     const { getAuthOptions } = await import('@/lib/auth')
     const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
@@ -193,6 +200,8 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Lazy import to prevent build-time evaluation
+    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
     if (!tenantId) {
@@ -200,6 +209,7 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Lazy import to prevent build-time evaluation
+    const { getServerSession } = await import('next-auth')
     const { getAuthOptions } = await import('@/lib/auth')
     const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
