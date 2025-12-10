@@ -2,14 +2,20 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 function LoginForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const [callbackUrl, setCallbackUrl] = useState('/')
+  
+  // Get callbackUrl on client side only
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const url = params.get('callbackUrl')
+    if (url) setCallbackUrl(url)
+  }, [])
   
   const [credentials, setCredentials] = useState({ 
     hotelCode: '', 
@@ -146,13 +152,5 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-        <div className="text-white text-lg">იტვირთება...</div>
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
-  )
+  return <LoginForm />
 }
