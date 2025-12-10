@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const body = await request.json()
     console.log('📥 POST /api/hotel/users - Body:', JSON.stringify(body, null, 2))
     
@@ -125,6 +127,8 @@ export async function PUT(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const body = await request.json()
     const { id, password, role, ...updates } = body
     
@@ -191,6 +195,8 @@ export async function DELETE(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
     

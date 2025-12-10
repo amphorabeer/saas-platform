@@ -4,8 +4,6 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
-import { prisma } from '@/lib/prisma'
-
 export async function GET() {
   try {
     const tenantId = await getTenantId()
@@ -13,6 +11,9 @@ export async function GET() {
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const rooms = await prisma.hotelRoom.findMany({
       where: { tenantId },
       orderBy: { roomNumber: 'asc' },
@@ -32,6 +33,9 @@ export async function POST(request: NextRequest) {
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const body = await request.json()
     console.log('📥 POST /api/hotel/rooms - Body:', JSON.stringify(body, null, 2))
     
@@ -80,6 +84,9 @@ export async function PUT(request: NextRequest) {
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const body = await request.json()
     const { id, type, ...updates } = body // Remove 'type' field
     
@@ -117,6 +124,9 @@ export async function DELETE(request: NextRequest) {
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
     
