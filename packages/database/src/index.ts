@@ -51,7 +51,8 @@ export const prisma = new Proxy({} as PrismaClient, {
   }
 })
 
-export * from '@prisma/client'
+// Export only types, not values (prevents build-time evaluation)
+export type { Prisma, PrismaClient } from '@prisma/client'
 
 // Export config service (after prisma is defined)
 export { getConfig, setConfig, deleteConfig, getAllConfigs } from './config'
