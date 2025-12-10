@@ -1,8 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { randomUUID } from 'crypto'
+import { prisma } from '@saas-platform/database'
+import bcrypt from 'bcryptjs'
 
 // Generate unique 4-digit hotel code
-async function generateUniqueHotelCode(prisma: any): Promise<string> {
+async function generateUniqueHotelCode(): Promise<string> {
   let code: string = ''
   let exists = true
   
@@ -23,10 +25,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   
   try {
-    // Use the shared database package
-    const { prisma } = await import('@saas-platform/database')
-    const bcrypt = require('bcryptjs')
-    
     const { 
       name, email, password, organizationName, module, plan,
       company, taxId, address, city, country, phone, website, bankName, bankAccount
@@ -49,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Generate unique hotel code
-    const hotelCode = await generateUniqueHotelCode(prisma)
+    const hotelCode = await generateUniqueHotelCode()
     console.log('🔑 Generated hotel code:', hotelCode)
 
     // Generate slug
