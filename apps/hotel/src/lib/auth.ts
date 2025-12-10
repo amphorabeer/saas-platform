@@ -1,7 +1,21 @@
 import type { NextAuthOptions } from "next-auth"
 
+// Check if we're in build phase
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || 
+                     process.env.VERCEL_ENV === undefined && process.env.CI === 'true'
+
 // Export function instead of object to enable lazy loading
 export async function getAuthOptions(): Promise<NextAuthOptions> {
+  // During build, return minimal config
+  if (isBuildPhase) {
+    return {
+      session: { strategy: "jwt" },
+      providers: [],
+      pages: { signIn: "/login" },
+    }
+  }
+  
+  // Normal runtime config
   const CredentialsProvider = (await import("next-auth/providers/credentials")).default
   const bcrypt = (await import("bcryptjs")).default
   const { getPrismaClient } = await import('./prisma')
