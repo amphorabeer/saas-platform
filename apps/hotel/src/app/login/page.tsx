@@ -1,21 +1,12 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
 import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
-function LoginForm() {
+export default function LoginPage() {
   const router = useRouter()
   const [callbackUrl, setCallbackUrl] = useState('/')
-  
-  // Get callbackUrl on client side only
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const url = params.get('callbackUrl')
-    if (url) setCallbackUrl(url)
-  }, [])
   
   const [credentials, setCredentials] = useState({ 
     hotelCode: '', 
@@ -24,6 +15,15 @@ function LoginForm() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  
+  // Get callbackUrl on client side only
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const url = params.get('callbackUrl')
+      if (url) setCallbackUrl(url)
+    }
+  }, [])
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,11 +48,9 @@ function LoginForm() {
         setError('არასწორი მონაცემები. შეამოწმეთ სასტუმროს კოდი, ელ-ფოსტა და პაროლი.')
         setLoading(false)
       } else if (result?.ok) {
-        // Clear any old localStorage data
         localStorage.removeItem('currentUser')
         localStorage.removeItem('hotelRooms')
         localStorage.removeItem('hotelFolios')
-        
         router.push(callbackUrl)
         router.refresh()
       }
@@ -79,7 +77,6 @@ function LoginForm() {
               type="text"
               value={credentials.hotelCode}
               onChange={(e) => {
-                // Allow only digits, max 4
                 const value = e.target.value.replace(/\D/g, '').slice(0, 4)
                 setCredentials({...credentials, hotelCode: value})
               }}
@@ -149,8 +146,4 @@ function LoginForm() {
       </div>
     </div>
   )
-}
-
-export default function LoginPage() {
-  return <LoginForm />
 }
