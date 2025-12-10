@@ -19,7 +19,7 @@ export const authOptions = {
         }
         
         try {
-          const { prisma } = await import('@/lib/prisma')
+          const { prisma } = await import('../../../lib/prisma')
           const bcrypt = require('bcryptjs')
           
           const user = await prisma.user.findUnique({

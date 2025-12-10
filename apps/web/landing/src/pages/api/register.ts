@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { randomUUID } from 'crypto'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '../../lib/prisma'
 import bcrypt from 'bcryptjs'
 
 // Generate unique 4-digit hotel code
