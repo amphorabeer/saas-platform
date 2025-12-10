@@ -1,77 +1,50 @@
-import type { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
+import type { NextAuthOptions } from "next-auth"
 
-export const authOptions: NextAuthOptions = {
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  providers: [
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        hotelCode: { label: "Hotel Code", type: "text" },
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        console.log('🔐 Login attempt:', { 
-          hotelCode: credentials?.hotelCode, 
-          email: credentials?.email 
-        });
-
-        if (!credentials?.email || !credentials?.password) {
-          console.log('❌ Missing email or password');
-          throw new Error("Invalid credentials");
-        }
-
-        try {
-          // Lazy import inside function
-          const { getPrismaClient } = await import('./prisma');
-          const prisma = getPrismaClient();
+// Export function instead of object to enable lazy loading
+export async function getAuthOptions(): Promise<NextAuthOptions> {
+  const CredentialsProvider = (await import("next-auth/providers/credentials")).default
+  const bcrypt = (await import("bcryptjs")).default
+  const { getPrismaClient } = await import('./prisma')
+  
+  return {
+    session: {
+      strategy: "jwt",
+      maxAge: 30 * 24 * 60 * 60,
+    },
+    providers: [
+      CredentialsProvider({
+        name: "credentials",
+        credentials: {
+          hotelCode: { label: "Hotel Code", type: "text" },
+          email: { label: "Email", type: "email" },
+          password: { label: "Password", type: "password" },
+        },
+        async authorize(credentials) {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error("Invalid credentials")
+          }
           
-          // Find user by email
+          const prisma = getPrismaClient()
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
             include: { organization: true },
-          });
-
+          })
+          
           if (!user) {
-            console.log('❌ User not found:', credentials.email);
-            throw new Error("Invalid credentials");
+            throw new Error("Invalid credentials")
           }
-
-          // Verify hotel code if provided (required for hotel app)
+          
           if (credentials.hotelCode) {
-            if (!user.organization) {
-              console.log('❌ User has no organization');
-              throw new Error("Invalid credentials");
+            if (!user.organization || user.organization.hotelCode !== credentials.hotelCode) {
+              throw new Error("Invalid credentials")
             }
-            
-            if (user.organization.hotelCode !== credentials.hotelCode) {
-              console.log('❌ Hotel code mismatch:', {
-                provided: credentials.hotelCode,
-                expected: user.organization.hotelCode
-              });
-              throw new Error("Invalid credentials");
-            }
-            console.log('✅ Hotel code verified:', credentials.hotelCode);
           }
-
-          // Verify password
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
           if (!isPasswordValid) {
-            console.log('❌ Invalid password for:', credentials.email);
-            throw new Error("Invalid credentials");
+            throw new Error("Invalid credentials")
           }
-
-          console.log('✅ Login successful:', {
-            userId: user.id,
-            email: user.email,
-            hotelCode: user.organization?.hotelCode
-          });
-
+          
           return {
             id: user.id,
             email: user.email,
@@ -80,39 +53,42 @@ export const authOptions: NextAuthOptions = {
             organizationId: user.organizationId,
             tenantId: user.organization?.tenantId,
             hotelCode: user.organization?.hotelCode,
-          };
-        } catch (error) {
-          console.error('Auth error:', error);
-          throw error;
+          }
+        },
+      }),
+    ],
+    callbacks: {
+      async jwt({ token, user }) {
+        if (user) {
+          token.id = user.id
+          token.role = (user as any).role
+          token.organizationId = (user as any).organizationId
+          token.tenantId = (user as any).tenantId
+          token.hotelCode = (user as any).hotelCode
         }
+        return token
       },
-    }),
-  ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.organizationId = user.organizationId;
-        token.tenantId = (user as any).tenantId;
-        token.hotelCode = (user as any).hotelCode;
-      }
-      return token;
+      async session({ session, token }) {
+        if (session?.user) {
+          (session.user as any).id = token.id;
+          (session.user as any).role = token.role;
+          (session.user as any).organizationId = token.organizationId;
+          (session.user as any).tenantId = token.tenantId;
+          (session.user as any).hotelCode = token.hotelCode
+        }
+        return session
+      },
     },
-    async session({ session, token }) {
-      if (session?.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).role = token.role;
-        (session.user as any).organizationId = token.organizationId;
-        (session.user as any).tenantId = token.tenantId;
-        (session.user as any).hotelCode = token.hotelCode;
-      }
-      return session;
+    pages: {
+      signIn: "/login",
+      error: "/login",
     },
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
-};
+  }
+}
 
+// For backward compatibility - synchronous version with minimal config
+export const authOptions: NextAuthOptions = {
+  session: { strategy: "jwt" },
+  providers: [],
+  pages: { signIn: "/login" },
+}

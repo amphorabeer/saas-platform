@@ -15,7 +15,8 @@ export async function GET() {
     }
     
     // Lazy import to prevent build-time evaluation
-    const { authOptions } = await import('@/lib/auth')
+    const { getAuthOptions } = await import('@/lib/auth')
+    const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
@@ -52,7 +53,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Lazy import to prevent build-time evaluation
-    const { authOptions } = await import('@/lib/auth')
+    const { getAuthOptions } = await import('@/lib/auth')
+    const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
@@ -126,7 +128,8 @@ export async function PUT(request: NextRequest) {
     }
     
     // Lazy import to prevent build-time evaluation
-    const { authOptions } = await import('@/lib/auth')
+    const { getAuthOptions } = await import('@/lib/auth')
+    const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
@@ -196,7 +199,8 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Lazy import to prevent build-time evaluation
-    const { authOptions } = await import('@/lib/auth')
+    const { getAuthOptions } = await import('@/lib/auth')
+    const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
