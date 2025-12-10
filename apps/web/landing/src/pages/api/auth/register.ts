@@ -23,9 +23,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   
   try {
-    const { PrismaClient } = require('@prisma/client')
+    // Use the shared database package
+    const { prisma } = await import('@saas-platform/database')
     const bcrypt = require('bcryptjs')
-    const prisma = new PrismaClient()
     
     const { 
       name, email, password, organizationName, module, plan,
@@ -36,7 +36,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Validation
     if (!name || !email || !password || !organizationName) {
-      await prisma.$disconnect()
       return res.status(400).json({ error: 'ყველა ველის შევსება აუცილებელია' })
     }
 
@@ -46,7 +45,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
 
     if (existingUser) {
-      await prisma.$disconnect()
       return res.status(400).json({ error: 'ეს ელ-ფოსტა უკვე რეგისტრირებულია' })
     }
 
@@ -134,8 +132,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       return { organization, user }
     })
-
-    await prisma.$disconnect()
 
     console.log('✅ Registration successful:', {
       organizationId: result.organization.id,
