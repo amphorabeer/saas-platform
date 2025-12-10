@@ -1,3 +1,5 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -8,6 +10,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // IMPORTANT: This tells Vercel to include files from monorepo root
+  outputFileTracingRoot: path.join(__dirname, '../../../'),
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', 'prisma'],
   },
