@@ -11,6 +11,16 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    outputFileTracingIncludes: {
+      '/api/*': [
+        './node_modules/.prisma/**/*',
+        './node_modules/@prisma/client/**/*',
+        '../../../node_modules/.pnpm/@prisma+client@5.22.0*/node_modules/.prisma/**/*',
+        '../../../node_modules/.pnpm/@prisma+client@5.22.0*/node_modules/@prisma/client/**/*',
+      ],
+    },
+  },
 };
 
 module.exports = nextConfig;
