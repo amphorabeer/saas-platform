@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../lib/prisma'
+import { prisma } from '@/lib/prisma'
 
 // Generate unique 4-digit hotel code
 async function generateHotelCode(): Promise<string> {
