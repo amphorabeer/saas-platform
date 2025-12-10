@@ -19,16 +19,13 @@ export const authOptions = {
         }
         
         try {
-          const { PrismaClient } = require('@prisma/client')
+          const { prisma } = await import('@saas-platform/database')
           const bcrypt = require('bcryptjs')
-          const prisma = new PrismaClient()
           
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
             include: { organization: true },
           })
-          
-          await prisma.$disconnect()
           
           if (!user) return null
           
