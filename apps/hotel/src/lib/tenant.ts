@@ -1,7 +1,8 @@
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function getTenantId() {
+  // Lazy import everything to prevent build-time evaluation
+  const { getServerSession } = await import("next-auth");
   const { getAuthOptions } = await import("@/lib/auth");
   const authOptions = await getAuthOptions();
   const session = await getServerSession(authOptions);
