@@ -1,8 +1,8 @@
 {
-  "buildCommand": "cd apps/hotel && pnpm build",
-  "devCommand": "cd apps/hotel && pnpm dev",
+  "buildCommand": "pnpm build",
+  "devCommand": "pnpm dev",
   "installCommand": "pnpm install",
-  "outputDirectory": "apps/hotel/.next",
+  "outputDirectory": ".next",
   "framework": "nextjs"
 }
 
