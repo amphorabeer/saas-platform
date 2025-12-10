@@ -1,21 +1,35 @@
 import { PrismaClient } from '@prisma/client'
 
-// Global prisma instance for development
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Lazy initialization - only create when actually used
-function createPrismaClient() {
+// Check if we're in build phase
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
+
+function createPrismaClient(): PrismaClient {
+  // During build, return a mock that doesn't connect
+  if (isBuildPhase) {
+    console.log('[Prisma] Build phase detected, skipping initialization')
+    return new Proxy({} as PrismaClient, {
+      get() {
+        return () => Promise.resolve(null)
+      }
+    })
+  }
+  
   return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   })
 }
 
-// Export a getter function instead of direct instance
 export function getPrisma(): PrismaClient {
   if (typeof window !== 'undefined') {
     throw new Error('PrismaClient cannot be used in the browser')
+  }
+  
+  if (isBuildPhase) {
+    return createPrismaClient()
   }
   
   if (process.env.NODE_ENV === 'production') {
@@ -29,7 +43,7 @@ export function getPrisma(): PrismaClient {
   return globalForPrisma.prisma
 }
 
-// For backward compatibility - use getter
+// For backward compatibility
 export const prisma = new Proxy({} as PrismaClient, {
   get(target, prop) {
     const client = getPrisma()
