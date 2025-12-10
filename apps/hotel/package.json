@@ -5,7 +5,7 @@
   "scripts": {
     "postinstall": "cd ../../packages/database && npx prisma generate",
     "dev": "next dev -p 3010",
-    "build": "cd ../../packages/database && npx prisma generate && cd ../../apps/hotel && next build --no-lint",
+    "build": "npx prisma generate --schema=../../packages/database/prisma/schema.prisma && next build --no-lint",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
