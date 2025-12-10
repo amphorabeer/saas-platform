@@ -132,6 +132,8 @@ export async function PUT(request: NextRequest) {
   let body: any = {}
   let updateData: any = {}
   try {
+    // Lazy import to prevent build-time evaluation
+    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
     if (!tenantId) {
