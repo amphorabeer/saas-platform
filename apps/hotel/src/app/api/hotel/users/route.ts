@@ -4,7 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 import { getServerSession } from 'next-auth'
-import { getAuthOptions } from '@saas-platform/auth'
+import { authOptions } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 
 import { prisma } from '@/lib/prisma'
@@ -17,7 +17,6 @@ export async function GET() {
       return unauthorizedResponse()
     }
     
-    const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
@@ -51,7 +50,6 @@ export async function POST(request: NextRequest) {
       return unauthorizedResponse()
     }
     
-    const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
@@ -122,7 +120,6 @@ export async function PUT(request: NextRequest) {
       return unauthorizedResponse()
     }
     
-    const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
@@ -189,7 +186,6 @@ export async function DELETE(request: NextRequest) {
       return unauthorizedResponse()
     }
     
-    const authOptions = await getAuthOptions()
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()

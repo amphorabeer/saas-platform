@@ -1,9 +1,8 @@
 import { getServerSession } from "next-auth";
-import { getAuthOptions } from "@saas-platform/auth";
+import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export async function getTenantId() {
-  const authOptions = await getAuthOptions();
   const session = await getServerSession(authOptions);
   
   if (!session?.user) {
