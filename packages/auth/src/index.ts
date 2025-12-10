@@ -1,8 +1,4 @@
-export { getAuthOptions } from "./auth.config";
-// For backward compatibility, export a function that returns authOptions
-export async function authOptions() {
-  return await getAuthOptions();
-}
+export { authOptions, getAuthOptions } from "./auth.config";
 export { getServerSession } from "next-auth";
 export type { Session } from "next-auth";
 

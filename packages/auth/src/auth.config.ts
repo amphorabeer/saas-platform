@@ -4,37 +4,36 @@ import bcrypt from "bcryptjs";
 
 // Lazy load Prisma to avoid build-time initialization
 async function getPrisma() {
-  const { prisma } = await import("@saas-platform/database");
-  return prisma;
+  // Skip during build
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return new Proxy({}, {
+      get: () => () => Promise.resolve(null)
+    }) as any;
+  }
+  
+  const { getPrisma: getDbPrisma } = await import("@saas-platform/database");
+  return getDbPrisma();
 }
 
 // Create a lazy adapter that only initializes when used
-function createLazyAdapter() {
-  let adapterPromise: Promise<any> | null = null;
+async function createLazyAdapter() {
+  // Skip during build
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return new Proxy({}, {
+      get: () => () => Promise.resolve(null)
+    }) as any;
+  }
   
-  return new Proxy({} as any, {
-    get(target, prop) {
-      if (!adapterPromise) {
-        adapterPromise = (async () => {
-          const { PrismaAdapter } = await import("@auth/prisma-adapter");
-          const prisma = await getPrisma();
-          return PrismaAdapter(prisma) as any;
-        })();
-      }
-      return async (...args: any[]) => {
-        const adapter = await adapterPromise;
-        const method = adapter[prop];
-        if (typeof method === 'function') {
-          return method.apply(adapter, args);
-        }
-        return method;
-      };
-    }
-  });
+  const { PrismaAdapter } = await import("@auth/prisma-adapter");
+  const prisma = await getPrisma();
+  return PrismaAdapter(prisma) as any;
 }
 
-export const authOptions: NextAuthOptions = {
-  adapter: createLazyAdapter() as any,
+export async function getAuthOptions(): Promise<NextAuthOptions> {
+  const adapter = await createLazyAdapter();
+  
+  return {
+    adapter,
     session: {
       strategy: "jwt",
       maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -136,6 +135,17 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+    pages: {
+      signIn: "/login",
+      error: "/login",
+    },
+  };
+}
+
+// Backward compatibility - empty object for build-time
+export const authOptions: NextAuthOptions = {
+  providers: [],
+  session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
     error: "/login",
