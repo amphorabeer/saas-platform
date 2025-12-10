@@ -3,14 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "postinstall": "cd ../../packages/database && npx prisma generate",
     "dev": "next dev -p 3010",
-    "build": "npx prisma generate --schema=../../packages/database/prisma/schema.prisma && next build --no-lint",
+    "build": "prisma generate && next build --no-lint",
     "start": "next start",
+    "postinstall": "prisma generate",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/client": "^5.7.1",
     "@saas-platform/auth": "workspace:*",
     "@saas-platform/database": "workspace:*",
     "@saas-platform/types": "workspace:*",
@@ -23,6 +24,7 @@
     "next": "^14.0.4",
     "next-auth": "^4.24.5",
     "nodemailer": "^6.10.1",
+    "prisma": "^5.7.1",
     "react": "^18.2.0",
     "react-big-calendar": "^1.19.4",
     "react-dnd": "^16.0.1",
