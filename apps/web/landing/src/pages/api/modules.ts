@@ -87,7 +87,7 @@ export default async function handler(
   if (req.method === 'GET') {
     try {
       // Try to fetch from database first
-      const { prisma } = await import('@saas-platform/database')
+      const { prisma } = await import('@/lib/prisma')
       const dbModules = await prisma.moduleConfig.findMany({
         where: { isEnabled: true },
         orderBy: { displayOrder: 'asc' }
@@ -152,7 +152,7 @@ export default async function handler(
 
       // Try to update database first
       try {
-        const { prisma } = await import('@saas-platform/database')
+        const { prisma } = await import('@/lib/prisma')
         for (const module of normalizedModules) {
           const moduleType = (module.moduleType || module.id || '').toUpperCase()
           
