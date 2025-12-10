@@ -4,11 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
-// Lazy load prisma to avoid build-time initialization
-async function getPrisma() {
-  const { prisma } = await import('@saas-platform/database')
-  return prisma
-}
+import { prisma } from '@/lib/prisma'
 
 export async function DELETE(
   request: NextRequest,
@@ -20,8 +16,6 @@ export async function DELETE(
     if (!tenantId) {
       return unauthorizedResponse()
     }
-    
-    const prisma = await getPrisma()
     const { id } = params
     
     if (!id) {
