@@ -2,8 +2,13 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@saas-platform/database'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
+
+// Lazy load prisma to avoid build-time initialization
+async function getPrisma() {
+  const { prisma } = await import('@saas-platform/database')
+  return prisma
+}
 
 export async function GET() {
   try {
@@ -13,6 +18,7 @@ export async function GET() {
       return unauthorizedResponse()
     }
     
+    const prisma = await getPrisma()
     const reservations = await prisma.hotelReservation.findMany({
       where: { tenantId },
       include: { room: true },
@@ -42,6 +48,7 @@ export async function POST(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    const prisma = await getPrisma()
     const data = await request.json()
     
     // Check for overlapping reservations
@@ -132,6 +139,7 @@ export async function PUT(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    const prisma = await getPrisma()
     body = await request.json()
     const { id } = body
     
@@ -300,6 +308,7 @@ export async function DELETE() {
       return unauthorizedResponse()
     }
     
+    const prisma = await getPrisma()
     const result = await prisma.hotelReservation.deleteMany({
       where: { tenantId },
     })
