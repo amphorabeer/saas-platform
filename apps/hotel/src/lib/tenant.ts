@@ -2,21 +2,15 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function getTenantId() {
-  // Lazy import to prevent build-time evaluation
-  const { authOptions } = await import("@/lib/auth");
+  const { getAuthOptions } = await import("@/lib/auth");
+  const authOptions = await getAuthOptions();
   const session = await getServerSession(authOptions);
   
   if (!session?.user) {
     return null;
   }
   
-  const tenantId = (session.user as any).tenantId;
-  
-  if (!tenantId) {
-    return null;
-  }
-  
-  return tenantId;
+  return (session.user as any).tenantId || null;
 }
 
 export function unauthorizedResponse() {
