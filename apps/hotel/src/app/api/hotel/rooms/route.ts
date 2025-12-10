@@ -4,11 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
-// Lazy load prisma to avoid build-time initialization
-async function getPrisma() {
-  const { prisma } = await import('@saas-platform/database')
-  return prisma
-}
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
@@ -17,8 +13,6 @@ export async function GET() {
     if (!tenantId) {
       return unauthorizedResponse()
     }
-    
-    const prisma = await getPrisma()
     const rooms = await prisma.hotelRoom.findMany({
       where: { tenantId },
       orderBy: { roomNumber: 'asc' },
@@ -38,8 +32,6 @@ export async function POST(request: NextRequest) {
     if (!tenantId) {
       return unauthorizedResponse()
     }
-    
-    const prisma = await getPrisma()
     const body = await request.json()
     console.log('📥 POST /api/hotel/rooms - Body:', JSON.stringify(body, null, 2))
     
@@ -88,8 +80,6 @@ export async function PUT(request: NextRequest) {
     if (!tenantId) {
       return unauthorizedResponse()
     }
-    
-    const prisma = await getPrisma()
     const body = await request.json()
     const { id, type, ...updates } = body // Remove 'type' field
     
@@ -127,8 +117,6 @@ export async function DELETE(request: NextRequest) {
     if (!tenantId) {
       return unauthorizedResponse()
     }
-    
-    const prisma = await getPrisma()
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
     

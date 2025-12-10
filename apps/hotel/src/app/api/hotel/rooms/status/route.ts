@@ -4,11 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
-// Lazy load prisma to avoid build-time initialization
-async function getPrisma() {
-  const { prisma } = await import('@saas-platform/database')
-  return prisma
-}
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,8 +13,6 @@ export async function POST(request: NextRequest) {
     if (!tenantId) {
       return unauthorizedResponse()
     }
-    
-    const prisma = await getPrisma()
     const { roomId, status } = await request.json()
     
     if (!roomId || !status) {

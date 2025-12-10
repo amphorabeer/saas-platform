@@ -7,11 +7,7 @@ import { getServerSession } from 'next-auth'
 import { getAuthOptions } from '@saas-platform/auth'
 import bcrypt from 'bcryptjs'
 
-// Lazy load prisma to avoid build-time initialization
-async function getPrisma() {
-  const { prisma } = await import('@saas-platform/database')
-  return prisma
-}
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
@@ -27,7 +23,6 @@ export async function GET() {
       return unauthorizedResponse()
     }
     
-    const prisma = await getPrisma()
     const users = await prisma.user.findMany({
       where: { organizationId: session.user.organizationId },
       select: {
@@ -62,7 +57,6 @@ export async function POST(request: NextRequest) {
       return unauthorizedResponse()
     }
     
-    const prisma = await getPrisma()
     const body = await request.json()
     console.log('📥 POST /api/hotel/users - Body:', JSON.stringify(body, null, 2))
     
@@ -134,7 +128,6 @@ export async function PUT(request: NextRequest) {
       return unauthorizedResponse()
     }
     
-    const prisma = await getPrisma()
     const body = await request.json()
     const { id, password, role, ...updates } = body
     
@@ -202,7 +195,6 @@ export async function DELETE(request: NextRequest) {
       return unauthorizedResponse()
     }
     
-    const prisma = await getPrisma()
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
     
