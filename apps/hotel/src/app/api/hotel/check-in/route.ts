@@ -4,8 +4,6 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
-import { prisma } from '@/lib/prisma'
-
 export async function POST(request: NextRequest) {
   try {
     const tenantId = await getTenantId()
@@ -13,6 +11,9 @@ export async function POST(request: NextRequest) {
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const data = await request.json()
     
     // Get room for validation

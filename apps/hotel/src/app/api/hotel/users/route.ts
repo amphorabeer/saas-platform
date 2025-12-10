@@ -7,8 +7,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 
-import { prisma } from '@/lib/prisma'
-
 export async function GET() {
   try {
     const tenantId = await getTenantId()
@@ -22,6 +20,8 @@ export async function GET() {
       return unauthorizedResponse()
     }
     
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const users = await prisma.user.findMany({
       where: { organizationId: session.user.organizationId },
       select: {
