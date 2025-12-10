@@ -84,5 +84,7 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
     error: "/login",
   },
-})
+}
+
+export default NextAuth(authOptions)
 
