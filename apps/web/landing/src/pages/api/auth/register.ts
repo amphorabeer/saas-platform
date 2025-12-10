@@ -1,10 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@saas-platform/database'
-import bcrypt from 'bcryptjs'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import { randomUUID } from 'crypto'
 
 // Generate unique 4-digit hotel code
-async function generateUniqueHotelCode(): Promise<string> {
+async function generateUniqueHotelCode(prisma: any): Promise<string> {
   let code: string = ''
   let exists = true
   
@@ -19,22 +17,27 @@ async function generateUniqueHotelCode(): Promise<string> {
   return code
 }
 
-export async function POST(request: NextRequest) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+  
   try {
-    const body = await request.json()
+    const { PrismaClient } = require('@prisma/client')
+    const bcrypt = require('bcryptjs')
+    const prisma = new PrismaClient()
+    
     const { 
       name, email, password, organizationName, module, plan,
       company, taxId, address, city, country, phone, website, bankName, bankAccount
-    } = body
+    } = req.body
 
     console.log('📥 Registration request:', { name, email, organizationName })
 
     // Validation
     if (!name || !email || !password || !organizationName) {
-      return NextResponse.json(
-        { error: 'ყველა ველის შევსება აუცილებელია' },
-        { status: 400 }
-      )
+      await prisma.$disconnect()
+      return res.status(400).json({ error: 'ყველა ველის შევსება აუცილებელია' })
     }
 
     // Check if email already exists
@@ -43,14 +46,12 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'ეს ელ-ფოსტა უკვე რეგისტრირებულია' },
-        { status: 400 }
-      )
+      await prisma.$disconnect()
+      return res.status(400).json({ error: 'ეს ელ-ფოსტა უკვე რეგისტრირებულია' })
     }
 
     // Generate unique hotel code
-    const hotelCode = await generateUniqueHotelCode()
+    const hotelCode = await generateUniqueHotelCode(prisma)
     console.log('🔑 Generated hotel code:', hotelCode)
 
     // Generate slug
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
     const trialEnd = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000)
 
     // Create everything in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // 1. Create Organization with all hotel info
       const organization = await tx.organization.create({
         data: {
@@ -134,12 +135,14 @@ export async function POST(request: NextRequest) {
       return { organization, user }
     })
 
+    await prisma.$disconnect()
+
     console.log('✅ Registration successful:', {
       organizationId: result.organization.id,
       hotelCode: result.organization.hotelCode,
     })
 
-    return NextResponse.json({
+    return res.status(201).json({
       success: true,
       userId: result.user.id,
       organizationId: result.organization.id,
@@ -150,9 +153,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Registration error:', error)
-    return NextResponse.json(
-      { error: 'რეგისტრაციის შეცდომა: ' + error.message },
-      { status: 500 }
-    )
+    return res.status(500).json({ error: 'რეგისტრაციის შეცდომა: ' + error.message })
   }
 }
+
