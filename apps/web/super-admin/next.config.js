@@ -1,6 +1,10 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@saas-platform/ui", "@saas-platform/database", "@saas-platform/auth"],
+  // IMPORTANT: This tells Vercel to include files from monorepo root
+  outputFileTracingRoot: path.join(__dirname, '../../../'),
   eslint: {
     ignoreDuringBuilds: true,
   },

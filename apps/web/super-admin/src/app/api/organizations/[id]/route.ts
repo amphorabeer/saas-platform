@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@saas-platform/database'
+import { prisma } from '../../../../lib/prisma'
 
 // GET single organization
 export async function GET(
