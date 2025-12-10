@@ -2,36 +2,24 @@ const path = require('path')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  transpilePackages: ["@saas-platform/ui", "@saas-platform/database"],
+  output: 'standalone',
+  outputFileTracingRoot: path.join(__dirname, '../../../'),
+  transpilePackages: ['@saas-platform/database', '@saas-platform/ui'],
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  // IMPORTANT: This tells Vercel to include files from monorepo root
-  outputFileTracingRoot: path.join(__dirname, '../../../'),
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'prisma'],
-  },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push('@prisma/client')
-    }
-    return config
-  },
   async headers() {
-    return [
-      {
-        source: "/api/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET,POST,PUT,DELETE,OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Content-Type,Authorization" },
-        ],
-      },
-    ];
+    return [{
+      source: "/api/:path*",
+      headers: [
+        { key: "Access-Control-Allow-Origin", value: "*" },
+        { key: "Access-Control-Allow-Methods", value: "GET,POST,PUT,DELETE,OPTIONS" },
+        { key: "Access-Control-Allow-Headers", value: "Content-Type,Authorization" },
+      ],
+    }];
   },
 };
 
