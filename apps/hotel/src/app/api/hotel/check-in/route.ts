@@ -2,10 +2,11 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
 export async function POST(request: NextRequest) {
   try {
+    // Lazy import to prevent build-time evaluation
+    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
     if (!tenantId) {

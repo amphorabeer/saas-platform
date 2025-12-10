@@ -2,10 +2,11 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
-import { getTenantId } from '@/lib/tenant'
 
 export async function GET() {
   try {
+    // Lazy import to prevent build-time evaluation
+    const { getTenantId } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
     if (!tenantId) {
