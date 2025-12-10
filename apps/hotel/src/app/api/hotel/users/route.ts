@@ -4,7 +4,6 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 
 export async function GET() {
@@ -15,6 +14,8 @@ export async function GET() {
       return unauthorizedResponse()
     }
     
+    // Lazy import to prevent build-time evaluation
+    const { authOptions } = await import('@/lib/auth')
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
@@ -50,6 +51,8 @@ export async function POST(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    // Lazy import to prevent build-time evaluation
+    const { authOptions } = await import('@/lib/auth')
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
@@ -122,6 +125,8 @@ export async function PUT(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    // Lazy import to prevent build-time evaluation
+    const { authOptions } = await import('@/lib/auth')
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
@@ -190,6 +195,8 @@ export async function DELETE(request: NextRequest) {
       return unauthorizedResponse()
     }
     
+    // Lazy import to prevent build-time evaluation
+    const { authOptions } = await import('@/lib/auth')
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return unauthorizedResponse()
