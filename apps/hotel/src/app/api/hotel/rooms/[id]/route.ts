@@ -4,8 +4,6 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
-import { prisma } from '@/lib/prisma'
-
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const tenantId = await getTenantId()
@@ -13,6 +11,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const id = params.id
     const updates = await request.json()
     
@@ -41,6 +42,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const id = params.id
     
     // Check if room has active reservations

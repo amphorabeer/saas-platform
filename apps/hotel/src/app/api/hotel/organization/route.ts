@@ -4,8 +4,6 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
-import { prisma } from '@/lib/prisma'
-
 export async function GET() {
   try {
     const tenantId = await getTenantId()
@@ -13,6 +11,9 @@ export async function GET() {
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     // Get organization by tenantId
     const organization = await prisma.organization.findUnique({
       where: { tenantId },
@@ -59,6 +60,9 @@ export async function PUT(request: NextRequest) {
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const body = await request.json()
     
     // Update organization

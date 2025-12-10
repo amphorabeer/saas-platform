@@ -4,8 +4,6 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantId, unauthorizedResponse } from '@/lib/tenant'
 
-import { prisma } from '@/lib/prisma'
-
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -16,6 +14,9 @@ export async function DELETE(
     if (!tenantId) {
       return unauthorizedResponse()
     }
+    
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
     const { id } = params
     
     if (!id) {
