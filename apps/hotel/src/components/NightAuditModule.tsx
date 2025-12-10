@@ -1989,6 +1989,70 @@ This is an automated report from Night Audit System.
     }
   }
   
+  // ============================================
+  // P10: Auto-Close Cashier Shift on Night Audit
+  // ============================================
+  const autoCloseCashierShift = (businessDate: string) => {
+    try {
+      // Get payments from folios and manual transactions (same logic as getZReportPayments)
+      const payments = getZReportPayments(businessDate)
+      
+      // Get manual transactions for expenses
+      const manualTransactions = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+      const expenses = manualTransactions
+        .filter((t: any) => t.date === businessDate && t.type === 'expense')
+        .reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0)
+      
+      // Get previous closing balance from history
+      const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
+      const lastSession = history.length > 0 ? history[history.length - 1] : null
+      const openingBalance = Number(lastSession?.closingBalance || 0)
+      
+      // Calculate closing balance (opening + cash collected - expenses)
+      const closingBalance = openingBalance + payments.cash - expenses
+      
+      // Create shift record
+      const shiftRecord = {
+        id: `CS-${Date.now()}`,
+        date: businessDate,
+        closedDate: businessDate,
+        openedAt: lastSession?.closedAt || moment(businessDate).startOf('day').toISOString(),
+        closedAt: moment().toISOString(),
+        openingBalance: openingBalance,
+        cashCollected: payments.cash,
+        cardPayments: payments.card,
+        bankTransfers: payments.bank,
+        totalCollected: payments.total,
+        expenses: expenses,
+        closingBalance: closingBalance,
+        closedBy: 'Night Audit',
+        status: 'closed' as const,
+        autoClosed: true
+      }
+      
+      // Save to history
+      history.push(shiftRecord)
+      localStorage.setItem('cashierHistory', JSON.stringify(history))
+      
+      // Also save to cashierShifts for compatibility
+      const shifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
+      shifts.push(shiftRecord)
+      localStorage.setItem('cashierShifts', JSON.stringify(shifts))
+      
+      // Clear current shift (if exists)
+      localStorage.removeItem('currentCashierShift')
+      localStorage.removeItem('cashierSession')
+      
+      addToLog(`💰 სალაროს shift ავტომატურად დახურულია: ₾${closingBalance.toFixed(2)}`)
+      
+      return shiftRecord
+    } catch (error) {
+      console.error('Error auto-closing cashier shift:', error)
+      addToLog(`⚠️ შეცდომა სალაროს დახურვისას: ${error}`)
+      return null
+    }
+  }
+  
   const changeBusinessDay = () => {
     const nextDay = moment(selectedDate).add(1, 'day').format('YYYY-MM-DD')
     localStorage.setItem('currentBusinessDate', nextDay)
@@ -2160,6 +2224,9 @@ This is an automated report from Night Audit System.
       alert('⚠️ Night Audit უკვე არსებობს ამ დღისთვის!')
       return
     }
+    
+    // P10: Auto-close cashier shift before changing business day
+    autoCloseCashierShift(auditResult.date)
     
     // Set audit date properly (always update, even if duplicate)
     localStorage.setItem('lastAuditDate', JSON.stringify(auditResult.date))

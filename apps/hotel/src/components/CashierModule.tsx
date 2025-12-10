@@ -175,6 +175,52 @@ export default function CashierModule() {
   // All updates should be done through handleRefresh button instead
 
   // Calculate totals from loaded transactions
+  // Calculate cumulative cash balance (opening + today's cash)
+  // P11b: Always calculate, even when cashier is closed
+  const getCumulativeBalance = useMemo(() => {
+    let openingBalance = 0
+    
+    // Get opening balance from current shift or history
+    if (currentShift) {
+      openingBalance = Number(currentShift.openingBalance || 0)
+    } else {
+      // If no current shift, get from last closed shift
+      const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
+      if (history.length > 0) {
+        const lastSession = history[history.length - 1]
+        openingBalance = Number(lastSession?.closingBalance || 0)
+      }
+    }
+    
+    // Calculate today's cash from transactions
+    let todayCash = 0
+    transactions.forEach(t => {
+      const amount = t.amount || 0
+      if (t.method === 'cash' || t.method === 'CASH') {
+        todayCash += amount
+      }
+    })
+    
+    // Subtract expenses from cash
+    const expenses = manualTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    
+    return openingBalance + todayCash - expenses
+  }, [currentShift, transactions, manualTransactions])
+  
+  // P11b: Get previous balance for display when closed
+  const previousBalance = useMemo(() => {
+    if (currentShift) {
+      return Number(currentShift.openingBalance || 0)
+    }
+    const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
+    if (history.length > 0) {
+      return Number(history[history.length - 1]?.closingBalance || 0)
+    }
+    return 0
+  }, [currentShift])
+  
   const calculatedTotals = useMemo(() => {
     let cash = 0, card = 0, bank = 0
     
@@ -525,88 +571,130 @@ export default function CashierModule() {
   }
 
   // Shift History Modal
-  const ShiftHistoryModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold">📜 სალაროს ისტორია</h3>
-          <button onClick={() => setShowHistory(false)} className="text-gray-500">✕</button>
-        </div>
+  const ShiftHistoryModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+    const [modalShifts, setModalShifts] = useState<CashierShift[]>([])
+    const [loading, setLoading] = useState(true)
+    const [modalSelectedShift, setModalSelectedShift] = useState<CashierShift | null>(null)
+    
+    // ✅ Load data in useEffect, not during render
+    useEffect(() => {
+      if (isOpen) {
+        setLoading(true)
         
-        {shifts.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">ისტორია ცარიელია</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 text-left">თარიღი</th>
-                <th className="p-2 text-left">მოლარე</th>
-                <th className="p-2 text-right">საწყისი</th>
-                <th className="p-2 text-right">შემოსავალი</th>
-                <th className="p-2 text-right">სხვაობა</th>
-                <th className="p-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {shifts.slice().reverse().map(shift => (
-                <tr key={shift.id} className="border-t hover:bg-gray-50">
-                  <td className="p-2">{moment(shift.openedAt).format('DD/MM/YY')}</td>
-                  <td className="p-2">{shift.userName}</td>
-                  <td className="p-2 text-right">₾{shift.openingBalance.toFixed(2)}</td>
-                  <td className="p-2 text-right">₾{shift.totalCollected.toFixed(2)}</td>
-                  <td className={`p-2 text-right ${shift.discrepancy !== 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    {shift.discrepancy !== 0 ? `₾${shift.discrepancy.toFixed(2)}` : '✓'}
-                  </td>
-                  <td className="p-2">
-                    <button
-                      onClick={() => setSelectedShift(shift)}
-                      className="text-blue-500 hover:underline"
-                    >
-                      დეტალები
-                    </button>
-                  </td>
+        // Load from both sources
+        const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
+        const shiftsData = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
+        
+        // Combine and deduplicate by id or date
+        const allShifts = [...history, ...shiftsData]
+        const uniqueShifts = allShifts.filter((shift, index, self) =>
+          index === self.findIndex(s => 
+            (s.id && shift.id && s.id === shift.id) || 
+            (s.date && shift.date && s.date === shift.date && s.closedAt && shift.closedAt)
+          )
+        )
+        
+        // Sort by date descending (most recent first)
+        uniqueShifts.sort((a, b) => {
+          const dateA = new Date(a.closedAt || a.closedDate || a.date || a.openedAt || 0).getTime()
+          const dateB = new Date(b.closedAt || b.closedDate || b.date || b.openedAt || 0).getTime()
+          return dateB - dateA
+        })
+        
+        setModalShifts(uniqueShifts)
+        setLoading(false)
+      } else {
+        // Reset when modal closes
+        setModalSelectedShift(null)
+      }
+    }, [isOpen])
+    
+    if (!isOpen) return null
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold">📜 სალაროს ისტორია</h3>
+            <button onClick={onClose} className="text-gray-500">✕</button>
+          </div>
+          
+          {loading ? (
+            <p className="text-gray-500 text-center py-8">იტვირთება...</p>
+          ) : modalShifts.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">ისტორია ცარიელია</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 text-left">თარიღი</th>
+                  <th className="p-2 text-left">მოლარე</th>
+                  <th className="p-2 text-right">საწყისი</th>
+                  <th className="p-2 text-right">შემოსავალი</th>
+                  <th className="p-2 text-right">სხვაობა</th>
+                  <th className="p-2"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {modalShifts.map(shift => (
+                  <tr key={shift.id || shift.date} className="border-t hover:bg-gray-50">
+                    <td className="p-2">{moment(shift.openedAt || shift.date).format('DD/MM/YY')}</td>
+                    <td className="p-2">{shift.userName || shift.closedBy || '-'}</td>
+                    <td className="p-2 text-right">₾{(shift.openingBalance || 0).toFixed(2)}</td>
+                    <td className="p-2 text-right">₾{(shift.totalCollected || 0).toFixed(2)}</td>
+                    <td className={`p-2 text-right ${shift.discrepancy !== 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {shift.discrepancy !== 0 ? `₾${(shift.discrepancy || 0).toFixed(2)}` : '✓'}
+                    </td>
+                    <td className="p-2">
+                      <button
+                        onClick={() => setModalSelectedShift(shift)}
+                        className="text-blue-500 hover:underline"
+                      >
+                        დეტალები
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         
-        {selectedShift && (
+        {modalSelectedShift && (
           <div className="mt-4 p-4 bg-gray-50 rounded-lg">
             <h4 className="font-bold mb-3">Shift დეტალები</h4>
             
             <div className="grid grid-cols-2 gap-2 text-sm mb-4">
               <div>გახსნა:</div>
-              <div>{moment(selectedShift.openedAt).format('DD/MM/YYYY HH:mm')}</div>
+              <div>{moment(modalSelectedShift.openedAt || modalSelectedShift.date).format('DD/MM/YYYY HH:mm')}</div>
               <div>დახურვა:</div>
-              <div>{selectedShift.closedAt ? moment(selectedShift.closedAt).format('DD/MM/YYYY HH:mm') : '-'}</div>
+              <div>{modalSelectedShift.closedAt ? moment(modalSelectedShift.closedAt).format('DD/MM/YYYY HH:mm') : '-'}</div>
               <div>ნაღდი:</div>
-              <div>₾{(selectedShift.cashCollected || 0).toFixed(2)}</div>
+              <div>₾{(modalSelectedShift.cashCollected || 0).toFixed(2)}</div>
               <div>ბარათი:</div>
-              <div>₾{(selectedShift.cardPayments || 0).toFixed(2)}</div>
+              <div>₾{(modalSelectedShift.cardPayments || 0).toFixed(2)}</div>
               <div>ხარჯები:</div>
-              <div>-₾{(selectedShift.expenses || 0).toFixed(2)}</div>
+              <div>-₾{(modalSelectedShift.expenses || 0).toFixed(2)}</div>
               <div>გასატანი:</div>
-              <div>₾{(selectedShift.withdrawal || 0).toFixed(2)}</div>
+              <div>₾{(modalSelectedShift.withdrawal || 0).toFixed(2)}</div>
             </div>
             
             {/* Z-Report Tax Breakdown */}
-            {selectedShift.totalCollected > 0 && selectedShift.totalTax !== undefined && selectedShift.totalTax > 0 && (
+            {modalSelectedShift.totalCollected > 0 && modalSelectedShift.totalTax !== undefined && modalSelectedShift.totalTax > 0 && (
               <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
                 <h5 className="font-bold text-purple-800 mb-2">🧾 Z-Report Tax Breakdown</h5>
                 <div className="text-sm space-y-1">
                   <div className="flex justify-between">
                     <span>Gross Sales:</span>
-                    <span className="font-medium">₾{(selectedShift.totalCollected || 0).toFixed(2)}</span>
+                    <span className="font-medium">₾{(modalSelectedShift.totalCollected || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Net Sales:</span>
-                    <span>₾{(selectedShift.netSales || 0).toFixed(2)}</span>
+                    <span>₾{(modalSelectedShift.netSales || 0).toFixed(2)}</span>
                   </div>
-                  {selectedShift.taxes && selectedShift.taxes.length > 0 && (
+                  {modalSelectedShift.taxes && modalSelectedShift.taxes.length > 0 && (
                     <div className="border-t pt-1 mt-1">
                       <p className="text-xs text-gray-500 mb-1">Taxes Collected:</p>
-                      {selectedShift.taxes.map((tax: any, idx: number) => (
+                      {modalSelectedShift.taxes.map((tax: any, idx: number) => (
                         <div key={idx} className="flex justify-between pl-2">
                           <span>{tax.name} ({tax.rate}%):</span>
                           <span>₾{tax.amount.toFixed(2)}</span>
@@ -616,21 +704,21 @@ export default function CashierModule() {
                   )}
                   <div className="flex justify-between font-bold text-lg border-t-2 pt-1 mt-1 text-purple-700">
                     <span>TOTAL TAX:</span>
-                    <span>₾{(selectedShift.totalTax || 0).toFixed(2)}</span>
+                    <span>₾{(modalSelectedShift.totalTax || 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
             )}
             
             {/* Show saved transactions */}
-            {selectedShift.transactions && selectedShift.transactions.length > 0 && (
+            {modalSelectedShift.transactions && modalSelectedShift.transactions.length > 0 && (
               <div className="mt-3">
                 <h5 className="font-medium text-green-700 mb-2">
-                  💰 შემოსავლები ({selectedShift.transactions.length})
+                  💰 შემოსავლები ({modalSelectedShift.transactions.length})
                 </h5>
                 <table className="w-full text-sm">
                   <tbody>
-                    {selectedShift.transactions.map((t: any, idx: number) => (
+                    {modalSelectedShift.transactions.map((t: any, idx: number) => (
                       <tr key={idx} className="border-t">
                         <td className="py-1">{t.time}</td>
                         <td>{t.description}</td>
@@ -646,15 +734,15 @@ export default function CashierModule() {
             )}
             
             {/* Show saved expenses */}
-            {selectedShift.manualTransactions && 
-             selectedShift.manualTransactions.filter((t: any) => t.type === 'expense').length > 0 && (
+            {modalSelectedShift.manualTransactions && 
+             modalSelectedShift.manualTransactions.filter((t: any) => t.type === 'expense').length > 0 && (
               <div className="mt-3">
                 <h5 className="font-medium text-red-700 mb-2">
-                  💸 ხარჯები ({selectedShift.manualTransactions.filter((t: any) => t.type === 'expense').length})
+                  💸 ხარჯები ({modalSelectedShift.manualTransactions.filter((t: any) => t.type === 'expense').length})
                 </h5>
                 <table className="w-full text-sm">
                   <tbody>
-                    {selectedShift.manualTransactions
+                    {modalSelectedShift.manualTransactions
                       .filter((t: any) => t.type === 'expense')
                       .map((t: any, idx: number) => (
                         <tr key={idx} className="border-t">
@@ -669,7 +757,7 @@ export default function CashierModule() {
             )}
             
             <button
-              onClick={() => setSelectedShift(null)}
+              onClick={() => setModalSelectedShift(null)}
               className="mt-3 px-4 py-1 bg-gray-200 rounded"
             >
               დახურვა
@@ -678,7 +766,8 @@ export default function CashierModule() {
         )}
       </div>
     </div>
-  )
+    )
+  }
 
   
   return (
@@ -723,7 +812,7 @@ export default function CashierModule() {
       <div className="p-6">
         {/* Totals - Show Always */}
         <div className="mb-6">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-5 gap-4">
             <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
               <div className="text-3xl font-bold text-green-600">₾{calculatedTotals.cash.toFixed(2)}</div>
               <div className="text-sm text-gray-600 mt-1">💵 ნაღდი</div>
@@ -740,6 +829,14 @@ export default function CashierModule() {
               <div className="text-3xl font-bold text-gray-800">₾{calculatedTotals.total.toFixed(2)}</div>
               <div className="text-sm text-gray-600 mt-1">📊 სულ</div>
             </div>
+            {/* P11b: Cumulative Balance Card - Always Show */}
+            <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-green-100 rounded-lg border-2 border-emerald-300 shadow-md">
+              <div className="text-3xl font-bold text-emerald-700">₾{getCumulativeBalance.toFixed(2)}</div>
+              <div className="text-sm text-emerald-600 mt-1 font-medium">💰 ბალანსი</div>
+              <div className="text-xs text-emerald-500 mt-1">
+                {currentShift ? 'საწყისი + დღევანდელი' : `წინა ნაშთი: ₾${previousBalance.toFixed(2)}`}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -749,6 +846,25 @@ export default function CashierModule() {
               <p className="font-bold">სალარო ღიაა</p>
               <p className="text-sm">მოლარე: {currentShift.userName}</p>
               <p className="text-sm">გახსნის დრო: {moment(currentShift.openedAt).format('DD/MM/YYYY HH:mm')}</p>
+            </div>
+            
+            {/* P11: Cumulative Balance Banner */}
+            <div className="bg-gradient-to-r from-emerald-50 to-green-50 border-l-4 border-emerald-400 p-4 mb-4 rounded-r-lg shadow-sm">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-emerald-600 font-medium">💰 სალაროს ბალანსი</p>
+                  <p className="text-xs text-emerald-500 mt-1">
+                    საწყისი: ₾{Number(currentShift.openingBalance || 0).toFixed(2)} + დღევანდელი ნაღდი: ₾{calculatedTotals.cash.toFixed(2)}
+                    {calculatedTotals.expenses > 0 && ` - ხარჯები: ₾${calculatedTotals.expenses.toFixed(2)}`}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-emerald-700">
+                    ₾{getCumulativeBalance.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-emerald-500">დაგროვილი ნაღდი</p>
+                </div>
+              </div>
             </div>
             
             {/* Expenses display */}
@@ -982,7 +1098,7 @@ export default function CashierModule() {
         </div>
       )}
       {showXReport && <XReportModal />}
-      {showHistory && <ShiftHistoryModal />}
+      {showHistory && <ShiftHistoryModal isOpen={showHistory} onClose={() => setShowHistory(false)} />}
       {showAddTransaction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
@@ -1101,19 +1217,29 @@ const OpenShiftForm = ({ onOpen }: { onOpen: (balance: number) => void }) => {
   const [previousBalance, setPreviousBalance] = useState<number | null>(null)
   
   useEffect(() => {
-    // Get last closed shift's nextDayOpening
+    // Get last closed shift's closing balance (priority: cashierHistory > cashierShifts)
+    const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
     const shifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
-    if (shifts.length > 0) {
-      // Sort by closedAt descending to get most recent
+    
+    // Priority 1: cashierHistory (preferred)
+    let lastBalance = null
+    if (history.length > 0) {
+      const lastSession = history[history.length - 1]
+      lastBalance = lastSession?.closingBalance || null
+    }
+    
+    // Priority 2: cashierShifts (fallback - legacy)
+    if (lastBalance === null && shifts.length > 0) {
       const sortedShifts = shifts.sort((a: any, b: any) => 
         new Date(b.closedAt || 0).getTime() - new Date(a.closedAt || 0).getTime()
       )
       const lastShift = sortedShifts[0]
-      
-      if (lastShift && lastShift.nextDayOpening !== undefined) {
-        setPreviousBalance(lastShift.nextDayOpening)
-        setOpeningBalance(lastShift.nextDayOpening) // Auto-fill
-      }
+      lastBalance = lastShift?.closingBalance || lastShift?.nextDayOpening || null
+    }
+    
+    if (lastBalance !== null) {
+      setPreviousBalance(lastBalance)
+      setOpeningBalance(lastBalance) // Auto-fill
     }
   }, [])
   
