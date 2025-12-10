@@ -1,0 +1,432 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUMS
+enum Role {
+  SUPER_ADMIN
+  ORGANIZATION_OWNER
+  MODULE_ADMIN
+  MANAGER
+  USER
+}
+
+enum ModuleType {
+  HOTEL
+  RESTAURANT
+  BEAUTY
+  SHOP
+  BREWERY
+  WINERY
+  DISTILLERY
+}
+
+enum PlanType {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+// MODELS
+model Organization {
+  id                String             @id @default(cuid())
+  name              String
+  slug              String             @unique
+  email             String
+  phone             String?
+  address           String?
+  logo              String?
+  
+  // Hotel Info
+  company           String?
+  taxId             String?
+  city              String?
+  country           String?            @default("Georgia")
+  website           String?
+  bankName          String?
+  bankAccount       String?
+
+  // Multi-tenancy
+  tenantId          String             @unique @default(cuid())
+  hotelCode         String             @unique
+  databaseUrl       String?
+
+  // Relations
+  subscription      Subscription?
+  users             User[]
+  modules           ModuleAccess[]
+  tickets          SupportTicket[]
+
+  // Timestamps
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([slug])
+  @@index([tenantId])
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  name              String?
+  password          String
+  avatar            String?
+  role              Role               @default(USER)
+
+  // Organization
+  organizationId    String?
+  organization      Organization?      @relation(fields: [organizationId], references: [id])
+
+  // Auth
+  emailVerified     DateTime?
+  sessions          Session[]
+  accounts          Account[]
+
+  // Activity
+  lastLoginAt       DateTime?
+  activities        ActivityLog[]
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([email])
+  @@index([organizationId])
+}
+
+model Account {
+  id                String             @id @default(cuid())
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?            @db.Text
+  access_token      String?            @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?            @db.Text
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id                String             @id @default(cuid())
+  sessionToken      String             @unique
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires           DateTime
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Subscription {
+  id                String             @id @default(cuid())
+  organizationId    String             @unique
+  organization      Organization       @relation(fields: [organizationId], references: [id])
+
+  plan              PlanType           @default(STARTER)
+  status            SubscriptionStatus @default(TRIAL)
+
+  // Pricing
+  price             Decimal            @db.Decimal(10, 2)
+  currency          String             @default("GEL")
+
+  // Billing
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean           @default(false)
+
+  // Trial
+  trialStart        DateTime?
+  trialEnd          DateTime?
+
+  // Payment
+  paymentMethod     String?
+  lastPaymentDate   DateTime?
+  nextBillingDate   DateTime?
+
+  // Relations
+  invoices          Invoice[]
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model ModuleAccess {
+  id                String             @id @default(cuid())
+  organizationId    String
+  organization      Organization       @relation(fields: [organizationId], references: [id])
+
+  moduleType        ModuleType
+  isActive          Boolean            @default(true)
+
+  // Module-specific settings
+  settings          Json?
+
+  // Module limits
+  maxUsers          Int?
+  maxRecords        Int?
+
+  // Module features
+  features          ModuleFeature[]
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@unique([organizationId, moduleType])
+  @@index([organizationId])
+  @@index([moduleType])
+}
+
+model ModuleFeature {
+  id                String             @id @default(cuid())
+  moduleAccessId    String
+  moduleAccess      ModuleAccess       @relation(fields: [moduleAccessId], references: [id])
+
+  name              String
+  isEnabled         Boolean            @default(true)
+
+  @@index([moduleAccessId])
+}
+
+model Invoice {
+  id                String             @id @default(cuid())
+  subscriptionId    String
+  subscription      Subscription       @relation(fields: [subscriptionId], references: [id])
+
+  invoiceNumber     String             @unique @default(cuid())
+  amount            Decimal            @db.Decimal(10, 2)
+  currency          String             @default("GEL")
+  status            String
+
+  dueDate           DateTime
+  paidAt            DateTime?
+
+  invoiceUrl        String?
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([subscriptionId])
+  @@index([status])
+}
+
+// Landing Page Configuration
+model ModuleConfig {
+  id                String             @id @default(cuid())
+  moduleType        ModuleType         @unique
+  
+  // Display info
+  name              String
+  nameEn            String?
+  nameRu            String?
+  
+  description       String
+  descriptionEn     String?
+  descriptionRu     String?
+  
+  icon              String
+  color             String
+  isEnabled         Boolean            @default(true)
+  displayOrder      Int                @default(0)
+  
+  // Pricing
+  starterPrice      Decimal?           @db.Decimal(10, 2)
+  starterDuration   String?            @default("15 დღე")
+  starterFeatures   String[]
+  
+  professionalPrice Decimal?           @db.Decimal(10, 2)
+  professionalDuration String?         @default("თვეში")
+  professionalFeatures String[]
+  
+  enterprisePrice   Decimal?           @db.Decimal(10, 2)
+  enterpriseDuration String?           @default("თვეში")
+  enterpriseFeatures String[]
+  
+  // Stats
+  activeOrganizations Int              @default(0)
+  totalUsers        Int                @default(0)
+  
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model LandingPageContent {
+  id                String             @id @default(cuid())
+  key               String             @unique
+  
+  // Hero section
+  heroTitle         String?
+  heroSubtitle      String?
+  heroDescription   String?
+  
+  // Statistics
+  statsBusinesses   Int?
+  statsTransactions Int?
+  statsUsers        Int?
+  statsUptime       Decimal?           @db.Decimal(5, 2)
+  
+  // Other content
+  content           Json?
+  
+  updatedAt         DateTime           @updatedAt
+}
+
+model SupportTicket {
+  id                String             @id @default(cuid())
+  
+  organizationId    String
+  organization      Organization       @relation(fields: [organizationId], references: [id])
+  
+  subject           String
+  description       String             @db.Text
+  priority          TicketPriority     @default(MEDIUM)
+  status            TicketStatus       @default(OPEN)
+  
+  assignedTo        String?
+  resolvedAt        DateTime?
+  
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  @@index([organizationId])
+  @@index([status])
+  @@index([priority])
+}
+
+model ActivityLog {
+  id                String             @id @default(cuid())
+  
+  userId            String
+  user              User               @relation(fields: [userId], references: [id])
+  
+  action            String
+  details           Json?
+  ipAddress         String?
+  userAgent         String?
+  
+  createdAt         DateTime           @default(now())
+  
+  @@index([userId])
+  @@index([action])
+}
+
+// Module-specific schemas
+model HotelRoom {
+  id                String             @id @default(cuid())
+  tenantId          String
+
+  roomNumber        String
+  roomType          String
+  floor             Int
+  status            String
+
+  basePrice         Decimal            @db.Decimal(10, 2)
+
+  amenities         String[]
+  maxOccupancy      Int
+
+  reservations      HotelReservation[]
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@unique([tenantId, roomNumber])
+  @@index([tenantId])
+  @@index([status])
+}
+
+model HotelReservation {
+  id                String             @id @default(cuid())
+  tenantId          String
+
+  roomId            String
+  room              HotelRoom          @relation(fields: [roomId], references: [id])
+
+  guestName         String
+  guestEmail        String?
+  guestPhone        String?
+  guestCountry      String?
+
+  checkIn           DateTime
+  checkOut          DateTime
+
+  adults            Int
+  children          Int                @default(0)
+
+  totalAmount       Decimal            @db.Decimal(10, 2)
+  paidAmount        Decimal            @db.Decimal(10, 2) @default(0)
+
+  status            String
+
+  // Booking source
+  source            String?            @default("Direct")
+
+  // Company fields
+  companyName       String?
+  companyTaxId      String?
+  companyAddress    String?
+  companyBank       String?
+  companyBankAccount String?
+
+  notes             String?
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([tenantId])
+  @@index([roomId])
+  @@index([status])
+}
+
+model Configuration {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([key])
+}
