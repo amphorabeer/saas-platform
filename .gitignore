@@ -55,3 +55,6 @@ Thumbs.db
 # Database
 *.db
 *.sqlite
+
+# Prisma generated directories
+**/.prisma
