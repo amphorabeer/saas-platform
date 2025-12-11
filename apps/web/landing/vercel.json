@@ -1,6 +1,0 @@
-{
-  "buildCommand": "cd ../../../ && pnpm install && cd apps/web/landing && npx prisma generate --schema=./prisma/schema.prisma && pnpm build",
-  "installCommand": "echo 'Skipping default install'",
-  "framework": "nextjs"
-}
-
