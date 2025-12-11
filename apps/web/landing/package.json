@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
+    "@prisma/extension-accelerate": "^3.0.1",
     "@saas-platform/auth": "workspace:*",
     "@saas-platform/database": "workspace:*",
     "@saas-platform/types": "workspace:*",

@@ -212,6 +212,9 @@ importers:
       '@prisma/client':
         specifier: 5.22.0
         version: 5.22.0(prisma@5.22.0)
+      '@prisma/extension-accelerate':
+        specifier: ^3.0.1
+        version: 3.0.1(@prisma/client@5.22.0)
       '@saas-platform/auth':
         specifier: workspace:*
         version: link:../../../packages/auth
@@ -413,6 +416,9 @@ importers:
       '@prisma/client':
         specifier: ^5.7.1
         version: 5.22.0(prisma@5.22.0)
+      '@prisma/extension-accelerate':
+        specifier: ^3.0.1
+        version: 3.0.1(@prisma/client@5.22.0)
     devDependencies:
       '@types/bcryptjs':
         specifier: ^2.4.6
