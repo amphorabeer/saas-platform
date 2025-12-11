@@ -13,16 +13,6 @@ const nextConfig = {
   experimental: {
     instrumentationHook: true,
   },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      // Fix for Prisma in serverless
-      config.externals = config.externals || []
-      config.externals.push({
-        '@prisma/client': 'commonjs @prisma/client',
-      })
-    }
-    return config
-  },
   async headers() {
     return [{
       source: "/api/:path*",
