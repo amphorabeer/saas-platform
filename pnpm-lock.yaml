@@ -245,9 +245,6 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@18.3.1)(react@18.3.1)
-      prisma:
-        specifier: 5.22.0
-        version: 5.22.0
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -282,6 +279,9 @@ importers:
       postcss:
         specifier: ^8.4.32
         version: 8.5.6
+      prisma:
+        specifier: 5.22.0
+        version: 5.22.0
       tailwindcss:
         specifier: ^3.4.0
         version: 3.4.18
@@ -294,6 +294,9 @@ importers:
       '@prisma/client':
         specifier: 5.22.0
         version: 5.22.0(prisma@5.22.0)
+      '@prisma/extension-accelerate':
+        specifier: ^3.0.1
+        version: 3.0.1(@prisma/client@5.22.0)
       '@saas-platform/auth':
         specifier: workspace:*
         version: link:../../../packages/auth
@@ -321,9 +324,6 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@18.3.1)(react@18.3.1)
-      prisma:
-        specifier: 5.22.0
-        version: 5.22.0
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -358,6 +358,9 @@ importers:
       postcss:
         specifier: ^8.4.32
         version: 8.5.6
+      prisma:
+        specifier: 5.22.0
+        version: 5.22.0
       tailwindcss:
         specifier: ^3.4.0
         version: 3.4.18
@@ -1689,6 +1692,15 @@ packages:
       '@prisma/engines-version': 5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2
       '@prisma/fetch-engine': 5.22.0
       '@prisma/get-platform': 5.22.0
+
+  /@prisma/extension-accelerate@3.0.1(@prisma/client@5.22.0):
+    resolution: {integrity: sha512-xc+kn4AjjTzS9jsdD1JWCebB09y0Aj+C8GjjG7oUm81PF9psvmJOw5rxpl7tOEBz/8hmuNX996XL28ys/OLxVA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      '@prisma/client': '>=4.16.1'
+    dependencies:
+      '@prisma/client': 5.22.0(prisma@5.22.0)
+    dev: false
 
   /@prisma/fetch-engine@5.22.0:
     resolution: {integrity: sha512-bkrD/Mc2fSvkQBV5EpoFcZ87AvOgDxbG99488a5cexp5Ccny+UM6MAe/UFkUC0wLYD9+9befNOqGiIJhhq+HbA==}
