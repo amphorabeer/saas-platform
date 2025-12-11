@@ -3,7 +3,6 @@ const path = require('path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  outputFileTracingRoot: path.join(__dirname, '../../../'),
   transpilePackages: ['@saas-platform/database', '@saas-platform/ui'],
   eslint: {
     ignoreDuringBuilds: true,
@@ -12,14 +11,17 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    outputFileTracingIncludes: {
-      '/api/*': [
-        './node_modules/.prisma/**/*',
-        './node_modules/@prisma/client/**/*',
-        '../../../node_modules/.pnpm/@prisma+client@5.22.0*/node_modules/.prisma/**/*',
-        '../../../node_modules/.pnpm/@prisma+client@5.22.0*/node_modules/@prisma/client/**/*',
-      ],
-    },
+    instrumentationHook: true,
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Fix for Prisma in serverless
+      config.externals = config.externals || []
+      config.externals.push({
+        '@prisma/client': 'commonjs @prisma/client',
+      })
+    }
+    return config
   },
   async headers() {
     return [{
