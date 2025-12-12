@@ -1,0 +1,491 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ORGANIZATION ====================
+
+model BreweryOrganization {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique // უნიკალური კოდი შესვლისთვის
+  email       String?
+  phone       String?
+  address     String?
+  logo        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users             BreweryUser[]
+  batches           Batch[]
+  recipes           Recipe[]
+  tanks             Tank[]
+  ingredients       Ingredient[]
+  inventory         InventoryTransaction[]
+  equipment         Equipment[]
+  activities        Activity[]
+  settings          BrewerySetting[]
+
+  @@map("brewery_organizations")
+}
+
+// ==================== USERS ====================
+
+model BreweryUser {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  password       String
+  firstName      String
+  lastName       String
+  role           UserRole @default(BREWER)
+  isActive       Boolean  @default(true)
+  lastLogin      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organizationId String
+  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
+
+  // Relations
+  createdBatches    Batch[]            @relation("BatchCreator")
+  qcTests           QCTest[]
+  activities        Activity[]
+  maintenanceLogs   MaintenanceLog[]
+
+  @@map("brewery_users")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  HEAD_BREWER
+  BREWER
+  QC_SPECIALIST
+  INVENTORY_MANAGER
+  VIEWER
+}
+
+// ==================== BATCHES ====================
+
+model Batch {
+  id              String      @id @default(cuid())
+  batchNumber     String      // BRW-2024-0156
+  status          BatchStatus @default(PLANNED)
+  
+  // Recipe Info
+  recipeId        String
+  recipe          Recipe      @relation(fields: [recipeId], references: [id])
+  
+  // Tank Assignment
+  tankId          String?
+  tank            Tank?       @relation(fields: [tankId], references: [id])
+  
+  // Measurements
+  volumeLiters    Decimal     @db.Decimal(10, 2)
+  originalGravity Decimal?    @db.Decimal(5, 3) // 1.048
+  currentGravity  Decimal?    @db.Decimal(5, 3)
+  finalGravity    Decimal?    @db.Decimal(5, 3)
+  actualAbv       Decimal?    @db.Decimal(4, 2)
+  
+  // Dates
+  plannedDate     DateTime?
+  brewDate        DateTime?
+  fermentationStart DateTime?
+  fermentationEnd DateTime?
+  conditioningStart DateTime?
+  packagingDate   DateTime?
+  estimatedReady  DateTime?
+  
+  // Notes
+  notes           String?
+  
+  // Audit
+  createdById     String
+  createdBy       BreweryUser @relation("BatchCreator", fields: [createdById], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  organizationId  String
+  organization    BreweryOrganization @relation(fields: [organizationId], references: [id])
+
+  // Relations
+  fermentationLogs FermentationLog[]
+  qcTests          QCTest[]
+  ingredientUsages IngredientUsage[]
+
+  @@unique([organizationId, batchNumber])
+  @@map("batches")
+}
+
+enum BatchStatus {
+  PLANNED
+  BREWING
+  FERMENTING
+  CONDITIONING
+  READY
+  PACKAGED
+  ARCHIVED
+}
+
+// ==================== RECIPES ====================
+
+model Recipe {
+  id            String   @id @default(cuid())
+  name          String
+  style         String   // IPA, Lager, Stout...
+  version       String   @default("1.0")
+  description   String?
+  
+  // Targets
+  targetAbv     Decimal  @db.Decimal(4, 2)
+  targetIbu     Int?
+  targetSrm     Int?     // Color
+  targetOg      Decimal  @db.Decimal(5, 3)
+  targetFg      Decimal? @db.Decimal(5, 3)
+  
+  // Process
+  boilTime      Int      @default(60) // minutes
+  mashTemp      Decimal? @db.Decimal(4, 1)
+  mashDuration  Int?     // minutes
+  fermentationTemp Decimal? @db.Decimal(4, 1)
+  fermentationDays Int   @default(14)
+  conditioningDays Int   @default(7)
+  
+  // JSON data for complex structures
+  ingredients   Json?    // Array of ingredients with amounts
+  mashSchedule  Json?    // Temperature steps
+  hopSchedule   Json?    // Hop additions timing
+  
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  organizationId String
+  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
+
+  // Relations
+  batches       Batch[]
+
+  @@map("recipes")
+}
+
+// ==================== TANKS ====================
+
+model Tank {
+  id          String     @id @default(cuid())
+  name        String     // FV-01, BBT-01
+  type        TankType
+  capacity    Decimal    @db.Decimal(10, 2) // Liters
+  status      TankStatus @default(AVAILABLE)
+  
+  // Current state
+  currentTemp    Decimal? @db.Decimal(4, 1)
+  currentPressure Decimal? @db.Decimal(5, 2)
+  fillLevel      Decimal? @db.Decimal(5, 2) // Percentage
+  
+  // Location & Info
+  location    String?
+  notes       String?
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizationId String
+  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
+
+  // Relations
+  batches          Batch[]
+  fermentationLogs FermentationLog[]
+
+  @@map("tanks")
+}
+
+enum TankType {
+  FERMENTER
+  BBT          // Bright Beer Tank
+  KETTLE
+  MASH_TUN
+  HLT          // Hot Liquor Tank
+  SERVING
+}
+
+enum TankStatus {
+  AVAILABLE
+  IN_USE
+  CLEANING
+  MAINTENANCE
+}
+
+// ==================== FERMENTATION LOGS ====================
+
+model FermentationLog {
+  id          String   @id @default(cuid())
+  
+  batchId     String
+  batch       Batch    @relation(fields: [batchId], references: [id])
+  
+  tankId      String?
+  tank        Tank?    @relation(fields: [tankId], references: [id])
+  
+  // Measurements
+  temperature Decimal  @db.Decimal(4, 1)
+  gravity     Decimal? @db.Decimal(5, 3)
+  ph          Decimal? @db.Decimal(3, 2)
+  pressure    Decimal? @db.Decimal(5, 2)
+  
+  notes       String?
+  recordedAt  DateTime @default(now())
+
+  @@map("fermentation_logs")
+}
+
+// ==================== INGREDIENTS ====================
+
+model Ingredient {
+  id          String             @id @default(cuid())
+  name        String
+  category    IngredientCategory
+  description String?
+  
+  // Supplier info
+  supplier    String?
+  sku         String?
+  
+  // Stock management
+  unit        String             // kg, g, L, units
+  minStock    Decimal            @db.Decimal(10, 2)
+  currentStock Decimal           @db.Decimal(10, 2) @default(0)
+  costPerUnit Decimal?           @db.Decimal(10, 2)
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizationId String
+  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
+
+  // Relations
+  transactions InventoryTransaction[]
+  usages       IngredientUsage[]
+
+  @@map("ingredients")
+}
+
+enum IngredientCategory {
+  GRAIN
+  HOPS
+  YEAST
+  ADJUNCT
+  ADDITIVE
+  WATER_TREATMENT
+  PACKAGING
+  CLEANING
+}
+
+// ==================== INVENTORY TRANSACTIONS ====================
+
+model InventoryTransaction {
+  id            String          @id @default(cuid())
+  type          TransactionType
+  
+  ingredientId  String
+  ingredient    Ingredient      @relation(fields: [ingredientId], references: [id])
+  
+  quantity      Decimal         @db.Decimal(10, 2)
+  unitCost      Decimal?        @db.Decimal(10, 2)
+  totalCost     Decimal?        @db.Decimal(10, 2)
+  
+  reference     String?         // PO number, batch number, etc.
+  notes         String?
+  
+  createdAt     DateTime        @default(now())
+
+  organizationId String
+  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
+
+  @@map("inventory_transactions")
+}
+
+enum TransactionType {
+  PURCHASE
+  USAGE
+  ADJUSTMENT
+  WASTE
+  RETURN
+}
+
+// ==================== INGREDIENT USAGE (per Batch) ====================
+
+model IngredientUsage {
+  id           String     @id @default(cuid())
+  
+  batchId      String
+  batch        Batch      @relation(fields: [batchId], references: [id])
+  
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  
+  quantity     Decimal    @db.Decimal(10, 2)
+  unit         String
+  addedAt      DateTime   @default(now())
+  notes        String?
+
+  @@map("ingredient_usages")
+}
+
+// ==================== QC TESTS ====================
+
+model QCTest {
+  id          String       @id @default(cuid())
+  
+  batchId     String
+  batch       Batch        @relation(fields: [batchId], references: [id])
+  
+  testType    String       // gravity, pH, appearance, taste, etc.
+  result      QCResult     @default(PENDING)
+  value       Decimal?     @db.Decimal(10, 4)
+  unit        String?
+  
+  notes       String?
+  testedAt    DateTime     @default(now())
+  
+  testedById  String
+  testedBy    BreweryUser  @relation(fields: [testedById], references: [id])
+
+  @@map("qc_tests")
+}
+
+enum QCResult {
+  PENDING
+  PASSED
+  FAILED
+  NEEDS_REVIEW
+}
+
+// ==================== EQUIPMENT ====================
+
+model Equipment {
+  id              String          @id @default(cuid())
+  name            String
+  type            String          // pump, valve, sensor, etc.
+  model           String?
+  serialNumber    String?
+  
+  location        String?
+  status          EquipmentStatus @default(OPERATIONAL)
+  
+  purchaseDate    DateTime?
+  warrantyExpiry  DateTime?
+  lastMaintenance DateTime?
+  nextMaintenance DateTime?
+  
+  notes           String?
+  
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organizationId String
+  organization    BreweryOrganization @relation(fields: [organizationId], references: [id])
+
+  // Relations
+  maintenanceLogs MaintenanceLog[]
+
+  @@map("equipment")
+}
+
+enum EquipmentStatus {
+  OPERATIONAL
+  NEEDS_MAINTENANCE
+  UNDER_REPAIR
+  OUT_OF_SERVICE
+}
+
+// ==================== MAINTENANCE LOGS ====================
+
+model MaintenanceLog {
+  id           String          @id @default(cuid())
+  
+  equipmentId  String
+  equipment    Equipment       @relation(fields: [equipmentId], references: [id])
+  
+  type         MaintenanceType
+  description  String
+  cost         Decimal?        @db.Decimal(10, 2)
+  
+  performedAt  DateTime        @default(now())
+  performedById String
+  performedBy  BreweryUser     @relation(fields: [performedById], references: [id])
+  
+  nextScheduled DateTime?
+  notes        String?
+
+  @@map("maintenance_logs")
+}
+
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  INSPECTION
+  CLEANING
+  CALIBRATION
+}
+
+// ==================== ACTIVITIES ====================
+
+model Activity {
+  id          String       @id @default(cuid())
+  type        ActivityType
+  description String
+  
+  // References
+  batchNumber String?
+  reference   String?      // Generic reference field
+  
+  userId      String?
+  user        BreweryUser? @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime     @default(now())
+
+  organizationId String
+  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
+
+  @@map("activities")
+}
+
+enum ActivityType {
+  BATCH_CREATED
+  BATCH_STARTED
+  BATCH_STATUS_CHANGED
+  FERMENTATION_LOG
+  QC_TEST
+  TANK_ASSIGNED
+  INVENTORY_LOW
+  INVENTORY_RECEIVED
+  EQUIPMENT_MAINTENANCE
+  USER_ACTION
+}
+
+// ==================== SETTINGS ====================
+
+model BrewerySetting {
+  id    String @id @default(cuid())
+  key   String
+  value String
+  
+  organizationId String
+  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, key])
+  @@map("brewery_settings")
+}
+
+
+
