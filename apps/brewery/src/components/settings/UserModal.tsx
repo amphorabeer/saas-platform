@@ -126,7 +126,7 @@ export function UserModal({ isOpen, onClose, onSubmit, user }: UserModalProps) {
               type="text"
               value={position}
               onChange={(e) => setPosition(e.target.value)}
-              placeholder="მთავარი მეხარშე"
+              placeholder="მთავარი ტექნოლოგი"
               className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
             />
           </div>
@@ -188,4 +188,3 @@ export function UserModal({ isOpen, onClose, onSubmit, user }: UserModalProps) {
     </div>
   )
 }
-

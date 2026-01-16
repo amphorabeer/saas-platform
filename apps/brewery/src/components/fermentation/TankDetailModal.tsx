@@ -1,759 +1,713 @@
 'use client'
 
-
-
-import { useState } from 'react'
-
+import { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button, ProgressBar, BatchStatusBadge } from '@/components/ui'
-
 import { formatDate, formatTime } from '@/lib/utils'
-
-
+import { useBreweryStore } from '@/store'
+import { CIPLogModal } from '@/components/equipment/CIPLogModal'
 
 interface Tank {
-
   id: string
-
   name: string
-
-  type: 'fermenter' | 'brite' | 'conditioning'
-
+  type: 'fermenter' | 'brite' | 'unitank' | 'conditioning'
   capacity: number
-
   currentVolume: number
-
   status: 'available' | 'in_use' | 'cleaning' | 'maintenance'
-
+  needsCIP?: boolean    // ✅ ADD
+  openCIPTab?: boolean  // ✅ ADD
+  phase?: 'FERMENTATION' | 'CONDITIONING' | 'BRIGHT' | 'PACKAGING'  // ✅ დაამატე
   batch?: {
-
     id: string
-
     batchNumber: string
-
     recipe: string
-
-    status: 'fermenting' | 'conditioning' | 'ready'
-
+    status: 'fermenting' | 'conditioning' | 'ready' | 'brewing' | 'planned' | 'packaging' | 'completed'
     startDate: Date
-
     estimatedEndDate: Date
-
     progress: number
-
+    packagedVolume?: number  // ✅ ADD
+    volume?: number          // ✅ ADD
   }
-
   temperature: {
-
     current: number
-
     target: number
-
     history: { time: string; value: number }[]
-
   }
-
   gravity: {
-
     original: number
-
     current: number
-
     target: number
-
     history: { time: string; value: number }[]
-
   }
-
   pressure?: number
-
   ph?: number
-
   lastUpdated: Date
-
 }
 
-
+interface CIPLog {
+  id: string
+  equipmentId: string
+  cipType: string
+  date: string
+  duration: number
+  temperature: number | null
+  causticConcentration: number | null
+  performedBy: string
+  result: string
+  notes: string | null
+  createdAt: string
+}
 
 interface TankDetailModalProps {
-
   tank: Tank
-
   onClose: () => void
-
+  onEquipmentUpdate?: () => void
 }
 
-
-
-export function TankDetailModal({ tank, onClose }: TankDetailModalProps) {
-
-  const [activeTab, setActiveTab] = useState<'overview' | 'temperature' | 'gravity' | 'log'>('overview')
-
+export function TankDetailModal({ tank, onClose, onEquipmentUpdate }: TankDetailModalProps) {
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<'overview' | 'log' | 'cip'>('overview')
   const [newTempTarget, setNewTempTarget] = useState(tank.temperature.target)
+  const [isUpdating, setIsUpdating] = useState(false)
 
+  // ✅ Auto-open CIP tab when openCIPTab is true
+  useEffect(() => {
+    if (tank?.openCIPTab) {
+      setActiveTab('cip')
+      setShowCipForm(true)  // Also open the CIP form
+    }
+  }, [tank?.openCIPTab])
 
+  // CIP state
+  const [cipLogs, setCipLogs] = useState<CIPLog[]>([])
+  const [loadingCip, setLoadingCip] = useState(false)
+  const [showCipForm, setShowCipForm] = useState(false)
+
+  // ✅ Batch data (fetched from API for sync)
+  const [batchData, setBatchData] = useState<any>(null)
+  const [loadingBatch, setLoadingBatch] = useState(false)
+
+  // Get real batch data from Zustand
+  const batches = useBreweryStore(state => state.batches)
+  const updateBatch = useBreweryStore(state => state.updateBatch)
+  
+  // Find the actual batch for this tank
+  const realBatch = useMemo(() => {
+    if (!tank.batch?.id) return null
+    return batches.find(b => b.id === tank.batch?.id) || null
+  }, [batches, tank.batch?.id])
+
+  // ✅ Get batch object from API response
+  const apiBatch = batchData?.batch || batchData
+
+  // ✅ Get gravity readings from API batch data (synced with batch)
+  const gravityHistory = useMemo(() => {
+    if (!apiBatch?.gravityReadings) return []
+    return apiBatch.gravityReadings.map((reading: any) => ({
+      time: formatDate(reading.recordedAt || reading.date),
+      value: reading.gravity,
+      temperature: reading.temperature,
+    }))
+  }, [apiBatch])
+
+  // ✅ Get timeline/log from API batch data (synced with batch)
+  const activityLog = useMemo(() => {
+    if (!apiBatch?.timeline) return []
+    return apiBatch.timeline.map((event: any) => ({
+      time: formatDate(event.createdAt || event.date),
+      timeShort: formatTime(event.createdAt || event.date),
+      action: event.title || event.action,
+      description: event.description || event.note,
+      user: event.user || event.userId,
+      type: event.type,
+    }))
+  }, [apiBatch])
+
+  // ✅ SYNC: Get current temperature from batch gravity readings (latest reading)
+  const currentTemperature = useMemo(() => {
+    if (apiBatch?.gravityReadings?.length > 0) {
+      const latestReading = apiBatch.gravityReadings[0] // Already ordered desc
+      if (latestReading?.temperature != null) {
+        return Number(latestReading.temperature)
+      }
+    }
+    return tank.temperature.current
+  }, [apiBatch, tank.temperature.current])
+  const targetTemperature = newTempTarget
 
   const fillPercent = Math.round((tank.currentVolume / tank.capacity) * 100)
+  
+  // ✅ Calculate attenuation and ABV from batch data (synced with batch - same formula as batch detail page)
+  const { attenuationPercent, calculateABV } = useMemo(() => {
+    // Get OG from gravity readings or batch (same as batch detail page)
+    const ogReading = apiBatch?.gravityReadings?.find((r: any) => r.notes?.includes('OG') || r.notes?.includes('საწყისი'))
+    const actualOG = ogReading?.gravity || (apiBatch?.originalGravity ? Number(apiBatch.originalGravity) : (tank.gravity.original || 0))
+    
+    // Get current gravity from latest reading (same as batch detail page)
+    const latestReading = apiBatch?.gravityReadings?.[0] // Already sorted desc by recordedAt
+    const currentGravity = latestReading?.gravity || (apiBatch?.currentGravity ? Number(apiBatch.currentGravity) : (tank.gravity.current || 0))
+    
+    // Calculate ABV: (OG - currentGravity) * 131.25 (same as batch detail page)
+    const abv = actualOG && currentGravity && actualOG !== currentGravity
+      ? ((actualOG - currentGravity) * 131.25)
+      : 0
+    
+    // Calculate Attenuation: ((OG - currentGravity) / (OG - 1)) * 100 (same as batch detail page)
+    const attenuation = actualOG && currentGravity && actualOG > 1 && actualOG !== currentGravity
+      ? (((actualOG - currentGravity) / (actualOG - 1)) * 100)
+      : 0
+    
+    return {
+      attenuationPercent: attenuation > 0 ? Math.round(attenuation) : 0,
+      calculateABV: abv > 0 ? abv.toFixed(1) : '0.0',
+    }
+  }, [apiBatch, tank.gravity])
+  
+  // ✅ Calculate progress based on batch status (same as batch detail page)
+  const batchProgress = useMemo(() => {
+    const status = apiBatch?.status?.toLowerCase() || tank.batch?.status
+    
+    // Status-based progress (same as batch detail page)
+    switch (status) {
+      case 'planned':
+        return 0
+      case 'brewing':
+        return 10
+      case 'fermenting':
+        return 40
+      case 'conditioning':
+        return 70
+      case 'ready':
+        return 85
+      case 'packaging':
+        return 95
+      case 'completed':
+        return 100
+      default:
+        return 0
+    }
+  }, [apiBatch, tank.batch])
 
-  const attenuationPercent = tank.gravity.original > 0 
-
-    ? Math.round(((tank.gravity.original - tank.gravity.current) / (tank.gravity.original - tank.gravity.target)) * 100)
-
-    : 0
-
-
-
-  const calculateABV = () => {
-
-    if (tank.gravity.original === 0) return 0
-
-    return ((tank.gravity.original - tank.gravity.current) * 131.25).toFixed(1)
-
+  // ✅ Get phase label - BATCH STATUS HAS PRIORITY!
+  const getPhaseLabel = (): string => {
+    const batchStatus = tank.batch?.status?.toLowerCase()
+    
+    // ✅ PRIORITY 1: Batch status (most accurate)
+    const batchStatusLabels: Record<string, string> = {
+      'fermenting': 'ფერმენტაცია',
+      'brewing': 'ფერმენტაცია',
+      'conditioning': 'კონდიცირება',
+      'ready': 'მზადაა',
+      'packaging': 'დაფასოვება',
+      'completed': 'დასრულებული',
+    }
+    
+    if (batchStatus && batchStatusLabels[batchStatus]) {
+      return batchStatusLabels[batchStatus]
+    }
+    
+    // ✅ PRIORITY 2: TankAssignment phase (fallback)
+    if (tank.phase) {
+      const phaseLabels: Record<string, string> = {
+        'FERMENTATION': 'ფერმენტაცია',
+        'CONDITIONING': 'კონდიცირება',
+        'BRIGHT': 'მზადაა',
+        'PACKAGING': 'დაფასოვება',
+      }
+      return phaseLabels[tank.phase] || tank.phase
+    }
+    
+    return '-'
   }
 
+  // ✅ Check if batch is active (not completed)
+  const isActiveBatch = tank.batch && tank.batch.status !== 'completed'
 
+  // Fetch CIP logs when CIP tab is active
+  useEffect(() => {
+    if (activeTab === 'cip') {
+      fetchCipLogs()
+    }
+  }, [activeTab, tank.id])
+
+  const fetchCipLogs = async () => {
+    setLoadingCip(true)
+    try {
+      const response = await fetch(`/api/equipment/${tank.id}/cip`)
+      if (response.ok) {
+        const data = await response.json()
+        setCipLogs(Array.isArray(data) ? data : [])
+      }
+    } catch (error) {
+      console.error('Error fetching CIP logs:', error)
+    } finally {
+      setLoadingCip(false)
+    }
+  }
+
+  // ✅ Fetch batch data from API (gravity readings, timeline, etc.)
+  const fetchBatchData = async () => {
+    if (!tank.batch?.id) return
+    
+    setLoadingBatch(true)
+    try {
+      const response = await fetch(`/api/batches/${tank.batch.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setBatchData(data)
+      }
+    } catch (error) {
+      console.error('Error fetching batch data:', error)
+    } finally {
+      setLoadingBatch(false)
+    }
+  }
+
+  // Fetch batch data when modal opens
+  useEffect(() => {
+    if (tank.batch?.id) {
+      fetchBatchData()
+    }
+  }, [tank.batch?.id])
+
+  const handleViewBatch = () => {
+    if (tank.batch?.id) {
+      onClose()
+      router.push(`/production/${tank.batch.id}`)
+    }
+  }
+
+  const handleUpdateTemperature = () => {
+    if (!realBatch?.id) return
+    setIsUpdating(true)
+    updateBatch(realBatch.id, { temperature: newTempTarget })
+    setTimeout(() => {
+      setIsUpdating(false)
+      alert('ტემპერატურა განახლდა!')
+    }, 500)
+  }
+
+  // Handle CIP save from modal
+  const handleCipSave = async (cipData: any) => {
+    try {
+      const cipTypeMap: Record<string, string> = {
+        'full': 'FULL',
+        'caustic_only': 'CAUSTIC',
+        'sanitizer_only': 'SANITIZE',
+        'rinse': 'RINSE',
+      }
+      
+      const resultMap: Record<string, string> = {
+        'success': 'PASS',
+        'needs_repeat': 'PARTIAL',
+        'problem': 'FAIL',
+      }
+
+      const response = await fetch(`/api/equipment/${tank.id}/cip`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cipType: cipTypeMap[cipData.cipType] || 'FULL',
+          duration: cipData.duration,
+          temperature: cipData.temperature || null,
+          causticConcentration: cipData.causticConcentration || null,
+          performedBy: cipData.performedBy,
+          result: resultMap[cipData.result] || 'PASS',
+          notes: cipData.notes || null,
+          usedSupplies: cipData.usedSupplies || [],
+        }),
+      })
+
+      if (response.ok) {
+        await fetchCipLogs()
+        if (onEquipmentUpdate) {
+          onEquipmentUpdate()
+        }
+        alert('CIP ჩანაწერი შენახულია! ავზი მზადაა გამოყენებისთვის.')
+      } else {
+        const error = await response.json()
+        alert(`შეცდომა: ${error.error || 'CIP ჩანაწერის შენახვა ვერ მოხერხდა'}`)
+      }
+    } catch (error) {
+      console.error('Error saving CIP:', error)
+      alert('შეცდომა CIP ჩანაწერის შენახვისას')
+    }
+  }
+
+  // Format CIP type for display
+  const formatCipType = (type: string) => {
+    const types: Record<string, string> = {
+      'FULL': 'სრული CIP',
+      'CAUSTIC': 'მხოლოდ კაუსტიკი',
+      'SANITIZE': 'სანიტარიზაცია',
+      'RINSE': 'სწრაფი rinse',
+      'QUICK': 'სწრაფი CIP',
+      'full': 'სრული CIP',
+    }
+    return types[type] || type
+  }
+
+  const formatResult = (result: string) => {
+    const results: Record<string, { text: string; color: string }> = {
+      'PASS': { text: 'წარმატებული', color: 'text-green-400' },
+      'FAIL': { text: 'პრობლემა', color: 'text-red-400' },
+      'PARTIAL': { text: 'გამეორება საჭირო', color: 'text-amber-400' },
+      'success': { text: 'წარმატებული', color: 'text-green-400' },
+    }
+    return results[result] || { text: result, color: 'text-text-primary' }
+  }
 
   return (
-
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-
       
-
-      <div className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
-
+      <div className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
         {/* Header */}
-
-        <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-bg-tertiary">
-
+        <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-bg-tertiary flex-shrink-0">
           <div className="flex items-center gap-4">
-
             <div className="w-12 h-12 rounded-xl bg-copper/20 flex items-center justify-center text-2xl">
-
-              🧪
-
+              🛢️
             </div>
-
             <div>
-
               <h2 className="text-xl font-display font-semibold">{tank.name}</h2>
-
               <p className="text-sm text-text-muted">
-
-                {tank.type === 'fermenter' ? 'ფერმენტატორი' : 'ბრაიტ ტანკი'} • {tank.capacity}L
-
+                {tank.type === 'fermenter' ? 'ფერმენტატორი' : tank.type === 'unitank' ? 'Unitank' : 'ბრაიტ ავზი'} • {tank.capacity}L
               </p>
-
             </div>
-
           </div>
-
-          <button 
-
-            onClick={onClose}
-
-            className="w-8 h-8 rounded-lg bg-bg-card border border-border flex items-center justify-center hover:border-danger hover:text-danger transition-colors"
-
-          >
-
-            ✕
-
-          </button>
-
+          
+          <div className="flex items-center gap-3">
+            {tank.status === 'cleaning' && (
+              <span className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm font-medium">
+                საჭიროებს CIP-ს
+              </span>
+            )}
+            <button 
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg bg-bg-card border border-border flex items-center justify-center hover:border-danger hover:text-danger transition-colors"
+            >
+              ✕
+            </button>
+          </div>
         </div>
-
-
 
         {/* Tabs */}
-
-        <div className="px-6 pt-4 border-b border-border">
-
+        <div className="px-6 pt-4 border-b border-border flex-shrink-0">
           <div className="flex gap-4">
-
             {[
-
-              { key: 'overview', label: 'მიმოხილვა' },
-
-              { key: 'temperature', label: 'ტემპერატურა' },
-
-              { key: 'gravity', label: 'სიმკვრივე' },
-
-              { key: 'log', label: 'ჟურნალი' },
-
+              { key: 'overview', label: 'მიმოხილვა', icon: '📊' },
+              { key: 'log', label: 'ჟურნალი', icon: '📋' },
+              { key: 'cip', label: 'CIP', icon: '🧹', badge: tank.status === 'cleaning' },
             ].map(tab => (
-
               <button
-
                 key={tab.key}
-
                 onClick={() => setActiveTab(tab.key as typeof activeTab)}
-
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                   activeTab === tab.key
-
                     ? 'border-copper text-copper-light'
-
                     : 'border-transparent text-text-muted hover:text-text-primary'
-
                 }`}
-
               >
-
+                <span>{tab.icon}</span>
                 {tab.label}
-
+                {tab.badge && (
+                  <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                )}
               </button>
-
             ))}
-
           </div>
-
         </div>
-
-
 
         {/* Content */}
-
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-
+        <div className="p-6 overflow-y-auto flex-1">
           {activeTab === 'overview' && (
-
             <div className="grid grid-cols-2 gap-6">
-
               {/* Left Column */}
-
               <div className="space-y-6">
-
-                {/* Batch Info */}
-
-                {tank.batch && (
-
+                {isActiveBatch && (
                   <div className="bg-bg-card border border-border rounded-xl p-4">
-
                     <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-
                       🍺 აქტიური პარტია
-
                     </h3>
-
                     <div className="space-y-3">
-
                       <div className="flex justify-between items-center">
-
-                        <span className="font-mono text-copper-light">{tank.batch.batchNumber}</span>
-
-                        <BatchStatusBadge status={tank.batch.status} showPulse={tank.batch.status === 'fermenting'} />
-
+                        <span className="font-mono text-copper-light">{tank.batch!.batchNumber}</span>
+                        <BatchStatusBadge status={tank.batch!.status} showPulse={tank.batch!.status === 'fermenting'} />
                       </div>
-
-                      <p className="text-lg font-medium">{tank.batch.recipe}</p>
-
-                      <div>
-
+                      {/* ✅ Phase label */}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-text-muted">ფაზა:</span>
+                        <span className="font-medium">{getPhaseLabel()}</span>
+                      </div>
+                      <p className="text-lg font-medium">{tank.batch!.recipe}</p>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-text-muted">დაწყება:</span>
+                        <span>{formatDate(tank.batch!.startDate)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-text-muted">სავარაუდო დასრულება:</span>
+                        <span>{formatDate(tank.batch!.estimatedEndDate)}</span>
+                      </div>
+                      <div className="mt-2">
                         <div className="flex justify-between text-sm mb-1">
-
                           <span className="text-text-muted">პროგრესი</span>
-
-                          <span>{tank.batch.progress}%</span>
-
+                          <span>{batchProgress}%</span>
                         </div>
-
-                        <ProgressBar value={tank.batch.progress} color="copper" />
-
+                        <ProgressBar value={batchProgress} color="copper" />
                       </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-
-                        <div>
-
-                          <p className="text-text-muted">დაწყება</p>
-
-                          <p>{formatDate(tank.batch.startDate)}</p>
-
-                        </div>
-
-                        <div>
-
-                          <p className="text-text-muted">სავარაუდო დასრულება</p>
-
-                          <p>{formatDate(tank.batch.estimatedEndDate)}</p>
-
-                        </div>
-
-                      </div>
-
                     </div>
-
                   </div>
-
                 )}
 
+                {/* ✅ Completed batch - show different message */}
+                {tank.batch && tank.batch.status === 'completed' && (
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                    <h3 className="text-sm font-medium mb-2 flex items-center gap-2 text-green-400">
+                      ✅ პარტია დასრულებულია
+                    </h3>
+                    <p className="text-sm text-text-muted mb-2">
+                      {tank.batch.batchNumber} - {tank.batch.recipe}
+                    </p>
+                    <p className="text-xs text-text-muted">
+                      ტანკს ესაჭიროება CIP პროცედურა.
+                    </p>
+                  </div>
+                )}
 
+                {!tank.batch && tank.status === 'cleaning' && (
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+                    <h3 className="text-sm font-medium mb-2 flex items-center gap-2 text-amber-400">
+                      ⚠️ საჭიროებს CIP-ს
+                    </h3>
+                    <p className="text-sm text-text-muted mb-3">
+                      ავზი გაცარიელებულია და საჭიროებს CIP პროცედურას.
+                    </p>
+                    <Button variant="primary" onClick={() => setActiveTab('cip')} className="w-full">
+                      🧹 CIP ჩანაწერის დამატება
+                    </Button>
+                  </div>
+                )}
 
-                {/* Volume */}
+                {!tank.batch && tank.status === 'available' && (
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                    <h3 className="text-sm font-medium mb-2 flex items-center gap-2 text-green-400">
+                      ✅ მზადაა
+                    </h3>
+                    <p className="text-sm text-text-muted">
+                      ავზი სუფთაა და მზადაა ახალი პარტიისთვის.
+                    </p>
+                  </div>
+                )}
 
                 <div className="bg-bg-card border border-border rounded-xl p-4">
-
-                  <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-
-                    📊 მოცულობა
-
-                  </h3>
-
-                  <div className="flex items-center gap-4">
-
-                    <div className="flex-1">
-
-                      <div className="flex justify-between text-sm mb-1">
-
-                        <span className="text-text-muted">შევსება</span>
-
-                        <span>{fillPercent}%</span>
-
+                  <h3 className="text-sm font-medium mb-3 flex items-center gap-2">📦 მოცულობა</h3>
+                  <div className="space-y-3">
+                    <div className="h-32 bg-bg-tertiary rounded-lg flex items-end overflow-hidden relative">
+                      <div 
+                        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-amber-600/50 to-amber-400/30 transition-all duration-500"
+                        style={{ height: `${fillPercent}%` }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-3xl font-bold">{fillPercent}%</span>
                       </div>
-
-                      <ProgressBar value={fillPercent} color="amber" />
-
                     </div>
-
-                    <div className="text-right">
-
-                      <p className="text-2xl font-bold font-display">{tank.currentVolume}</p>
-
+                    <div className="flex justify-between text-sm">
+                      <p className="text-lg font-bold">{tank.currentVolume} L</p>
                       <p className="text-xs text-text-muted">/ {tank.capacity} L</p>
-
                     </div>
-
                   </div>
-
                 </div>
-
               </div>
 
-
-
-              {/* Right Column - Metrics */}
-
+              {/* Right Column */}
               <div className="space-y-6">
-
-                {/* Temperature Control */}
-
                 <div className="bg-bg-card border border-border rounded-xl p-4">
-
-                  <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-
-                    🌡️ ტემპერატურის კონტროლი
-
-                  </h3>
-
+                  <h3 className="text-sm font-medium mb-3 flex items-center gap-2">🌡️ ტემპერატურა</h3>
                   <div className="grid grid-cols-2 gap-4 mb-4">
-
-                    <div className="text-center p-4 bg-bg-tertiary rounded-xl">
-
-                      <p className="text-3xl font-bold font-mono text-amber-400">{tank.temperature.current}°C</p>
-
+                    <div className="text-center p-3 bg-bg-tertiary rounded-lg">
+                      <p className="text-2xl font-mono font-bold text-amber-400">{currentTemperature.toFixed(1)}°C</p>
                       <p className="text-xs text-text-muted">მიმდინარე</p>
-
                     </div>
-
-                    <div className="text-center p-4 bg-bg-tertiary rounded-xl">
-
-                      <p className="text-3xl font-bold font-mono text-green-400">{tank.temperature.target}°C</p>
-
+                    <div className="text-center p-3 bg-bg-tertiary rounded-lg">
+                      <p className="text-2xl font-mono font-bold text-green-400">{targetTemperature.toFixed(1)}°C</p>
                       <p className="text-xs text-text-muted">სამიზნე</p>
-
                     </div>
-
                   </div>
-
-                  <div className="flex items-center gap-2">
-
+                  <div className="flex gap-2">
                     <input
-
                       type="number"
-
-                      value={newTempTarget}
-
-                      onChange={(e) => setNewTempTarget(Number(e.target.value))}
-
                       step="0.5"
-
-                      className="flex-1 px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-sm font-mono"
-
+                      value={newTempTarget}
+                      onChange={(e) => setNewTempTarget(parseFloat(e.target.value) || 0)}
+                      className="flex-1 px-3 py-2 bg-bg-tertiary border border-border rounded-lg font-mono text-center"
                     />
-
-                    <Button variant="secondary" size="sm">განაახლე</Button>
-
+                    <Button variant="primary" onClick={handleUpdateTemperature} disabled={isUpdating}>
+                      {isUpdating ? '...' : 'განახლება'}
+                    </Button>
                   </div>
-
                 </div>
-
-
-
-                {/* Gravity */}
 
                 <div className="bg-bg-card border border-border rounded-xl p-4">
-
-                  <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-
-                    📈 სიმკვრივე / ატენუაცია
-
-                  </h3>
-
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-
+                  <h3 className="text-sm font-medium mb-3 flex items-center gap-2">📈 სიმკვრივე</h3>
+                  <div className="grid grid-cols-3 gap-2 mb-3">
                     <div className="text-center">
-
-                      <p className="text-xl font-mono">{tank.gravity.original.toFixed(3)}</p>
-
+                      <p className="text-xl font-mono text-amber-400">
+                        {apiBatch?.originalGravity ? Number(apiBatch.originalGravity).toFixed(3) : tank.gravity.original.toFixed(3)}
+                      </p>
                       <p className="text-xs text-text-muted">OG</p>
-
                     </div>
-
                     <div className="text-center">
-
-                      <p className="text-xl font-mono text-copper-light">{tank.gravity.current.toFixed(3)}</p>
-
+                      <p className="text-xl font-mono text-purple-400">
+                        {apiBatch?.currentGravity ? Number(apiBatch.currentGravity).toFixed(3) : (tank.gravity.current || 0).toFixed(3)}
+                      </p>
                       <p className="text-xs text-text-muted">SG</p>
-
                     </div>
-
                     <div className="text-center">
-
-                      <p className="text-xl font-mono text-green-400">{tank.gravity.target.toFixed(3)}</p>
-
+                      <p className="text-xl font-mono text-green-400">
+                        {apiBatch?.finalGravity ? Number(apiBatch.finalGravity).toFixed(3) : tank.gravity.target.toFixed(3)}
+                      </p>
                       <p className="text-xs text-text-muted">FG</p>
-
                     </div>
-
                   </div>
-
                   <div className="mb-3">
-
                     <div className="flex justify-between text-sm mb-1">
-
                       <span className="text-text-muted">ატენუაცია</span>
-
                       <span>{Math.min(attenuationPercent, 100)}%</span>
-
                     </div>
-
                     <ProgressBar value={Math.min(attenuationPercent, 100)} color="success" />
-
                   </div>
-
                   <div className="flex justify-between items-center p-3 bg-bg-tertiary rounded-lg">
-
                     <span className="text-sm text-text-muted">სავარაუდო ABV</span>
-
-                    <span className="text-lg font-bold text-copper-light">{calculateABV()}%</span>
-
+                    <span className="text-lg font-bold text-copper-light">{calculateABV}%</span>
                   </div>
-
                 </div>
-
-
-
-                {/* Additional Metrics */}
-
-                {(tank.pressure !== undefined || tank.ph !== undefined) && (
-
-                  <div className="grid grid-cols-2 gap-4">
-
-                    {tank.pressure !== undefined && (
-
-                      <div className="bg-bg-card border border-border rounded-xl p-4 text-center">
-
-                        <p className="text-2xl font-bold font-mono">{tank.pressure}</p>
-
-                        <p className="text-xs text-text-muted">წნევა (bar)</p>
-
-                      </div>
-
-                    )}
-
-                    {tank.ph !== undefined && (
-
-                      <div className="bg-bg-card border border-border rounded-xl p-4 text-center">
-
-                        <p className="text-2xl font-bold font-mono">{tank.ph}</p>
-
-                        <p className="text-xs text-text-muted">pH</p>
-
-                      </div>
-
-                    )}
-
-                  </div>
-
-                )}
-
               </div>
-
             </div>
-
           )}
-
-
-
-          {activeTab === 'temperature' && (
-
-            <div className="space-y-6">
-
-              <div className="bg-bg-card border border-border rounded-xl p-4">
-
-                <h3 className="text-sm font-medium mb-4">ტემპერატურის ისტორია (24 სთ)</h3>
-
-                {tank.temperature.history.length > 0 ? (
-
-                  <div className="h-64 flex items-end gap-2">
-
-                    {tank.temperature.history.map((point, i) => (
-
-                      <div key={i} className="flex-1 flex flex-col items-center gap-2">
-
-                        <span className="text-xs font-mono">{point.value}°</span>
-
-                        <div 
-
-                          className="w-full bg-amber-500/60 rounded-t transition-all hover:bg-amber-500"
-
-                          style={{ height: `${(point.value / 25) * 100}%` }}
-
-                        />
-
-                        <span className="text-[10px] text-text-muted">{point.time}</span>
-
-                      </div>
-
-                    ))}
-
-                  </div>
-
-                ) : (
-
-                  <div className="h-64 flex items-center justify-center text-text-muted">
-
-                    მონაცემები არ არის
-
-                  </div>
-
-                )}
-
-                <div className="mt-4 flex items-center justify-center gap-8 text-sm">
-
-                  <div className="flex items-center gap-2">
-
-                    <div className="w-3 h-3 bg-amber-500/60 rounded" />
-
-                    <span className="text-text-muted">ტემპერატურა</span>
-
-                  </div>
-
-                  <div className="flex items-center gap-2">
-
-                    <div className="w-8 h-0.5 bg-green-400" />
-
-                    <span className="text-text-muted">სამიზნე ({tank.temperature.target}°C)</span>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          )}
-
-
-
-          {activeTab === 'gravity' && (
-
-            <div className="space-y-6">
-
-              <div className="bg-bg-card border border-border rounded-xl p-4">
-
-                <h3 className="text-sm font-medium mb-4">სიმკვრივის ცვლილება</h3>
-
-                {tank.gravity.history.length > 0 ? (
-
-                  <div className="h-64 flex items-end gap-4">
-
-                    {tank.gravity.history.map((point, i) => {
-
-                      const heightPercent = ((point.value - 1) / 0.07) * 100
-
-                      return (
-
-                        <div key={i} className="flex-1 flex flex-col items-center gap-2">
-
-                          <span className="text-xs font-mono">{point.value.toFixed(3)}</span>
-
-                          <div 
-
-                            className="w-full bg-purple-500/60 rounded-t transition-all hover:bg-purple-500"
-
-                            style={{ height: `${heightPercent}%` }}
-
-                          />
-
-                          <span className="text-[10px] text-text-muted">{point.time}</span>
-
-                        </div>
-
-                      )
-
-                    })}
-
-                  </div>
-
-                ) : (
-
-                  <div className="h-64 flex items-center justify-center text-text-muted">
-
-                    მონაცემები არ არის
-
-                  </div>
-
-                )}
-
-              </div>
-
-
-
-              {/* Add Reading */}
-
-              <div className="bg-bg-card border border-border rounded-xl p-4">
-
-                <h3 className="text-sm font-medium mb-3">ახალი გაზომვის დამატება</h3>
-
-                <div className="flex gap-4">
-
-                  <div className="flex-1">
-
-                    <label className="text-xs text-text-muted mb-1 block">სიმკვრივე (SG)</label>
-
-                    <input
-
-                      type="number"
-
-                      step="0.001"
-
-                      placeholder="1.012"
-
-                      className="w-full px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-sm font-mono"
-
-                    />
-
-                  </div>
-
-                  <div className="flex-1">
-
-                    <label className="text-xs text-text-muted mb-1 block">ტემპერატურა (°C)</label>
-
-                    <input
-
-                      type="number"
-
-                      step="0.1"
-
-                      placeholder="12.0"
-
-                      className="w-full px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-sm font-mono"
-
-                    />
-
-                  </div>
-
-                  <div className="flex items-end">
-
-                    <Button variant="primary">დამატება</Button>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          )}
-
-
 
           {activeTab === 'log' && (
-
             <div className="space-y-4">
-
-              {[
-
-                { time: '10:30', action: 'ტემპერატურის გაზომვა', value: '12.3°C', user: 'ნ. ზედგინიძე' },
-
-                { time: '08:00', action: 'სიმკვრივის გაზომვა', value: '1.018', user: 'ნ. ზედგინიძე' },
-
-                { time: 'გუშინ 18:00', action: 'ტემპერატურის კორექტირება', value: '12.0°C → 12.0°C', user: 'სისტემა' },
-
-                { time: 'გუშინ 08:00', action: 'სიმკვრივის გაზომვა', value: '1.024', user: 'ნ. ზედგინიძე' },
-
-                { time: '3 დღის წინ', action: 'ფერმენტაცია დაწყებულია', value: 'OG: 1.052', user: 'ნ. ზედგინიძე' },
-
-              ].map((log, i) => (
-
-                <div key={i} className="flex items-center gap-4 p-3 bg-bg-card border border-border rounded-lg">
-
-                  <div className="w-20 text-xs text-text-muted">{log.time}</div>
-
-                  <div className="flex-1">
-
-                    <p className="text-sm">{log.action}</p>
-
-                    <p className="text-xs text-text-muted">{log.user}</p>
-
+              <h3 className="text-sm font-medium mb-4">აქტივობის ჟურნალი</h3>
+              {activityLog.length > 0 ? (
+                activityLog.map((log: any, i: number) => (
+                  <div key={i} className="flex items-center gap-4 p-3 bg-bg-card border border-border rounded-lg">
+                    <div className="w-24 text-xs text-text-muted">
+                      <div>{log.time}</div>
+                      <div>{log.timeShort}</div>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{log.action}</p>
+                      <p className="text-xs text-text-muted">{log.description}</p>
+                    </div>
+                    <div className="text-xs text-text-muted">{log.user}</div>
                   </div>
-
-                  <div className="font-mono text-sm text-copper-light">{log.value}</div>
-
+                ))
+              ) : (
+                <div className="h-32 flex items-center justify-center text-text-muted">
+                  აქტივობის ჩანაწერები არ არის
                 </div>
-
-              ))}
-
+              )}
             </div>
-
           )}
 
+          {activeTab === 'cip' && (
+            <div className="space-y-6">
+              {tank.status === 'cleaning' && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+                  <p className="text-sm text-amber-400 flex items-center gap-2">
+                    ⚠️ ტანკს ესაჭიროება CIP პროცედურა სანამ ახალი პარტია დაიწყება
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-medium flex items-center gap-2">
+                  🧹 CIP (Clean-In-Place) ისტორია
+                </h3>
+                <Button variant="primary" onClick={() => setShowCipForm(true)}>
+                  + CIP ჩანაწერი
+                </Button>
+              </div>
+
+              {/* CIP Logs List */}
+              <div className="bg-bg-card border border-border rounded-xl p-4">
+                {loadingCip ? (
+                  <div className="h-32 flex items-center justify-center text-text-muted">
+                    იტვირთება...
+                  </div>
+                ) : cipLogs.length > 0 ? (
+                  <div className="space-y-3">
+                    {cipLogs.map((log) => (
+                      <div key={log.id} className="p-3 bg-bg-tertiary rounded-lg">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <span className="font-medium">{formatCipType(log.cipType)}</span>
+                            <span className="text-sm text-text-muted ml-2">
+                              {formatDate(new Date(log.date))}
+                            </span>
+                          </div>
+                          <span className={`text-sm font-medium ${formatResult(log.result).color}`}>
+                            {formatResult(log.result).text}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2 text-sm text-text-muted">
+                          <div>
+                            <span className="text-xs">ხანგრძლივობა:</span>
+                            <p className="text-text-primary">{log.duration} წთ</p>
+                          </div>
+                          <div>
+                            <span className="text-xs">ტემპ:</span>
+                            <p className="text-text-primary">{log.temperature || '-'}°C</p>
+                          </div>
+                          <div>
+                            <span className="text-xs">კაუსტიკი:</span>
+                            <p className="text-text-primary">{log.causticConcentration || '-'}%</p>
+                          </div>
+                          <div>
+                            <span className="text-xs">შემსრულებელი:</span>
+                            <p className="text-text-primary">{log.performedBy}</p>
+                          </div>
+                        </div>
+                        {log.notes && (
+                          <p className="text-xs text-text-muted mt-2 italic">{log.notes}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-32 flex items-center justify-center text-text-muted">
+                    CIP ჩანაწერები არ არის
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
-
+        {/* CIP Modal */}
+        <CIPLogModal
+          isOpen={showCipForm}
+          onClose={() => setShowCipForm(false)}
+          onSave={handleCipSave}
+          equipmentId={tank.id}
+          equipmentName={tank.name}
+        />
 
         {/* Footer */}
-
-        <div className="px-6 py-4 border-t border-border flex justify-between">
-
+        <div className="px-6 py-4 border-t border-border flex justify-between items-center bg-bg-secondary flex-shrink-0">
           <div className="text-xs text-text-muted">
-
             ბოლო განახლება: {formatTime(tank.lastUpdated)}
-
           </div>
-
           <div className="flex gap-3">
-
             <Button variant="secondary" onClick={onClose}>დახურვა</Button>
-
             {tank.batch && (
-
-              <Button variant="primary">პარტიის ნახვა →</Button>
-
+              <Button variant="primary" onClick={handleViewBatch}>
+                პარტიის ნახვა →
+              </Button>
             )}
-
           </div>
-
         </div>
-
       </div>
-
     </div>
-
   )
-
 }

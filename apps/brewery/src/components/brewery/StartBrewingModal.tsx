@@ -2,7 +2,7 @@
 
 
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 
 import { Button, ProgressBar } from '@/components/ui'
 
@@ -84,61 +84,85 @@ export function StartBrewingModal({
 
   recipeName,
 
-  recipeIngredients 
+  recipeIngredients
 
 }: StartBrewingModalProps) {
 
-  const [ingredients, setIngredients] = useState(
-
-    recipeIngredients.map(ing => ({
-
-      ...ing,
-
-      confirmedAmount: ing.requiredAmount,
-
-    }))
-
-  )
+  const [ingredients, setIngredients] = useState<(RecipeIngredient & { confirmedAmount: number })[]>([])
 
   const [notes, setNotes] = useState('')
 
+  const [isLoading, setIsLoading] = useState(false)
 
+  // Use ref to track previous ingredients signature and avoid unnecessary updates
+  const prevSignatureRef = useRef<string>('')
 
-  if (!isOpen) return null
+  // Sync state with props when recipeIngredients changes (using primitive dependencies)
+  useEffect(() => {
+    if (!recipeIngredients || recipeIngredients.length === 0) {
+      if (prevSignatureRef.current !== '') {
+        prevSignatureRef.current = ''
+        setIngredients([])
+      }
+      return
+    }
+    
+    // Create signature from current ingredients (stable string comparison)
+    const currentSignature = recipeIngredients.map(ing => `${ing.id}:${ing.requiredAmount}`).join('|')
+    
+    // Only update if signature actually changed
+    if (currentSignature !== prevSignatureRef.current) {
+      prevSignatureRef.current = currentSignature
+      setIngredients(
+        recipeIngredients.map(ing => ({
+          ...ing,
+          confirmedAmount: ing.requiredAmount,
+        }))
+      )
+    }
+  }, [recipeIngredients?.length]) // ✅ Only depend on length - ref handles actual comparison
 
+  // Reset loading state when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsLoading(false)
+    }
+  }, [isOpen])
 
-
-  const handleAmountChange = (id: string, amount: number) => {
-
+  // ✅ ALL useCallback hooks must be before early returns
+  const handleAmountChange = useCallback((id: string, amount: number) => {
     setIngredients(prev => prev.map(ing => 
-
       ing.id === id ? { ...ing, confirmedAmount: amount } : ing
-
     ))
+  }, [])
 
-  }
+  const handleConfirm = useCallback(async () => {
+    if (isLoading) return // Prevent double-click
+    
+    setIsLoading(true)
+    try {
+      onConfirm(
+        ingredients.map(ing => ({
+          id: ing.id,
+          amount: ing.confirmedAmount,
+        }))
+      )
+    } catch (error) {
+      console.error('Error starting brewing:', error)
+      setIsLoading(false)
+    }
+    // Note: Don't setIsLoading(false) on success - modal will close
+  }, [ingredients, onConfirm, isLoading])
 
-
-
+  // ✅ Computed values (not hooks, so can be after hooks)
   const hasInsufficientStock = ingredients.some(
 
     ing => ing.confirmedAmount > ing.stockAmount
 
   )
 
-
-
-  const handleConfirm = () => {
-
-    onConfirm(ingredients.map(ing => ({
-
-      id: ing.id,
-
-      amount: ing.confirmedAmount,
-
-    })))
-
-  }
+  // ✅ Early return AFTER all hooks
+  if (!isOpen) return null
 
 
 
@@ -448,7 +472,7 @@ export function StartBrewingModal({
 
           <div className="flex gap-3">
 
-            <Button variant="secondary" onClick={onClose}>
+            <Button variant="secondary" onClick={onClose} disabled={isLoading}>
 
               გაუქმება
 
@@ -460,11 +484,27 @@ export function StartBrewingModal({
 
               onClick={handleConfirm}
 
-              disabled={hasInsufficientStock}
+              disabled={hasInsufficientStock || isLoading}
+
+              className={isLoading ? 'opacity-70 cursor-not-allowed' : ''}
 
             >
 
-              ✓ დადასტურება და დაწყება
+              {isLoading ? (
+
+                <span className="flex items-center gap-2">
+
+                  <span className="animate-spin">⏳</span>
+
+                  მიმდინარეობს...
+
+                </span>
+
+              ) : (
+
+                '✓ დადასტურება და დაწყება'
+
+              )}
 
             </Button>
 

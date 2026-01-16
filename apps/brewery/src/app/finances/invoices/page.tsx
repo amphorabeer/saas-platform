@@ -1,297 +1,582 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui'
 import { StatCard } from '@/components/reports/StatCard'
-import { InvoiceModal } from '@/components/finances/InvoiceModal'
-import { PaymentModal } from '@/components/finances/PaymentModal'
-import { mockInvoicesOutgoing, mockInvoicesIncoming, Invoice } from '@/data/financeData'
 import { formatDate, formatCurrency } from '@/lib/utils'
+import { InvoiceModal, InvoiceFormData, InvoicePaymentModal, InvoicePaymentData } from '@/components/finances'
+
+interface InvoiceItem {
+  id: string
+  description: string
+  quantity: number
+  unit: string
+  unitPrice: number
+  total: number
+}
+
+interface InvoicePayment {
+  id: string
+  amount: number
+  method: string
+  date: string
+  reference: string | null
+}
+
+interface Invoice {
+  id: string
+  invoiceNumber: string
+  type: 'outgoing' | 'incoming'
+  status: string
+  statusName: string
+  issueDate: string
+  dueDate: string | null
+  paidAt: string | null
+  customerId: string | null
+  customerName: string | null
+  customerPhone?: string | null
+  customerEmail?: string | null
+  customerAddress?: string | null
+  customerTaxId?: string | null
+  supplierId: string | null
+  supplierName: string | null
+  orderId: string | null
+  orderNumber: string | null
+  subtotal: number
+  discount: number
+  tax: number
+  total: number
+  paidAmount: number
+  remaining: number
+  items: InvoiceItem[]
+  payments: InvoicePayment[]
+  notes: string | null
+}
+
+interface InvoiceStats {
+  total: number
+  totalAmount: number
+  paidAmount: number
+  pending: number
+  overdue: number
+}
+
+interface Customer {
+  id: string
+  name: string
+}
+
+interface Supplier {
+  id: string
+  name: string
+  category?: string | null
+}
+
+const statusConfig: Record<string, { name: string; color: string; bgColor: string }> = {
+  draft: { name: 'დრაფტი', color: 'text-gray-400', bgColor: 'bg-gray-400/20' },
+  sent: { name: 'გაგზავნილი', color: 'text-blue-400', bgColor: 'bg-blue-400/20' },
+  paid: { name: 'გადახდილი', color: 'text-green-400', bgColor: 'bg-green-400/20' },
+  partial: { name: 'ნაწილობრივ', color: 'text-amber-400', bgColor: 'bg-amber-400/20' },
+  overdue: { name: 'ვადაგასული', color: 'text-red-400', bgColor: 'bg-red-400/20' },
+  cancelled: { name: 'გაუქმებული', color: 'text-gray-500', bgColor: 'bg-gray-500/20' },
+}
 
 export default function InvoicesPage() {
-  const [activeTab, setActiveTab] = useState<'outgoing' | 'incoming'>('outgoing')
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [stats, setStats] = useState<InvoiceStats | null>(null)
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Filters
+  const [typeFilter, setTypeFilter] = useState<'all' | 'outgoing' | 'incoming'>('all')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [periodFilter, setPeriodFilter] = useState('all')
-  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false)
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [modalMode, setModalMode] = useState<'view' | 'create' | 'edit'>('create')
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState<Invoice | null>(null)
 
-  const invoices = activeTab === 'outgoing' ? mockInvoicesOutgoing : mockInvoicesIncoming
-  const filteredInvoices = invoices.filter(inv => {
-    if (statusFilter !== 'all' && inv.status !== statusFilter) return false
-    return true
-  })
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  // Statistics for outgoing
-  const outgoingTotal = mockInvoicesOutgoing.length
-  const outgoingPaid = mockInvoicesOutgoing.filter(inv => inv.status === 'paid').length
-  const outgoingPending = mockInvoicesOutgoing.filter(inv => inv.status === 'pending').length
-  const outgoingOverdue = mockInvoicesOutgoing.filter(inv => inv.status === 'overdue').length
+      // Build query params
+      const params = new URLSearchParams()
+      if (typeFilter !== 'all') params.append('type', typeFilter)
+      if (statusFilter !== 'all') params.append('status', statusFilter)
 
-  // Statistics for incoming
-  const incomingTotal = mockInvoicesIncoming.length
-  const incomingPaid = mockInvoicesIncoming.filter(inv => inv.status === 'paid').length
-  const incomingPending = mockInvoicesIncoming.filter(inv => inv.status === 'pending').length
-  const incomingOverdue = mockInvoicesIncoming.filter(inv => inv.status === 'overdue').length
+      // Fetch invoices
+      const invoicesRes = await fetch(`/api/finances/invoices?${params}`)
+      if (!invoicesRes.ok) throw new Error('Failed to fetch invoices')
+      const invoicesData = await invoicesRes.json()
+      setInvoices(invoicesData.invoices || [])
+      setStats(invoicesData.stats)
 
-  const getStatusBadge = (status: string) => {
-    const badges = {
-      paid: 'bg-green-400/20 text-green-400',
-      pending: 'bg-gray-400/20 text-gray-400',
-      partial: 'bg-amber-400/20 text-amber-400',
-      overdue: 'bg-red-400/20 text-red-400',
+      // Fetch customers for dropdown
+      const customersRes = await fetch('/api/customers')
+      if (customersRes.ok) {
+        const customersData = await customersRes.json()
+        setCustomers(customersData.customers || [])
+      }
+
+      // Fetch suppliers for dropdown
+      const suppliersRes = await fetch('/api/finances/suppliers')
+      if (suppliersRes.ok) {
+        const suppliersData = await suppliersRes.json()
+        setSuppliers(suppliersData.suppliers || [])
+      }
+
+    } catch (err) {
+      setError('მონაცემების ჩატვირთვა ვერ მოხერხდა')
+      console.error('Invoices fetch error:', err)
+    } finally {
+      setLoading(false)
     }
-    return badges[status as keyof typeof badges] || badges.pending
+  }, [typeFilter, statusFilter])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  // Separate invoices by type
+  const outgoingInvoices = invoices.filter(inv => inv.type === 'outgoing')
+  const incomingInvoices = invoices.filter(inv => inv.type === 'incoming')
+
+  // Calculate totals
+  const totalReceivable = outgoingInvoices.reduce((sum, inv) => sum + inv.remaining, 0)
+  const totalPayable = incomingInvoices.reduce((sum, inv) => sum + inv.remaining, 0)
+
+  const handleCreateInvoice = async (data: InvoiceFormData) => {
+    try {
+      const response = await fetch('/api/finances/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: data.type,
+          customerId: data.customerId,
+          supplierId: data.supplierId,
+          issueDate: data.issueDate,
+          dueDate: data.dueDate,
+          items: data.items,
+          discount: data.discount,
+          tax: data.tax,
+          notes: (data as any).notes,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create invoice')
+      }
+
+      setIsModalOpen(false)
+      setSelectedInvoice(null)
+      fetchData()
+    } catch (err: any) {
+      console.error('Invoice creation error:', err)
+      alert(err.message || 'ინვოისის შექმნა ვერ მოხერხდა')
+    }
   }
 
-  const getStatusText = (status: string) => {
-    const texts = {
-      paid: '✅ გადახდილი',
-      pending: '⏳ მოლოდინში',
-      partial: '🔄 ნაწილობრივ',
-      overdue: '❌ ვადაგადაცილებული',
+  const handleUpdateStatus = async (invoiceId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/finances/invoices/${invoiceId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (!response.ok) throw new Error('Failed to update invoice')
+      fetchData()
+    } catch (err) {
+      console.error('Invoice update error:', err)
+      alert('სტატუსის განახლება ვერ მოხერხდა')
     }
-    return texts[status as keyof typeof texts] || texts.pending
+  }
+
+  const openViewModal = (invoice: Invoice) => {
+    setSelectedInvoice(invoice)
+    setModalMode('view')
+    setIsModalOpen(true)
+  }
+
+  const openCreateModal = () => {
+    setSelectedInvoice(null)
+    setModalMode('create')
+    setIsModalOpen(true)
+  }
+
+  const openEditModal = (invoice: Invoice) => {
+    setSelectedInvoice(invoice)
+    setModalMode('edit')
+    setIsModalOpen(true)
+  }
+
+  const openPaymentModal = (invoice: Invoice) => {
+    setSelectedInvoiceForPayment(invoice)
+    setIsPaymentModalOpen(true)
+  }
+
+  const handleInvoicePayment = async (data: InvoicePaymentData) => {
+    try {
+      const response = await fetch(`/api/finances/invoices/${data.invoiceId}/payments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: data.amount,
+          method: data.method,
+          date: data.date,
+          reference: data.reference,
+          notes: (data as any).notes,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to register payment')
+      }
+
+      setIsPaymentModalOpen(false)
+      setSelectedInvoiceForPayment(null)
+      fetchData()
+      alert('✅ გადახდა წარმატებით დაფიქსირდა!')
+    } catch (err: any) {
+      console.error('Payment error:', err)
+      alert(err.message || 'გადახდის დაფიქსირება ვერ მოხერხდა')
+    }
+  }
+
+  const getStatusBadge = (status: string) => {
+    const config = statusConfig[status] || statusConfig.draft
+    return `${config.bgColor} ${config.color}`
+  }
+
+  const getDaysUntilDue = (dueDate: string | null) => {
+    if (!dueDate) return null
+    const due = new Date(dueDate)
+    const today = new Date()
+    const diffTime = due.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }
+
+  if (loading) {
+    return (
+      <DashboardLayout title="🧾 ინვოისები" breadcrumb="მთავარი / ფინანსები / ინვოისები">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-copper"></div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout title="🧾 ინვოისები" breadcrumb="მთავარი / ფინანსები / ინვოისები">
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <p className="text-red-400">{error}</p>
+          <Button onClick={fetchData}>🔄 ხელახლა ცდა</Button>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   return (
     <DashboardLayout title="🧾 ინვოისები" breadcrumb="მთავარი / ფინანსები / ინვოისები">
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex bg-bg-tertiary rounded-lg p-1">
-            <button
-              onClick={() => setActiveTab('outgoing')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === 'outgoing'
-                  ? 'bg-bg-card text-text-primary'
-                  : 'text-text-muted hover:text-text-primary'
-              }`}
-            >
-              📤 გასაგზავნი
-            </button>
-            <button
-              onClick={() => setActiveTab('incoming')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === 'incoming'
-                  ? 'bg-bg-card text-text-primary'
-                  : 'text-text-muted hover:text-text-primary'
-              }`}
-            >
-              📥 მიღებული
-            </button>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Link href="/finances">
+              <Button variant="ghost" size="sm">← უკან</Button>
+            </Link>
+            <h2 className="text-2xl font-bold text-text-primary">ინვოისები</h2>
           </div>
+          
+          <Button onClick={openCreateModal}>
+            + ახალი ინვოისი
+          </Button>
+        </div>
+
+        {/* Stats Cards - Compact */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="bg-bg-card border border-border rounded-xl p-3">
+            <div className="text-xs text-text-muted mb-1">🧾 სულ ინვოისი</div>
+            <div className="text-xl font-bold text-copper">{stats?.total || 0}</div>
+          </div>
+          <div className="bg-bg-card border border-border rounded-xl p-3">
+            <div className="text-xs text-text-muted mb-1">💰 მისაღები</div>
+            <div className="text-xl font-bold text-green-400">{formatCurrency(totalReceivable)}</div>
+          </div>
+          <div className="bg-bg-card border border-border rounded-xl p-3">
+            <div className="text-xs text-text-muted mb-1">📤 გადასახდელი</div>
+            <div className="text-xl font-bold text-red-400">{formatCurrency(totalPayable)}</div>
+          </div>
+          <div className="bg-bg-card border border-border rounded-xl p-3">
+            <div className="text-xs text-text-muted mb-1">⚠️ ვადაგასული</div>
+            <div className="text-xl font-bold text-amber-400">{stats?.overdue || 0}</div>
+          </div>
+        </div>
+
+        {/* Filters - After Cards */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as any)}
+            className="px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary text-sm"
+          >
+            <option value="all">ყველა ტიპი</option>
+            <option value="outgoing">გასაგზავნი</option>
+            <option value="incoming">მიღებული</option>
+          </select>
+          
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
+            className="px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary text-sm"
           >
             <option value="all">ყველა სტატუსი</option>
+            <option value="draft">დრაფტი</option>
+            <option value="sent">გაგზავნილი</option>
             <option value="paid">გადახდილი</option>
-            <option value="pending">მოლოდინში</option>
             <option value="partial">ნაწილობრივ</option>
-            <option value="overdue">ვადაგადაცილებული</option>
+            <option value="overdue">ვადაგასული</option>
           </select>
-          <select
-            value={periodFilter}
-            onChange={(e) => setPeriodFilter(e.target.value)}
-            className="px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
-          >
-            <option value="all">ყველა პერიოდი</option>
-            <option value="this_month">ამ თვე</option>
-            <option value="last_month">წინა თვე</option>
-            <option value="quarter">კვარტალი</option>
-          </select>
-          <Button onClick={() => {
-            setSelectedInvoice(null)
-            setIsInvoiceModalOpen(true)
-          }}>+ ახალი ინვოისი</Button>
         </div>
-      </div>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {activeTab === 'outgoing' ? (
-          <>
-            <StatCard title="სულ გასაგზავნი" value={outgoingTotal} icon="📤" color="blue" />
-            <StatCard title="გადახდილი" value={`${outgoingPaid} (${Math.round((outgoingPaid / outgoingTotal) * 100)}%)`} icon="✅" color="green" />
-            <StatCard title="მოლოდინში" value={outgoingPending} icon="⏳" color="amber" />
-            <StatCard title="ვადაგადაცილებული" value={outgoingOverdue} icon="❌" color="red" />
-          </>
-        ) : (
-          <>
-            <StatCard title="სულ მიღებული" value={incomingTotal} icon="📥" color="blue" />
-            <StatCard title="გადახდილი" value={`${incomingPaid} (${Math.round((incomingPaid / incomingTotal) * 100)}%)`} icon="✅" color="green" />
-            <StatCard title="მოლოდინში" value={incomingPending} icon="⏳" color="amber" />
-            <StatCard title="ვადაგადაცილებული" value={incomingOverdue} icon="❌" color="red" />
-          </>
-        )}
-      </div>
-
-      {/* Invoices Table */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-text-primary">
-            {activeTab === 'outgoing' ? 'გასაგზავნი ინვოისების ცხრილი' : 'მიღებული ინვოისების ცხრილი'}
-          </h3>
-        </CardHeader>
-        <CardBody>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">#</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">ინვოისი</th>
-                  {activeTab === 'outgoing' ? (
-                    <>
+        {/* Outgoing Invoices (Receivables) */}
+        {(typeFilter === 'all' || typeFilter === 'outgoing') && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-text-primary">
+                  📤 გასაგზავნი ინვოისები (მისაღები)
+                </h3>
+                <span className="text-sm text-text-muted">{outgoingInvoices.length} ინვოისი</span>
+              </div>
+            </CardHeader>
+            <CardBody>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">ინვოისი</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">კლიენტი</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">თარიღი</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">ვადა</th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-text-primary">თანხა</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-text-primary">გადახდილი</th>
+                      <th className="text-right py-3 px-4 text-sm font-semibold text-text-primary">დარჩენილი</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">სტატუსი</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">მოქმედება</th>
-                    </>
-                  ) : (
-                    <>
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-text-primary">მოქმედება</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {outgoingInvoices.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-8 text-center text-text-muted">
+                          ინვოისები არ მოიძებნა
+                        </td>
+                      </tr>
+                    ) : (
+                      outgoingInvoices.map((invoice) => {
+                        const daysUntilDue = getDaysUntilDue(invoice.dueDate)
+                        return (
+                          <tr key={invoice.id} className="border-b border-border hover:bg-bg-tertiary/50">
+                            <td className="py-3 px-4">
+                              <div className="font-medium text-text-primary">{invoice.invoiceNumber}</div>
+                              {invoice.orderNumber && (
+                                <div className="text-xs text-text-muted">შეკვეთა: {invoice.orderNumber}</div>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-text-primary">{invoice.customerName || '-'}</td>
+                            <td className="py-3 px-4 text-text-muted">{formatDate(new Date(invoice.issueDate))}</td>
+                            <td className="py-3 px-4">
+                              {invoice.dueDate ? (
+                                <div>
+                                  <div className="text-text-primary">{formatDate(new Date(invoice.dueDate))}</div>
+                                  {daysUntilDue !== null && invoice.status !== 'paid' && (
+                                    <div className={`text-xs ${daysUntilDue < 0 ? 'text-red-400' : daysUntilDue <= 3 ? 'text-amber-400' : 'text-text-muted'}`}>
+                                      {daysUntilDue < 0 ? `${Math.abs(daysUntilDue)} დღე ვადაგასული` : `${daysUntilDue} დღე დარჩა`}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : '-'}
+                            </td>
+                            <td className="py-3 px-4 text-right font-semibold text-text-primary">
+                              {formatCurrency(invoice.total)}
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              {invoice.remaining > 0 ? (
+                                <span className="font-semibold text-amber-400">{formatCurrency(invoice.remaining)}</span>
+                              ) : (
+                                <span className="text-green-400">✓</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getStatusBadge(invoice.status)}`}>
+                                {invoice.statusName}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <Button size="sm" variant="ghost" onClick={() => openViewModal(invoice)} title="ნახვა">
+                                  👁️
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={() => openEditModal(invoice)} title="რედაქტირება">
+                                  ✏️
+                                </Button>
+                                {invoice.status === 'draft' && (
+                                  <Button size="sm" variant="secondary" onClick={() => handleUpdateStatus(invoice.id, 'SENT')} title="გაგზავნა">
+                                    📤
+                                  </Button>
+                                )}
+                                {invoice.status !== 'paid' && invoice.remaining > 0 && (
+                                  <Button size="sm" variant="ghost" onClick={() => openPaymentModal(invoice)} title="გადახდა">
+                                    💳
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardBody>
+          </Card>
+        )}
+
+        {/* Incoming Invoices (Payables) */}
+        {(typeFilter === 'all' || typeFilter === 'incoming') && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-text-primary">
+                  📥 მიღებული ინვოისები (გადასახდელი)
+                </h3>
+                <span className="text-sm text-text-muted">{incomingInvoices.length} ინვოისი</span>
+              </div>
+            </CardHeader>
+            <CardBody>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">ინვოისი</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">მომწოდებელი</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">თარიღი</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">ვადა</th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-text-primary">თანხა</th>
+                      <th className="text-right py-3 px-4 text-sm font-semibold text-text-primary">დარჩენილი</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">სტატუსი</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">მოქმედება</th>
-                    </>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInvoices.map((invoice, index) => (
-                  <tr key={invoice.id} className="border-b border-border hover:bg-bg-tertiary/50">
-                    <td className="py-3 px-4 text-text-muted">{index + 1}</td>
-                    <td className="py-3 px-4 font-medium text-text-primary">{invoice.invoiceNumber}</td>
-                    {activeTab === 'outgoing' ? (
-                      <>
-                        <td className="py-3 px-4 text-text-primary">{invoice.customerName || '-'}</td>
-                        <td className="py-3 px-4 text-text-primary">{formatDate(invoice.date)}</td>
-                        <td className="py-3 px-4 text-text-primary">{formatDate(invoice.dueDate)}</td>
-                        <td className="py-3 px-4 text-right font-semibold text-text-primary">{formatCurrency(invoice.total)}</td>
-                        <td className="py-3 px-4 text-right text-text-primary">{formatCurrency(invoice.paidAmount)}</td>
-                        <td className="py-3 px-4">
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getStatusBadge(invoice.status)}`}>
-                            {getStatusText(invoice.status)}
-                          </span>
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-text-primary">მოქმედება</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {incomingInvoices.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-8 text-center text-text-muted">
+                          ინვოისები არ მოიძებნა
                         </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedInvoice(invoice)
-                                setIsInvoiceModalOpen(true)
-                              }}
-                            >
-                              👁️
-                            </Button>
-                            {invoice.status !== 'paid' && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedInvoice(invoice)
-                                  setIsPaymentModalOpen(true)
-                                }}
-                              >
-                                💳
-                              </Button>
-                            )}
-                            <Button variant="ghost" size="sm" onClick={() => console.log('PDF')}>📄</Button>
-                          </div>
-                        </td>
-                      </>
+                      </tr>
                     ) : (
-                      <>
-                        <td className="py-3 px-4 text-text-primary">{invoice.supplierName || '-'}</td>
-                        <td className="py-3 px-4 text-text-primary">{formatDate(invoice.date)}</td>
-                        <td className="py-3 px-4 text-text-primary">{formatDate(invoice.dueDate)}</td>
-                        <td className="py-3 px-4 text-right font-semibold text-text-primary">{formatCurrency(invoice.total)}</td>
-                        <td className="py-3 px-4">
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getStatusBadge(invoice.status)}`}>
-                            {getStatusText(invoice.status)}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedInvoice(invoice)
-                                setIsInvoiceModalOpen(true)
-                              }}
-                            >
-                              👁️
-                            </Button>
-                            {invoice.status !== 'paid' && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedInvoice(invoice)
-                                  setIsPaymentModalOpen(true)
-                                }}
-                              >
-                                💳 გადახდა
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </>
+                      incomingInvoices.map((invoice) => {
+                        const daysUntilDue = getDaysUntilDue(invoice.dueDate)
+                        return (
+                          <tr key={invoice.id} className="border-b border-border hover:bg-bg-tertiary/50">
+                            <td className="py-3 px-4">
+                              <div className="font-medium text-text-primary">{invoice.invoiceNumber}</div>
+                            </td>
+                            <td className="py-3 px-4 text-text-primary">{invoice.supplierName || '-'}</td>
+                            <td className="py-3 px-4 text-text-muted">{formatDate(new Date(invoice.issueDate))}</td>
+                            <td className="py-3 px-4">
+                              {invoice.dueDate ? (
+                                <div>
+                                  <div className="text-text-primary">{formatDate(new Date(invoice.dueDate))}</div>
+                                  {daysUntilDue !== null && invoice.status !== 'paid' && (
+                                    <div className={`text-xs ${daysUntilDue < 0 ? 'text-red-400' : daysUntilDue <= 3 ? 'text-amber-400' : 'text-text-muted'}`}>
+                                      {daysUntilDue < 0 ? `${Math.abs(daysUntilDue)} დღე ვადაგასული` : `${daysUntilDue} დღე დარჩა`}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : '-'}
+                            </td>
+                            <td className="py-3 px-4 text-right font-semibold text-text-primary">
+                              {formatCurrency(invoice.total)}
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              {invoice.remaining > 0 ? (
+                                <span className="font-semibold text-red-400">{formatCurrency(invoice.remaining)}</span>
+                              ) : (
+                                <span className="text-green-400">✓</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getStatusBadge(invoice.status)}`}>
+                                {invoice.statusName}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <Button size="sm" variant="ghost" onClick={() => openViewModal(invoice)} title="ნახვა">
+                                  👁️
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={() => openEditModal(invoice)} title="რედაქტირება">
+                                  ✏️
+                                </Button>
+                                {invoice.status !== 'paid' && invoice.remaining > 0 && (
+                                  <Button size="sm" variant="ghost" onClick={() => openPaymentModal(invoice)} title="გადახდა">
+                                    💳
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })
                     )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardBody>
-      </Card>
+                  </tbody>
+                </table>
+              </div>
+            </CardBody>
+          </Card>
+        )}
 
-      {/* Modals */}
-      <InvoiceModal
-        isOpen={isInvoiceModalOpen}
-        onClose={() => {
-          setIsInvoiceModalOpen(false)
-          setSelectedInvoice(null)
-        }}
-        onSubmit={(data) => {
-          console.log('Invoice saved:', data)
-          setIsInvoiceModalOpen(false)
-          setSelectedInvoice(null)
-        }}
-        invoice={selectedInvoice || undefined}
-        mode={selectedInvoice ? 'view' : 'create'}
-      />
+        {/* Invoice Modal */}
+        <InvoiceModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setSelectedInvoice(null)
+          }}
+          onSubmit={handleCreateInvoice}
+          invoice={selectedInvoice}
+          mode={modalMode}
+          customers={customers}
+          suppliers={suppliers as any}
+        />
 
-      {selectedInvoice && (
-        <PaymentModal
+        {/* Invoice Payment Modal */}
+        <InvoicePaymentModal
           isOpen={isPaymentModalOpen}
           onClose={() => {
             setIsPaymentModalOpen(false)
-            setSelectedInvoice(null)
+            setSelectedInvoiceForPayment(null)
           }}
-          onSubmit={(data) => {
-            console.log('Payment registered:', data)
-            setIsPaymentModalOpen(false)
-            setSelectedInvoice(null)
-          }}
-          invoice={selectedInvoice}
+          onSubmit={handleInvoicePayment}
+          invoice={selectedInvoiceForPayment as any}
         />
-      )}
       </div>
     </DashboardLayout>
   )
 }
-

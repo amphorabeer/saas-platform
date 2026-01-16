@@ -2,13 +2,14 @@
 
 
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { DashboardLayout } from '@/components/layout'
 
 import { Card, CardHeader, CardBody, Button } from '@/components/ui'
 
 import { formatDate } from '@/lib/utils'
+import { getKegDeposit } from '@/config/pricing'
 
 import { KegReturnModal } from '@/components/sales'
 
@@ -102,6 +103,10 @@ const mockCustomers = [
 
 export default function KegsPage() {
 
+  const [kegs, setKegs] = useState<Keg[]>([])
+  const [stats, setStats] = useState<any>({})
+  const [loading, setLoading] = useState(true)
+
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const [sizeFilter, setSizeFilter] = useState<string>('all')
@@ -112,11 +117,107 @@ export default function KegsPage() {
 
   const [showKegReturn, setShowKegReturn] = useState(false)
 
+  // Fetch kegs from API
+  useEffect(() => {
+    const fetchKegs = async () => {
+      try {
+        setLoading(true)
+        const res = await fetch('/api/kegs')
+        if (res.ok) {
+          const data = await res.json()
+          // Keep API status for filtering, but map to UI status for display
+          const statusMap: Record<string, string> = {
+            'AVAILABLE': 'in_stock',
+            'FILLED': 'filled',
+            'WITH_CUSTOMER': 'with_customer',
+            'IN_TRANSIT': 'in_transit',
+            'DAMAGED': 'damaged',
+            'LOST': 'lost',
+            'CLEANING': 'in_stock',
+          }
+          const transformedKegs = (data.kegs || []).map((k: any) => ({
+            id: k.id,
+            kegNumber: k.kegNumber,
+            size: k.size,
+            status: (statusMap[k.status] || k.status.toLowerCase()) as any,
+            apiStatus: k.status, // Keep original API status for filtering
+            productName: k.productName || undefined,
+            customerId: k.customerId || undefined,
+            customerName: k.customerName || undefined,
+            orderId: k.orderId || undefined,
+            sentDate: k.sentAt ? new Date(k.sentAt) : undefined,
+            deposit: getKegDeposit(k.size), // Deposit based on keg size
+            condition: k.condition?.toLowerCase() as any,
+          }))
+          setKegs(transformedKegs)
+          setStats(data.stats || {})
+        }
+      } catch (error) {
+        console.error('Failed to fetch kegs:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchKegs()
+  }, [])
+
+  // Delete keg handler
+  const handleDeleteKeg = async (kegId: string, kegNumber: string) => {
+    if (!confirm(`წავშალოთ კეგი ${kegNumber}?`)) return
+    
+    try {
+      const res = await fetch(`/api/kegs/${kegId}`, { method: 'DELETE' })
+      
+      if (res.ok) {
+        // Refresh kegs
+        const refreshRes = await fetch('/api/kegs')
+        if (refreshRes.ok) {
+          const data = await refreshRes.json()
+          const statusMap: Record<string, string> = {
+            'AVAILABLE': 'in_stock',
+            'FILLED': 'filled',
+            'WITH_CUSTOMER': 'with_customer',
+            'IN_TRANSIT': 'in_transit',
+            'DAMAGED': 'damaged',
+            'LOST': 'lost',
+            'CLEANING': 'in_stock',
+          }
+          const transformedKegs = (data.kegs || []).map((k: any) => ({
+            id: k.id,
+            kegNumber: k.kegNumber,
+            size: k.size,
+            status: (statusMap[k.status] || k.status.toLowerCase()) as any,
+            apiStatus: k.status, // Keep original API status for filtering
+            productName: k.productName || undefined,
+            customerId: k.customerId || undefined,
+            customerName: k.customerName || undefined,
+            orderId: k.orderId || undefined,
+            sentDate: k.sentAt ? new Date(k.sentAt) : undefined,
+            deposit: 150,
+            condition: k.condition?.toLowerCase() as any,
+          }))
+          setKegs(transformedKegs)
+          setStats(data.stats || {})
+        }
+      } else {
+        const data = await res.json()
+        alert(data.error || 'წაშლა ვერ მოხერხდა')
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      alert('წაშლა ვერ მოხერხდა')
+    }
+  }
 
 
-  const filteredKegs = mockKegs.filter(keg => {
 
-    if (statusFilter !== 'all' && keg.status !== statusFilter) return false
+  const filteredKegs = kegs.filter(keg => {
+
+    if (statusFilter !== 'all') {
+      // Compare using API status directly
+      const kegApiStatus = (keg as any).apiStatus || keg.status.toUpperCase()
+      if (kegApiStatus !== statusFilter) return false
+    }
 
     if (sizeFilter !== 'all' && keg.size !== Number(sizeFilter)) return false
 
@@ -126,20 +227,13 @@ export default function KegsPage() {
 
   })
 
-
-
-  const stats = {
-
-    total: mockKegs.length,
-
-    inStock: mockKegs.filter(k => k.status === 'in_stock' || k.status === 'filled').length,
-
-    withCustomer: mockKegs.filter(k => k.status === 'with_customer').length,
-
-    inTransit: mockKegs.filter(k => k.status === 'in_transit').length,
-
-    damaged: mockKegs.filter(k => k.status === 'damaged').length,
-
+  // Calculate stats from actual data
+  const calculatedStats = {
+    total: kegs.length,
+    inStock: kegs.filter(k => k.status === 'in_stock' || k.status === 'filled').length,
+    withCustomer: kegs.filter(k => k.status === 'with_customer').length,
+    inTransit: kegs.filter(k => k.status === 'in_transit').length,
+    damaged: kegs.filter(k => k.status === 'damaged').length,
   }
 
 
@@ -194,7 +288,7 @@ export default function KegsPage() {
 
           <CardBody className="p-4">
 
-            <p className="text-2xl font-bold font-display">{stats.total}</p>
+            <p className="text-2xl font-bold font-display">{calculatedStats.total}</p>
 
             <p className="text-xs text-text-muted">🛢️ სულ კეგი</p>
 
@@ -206,7 +300,7 @@ export default function KegsPage() {
 
           <CardBody className="p-4">
 
-            <p className="text-2xl font-bold font-display text-green-400">{stats.inStock}</p>
+            <p className="text-2xl font-bold font-display text-green-400">{calculatedStats.inStock}</p>
 
             <p className="text-xs text-text-muted">🏠 საწყობში</p>
 
@@ -218,7 +312,7 @@ export default function KegsPage() {
 
           <CardBody className="p-4">
 
-            <p className="text-2xl font-bold font-display text-blue-400">{stats.withCustomer}</p>
+            <p className="text-2xl font-bold font-display text-blue-400">{calculatedStats.withCustomer}</p>
 
             <p className="text-xs text-text-muted">👤 კლიენტთან</p>
 
@@ -230,7 +324,7 @@ export default function KegsPage() {
 
           <CardBody className="p-4">
 
-            <p className="text-2xl font-bold font-display text-amber-400">{stats.inTransit}</p>
+            <p className="text-2xl font-bold font-display text-amber-400">{calculatedStats.inTransit}</p>
 
             <p className="text-xs text-text-muted">🚚 გზაში</p>
 
@@ -242,7 +336,7 @@ export default function KegsPage() {
 
           <CardBody className="p-4">
 
-            <p className="text-2xl font-bold font-display text-red-400">{stats.damaged}</p>
+            <p className="text-2xl font-bold font-display text-red-400">{calculatedStats.damaged}</p>
 
             <p className="text-xs text-text-muted">⚠️ დაზიანებული</p>
 
@@ -278,17 +372,19 @@ export default function KegsPage() {
 
                 <option value="all">ყველა</option>
 
-                <option value="in_stock">საწყობში</option>
+                <option value="AVAILABLE">✓ ხელმისაწვდომი</option>
 
-                <option value="filled">შევსებული</option>
+                <option value="FILLED">🍺 სავსე</option>
 
-                <option value="with_customer">კლიენტთან</option>
+                <option value="WITH_CUSTOMER">👤 კლიენტთან</option>
 
-                <option value="in_transit">გზაში</option>
+                <option value="IN_TRANSIT">🚚 გზაში</option>
 
-                <option value="damaged">დაზიანებული</option>
+                <option value="CLEANING">🧹 საწმენდი</option>
 
-                <option value="lost">დაკარგული</option>
+                <option value="DAMAGED">⚠️ დაზიანებული</option>
+
+                <option value="LOST">❌ დაკარგული</option>
 
               </select>
 
@@ -407,43 +503,55 @@ export default function KegsPage() {
                   <td className="px-4 py-3 font-mono text-sm text-text-muted">{keg.orderId || '-'}</td>
 
                   <td className="px-4 py-3">
+                    <div className="flex gap-2 justify-end">
+                      {keg.status === 'with_customer' && (
 
-                    {keg.status === 'with_customer' && (
+                        <Button 
 
-                      <Button 
+                          variant="secondary" 
 
-                        variant="secondary" 
+                          size="sm"
 
-                        size="sm"
+                          onClick={() => {
 
-                        onClick={() => {
+                            setSelectedKegForReturn(keg)
 
-                          setSelectedKegForReturn(keg)
+                            setShowKegReturn(true)
 
-                          setShowKegReturn(true)
+                          }}
 
-                        }}
+                        >
 
-                      >
+                          დაბრუნება
 
-                        დაბრუნება
+                        </Button>
 
-                      </Button>
+                      )}
 
-                    )}
+                      {keg.status === 'in_stock' && keg.productName === 'ცარიელი' && (
 
-                    {keg.status === 'in_stock' && keg.productName === 'ცარიელი' && (
+                        <Button variant="secondary" size="sm">შევსება</Button>
 
-                      <Button variant="secondary" size="sm">შევსება</Button>
+                      )}
 
-                    )}
+                      {keg.status === 'damaged' && (
 
-                    {keg.status === 'damaged' && (
+                        <Button variant="secondary" size="sm">რემონტი</Button>
 
-                      <Button variant="secondary" size="sm">რემონტი</Button>
+                      )}
 
-                    )}
-
+                      {/* Delete button - only for available/empty kegs */}
+                      {(keg.status === 'in_stock') && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteKeg(keg.id, keg.kegNumber)}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          🗑️
+                        </Button>
+                      )}
+                    </div>
                   </td>
 
                 </tr>

@@ -1,0 +1,515 @@
+// ============================================
+// BREWERY SAAS - PROFESSIONAL SCHEMA
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MULTI-TENANCY
+// ============================================
+
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  plan        PlanType @default(STARTER)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users       User[]
+  recipes     Recipe[]
+  batches     Batch[]
+  tanks       Tank[]
+  inventory   InventoryItem[]
+  customers   Customer[]
+  orders      SalesOrder[]
+
+  @@index([slug])
+}
+
+model User {
+  id          String   @id @default(cuid())
+  tenantId    String
+  email       String
+  name        String
+  role        UserRole @default(OPERATOR)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+enum PlanType {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MANAGER
+  OPERATOR
+  VIEWER
+}
+
+// ============================================
+// RECIPES
+// ============================================
+
+model Recipe {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  style       String
+  abv         Decimal  @db.Decimal(4, 2)
+  ibu         Int
+  color       Int      // SRM
+  og          Decimal  @db.Decimal(5, 4)
+  fg          Decimal  @db.Decimal(5, 4)
+  batchSize   Decimal  @db.Decimal(10, 2) // Liters
+  boilTime    Int      // Minutes
+  notes       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  ingredients RecipeIngredient[]
+  batches     Batch[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model RecipeIngredient {
+  id            String   @id @default(cuid())
+  recipeId      String
+  inventoryItemId String?
+  name          String
+  category      IngredientCategory
+  amount        Decimal  @db.Decimal(10, 3)
+  unit          String
+  additionTime  Int?     // Minutes (for hops)
+
+  recipe        Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
+
+  @@index([recipeId])
+}
+
+// ============================================
+// INVENTORY - LEDGER BASED
+// ============================================
+
+model InventoryItem {
+  id           String            @id @default(cuid())
+  tenantId     String
+  sku          String
+  name         String
+  category     InventoryCategory
+  unit         String
+  reorderPoint Decimal?          @db.Decimal(10, 3)
+  supplier     String?
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  tenant       Tenant            @relation(fields: [tenantId], references: [id])
+  ledger       InventoryLedger[]
+  recipeIngredients RecipeIngredient[]
+
+  // NO quantity field - calculated from ledger!
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, category, isActive])
+}
+
+model InventoryLedger {
+  id          String          @id @default(cuid())
+  tenantId    String
+  itemId      String
+  quantity    Decimal         @db.Decimal(10, 3) // + for IN, - for OUT
+  type        LedgerEntryType
+  
+  // References
+  batchId     String?
+  orderId     String?
+  packagingId String?
+  
+  // Audit
+  notes       String?
+  createdBy   String
+  createdAt   DateTime        @default(now())
+
+  item        InventoryItem   @relation(fields: [itemId], references: [id])
+  batch       Batch?          @relation(fields: [batchId], references: [id])
+
+  @@index([tenantId, itemId, createdAt])
+  @@index([tenantId, batchId])
+  @@index([tenantId, createdAt])
+}
+
+enum InventoryCategory {
+  RAW_MATERIAL   // Malt, Hops, Yeast
+  PACKAGING      // Bottles, Cans, Kegs, Labels
+  FINISHED_GOOD  // Packaged beer
+  CONSUMABLE     // Cleaning supplies, etc.
+}
+
+enum LedgerEntryType {
+  PURCHASE       // Stock received
+  CONSUMPTION    // Used in production
+  PRODUCTION     // Finished goods created
+  ADJUSTMENT     // Manual correction
+  WASTE          // Spoilage/loss
+  SALE           // Sold to customer
+  RETURN         // Customer return
+}
+
+enum IngredientCategory {
+  MALT
+  HOPS
+  YEAST
+  ADJUNCT
+  WATER_CHEMISTRY
+}
+
+// ============================================
+// PRODUCTION - BATCHES & TANKS
+// ============================================
+
+model Batch {
+  id              String      @id @default(cuid())
+  tenantId        String
+  batchNumber     String
+  recipeId        String
+  status          BatchStatus @default(PLANNED)
+  volume          Decimal     @db.Decimal(10, 2)
+  
+  // Measurements
+  originalGravity Decimal?    @db.Decimal(5, 4)
+  currentGravity  Decimal?    @db.Decimal(5, 4)
+  finalGravity    Decimal?    @db.Decimal(5, 4)
+  abv             Decimal?    @db.Decimal(4, 2)
+  
+  // Tank assignment
+  tankId          String?
+  
+  // Lifecycle dates
+  plannedDate     DateTime
+  brewedAt        DateTime?
+  fermentationStartedAt DateTime?
+  conditioningStartedAt DateTime?
+  readyAt         DateTime?
+  completedAt     DateTime?
+  
+  // Audit
+  createdBy       String
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  tenant          Tenant      @relation(fields: [tenantId], references: [id])
+  recipe          Recipe      @relation(fields: [recipeId], references: [id])
+  tank            Tank?       @relation(fields: [tankId], references: [id])
+  ingredients     BatchIngredient[]
+  gravityReadings GravityReading[]
+  timeline        BatchTimeline[]
+  ledgerEntries   InventoryLedger[]
+  packagingRuns   PackagingRun[]
+
+  @@unique([tenantId, batchNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, tankId])
+}
+
+model BatchIngredient {
+  id              String   @id @default(cuid())
+  batchId         String
+  inventoryItemId String?
+  name            String
+  category        IngredientCategory
+  plannedAmount   Decimal  @db.Decimal(10, 3)
+  actualAmount    Decimal? @db.Decimal(10, 3)
+  unit            String
+  lotNumber       String?
+  addedAt         DateTime?
+
+  batch           Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId])
+}
+
+model GravityReading {
+  id          String   @id @default(cuid())
+  batchId     String
+  gravity     Decimal  @db.Decimal(5, 4)
+  temperature Decimal  @db.Decimal(4, 1)
+  notes       String?
+  recordedBy  String
+  recordedAt  DateTime @default(now())
+
+  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, recordedAt])
+}
+
+model BatchTimeline {
+  id          String        @id @default(cuid())
+  batchId     String
+  type        TimelineEventType
+  title       String
+  description String?
+  data        Json?
+  createdBy   String
+  createdAt   DateTime      @default(now())
+
+  batch       Batch         @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, createdAt])
+}
+
+enum BatchStatus {
+  PLANNED
+  BREWING
+  FERMENTING
+  CONDITIONING
+  READY
+  PACKAGING
+  COMPLETED
+  CANCELLED
+}
+
+enum TimelineEventType {
+  CREATED
+  STARTED
+  MASH
+  BOIL
+  TRANSFER
+  GRAVITY_READING
+  DRY_HOP
+  TEMPERATURE_CHANGE
+  NOTE
+  COMPLETED
+}
+
+// ============================================
+// TANKS
+// ============================================
+
+model Tank {
+  id              String     @id @default(cuid())
+  tenantId        String
+  name            String
+  type            TankType
+  capacity        Decimal    @db.Decimal(10, 2) // Liters
+  status          TankStatus @default(AVAILABLE)
+  currentBatchId  String?    // Denormalized for quick lookup
+  location        String?
+  
+  // For optimistic locking
+  version         Int        @default(0)
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  tenant          Tenant     @relation(fields: [tenantId], references: [id])
+  batches         Batch[]
+  occupations     TankOccupation[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, status])
+}
+
+model TankOccupation {
+  id        String          @id @default(cuid())
+  tenantId  String
+  tankId    String
+  batchId   String
+  phase     OccupationPhase
+  startedAt DateTime        @default(now())
+  endedAt   DateTime?
+
+  tank      Tank            @relation(fields: [tankId], references: [id])
+
+  @@index([tenantId, tankId, endedAt])
+}
+
+enum TankType {
+  FERMENTER
+  BRITE
+  UNITANK
+  KETTLE
+  MASH_TUN
+  HLT
+}
+
+enum TankStatus {
+  AVAILABLE
+  OCCUPIED
+  CLEANING
+  MAINTENANCE
+}
+
+enum OccupationPhase {
+  FERMENTATION
+  CONDITIONING
+  STORAGE
+}
+
+// ============================================
+// PACKAGING
+// ============================================
+
+model PackagingRun {
+  id           String      @id @default(cuid())
+  tenantId     String
+  batchId      String
+  packageType  PackageType
+  quantity     Int
+  volumeTotal  Decimal     @db.Decimal(10, 2)
+  lotNumber    String?
+  performedBy  String
+  notes        String?
+  performedAt  DateTime    @default(now())
+
+  batch        Batch       @relation(fields: [batchId], references: [id])
+
+  @@index([tenantId, batchId])
+}
+
+enum PackageType {
+  KEG_50
+  KEG_30
+  KEG_20
+  BOTTLE_500
+  BOTTLE_330
+  CAN_500
+  CAN_330
+}
+
+// ============================================
+// SALES
+// ============================================
+
+model Customer {
+  id          String       @id @default(cuid())
+  tenantId    String
+  name        String
+  type        CustomerType @default(RETAIL)
+  email       String?
+  phone       String?
+  address     String?
+  taxId       String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id])
+  orders      SalesOrder[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model SalesOrder {
+  id            String        @id @default(cuid())
+  tenantId      String
+  orderNumber   String
+  customerId    String
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  totalAmount   Decimal       @db.Decimal(12, 2)
+  notes         String?
+  
+  orderedAt     DateTime      @default(now())
+  shippedAt     DateTime?
+  deliveredAt  DateTime?
+  
+  createdBy     String
+  updatedAt     DateTime      @updatedAt
+
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  items         OrderItem[]
+
+  @@unique([tenantId, orderNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productName String
+  packageType PackageType
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  totalPrice  Decimal  @db.Decimal(12, 2)
+  batchId     String?
+
+  order       SalesOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+  RESTAURANT
+  BAR
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  IN_PRODUCTION
+  READY
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+  REFUNDED
+}
+
+// ============================================
+// AUDIT LOG
+// ============================================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String
+  action     String
+  entityType String
+  entityId   String
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId, entityType, entityId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, userId])
+}

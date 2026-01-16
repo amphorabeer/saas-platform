@@ -2,9 +2,10 @@
 
 
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 import { DashboardLayout } from '@/components/layout'
 
@@ -12,70 +13,103 @@ import { Card, CardHeader, CardBody, Button } from '@/components/ui'
 
 import { EquipmentCard, AddEquipmentModal } from '@/components/equipment'
 
-import { mockEquipment, type Equipment, type EquipmentType, type EquipmentStatus } from '@/data/equipmentData'
-
 import { formatDate } from '@/lib/utils'
 
-
+interface Equipment {
+  id: string
+  name: string
+  type: string
+  status: string
+  capacity?: number
+  model?: string
+  manufacturer?: string
+  location?: string
+  capabilities?: string[]
+  nextCIP?: string
+  lastCIP?: string
+  currentTemp?: number
+  currentPressure?: number
+  currentBatchNumber?: string
+}
 
 export default function EquipmentPage() {
-
+  const router = useRouter()
   const [showAddModal, setShowAddModal] = useState(false)
-
-  const [equipment, setEquipment] = useState<Equipment[]>(mockEquipment)
-
+  const [equipment, setEquipment] = useState<Equipment[]>([])
+  const [loading, setLoading] = useState(true)
   const [filterType, setFilterType] = useState<string>('all')
-
   const [filterStatus, setFilterStatus] = useState<string>('all')
 
+  // Fetch equipment from API
+  const fetchEquipment = async () => {
+    try {
+      setLoading(true)
+      const params = new URLSearchParams()
+      if (filterType !== 'all') params.set('type', filterType)
+      if (filterStatus !== 'all') params.set('status', filterStatus)
+      
+      const response = await fetch(`/api/equipment?${params}`)
+      if (response.ok) {
+        const data = await response.json()
+        setEquipment(data)
+      }
+    } catch (error) {
+      console.error('Error fetching equipment:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
+  useEffect(() => {
+    fetchEquipment()
+  }, [filterType, filterStatus])
 
-  const filteredEquipment = equipment.filter(eq => {
+  const handleAddEquipment = async (equipmentData: any) => {
+    try {
+      const response = await fetch('/api/equipment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...equipmentData,
+          type: equipmentData.type?.toUpperCase() || 'FERMENTER',
+          status: equipmentData.status?.toUpperCase() || 'OPERATIONAL',
+        }),
+      })
+      
+      if (response.ok) {
+        setShowAddModal(false)
+        fetchEquipment() // Refresh list
+      } else {
+        const error = await response.json()
+        console.error('Error adding equipment:', error)
+        alert('შეცდომა: ' + (error.error || 'აღჭურვილობის დამატება ვერ მოხერხდა'))
+      }
+    } catch (error) {
+      console.error('Error adding equipment:', error)
+      alert('აღჭურვილობის დამატება ვერ მოხერხდა')
+    }
+  }
 
-    if (filterType !== 'all' && eq.type !== filterType) return false
-
-    if (filterStatus !== 'all' && eq.status !== filterStatus) return false
-
-    return true
-
-  })
-
-
-
+  // Stats
   const totalEquipment = equipment.length
-
-  const operational = equipment.filter(e => e.status === 'operational').length
-
-  const needsMaintenance = equipment.filter(e => e.status === 'needs_maintenance').length
-
-  const outOfService = equipment.filter(e => e.status === 'out_of_service').length
+  const operational = equipment.filter(e => e.status === 'OPERATIONAL').length
+  const needsMaintenance = equipment.filter(e => e.status === 'NEEDS_MAINTENANCE').length
+  const outOfService = equipment.filter(e => e.status === 'OUT_OF_SERVICE').length
+  const unitanks = equipment.filter(e => e.type === 'UNITANK').length
 
   const overdueMaintenance = equipment.filter(eq => {
-
     if (!eq.nextCIP) return false
-
-    const now = new Date()
-
-    return eq.nextCIP < now
-
+    return new Date(eq.nextCIP) < new Date()
   })
 
-
-
-  const handleAddEquipment = (equipmentData: any) => {
-
-    const newEquipment: Equipment = {
-
-      id: `eq-${Date.now()}`,
-
-      ...equipmentData,
-
-      status: equipmentData.status || 'operational',
-
-    }
-
-    setEquipment([...equipment, newEquipment])
-
+  if (loading) {
+    return (
+      <DashboardLayout title="⚙️ აღჭურვილობა" breadcrumb="მთავარი / აღჭურვილობა">
+        <div className="text-center py-12">
+          <p className="text-slate-400">იტვირთება...</p>
+        </div>
+      </DashboardLayout>
+    )
   }
 
 
@@ -102,7 +136,9 @@ export default function EquipmentPage() {
 
             <option value="all">ყველა ტიპი</option>
 
-            <option value="fermenter">ტანკები</option>
+            <option value="fermenter">ფერმენტატორები</option>
+
+            <option value="unitank">Unitank</option>
 
             <option value="brite">Brite Tanks</option>
 
@@ -140,7 +176,7 @@ export default function EquipmentPage() {
 
           <Link href="/equipment/maintenance">
 
-            <Button variant="outline" size="sm">
+            <Button variant="secondary" size="sm">
 
               📅 მოვლის გრაფიკი
 
@@ -162,7 +198,7 @@ export default function EquipmentPage() {
 
       {/* Stats Cards */}
 
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-5 gap-4 mb-6">
 
         <Card>
 
@@ -212,6 +248,18 @@ export default function EquipmentPage() {
 
         </Card>
 
+        <Card>
+
+          <CardBody className="p-6">
+
+            <p className="text-3xl font-bold font-display text-purple-400 mb-1">{unitanks}</p>
+
+            <p className="text-sm text-text-muted">Unitank</p>
+
+          </CardBody>
+
+        </Card>
+
       </div>
 
 
@@ -220,21 +268,35 @@ export default function EquipmentPage() {
 
       <div className="grid grid-cols-3 gap-6 mb-6">
 
-        {filteredEquipment.map(eq => (
+        {equipment.map(eq => (
 
           <EquipmentCard
 
             key={eq.id}
 
-            equipment={eq}
+            equipment={eq as any}
 
-            onClick={() => window.location.href = `/equipment/${eq.id}`}
+            onClick={() => router.push(`/equipment/${eq.id}`)}
 
           />
 
         ))}
 
       </div>
+
+      {equipment.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">⚙️</div>
+          <p className="text-slate-400 text-lg">აღჭურვილობა არ მოიძებნა</p>
+          <Button 
+            onClick={() => setShowAddModal(true)} 
+            variant="primary" 
+            className="mt-4"
+          >
+            + დაამატე პირველი აღჭურვილობა
+          </Button>
+        </div>
+      )}
 
 
 
@@ -256,7 +318,7 @@ export default function EquipmentPage() {
 
               {overdueMaintenance.map(eq => {
 
-                const daysOverdue = eq.nextCIP ? Math.ceil((new Date().getTime() - eq.nextCIP.getTime()) / (1000 * 60 * 60 * 24)) : 0
+                const daysOverdue = eq.nextCIP ? Math.ceil((new Date().getTime() - new Date(eq.nextCIP).getTime()) / (1000 * 60 * 60 * 24)) : 0
 
                 return (
 
@@ -280,7 +342,7 @@ export default function EquipmentPage() {
 
                     </div>
 
-                    <Button variant="outline" size="sm">
+                    <Button variant="secondary" size="sm">
 
                       შესრულება
 

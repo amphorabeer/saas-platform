@@ -7,6 +7,57 @@ export type Currency = 'GEL' | 'USD' | 'EUR'
 export type GravityUnit = 'SG' | 'Plato' | 'Brix'
 export type VolumeUnit = 'L' | 'gal' | 'bbl'
 
+// Phase Colors Types
+export type PhaseColorKey = 'amber' | 'orange' | 'yellow' | 'green' | 'emerald' | 'teal' | 'cyan' | 'blue' | 'indigo' | 'purple' | 'violet' | 'pink' | 'red' | 'gray' | 'slate'
+
+export interface PhaseColors {
+  PLANNED: PhaseColorKey
+  BREWING: PhaseColorKey
+  FERMENTING: PhaseColorKey
+  CONDITIONING: PhaseColorKey
+  READY: PhaseColorKey
+  PACKAGING: PhaseColorKey
+  COMPLETED: PhaseColorKey
+}
+
+export const DEFAULT_PHASE_COLORS: PhaseColors = {
+  PLANNED: 'indigo',
+  BREWING: 'amber',
+  FERMENTING: 'green',
+  CONDITIONING: 'blue',
+  READY: 'teal',
+  PACKAGING: 'purple',
+  COMPLETED: 'gray',
+}
+
+export const PHASE_COLOR_OPTIONS: { key: PhaseColorKey; label: string; bg: string }[] = [
+  { key: 'amber', label: 'ნარინჯისფერი', bg: 'bg-amber-500' },
+  { key: 'orange', label: 'ფორთოხლისფერი', bg: 'bg-orange-500' },
+  { key: 'yellow', label: 'ყვითელი', bg: 'bg-yellow-500' },
+  { key: 'green', label: 'მწვანე', bg: 'bg-green-500' },
+  { key: 'emerald', label: 'ზურმუხტი', bg: 'bg-emerald-500' },
+  { key: 'teal', label: 'ცისფერი-მწვანე', bg: 'bg-teal-500' },
+  { key: 'cyan', label: 'ციანი', bg: 'bg-cyan-500' },
+  { key: 'blue', label: 'ლურჯი', bg: 'bg-blue-500' },
+  { key: 'indigo', label: 'იისფერი-ლურჯი', bg: 'bg-indigo-500' },
+  { key: 'purple', label: 'იისფერი', bg: 'bg-purple-500' },
+  { key: 'violet', label: 'იასამნისფერი', bg: 'bg-violet-500' },
+  { key: 'pink', label: 'ვარდისფერი', bg: 'bg-pink-500' },
+  { key: 'red', label: 'წითელი', bg: 'bg-red-500' },
+  { key: 'gray', label: 'ნაცრისფერი', bg: 'bg-gray-500' },
+  { key: 'slate', label: 'მუქი ნაცრისფერი', bg: 'bg-slate-500' },
+]
+
+export const PHASE_LABELS: Record<keyof PhaseColors, { label: string; icon: string }> = {
+  PLANNED: { label: 'დაგეგმილი', icon: '📅' },
+  BREWING: { label: 'ხარშვა', icon: '🍺' },
+  FERMENTING: { label: 'ფერმენტაცია', icon: '🧪' },
+  CONDITIONING: { label: 'კონდიცირება', icon: '🌡️' },
+  READY: { label: 'მზადაა', icon: '✅' },
+  PACKAGING: { label: 'დაფასოება', icon: '📦' },
+  COMPLETED: { label: 'დასრულებული', icon: '🏁' },
+}
+
 export interface User {
   id: string
   firstName: string
@@ -145,7 +196,7 @@ export const mockUsers: User[] = [
     email: 'nika@brewmaster.ge',
     phone: '+995 555 123 456',
     role: 'admin',
-    position: 'მთავარი მეხარშე',
+    position: 'მთავარი ტექნოლოგი',
     status: 'active',
     lastActivity: new Date(),
     createdAt: new Date('2022-01-15'),
@@ -199,9 +250,9 @@ export const mockCompanySettings: CompanySettings = {
   phone: '+995 555 123 456',
   email: 'info@brewmaster.ge',
   website: 'www.brewmaster.ge',
-  bankName: 'საქართველოს ბანკი',
-  bankAccount: 'GE29BG0000000123456789',
-  bankSwift: 'BAGAGE22',
+  bankName: 'თიბისი ბანკი',
+  bankAccount: 'GE00TB0000000000000000',
+  bankSwift: 'TBCBGE22',
 }
 
 export const mockAppearanceSettings: AppearanceSettings = {
@@ -333,19 +384,31 @@ export const roleConfig = {
   viewer: { name: 'მნახველი', icon: '👁️', color: 'gray' },
 }
 
-export const getRelativeTime = (date: Date): string => {
+export function getRelativeTime(date: Date | string | undefined | null): string {
+  if (!date) return '-'
+  
+  // Convert string to Date if needed
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  
+  // Check if valid date
+  if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+    return '-'
+  }
+  
   const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffMinutes < 1) return 'ახლა'
-  if (diffMinutes < 60) return `${diffMinutes} წთ წინ`
-  if (diffHours < 24) return `${diffHours} სთ წინ`
-  if (diffDays < 7) return `${diffDays} დღის წინ`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} კვირის წინ`
-  return `${Math.floor(diffDays / 30)} თვის წინ`
+  const diff = now.getTime() - dateObj.getTime()
+  
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  
+  if (minutes < 1) return 'ახლახანს'
+  if (minutes < 60) return `${minutes} წუთის წინ`
+  if (hours < 24) return `${hours} საათის წინ`
+  if (days < 7) return `${days} დღის წინ`
+  if (days < 30) return `${Math.floor(days / 7)} კვირის წინ`
+  if (days < 365) return `${Math.floor(days / 30)} თვის წინ`
+  return `${Math.floor(days / 365)} წლის წინ`
 }
 
 export const formatFileSize = (bytes: number): string => {

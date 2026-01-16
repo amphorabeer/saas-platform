@@ -7,3 +7,12 @@ export type TankType = 'fermenter' | 'brite' | 'conditioning' | 'storage'
 export type IngredientCategory = 'malt' | 'hops' | 'yeast' | 'adjunct' | 'water_chemistry'
 
 
+
+
+
+
+
+
+
+
+

@@ -2,11 +2,11 @@
 
 
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { Button } from '@/components/ui'
 
-import { equipmentTypeConfig, type EquipmentType } from '@/data/equipmentData'
+import { equipmentTypeConfig, capabilityConfig, type EquipmentType, type TankCapability } from '@/data/equipmentData'
 
 
 
@@ -66,6 +66,18 @@ export function AddEquipmentModal({ isOpen, onClose, onAdd }: AddEquipmentModalP
 
   const [notes, setNotes] = useState('')
 
+  const [capabilities, setCapabilities] = useState<TankCapability[]>([])
+
+  // When type changes, set default capabilities
+  useEffect(() => {
+    const config = equipmentTypeConfig[type as keyof typeof equipmentTypeConfig]
+    if (config?.defaultCapabilities) {
+      setCapabilities(config.defaultCapabilities)
+    } else {
+      setCapabilities([])
+    }
+  }, [type])
+
 
 
   if (!isOpen) return null
@@ -110,6 +122,8 @@ export function AddEquipmentModal({ isOpen, onClose, onAdd }: AddEquipmentModalP
 
       notes: notes || undefined,
 
+      capabilities: capabilities.length > 0 ? capabilities : undefined,
+
     })
 
 
@@ -137,6 +151,8 @@ export function AddEquipmentModal({ isOpen, onClose, onAdd }: AddEquipmentModalP
     setAnnualMaintenanceDays('365')
 
     setNotes('')
+
+    setCapabilities([])
 
     onClose()
 
@@ -222,7 +238,55 @@ export function AddEquipmentModal({ isOpen, onClose, onAdd }: AddEquipmentModalP
 
             </div>
 
-
+            {/* Capabilities Section (only for tank types) */}
+            {['fermenter', 'unitank', 'brite'].includes(type) && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  🔧 შესაძლებლობები
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={capabilities.includes('fermenting')}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCapabilities([...capabilities, 'fermenting'])
+                        } else {
+                          setCapabilities(capabilities.filter(c => c !== 'fermenting'))
+                        }
+                      }}
+                      className="w-4 h-4 rounded bg-slate-700 border-slate-600"
+                    />
+                    <span className="text-green-400">🧪 ფერმენტაცია</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={capabilities.includes('conditioning')}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCapabilities([...capabilities, 'conditioning'])
+                        } else {
+                          setCapabilities(capabilities.filter(c => c !== 'conditioning'))
+                        }
+                      }}
+                      className="w-4 h-4 rounded bg-slate-700 border-slate-600"
+                    />
+                    <span className="text-blue-400">❄️ კონდიცირება</span>
+                  </label>
+                </div>
+                
+                {/* Show Unitank indicator */}
+                {capabilities.includes('fermenting') && capabilities.includes('conditioning') && (
+                  <div className="mt-3 p-2 bg-purple-500/10 border border-purple-500 rounded-lg">
+                    <span className="text-purple-400 text-sm">
+                      🔄 Unitank რეჟიმი - ფერმენტაცია და კონდიცირება ერთ ავზში
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
 
@@ -240,7 +304,7 @@ export function AddEquipmentModal({ isOpen, onClose, onAdd }: AddEquipmentModalP
 
                   className="w-full px-4 py-2 bg-bg-card border border-border rounded-lg text-sm"
 
-                  placeholder="მხოლოდ ტანკებისთვის"
+                  placeholder="მხოლოდ ავზებისთვის"
 
                 />
 
@@ -506,7 +570,7 @@ export function AddEquipmentModal({ isOpen, onClose, onAdd }: AddEquipmentModalP
 
           <div className="flex justify-end gap-2 pt-4 border-t border-border">
 
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose}>
 
               გაუქმება
 

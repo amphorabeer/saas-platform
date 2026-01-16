@@ -1,14 +1,13 @@
 'use client'
 
-
-
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 import { Card, CardHeader, CardBody, ProgressBar } from '@/components/ui'
 
 import { formatDate } from '@/lib/utils'
 
-import { equipmentTypeConfig, type Equipment } from '@/data/equipmentData'
+import { equipmentTypeConfig, capabilityConfig, type Equipment, type TankCapability, type EquipmentType } from '@/data/equipmentData'
 
 
 
@@ -22,65 +21,82 @@ interface EquipmentCardProps {
 
 
 
-const getStatusConfig = (status: Equipment['status']) => {
-
-  const configs = {
-
+const getStatusConfig = (status: string) => {
+  // Normalize status to lowercase for lookup
+  const normalizedStatus = (status || 'operational').toLowerCase()
+  
+  const configs: Record<string, { label: string; borderColor: string; bgColor: string }> = {
     operational: { label: '✅ მუშა', borderColor: 'border-l-green-500', bgColor: 'bg-green-500/10' },
-
     needs_maintenance: { label: '⚠️ მოვლა საჭირო', borderColor: 'border-l-amber-500', bgColor: 'bg-amber-500/10' },
-
     under_maintenance: { label: '🔧 მოვლაზე', borderColor: 'border-l-blue-500', bgColor: 'bg-blue-500/10' },
-
     out_of_service: { label: '🔴 გაუმართავი', borderColor: 'border-l-red-500', bgColor: 'bg-red-500/10' },
-
   }
-
-  return configs[status]
-
+  
+  // Return config or default to operational
+  return configs[normalizedStatus] || configs['operational']
 }
 
 
 
-const getDaysUntilCIP = (nextCIP?: Date): number | null => {
-
-  if (!nextCIP) return null
-
+const getDaysUntilCIP = (nextCIP: Date | string | undefined | null): number => {
+  if (!nextCIP) return 0
+  
+  // Convert string to Date if needed (from localStorage)
+  const cipDate = typeof nextCIP === 'string' ? new Date(nextCIP) : nextCIP
+  
+  // Check if valid date
+  if (isNaN(cipDate.getTime())) return 0
+  
   const now = new Date()
-
-  const diffTime = nextCIP.getTime() - now.getTime()
-
+  const diffTime = cipDate.getTime() - now.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
   return diffDays
-
 }
 
 
 
-const getCIPProgressColor = (daysLeft: number | null): 'green' | 'amber' | 'red' => {
-
-  if (daysLeft === null) return 'green'
-
-  if (daysLeft < 0) return 'red' // Overdue
-
-  if (daysLeft <= 3) return 'red'
-
+const getCIPProgressColor = (daysLeft: number | null): 'success' | 'amber' | 'danger' => {
+  if (daysLeft === null || daysLeft === 0) return 'success'
+  if (daysLeft < 0) return 'danger' // Overdue
+  if (daysLeft <= 3) return 'danger'
   if (daysLeft <= 7) return 'amber'
-
-  return 'green'
-
+  return 'success'
 }
 
 
 
 export function EquipmentCard({ equipment, onClick }: EquipmentCardProps) {
+  const [mounted, setMounted] = useState(false)
 
-  const typeConfig = equipmentTypeConfig[equipment.type]
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Early return for SSR to prevent hydration mismatches
+  if (!mounted) {
+    return (
+      <Card className="animate-pulse bg-slate-700 rounded-xl h-48 border-l-4 border-l-slate-600">
+        <CardHeader className="pb-3">
+          <div className="h-6 bg-slate-600 rounded w-3/4"></div>
+        </CardHeader>
+        <CardBody>
+          <div className="space-y-2">
+            <div className="h-4 bg-slate-600 rounded w-full"></div>
+            <div className="h-4 bg-slate-600 rounded w-2/3"></div>
+          </div>
+        </CardBody>
+      </Card>
+    )
+  }
+
+  const typeConfig = equipmentTypeConfig[equipment.type?.toLowerCase() as EquipmentType] || {
+    icon: '⚙️',
+    name: equipment.type || 'უცნობი'
+  }
 
   const statusConfig = getStatusConfig(equipment.status)
 
-  const daysUntilCIP = getDaysUntilCIP(equipment.nextCIP)
+  const daysUntilCIP = equipment.nextCIP ? getDaysUntilCIP(equipment.nextCIP) : null
 
   const cipProgressColor = getCIPProgressColor(daysUntilCIP)
 
@@ -92,19 +108,20 @@ export function EquipmentCard({ equipment, onClick }: EquipmentCardProps) {
 
   const isOverdue = daysUntilCIP !== null && daysUntilCIP < 0
 
-  const needsPulse = equipment.status === 'needs_maintenance' || isOverdue
+  const normalizedStatus = (equipment.status || '').toLowerCase()
+  const needsPulse = normalizedStatus === 'needs_maintenance' || isOverdue
 
 
 
   return (
 
-    <Card
-
-      className={`cursor-pointer hover:border-copper/50 transition-all border-l-4 ${statusConfig.borderColor} ${needsPulse ? 'animate-pulse' : ''}`}
-
+    <div
+      className={`cursor-pointer hover:border-copper/50 transition-all`}
       onClick={onClick}
-
     >
+      <Card
+        className={`border-l-4 ${statusConfig.borderColor} ${needsPulse ? 'animate-pulse' : ''}`}
+      >
 
       <CardHeader className="pb-3">
 
@@ -116,9 +133,24 @@ export function EquipmentCard({ equipment, onClick }: EquipmentCardProps) {
 
             <div>
 
-              <h3 className="font-semibold text-lg text-copper-light">{equipment.name}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-lg text-copper-light">{equipment.name}</h3>
+                {(equipment.type?.toLowerCase() === 'unitank') && (
+                  <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded">
+                    🔄 Unitank
+                  </span>
+                )}
+              </div>
 
-              <p className="text-xs text-text-muted">{typeConfig.name}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs text-text-muted">{typeConfig.name}</p>
+                {equipment.capabilities?.some(cap => cap?.toLowerCase() === 'fermenting') && (
+                  <span className="text-xs text-green-400" title="ფერმენტაცია">🧪</span>
+                )}
+                {equipment.capabilities?.some(cap => cap?.toLowerCase() === 'conditioning') && (
+                  <span className="text-xs text-blue-400" title="კონდიცირება">❄️</span>
+                )}
+              </div>
 
             </div>
 
@@ -126,11 +158,11 @@ export function EquipmentCard({ equipment, onClick }: EquipmentCardProps) {
 
           <span className={`px-2 py-1 rounded text-xs font-medium ${statusConfig.bgColor} ${
 
-            equipment.status === 'operational' ? 'text-green-400' :
+            normalizedStatus === 'operational' ? 'text-green-400' :
 
-            equipment.status === 'needs_maintenance' ? 'text-amber-400' :
+            normalizedStatus === 'needs_maintenance' ? 'text-amber-400' :
 
-            equipment.status === 'under_maintenance' ? 'text-blue-400' :
+            normalizedStatus === 'under_maintenance' ? 'text-blue-400' :
 
             'text-red-400'
 
@@ -160,13 +192,32 @@ export function EquipmentCard({ equipment, onClick }: EquipmentCardProps) {
 
         </div>
 
+        {/* Capabilities */}
+        {equipment.capabilities && equipment.capabilities.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {equipment.capabilities.map((cap: TankCapability | string) => {
+              const normalizedCap = (cap || '').toLowerCase() as TankCapability
+              const capConfig = capabilityConfig[normalizedCap]
+              if (!capConfig) return null
+              return (
+                <span 
+                  key={cap}
+                  className={`px-2 py-0.5 text-xs rounded-full bg-slate-700 ${capConfig.color}`}
+                >
+                  {capConfig.icon} {capConfig.label}
+                </span>
+              )
+            })}
+          </div>
+        )}
+
 
 
         {/* Current Status */}
 
-        {(equipment.currentTemp !== undefined || equipment.currentPressure !== undefined) && (
+        {(equipment.currentTemp !== undefined || equipment.currentPressure !== undefined || (equipment as any).currentGravity !== undefined) && (
 
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-4 text-sm flex-wrap">
 
             {equipment.currentTemp !== undefined && (
 
@@ -175,6 +226,9 @@ export function EquipmentCard({ equipment, onClick }: EquipmentCardProps) {
                 <span>🌡️</span>
 
                 <span className="text-text-primary">{equipment.currentTemp}°C</span>
+                {(equipment as any).targetTemp !== undefined && (
+                  <span className="text-text-muted text-xs ml-1">(სამიზნე: {(equipment as any).targetTemp}°C)</span>
+                )}
 
               </div>
 
@@ -187,6 +241,18 @@ export function EquipmentCard({ equipment, onClick }: EquipmentCardProps) {
                 <span>📊</span>
 
                 <span className="text-text-primary">{equipment.currentPressure} bar</span>
+
+              </div>
+
+            )}
+
+            {(equipment as any).currentGravity !== undefined && (equipment as any).currentGravity !== null && (
+
+              <div className="flex items-center gap-1">
+
+                <span>📊</span>
+
+                <span className="text-text-primary">{(equipment as any).currentGravity}</span>
 
               </div>
 
@@ -210,6 +276,49 @@ export function EquipmentCard({ equipment, onClick }: EquipmentCardProps) {
 
           </div>
 
+        )}
+
+        {/* Conditioning Progress */}
+        {(equipment as any).conditioningProgress !== undefined && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-muted">კონდიცირება:</span>
+              <span className="font-medium text-blue-400">
+                {(equipment as any).conditioningProgress}% დასრულებული
+              </span>
+            </div>
+            <ProgressBar
+              value={(equipment as any).conditioningProgress || 0}
+              color={(equipment as any).conditioningProgress >= 100 ? 'success' : (equipment as any).conditioningProgress >= 50 ? 'amber' : 'danger'}
+              size="sm"
+            />
+            {(equipment as any).conditioningDaysRemaining !== undefined && (
+              <div className="text-xs text-text-muted">
+                {(equipment as any).conditioningDaysRemaining > 0 
+                  ? `${(equipment as any).conditioningDaysRemaining} დღე დარჩა`
+                  : 'დასრულებულია'}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Volume Info */}
+        {(equipment as any).currentVolume !== undefined && (
+          <div className="flex items-center gap-3 text-sm">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-text-muted">მოცულობა:</span>
+                <span className="font-mono">
+                  {(equipment as any).currentVolume}L / {equipment.capacity || 0}L
+                </span>
+              </div>
+              <ProgressBar
+                value={equipment.capacity ? ((equipment as any).currentVolume / equipment.capacity) * 100 : 0}
+                color="success"
+                size="sm"
+              />
+            </div>
+          </div>
         )}
 
 
@@ -310,7 +419,8 @@ export function EquipmentCard({ equipment, onClick }: EquipmentCardProps) {
 
       </CardBody>
 
-    </Card>
+      </Card>
+    </div>
 
   )
 

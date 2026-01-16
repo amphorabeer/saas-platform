@@ -1,315 +1,373 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui'
 import { StatCard } from '@/components/reports/StatCard'
-import { FinancialChart } from '@/components/finances/FinancialChart'
-import { TransactionModal } from '@/components/finances/TransactionModal'
-import { DonutChart } from '@/components/reports/DonutChart'
-import { mockTransactions, mockMonthlyFinancials, mockInvoicesIncoming, expenseCategoryConfig } from '@/data/financeData'
-import { formatDate, formatCurrency, formatShortDate } from '@/lib/utils'
+import { ExpenseModal, ExpenseFormData } from '@/components/finances/ExpenseModal'
+import { formatCurrency, formatDate } from '@/lib/utils'
+
+interface DashboardStats {
+  totalIncome: number
+  totalExpenses: number
+  netProfit: number
+  profitMargin: number
+  pendingPayments: number
+  overdueInvoices: number
+}
+
+interface Transaction {
+  id: string
+  type: 'income' | 'expense'
+  amount: number
+  description: string
+  category: string
+  categoryName: string
+  date: string
+  paymentMethod?: string
+}
+
+interface Supplier {
+  id: string
+  name: string
+}
+
+const expenseCategoryLabels: Record<string, string> = {
+  INGREDIENTS: 'ინგრედიენტები',
+  PACKAGING: 'შეფუთვა',
+  UTILITIES: 'კომუნალური',
+  RENT: 'იჯარა',
+  SALARY: 'ხელფასი',
+  EQUIPMENT: 'აღჭურვილობა',
+  MAINTENANCE: 'მოვლა',
+  MARKETING: 'მარკეტინგი',
+  TRANSPORT: 'ტრანსპორტი',
+  TAXES: 'გადასახადები',
+  OTHER: 'სხვა',
+}
+
+const incomeCategoryLabels: Record<string, string> = {
+  SALE: 'გაყიდვა',
+  SERVICE: 'მომსახურება',
+  OTHER: 'სხვა',
+}
 
 export default function FinancesPage() {
-  const [period, setPeriod] = useState('ამ თვე')
-  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false)
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
-  // Calculate statistics for current month
-  const currentMonth = mockMonthlyFinancials[mockMonthlyFinancials.length - 1]
-  const previousMonth = mockMonthlyFinancials[mockMonthlyFinancials.length - 2]
-
-  const totalIncome = currentMonth.income
-  const totalExpenses = currentMonth.expenses
-  const profit = currentMonth.profit
-  const pendingInvoices = mockInvoicesIncoming.filter(inv => inv.status === 'pending' || inv.status === 'overdue')
-  const totalPending = pendingInvoices.reduce((sum, inv) => sum + (inv.total - inv.paidAmount), 0)
-
-  const incomeChange = previousMonth ? Math.round(((totalIncome - previousMonth.income) / previousMonth.income) * 100) : 0
-  const expensesChange = previousMonth ? Math.round(((totalExpenses - previousMonth.expenses) / previousMonth.expenses) * 100) : 0
-  const profitChange = previousMonth ? Math.round(((profit - previousMonth.profit) / previousMonth.profit) * 100) : 0
-
-  // Recent transactions
-  const recentTransactions = mockTransactions.slice(0, 5)
-
-  // Expense distribution
-  const expenseData = Object.entries(currentMonth.expensesByCategory)
-    .filter(([_, amount]) => amount > 0)
-    .map(([category, amount]) => ({
-      label: expenseCategoryConfig[category as keyof typeof expenseCategoryConfig].name,
-      value: amount,
-      color: category === 'ingredients' ? '#B87333' :
-             category === 'packaging' ? '#3B82F6' :
-             category === 'salary' ? '#10B981' :
-             category === 'rent' ? '#8B5CF6' :
-             category === 'utilities' ? '#EAB308' :
-             category === 'equipment' ? '#6B7280' :
-             '#9CA3AF'
-    }))
-
-  const getStatusBadge = (status: string) => {
-    const badges = {
-      paid: 'bg-green-400/20 text-green-400',
-      pending: 'bg-gray-400/20 text-gray-400',
-      partial: 'bg-amber-400/20 text-amber-400',
-      overdue: 'bg-red-400/20 text-red-400',
+  // Helper function to get last N months
+  const getLastMonths = (count: number) => {
+    const months = []
+    const now = new Date()
+    
+    for (let i = 0; i < count; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      months.push({
+        month: date.getMonth() + 1,
+        year: date.getFullYear(),
+        label: date.toLocaleDateString('ka-GE', { month: 'long', year: 'numeric' })
+      })
     }
-    return badges[status as keyof typeof badges] || badges.pending
+    
+    return months
+  }
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
+
+      // Fetch dashboard stats with month/year filter
+      const dashboardRes = await fetch(`/api/finances/dashboard?period=month&month=${selectedMonth}&year=${selectedYear}`)
+      if (dashboardRes.ok) {
+        const dashboardData = await dashboardRes.json()
+        // Transform to new format
+        setStats({
+          totalIncome: dashboardData.summary?.totalIncome || 0,
+          totalExpenses: dashboardData.summary?.totalExpenses || 0,
+          netProfit: dashboardData.summary?.profit || 0,
+          profitMargin: dashboardData.summary?.profitMargin || 0,
+          pendingPayments: (dashboardData.receivables?.pending || 0) + (dashboardData.payables?.pending || 0),
+          overdueInvoices: dashboardData.overdueInvoices?.length || 0,
+        })
+
+        // Use recent transactions from dashboard (already filtered by month)
+        if (dashboardData.recentTransactions) {
+          const transformed = dashboardData.recentTransactions.slice(0, 3).map((t: any) => {
+            const isIncome = t.type === 'INCOME' || t.type?.toLowerCase() === 'income'
+            const category = t.category || 'OTHER'
+            return {
+              id: t.id,
+              type: isIncome ? 'income' : 'expense',
+              amount: t.amount,
+              description: t.description || 'ტრანზაქცია',
+              category,
+              categoryName: isIncome 
+                ? (incomeCategoryLabels[category] || category)
+                : (expenseCategoryLabels[category] || category),
+              date: t.date,
+              paymentMethod: t.paymentMethod,
+            }
+          })
+          setTransactions(transformed)
+        }
+      }
+
+      // Fetch suppliers (no date filter needed)
+      const suppliersRes = await fetch('/api/finances/suppliers')
+      if (suppliersRes.ok) {
+        const suppliersData = await suppliersRes.json()
+        setSuppliers(suppliersData.suppliers || [])
+      }
+
+    } catch (err) {
+      console.error('Finance dashboard fetch error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [selectedMonth, selectedYear])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  const handleExpenseSubmit = async (data: ExpenseFormData) => {
+    try {
+      const response = await fetch('/api/finances/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) throw new Error('Failed to create expense')
+
+      setIsExpenseModalOpen(false)
+      fetchData()
+    } catch (err) {
+      console.error('Expense creation error:', err)
+      alert('ხარჯის დამატება ვერ მოხერხდა')
+    }
+  }
+
+  if (loading) {
+    return (
+      <DashboardLayout title="💵 ფინანსები" breadcrumb="მთავარი / ფინანსები">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-copper"></div>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   return (
     <DashboardLayout title="💵 ფინანსები" breadcrumb="მთავარი / ფინანსები">
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <select
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
-            className="px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
-          >
-            <option>ამ თვე</option>
-            <option>წინა თვე</option>
-            <option>კვარტალი</option>
-            <option>წელი</option>
-            <option>custom</option>
-          </select>
-          <Button variant="secondary" onClick={() => console.log('Export')}>📊 ანგარიში</Button>
-          <Button onClick={() => setIsTransactionModalOpen(true)}>+ ტრანზაქცია</Button>
+        {/* Header with Date Picker and Actions */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {/* Date Picker */}
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">📅</span>
+            <select
+              value={`${selectedYear}-${selectedMonth}`}
+              onChange={(e) => {
+                const [year, month] = e.target.value.split('-')
+                setSelectedYear(parseInt(year))
+                setSelectedMonth(parseInt(month))
+              }}
+              className="px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary font-medium"
+            >
+              {getLastMonths(12).map((date) => (
+                <option key={`${date.year}-${date.month}`} value={`${date.year}-${date.month}`}>
+                  {date.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link href="/finances/income">
+              <Button variant="ghost" size="sm">💰 შემოსავლები</Button>
+            </Link>
+            <Link href="/finances/expenses">
+              <Button variant="ghost" size="sm">📉 ხარჯები</Button>
+            </Link>
+            <Link href="/finances/invoices">
+              <Button variant="ghost" size="sm">🧾 ინვოისები</Button>
+            </Link>
+            <Link href="/sales/customers?from=finances">
+              <Button variant="ghost" size="sm">👤 კლიენტები</Button>
+            </Link>
+            <Link href="/finances/suppliers">
+              <Button variant="ghost" size="sm">👥 მომწოდებლები</Button>
+            </Link>
+            <Link href="/finances/reports">
+              <Button variant="secondary" size="sm">📊 ანგარიში</Button>
+            </Link>
+            <Button size="sm" onClick={() => setIsExpenseModalOpen(true)}>
+              ➕ ტრანზაქცია
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Cards - Compact */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div className="bg-bg-card border border-border rounded-xl p-3">
+            <div className="text-xs text-text-muted mb-1">📈 შემოსავალი</div>
+            <div className="text-xl font-bold text-green-400">{formatCurrency(stats?.totalIncome || 0)}</div>
+          </div>
+          <div className="bg-bg-card border border-border rounded-xl p-3">
+            <div className="text-xs text-text-muted mb-1">📉 ხარჯი</div>
+            <div className="text-xl font-bold text-red-400">{formatCurrency(stats?.totalExpenses || 0)}</div>
+          </div>
+          <div className="bg-bg-card border border-border rounded-xl p-3">
+            <div className="text-xs text-text-muted mb-1">💰 მოგება</div>
+            <div className={`text-xl font-bold ${(stats?.netProfit || 0) >= 0 ? 'text-copper' : 'text-red-400'}`}>
+              {formatCurrency(stats?.netProfit || 0)}
+            </div>
+          </div>
+          <div className="bg-bg-card border border-border rounded-xl p-3">
+            <div className="text-xs text-text-muted mb-1">📊 მარჟა</div>
+            <div className="text-xl font-bold text-text-primary">{stats?.profitMargin?.toFixed(1) || 0}%</div>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Recent Transactions */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-text-primary">📋 ბოლო ტრანზაქციები</h3>
+                <Link href="/finances/expenses">
+                  <Button variant="ghost" size="sm">ყველა →</Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardBody>
+              {transactions.length === 0 ? (
+                <div className="text-center py-8 text-text-muted">
+                  <div className="text-4xl mb-2">📋</div>
+                  <p>ტრანზაქციები არ არის</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {transactions.map((tx) => (
+                    <div 
+                      key={tx.id} 
+                      className="flex items-center justify-between p-3 bg-bg-tertiary rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${
+                          tx.type === 'income' ? 'bg-green-400/20' : 'bg-red-400/20'
+                        }`}>
+                          {tx.type === 'income' ? '📈' : '📉'}
+                        </div>
+                        <div>
+                          <div className="font-medium text-text-primary text-sm">{tx.description}</div>
+                          <div className="text-xs text-text-muted">
+                            {formatDate(new Date(tx.date))} • {tx.categoryName || expenseCategoryLabels[tx.category] || tx.category}
+                          </div>
+                        </div>
+                      </div>
+                      <div className={`font-semibold ${tx.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
+                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardBody>
+          </Card>
+
+          {/* Quick Summary */}
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-semibold text-text-primary">📊 თვის შეჯამება</h3>
+            </CardHeader>
+            <CardBody>
+              <div className="space-y-4">
+                {/* Progress Bar */}
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-text-muted">შემოსავალი vs ხარჯი</span>
+                    <span className="text-text-primary">
+                      {stats?.totalIncome && stats?.totalExpenses 
+                        ? `${Math.round((stats.totalExpenses / stats.totalIncome) * 100)}% ხარჯი`
+                        : '-'}
+                    </span>
+                  </div>
+                  <div className="h-4 bg-bg-tertiary rounded-full overflow-hidden flex">
+                    {stats?.totalIncome && stats.totalIncome > 0 && (
+                      <>
+                        <div 
+                          className="bg-green-400 h-full"
+                          style={{ 
+                            width: `${Math.min(100 - ((stats.totalExpenses || 0) / stats.totalIncome) * 100, 100)}%` 
+                          }}
+                        />
+                        <div 
+                          className="bg-red-400 h-full"
+                          style={{ 
+                            width: `${Math.min(((stats.totalExpenses || 0) / stats.totalIncome) * 100, 100)}%` 
+                          }}
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-bg-tertiary rounded-lg text-center">
+                    <div className="text-2xl font-bold text-green-400">
+                      {formatCurrency(stats?.totalIncome || 0)}
+                    </div>
+                    <div className="text-xs text-text-muted">შემოსავალი</div>
+                  </div>
+                  <div className="p-3 bg-bg-tertiary rounded-lg text-center">
+                    <div className="text-2xl font-bold text-red-400">
+                      {formatCurrency(stats?.totalExpenses || 0)}
+                    </div>
+                    <div className="text-xs text-text-muted">ხარჯი</div>
+                  </div>
+                </div>
+
+                {/* Net Profit */}
+                <div className="p-4 bg-copper/10 border border-copper/30 rounded-lg text-center">
+                  <div className="text-xs text-text-muted mb-1">წმინდა მოგება</div>
+                  <div className={`text-3xl font-bold ${(stats?.netProfit || 0) >= 0 ? 'text-copper' : 'text-red-400'}`}>
+                    {formatCurrency(stats?.netProfit || 0)}
+                  </div>
+                </div>
+
+                {/* Pending */}
+                {(stats?.pendingPayments || 0) > 0 && (
+                  <div className="flex items-center justify-between p-3 bg-amber-400/10 border border-amber-400/30 rounded-lg">
+                    <span className="text-text-muted text-sm">მოლოდინში გადახდები</span>
+                    <span className="font-semibold text-amber-400">{formatCurrency(stats?.pendingPayments || 0)}</span>
+                  </div>
+                )}
+              </div>
+            </CardBody>
+          </Card>
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="შემოსავალი"
-          value={formatCurrency(totalIncome)}
-          change={incomeChange}
-          changeLabel="vs წინა"
-          icon="💰"
-          color="green"
-        />
-        <StatCard
-          title="ხარჯები"
-          value={formatCurrency(totalExpenses)}
-          change={expensesChange}
-          changeLabel="vs წინა"
-          icon="📉"
-          color="red"
-        />
-        <StatCard
-          title="მოგება"
-          value={formatCurrency(profit)}
-          change={profitChange}
-          changeLabel="vs წინა"
-          icon="📈"
-          color="emerald"
-        />
-        <StatCard
-          title="გადასახდელი"
-          value={formatCurrency(totalPending)}
-          icon="💳"
-          color="amber"
-        />
-      </div>
-
-      {/* Main Chart */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-text-primary">📊 შემოსავლები vs ხარჯები (12 თვე)</h3>
-        </CardHeader>
-        <CardBody>
-          <FinancialChart
-            data={mockMonthlyFinancials}
-            showIncome={true}
-            showExpenses={true}
-            showProfit={true}
-            height={300}
-          />
-        </CardBody>
-      </Card>
-
-      {/* 3 Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Transactions */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-text-primary">📋 ბოლო ტრანზაქციები</h3>
-          </CardHeader>
-          <CardBody>
-            <div className="space-y-3">
-              {recentTransactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className={`p-3 rounded-lg border-l-4 ${
-                    transaction.type === 'income' ? 'border-l-green-500 bg-green-500/5' : 'border-l-red-500 bg-red-500/5'
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-1">
-                    <div className="flex-1">
-                      <div className="font-medium text-text-primary">{transaction.description}</div>
-                      {transaction.customerName && (
-                        <div className="text-sm text-text-muted">{transaction.customerName}</div>
-                      )}
-                      {transaction.supplierName && (
-                        <div className="text-sm text-text-muted">{transaction.supplierName}</div>
-                      )}
-                    </div>
-                    <div className={`text-right font-semibold ${
-                      transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
-                    }`}>
-                      {transaction.type === 'income' ? '↑' : '↓'} {formatCurrency(transaction.amount)}
-                    </div>
-                  </div>
-                  <div className="text-xs text-text-muted">{formatShortDate(transaction.date)}</div>
-                </div>
-              ))}
-            </div>
-            <Link href="/finances/income">
-              <Button variant="ghost" className="w-full mt-4">ყველა ტრანზაქცია →</Button>
-            </Link>
-          </CardBody>
-        </Card>
-
-        {/* Pending Invoices */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-text-primary">🧾 გადასახდელი ინვოისები</h3>
-          </CardHeader>
-          <CardBody>
-            <div className="space-y-3">
-              {pendingInvoices.slice(0, 3).map((invoice) => {
-                const daysOverdue = Math.floor((new Date().getTime() - invoice.dueDate.getTime()) / (1000 * 60 * 60 * 24))
-                const remaining = invoice.total - invoice.paidAmount
-                return (
-                  <div key={invoice.id} className="p-3 rounded-lg bg-bg-tertiary">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <div className={`inline-block px-2 py-1 rounded text-xs font-medium mb-1 ${
-                          invoice.status === 'overdue' ? 'bg-red-400/20 text-red-400' :
-                          invoice.status === 'pending' && daysOverdue < 0 ? 'bg-amber-400/20 text-amber-400' :
-                          'bg-gray-400/20 text-gray-400'
-                        }`}>
-                          {invoice.status === 'overdue' ? '❌' : invoice.status === 'pending' && daysOverdue < 0 ? '⚠️' : '⏳'} {invoice.invoiceNumber}
-                        </div>
-                        <div className="font-medium text-text-primary">{invoice.supplierName}</div>
-                        <div className="text-sm text-text-muted">{formatCurrency(remaining)}</div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-text-muted">
-                      ვადა: {formatDate(invoice.dueDate)}
-                      {daysOverdue > 0 && (
-                        <span className="text-red-400 ml-2">| {daysOverdue} დღით გადაცილებული</span>
-                      )}
-                      {daysOverdue < 0 && (
-                        <span className="text-amber-400 ml-2">| {Math.abs(daysOverdue)} დღე დარჩა</span>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            <div className="mt-4 pt-4 border-t border-border">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-text-muted">სულ გადასახდელი:</span>
-                <span className="font-semibold text-text-primary">{formatCurrency(totalPending)}</span>
-              </div>
-            </div>
-            <Link href="/finances/invoices">
-              <Button variant="ghost" className="w-full mt-2">ყველა ინვოისი →</Button>
-            </Link>
-          </CardBody>
-        </Card>
-
-        {/* Expense Distribution */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-text-primary">📊 ხარჯების განაწილება (თვე)</h3>
-          </CardHeader>
-          <CardBody>
-            <div className="space-y-3">
-              {Object.entries(currentMonth.expensesByCategory)
-                .filter(([_, amount]) => amount > 0)
-                .sort(([_, a], [__, b]) => b - a)
-                .map(([category, amount]) => {
-                  const config = expenseCategoryConfig[category as keyof typeof expenseCategoryConfig]
-                  const percentage = Math.round((amount / totalExpenses) * 100)
-                  const barWidth = (amount / totalExpenses) * 100
-                  return (
-                    <div key={category}>
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2">
-                          <span>{config.icon}</span>
-                          <span className="text-sm text-text-primary">{config.name}</span>
-                        </div>
-                        <div className="text-sm font-semibold text-text-primary">{formatCurrency(amount)}</div>
-                      </div>
-                      <div className="h-2 bg-bg-tertiary rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-copper to-amber-600"
-                          style={{ width: `${barWidth}%` }}
-                        />
-                      </div>
-                      <div className="text-xs text-text-muted mt-1">{percentage}%</div>
-                    </div>
-                  )
-                })}
-            </div>
-            <Link href="/finances/expenses">
-              <Button variant="ghost" className="w-full mt-4">დეტალური ხარჯები →</Button>
-            </Link>
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* Quick Links */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Link href="/finances/income">
-          <Card className="cursor-pointer hover:border-copper transition-colors h-full">
-            <CardBody className="p-6 text-center">
-              <div className="text-3xl mb-2">💰</div>
-              <div className="font-semibold text-text-primary">შემოსავლები</div>
-            </CardBody>
-          </Card>
-        </Link>
-        <Link href="/finances/expenses">
-          <Card className="cursor-pointer hover:border-copper transition-colors h-full">
-            <CardBody className="p-6 text-center">
-              <div className="text-3xl mb-2">📉</div>
-              <div className="font-semibold text-text-primary">ხარჯები</div>
-            </CardBody>
-          </Card>
-        </Link>
-        <Link href="/finances/invoices">
-          <Card className="cursor-pointer hover:border-copper transition-colors h-full">
-            <CardBody className="p-6 text-center">
-              <div className="text-3xl mb-2">🧾</div>
-              <div className="font-semibold text-text-primary">ინვოისები</div>
-            </CardBody>
-          </Card>
-        </Link>
-        <Link href="/finances/reports">
-          <Card className="cursor-pointer hover:border-copper transition-colors h-full">
-            <CardBody className="p-6 text-center">
-              <div className="text-3xl mb-2">📊</div>
-              <div className="font-semibold text-text-primary">ანგარიშები</div>
-            </CardBody>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Transaction Modal */}
-      <TransactionModal
-        isOpen={isTransactionModalOpen}
-        onClose={() => setIsTransactionModalOpen(false)}
-        onSubmit={(data) => {
-          console.log('New transaction:', data)
-          setIsTransactionModalOpen(false)
-        }}
+      {/* Expense Modal */}
+      <ExpenseModal
+        isOpen={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+        onSubmit={handleExpenseSubmit}
+        suppliers={suppliers as any}
       />
-      </div>
     </DashboardLayout>
   )
 }
-

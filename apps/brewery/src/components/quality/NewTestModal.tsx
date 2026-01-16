@@ -6,9 +6,35 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui'
 
-import { mockBatches } from '@/data/mockData'
-
 import { testTypeConfig, type TestType, type Priority } from '@/data/qualityData'
+
+// Map API test types to component test types
+const API_TEST_TYPE_MAP: Record<string, TestType> = {
+  GRAVITY: 'gravity',
+  TEMPERATURE: 'gravity', // Map to gravity for now
+  PH: 'ph',
+  DISSOLVED_O2: 'gravity',
+  TURBIDITY: 'gravity',
+  COLOR: 'color',
+  BITTERNESS: 'ibu',
+  ALCOHOL: 'abv',
+  CARBONATION: 'gravity',
+  APPEARANCE: 'sensory',
+  AROMA: 'sensory',
+  TASTE: 'sensory',
+  MICROBIOLOGICAL: 'microbiology',
+}
+
+// Map component test types to API test types
+const COMPONENT_TO_API_MAP: Record<TestType, string> = {
+  gravity: 'GRAVITY',
+  ph: 'PH',
+  abv: 'ALCOHOL',
+  ibu: 'BITTERNESS',
+  color: 'COLOR',
+  sensory: 'APPEARANCE',
+  microbiology: 'MICROBIOLOGICAL',
+}
 
 
 
@@ -20,11 +46,13 @@ interface NewTestModalProps {
 
   onAdd: (testData: any) => void
 
+  batches?: Array<{ id: string; batchNumber: string; recipe?: { name: string } | null; status: string }>
+
 }
 
 
 
-export function NewTestModal({ isOpen, onClose, onAdd }: NewTestModalProps) {
+export function NewTestModal({ isOpen, onClose, onAdd, batches = [] }: NewTestModalProps) {
 
   const [step, setStep] = useState(1)
 
@@ -54,7 +82,7 @@ export function NewTestModal({ isOpen, onClose, onAdd }: NewTestModalProps) {
 
 
 
-  const selectedBatch = mockBatches.find(b => b.id === batchId)
+  const selectedBatch = batches.find(b => b.id === batchId)
 
   const testConfig = testType ? testTypeConfig[testType] : null
 
@@ -94,7 +122,7 @@ export function NewTestModal({ isOpen, onClose, onAdd }: NewTestModalProps) {
 
       batchId,
 
-      testType,
+      testType: COMPONENT_TO_API_MAP[testType as TestType] || testType.toUpperCase(),
 
       minValue,
 
@@ -172,11 +200,11 @@ export function NewTestModal({ isOpen, onClose, onAdd }: NewTestModalProps) {
 
                   <option value="">აირჩიეთ პარტია</option>
 
-                  {mockBatches.map(batch => (
+                  {batches.map(batch => (
 
                     <option key={batch.id} value={batch.id}>
 
-                      {batch.batchNumber} - {batch.recipeName} ({batch.status})
+                      {batch.batchNumber} - {batch.recipe?.name || 'N/A'} ({batch.status})
 
                     </option>
 
@@ -190,7 +218,7 @@ export function NewTestModal({ isOpen, onClose, onAdd }: NewTestModalProps) {
 
               <div className="flex justify-end gap-2">
 
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="secondary" onClick={onClose}>
 
                   გაუქმება
 
@@ -266,7 +294,7 @@ export function NewTestModal({ isOpen, onClose, onAdd }: NewTestModalProps) {
 
               <div className="flex justify-end gap-2">
 
-                <Button type="button" variant="outline" onClick={() => setStep(1)}>
+                <Button type="button" variant="secondary" onClick={() => setStep(1)}>
 
                   უკან
 
@@ -470,13 +498,13 @@ export function NewTestModal({ isOpen, onClose, onAdd }: NewTestModalProps) {
 
               <div className="flex justify-end gap-2 pt-4 border-t border-border">
 
-                <Button type="button" variant="outline" onClick={() => setStep(2)}>
+                <Button type="button" variant="secondary" onClick={() => setStep(2)}>
 
                   უკან
 
                 </Button>
 
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="secondary" onClick={onClose}>
 
                   გაუქმება
 

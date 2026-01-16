@@ -1,577 +1,499 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
-import { Card, CardHeader, CardBody, Button } from '@/components/ui'
+import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { Button } from '@/components/ui'
 import { StatCard, BarChart, LineChart, DonutChart } from '@/components/reports'
 import { formatCurrency } from '@/lib/utils'
-import { getStats, batches, orders, recipes } from '@/data/centralData'
 
-// Get stats from central data
-const stats = getStats()
+interface DashboardStats {
+  // Production
+  totalProduction: number
+  batchesCount: number
+  avgBatchSize: number
+  activeBatches: number
+  
+  // Sales
+  totalRevenue: number
+  ordersCount: number
+  avgOrderValue: number
+  customersCount: number
+  
+  // Inventory
+  totalItems: number
+  lowStockItems: number
+  inventoryValue: number
+  
+  // Finance
+  totalIncome: number
+  totalExpenses: number
+  netProfit: number
+  profitMargin: number
+}
 
-const monthlyProduction = [
-  { month: 'იან', liters: 1850 },
-  { month: 'თებ', liters: 2100 },
-  { month: 'მარ', liters: 1950 },
-  { month: 'აპრ', liters: 2400 },
-  { month: 'მაი', liters: 2650 },
-  { month: 'ივნ', liters: 2200 },
-  { month: 'ივლ', liters: 2800 },
-  { month: 'აგვ', liters: 2500 },
-  { month: 'სექ', liters: 2300 },
-  { month: 'ოქტ', liters: 2100 },
-  { month: 'ნოე', liters: 1900 },
-  { month: 'დეკ', liters: stats.production.totalVolume / 1000 || 2250 },
-]
+interface MonthlyData {
+  month: string
+  production: number
+  sales: number
+  expenses: number
+}
 
+interface CategoryData {
+  label: string
+  value: number
+  color: string
+}
 
-
-const monthlySales = [
-
-  { month: 'იან', revenue: 8500 },
-
-  { month: 'თებ', revenue: 9200 },
-
-  { month: 'მარ', revenue: 10500 },
-
-  { month: 'აპრ', revenue: 11200 },
-
-  { month: 'მაი', revenue: 12800 },
-
-  { month: 'ივნ', revenue: 11500 },
-
-  { month: 'ივლ', revenue: 13500 },
-
-  { month: 'აგვ', revenue: 12200 },
-
-  { month: 'სექ', revenue: 11800 },
-
-  { month: 'ოქტ', revenue: 10900 },
-
-  { month: 'ნოე', revenue: 10200 },
-
-  { month: 'დეკ', revenue: 12600 },
-
-]
-
-
-
-const styleDistribution = [
-
-  { label: 'Lager', value: 35, color: '#B87333' },
-
-  { label: 'IPA', value: 25, color: '#F59E0B' },
-
-  { label: 'Wheat', value: 20, color: '#EAB308' },
-
-  { label: 'Stout', value: 12, color: '#78350F' },
-
-  { label: 'სხვა', value: 8, color: '#6B7280' },
-
-]
-
-
-
-const topProducts = [
-
-  { name: 'Georgian Amber Lager', liters: 4200 },
-
-  { name: 'Tbilisi IPA', liters: 3500 },
-
-  { name: 'Kolkheti Wheat', liters: 2800 },
-
-  { name: 'Caucasus Stout', liters: 2100 },
-
-  { name: 'Svaneti Pilsner', liters: 1400 },
-
-]
-
-
-
-const latestBatches = [
-
-  { batch: 'BRW-0156', recipe: 'Georgian Amber', volume: '1,850L', status: 'Fermenting', date: '10.12' },
-
-  { batch: 'BRW-0155', recipe: 'Tbilisi IPA', volume: '2,000L', status: 'Conditioning', date: '05.12' },
-
-  { batch: 'BRW-0154', recipe: 'Kolkheti Wheat', volume: '1,500L', status: 'Ready', date: '01.12' },
-
-]
-
-
-
-const topCustomers = [
-
-  { customer: 'BeerGe', orders: 35, revenue: 125000 },
-
-  { customer: 'ფუნიკულიორი', orders: 15, revenue: 42000 },
-
-  { customer: 'Wine Bar 8000', orders: 12, revenue: 28500 },
-
-]
-
-
-
-const maxProductLiters = Math.max(...topProducts.map(p => p.liters))
-
-
+const getLastMonths = (count: number) => {
+  const months = []
+  const now = new Date()
+  
+  for (let i = 0; i < count; i++) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    months.push({
+      month: date.getMonth() + 1,
+      year: date.getFullYear(),
+      label: date.toLocaleDateString('ka-GE', { month: 'short' })
+    })
+  }
+  
+  return months.reverse()
+}
 
 export default function ReportsPage() {
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([])
+  const [salesByProduct, setSalesByProduct] = useState<CategoryData[]>([])
+  const [expensesByCategory, setExpensesByCategory] = useState<CategoryData[]>([])
+  const [selectedPeriod, setSelectedPeriod] = useState('year')
 
-  const [period, setPeriod] = useState('30')
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
 
+      // Fetch production stats
+      const productionRes = await fetch('/api/batches?limit=100')
+      let batchesData: any[] = []
+      if (productionRes.ok) {
+        const data = await productionRes.json()
+        batchesData = data.batches || []
+      }
 
+      // Fetch sales stats
+      const salesRes = await fetch('/api/orders?limit=100')
+      let ordersData: any[] = []
+      if (salesRes.ok) {
+        const data = await salesRes.json()
+        ordersData = data.orders || []
+      }
 
-  const handleExportPDF = () => {
+      // Fetch customers
+      const customersRes = await fetch('/api/customers')
+      let customersCount = 0
+      if (customersRes.ok) {
+        const data = await customersRes.json()
+        customersCount = data.customers?.length || 0
+      }
 
-    console.log('Exporting to PDF...')
+      // Fetch inventory stats
+      const inventoryRes = await fetch('/api/inventory')
+      let inventoryData: any[] = []
+      if (inventoryRes.ok) {
+        const data = await inventoryRes.json()
+        inventoryData = data.items || []
+      }
 
+      // Fetch finance stats
+      const financeRes = await fetch('/api/finances/dashboard')
+      let financeStats: any = {}
+      if (financeRes.ok) {
+        const data = await financeRes.json()
+        financeStats = data.summary || {}
+      }
+
+      // Calculate stats
+      const totalProduction = batchesData.reduce((sum, b) => sum + (Number(b.volume) || 0), 0)
+      const activeBatches = batchesData.filter(b => {
+        const status = (b.status || '').toUpperCase()
+        return ['PLANNED', 'BREWING', 'FERMENTING', 'CONDITIONING'].includes(status)
+      }).length
+      const avgBatchSize = batchesData.length > 0 ? totalProduction / batchesData.length : 0
+
+      const totalRevenue = ordersData.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0)
+      const avgOrderValue = ordersData.length > 0 ? totalRevenue / ordersData.length : 0
+
+      const lowStockItems = inventoryData.filter((item: any) => {
+        const balance = Number(item.cachedBalance) || 0
+        const reorderPoint = Number(item.reorderPoint) || 0
+        return reorderPoint > 0 && balance <= reorderPoint
+      }).length
+
+      const inventoryValue = inventoryData.reduce((sum: number, item: any) => {
+        const balance = Number(item.cachedBalance) || 0
+        const cost = Number(item.costPerUnit) || 0
+        return sum + (balance * cost)
+      }, 0)
+
+      setStats({
+        totalProduction,
+        batchesCount: batchesData.length,
+        avgBatchSize,
+        activeBatches,
+        totalRevenue,
+        ordersCount: ordersData.length,
+        avgOrderValue,
+        customersCount,
+        totalItems: inventoryData.length,
+        lowStockItems,
+        inventoryValue,
+        totalIncome: financeStats.totalIncome || 0,
+        totalExpenses: financeStats.totalExpenses || 0,
+        netProfit: financeStats.profit || 0,
+        profitMargin: financeStats.profitMargin || 0,
+      })
+
+      // Monthly data for charts
+      const months = getLastMonths(6)
+      const monthlyChartData = months.map(m => ({
+        month: m.label,
+        production: Math.round(Math.random() * 2000 + 1000), // TODO: Real data
+        sales: Math.round(Math.random() * 15000 + 5000), // TODO: Real data
+        expenses: Math.round(Math.random() * 8000 + 3000), // TODO: Real data
+      }))
+      setMonthlyData(monthlyChartData)
+
+      // Sales by product (from orders)
+      const productSales: Record<string, number> = {}
+      ordersData.forEach((order: any) => {
+        order.items?.forEach((item: any) => {
+          const name = item.productName || 'სხვა'
+          productSales[name] = (productSales[name] || 0) + (Number(item.totalPrice) || 0)
+        })
+      })
+      
+      const colors = ['#B87333', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899']
+      const salesData = Object.entries(productSales)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 5)
+        .map(([label, value], i) => ({
+          label,
+          value,
+          color: colors[i % colors.length]
+        }))
+      setSalesByProduct(salesData)
+
+      // Expenses by category
+      const expensesRes = await fetch('/api/finances/expenses?limit=100')
+      if (expensesRes.ok) {
+        const expensesData = await expensesRes.json()
+        const categoryTotals: Record<string, number> = {}
+        
+        expensesData.expenses?.forEach((exp: any) => {
+          const cat = exp.categoryName || exp.category || 'სხვა'
+          categoryTotals[cat] = (categoryTotals[cat] || 0) + (Number(exp.amount) || 0)
+        })
+        
+        const expenseCategoryData = Object.entries(categoryTotals)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5)
+          .map(([label, value], i) => ({
+            label,
+            value,
+            color: ['#EF4444', '#F97316', '#F59E0B', '#84CC16', '#06B6D4'][i % 5]
+          }))
+        setExpensesByCategory(expenseCategoryData)
+      }
+
+    } catch (err) {
+      console.error('Reports fetch error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  if (loading) {
+    return (
+      <DashboardLayout title="📈 რეპორტები" breadcrumb="მთავარი / რეპორტები">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-copper"></div>
+        </div>
+      </DashboardLayout>
+    )
   }
-
-
-
-  const handleExportExcel = () => {
-
-    console.log('Exporting to Excel...')
-
-  }
-
-
 
   return (
-
-    <DashboardLayout title="📈 ანგარიშები" breadcrumb="მთავარი / ანგარიშები">
-
-      {/* Header Controls */}
-
-      <div className="flex justify-between items-center mb-6">
-
-        <div className="flex items-center gap-4">
-
-          <span className="text-sm text-text-muted">პერიოდი:</span>
-
-          <select
-
-            value={period}
-
-            onChange={(e) => setPeriod(e.target.value)}
-
-            className="px-4 py-2 bg-bg-card border border-border rounded-lg text-sm"
-
-          >
-
-            <option value="7">ბოლო 7 დღე</option>
-
-            <option value="30">ბოლო 30 დღე</option>
-
-            <option value="90">ბოლო 3 თვე</option>
-
-            <option value="365">ბოლო 12 თვე</option>
-
-            <option value="year">წელი</option>
-
-          </select>
-
+    <DashboardLayout title="📈 რეპორტები" breadcrumb="მთავარი / რეპორტები">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/">
+              <Button variant="ghost" size="sm">← უკან</Button>
+            </Link>
+            <h2 className="text-2xl font-bold text-text-primary">რეპორტები</h2>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary text-sm"
+            >
+              <option value="month">ეს თვე</option>
+              <option value="quarter">კვარტალი</option>
+              <option value="year">წელი</option>
+            </select>
+            <Button variant="secondary" size="sm">📄 PDF</Button>
+            <Button variant="secondary" size="sm">📊 Excel</Button>
+          </div>
         </div>
 
-        <div className="flex gap-2">
-
-          <Button onClick={handleExportPDF} variant="secondary" size="sm">
-
-            📄 PDF
-
-          </Button>
-
-          <Button onClick={handleExportExcel} variant="secondary" size="sm">
-
-            📊 Excel
-
-          </Button>
-
+        {/* Quick Stats Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard
+            title="წარმოება"
+            value={`${stats?.totalProduction?.toLocaleString() || 0}L`}
+            icon="🍺"
+            subtitle={`${stats?.batchesCount || 0} პარტია`}
+            color="copper"
+          />
+          <StatCard
+            title="გაყიდვები"
+            value={formatCurrency(stats?.totalRevenue || 0)}
+            icon="💰"
+            subtitle={`${stats?.ordersCount || 0} შეკვეთა`}
+            color="green"
+          />
+          <StatCard
+            title="მოგება"
+            value={formatCurrency(stats?.netProfit || 0)}
+            icon="📊"
+            subtitle={`მარჟა: ${stats?.profitMargin?.toFixed(1) || 0}%`}
+            variant={(stats?.netProfit || 0) >= 0 ? 'success' : 'danger'}
+          />
+          <StatCard
+            title="მარაგი"
+            value={stats?.totalItems || 0}
+            icon="📦"
+            subtitle={stats?.lowStockItems ? `${stats.lowStockItems} დაბალი` : 'OK'}
+            variant={stats?.lowStockItems ? 'warning' : 'default'}
+          />
         </div>
 
-      </div>
+        {/* Quick Access Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Link href="/reports/production">
+            <div className="p-4 bg-bg-card border border-border rounded-xl hover:border-copper/50 transition-colors cursor-pointer">
+              <div className="text-2xl mb-2">🏭</div>
+              <div className="font-semibold text-text-primary">წარმოების ანგარიში</div>
+              <div className="text-xs text-text-muted mt-1">პარტიები, ეფექტურობა</div>
+            </div>
+          </Link>
+          <Link href="/reports/sales">
+            <div className="p-4 bg-bg-card border border-border rounded-xl hover:border-copper/50 transition-colors cursor-pointer">
+              <div className="text-2xl mb-2">📈</div>
+              <div className="font-semibold text-text-primary">გაყიდვების ანგარიში</div>
+              <div className="text-xs text-text-muted mt-1">შეკვეთები, კლიენტები</div>
+            </div>
+          </Link>
+          <Link href="/reports/inventory">
+            <div className="p-4 bg-bg-card border border-border rounded-xl hover:border-copper/50 transition-colors cursor-pointer">
+              <div className="text-2xl mb-2">📦</div>
+              <div className="font-semibold text-text-primary">მარაგების ანგარიში</div>
+              <div className="text-xs text-text-muted mt-1">ინგრედიენტები, მოძრაობა</div>
+            </div>
+          </Link>
+          <Link href="/finances/reports">
+            <div className="p-4 bg-bg-card border border-border rounded-xl hover:border-copper/50 transition-colors cursor-pointer">
+              <div className="text-2xl mb-2">💵</div>
+              <div className="font-semibold text-text-primary">ფინანსური ანგარიში</div>
+              <div className="text-xs text-text-muted mt-1">შემოსავალი, ხარჯები</div>
+            </div>
+          </Link>
+        </div>
 
+        {/* Charts Row */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Sales Trend */}
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-semibold text-text-primary">📈 გაყიდვების ტრენდი</h3>
+            </CardHeader>
+            <CardBody>
+              {monthlyData.length > 0 ? (
+                <LineChart 
+                  data={monthlyData.map(m => ({ label: m.month, value: m.sales }))} 
+                  height={200}
+                  fillArea={true}
+                />
+              ) : (
+                <div className="h-48 flex items-center justify-center text-text-muted">
+                  მონაცემები არ არის
+                </div>
+              )}
+            </CardBody>
+          </Card>
 
+          {/* Production */}
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-semibold text-text-primary">🍺 წარმოება (6 თვე)</h3>
+            </CardHeader>
+            <CardBody>
+              {monthlyData.length > 0 ? (
+                <BarChart 
+                  data={monthlyData.map(m => ({ label: m.month, value: m.production }))} 
+                  height={200}
+                  formatValue={(v) => `${v}L`}
+                />
+              ) : (
+                <div className="h-48 flex items-center justify-center text-text-muted">
+                  მონაცემები არ არის
+                </div>
+              )}
+            </CardBody>
+          </Card>
+        </div>
 
-      {/* Stats Cards */}
+        {/* Bottom Row */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Sales by Product */}
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-semibold text-text-primary">🍻 გაყიდვები პროდუქტით</h3>
+            </CardHeader>
+            <CardBody>
+              {salesByProduct.length > 0 ? (
+                <DonutChart 
+                  data={salesByProduct} 
+                  size={160}
+                  centerText={formatCurrency(salesByProduct.reduce((s, p) => s + p.value, 0))}
+                  centerSubtext="სულ"
+                />
+              ) : (
+                <div className="h-48 flex items-center justify-center text-text-muted">
+                  მონაცემები არ არის
+                </div>
+              )}
+            </CardBody>
+          </Card>
 
-      <div className="grid grid-cols-6 gap-4 mb-6">
+          {/* Expenses by Category */}
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-semibold text-text-primary">📉 ხარჯები კატეგორიით</h3>
+            </CardHeader>
+            <CardBody>
+              {expensesByCategory.length > 0 ? (
+                <DonutChart 
+                  data={expensesByCategory} 
+                  size={160}
+                  centerText={formatCurrency(expensesByCategory.reduce((s, e) => s + e.value, 0))}
+                  centerSubtext="სულ"
+                />
+              ) : (
+                <div className="h-48 flex items-center justify-center text-text-muted">
+                  მონაცემები არ არის
+                </div>
+              )}
+            </CardBody>
+          </Card>
+        </div>
 
-        <StatCard title="წარმოებული" value="18,500L" change={12} icon="🍺" color="copper" />
-
-        <StatCard title="პარტიები" value="24" change={8} icon="📦" color="blue" />
-
-        <StatCard title="გაყიდვები" value={formatCurrency(125400)} change={18} icon="💰" color="green" />
-
-        <StatCard title="მოგება" value={formatCurrency(45200)} change={15} icon="📈" color="emerald" />
-
-        <StatCard title="კეგები გაყიდული" value="156" change={22} icon="🛢️" color="amber" />
-
-        <StatCard title="ბოთლები გაყიდული" value="3,400" change={10} icon="🍾" color="purple" />
-
-      </div>
-
-
-
-      {/* Charts Grid 2x2 */}
-
-      <div className="grid grid-cols-2 gap-6 mb-6">
-
-        {/* Production Chart */}
-
+        {/* Key Metrics Table */}
         <Card>
-
           <CardHeader>
-
-            <span className="text-lg font-semibold">წარმოების დინამიკა</span>
-
+            <h3 className="text-lg font-semibold text-text-primary">📋 ძირითადი მეტრიკები</h3>
           </CardHeader>
-
           <CardBody>
-
-            <BarChart data={monthlyProduction.map(m => ({ label: m.month, value: m.liters }))} maxValue={3000} height={250} />
-
-          </CardBody>
-
-        </Card>
-
-
-
-        {/* Sales Chart */}
-
-        <Card>
-
-          <CardHeader>
-
-            <span className="text-lg font-semibold">გაყიდვების ტრენდი</span>
-
-          </CardHeader>
-
-          <CardBody>
-
-            <LineChart data={monthlySales.map(m => ({ label: m.month, value: m.revenue }))} height={250} />
-
-          </CardBody>
-
-        </Card>
-
-
-
-        {/* Style Distribution */}
-
-        <Card>
-
-          <CardHeader>
-
-            <span className="text-lg font-semibold">წარმოება სტილების მიხედვით</span>
-
-          </CardHeader>
-
-          <CardBody>
-
-            <DonutChart data={styleDistribution} centerText="24 პარტია" size={220} />
-
-          </CardBody>
-
-        </Card>
-
-
-
-        {/* Top Products */}
-
-        <Card>
-
-          <CardHeader>
-
-            <span className="text-lg font-semibold">ტოპ 5 პროდუქტი</span>
-
-          </CardHeader>
-
-          <CardBody>
-
-            <div className="space-y-4">
-
-              {topProducts.map((product, index) => {
-
-                const percentage = (product.liters / maxProductLiters) * 100
-
-                return (
-
-                  <div key={index} className="space-y-2">
-
-                    <div className="flex items-center justify-between text-sm">
-
-                      <span className="font-medium text-text-primary">{product.name}</span>
-
-                      <span className="text-text-muted">{product.liters.toLocaleString('en-US')}L</span>
-
-                    </div>
-
-                    <div className="relative h-6 bg-bg-tertiary rounded-full overflow-hidden">
-
-                      <div
-
-                        className="h-full bg-gradient-to-r from-copper to-amber-400 rounded-full transition-all duration-500"
-
-                        style={{ width: `${percentage}%` }}
-
-                      />
-
-                      <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-text-primary">
-
-                        {percentage.toFixed(0)}%
-
-                      </div>
-
-                    </div>
-
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Production Metrics */}
+              <div>
+                <h4 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+                  <span>🏭</span> წარმოება
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">სულ წარმოებული</span>
+                    <span className="text-text-primary font-medium">{stats?.totalProduction?.toLocaleString() || 0}L</span>
                   </div>
-
-                )
-
-              })}
-
-            </div>
-
-          </CardBody>
-
-        </Card>
-
-      </div>
-
-
-
-      {/* Tables Section 2 Column */}
-
-      <div className="grid grid-cols-2 gap-6 mb-6">
-
-        {/* Latest Batches */}
-
-        <Card>
-
-          <CardHeader>
-
-            <span className="text-lg font-semibold">უახლესი პარტიები</span>
-
-          </CardHeader>
-
-          <CardBody>
-
-            <div className="overflow-x-auto">
-
-              <table className="w-full">
-
-                <thead>
-
-                  <tr className="border-b border-border">
-
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">პარტია</th>
-
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">რეცეპტი</th>
-
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">მოცულობა</th>
-
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">სტატუსი</th>
-
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">თარიღი</th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody>
-
-                  {latestBatches.map((batch, index) => (
-
-                    <tr key={index} className="border-b border-border/50 hover:bg-bg-tertiary transition-colors">
-
-                      <td className="py-3 px-4 text-sm font-medium text-copper-light">{batch.batch}</td>
-
-                      <td className="py-3 px-4 text-sm text-text-primary">{batch.recipe}</td>
-
-                      <td className="py-3 px-4 text-sm text-text-primary">{batch.volume}</td>
-
-                      <td className="py-3 px-4 text-sm">
-
-                        <span className="px-2 py-1 rounded bg-amber-400/20 text-amber-400 text-xs">
-
-                          {batch.status}
-
-                        </span>
-
-                      </td>
-
-                      <td className="py-3 px-4 text-sm text-text-muted">{batch.date}</td>
-
-                    </tr>
-
-                  ))}
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          </CardBody>
-
-        </Card>
-
-
-
-        {/* Top Customers */}
-
-        <Card>
-
-          <CardHeader>
-
-            <span className="text-lg font-semibold">ტოპ კლიენტები</span>
-
-          </CardHeader>
-
-          <CardBody>
-
-            <div className="overflow-x-auto">
-
-              <table className="w-full">
-
-                <thead>
-
-                  <tr className="border-b border-border">
-
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">კლიენტი</th>
-
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">შეკვეთები</th>
-
-                    <th className="text-left py-3 px-4 text-sm font-medium text-text-muted">შემოსავალი</th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody>
-
-                  {topCustomers.map((customer, index) => (
-
-                    <tr key={index} className="border-b border-border/50 hover:bg-bg-tertiary transition-colors">
-
-                      <td className="py-3 px-4 text-sm font-medium text-text-primary">{customer.customer}</td>
-
-                      <td className="py-3 px-4 text-sm text-text-primary">{customer.orders}</td>
-
-                      <td className="py-3 px-4 text-sm font-medium text-copper-light">{formatCurrency(customer.revenue)}</td>
-
-                    </tr>
-
-                  ))}
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          </CardBody>
-
-        </Card>
-
-      </div>
-
-
-
-      {/* Quick Links */}
-
-      <div className="grid grid-cols-3 gap-4">
-
-        <Link href="/reports/production">
-
-          <Card className="cursor-pointer hover:border-copper transition-colors h-full">
-
-            <CardBody className="p-6">
-
-              <div className="flex items-center gap-4">
-
-                <span className="text-3xl">📊</span>
-
-                <div>
-
-                  <h3 className="font-semibold text-lg mb-1">წარმოების დეტალური</h3>
-
-                  <p className="text-sm text-text-muted">დეტალური ანგარიშები წარმოების შესახებ</p>
-
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">პარტიების რაოდენობა</span>
+                    <span className="text-text-primary font-medium">{stats?.batchesCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">საშუალო პარტია</span>
+                    <span className="text-text-primary font-medium">{Math.round(stats?.avgBatchSize || 0)}L</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">აქტიური პარტიები</span>
+                    <span className="text-amber-400 font-medium">{stats?.activeBatches || 0}</span>
+                  </div>
                 </div>
-
               </div>
 
-            </CardBody>
-
-          </Card>
-
-        </Link>
-
-
-
-        <Link href="/reports/sales">
-
-          <Card className="cursor-pointer hover:border-copper transition-colors h-full">
-
-            <CardBody className="p-6">
-
-              <div className="flex items-center gap-4">
-
-                <span className="text-3xl">💰</span>
-
-                <div>
-
-                  <h3 className="font-semibold text-lg mb-1">გაყიდვების დეტალური</h3>
-
-                  <p className="text-sm text-text-muted">დეტალური ანგარიშები გაყიდვების შესახებ</p>
-
+              {/* Sales Metrics */}
+              <div>
+                <h4 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+                  <span>💰</span> გაყიდვები
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">სულ გაყიდვები</span>
+                    <span className="text-green-400 font-medium">{formatCurrency(stats?.totalRevenue || 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">შეკვეთები</span>
+                    <span className="text-text-primary font-medium">{stats?.ordersCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">საშუალო შეკვეთა</span>
+                    <span className="text-text-primary font-medium">{formatCurrency(stats?.avgOrderValue || 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">კლიენტები</span>
+                    <span className="text-text-primary font-medium">{stats?.customersCount || 0}</span>
+                  </div>
                 </div>
-
               </div>
 
-            </CardBody>
-
-          </Card>
-
-        </Link>
-
-
-
-        <Link href="/reports/inventory">
-
-          <Card className="cursor-pointer hover:border-copper transition-colors h-full">
-
-            <CardBody className="p-6">
-
-              <div className="flex items-center gap-4">
-
-                <span className="text-3xl">📦</span>
-
-                <div>
-
-                  <h3 className="font-semibold text-lg mb-1">მარაგების დეტალური</h3>
-
-                  <p className="text-sm text-text-muted">დეტალური ანგარიშები მარაგების შესახებ</p>
-
+              {/* Finance Metrics */}
+              <div>
+                <h4 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+                  <span>📊</span> ფინანსები
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">შემოსავალი</span>
+                    <span className="text-green-400 font-medium">{formatCurrency(stats?.totalIncome || 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">ხარჯები</span>
+                    <span className="text-red-400 font-medium">{formatCurrency(stats?.totalExpenses || 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">მოგება</span>
+                    <span className={`font-medium ${(stats?.netProfit || 0) >= 0 ? 'text-copper' : 'text-red-400'}`}>
+                      {formatCurrency(stats?.netProfit || 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">მარჟა</span>
+                    <span className="text-text-primary font-medium">{stats?.profitMargin?.toFixed(1) || 0}%</span>
+                  </div>
                 </div>
-
               </div>
-
-            </CardBody>
-
-          </Card>
-
-        </Link>
-
+            </div>
+          </CardBody>
+        </Card>
       </div>
-
     </DashboardLayout>
-
   )
-
 }

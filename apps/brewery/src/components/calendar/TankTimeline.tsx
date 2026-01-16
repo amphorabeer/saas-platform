@@ -28,7 +28,7 @@ interface CalendarEvent {
 
   id: string
 
-  type: 'brewing' | 'fermentation' | 'conditioning' | 'packaging' | 'maintenance'
+  type: 'brewing' | 'fermentation' | 'conditioning' | 'packaging' | 'maintenance' | 'cip' | 'cip_warning'
 
   title: string
 
@@ -130,7 +130,7 @@ export function TankTimeline({ weekStart, tanks, events, onEventClick, onAddEven
 
         <div className="w-[120px] p-3 border-r border-border flex-shrink-0">
 
-          <span className="text-sm font-semibold text-text-muted">ტანკი</span>
+          <span className="text-sm font-semibold text-text-muted">ავზი</span>
 
         </div>
 

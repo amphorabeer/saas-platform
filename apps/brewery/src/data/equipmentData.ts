@@ -1,4 +1,6 @@
-export type EquipmentType = 'fermenter' | 'brite' | 'kettle' | 'mash_tun' | 'hlt' | 'pump' | 'chiller' | 'cip' | 'other'
+export type EquipmentType = 'fermenter' | 'brite' | 'unitank' | 'kettle' | 'mash_tun' | 'hlt' | 'pump' | 'chiller' | 'cip' | 'other'
+
+export type TankCapability = 'fermenting' | 'conditioning' | 'brewing' | 'storage'
 
 export type EquipmentStatus = 'operational' | 'needs_maintenance' | 'under_maintenance' | 'out_of_service'
 
@@ -61,6 +63,8 @@ export interface Equipment {
   uptime?: number
 
   notes?: string
+
+  capabilities?: TankCapability[] // ['fermenting', 'conditioning'] for unitank
 
 }
 
@@ -214,11 +218,11 @@ export const mockEquipment: Equipment[] = [
 
     currentBatchId: '1',
 
-    currentBatchNumber: 'BRW-2024-0156',
+    currentBatchNumber: 'BRW-2025-0156',
 
-    lastCIP: new Date('2024-12-09'),
+    lastCIP: new Date('2025-12-09'),
 
-    nextCIP: new Date('2024-12-16'),
+    nextCIP: new Date('2025-12-16'),
 
     cipIntervalDays: 7,
 
@@ -231,6 +235,8 @@ export const mockEquipment: Equipment[] = [
     totalBatches: 28,
 
     uptime: 98.5,
+
+    capabilities: ['fermenting'],
 
   },
 
@@ -260,15 +266,17 @@ export const mockEquipment: Equipment[] = [
 
     currentBatchId: '2',
 
-    currentBatchNumber: 'BRW-2024-0155',
+    currentBatchNumber: 'BRW-2025-0155',
 
-    lastCIP: new Date('2024-12-07'),
+    lastCIP: new Date('2025-12-07'),
 
-    nextCIP: new Date('2024-12-14'),
+    nextCIP: new Date('2025-12-14'),
 
     cipIntervalDays: 7,
 
     inspectionIntervalDays: 30,
+
+    capabilities: ['fermenting'],
 
   },
 
@@ -278,7 +286,7 @@ export const mockEquipment: Equipment[] = [
 
     name: 'FV-03',
 
-    type: 'fermenter',
+    type: 'unitank',
 
     model: 'Unitank 1500',
 
@@ -292,13 +300,15 @@ export const mockEquipment: Equipment[] = [
 
     status: 'needs_maintenance',
 
-    lastCIP: new Date('2024-11-30'),
+    lastCIP: new Date('2025-11-30'),
 
-    nextCIP: new Date('2024-12-10'),
+    nextCIP: new Date('2025-12-10'),
 
     cipIntervalDays: 7,
 
     inspectionIntervalDays: 30,
+
+    capabilities: ['fermenting', 'conditioning'],
 
   },
 
@@ -326,15 +336,17 @@ export const mockEquipment: Equipment[] = [
 
     currentBatchId: '3',
 
-    currentBatchNumber: 'BRW-2024-0154',
+    currentBatchNumber: 'BRW-2025-0154',
 
-    lastCIP: new Date('2024-12-08'),
+    lastCIP: new Date('2025-12-08'),
 
-    nextCIP: new Date('2024-12-15'),
+    nextCIP: new Date('2025-12-15'),
 
     cipIntervalDays: 7,
 
     inspectionIntervalDays: 30,
+
+    capabilities: ['conditioning'],
 
   },
 
@@ -358,13 +370,15 @@ export const mockEquipment: Equipment[] = [
 
     status: 'operational',
 
-    lastCIP: new Date('2024-12-08'),
+    lastCIP: new Date('2025-12-08'),
 
-    nextCIP: new Date('2024-12-15'),
+    nextCIP: new Date('2025-12-15'),
 
     cipIntervalDays: 7,
 
     inspectionIntervalDays: 30,
+
+    capabilities: ['conditioning'],
 
   },
 
@@ -388,13 +402,15 @@ export const mockEquipment: Equipment[] = [
 
     status: 'operational',
 
-    lastCIP: new Date('2024-12-07'),
+    lastCIP: new Date('2025-12-07'),
 
-    nextCIP: new Date('2024-12-18'),
+    nextCIP: new Date('2025-12-18'),
 
     cipIntervalDays: 10,
 
     inspectionIntervalDays: 60,
+
+    capabilities: ['brewing'],
 
   },
 
@@ -421,6 +437,8 @@ export const mockEquipment: Equipment[] = [
     cipIntervalDays: 10,
 
     inspectionIntervalDays: 60,
+
+    capabilities: ['brewing'],
 
   },
 
@@ -449,6 +467,8 @@ export const mockEquipment: Equipment[] = [
     cipIntervalDays: 14,
 
     inspectionIntervalDays: 60,
+
+    capabilities: ['brewing'],
 
   },
 
@@ -568,10 +588,50 @@ export const mockMaintenanceRecords: MaintenanceRecord[] = [
 
     status: 'overdue',
 
-    scheduledDate: new Date('2024-12-10'),
+    scheduledDate: new Date('2025-12-10'),
 
     priority: 'high',
 
+  },
+  {
+    id: 'maint-fv03-1',
+    equipmentId: '3',
+    equipmentName: 'FV-03',
+    type: 'inspection',
+    scheduledDate: new Date('2025-11-15'),
+    completedDate: new Date('2025-11-15'),
+    status: 'completed',
+    priority: 'medium',
+    description: 'რეგულარული შემოწმება',
+    performedBy: 'გიორგი კაპანაძე',
+    cost: 150,
+  },
+  {
+    id: 'maint-fv03-2',
+    equipmentId: '3',
+    equipmentName: 'FV-03',
+    type: 'corrective',
+    scheduledDate: new Date('2025-10-20'),
+    completedDate: new Date('2025-10-22'),
+    status: 'completed',
+    priority: 'high',
+    description: 'სენსორის შეცვლა',
+    performedBy: 'ნიკა ზედგინიძე',
+    cost: 350,
+  },
+  {
+    id: 'maint-fv03-3',
+    equipmentId: '3',
+    equipmentName: 'FV-03',
+    type: 'cip',
+    scheduledDate: new Date('2025-09-10'),
+    completedDate: new Date('2025-09-10'),
+    status: 'completed',
+    priority: 'medium',
+    description: 'სრული CIP გაწმენდა',
+    performedBy: 'ნიკა ზედგინიძე',
+    cost: 200,
+    duration: 60,
   },
 
   {
@@ -586,7 +646,7 @@ export const mockMaintenanceRecords: MaintenanceRecord[] = [
 
     status: 'overdue',
 
-    scheduledDate: new Date('2024-12-08'),
+    scheduledDate: new Date('2025-12-08'),
 
     priority: 'medium',
 
@@ -604,7 +664,7 @@ export const mockMaintenanceRecords: MaintenanceRecord[] = [
 
     status: 'scheduled',
 
-    scheduledDate: new Date('2024-12-15'),
+    scheduledDate: new Date('2025-12-15'),
 
     priority: 'medium',
 
@@ -622,7 +682,7 @@ export const mockMaintenanceRecords: MaintenanceRecord[] = [
 
     status: 'scheduled',
 
-    scheduledDate: new Date('2024-12-17'),
+    scheduledDate: new Date('2025-12-17'),
 
     priority: 'low',
 
@@ -640,9 +700,9 @@ export const mockMaintenanceRecords: MaintenanceRecord[] = [
 
     status: 'completed',
 
-    scheduledDate: new Date('2024-12-09'),
+    scheduledDate: new Date('2025-12-09'),
 
-    completedDate: new Date('2024-12-09'),
+    completedDate: new Date('2025-12-09'),
 
     duration: 45,
 
@@ -664,7 +724,7 @@ export const mockMaintenanceRecords: MaintenanceRecord[] = [
 
     status: 'scheduled',
 
-    scheduledDate: new Date('2024-12-18'),
+    scheduledDate: new Date('2025-12-18'),
 
     priority: 'medium',
 
@@ -722,7 +782,7 @@ export const mockCIPLogs: CIPLog[] = [
 
     cipType: 'full',
 
-    date: new Date('2024-12-09T10:30:00'),
+    date: new Date('2025-12-09T10:30:00'),
 
     duration: 45,
 
@@ -748,7 +808,7 @@ export const mockCIPLogs: CIPLog[] = [
 
     cipType: 'rinse',
 
-    date: new Date('2024-12-02T14:00:00'),
+    date: new Date('2025-12-02T14:00:00'),
 
     duration: 15,
 
@@ -768,7 +828,7 @@ export const mockCIPLogs: CIPLog[] = [
 
     cipType: 'full',
 
-    date: new Date('2024-11-25T09:00:00'),
+    date: new Date('2025-11-25T09:00:00'),
 
     duration: 50,
 
@@ -794,7 +854,7 @@ export const mockCIPLogs: CIPLog[] = [
 
     cipType: 'sanitizer_only',
 
-    date: new Date('2024-11-18T11:00:00'),
+    date: new Date('2025-11-18T11:00:00'),
 
     duration: 30,
 
@@ -824,13 +884,13 @@ export const mockProblemReports: ProblemReport[] = [
 
     description: 'ტემპერატურის სენსორი აჩვენებს 2°C-ით მეტს',
 
-    reportedDate: new Date('2024-12-05'),
+    reportedDate: new Date('2025-12-05'),
 
     reportedBy: 'ნიკა ზედგინიძე',
 
     status: 'resolved',
 
-    resolvedDate: new Date('2024-12-06'),
+    resolvedDate: new Date('2025-12-06'),
 
     resolution: 'სენსორის კალიბრაცია',
 
@@ -850,13 +910,13 @@ export const mockProblemReports: ProblemReport[] = [
 
     description: 'გაჟონვა ზედა manway gasket-ზე',
 
-    reportedDate: new Date('2024-11-20'),
+    reportedDate: new Date('2025-11-20'),
 
     reportedBy: 'გიორგი კაპანაძე',
 
     status: 'resolved',
 
-    resolvedDate: new Date('2024-11-20'),
+    resolvedDate: new Date('2025-11-20'),
 
     resolution: 'Gasket-ის შეცვლა',
 
@@ -876,13 +936,13 @@ export const mockProblemReports: ProblemReport[] = [
 
     description: 'CIP spray ball დაბლოკილი',
 
-    reportedDate: new Date('2024-09-15'),
+    reportedDate: new Date('2025-09-15'),
 
     reportedBy: 'ნიკა ზედგინიძე',
 
     status: 'resolved',
 
-    resolvedDate: new Date('2024-09-15'),
+    resolvedDate: new Date('2025-09-15'),
 
     resolution: 'გაწმენდა',
 
@@ -914,26 +974,24 @@ export const mockSpareParts: SparePart[] = [
 
 
 
-export const equipmentTypeConfig = {
+export const capabilityConfig: Record<TankCapability, { label: string; icon: string; color: string }> = {
+  fermenting: { label: 'ფერმენტაცია', icon: '🧪', color: 'text-green-400' },
+  conditioning: { label: 'კონდიცირება', icon: '❄️', color: 'text-blue-400' },
+  brewing: { label: 'ხარშვა', icon: '🔥', color: 'text-orange-400' },
+  storage: { label: 'შენახვა', icon: '📦', color: 'text-slate-400' },
+}
 
-  fermenter: { name: 'ფერმენტატორი', icon: '🧪' },
-
-  brite: { name: 'Brite Tank', icon: '🍺' },
-
-  kettle: { name: 'სახარში ქვაბი', icon: '🔥' },
-
-  mash_tun: { name: 'Mash Tun', icon: '🌾' },
-
-  hlt: { name: 'HLT', icon: '♨️' },
-
+export const equipmentTypeConfig: Record<EquipmentType, { name: string; icon: string; defaultCapabilities?: TankCapability[] }> = {
+  fermenter: { name: 'ფერმენტატორი', icon: '🧪', defaultCapabilities: ['fermenting'] },
+  unitank: { name: 'Unitank', icon: '🔄', defaultCapabilities: ['fermenting', 'conditioning'] },
+  brite: { name: 'Brite Tank', icon: '🍺', defaultCapabilities: ['conditioning'] },
+  kettle: { name: 'სახარში ქვაბი', icon: '🔥', defaultCapabilities: ['brewing'] },
+  mash_tun: { name: 'Mash Tun', icon: '🌾', defaultCapabilities: ['brewing'] },
+  hlt: { name: 'HLT', icon: '♨️', defaultCapabilities: ['brewing'] },
   pump: { name: 'ტუმბო', icon: '💨' },
-
   chiller: { name: 'გამაცივებელი', icon: '❄️' },
-
   cip: { name: 'CIP სისტემა', icon: '🧹' },
-
   other: { name: 'სხვა', icon: '⚙️' },
-
 }
 
 
@@ -956,7 +1014,7 @@ export const maintenanceTypeConfig = {
 
 export const mockTesters = [
 
-  { id: '1', name: 'ნიკა ზედგინიძე', role: 'მთავარი მეხარშე' },
+  { id: '1', name: 'ნიკა ზედგინიძე', role: 'მთავარი ტექნოლოგი' },
 
   { id: '2', name: 'გიორგი კაპანაძე', role: 'QC მენეჯერი' },
 

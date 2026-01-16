@@ -1,459 +1,246 @@
 'use client'
 
-
-
-import { useState } from 'react'
-
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
-
 import { Card, CardHeader, CardBody, Button } from '@/components/ui'
-
 import { formatDate, formatCurrency } from '@/lib/utils'
 
-
-
-interface FinishedProduct {
-
+interface Product {
   id: string
-
-  batchId: string
-
-  batchNumber: string
-
-  productName: string
-
-  style: string
-
-  abv: number
-
-  packageType: 'keg' | 'bottle' | 'can'
-
-  packageSize: number
-
-  quantity: number
-
-  reservedQuantity: number
-
+  name: string
+  style?: string | null
+  abv?: number | null
+  packageType: string
+  packageTypeName?: string
+  totalProduced: number
+  soldQuantity: number
+  reservedQuantity?: number
   availableQuantity: number
-
-  pricePerUnit: number
-
-  productionDate: Date
-
-  expiryDate: Date
-
-  status: 'available' | 'low_stock' | 'sold_out'
-
+  pricePerUnit?: number
 }
 
+const getPackageTypeName = (type: string): string => {
+  const names: Record<string, string> = {
+    KEG_50: 'კეგი 50L',
+    KEG_30: 'კეგი 30L',
+    KEG_20: 'კეგი 20L',
+    BOTTLE_750: 'ბოთლი 750ml',
+    BOTTLE_500: 'ბოთლი 500ml',
+    BOTTLE_330: 'ბოთლი 330ml',
+    CAN_500: 'ქილა 500ml',
+    CAN_330: 'ქილა 330ml',
+  }
+  return names[type] || type
+}
 
-
-const mockProducts: FinishedProduct[] = [
-
-  { id: '1', batchId: '1', batchNumber: 'BRW-2024-0156', productName: 'Georgian Amber Lager', style: 'Amber Lager', abv: 5.2, packageType: 'keg', packageSize: 30, quantity: 12, reservedQuantity: 2, availableQuantity: 10, pricePerUnit: 2400, productionDate: new Date('2024-12-01'), expiryDate: new Date('2025-03-15'), status: 'available' },
-
-  { id: '2', batchId: '1', batchNumber: 'BRW-2024-0156', productName: 'Georgian Amber Lager', style: 'Amber Lager', abv: 5.2, packageType: 'bottle', packageSize: 0.5, quantity: 240, reservedQuantity: 60, availableQuantity: 180, pricePerUnit: 8, productionDate: new Date('2024-12-01'), expiryDate: new Date('2025-06-01'), status: 'available' },
-
-  { id: '3', batchId: '2', batchNumber: 'BRW-2024-0155', productName: 'Tbilisi IPA', style: 'IPA', abv: 6.5, packageType: 'keg', packageSize: 30, quantity: 8, reservedQuantity: 2, availableQuantity: 6, pricePerUnit: 2600, productionDate: new Date('2024-11-25'), expiryDate: new Date('2025-02-25'), status: 'available' },
-
-  { id: '4', batchId: '2', batchNumber: 'BRW-2024-0155', productName: 'Tbilisi IPA', style: 'IPA', abv: 6.5, packageType: 'bottle', packageSize: 0.5, quantity: 480, reservedQuantity: 160, availableQuantity: 320, pricePerUnit: 9, productionDate: new Date('2024-11-25'), expiryDate: new Date('2025-05-25'), status: 'available' },
-
-  { id: '5', batchId: '3', batchNumber: 'BRW-2024-0154', productName: 'Kolkheti Wheat', style: 'Wheat', abv: 4.8, packageType: 'keg', packageSize: 30, quantity: 6, reservedQuantity: 2, availableQuantity: 4, pricePerUnit: 2200, productionDate: new Date('2024-11-20'), expiryDate: new Date('2025-02-20'), status: 'low_stock' },
-
-  { id: '6', batchId: '4', batchNumber: 'BRW-2024-0153', productName: 'Caucasus Stout', style: 'Stout', abv: 5.8, packageType: 'bottle', packageSize: 0.33, quantity: 360, reservedQuantity: 80, availableQuantity: 280, pricePerUnit: 7, productionDate: new Date('2024-11-15'), expiryDate: new Date('2025-05-15'), status: 'available' },
-
-  { id: '7', batchId: '5', batchNumber: 'BRW-2024-0152', productName: 'Svaneti Pilsner', style: 'Pilsner', abv: 4.5, packageType: 'keg', packageSize: 50, quantity: 4, reservedQuantity: 2, availableQuantity: 2, pricePerUnit: 3800, productionDate: new Date('2024-11-10'), expiryDate: new Date('2025-02-10'), status: 'low_stock' },
-
-  { id: '8', batchId: '5', batchNumber: 'BRW-2024-0152', productName: 'Svaneti Pilsner', style: 'Pilsner', abv: 4.5, packageType: 'can', packageSize: 0.5, quantity: 600, reservedQuantity: 150, availableQuantity: 450, pricePerUnit: 6, productionDate: new Date('2024-11-10'), expiryDate: new Date('2025-08-10'), status: 'available' },
-
-]
-
-
+const getStatusBadge = (status: string) => {
+  const config: Record<string, { label: string; color: string; bg: string }> = {
+    available: { label: 'ხელმისაწვდომი', color: 'text-green-400', bg: 'bg-green-400/20' },
+    low_stock: { label: 'დაბალი მარაგი', color: 'text-amber-400', bg: 'bg-amber-400/20' },
+    sold_out: { label: 'გაყიდული', color: 'text-red-400', bg: 'bg-red-400/20' },
+  }
+  const c = config[status] || config.available
+  return <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${c.bg} ${c.color}`}>{c.label}</span>
+}
 
 export default function ProductsPage() {
-
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-
-  const [typeFilter, setTypeFilter] = useState<string>('all')
-
-  const [styleFilter, setStyleFilter] = useState<string>('all')
-
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-
-
-
-  const filteredProducts = mockProducts.filter(product => {
-
-    if (typeFilter !== 'all' && product.packageType !== typeFilter) return false
-
-    if (styleFilter !== 'all' && product.style !== styleFilter) return false
-
-    if (statusFilter !== 'all' && product.status !== statusFilter) return false
-
-    return true
-
+  const router = useRouter()
+  const [products, setProducts] = useState<Product[]>([])
+  const [stats, setStats] = useState({
+    total: 0,
+    kegs: 0,
+    bottles: 0,
+    cans: 0,
+    totalProduced: 0,
+    totalSold: 0,
+    totalAvailable: 0,
   })
+  const [loading, setLoading] = useState(true)
+  const [packageTypeFilter, setPackageTypeFilter] = useState<string>('all')
+  const [availabilityFilter, setAvailabilityFilter] = useState<string>('all')
 
+  // Fetch products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        const params = new URLSearchParams()
+        if (packageTypeFilter !== 'all') params.append('packageType', packageTypeFilter)
+        if (availabilityFilter === 'available') params.append('availableOnly', 'true')
 
-
-  const getStatusBadge = (status: string) => {
-
-    const config: Record<string, { label: string; color: string; bg: string }> = {
-
-      available: { label: 'ხელმისაწვდომი', color: 'text-green-400', bg: 'bg-green-400/20' },
-
-      low_stock: { label: 'მცირე მარაგი', color: 'text-amber-400', bg: 'bg-amber-400/20' },
-
-      sold_out: { label: 'ამოიწურა', color: 'text-red-400', bg: 'bg-red-400/20' },
-
+        const res = await fetch(`/api/products?${params.toString()}`)
+        if (res.ok) {
+          const data = await res.json()
+          setProducts(data.products || [])
+          // Map API response to our stats format
+          const apiStats = data.stats || {}
+          setStats({
+            total: apiStats.totalProducts || 0,
+            kegs: apiStats.kegs || 0,
+            bottles: apiStats.bottles || 0,
+            cans: apiStats.cans || 0,
+            totalProduced: apiStats.totalProduced || 0,
+            totalSold: apiStats.totalSold || 0,
+            totalAvailable: apiStats.totalAvailable || 0,
+          })
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    const c = config[status] || config.available
+    fetchProducts()
+  }, [packageTypeFilter, availabilityFilter])
 
-    return <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${c.bg} ${c.color}`}>{c.label}</span>
-
-  }
-
-
-
-  const getPackageLabel = (type: string, size: number) => {
-
-    if (type === 'keg') return `კეგი ${size}L`
-
-    if (type === 'bottle') return `ბოთლი ${size}L`
-
-    return `ქილა ${size}L`
-
-  }
-
-
+  const filteredProducts = products
 
   return (
-
-    <DashboardLayout title="მზა პროდუქცია" breadcrumb="მთავარი / გაყიდვები / მზა პროდუქცია">
-
+    <DashboardLayout 
+      title="🍺 პროდუქტების მართვა"
+      breadcrumb="მთავარი / გაყიდვები / პროდუქტები"
+    >
       {/* Header */}
-
-      <div className="flex justify-between items-center mb-6">
-
-        <h1 className="text-2xl font-display font-bold">მზა პროდუქცია</h1>
-
-        <div className="flex gap-2">
-
-          <button
-
-            onClick={() => setViewMode('grid')}
-
-            className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-copper text-white' : 'bg-bg-tertiary'}`}
-
-          >
-
-            ▦
-
-          </button>
-
-          <button
-
-            onClick={() => setViewMode('list')}
-
-            className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-copper text-white' : 'bg-bg-tertiary'}`}
-
-          >
-
-            ☰
-
-          </button>
-
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Link href="/sales">
+            <Button variant="ghost" size="sm">← უკან</Button>
+          </Link>
+          <h2 className="text-2xl font-bold text-text-primary">პროდუქტები</h2>
         </div>
-
+      </div>
+      {/* Stats Cards - Compact */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-bg-card border border-border rounded-xl p-4">
+          <div className="text-2xl mb-1">📦</div>
+          <div className="text-2xl font-bold text-copper">{stats?.total || products.length}</div>
+          <div className="text-xs text-text-muted">სულ პროდუქტი</div>
+        </div>
+        <div className="bg-bg-card border border-border rounded-xl p-4">
+          <div className="text-2xl mb-1">🛢️</div>
+          <div className="text-2xl font-bold text-amber-400">{stats?.kegs || 0}</div>
+          <div className="text-xs text-text-muted">კეგები</div>
+        </div>
+        <div className="bg-bg-card border border-border rounded-xl p-4">
+          <div className="text-2xl mb-1">🍾</div>
+          <div className="text-2xl font-bold text-green-400">{stats?.bottles || 0}</div>
+          <div className="text-xs text-text-muted">ბოთლები</div>
+        </div>
+        <div className="bg-bg-card border border-border rounded-xl p-4">
+          <div className="text-2xl mb-1">🥫</div>
+          <div className="text-2xl font-bold text-blue-400">{stats?.cans || 0}</div>
+          <div className="text-xs text-text-muted">ქილები</div>
+        </div>
       </div>
 
-
-
       {/* Filters */}
-
       <Card className="mb-6">
-
         <CardBody>
-
-          <div className="grid grid-cols-3 gap-4">
-
+          <div className="grid grid-cols-2 gap-4">
             <div>
-
-              <label className="block text-xs text-text-muted mb-2">ტიპი</label>
-
+              <label className="block text-xs text-text-muted mb-2">შეფუთვის ტიპი</label>
               <select
-
-                value={typeFilter}
-
-                onChange={(e) => setTypeFilter(e.target.value)}
-
+                value={packageTypeFilter}
+                onChange={(e) => setPackageTypeFilter(e.target.value)}
                 className="w-full px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-sm outline-none focus:border-copper"
-
               >
-
                 <option value="all">ყველა</option>
-
-                <option value="keg">კეგი</option>
-
-                <option value="bottle">ბოთლი</option>
-
-                <option value="can">ქილა</option>
-
+                <option value="KEG_50">კეგი 50L</option>
+                <option value="KEG_30">კეგი 30L</option>
+                <option value="KEG_20">კეგი 20L</option>
+                <option value="BOTTLE_750">ბოთლი 750ml</option>
+                <option value="BOTTLE_500">ბოთლი 500ml</option>
+                <option value="BOTTLE_330">ბოთლი 330ml</option>
+                <option value="CAN_500">ქილა 500ml</option>
+                <option value="CAN_330">ქილა 330ml</option>
               </select>
-
             </div>
 
             <div>
-
-              <label className="block text-xs text-text-muted mb-2">სტილი</label>
-
+              <label className="block text-xs text-text-muted mb-2">ხელმისაწვდომობა</label>
               <select
-
-                value={styleFilter}
-
-                onChange={(e) => setStyleFilter(e.target.value)}
-
+                value={availabilityFilter}
+                onChange={(e) => setAvailabilityFilter(e.target.value)}
                 className="w-full px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-sm outline-none focus:border-copper"
-
               >
-
                 <option value="all">ყველა</option>
-
-                <option value="Amber Lager">Amber Lager</option>
-
-                <option value="IPA">IPA</option>
-
-                <option value="Wheat">Wheat</option>
-
-                <option value="Stout">Stout</option>
-
-                <option value="Pilsner">Pilsner</option>
-
-              </select>
-
-            </div>
-
-            <div>
-
-              <label className="block text-xs text-text-muted mb-2">სტატუსი</label>
-
-              <select
-
-                value={statusFilter}
-
-                onChange={(e) => setStatusFilter(e.target.value)}
-
-                className="w-full px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-sm outline-none focus:border-copper"
-
-              >
-
-                <option value="all">ყველა</option>
-
                 <option value="available">ხელმისაწვდომი</option>
-
-                <option value="low_stock">მცირე მარაგი</option>
-
-                <option value="sold_out">ამოიწურა</option>
-
+                <option value="low_stock">დაბალი მარაგი</option>
+                <option value="sold_out">გაყიდული</option>
               </select>
-
             </div>
-
           </div>
-
         </CardBody>
-
       </Card>
 
-
-
-      {/* Products Grid/List */}
-
-      {viewMode === 'grid' ? (
-
-        <div className="grid grid-cols-3 gap-6">
-
-          {filteredProducts.map(product => (
-
-            <Card key={product.id} className="hover:border-copper transition-colors">
-
-              <CardBody>
-
-                <div className="flex items-start justify-between mb-3">
-
-                  <div className="flex-1">
-
-                    <h3 className="font-medium text-lg mb-1">{product.productName}</h3>
-
-                    <p className="text-xs text-text-muted">
-
-                      {product.batchNumber} | {product.style} | {product.abv}% ABV
-
-                    </p>
-
-                  </div>
-
-                  {getStatusBadge(product.status)}
-
-                </div>
-
-
-
-                <div className="mb-4 p-3 bg-bg-tertiary rounded-lg">
-
-                  <p className="text-sm font-medium mb-2">📦 {getPackageLabel(product.packageType, product.packageSize)}</p>
-
-                  <div className="space-y-1 text-sm">
-
-                    <div className="flex justify-between">
-
-                      <span className="text-text-muted">მარაგში:</span>
-
-                      <span className="font-mono">{product.quantity} ცალი ({product.quantity * product.packageSize}L)</span>
-
-                    </div>
-
-                    <div className="flex justify-between">
-
-                      <span className="text-text-muted">დაჯავშნილი:</span>
-
-                      <span className="font-mono">{product.reservedQuantity} ცალი</span>
-
-                    </div>
-
-                    <div className="flex justify-between">
-
-                      <span className="text-text-muted">ხელმისაწვდომი:</span>
-
-                      <span className="font-mono text-green-400">{product.availableQuantity} ცალი</span>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-
-
-                <div className="mb-4">
-
-                  <p className="text-sm text-text-muted mb-1">ფასი:</p>
-
-                  <p className="text-xl font-bold font-mono text-copper-light">{formatCurrency(product.pricePerUnit)} / ცალი</p>
-
-                </div>
-
-
-
-                <div className="mb-4 text-xs text-text-muted">
-
-                  <p>ვარგისი: {formatDate(product.expiryDate)}</p>
-
-                </div>
-
-
-
-                <Button variant="primary" className="w-full" disabled={product.status === 'sold_out'}>
-
-                  + შეკვეთაში
-
-                </Button>
-
-              </CardBody>
-
-            </Card>
-
-          ))}
-
-        </div>
-
-      ) : (
-
-        <Card>
-
-          <CardBody noPadding>
-
+      {/* Products Table */}
+      <Card>
+        <CardHeader>📦 პროდუქტების სია ({filteredProducts.length})</CardHeader>
+        <CardBody noPadding>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-copper"></div>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-8 text-text-muted">
+              პროდუქტები არ მოიძებნა
+            </div>
+          ) : (
             <table className="w-full">
-
               <thead>
-
                 <tr className="bg-bg-tertiary border-b border-border text-left text-xs text-text-muted">
-
                   <th className="px-4 py-3">პროდუქტი</th>
-
-                  <th className="px-4 py-3">პარტია</th>
-
-                  <th className="px-4 py-3">ტიპი</th>
-
-                  <th className="px-4 py-3">მარაგი</th>
-
-                  <th className="px-4 py-3">ხელმისაწვდომი</th>
-
-                  <th className="px-4 py-3">ფასი</th>
-
+                  <th className="px-4 py-3">შეფუთვა</th>
+                  <th className="px-4 py-3 text-right">წარმოებული</th>
+                  <th className="px-4 py-3 text-right">გაყიდული</th>
+                  <th className="px-4 py-3 text-right">დაჯავშნილი</th>
+                  <th className="px-4 py-3 text-right">ხელმისაწვდომი</th>
                   <th className="px-4 py-3">სტატუსი</th>
-
-                  <th className="px-4 py-3"></th>
-
                 </tr>
-
               </thead>
-
               <tbody>
-
                 {filteredProducts.map(product => (
-
-                  <tr key={product.id} className="border-b border-border/50 hover:bg-bg-tertiary/50">
-
+                  <tr
+                    key={product.id}
+                    className="border-b border-border/50 hover:bg-bg-tertiary/50 transition-colors"
+                  >
                     <td className="px-4 py-3">
-
-                      <p className="font-medium">{product.productName}</p>
-
-                      <p className="text-xs text-text-muted">{product.style} | {product.abv}% ABV</p>
-
+                      <p className="font-medium">{product.name}</p>
+                      {product.style && (
+                        <p className="text-xs text-text-muted">{product.style}</p>
+                      )}
+                      {product.abv && (
+                        <p className="text-xs text-text-muted">ABV: {product.abv}%</p>
+                      )}
                     </td>
-
-                    <td className="px-4 py-3 font-mono text-sm text-text-muted">{product.batchNumber}</td>
-
-                    <td className="px-4 py-3 text-sm">{getPackageLabel(product.packageType, product.packageSize)}</td>
-
-                    <td className="px-4 py-3 font-mono text-sm">{product.quantity} ცალი</td>
-
-                    <td className="px-4 py-3 font-mono text-sm text-green-400">{product.availableQuantity} ცალი</td>
-
-                    <td className="px-4 py-3 font-mono">{formatCurrency(product.pricePerUnit)}</td>
-
-                    <td className="px-4 py-3">{getStatusBadge(product.status)}</td>
-
+                    <td className="px-4 py-3 text-sm">{product.packageTypeName || getPackageTypeName(product.packageType)}</td>
+                    <td className="px-4 py-3 text-right font-mono">{product.totalProduced}</td>
+                    <td className="px-4 py-3 text-right font-mono text-amber-400">
+                      {product.soldQuantity || 0}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-blue-400">
+                      {product.reservedQuantity || 0}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-green-400 font-bold">
+                      {product.availableQuantity}
+                    </td>
                     <td className="px-4 py-3">
-
-                      <Button variant="primary" size="sm" disabled={product.status === 'sold_out'}>
-
-                        + შეკვეთაში
-
-                      </Button>
-
+                      {product.availableQuantity === 0
+                        ? getStatusBadge('sold_out')
+                        : product.availableQuantity < 10
+                        ? getStatusBadge('low_stock')
+                        : getStatusBadge('available')}
                     </td>
-
                   </tr>
-
                 ))}
-
               </tbody>
-
             </table>
-
-          </CardBody>
-
-        </Card>
-
-      )}
-
+          )}
+        </CardBody>
+      </Card>
     </DashboardLayout>
-
   )
-
 }
-
-

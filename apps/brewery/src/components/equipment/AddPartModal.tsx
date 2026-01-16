@@ -380,7 +380,7 @@ export function AddPartModal({ isOpen, onClose, onAdd }: AddPartModalProps) {
 
           <div className="flex justify-end gap-2 pt-4 border-t border-border">
 
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose}>
 
               გაუქმება
 

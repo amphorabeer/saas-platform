@@ -8,7 +8,15 @@ import { Button } from '@/components/ui'
 
 import { formatDateTime } from '@/lib/utils'
 
-import { mockTesters, type SensoryTest } from '@/data/qualityData'
+import { type SensoryTest } from '@/data/qualityData'
+
+interface User {
+  id: string
+  name: string
+  email?: string
+  role?: string
+  isActive?: boolean
+}
 
 import { mockBatches } from '@/data/mockData'
 
@@ -91,6 +99,31 @@ export function SensoryTestModal({ test, batchId, isOpen, onClose, onSave }: Sen
   const [performedBy, setPerformedBy] = useState<string>(test?.performedBy || '')
 
   const [notes, setNotes] = useState<string>(test?.notes || '')
+  
+  // Users state (synced with settings/users)
+  const [users, setUsers] = useState<User[]>([])
+
+  // Fetch users from API (same as settings/users page)
+  useEffect(() => {
+    if (isOpen) {
+      const fetchUsers = async () => {
+        try {
+          const response = await fetch('/api/users')
+          if (response.ok) {
+            const data = await response.json()
+            setUsers(data.users || [])
+          } else {
+            console.error('Error fetching users:', response.statusText)
+            setUsers([])
+          }
+        } catch (error) {
+          console.error('Error fetching users:', error)
+          setUsers([])
+        }
+      }
+      fetchUsers()
+    }
+  }, [isOpen])
 
 
 
@@ -148,9 +181,9 @@ export function SensoryTestModal({ test, batchId, isOpen, onClose, onSave }: Sen
 
       batchId: selectedBatchId,
 
-      batchNumber: selectedBatch.batchNumber,
+      batchNumber: selectedBatch?.batchNumber,
 
-      recipeName: selectedBatch.recipeName,
+      recipeName: selectedBatch?.recipeName,
 
       ...scores,
 
@@ -244,7 +277,7 @@ export function SensoryTestModal({ test, batchId, isOpen, onClose, onSave }: Sen
 
                 <span className="text-text-muted">პარტია:</span>
 
-                <span className="ml-2 font-medium text-copper-light">{selectedBatch.batchNumber}</span>
+                <span className="ml-2 font-medium text-copper-light">{selectedBatch?.batchNumber}</span>
 
               </div>
 
@@ -252,7 +285,7 @@ export function SensoryTestModal({ test, batchId, isOpen, onClose, onSave }: Sen
 
                 <span className="text-text-muted">რეცეპტი:</span>
 
-                <span className="ml-2 font-medium text-text-primary">{selectedBatch.recipeName}</span>
+                <span className="ml-2 font-medium text-text-primary">{selectedBatch?.recipeName}</span>
 
               </div>
 
@@ -404,7 +437,7 @@ export function SensoryTestModal({ test, batchId, isOpen, onClose, onSave }: Sen
 
               />
 
-              <Button type="button" variant="outline" size="sm" onClick={handleAddCustomDefect}>
+              <Button type="button" variant="secondary" size="sm" onClick={handleAddCustomDefect}>
 
                 დამატება
 
@@ -460,11 +493,11 @@ export function SensoryTestModal({ test, batchId, isOpen, onClose, onSave }: Sen
 
               <option value="">აირჩიეთ შემსრულებელი</option>
 
-              {mockTesters.map(tester => (
+              {users.filter(user => user.name && user.isActive !== false).map(user => (
 
-                <option key={tester.id} value={tester.name}>
+                <option key={user.id} value={user.name}>
 
-                  {tester.name} - {tester.role}
+                  {user.name}{user.role ? ` – ${user.role}` : ''}
 
                 </option>
 
@@ -506,7 +539,7 @@ export function SensoryTestModal({ test, batchId, isOpen, onClose, onSave }: Sen
 
         <div className="p-6 border-t border-border flex justify-end gap-2">
 
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
 
             გაუქმება
 
