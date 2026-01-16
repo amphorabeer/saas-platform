@@ -1,4 +1,4 @@
-// ტანკები - გამოიყენება: /fermentation, /calendar
+// ავზები - გამოიყენება: /fermentation, /calendar
 
 export const mockTanks = [
 
@@ -286,7 +286,7 @@ export const mockCalendarEvents = [
 
     type: 'conditioning' as const,
 
-    title: 'BRW-0154 კონდიციონირება',
+    title: 'BRW-0154 კონდიცირება',
 
     batchId: '3',
 

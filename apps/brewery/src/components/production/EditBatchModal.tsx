@@ -7,6 +7,7 @@ interface EditBatchModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (data: BatchEditData) => void
+  onDelete?: () => void
   batch: {
     id: string
     batchNumber: string
@@ -26,7 +27,7 @@ interface BatchEditData {
   brewer: string
 }
 
-export function EditBatchModal({ isOpen, onClose, onSubmit, batch }: EditBatchModalProps) {
+export function EditBatchModal({ isOpen, onClose, onSubmit, onDelete, batch }: EditBatchModalProps) {
   const [formData, setFormData] = useState<BatchEditData>({
     volume: batch.volume,
     targetOG: batch.targetOG,
@@ -34,6 +35,7 @@ export function EditBatchModal({ isOpen, onClose, onSubmit, batch }: EditBatchMo
     notes: batch.notes || '',
     brewer: batch.brewer || '',
   })
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -145,14 +147,43 @@ export function EditBatchModal({ isOpen, onClose, onSubmit, batch }: EditBatchMo
               />
             </div>
           </div>
+
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-border flex justify-end gap-3 bg-bg-tertiary">
-          <Button variant="secondary" onClick={onClose}>გაუქმება</Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            შენახვა
-          </Button>
+        <div className="px-6 py-4 border-t border-border flex justify-between items-center bg-bg-tertiary">
+          {/* Delete on LEFT */}
+          {onDelete && (
+            <div>
+              {!showDeleteConfirm ? (
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                >
+                  🗑️ წაშლა
+                </Button>
+              ) : (
+                <div className="flex gap-2 items-center">
+                  <p className="text-red-400 text-sm mr-2">დარწმუნებული ხარ?</p>
+                  <Button size="sm" variant="secondary" onClick={() => setShowDeleteConfirm(false)}>არა</Button>
+                  <Button size="sm" className="bg-red-600" onClick={() => {
+                    onDelete()
+                    setShowDeleteConfirm(false)
+                    onClose()
+                  }}>დიახ, წაშალე</Button>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Save/Cancel on RIGHT */}
+          <div className="flex gap-3">
+            <Button variant="secondary" onClick={onClose}>გაუქმება</Button>
+            <Button variant="primary" onClick={handleSubmit}>
+              შენახვა
+            </Button>
+          </div>
         </div>
       </div>
     </div>

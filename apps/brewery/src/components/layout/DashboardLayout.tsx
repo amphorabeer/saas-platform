@@ -4,7 +4,7 @@ import { Header } from './Header'
 interface DashboardLayoutProps {
   children: React.ReactNode
   title: string
-  breadcrumb: string
+  breadcrumb?: string
   onNewBatch?: () => void
 }
 
@@ -13,7 +13,7 @@ export function DashboardLayout({ children, title, breadcrumb, onNewBatch }: Das
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="flex-1 ml-[260px] flex flex-col">
-        <Header title={title} breadcrumb={breadcrumb} onNewBatch={onNewBatch} />
+        <Header title={title} breadcrumb={breadcrumb || ''} onNewBatch={onNewBatch} />
         <div className="flex-1 p-8 overflow-y-auto">
           {children}
         </div>
@@ -21,5 +21,14 @@ export function DashboardLayout({ children, title, breadcrumb, onNewBatch }: Das
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
 
 

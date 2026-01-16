@@ -2,13 +2,21 @@
 
 
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { Button } from '@/components/ui'
 
 import { formatDate, formatTime, formatDateTime } from '@/lib/utils'
 
-import { mockTesters, getTestStatus, testTypeConfig, type QCTest } from '@/data/qualityData'
+import { getTestStatus, testTypeConfig, type QCTest } from '@/data/qualityData'
+
+interface User {
+  id: string
+  name: string
+  email?: string
+  role?: string
+  isActive?: boolean
+}
 
 
 
@@ -41,6 +49,31 @@ export function TestResultModal({ test, isOpen, onClose, onSave }: TestResultMod
   )
 
   const [notes, setNotes] = useState<string>(test?.notes || '')
+  
+  // Users state (synced with settings/users)
+  const [users, setUsers] = useState<User[]>([])
+
+  // Fetch users from API (same as settings/users page)
+  useEffect(() => {
+    if (isOpen) {
+      const fetchUsers = async () => {
+        try {
+          const response = await fetch('/api/users')
+          if (response.ok) {
+            const data = await response.json()
+            setUsers(data.users || [])
+          } else {
+            console.error('Error fetching users:', response.statusText)
+            setUsers([])
+          }
+        } catch (error) {
+          console.error('Error fetching users:', error)
+          setUsers([])
+        }
+      }
+      fetchUsers()
+    }
+  }, [isOpen])
 
 
 
@@ -77,6 +110,7 @@ export function TestResultModal({ test, isOpen, onClose, onSave }: TestResultMod
     onSave(test.id, numResult, performedBy, notes || undefined)
 
     setIsEditing(false)
+    onClose()
 
   }
 
@@ -336,11 +370,11 @@ export function TestResultModal({ test, isOpen, onClose, onSave }: TestResultMod
 
                   <option value="">აირჩიეთ შემსრულებელი</option>
 
-                  {mockTesters.map(tester => (
+                  {users.filter(user => user.name && user.isActive !== false).map(user => (
 
-                    <option key={tester.id} value={tester.name}>
+                    <option key={user.id} value={user.name}>
 
-                      {tester.name} - {tester.role}
+                      {user.name}{user.role ? ` – ${user.role}` : ''}
 
                     </option>
 
@@ -410,13 +444,13 @@ export function TestResultModal({ test, isOpen, onClose, onSave }: TestResultMod
 
             <>
 
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="secondary" onClick={onClose}>
 
                 დახურვა
 
               </Button>
 
-              <Button variant="outline" onClick={() => setIsEditing(true)}>
+              <Button variant="secondary" onClick={() => setIsEditing(true)}>
 
                 რედაქტირება
 
@@ -428,16 +462,12 @@ export function TestResultModal({ test, isOpen, onClose, onSave }: TestResultMod
 
             <>
 
-              <Button variant="outline" onClick={() => {
-
+              <Button variant="secondary" onClick={() => {
                 setIsEditing(false)
-
                 setResult(test.result?.toString() || '')
-
                 setPerformedBy(test.performedBy || '')
-
                 setNotes(test.notes || '')
-
+                onClose()
               }}>
 
                 გაუქმება

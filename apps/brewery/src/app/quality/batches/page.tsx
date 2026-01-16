@@ -212,7 +212,7 @@ export default function BatchesQCPage() {
 
                       {batch.batchStatus === 'fermenting' ? '🧪 ფერმენტაცია' :
 
-                       batch.batchStatus === 'conditioning' ? '🔵 კონდიციონირება' :
+                       batch.batchStatus === 'conditioning' ? '🔵 კონდიცირება' :
 
                        batch.batchStatus === 'packaged' ? '✅ დაფასოებული' :
 
@@ -224,7 +224,7 @@ export default function BatchesQCPage() {
 
                   <div>
 
-                    <span className="text-text-muted">ტანკი:</span>
+                    <span className="text-text-muted">ავზი:</span>
 
                     <span className="ml-2 font-medium text-text-primary">{batch.tankName}</span>
 

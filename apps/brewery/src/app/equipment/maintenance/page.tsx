@@ -338,7 +338,7 @@ export default function MaintenancePage() {
 
                     </div>
 
-                    <Button variant="outline" size="sm">
+                    <Button variant="secondary" size="sm">
 
                       შესრულება
 
@@ -426,7 +426,7 @@ export default function MaintenancePage() {
 
                       <td className="py-3 px-4 text-sm">
 
-                        <Button variant="outline" size="sm">
+                        <Button variant="secondary" size="sm">
 
                           შესრულება
 

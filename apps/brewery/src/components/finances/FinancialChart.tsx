@@ -1,190 +1,160 @@
 'use client'
 
-import { MonthlyFinancials } from '@/data/financeData'
-import { formatCurrency } from '@/lib/utils'
-import { useState } from 'react'
+import { useEffect, useRef } from 'react'
+
+interface MonthData {
+  month: string
+  year: number
+  income: number
+  expenses: number
+  profit: number
+}
 
 interface FinancialChartProps {
-  data: MonthlyFinancials[]
-  showIncome?: boolean
-  showExpenses?: boolean
-  showProfit?: boolean
+  data: MonthData[]
   height?: number
 }
 
-export function FinancialChart({
-  data,
-  showIncome = true,
-  showExpenses = true,
-  showProfit = true,
-  height = 300
-}: FinancialChartProps) {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+export function FinancialChart({ data, height = 300 }: FinancialChartProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const maxValue = Math.max(
-    ...data.map(d => Math.max(d.income, d.expenses, d.profit))
-  )
+  useEffect(() => {
+    if (!canvasRef.current || data.length === 0) return
 
-  const getBarHeight = (value: number) => {
-    return (value / maxValue) * (height - 60)
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    // Set canvas size
+    const dpr = window.devicePixelRatio || 1
+    const rect = canvas.getBoundingClientRect()
+    canvas.width = rect.width * dpr
+    canvas.height = rect.height * dpr
+    ctx.scale(dpr, dpr)
+
+    // Clear canvas
+    ctx.clearRect(0, 0, rect.width, rect.height)
+
+    // Chart dimensions
+    const padding = { top: 20, right: 20, bottom: 60, left: 70 }
+    const chartWidth = rect.width - padding.left - padding.right
+    const chartHeight = rect.height - padding.top - padding.bottom
+
+    // Find max value for scale
+    const allValues = data.flatMap(d => [d.income, d.expenses, Math.abs(d.profit)])
+    const maxValue = Math.max(...allValues, 1000) * 1.1
+
+    // Draw grid lines
+    ctx.strokeStyle = '#333'
+    ctx.lineWidth = 0.5
+    const gridLines = 5
+    for (let i = 0; i <= gridLines; i++) {
+      const y = padding.top + (chartHeight / gridLines) * i
+      ctx.beginPath()
+      ctx.moveTo(padding.left, y)
+      ctx.lineTo(rect.width - padding.right, y)
+      ctx.stroke()
+
+      // Y-axis labels
+      const value = maxValue - (maxValue / gridLines) * i
+      ctx.fillStyle = '#888'
+      ctx.font = '11px sans-serif'
+      ctx.textAlign = 'right'
+      ctx.fillText(formatK(value), padding.left - 10, y + 4)
+    }
+
+    // Bar width calculation
+    const barGroupWidth = chartWidth / data.length
+    const barWidth = barGroupWidth * 0.25
+    const gap = barWidth * 0.3
+
+    // Draw bars
+    data.forEach((item, index) => {
+      const x = padding.left + barGroupWidth * index + barGroupWidth / 2
+
+      // Income bar (green)
+      const incomeHeight = (item.income / maxValue) * chartHeight
+      ctx.fillStyle = '#22c55e'
+      ctx.fillRect(x - barWidth - gap/2, padding.top + chartHeight - incomeHeight, barWidth, incomeHeight)
+
+      // Expenses bar (red)
+      const expenseHeight = (item.expenses / maxValue) * chartHeight
+      ctx.fillStyle = '#ef4444'
+      ctx.fillRect(x + gap/2, padding.top + chartHeight - expenseHeight, barWidth, expenseHeight)
+
+      // X-axis labels (month)
+      ctx.fillStyle = '#888'
+      ctx.font = '10px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText(item.month.slice(0, 3), x, rect.height - padding.bottom + 15)
+    })
+
+    // Draw profit line
+    ctx.beginPath()
+    ctx.strokeStyle = '#B87333'
+    ctx.lineWidth = 2.5
+    data.forEach((item, index) => {
+      const x = padding.left + barGroupWidth * index + barGroupWidth / 2
+      const y = padding.top + chartHeight - (item.profit / maxValue) * chartHeight
+      
+      if (index === 0) {
+        ctx.moveTo(x, y)
+      } else {
+        ctx.lineTo(x, y)
+      }
+    })
+    ctx.stroke()
+
+    // Draw profit dots
+    data.forEach((item, index) => {
+      const x = padding.left + barGroupWidth * index + barGroupWidth / 2
+      const y = padding.top + chartHeight - (item.profit / maxValue) * chartHeight
+      
+      ctx.beginPath()
+      ctx.fillStyle = '#B87333'
+      ctx.arc(x, y, 4, 0, Math.PI * 2)
+      ctx.fill()
+    })
+
+    // Legend
+    const legendY = rect.height - 20
+    const legendItems = [
+      { color: '#22c55e', label: 'შემოსავალი' },
+      { color: '#ef4444', label: 'ხარჯი' },
+      { color: '#B87333', label: 'მოგება' },
+    ]
+    
+    let legendX = padding.left
+    legendItems.forEach(item => {
+      ctx.fillStyle = item.color
+      ctx.fillRect(legendX, legendY - 8, 12, 12)
+      ctx.fillStyle = '#888'
+      ctx.font = '11px sans-serif'
+      ctx.textAlign = 'left'
+      ctx.fillText(item.label, legendX + 16, legendY + 2)
+      legendX += ctx.measureText(item.label).width + 40
+    })
+
+  }, [data, height])
+
+  const formatK = (value: number): string => {
+    if (value >= 1000) return `${(value / 1000).toFixed(0)}K`
+    return value.toFixed(0)
   }
 
-  const getBarX = (index: number, barIndex: number) => {
-    const barWidth = 20
-    const spacing = 40
-    const startX = 60 + index * spacing
-    return startX + barIndex * (barWidth + 2)
-  }
-
-  const getLineY = (value: number) => {
-    return height - 40 - getBarHeight(value)
+  if (data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-text-muted">
+        მონაცემები არ არის
+      </div>
+    )
   }
 
   return (
-    <div className="relative" style={{ height: `${height}px` }}>
-      <svg width="100%" height={height} className="overflow-visible">
-        {/* Grid lines */}
-        {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-          const y = height - 40 - ratio * (height - 60)
-          const value = Math.round(maxValue * ratio)
-          return (
-            <g key={ratio}>
-              <line
-                x1="60"
-                y1={y}
-                x2="100%"
-                y2={y}
-                stroke="currentColor"
-                strokeWidth="1"
-                className="text-border opacity-30"
-              />
-              <text
-                x="55"
-                y={y + 4}
-                textAnchor="end"
-                className="text-xs fill-text-muted"
-              >
-                {formatCurrency(value)}
-              </text>
-            </g>
-          )
-        })}
-
-        {/* Bars */}
-        {data.map((monthData, index) => {
-          const x = getBarX(index, 0)
-          return (
-            <g key={index}>
-              {showIncome && (
-                <rect
-                  x={x}
-                  y={getLineY(monthData.income)}
-                  width={20}
-                  height={getBarHeight(monthData.income)}
-                  fill="#10b981"
-                  className="hover:opacity-80 transition-opacity cursor-pointer"
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                />
-              )}
-              {showExpenses && (
-                <rect
-                  x={x + (showIncome ? 22 : 0)}
-                  y={getLineY(monthData.expenses)}
-                  width={20}
-                  height={getBarHeight(monthData.expenses)}
-                  fill="#ef4444"
-                  className="hover:opacity-80 transition-opacity cursor-pointer"
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                />
-              )}
-            </g>
-          )
-        })}
-
-        {/* Profit line */}
-        {showProfit && (
-          <polyline
-            points={data.map((monthData, index) => {
-              const x = getBarX(index, 0) + 10
-              const y = getLineY(monthData.profit)
-              return `${x},${y}`
-            }).join(' ')}
-            fill="none"
-            stroke="#10b981"
-            strokeWidth="2"
-            strokeDasharray="5,5"
-            className="opacity-70"
-          />
-        )}
-
-        {/* Profit points */}
-        {showProfit && data.map((monthData, index) => {
-          const x = getBarX(index, 0) + 10
-          const y = getLineY(monthData.profit)
-          return (
-            <circle
-              key={index}
-              cx={x}
-              cy={y}
-              r="4"
-              fill="#10b981"
-              className="hover:r-6 transition-all cursor-pointer"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            />
-          )
-        })}
-
-        {/* X-axis labels */}
-        {data.map((monthData, index) => {
-          const x = getBarX(index, 0) + 10
-          return (
-            <text
-              key={index}
-              x={x}
-              y={height - 10}
-              textAnchor="middle"
-              className="text-xs fill-text-muted"
-            >
-              {monthData.month}
-            </text>
-          )
-        })}
-      </svg>
-
-      {/* Tooltip */}
-      {hoveredIndex !== null && (
-        <div
-          className="absolute bg-bg-card border border-border rounded-lg p-3 shadow-lg z-10 pointer-events-none"
-          style={{
-            left: `${getBarX(hoveredIndex, 0) + 10}px`,
-            top: '10px',
-            transform: 'translateX(-50%)'
-          }}
-        >
-          <div className="text-sm font-semibold text-text-primary mb-2">
-            {data[hoveredIndex].month} {data[hoveredIndex].year}
-          </div>
-          {showIncome && (
-            <div className="text-xs text-green-400 mb-1">
-              შემოსავალი: {formatCurrency(data[hoveredIndex].income)}
-            </div>
-          )}
-          {showExpenses && (
-            <div className="text-xs text-red-400 mb-1">
-              ხარჯები: {formatCurrency(data[hoveredIndex].expenses)}
-            </div>
-          )}
-          {showProfit && (
-            <div className="text-xs text-emerald-400">
-              მოგება: {formatCurrency(data[hoveredIndex].profit)}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+    <canvas
+      ref={canvasRef}
+      style={{ width: '100%', height }}
+      className="w-full"
+    />
   )
 }
-

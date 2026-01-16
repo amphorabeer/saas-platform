@@ -14,37 +14,28 @@ interface BatchStatusBadgeProps {
 
 const BATCH_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
 
-  // ქართული სტატუსები
-
-  'მეიშინგი': { label: 'მეიშინგი', color: 'text-orange-400', bg: 'bg-orange-400/20' },
-
-  'ხარშვა': { label: 'ხარშვა', color: 'text-red-400', bg: 'bg-red-400/20' },
-
-  'ფერმენტაცია': { label: 'ფერმენტაცია', color: 'text-amber-400', bg: 'bg-amber-400/20' },
-
-  'კონდიციონირება': { label: 'კონდიციონირება', color: 'text-blue-400', bg: 'bg-blue-400/20' },
-
-  'მზადაა': { label: 'მზადაა', color: 'text-green-400', bg: 'bg-green-400/20' },
-
-  'ჩამოსხმა': { label: 'ჩამოსხმა', color: 'text-purple-400', bg: 'bg-purple-400/20' },
-
-  'დასრულებული': { label: 'დასრულებული', color: 'text-gray-400', bg: 'bg-gray-400/20' },
-
-  // English statuses
-
-  mashing: { label: 'მეიშინგი', color: 'text-orange-400', bg: 'bg-orange-400/20' },
-
-  boiling: { label: 'ხარშვა', color: 'text-red-400', bg: 'bg-red-400/20' },
-
+  // Store statuses (from types.ts)
+  planned: { label: 'დაგეგმილი', color: 'text-gray-400', bg: 'bg-gray-400/20' },
+  brewing: { label: 'ხარშვა', color: 'text-orange-400', bg: 'bg-orange-400/20' },
   fermenting: { label: 'ფერმენტაცია', color: 'text-amber-400', bg: 'bg-amber-400/20' },
-
-  conditioning: { label: 'კონდიციონირება', color: 'text-blue-400', bg: 'bg-blue-400/20' },
-
+  conditioning: { label: 'კონდიცირება', color: 'text-blue-400', bg: 'bg-blue-400/20' },
   ready: { label: 'მზადაა', color: 'text-green-400', bg: 'bg-green-400/20' },
-
-  bottling: { label: 'ჩამოსხმა', color: 'text-purple-400', bg: 'bg-purple-400/20' },
-
+  packaging: { label: 'დაფასოვება', color: 'text-orange-400', bg: 'bg-orange-400/20' },
+  packaged: { label: 'დაფასოვებული', color: 'text-purple-400', bg: 'bg-purple-400/20' },
   completed: { label: 'დასრულებული', color: 'text-gray-400', bg: 'bg-gray-400/20' },
+  cancelled: { label: 'გაუქმებული', color: 'text-red-400', bg: 'bg-red-400/20' },
+
+  // Legacy/alternative statuses (for backward compatibility)
+  'მეიშინგი': { label: 'მეიშინგი', color: 'text-orange-400', bg: 'bg-orange-400/20' },
+  'ხარშვა': { label: 'ხარშვა', color: 'text-orange-400', bg: 'bg-orange-400/20' },
+  'ფერმენტაცია': { label: 'ფერმენტაცია', color: 'text-amber-400', bg: 'bg-amber-400/20' },
+  'კონდიცირება': { label: 'კონდიცირება', color: 'text-blue-400', bg: 'bg-blue-400/20' },
+  'მზადაა': { label: 'მზადაა', color: 'text-green-400', bg: 'bg-green-400/20' },
+  'ჩამოსხმა': { label: 'ჩამოსხმა', color: 'text-purple-400', bg: 'bg-purple-400/20' },
+  'დასრულებული': { label: 'დასრულებული', color: 'text-gray-400', bg: 'bg-gray-400/20' },
+  mashing: { label: 'მეიშინგი', color: 'text-orange-400', bg: 'bg-orange-400/20' },
+  boiling: { label: 'ხარშვა', color: 'text-orange-400', bg: 'bg-orange-400/20' },
+  bottling: { label: 'ჩამოსხმა', color: 'text-purple-400', bg: 'bg-purple-400/20' },
 
 }
 

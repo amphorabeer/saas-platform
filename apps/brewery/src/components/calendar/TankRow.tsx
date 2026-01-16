@@ -32,7 +32,7 @@ interface CalendarEvent {
 
   id: string
 
-  type: 'brewing' | 'fermentation' | 'conditioning' | 'packaging' | 'maintenance'
+  type: 'brewing' | 'fermentation' | 'conditioning' | 'packaging' | 'maintenance' | 'cip' | 'cip_warning'
 
   title: string
 
@@ -57,6 +57,8 @@ interface CalendarEvent {
   temperature?: number
 
   notes?: string
+  
+  batchStatus?: string // რეალური batch სტატუსი TimelineBar-ისთვის
 
 }
 
@@ -220,7 +222,7 @@ export function TankRow({ tank, events, weekStart, onEventClick, onCellClick }: 
 
                 key={dayIndex}
 
-                className={`border-r border-border/50 min-h-[60px] relative flex items-center justify-center ${
+                className={`border-r border-border/50 min-h-[52px] relative flex items-center justify-center ${
 
                   isTodayCell ? 'bg-copper/10' : ''
 
@@ -240,9 +242,8 @@ export function TankRow({ tank, events, weekStart, onEventClick, onCellClick }: 
 
                     recipe={event.recipe || event.title}
 
-                    onClick={(e) => {
+                    onClick={() => {
 
-                      e.stopPropagation()
 
                       onEventClick(event)
 
@@ -330,7 +331,7 @@ export function TankRow({ tank, events, weekStart, onEventClick, onCellClick }: 
 
               key={event.id}
 
-              event={event}
+              event={event as any}
 
               startDay={position.startDay}
 

@@ -7,120 +7,636 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==================== ORGANIZATION ====================
+model Tenant {
+  id        String          @id @default(cuid())
+  name      String
+  slug      String          @unique
+  plan      PlanType        @default(STARTER)
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  batches   Batch[]
+  customers Customer[]
+  equipment Equipment[]
+  inventory InventoryItem[]
+  recipes   Recipe[]
+  orders    SalesOrder[]
+  tanks     Tank[]
+  users     User[]
 
-model BreweryOrganization {
-  id          String   @id @default(cuid())
-  name        String
-  code        String   @unique // უნიკალური კოდი შესვლისთვის
-  email       String?
-  phone       String?
-  address     String?
-  logo        String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  users             BreweryUser[]
-  batches           Batch[]
-  recipes           Recipe[]
-  tanks             Tank[]
-  ingredients       Ingredient[]
-  inventory         InventoryTransaction[]
-  equipment         Equipment[]
-  activities        Activity[]
-  settings          BrewerySetting[]
-
-  @@map("brewery_organizations")
+  @@index([slug])
 }
 
-// ==================== USERS ====================
+model User {
+  id        String   @id @default(cuid())
+  tenantId  String
+  email     String
+  name      String
+  role      UserRole @default(OPERATOR)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  password  String?
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
 
-model BreweryUser {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  password       String
-  firstName      String
-  lastName       String
-  role           UserRole @default(BREWER)
-  isActive       Boolean  @default(true)
-  lastLogin      DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
 
-  organizationId String
-  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
+model Recipe {
+  id          String             @id @default(cuid())
+  tenantId    String
+  createdBy   String?
+  name        String
+  style       String?
+  abv         Decimal?           @db.Decimal(4, 2)
+  ibu         Int?
+  color       Int?
+  og          Decimal?           @db.Decimal(6, 3)
+  fg          Decimal?           @db.Decimal(6, 3)
+  batchSize   Decimal?           @db.Decimal(10, 2)
+  boilTime    Int?
+  efficiency  Decimal?           @db.Decimal(5, 2)
+  description String?
+  notes       String?
+  process     Json?
+  status      RecipeStatus       @default(DRAFT)
+  isActive    Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  yeastStrain String?
+  batches     Batch[]
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  ingredients RecipeIngredient[]
 
-  // Relations
-  createdBatches    Batch[]            @relation("BatchCreator")
-  qcTests           QCTest[]
-  activities        Activity[]
-  maintenanceLogs   MaintenanceLog[]
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
 
-  @@map("brewery_users")
+model RecipeIngredient {
+  id              String             @id @default(cuid())
+  recipeId        String
+  inventoryItemId String?
+  name            String
+  category        IngredientCategory
+  amount          Decimal            @db.Decimal(10, 3)
+  unit            String
+  additionTime    Int?
+  specs           Json?
+  inventoryItem   InventoryItem?     @relation(fields: [inventoryItemId], references: [id])
+  recipe          Recipe             @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@index([inventoryItemId])
+}
+
+model InventoryItem {
+  id                String             @id @default(cuid())
+  tenantId          String
+  sku               String
+  name              String
+  category          InventoryCategory  @default(RAW_MATERIAL)
+  ingredientType    String?
+  unit              String             @default("kg")
+  reorderPoint      Decimal?           @db.Decimal(10, 3)
+  supplier          String?
+  location          String?
+  specs             Json?
+  cachedBalance     Decimal            @default(0) @db.Decimal(12, 3)
+  costPerUnit       Decimal?           @db.Decimal(10, 4)
+  balanceUpdatedAt  DateTime           @default(now())
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenant            Tenant             @relation(fields: [tenantId], references: [id])
+  ledger            InventoryLedger[]
+  recipeIngredients RecipeIngredient[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, category, isActive])
+}
+
+model InventoryLedger {
+  id          String          @id @default(cuid())
+  tenantId    String
+  itemId      String
+  quantity    Decimal         @db.Decimal(12, 3)
+  type        LedgerEntryType
+  batchId     String?
+  orderId     String?
+  packagingId String?
+  notes       String?
+  createdBy   String
+  createdAt   DateTime        @default(now())
+  batch       Batch?          @relation(fields: [batchId], references: [id])
+  item        InventoryItem   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, itemId, createdAt])
+  @@index([tenantId, batchId])
+  @@index([tenantId, createdAt])
+  @@index([itemId])
+}
+
+model Batch {
+  id                    String            @id @default(cuid())
+  tenantId              String
+  batchNumber           String
+  recipeId              String
+  status                BatchStatus       @default(PLANNED)
+  volume                Decimal           @db.Decimal(10, 2)
+  originalGravity       Decimal?          @db.Decimal(6, 3)
+  currentGravity        Decimal?          @db.Decimal(6, 3)
+  finalGravity          Decimal?          @db.Decimal(6, 3)
+  abv                   Decimal?          @db.Decimal(4, 2)
+  tankId                String?
+  plannedDate           DateTime
+  brewedAt              DateTime?
+  fermentationStartedAt DateTime?
+  conditioningStartedAt DateTime?
+  readyAt               DateTime?
+  completedAt           DateTime?
+  createdBy             String
+  notes                 String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  targetOg              Decimal?          @db.Decimal(6, 3)
+  recipe                Recipe            @relation(fields: [recipeId], references: [id])
+  tank                  Tank?             @relation(fields: [tankId], references: [id])
+  tenant                Tenant            @relation(fields: [tenantId], references: [id])
+  ingredients           BatchIngredient[]
+  timeline              BatchTimeline[]
+  gravityReadings       GravityReading[]
+  ledgerEntries         InventoryLedger[]
+  LotBatch              LotBatch[]
+  packagingRuns         PackagingRun[]
+  qcTests               QCTest[]
+
+  @@unique([tenantId, batchNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, tankId])
+}
+
+model BatchIngredient {
+  id              String             @id @default(cuid())
+  batchId         String
+  inventoryItemId String?
+  name            String
+  category        IngredientCategory
+  plannedAmount   Decimal            @db.Decimal(10, 3)
+  actualAmount    Decimal?           @db.Decimal(10, 3)
+  unit            String
+  lotNumber       String?
+  addedAt         DateTime?
+  batch           Batch              @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId])
+}
+
+model GravityReading {
+  id          String   @id @default(cuid())
+  batchId     String
+  gravity     Decimal  @db.Decimal(6, 3)
+  temperature Decimal  @db.Decimal(4, 1)
+  notes       String?
+  recordedBy  String
+  recordedAt  DateTime @default(now())
+  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, recordedAt])
+}
+
+model BatchTimeline {
+  id          String            @id @default(cuid())
+  batchId     String
+  type        TimelineEventType
+  title       String
+  description String?
+  data        Json?
+  createdBy   String
+  createdAt   DateTime          @default(now())
+  batch       Batch             @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, createdAt])
+}
+
+model Tank {
+  id                                   String           @id @default(cuid())
+  tenantId                             String
+  name                                 String
+  type                                 TankType
+  capacity                             Decimal          @db.Decimal(10, 2)
+  status                               TankStatus       @default(AVAILABLE)
+  currentBatchId                       String?
+  location                             String?
+  version                              Int              @default(0)
+  createdAt                            DateTime         @default(now())
+  updatedAt                            DateTime         @updatedAt
+  capabilities                         TankCapability[] @default([])
+  currentLotId                         String?
+  currentPhase                         LotPhase?
+  defaultTurnaroundHours               Int?             @default(4)
+  maxFillPercent                       Int?             @default(95)
+  minFillPercent                       Int?             @default(20)
+  batches                              Batch[]
+  LotReading                           LotReading[]
+  tenant                               Tenant           @relation(fields: [tenantId], references: [id])
+  TankAssignment                       TankAssignment[]
+  occupations                          TankOccupation[]
+  Transfer_Transfer_destTankIdToTank   Transfer[]       @relation("Transfer_destTankIdToTank")
+  Transfer_Transfer_sourceTankIdToTank Transfer[]       @relation("Transfer_sourceTankIdToTank")
+
+  @@unique([tenantId, name])
+  @@index([tenantId, status])
+}
+
+model TankOccupation {
+  id        String          @id @default(cuid())
+  tenantId  String
+  tankId    String
+  batchId   String
+  phase     OccupationPhase
+  startedAt DateTime        @default(now())
+  endedAt   DateTime?
+  tank      Tank            @relation(fields: [tankId], references: [id])
+
+  @@index([tenantId, tankId, endedAt])
+}
+
+model PackagingRun {
+  id          String      @id @default(cuid())
+  tenantId    String
+  batchId     String
+  packageType PackageType
+  quantity    Int
+  volumeTotal Decimal     @db.Decimal(10, 2)
+  lotNumber   String?
+  performedBy String
+  notes       String?
+  performedAt DateTime    @default(now())
+  batch       Batch       @relation(fields: [batchId], references: [id])
+
+  @@index([tenantId, batchId])
+}
+
+model Customer {
+  id        String       @id @default(cuid())
+  tenantId  String
+  name      String
+  type      CustomerType @default(RETAIL)
+  email     String?
+  phone     String?
+  address   String?
+  city      String?
+  taxId     String?
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  tenant    Tenant       @relation(fields: [tenantId], references: [id])
+  orders    SalesOrder[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model SalesOrder {
+  id            String        @id @default(cuid())
+  tenantId      String
+  orderNumber   String
+  customerId    String
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  totalAmount   Decimal       @db.Decimal(12, 2)
+  notes         String?
+  orderedAt     DateTime      @default(now())
+  shippedAt     DateTime?
+  deliveredAt   DateTime?
+  createdBy     String
+  updatedAt     DateTime      @updatedAt
+  items         OrderItem[]
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, orderNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+}
+
+model OrderItem {
+  id          String      @id @default(cuid())
+  orderId     String
+  productName String
+  packageType PackageType
+  quantity    Int
+  unitPrice   Decimal     @db.Decimal(10, 2)
+  totalPrice  Decimal     @db.Decimal(12, 2)
+  batchId     String?
+  order       SalesOrder  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  tenantId      String
+  userId        String
+  action        String
+  entityType    String
+  entityId      String
+  oldData       Json?
+  newData       Json?
+  metadata      Json?
+  correlationId String?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  @@index([tenantId, entityType, entityId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, userId])
+}
+
+model IngredientCatalog {
+  id        String   @id @default(cuid())
+  type      String   @default("grain")
+  name      String
+  supplier  String?
+  origin    String?
+  specs     Json?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type, isActive])
+}
+
+model Equipment {
+  id                     String           @id @default(cuid())
+  tenantId               String
+  name                   String
+  type                   EquipmentType
+  status                 EquipmentStatus  @default(OPERATIONAL)
+  capacity               Int?
+  model                  String?
+  manufacturer           String?
+  serialNumber           String?
+  location               String?
+  workingPressure        Float?
+  currentTemp            Float?
+  currentPressure        Float?
+  capabilities           TankCapability[]
+  installationDate       DateTime?
+  warrantyDate           DateTime?
+  lastCIP                DateTime?
+  nextCIP                DateTime?
+  lastMaintenance        DateTime?
+  nextMaintenance        DateTime?
+  cipIntervalDays        Int              @default(7)
+  inspectionIntervalDays Int              @default(30)
+  annualMaintenanceDays  Int              @default(365)
+  currentBatchId         String?
+  currentBatchNumber     String?
+  notes                  String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  cipLogs                CIPLog[]
+  tenant                 Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  maintenanceLogs        MaintenanceLog[]
+  problemReports         ProblemReport[]
+
+  @@index([tenantId])
+  @@index([type])
+  @@index([status])
+}
+
+model MaintenanceLog {
+  id            String    @id @default(cuid())
+  equipmentId   String
+  type          String
+  status        String
+  priority      String?
+  scheduledDate DateTime?
+  completedDate DateTime?
+  duration      Int?
+  performedBy   String?
+  cost          Float?
+  partsUsed     String[]
+  description   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  equipment     Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId])
+  @@index([status])
+}
+
+model CIPLog {
+  id                   String    @id @default(cuid())
+  equipmentId          String
+  cipType              String
+  date                 DateTime
+  duration             Int
+  temperature          Float?
+  causticConcentration Float?
+  performedBy          String
+  result               String
+  notes                String?
+  createdAt            DateTime  @default(now())
+  equipment            Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId])
+  @@index([date])
+}
+
+model ProblemReport {
+  id           String    @id @default(cuid())
+  equipmentId  String
+  problemType  String
+  severity     String
+  status       String    @default("open")
+  description  String
+  reportedDate DateTime
+  reportedBy   String
+  resolvedDate DateTime?
+  resolvedBy   String?
+  resolution   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  equipment    Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId])
+  @@index([status])
+}
+
+model BlendingConfig {
+  id                    String   @id
+  tenantId              String   @unique
+  requireRecipeMatch    Boolean  @default(false)
+  requireYeastMatch     Boolean  @default(true)
+  requirePhaseMatch     Boolean  @default(true)
+  requireStyleMatch     Boolean  @default(false)
+  maxBlendSources       Int      @default(4)
+  allowOverCapacity     Boolean  @default(false)
+  maxAgeDifferenceHours Int      @default(48)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now())
+}
+
+model Lot {
+  id                                 String           @id
+  tenantId                           String
+  lotCode                            String
+  phase                              LotPhase         @default(FERMENTATION)
+  status                             LotStatus        @default(PLANNED)
+  plannedVolume                      Decimal          @db.Decimal(10, 2)
+  actualVolume                       Decimal?         @db.Decimal(10, 2)
+  notes                              String?
+  parentLotId                        String?
+  splitRatio                         Decimal?         @db.Decimal(5, 2)
+  createdBy                          String
+  createdAt                          DateTime         @default(now())
+  updatedAt                          DateTime         @default(now())
+  completedAt                        DateTime?
+  Lot                                Lot?             @relation("LotToLot", fields: [parentLotId], references: [id])
+  other_Lot                          Lot[]            @relation("LotToLot")
+  LotBatch                           LotBatch[]
+  LotReading                         LotReading[]
+  TankAssignment                     TankAssignment[]
+  Transfer_Transfer_destLotIdToLot   Transfer[]       @relation("Transfer_destLotIdToLot")
+  Transfer_Transfer_sourceLotIdToLot Transfer[]       @relation("Transfer_sourceLotIdToLot")
+  QCTest                             QCTest[]
+
+  @@unique([tenantId, lotCode])
+  @@index([tenantId, status])
+}
+
+model LotBatch {
+  id                 String   @id
+  lotId              String
+  batchId            String
+  volumeContribution Decimal  @db.Decimal(10, 2)
+  batchPercentage    Decimal  @default(100.00) @db.Decimal(5, 2)
+  addedAt            DateTime @default(now())
+  Batch              Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  Lot                Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@unique([lotId, batchId])
+}
+
+model LotReading {
+  id          String      @id
+  lotId       String
+  tankId      String
+  readingType ReadingType
+  value       Decimal     @db.Decimal(10, 4)
+  unit        String
+  notes       String?
+  recordedBy  String
+  recordedAt  DateTime    @default(now())
+  Lot         Lot         @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  Tank        Tank        @relation(fields: [tankId], references: [id], onDelete: Cascade)
+
+  @@index([lotId, readingType])
+}
+
+model TankAssignment {
+  id            String           @id
+  tenantId      String
+  tankId        String
+  lotId         String
+  phase         LotPhase
+  plannedStart  DateTime
+  plannedEnd    DateTime
+  actualStart   DateTime?
+  actualEnd     DateTime?
+  status        AssignmentStatus @default(PLANNED)
+  plannedVolume Decimal          @db.Decimal(10, 2)
+  actualVolume  Decimal?         @db.Decimal(10, 2)
+  isBlendTarget Boolean          @default(false)
+  isSplitSource Boolean          @default(false)
+  createdBy     String
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @default(now())
+  Lot           Lot              @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  Tank          Tank             @relation(fields: [tankId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, tankId])
+}
+
+model Transfer {
+  id                               String         @id
+  tenantId                         String
+  transferCode                     String
+  sourceLotId                      String?
+  sourceTankId                     String
+  destLotId                        String?
+  destTankId                       String
+  transferType                     TransferType
+  volume                           Decimal        @db.Decimal(10, 2)
+  plannedAt                        DateTime
+  executedAt                       DateTime?
+  status                           TransferStatus @default(PLANNED)
+  measuredLoss                     Decimal?       @db.Decimal(10, 2)
+  lossReason                       String?
+  performedBy                      String?
+  notes                            String?
+  createdAt                        DateTime       @default(now())
+  updatedAt                        DateTime       @default(now())
+  Lot_Transfer_destLotIdToLot      Lot?           @relation("Transfer_destLotIdToLot", fields: [destLotId], references: [id])
+  Tank_Transfer_destTankIdToTank   Tank           @relation("Transfer_destTankIdToTank", fields: [destTankId], references: [id], onDelete: Cascade)
+  Lot_Transfer_sourceLotIdToLot    Lot?           @relation("Transfer_sourceLotIdToLot", fields: [sourceLotId], references: [id])
+  Tank_Transfer_sourceTankIdToTank Tank           @relation("Transfer_sourceTankIdToTank", fields: [sourceTankId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, transferCode])
+}
+
+enum PlanType {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
 }
 
 enum UserRole {
   OWNER
   ADMIN
-  HEAD_BREWER
-  BREWER
-  QC_SPECIALIST
-  INVENTORY_MANAGER
+  MANAGER
+  OPERATOR
   VIEWER
 }
 
-// ==================== BATCHES ====================
+enum RecipeStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
 
-model Batch {
-  id              String      @id @default(cuid())
-  batchNumber     String      // BRW-2024-0156
-  status          BatchStatus @default(PLANNED)
-  
-  // Recipe Info
-  recipeId        String
-  recipe          Recipe      @relation(fields: [recipeId], references: [id])
-  
-  // Tank Assignment
-  tankId          String?
-  tank            Tank?       @relation(fields: [tankId], references: [id])
-  
-  // Measurements
-  volumeLiters    Decimal     @db.Decimal(10, 2)
-  originalGravity Decimal?    @db.Decimal(5, 3) // 1.048
-  currentGravity  Decimal?    @db.Decimal(5, 3)
-  finalGravity    Decimal?    @db.Decimal(5, 3)
-  actualAbv       Decimal?    @db.Decimal(4, 2)
-  
-  // Dates
-  plannedDate     DateTime?
-  brewDate        DateTime?
-  fermentationStart DateTime?
-  fermentationEnd DateTime?
-  conditioningStart DateTime?
-  packagingDate   DateTime?
-  estimatedReady  DateTime?
-  
-  // Notes
-  notes           String?
-  
-  // Audit
-  createdById     String
-  createdBy       BreweryUser @relation("BatchCreator", fields: [createdById], references: [id])
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+enum InventoryCategory {
+  RAW_MATERIAL
+  PACKAGING
+  FINISHED_GOOD
+  CONSUMABLE
+}
 
-  organizationId  String
-  organization    BreweryOrganization @relation(fields: [organizationId], references: [id])
+enum LedgerEntryType {
+  PURCHASE
+  CONSUMPTION
+  PRODUCTION
+  ADJUSTMENT
+  ADJUSTMENT_ADD
+  ADJUSTMENT_REMOVE
+  WASTE
+  SALE
+  RETURN
+  REVERSAL
+  TRANSFER
+}
 
-  // Relations
-  fermentationLogs FermentationLog[]
-  qcTests          QCTest[]
-  ingredientUsages IngredientUsage[]
-
-  @@unique([organizationId, batchNumber])
-  @@map("batches")
+enum IngredientCategory {
+  MALT
+  HOPS
+  YEAST
+  ADJUNCT
+  WATER_CHEMISTRY
 }
 
 enum BatchStatus {
@@ -129,363 +645,231 @@ enum BatchStatus {
   FERMENTING
   CONDITIONING
   READY
-  PACKAGED
-  ARCHIVED
+  PACKAGING
+  COMPLETED
+  CANCELLED
 }
 
-// ==================== RECIPES ====================
-
-model Recipe {
-  id            String   @id @default(cuid())
-  name          String
-  style         String   // IPA, Lager, Stout...
-  version       String   @default("1.0")
-  description   String?
-  
-  // Targets
-  targetAbv     Decimal  @db.Decimal(4, 2)
-  targetIbu     Int?
-  targetSrm     Int?     // Color
-  targetOg      Decimal  @db.Decimal(5, 3)
-  targetFg      Decimal? @db.Decimal(5, 3)
-  
-  // Process
-  boilTime      Int      @default(60) // minutes
-  mashTemp      Decimal? @db.Decimal(4, 1)
-  mashDuration  Int?     // minutes
-  fermentationTemp Decimal? @db.Decimal(4, 1)
-  fermentationDays Int   @default(14)
-  conditioningDays Int   @default(7)
-  
-  // JSON data for complex structures
-  ingredients   Json?    // Array of ingredients with amounts
-  mashSchedule  Json?    // Temperature steps
-  hopSchedule   Json?    // Hop additions timing
-  
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  organizationId String
-  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
-
-  // Relations
-  batches       Batch[]
-
-  @@map("recipes")
-}
-
-// ==================== TANKS ====================
-
-model Tank {
-  id          String     @id @default(cuid())
-  name        String     // FV-01, BBT-01
-  type        TankType
-  capacity    Decimal    @db.Decimal(10, 2) // Liters
-  status      TankStatus @default(AVAILABLE)
-  
-  // Current state
-  currentTemp    Decimal? @db.Decimal(4, 1)
-  currentPressure Decimal? @db.Decimal(5, 2)
-  fillLevel      Decimal? @db.Decimal(5, 2) // Percentage
-  
-  // Location & Info
-  location    String?
-  notes       String?
-  
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  organizationId String
-  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
-
-  // Relations
-  batches          Batch[]
-  fermentationLogs FermentationLog[]
-
-  @@map("tanks")
+enum TimelineEventType {
+  CREATED
+  STARTED
+  MASH
+  BOIL
+  TRANSFER
+  GRAVITY_READING
+  DRY_HOP
+  TEMPERATURE_CHANGE
+  NOTE
+  COMPLETED
+  INGREDIENTS_RESERVED
+  BREWING_STARTED
+  MASH_COMPLETE
+  BOIL_COMPLETE
+  TRANSFER_TO_FERMENTER
+  FERMENTATION_STARTED
+  DRY_HOP_ADDED
+  CONDITIONING_STARTED
+  READY_FOR_PACKAGING
+  PACKAGING_STARTED
+  PACKAGING_COMPLETE
+  CANCELLED
 }
 
 enum TankType {
   FERMENTER
-  BBT          // Bright Beer Tank
+  BRITE
+  UNITANK
   KETTLE
   MASH_TUN
-  HLT          // Hot Liquor Tank
-  SERVING
+  HLT
 }
 
 enum TankStatus {
   AVAILABLE
-  IN_USE
+  OCCUPIED
   CLEANING
   MAINTENANCE
+  OUT_OF_SERVICE
 }
 
-// ==================== FERMENTATION LOGS ====================
-
-model FermentationLog {
-  id          String   @id @default(cuid())
-  
-  batchId     String
-  batch       Batch    @relation(fields: [batchId], references: [id])
-  
-  tankId      String?
-  tank        Tank?    @relation(fields: [tankId], references: [id])
-  
-  // Measurements
-  temperature Decimal  @db.Decimal(4, 1)
-  gravity     Decimal? @db.Decimal(5, 3)
-  ph          Decimal? @db.Decimal(3, 2)
-  pressure    Decimal? @db.Decimal(5, 2)
-  
-  notes       String?
-  recordedAt  DateTime @default(now())
-
-  @@map("fermentation_logs")
+enum OccupationPhase {
+  FERMENTATION
+  CONDITIONING
+  STORAGE
 }
 
-// ==================== INGREDIENTS ====================
-
-model Ingredient {
-  id          String             @id @default(cuid())
-  name        String
-  category    IngredientCategory
-  description String?
-  
-  // Supplier info
-  supplier    String?
-  sku         String?
-  
-  // Stock management
-  unit        String             // kg, g, L, units
-  minStock    Decimal            @db.Decimal(10, 2)
-  currentStock Decimal           @db.Decimal(10, 2) @default(0)
-  costPerUnit Decimal?           @db.Decimal(10, 2)
-  
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  organizationId String
-  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
-
-  // Relations
-  transactions InventoryTransaction[]
-  usages       IngredientUsage[]
-
-  @@map("ingredients")
+enum PackageType {
+  KEG_50
+  KEG_30
+  KEG_20
+  BOTTLE_750
+  BOTTLE_500
+  BOTTLE_330
+  CAN_500
+  CAN_330
 }
 
-enum IngredientCategory {
-  GRAIN
-  HOPS
-  YEAST
-  ADJUNCT
-  ADDITIVE
-  WATER_TREATMENT
-  PACKAGING
-  CLEANING
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+  RESTAURANT
+  BAR
+  EXPORT
 }
 
-// ==================== INVENTORY TRANSACTIONS ====================
-
-model InventoryTransaction {
-  id            String          @id @default(cuid())
-  type          TransactionType
-  
-  ingredientId  String
-  ingredient    Ingredient      @relation(fields: [ingredientId], references: [id])
-  
-  quantity      Decimal         @db.Decimal(10, 2)
-  unitCost      Decimal?        @db.Decimal(10, 2)
-  totalCost     Decimal?        @db.Decimal(10, 2)
-  
-  reference     String?         // PO number, batch number, etc.
-  notes         String?
-  
-  createdAt     DateTime        @default(now())
-
-  organizationId String
-  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
-
-  @@map("inventory_transactions")
-}
-
-enum TransactionType {
-  PURCHASE
-  USAGE
-  ADJUSTMENT
-  WASTE
-  RETURN
-}
-
-// ==================== INGREDIENT USAGE (per Batch) ====================
-
-model IngredientUsage {
-  id           String     @id @default(cuid())
-  
-  batchId      String
-  batch        Batch      @relation(fields: [batchId], references: [id])
-  
-  ingredientId String
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
-  
-  quantity     Decimal    @db.Decimal(10, 2)
-  unit         String
-  addedAt      DateTime   @default(now())
-  notes        String?
-
-  @@map("ingredient_usages")
-}
-
-// ==================== QC TESTS ====================
-
-model QCTest {
-  id          String       @id @default(cuid())
-  
-  batchId     String
-  batch       Batch        @relation(fields: [batchId], references: [id])
-  
-  testType    String       // gravity, pH, appearance, taste, etc.
-  result      QCResult     @default(PENDING)
-  value       Decimal?     @db.Decimal(10, 4)
-  unit        String?
-  
-  notes       String?
-  testedAt    DateTime     @default(now())
-  
-  testedById  String
-  testedBy    BreweryUser  @relation(fields: [testedById], references: [id])
-
-  @@map("qc_tests")
-}
-
-enum QCResult {
+enum OrderStatus {
+  DRAFT
   PENDING
-  PASSED
-  FAILED
-  NEEDS_REVIEW
+  CONFIRMED
+  PROCESSING
+  READY
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
-// ==================== EQUIPMENT ====================
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+  REFUNDED
+}
 
-model Equipment {
-  id              String          @id @default(cuid())
-  name            String
-  type            String          // pump, valve, sensor, etc.
-  model           String?
-  serialNumber    String?
-  
-  location        String?
-  status          EquipmentStatus @default(OPERATIONAL)
-  
-  purchaseDate    DateTime?
-  warrantyExpiry  DateTime?
-  lastMaintenance DateTime?
-  nextMaintenance DateTime?
-  
-  notes           String?
-  
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  organizationId String
-  organization    BreweryOrganization @relation(fields: [organizationId], references: [id])
-
-  // Relations
-  maintenanceLogs MaintenanceLog[]
-
-  @@map("equipment")
+enum EquipmentType {
+  FERMENTER
+  UNITANK
+  BRITE
+  KETTLE
+  MASH_TUN
+  HLT
+  PUMP
+  CHILLER
+  FILTER
+  OTHER
 }
 
 enum EquipmentStatus {
   OPERATIONAL
   NEEDS_MAINTENANCE
-  UNDER_REPAIR
+  UNDER_MAINTENANCE
   OUT_OF_SERVICE
+  NEEDS_CIP
 }
 
-// ==================== MAINTENANCE LOGS ====================
-
-model MaintenanceLog {
-  id           String          @id @default(cuid())
-  
-  equipmentId  String
-  equipment    Equipment       @relation(fields: [equipmentId], references: [id])
-  
-  type         MaintenanceType
-  description  String
-  cost         Decimal?        @db.Decimal(10, 2)
-  
-  performedAt  DateTime        @default(now())
-  performedById String
-  performedBy  BreweryUser     @relation(fields: [performedById], references: [id])
-  
-  nextScheduled DateTime?
-  notes        String?
-
-  @@map("maintenance_logs")
+enum TankCapability {
+  FERMENTING
+  CONDITIONING
+  BREWING
+  BRIGHT
+  STORAGE
 }
 
-enum MaintenanceType {
-  PREVENTIVE
-  CORRECTIVE
-  INSPECTION
-  CLEANING
-  CALIBRATION
+enum AssignmentStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
 }
 
-// ==================== ACTIVITIES ====================
-
-model Activity {
-  id          String       @id @default(cuid())
-  type        ActivityType
-  description String
-  
-  // References
-  batchNumber String?
-  reference   String?      // Generic reference field
-  
-  userId      String?
-  user        BreweryUser? @relation(fields: [userId], references: [id])
-  
-  createdAt   DateTime     @default(now())
-
-  organizationId String
-  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
-
-  @@map("activities")
+enum LotPhase {
+  FERMENTATION
+  CONDITIONING
+  BRIGHT
+  PACKAGING
 }
 
-enum ActivityType {
-  BATCH_CREATED
-  BATCH_STARTED
-  BATCH_STATUS_CHANGED
-  FERMENTATION_LOG
-  QC_TEST
-  TANK_ASSIGNED
-  INVENTORY_LOW
-  INVENTORY_RECEIVED
-  EQUIPMENT_MAINTENANCE
-  USER_ACTION
+enum LotStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
 }
 
-// ==================== SETTINGS ====================
-
-model BrewerySetting {
-  id    String @id @default(cuid())
-  key   String
-  value String
-  
-  organizationId String
-  organization   BreweryOrganization @relation(fields: [organizationId], references: [id])
-
-  @@unique([organizationId, key])
-  @@map("brewery_settings")
+enum ReadingType {
+  GRAVITY
+  TEMPERATURE
+  PH
+  PRESSURE
+  DISSOLVED_O2
+  TURBIDITY
 }
 
+enum TransferStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
 
+enum TransferType {
+  FERMENT_TO_CONDITION
+  CONDITION_TO_BRIGHT
+  TANK_TO_TANK
+  BLEND
+  SPLIT
+}
 
+// ═══════════════════════════════════════════════════════════
+// QC (Quality Control) Models
+// ═══════════════════════════════════════════════════════════
+
+enum QCTestType {
+  GRAVITY
+  TEMPERATURE
+  PH
+  DISSOLVED_O2
+  TURBIDITY
+  COLOR
+  BITTERNESS
+  ALCOHOL
+  CARBONATION
+  APPEARANCE
+  AROMA
+  TASTE
+  MICROBIOLOGICAL
+}
+
+enum QCTestStatus {
+  SCHEDULED
+  IN_PROGRESS
+  PASSED
+  WARNING
+  FAILED
+  CANCELLED
+}
+
+enum QCTestPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model QCTest {
+  id            String         @id @default(cuid())
+  tenantId      String
+  batchId       String
+  lotId         String?
+  testType      QCTestType
+  status        QCTestStatus   @default(SCHEDULED)
+  priority      QCTestPriority @default(MEDIUM)
+  scheduledDate DateTime
+  completedDate DateTime?
+  minValue      Decimal?       @db.Decimal(10, 4)
+  maxValue      Decimal?       @db.Decimal(10, 4)
+  targetValue   Decimal?       @db.Decimal(10, 4)
+  result        Decimal?       @db.Decimal(10, 4)
+  unit          String?
+  notes         String?
+  performedBy   String?
+  createdBy     String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  batch         Batch          @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  lot           Lot?           @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, batchId])
+  @@index([scheduledDate])
+}

@@ -420,7 +420,7 @@ export const mockSensoryTests: SensoryTest[] = [
 
 export const mockTesters = [
 
-  { id: '1', name: 'ნიკა ზედგინიძე', role: 'მთავარი მეხარშე' },
+  { id: '1', name: 'ნიკა ზედგინიძე', role: 'მთავარი ტექნოლოგი' },
 
   { id: '2', name: 'გიორგი კაპანაძე', role: 'QC მენეჯერი' },
 

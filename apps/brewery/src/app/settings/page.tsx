@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui'
@@ -25,8 +25,14 @@ import {
   VolumeUnit,
   DateFormat,
   Currency,
+  PHASE_COLOR_OPTIONS,
+  PHASE_LABELS,
+  DEFAULT_PHASE_COLORS,
+  PhaseColors,
+  PhaseColorKey,
 } from '@/data/settingsData'
 import { formatDate } from '@/lib/utils'
+import { useSettingsStore } from '@/store'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('company')
@@ -37,12 +43,29 @@ export default function SettingsPage() {
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
   const [confirmationAction, setConfirmationAction] = useState<(() => void) | null>(null)
 
+  // Phase colors, company settings, and appearance settings from store
+  const { 
+    phaseColors, 
+    setPhaseColor, 
+    resetPhaseColors,
+    companySettings: storedCompanySettings,
+    setCompanySettings: saveCompanySettings,
+    appearanceSettings: storedAppearanceSettings,
+    setAppearanceSettings: saveAppearanceSettings,
+    productionSettings: storeProductionSettings,
+    setProductionSettings: setStoreProductionSettings,
+  } = useSettingsStore()
+
+  // Hydration state
+  const [isHydrated, setIsHydrated] = useState(false)
+
   // State for each tab
   const [companySettings, setCompanySettings] = useState(mockCompanySettings)
   const [appearanceSettings, setAppearanceSettings] = useState(mockAppearanceSettings)
-  const [productionSettings, setProductionSettings] = useState(mockProductionSettings)
+  const [productionSettings, setProductionSettings] = useState(storeProductionSettings || mockProductionSettings)
   const [financeSettings, setFinanceSettings] = useState(mockFinanceSettings)
   const [securitySettings, setSecuritySettings] = useState(mockSecuritySettings)
+  
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: {
       lowStock: true,
@@ -66,14 +89,128 @@ export default function SettingsPage() {
     },
   })
 
+  // Hydration: მონიშნე რომ client-side render-ია
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  // Hydration: store-დან ჩატვირთვა client-side
+  useEffect(() => {
+    if (isHydrated && storedCompanySettings && storedCompanySettings.name) {
+      setCompanySettings(prev => ({
+        ...prev,
+        name: storedCompanySettings.name || prev.name,
+        legalName: storedCompanySettings.legalName || prev.legalName,
+        taxId: storedCompanySettings.taxId || prev.taxId,
+        address: storedCompanySettings.address || prev.address,
+        phone: storedCompanySettings.phone || prev.phone,
+        email: storedCompanySettings.email || prev.email,
+        website: storedCompanySettings.website || prev.website,
+        bankName: storedCompanySettings.bankName || prev.bankName,
+        bankAccount: storedCompanySettings.bankAccount || prev.bankAccount,
+        bankSwift: storedCompanySettings.bankSwift || prev.bankSwift,
+      }))
+    }
+    
+    // Appearance settings hydration
+    if (isHydrated && storedAppearanceSettings) {
+      setAppearanceSettings(prev => ({
+        ...prev,
+        theme: storedAppearanceSettings.theme || prev.theme,
+        accentColor: storedAppearanceSettings.accentColor || prev.accentColor,
+        language: storedAppearanceSettings.language || prev.language,
+        dateFormat: storedAppearanceSettings.dateFormat || prev.dateFormat,
+        currency: storedAppearanceSettings.currency || prev.currency,
+        numberFormat: storedAppearanceSettings.numberFormat || prev.numberFormat,
+      }))
+    }
+    
+    // Production settings hydration
+    if (isHydrated && storeProductionSettings) {
+      setProductionSettings(prev => ({
+        ...prev,
+        ...storeProductionSettings,
+      }))
+    }
+  }, [isHydrated, storedCompanySettings, storedAppearanceSettings, storeProductionSettings])
+
+  // Users state
+  const [users, setUsers] = useState<User[]>([])
+  const [usersLoading, setUsersLoading] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<string | null>(null)
+
+  // Fetch users
+  const fetchUsers = async () => {
+    try {
+      setUsersLoading(true)
+      const res = await fetch('/api/users')
+      if (res.ok) {
+        const data = await res.json()
+        setUsers(data.users || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch users:', err)
+    } finally {
+      setUsersLoading(false)
+    }
+  }
+
+  // Load users when tab changes to 'users'
+  useEffect(() => {
+    if (activeTab === 'users') {
+      fetchUsers()
+    }
+  }, [activeTab])
+
   const handleSave = () => {
-    console.log('Settings saved')
-    // In real app, this would save to backend
+    // შეინახე კომპანიის პარამეტრები store-ში
+    saveCompanySettings({
+      name: companySettings.name,
+      legalName: companySettings.legalName,
+      taxId: companySettings.taxId,
+      address: companySettings.address,
+      phone: companySettings.phone,
+      email: companySettings.email,
+      website: companySettings.website || '',
+      bankName: companySettings.bankName,
+      bankAccount: companySettings.bankAccount,
+      bankSwift: companySettings.bankSwift,
+    })
+    
+    // შეინახე გარეგნობის პარამეტრები store-ში
+    saveAppearanceSettings({
+      theme: appearanceSettings.theme,
+      accentColor: appearanceSettings.accentColor,
+      language: appearanceSettings.language,
+      dateFormat: appearanceSettings.dateFormat,
+      currency: appearanceSettings.currency,
+      numberFormat: appearanceSettings.numberFormat,
+    })
+    
+    console.log('Settings saved to store')
+    
+    // შეტყობინება მომხმარებელს
+    alert('პარამეტრები შენახულია!')
   }
 
   const handleDeleteUser = (userId: string) => {
-    setConfirmationAction(() => () => {
-      console.log('Delete user:', userId)
+    setUserToDelete(userId)
+    setConfirmationAction(() => async () => {
+      try {
+        const res = await fetch(`/api/users/${userId}`, {
+          method: 'DELETE',
+        })
+        if (res.ok) {
+          fetchUsers()
+        } else {
+          const data = await res.json()
+          alert(data.error || 'წაშლა ვერ მოხერხდა')
+        }
+      } catch (err) {
+        console.error('Failed to delete user:', err)
+        alert('წაშლა ვერ მოხერხდა')
+      }
+      setUserToDelete(null)
     })
     setIsConfirmationModalOpen(true)
   }
@@ -179,34 +316,37 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="pt-4 border-t border-border">
-                  <h4 className="font-semibold text-text-primary mb-4">საბანკო რეკვიზიტები</h4>
+                <div className="pt-4 border-t border-border mt-6">
+                  <h4 className="font-semibold text-text-primary mb-4">🏦 საბანკო რეკვიზიტები</h4>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">ბანკი</label>
+                      <label className="block text-sm font-medium text-text-primary mb-2">ბანკის სახელი</label>
                       <input
                         type="text"
                         value={companySettings.bankName || ''}
                         onChange={(e) => setCompanySettings({ ...companySettings, bankName: e.target.value })}
+                        placeholder="მაგ: თიბისი ბანკი"
                         className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">ანგარიშის #</label>
+                      <label className="block text-sm font-medium text-text-primary mb-2">ანგარიშის ნომერი (IBAN)</label>
                       <input
                         type="text"
                         value={companySettings.bankAccount || ''}
                         onChange={(e) => setCompanySettings({ ...companySettings, bankAccount: e.target.value })}
-                        className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
+                        placeholder="მაგ: GE00TB0000000000000000"
+                        className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary font-mono"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">SWIFT</label>
+                      <label className="block text-sm font-medium text-text-primary mb-2">SWIFT კოდი</label>
                       <input
                         type="text"
                         value={companySettings.bankSwift || ''}
                         onChange={(e) => setCompanySettings({ ...companySettings, bankSwift: e.target.value })}
-                        className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
+                        placeholder="მაგ: TBCBGE22"
+                        className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary font-mono"
                       />
                     </div>
                   </div>
@@ -243,7 +383,16 @@ export default function SettingsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {mockUsers.map((user, index) => {
+                      {usersLoading ? (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-text-muted">
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-copper"></div>
+                              <span>იტვირთება...</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (users.length > 0 ? users : mockUsers).map((user, index) => {
                         const role = roleConfig[user.role]
                         return (
                           <tr key={user.id} className="border-b border-border hover:bg-bg-tertiary/50">
@@ -264,7 +413,7 @@ export default function SettingsPage() {
                               </span>
                             </td>
                             <td className="py-3 px-4 text-text-muted text-sm">
-                              {user.lastActivity ? getRelativeTime(user.lastActivity) : '-'}
+                              {getRelativeTime(user.lastActivity || (user as any).updatedAt)}
                             </td>
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-2">
@@ -409,6 +558,45 @@ export default function SettingsPage() {
                       </label>
                     ))}
                   </div>
+                </div>
+
+                {/* ფაზების ფერები */}
+                <div className="pt-4 border-t border-border">
+                  <label className="block text-sm font-medium text-text-primary mb-2">ფაზების ფერები</label>
+                  <p className="text-xs text-text-muted mb-4">აირჩიეთ ფერი კალენდარის თითოეული ფაზისთვის</p>
+                  <div className="space-y-3">
+                    {(Object.keys(PHASE_LABELS) as Array<keyof PhaseColors>).map((phase) => (
+                      <div key={phase} className="flex items-center justify-between p-3 bg-bg-tertiary rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <span>{PHASE_LABELS[phase].icon}</span>
+                          <span className="text-sm text-text-primary">{PHASE_LABELS[phase].label}</span>
+                        </div>
+                        <div className="flex gap-1.5 flex-wrap max-w-[280px] justify-end">
+                          {PHASE_COLOR_OPTIONS.map((color) => (
+                            <button
+                              key={color.key}
+                              onClick={() => setPhaseColor(phase, color.key)}
+                              className={`w-6 h-6 rounded border-2 transition-all ${
+                                phaseColors[phase] === color.key
+                                  ? 'border-white scale-110 ring-2 ring-white/30'
+                                  : 'border-transparent hover:border-white/50'
+                              }`}
+                              title={color.label}
+                            >
+                              <div className={`w-full h-full rounded-sm ${color.bg}`} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button
+                    onClick={resetPhaseColors}
+                    className="mt-4 text-sm text-copper hover:text-copper/80 transition-colors"
+                  >
+                    ↺ ნაგულისხმევი ფერების დაბრუნება
+                  </button>
                 </div>
 
                 <div>
@@ -577,7 +765,11 @@ export default function SettingsPage() {
                       <input
                         type="text"
                         value={productionSettings.batchPrefix}
-                        onChange={(e) => setProductionSettings({ ...productionSettings, batchPrefix: e.target.value })}
+                        onChange={(e) => {
+                          const newSettings = { ...productionSettings, batchPrefix: e.target.value }
+                          setProductionSettings(newSettings)
+                          setStoreProductionSettings(newSettings)
+                        }}
                         className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
                       />
                     </div>
@@ -586,7 +778,11 @@ export default function SettingsPage() {
                       <input
                         type="text"
                         value={productionSettings.batchFormat}
-                        onChange={(e) => setProductionSettings({ ...productionSettings, batchFormat: e.target.value })}
+                        onChange={(e) => {
+                          const newSettings = { ...productionSettings, batchFormat: e.target.value }
+                          setProductionSettings(newSettings)
+                          setStoreProductionSettings(newSettings)
+                        }}
                         className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
                       />
                     </div>
@@ -595,7 +791,11 @@ export default function SettingsPage() {
                       <input
                         type="number"
                         value={productionSettings.nextBatchNumber}
-                        onChange={(e) => setProductionSettings({ ...productionSettings, nextBatchNumber: parseInt(e.target.value) || 0 })}
+                        onChange={(e) => {
+                          const newSettings = { ...productionSettings, nextBatchNumber: parseInt(e.target.value) || 0 }
+                          setProductionSettings(newSettings)
+                          setStoreProductionSettings(newSettings)
+                        }}
                         className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
                       />
                     </div>
@@ -626,7 +826,7 @@ export default function SettingsPage() {
                       <span className="text-sm text-text-muted ml-2">დღე</span>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">კონდიციონირების ტემპერატურა</label>
+                      <label className="block text-sm font-medium text-text-primary mb-2">კონდიცირების ტემპერატურა</label>
                       <input
                         type="number"
                         value={productionSettings.defaultConditioningTemp}
@@ -636,7 +836,7 @@ export default function SettingsPage() {
                       <span className="text-sm text-text-muted ml-2">°C</span>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">კონდიციონირების ხანგრძლივობა</label>
+                      <label className="block text-sm font-medium text-text-primary mb-2">კონდიცირების ხანგრძლივობა</label>
                       <input
                         type="number"
                         value={productionSettings.defaultConditioningDays}
@@ -690,7 +890,11 @@ export default function SettingsPage() {
                       <label className="block text-sm font-medium text-text-primary mb-2">გრავიტაციის ერთეული</label>
                       <select
                         value={productionSettings.gravityUnit}
-                        onChange={(e) => setProductionSettings({ ...productionSettings, gravityUnit: e.target.value as GravityUnit })}
+                        onChange={(e) => {
+                          const newSettings = { ...productionSettings, gravityUnit: e.target.value as GravityUnit }
+                          setProductionSettings(newSettings)
+                          setStoreProductionSettings(newSettings)
+                        }}
                         className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
                       >
                         <option value="SG">SG (1.050)</option>
@@ -702,7 +906,11 @@ export default function SettingsPage() {
                       <label className="block text-sm font-medium text-text-primary mb-2">მოცულობის ერთეული</label>
                       <select
                         value={productionSettings.volumeUnit}
-                        onChange={(e) => setProductionSettings({ ...productionSettings, volumeUnit: e.target.value as VolumeUnit })}
+                        onChange={(e) => {
+                          const newSettings = { ...productionSettings, volumeUnit: e.target.value as VolumeUnit }
+                          setProductionSettings(newSettings)
+                          setStoreProductionSettings(newSettings)
+                        }}
                         className="w-full px-4 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary"
                       >
                         <option value="L">ლიტრი (L)</option>
@@ -1327,8 +1535,52 @@ export default function SettingsPage() {
           setIsUserModalOpen(false)
           setSelectedUser(null)
         }}
-        onSubmit={(data) => {
-          console.log('User saved:', data)
+        onSubmit={async (data) => {
+          try {
+            const name = `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.email?.split('@')[0] || 'User'
+            const role = (data.role || 'operator').toUpperCase()
+            const isActive = data.status === 'active'
+            
+            if (selectedUser) {
+              // Update
+              const res = await fetch(`/api/users/${selectedUser.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, role, isActive }),
+              })
+              if (res.ok) {
+                fetchUsers()
+              } else {
+                const errorData = await res.json()
+                alert(errorData.error || 'განახლება ვერ მოხერხდა')
+              }
+            } else {
+              // Create
+              if (!data.email) {
+                alert('ელ-ფოსტა საჭიროა')
+                return
+              }
+              const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  email: data.email,
+                  name,
+                  role,
+                  isActive,
+                }),
+              })
+              if (res.ok) {
+                fetchUsers()
+              } else {
+                const errorData = await res.json()
+                alert(errorData.error || 'შექმნა ვერ მოხერხდა')
+              }
+            }
+          } catch (err) {
+            console.error('Failed to save user:', err)
+            alert('მოქმედება ვერ მოხერხდა')
+          }
           setIsUserModalOpen(false)
           setSelectedUser(null)
         }}

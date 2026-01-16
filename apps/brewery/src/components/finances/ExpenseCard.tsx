@@ -50,7 +50,6 @@ export function ExpenseCard({ category, amount, budget, percentage, trend }: Exp
             value={budgetPercentage}
             max={100}
             className={getProgressColor()}
-            height={8}
           />
           <div className="flex items-center justify-between mt-1 text-xs text-text-muted">
             <span>{budgetPercentage.toFixed(0)}%</span>

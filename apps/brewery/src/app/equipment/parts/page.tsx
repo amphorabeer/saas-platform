@@ -298,7 +298,7 @@ export default function PartsPage() {
 
                           {part.quantity === 0 && (
 
-                            <Button variant="outline" size="sm">
+                            <Button variant="secondary" size="sm">
 
                               შეკვეთა
 
@@ -344,7 +344,7 @@ export default function PartsPage() {
 
             <div className="flex items-center justify-between py-2 border-b border-border/50">
 
-              <span className="text-text-primary">Tri-clamp gasket 4"</span>
+              <span className="text-text-primary">Tri-clamp gasket 4&quot;</span>
 
               <span className="text-text-muted">FV-01 - {formatDate(new Date('2024-11-20'))}</span>
 

@@ -1,16 +1,12 @@
 export { TankTimeline } from './TankTimeline'
-
 export { TankRow } from './TankRow'
-
 export { TankInfo } from './TankInfo'
-
 export { TimelineBar } from './TimelineBar'
-
 export { BrewDayBadge } from './BrewDayBadge'
-
-export { AddEventModal } from './AddEventModal'
-
 export { EventDetailModal } from './EventDetailModal'
-
 export { UpcomingEvents } from './UpcomingEvents'
-
+export { OrdersCalendar } from './OrdersCalendar'
+export { ResourceTimeline } from './ResourceTimeline'
+export { ResourceSection } from './ResourceSection'
+export { ResourceRow } from './ResourceRow'
+export type { CalendarEvent, Resource } from './ResourceTimeline'

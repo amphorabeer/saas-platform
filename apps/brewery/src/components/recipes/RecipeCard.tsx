@@ -2,9 +2,13 @@
 
 
 
+import { useMemo } from 'react'
+
 import type { Recipe } from '@/app/recipes/page'
 
 import { formatDate } from '@/lib/utils'
+
+import { useBreweryStore } from '@/store'
 
 
 
@@ -21,6 +25,42 @@ interface RecipeCardProps {
 }
 
 
+
+// Utility function to get beer color from SRM
+const getBeerColor = (srm: number): string => {
+  // Clamp SRM to valid range
+  const clampedSrm = Math.max(1, Math.min(40, srm || 5))
+  
+  // SRM to RGB approximation (SRM color chart)
+  const colors: [number, string][] = [
+    [1, '#FFE699'],   // Very Light
+    [2, '#FFD878'],   // Light
+    [3, '#FFCA5A'],   // Pale
+    [4, '#FFBF42'],   // Gold
+    [5, '#FBB123'],   // Deep Gold
+    [6, '#F8A600'],   // Amber
+    [7, '#F39C00'],   // Medium Amber
+    [8, '#EA8F00'],   // Deep Amber
+    [9, '#E58500'],   // Copper
+    [10, '#DE7C00'],  // Deep Copper
+    [12, '#CF6900'],  // Brown
+    [14, '#C35900'],  // Very Dark Brown
+    [17, '#A34200'],  // Dark Brown
+    [20, '#8D4000'],  // Black
+    [25, '#5A2800'],  // Deep Black
+    [30, '#261716'],  // Opaque Black
+    [40, '#0F0B0A'],  // Pitch Black
+  ]
+  
+  // Find closest SRM value
+  for (let i = colors.length - 1; i >= 0; i--) {
+    if (clampedSrm >= colors[i][0]) {
+      return colors[i][1]
+    }
+  }
+  
+  return colors[0][1]
+}
 
 const STYLE_COLORS: Record<string, string> = {
 
@@ -44,6 +84,12 @@ export function RecipeCard({ recipe, viewMode, onClick, onToggleFavorite }: Reci
 
   const styleColor = STYLE_COLORS[recipe.style] || 'bg-copper'
 
+  // Get real batch count from Zustand store
+  const batches = useBreweryStore(state => state.batches)
+  const realBatchCount = useMemo(() => {
+    return batches.filter(b => b.recipeId === recipe.id).length
+  }, [batches, recipe.id])
+
 
 
   if (viewMode === 'list') {
@@ -58,9 +104,11 @@ export function RecipeCard({ recipe, viewMode, onClick, onToggleFavorite }: Reci
 
       >
 
-        {/* Color indicator */}
-
-        <div className={`w-2 h-16 rounded-full ${styleColor}`} />
+        {/* Beer color indicator */}
+        <div 
+          className="w-2 h-16 rounded-full"
+          style={{ backgroundColor: getBeerColor(recipe.srm || 5) }}
+        />
 
         
 
@@ -104,7 +152,7 @@ export function RecipeCard({ recipe, viewMode, onClick, onToggleFavorite }: Reci
 
           <div>
 
-            <p className="font-mono">{recipe.batchCount}</p>
+            <p className="font-mono">{realBatchCount}</p>
 
             <p className="text-xs text-text-muted">პარტია</p>
 
@@ -160,9 +208,13 @@ export function RecipeCard({ recipe, viewMode, onClick, onToggleFavorite }: Reci
 
     >
 
-      {/* Header with color */}
-
-      <div className={`h-24 ${styleColor} relative`}>
+      {/* Header with beer color */}
+      <div 
+        className="h-24 relative"
+        style={{ 
+          backgroundColor: getBeerColor(recipe.srm || 5)
+        }}
+      >
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
@@ -232,12 +284,15 @@ export function RecipeCard({ recipe, viewMode, onClick, onToggleFavorite }: Reci
 
           </div>
 
-          <div className="bg-bg-tertiary rounded-lg p-2">
-
-            <p className="font-mono text-sm">{recipe.srm}</p>
-
-            <p className="text-[10px] text-text-muted">SRM</p>
-
+          <div className="bg-bg-tertiary rounded-lg p-2 flex items-center justify-center gap-1.5">
+            <div 
+              className="w-4 h-4 rounded-full border border-border"
+              style={{ backgroundColor: getBeerColor(recipe.srm || 5) }}
+            />
+            <div>
+              <p className="font-mono text-sm">{recipe.srm}</p>
+              <p className="text-[10px] text-text-muted">SRM</p>
+            </div>
           </div>
 
           <div className="bg-bg-tertiary rounded-lg p-2">
@@ -262,7 +317,7 @@ export function RecipeCard({ recipe, viewMode, onClick, onToggleFavorite }: Reci
 
             <span className="text-sm">{recipe.rating}</span>
 
-            <span className="text-text-muted text-sm">• {recipe.batchCount} პარტია</span>
+            <span className="text-text-muted text-sm">• {realBatchCount} პარტია</span>
 
           </div>
 

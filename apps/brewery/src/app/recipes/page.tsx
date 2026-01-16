@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardHeader, CardBody, Button } from '@/components/ui'
 import { RecipeCard } from '@/components/recipes/RecipeCard'
 import { RecipeDetailModal } from '@/components/recipes/RecipeDetailModal'
 import { NewRecipeModal } from '@/components/recipes/NewRecipeModal'
 import { recipes as centralRecipes, batches } from '@/data/centralData'
+import { useBreweryStore } from '@/store'
 
 export interface Ingredient {
   id: string
@@ -44,9 +45,10 @@ export interface Recipe {
   efficiency: number
   ingredients: Ingredient[]
   steps: BrewingStep[]
+  process?: any  // Brewing process (mash steps, hop schedule, fermentation, conditioning)
   notes: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date | string  // Can be Date object or ISO string from API
+  updatedAt: Date | string  // Can be Date object or ISO string from API
   batchCount: number
   rating: number
   isFavorite: boolean
@@ -93,11 +95,43 @@ const mockRecipes: Recipe[] = centralRecipes.map((r, index) => ({
 
 export default function RecipesPage() {
 
-  const [recipes, setRecipes] = useState(mockRecipes)
+  const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
 
   const [showNewRecipeModal, setShowNewRecipeModal] = useState(false)
+
+  const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null)
+
+  // Fetch recipes from API
+  const fetchRecipes = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/recipes')
+      if (response.ok) {
+        const data = await response.json()
+        const fetchedRecipes = data.recipes || data || []
+        console.log('[RecipesPage] Fetched recipes:', fetchedRecipes.length)
+        setRecipes(fetchedRecipes)
+      } else {
+        console.error('[RecipesPage] Failed to fetch recipes:', response.status)
+        // Fallback to mock data if API fails
+        setRecipes(mockRecipes)
+      }
+    } catch (error) {
+      console.error('[RecipesPage] Fetch recipes error:', error)
+      // Fallback to mock data on error
+      setRecipes(mockRecipes)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Load recipes on mount
+  useEffect(() => {
+    fetchRecipes()
+  }, [])
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
@@ -135,7 +169,12 @@ export default function RecipesPage() {
 
         case 'batchCount': return b.batchCount - a.batchCount
 
-        case 'updatedAt': return b.updatedAt.getTime() - a.updatedAt.getTime()
+        case 'updatedAt': {
+          // Convert ISO string to Date before comparing
+          const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
+          const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
+          return dateB - dateA
+        }
 
         default: return 0
 
@@ -155,7 +194,77 @@ export default function RecipesPage() {
 
   }
 
+  const handleDuplicate = (recipe: Recipe) => {
 
+    const duplicated: Recipe = {
+
+      ...recipe,
+
+      id: `recipe-${Date.now()}`,
+
+      name: `${recipe.name} (ასლი)`,
+
+      createdAt: new Date(),
+
+      updatedAt: new Date(),
+
+      batchCount: 0,
+
+    }
+
+    setRecipes(prev => [...prev, duplicated])
+
+    setSelectedRecipe(null)
+
+    alert('რეცეპტი დუბლირებულია!')
+
+  }
+
+  const handleExport = (recipe: Recipe) => {
+
+    // Export as JSON
+
+    const dataStr = JSON.stringify(recipe, null, 2)
+
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+
+    const url = URL.createObjectURL(dataBlob)
+
+    const link = document.createElement('a')
+
+    link.href = url
+
+    link.download = `${recipe.name.replace(/\s+/g, '_')}.json`
+
+    link.click()
+
+    URL.revokeObjectURL(url)
+
+    alert('რეცეპტი ექსპორტირებულია!')
+
+  }
+
+  const handleEditRecipe = (recipe: Recipe) => {
+    console.log('Edit recipe clicked:', recipe.id) // Debug
+    setEditingRecipe(recipe)
+    setSelectedRecipe(null) // Close detail modal
+    setShowNewRecipeModal(true) // Open edit modal
+  }
+
+  const handleEditSave = (recipe: Recipe) => {
+
+    setRecipes(prev => prev.map(r => r.id === recipe.id ? recipe : r))
+
+    setEditingRecipe(null)
+
+    setShowNewRecipeModal(false)
+
+  }
+
+
+
+  // Get batches from Zustand store for real count
+  const storeBatches = useBreweryStore(state => state.batches)
 
   const stats = {
 
@@ -163,7 +272,7 @@ export default function RecipesPage() {
 
     favorites: recipes.filter(r => r.isFavorite).length,
 
-    totalBatches: recipes.reduce((sum, r) => sum + r.batchCount, 0),
+    totalBatches: storeBatches.length, // Real batch count from Zustand store
 
     avgRating: (recipes.reduce((sum, r) => sum + r.rating, 0) / recipes.length).toFixed(1),
 
@@ -333,11 +442,18 @@ export default function RecipesPage() {
 
 
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-12 text-text-muted">
+          <p className="text-lg">იტვირთება...</p>
+        </div>
+      )}
+
       {/* Recipes Grid/List */}
+      {!isLoading && (
+        <div className={viewMode === 'grid' ? 'grid grid-cols-3 gap-6' : 'space-y-4'}>
 
-      <div className={viewMode === 'grid' ? 'grid grid-cols-3 gap-6' : 'space-y-4'}>
-
-        {filteredRecipes.map(recipe => (
+          {filteredRecipes.map(recipe => (
 
           <RecipeCard
 
@@ -353,13 +469,14 @@ export default function RecipesPage() {
 
           />
 
-        ))}
+          ))}
 
-      </div>
+        </div>
+      )}
 
 
 
-      {filteredRecipes.length === 0 && (
+      {!isLoading && filteredRecipes.length === 0 && (
 
         <div className="text-center py-12 text-text-muted">
 
@@ -391,26 +508,40 @@ export default function RecipesPage() {
 
           }}
 
+          onEdit={handleEditRecipe}
+
+          onDuplicate={handleDuplicate}
+
+          onExport={handleExport}
+
         />
 
       )}
 
 
 
-      {/* New Recipe Modal */}
+      {/* New Recipe Modal / Edit Modal */}
 
-      {showNewRecipeModal && (
+      {(showNewRecipeModal || editingRecipe) && (
 
         <NewRecipeModal
 
-          onClose={() => setShowNewRecipeModal(false)}
+          editingRecipe={editingRecipe}
 
-          onSave={(recipe) => {
-
-            setRecipes(prev => [...prev, { ...recipe, id: Date.now().toString() }])
+          onClose={() => {
 
             setShowNewRecipeModal(false)
 
+            setEditingRecipe(null)
+
+          }}
+
+          onSave={async (recipe) => {
+            console.log('[RecipesPage] Recipe saved, refreshing list...')
+            // Refresh recipes from API after save
+            await fetchRecipes()
+            setShowNewRecipeModal(false)
+            setEditingRecipe(null)
           }}
 
         />

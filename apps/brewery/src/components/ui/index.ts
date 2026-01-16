@@ -3,5 +3,4 @@ export { StatCard } from './StatCard'
 export { BatchStatusBadge, TankStatusBadge, StatusBadge } from './StatusBadge'
 export { Button } from './Button'
 export { ProgressBar } from './ProgressBar'
-
-
+export { BlendBadge, BlendIndicator, SourceBatchesSection } from './BlendBadge'

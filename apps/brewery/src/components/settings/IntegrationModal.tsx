@@ -158,4 +158,3 @@ export function IntegrationModal({ isOpen, onClose, onSubmit, integration }: Int
     </div>
   )
 }
-
