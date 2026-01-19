@@ -24,6 +24,8 @@ interface PackagingModalProps {
   recipeName: string
 
   availableLiters: number
+  totalVolume?: number
+  packagedVolume?: number
 
   lotId?: string      // ✅ ADD THIS
 
@@ -109,6 +111,8 @@ export function PackagingModal({
   recipeName, 
   
   availableLiters,
+  totalVolume,
+  packagedVolume,
 
   lotId,      // ✅ ADD THIS
 
@@ -1037,6 +1041,26 @@ export function PackagingModal({
             <p className="font-medium">{recipeName}</p>
 
             <p className="text-sm text-text-muted">ხელმისაწვდომი: {availableLiters}L</p>
+
+          {/* Progress Bar */}
+          {totalVolume && packagedVolume !== undefined && (
+            <div className="mt-3">
+              <div className="flex justify-between text-xs text-text-muted mb-1">
+                <span>დაფასოებული</span>
+                <span>{((packagedVolume / totalVolume) * 100).toFixed(0)}%</span>
+              </div>
+              <div className="w-full bg-bg-muted rounded-full h-2.5">
+                <div 
+                  className="bg-accent-primary h-2.5 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min((packagedVolume / totalVolume) * 100, 100)}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-text-muted mt-1">
+                <span>დაფასოებული: {packagedVolume.toFixed(1)}L</span>
+                <span>დარჩა: {(totalVolume - packagedVolume).toFixed(1)}L</span>
+              </div>
+            </div>
+          )}
 
           </div>
 

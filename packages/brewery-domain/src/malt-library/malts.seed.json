@@ -1,0 +1,1380 @@
+{
+  "library": {
+    "name": "Malt Library",
+    "version": "1.0.0",
+    "generatedAt": "2025-12-15T00:00:00.000Z",
+    "defaults": {
+      "allergens": {
+        "gluten": true
+      }
+    }
+  },
+  "items": [
+    {
+      "id": "malt_pilsner_weyermann",
+      "name": "Pilsner Malt",
+      "type": "base",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 3.5,
+          "min": 3.0,
+          "max": 4.0
+        }
+      },
+      "extract": {
+        "fgdbPercent": 81.5
+      },
+      "diastaticPower": {
+        "wk": 110,
+        "lintner": 120
+      },
+      "moisturePercent": 4.5,
+      "proteinPercent": 10.5,
+      "maxUsagePercent": 100,
+      "recommendedUsage": {
+        "min": 0,
+        "max": 100
+      },
+      "flavorNotes": ["clean", "crisp", "light", "sweet"],
+      "styles": ["Pilsner", "Lager", "Helles", "Kölsch"],
+      "tags": ["base", "pilsner", "lager"],
+      "keywords": ["pilsner", "pils", "lager", "base malt", "german"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_pilsner_bestmalz",
+      "name": "Pilsner Malt",
+      "type": "base",
+      "producer": "BestMalz",
+      "country": "DE",
+      "supplier": "BestMalz",
+      "color": {
+        "ebc": {
+          "typical": 3.2,
+          "min": 3.0,
+          "max": 3.5
+        }
+      },
+      "extract": {
+        "fgdbPercent": 82.0
+      },
+      "diastaticPower": {
+        "wk": 108,
+        "lintner": 118
+      },
+      "moisturePercent": 4.0,
+      "proteinPercent": 10.8,
+      "maxUsagePercent": 100,
+      "flavorNotes": ["clean", "neutral", "sweet"],
+      "styles": ["Pilsner", "Lager", "Helles"],
+      "tags": ["base", "pilsner"],
+      "keywords": ["pilsner", "bestmalz", "german"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_pale_ale_crisp",
+      "name": "Pale Ale Malt",
+      "type": "base",
+      "producer": "Crisp",
+      "country": "UK",
+      "supplier": "Crisp",
+      "color": {
+        "ebc": {
+          "typical": 5.5,
+          "min": 5.0,
+          "max": 6.0
+        }
+      },
+      "extract": {
+        "fgdbPercent": 81.0
+      },
+      "diastaticPower": {
+        "wk": 105,
+        "lintner": 115
+      },
+      "moisturePercent": 4.0,
+      "proteinPercent": 11.0,
+      "maxUsagePercent": 100,
+      "flavorNotes": ["malty", "biscuity", "slightly nutty"],
+      "styles": ["Pale Ale", "IPA", "ESB", "Bitter"],
+      "tags": ["base", "pale ale", "british"],
+      "keywords": ["pale ale", "crisp", "british", "biscuit"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_maris_otter_crisp",
+      "name": "Maris Otter",
+      "type": "base",
+      "producer": "Crisp",
+      "country": "UK",
+      "supplier": "Crisp",
+      "color": {
+        "ebc": {
+          "typical": 6.0,
+          "min": 5.5,
+          "max": 6.5
+        }
+      },
+      "extract": {
+        "fgdbPercent": 80.5
+      },
+      "diastaticPower": {
+        "wk": 100,
+        "lintner": 110
+      },
+      "moisturePercent": 4.0,
+      "proteinPercent": 11.5,
+      "maxUsagePercent": 100,
+      "flavorNotes": ["rich", "malty", "biscuity", "nutty", "complex"],
+      "styles": ["ESB", "Bitter", "Pale Ale", "IPA"],
+      "tags": ["base", "maris otter", "premium", "british"],
+      "keywords": ["maris otter", "crisp", "british", "premium", "biscuit"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_vienna_weyermann",
+      "name": "Vienna Malt",
+      "type": "base",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 7.5,
+          "min": 7.0,
+          "max": 8.0
+        }
+      },
+      "extract": {
+        "fgdbPercent": 81.0
+      },
+      "diastaticPower": {
+        "wk": 95,
+        "lintner": 105
+      },
+      "moisturePercent": 4.5,
+      "proteinPercent": 11.0,
+      "maxUsagePercent": 100,
+      "recommendedUsage": {
+        "min": 0,
+        "max": 100
+      },
+      "flavorNotes": ["malty", "sweet", "toasty", "honey-like"],
+      "styles": ["Vienna Lager", "Märzen", "Oktoberfest", "Amber Lager"],
+      "tags": ["base", "vienna", "german"],
+      "keywords": ["vienna", "märzen", "oktoberfest", "amber"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_munich_i_weyermann",
+      "name": "Munich Malt I",
+      "type": "base",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 15,
+          "min": 14,
+          "max": 16
+        }
+      },
+      "extract": {
+        "fgdbPercent": 80.0
+      },
+      "diastaticPower": {
+        "wk": 85,
+        "lintner": 95
+      },
+      "moisturePercent": 4.5,
+      "proteinPercent": 11.5,
+      "maxUsagePercent": 100,
+      "flavorNotes": ["malty", "sweet", "bread-like", "toasty"],
+      "styles": ["Märzen", "Bock", "Amber Lager", "Dunkel"],
+      "tags": ["base", "munich", "german"],
+      "keywords": ["munich", "märzen", "bock", "amber"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_munich_ii_weyermann",
+      "name": "Munich Malt II",
+      "type": "base",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 25,
+          "min": 23,
+          "max": 27
+        }
+      },
+      "extract": {
+        "fgdbPercent": 79.5
+      },
+      "diastaticPower": {
+        "wk": 75,
+        "lintner": 85
+      },
+      "moisturePercent": 4.5,
+      "proteinPercent": 11.5,
+      "maxUsagePercent": 100,
+      "flavorNotes": ["rich", "malty", "toasty", "caramel-like"],
+      "styles": ["Dunkel", "Bock", "Doppelbock", "Amber Lager"],
+      "tags": ["base", "munich", "german", "dark"],
+      "keywords": ["munich", "dunkel", "bock", "dark"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_wheat_weyermann",
+      "name": "Wheat Malt",
+      "type": "base",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 4.0,
+          "min": 3.5,
+          "max": 4.5
+        }
+      },
+      "extract": {
+        "fgdbPercent": 82.0
+      },
+      "diastaticPower": {
+        "wk": 120,
+        "lintner": 130
+      },
+      "moisturePercent": 4.5,
+      "proteinPercent": 12.5,
+      "maxUsagePercent": 100,
+      "flavorNotes": ["light", "bready", "slightly tart"],
+      "styles": ["Hefeweizen", "Wheat Beer", "Witbier", "Berliner Weisse"],
+      "tags": ["base", "wheat", "german"],
+      "keywords": ["wheat", "hefeweizen", "weizen", "witbier"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_carapils_weyermann",
+      "name": "CaraPils",
+      "type": "caramel",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 3.5,
+          "min": 3.0,
+          "max": 4.0
+        }
+      },
+      "extract": {
+        "fgdbPercent": 75.0
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 20,
+      "recommendedUsage": {
+        "min": 5,
+        "max": 15
+      },
+      "flavorNotes": ["light", "body", "foam", "head retention"],
+      "styles": ["Lager", "Pilsner", "Light Ale"],
+      "tags": ["caramel", "body", "foam"],
+      "keywords": ["carapils", "dextrin", "body", "foam"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_cara20_weyermann",
+      "name": "CaraHell",
+      "type": "caramel",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 20,
+          "min": 18,
+          "max": 22
+        }
+      },
+      "extract": {
+        "fgdbPercent": 75.0
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 20,
+      "flavorNotes": ["light caramel", "sweet", "honey"],
+      "styles": ["Helles", "Pilsner", "Light Lager"],
+      "tags": ["caramel", "light"],
+      "keywords": ["carahell", "cara 20", "light caramel"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_cara60_weyermann",
+      "name": "CaraAmber",
+      "type": "caramel",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 60,
+          "min": 55,
+          "max": 65
+        }
+      },
+      "extract": {
+        "fgdbPercent": 74.0
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 20,
+      "recommendedUsage": {
+        "min": 5,
+        "max": 15
+      },
+      "flavorNotes": ["caramel", "toffee", "sweet", "honey"],
+      "styles": ["Amber Ale", "ESB", "Bitter", "Amber Lager"],
+      "tags": ["caramel", "amber"],
+      "keywords": ["caraamber", "cara 60", "caramel", "amber"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_cara120_weyermann",
+      "name": "CaraAroma",
+      "type": "caramel",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 120,
+          "min": 115,
+          "max": 125
+        }
+      },
+      "extract": {
+        "fgdbPercent": 72.0
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 15,
+      "recommendedUsage": {
+        "min": 2,
+        "max": 10
+      },
+      "flavorNotes": ["dark caramel", "raisin", "plum", "sweet"],
+      "styles": ["Porter", "Stout", "Dark Ale", "Old Ale"],
+      "tags": ["caramel", "dark"],
+      "keywords": ["caraaroma", "cara 120", "dark caramel", "raisin"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_chocolate_weyermann",
+      "name": "Chocolate Malt",
+      "type": "roasted",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 900,
+          "min": 850,
+          "max": 950
+        }
+      },
+      "extract": {
+        "fgdbPercent": 70.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 10,
+      "recommendedUsage": {
+        "min": 1,
+        "max": 5
+      },
+      "flavorNotes": ["chocolate", "coffee", "roasted", "bitter"],
+      "styles": ["Porter", "Stout", "Brown Ale", "Dark Lager"],
+      "tags": ["roasted", "chocolate", "dark"],
+      "keywords": ["chocolate", "roasted", "porter", "stout"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_black_weyermann",
+      "name": "Black Malt",
+      "type": "roasted",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 1300,
+          "min": 1250,
+          "max": 1350
+        }
+      },
+      "extract": {
+        "fgdbPercent": 68.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 5,
+      "recommendedUsage": {
+        "min": 0.5,
+        "max": 3
+      },
+      "flavorNotes": ["roasted", "burnt", "coffee", "bitter", "acrid"],
+      "styles": ["Stout", "Porter", "Schwarzbier"],
+      "tags": ["roasted", "black", "dark"],
+      "keywords": ["black", "roasted", "stout", "burnt"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_roasted_barley_crisp",
+      "name": "Roasted Barley",
+      "type": "roasted",
+      "producer": "Crisp",
+      "country": "UK",
+      "supplier": "Crisp",
+      "color": {
+        "ebc": {
+          "typical": 1200,
+          "min": 1150,
+          "max": 1250
+        }
+      },
+      "extract": {
+        "fgdbPercent": 68.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 10,
+      "recommendedUsage": {
+        "min": 2,
+        "max": 8
+      },
+      "flavorNotes": ["coffee", "roasted", "dry", "bitter"],
+      "styles": ["Stout", "Porter", "Irish Red"],
+      "tags": ["roasted", "barley", "stout"],
+      "keywords": ["roasted barley", "stout", "coffee"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_rye_weyermann",
+      "name": "Rye Malt",
+      "type": "specialty",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 5.5,
+          "min": 5.0,
+          "max": 6.0
+        }
+      },
+      "extract": {
+        "fgdbPercent": 80.0
+      },
+      "diastaticPower": {
+        "wk": 100,
+        "lintner": 110
+      },
+      "moisturePercent": 4.5,
+      "proteinPercent": 12.0,
+      "maxUsagePercent": 40,
+      "recommendedUsage": {
+        "min": 5,
+        "max": 30
+      },
+      "flavorNotes": ["spicy", "peppery", "earthy", "dry"],
+      "styles": ["Rye IPA", "Roggenbier", "Rye Beer"],
+      "tags": ["specialty", "rye", "spicy"],
+      "keywords": ["rye", "roggenbier", "spicy", "peppery"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_oat_flakes",
+      "name": "Flaked Oats",
+      "type": "adjunct",
+      "producer": "Generic",
+      "country": "US",
+      "supplier": "Generic",
+      "color": {
+        "ebc": {
+          "typical": 2.0,
+          "min": 1.5,
+          "max": 2.5
+        }
+      },
+      "extract": {
+        "fgdbPercent": 78.0
+      },
+      "moisturePercent": 8.0,
+      "proteinPercent": 13.0,
+      "maxUsagePercent": 30,
+      "recommendedUsage": {
+        "min": 5,
+        "max": 20
+      },
+      "flavorNotes": ["creamy", "smooth", "full body", "sweet"],
+      "styles": ["Oatmeal Stout", "NEIPA", "Hazy IPA"],
+      "tags": ["adjunct", "oats", "body"],
+      "keywords": ["oats", "oatmeal", "flaked", "body", "creamy"],
+      "allergens": {
+        "gluten": false
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "internal",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_smoked_beech_weyermann",
+      "name": "Smoked Malt (Beechwood)",
+      "type": "specialty",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 3.5,
+          "min": 3.0,
+          "max": 4.0
+        }
+      },
+      "extract": {
+        "fgdbPercent": 81.0
+      },
+      "diastaticPower": {
+        "wk": 110,
+        "lintner": 120
+      },
+      "moisturePercent": 4.5,
+      "maxUsagePercent": 100,
+      "recommendedUsage": {
+        "min": 0,
+        "max": 100
+      },
+      "flavorNotes": ["smoky", "bacon-like", "campfire", "intense"],
+      "styles": ["Rauchbier", "Smoked Beer", "Bamberg"],
+      "tags": ["specialty", "smoked", "rauchbier"],
+      "keywords": ["smoked", "rauchbier", "beechwood", "bamberg"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_acidulated_weyermann",
+      "name": "Acidulated Malt",
+      "type": "specialty",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 3.5,
+          "min": 3.0,
+          "max": 4.0
+        }
+      },
+      "extract": {
+        "fgdbPercent": 60.0
+      },
+      "moisturePercent": 4.5,
+      "maxUsagePercent": 5,
+      "recommendedUsage": {
+        "min": 1,
+        "max": 3
+      },
+      "flavorNotes": ["sour", "tart", "acidic"],
+      "styles": ["Gose", "Berliner Weisse", "Sour Beer"],
+      "tags": ["specialty", "acid", "sour"],
+      "keywords": ["acidulated", "acid", "sour", "gose"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_honey_dingemans",
+      "name": "Honey Malt",
+      "type": "specialty",
+      "producer": "Dingemans",
+      "country": "BE",
+      "supplier": "Dingemans",
+      "color": {
+        "ebc": {
+          "typical": 25,
+          "min": 23,
+          "max": 27
+        }
+      },
+      "extract": {
+        "fgdbPercent": 76.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 15,
+      "recommendedUsage": {
+        "min": 3,
+        "max": 10
+      },
+      "flavorNotes": ["honey", "sweet", "malty", "toasty"],
+      "styles": ["Amber Ale", "Honey Beer", "Blonde Ale"],
+      "tags": ["specialty", "honey"],
+      "keywords": ["honey", "sweet", "malty"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_biscuit_dingemans",
+      "name": "Biscuit Malt",
+      "type": "specialty",
+      "producer": "Dingemans",
+      "country": "BE",
+      "supplier": "Dingemans",
+      "color": {
+        "ebc": {
+          "typical": 50,
+          "min": 45,
+          "max": 55
+        }
+      },
+      "extract": {
+        "fgdbPercent": 75.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 15,
+      "recommendedUsage": {
+        "min": 3,
+        "max": 10
+      },
+      "flavorNotes": ["biscuit", "toasty", "nutty", "bread-like"],
+      "styles": ["Amber Ale", "ESB", "Bitter", "Brown Ale"],
+      "tags": ["specialty", "biscuit", "toasty"],
+      "keywords": ["biscuit", "toasty", "nutty", "bread"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_caramunich_i_weyermann",
+      "name": "CaraMunich I",
+      "type": "caramel",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 100,
+          "min": 95,
+          "max": 105
+        }
+      },
+      "extract": {
+        "fgdbPercent": 73.0
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 20,
+      "recommendedUsage": {
+        "min": 5,
+        "max": 15
+      },
+      "flavorNotes": ["caramel", "toffee", "malty", "sweet"],
+      "styles": ["Amber Ale", "ESB", "Bitter", "Amber Lager"],
+      "tags": ["caramel", "munich"],
+      "keywords": ["caramunich", "cara munich", "caramel"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_caramunich_ii_weyermann",
+      "name": "CaraMunich II",
+      "type": "caramel",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 150,
+          "min": 145,
+          "max": 155
+        }
+      },
+      "extract": {
+        "fgdbPercent": 72.0
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 15,
+      "recommendedUsage": {
+        "min": 3,
+        "max": 10
+      },
+      "flavorNotes": ["dark caramel", "raisin", "sweet", "malty"],
+      "styles": ["Porter", "Stout", "Dark Ale", "Dunkel"],
+      "tags": ["caramel", "dark"],
+      "keywords": ["caramunich", "dark caramel", "raisin"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_caravienne_weyermann",
+      "name": "CaraVienne",
+      "type": "caramel",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 50,
+          "min": 48,
+          "max": 52
+        }
+      },
+      "extract": {
+        "fgdbPercent": 74.0
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 20,
+      "recommendedUsage": {
+        "min": 5,
+        "max": 15
+      },
+      "flavorNotes": ["caramel", "toasty", "malty", "sweet"],
+      "styles": ["Vienna Lager", "Märzen", "Amber Lager"],
+      "tags": ["caramel", "vienna"],
+      "keywords": ["caravienne", "vienna", "caramel"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_carafa_i_weyermann",
+      "name": "Carafa Special I",
+      "type": "roasted",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 600,
+          "min": 580,
+          "max": 620
+        }
+      },
+      "extract": {
+        "fgdbPercent": 70.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 10,
+      "recommendedUsage": {
+        "min": 1,
+        "max": 5
+      },
+      "flavorNotes": ["smooth", "chocolate", "coffee", "less bitter"],
+      "styles": ["Schwarzbier", "Porter", "Dark Lager"],
+      "tags": ["roasted", "carafa", "smooth"],
+      "keywords": ["carafa", "special", "smooth", "chocolate"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_carafa_ii_weyermann",
+      "name": "Carafa Special II",
+      "type": "roasted",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 800,
+          "min": 780,
+          "max": 820
+        }
+      },
+      "extract": {
+        "fgdbPercent": 69.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 8,
+      "recommendedUsage": {
+        "min": 1,
+        "max": 5
+      },
+      "flavorNotes": ["dark chocolate", "coffee", "smooth"],
+      "styles": ["Schwarzbier", "Porter", "Stout"],
+      "tags": ["roasted", "carafa", "dark"],
+      "keywords": ["carafa", "special", "dark", "chocolate"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_carafa_iii_weyermann",
+      "name": "Carafa Special III",
+      "type": "roasted",
+      "producer": "Weyermann",
+      "country": "DE",
+      "supplier": "Weyermann",
+      "color": {
+        "ebc": {
+          "typical": 1000,
+          "min": 980,
+          "max": 1020
+        }
+      },
+      "extract": {
+        "fgdbPercent": 68.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 5,
+      "recommendedUsage": {
+        "min": 0.5,
+        "max": 3
+      },
+      "flavorNotes": ["very dark", "chocolate", "coffee", "smooth"],
+      "styles": ["Schwarzbier", "Stout", "Porter"],
+      "tags": ["roasted", "carafa", "very dark"],
+      "keywords": ["carafa", "special", "very dark", "stout"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_2row_rahr",
+      "name": "2-Row Barley",
+      "type": "base",
+      "producer": "Rahr",
+      "country": "US",
+      "supplier": "Rahr",
+      "color": {
+        "ebc": {
+          "typical": 3.0,
+          "min": 2.5,
+          "max": 3.5
+        }
+      },
+      "extract": {
+        "fgdbPercent": 81.5
+      },
+      "diastaticPower": {
+        "wk": 115,
+        "lintner": 125
+      },
+      "moisturePercent": 4.0,
+      "proteinPercent": 11.0,
+      "maxUsagePercent": 100,
+      "flavorNotes": ["clean", "neutral", "sweet"],
+      "styles": ["American Lager", "Pale Ale", "IPA"],
+      "tags": ["base", "2-row", "american"],
+      "keywords": ["2-row", "rahr", "american", "base"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_6row_generic",
+      "name": "6-Row Barley",
+      "type": "base",
+      "producer": "Generic",
+      "country": "US",
+      "supplier": "Generic",
+      "color": {
+        "ebc": {
+          "typical": 2.5,
+          "min": 2.0,
+          "max": 3.0
+        }
+      },
+      "extract": {
+        "fgdbPercent": 80.0
+      },
+      "diastaticPower": {
+        "wk": 130,
+        "lintner": 140
+      },
+      "moisturePercent": 4.0,
+      "proteinPercent": 12.5,
+      "maxUsagePercent": 100,
+      "flavorNotes": ["clean", "neutral", "high diastatic"],
+      "styles": ["American Lager", "Light Lager"],
+      "tags": ["base", "6-row", "american"],
+      "keywords": ["6-row", "american", "high diastatic"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "internal",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_golden_promise_simpsons",
+      "name": "Golden Promise",
+      "type": "base",
+      "producer": "Simpsons",
+      "country": "UK",
+      "supplier": "Simpsons",
+      "color": {
+        "ebc": {
+          "typical": 5.0,
+          "min": 4.5,
+          "max": 5.5
+        }
+      },
+      "extract": {
+        "fgdbPercent": 80.0
+      },
+      "diastaticPower": {
+        "wk": 100,
+        "lintner": 110
+      },
+      "moisturePercent": 4.0,
+      "proteinPercent": 11.2,
+      "maxUsagePercent": 100,
+      "flavorNotes": ["sweet", "malty", "honey-like", "smooth"],
+      "styles": ["Scottish Ale", "Pale Ale", "IPA"],
+      "tags": ["base", "golden promise", "premium", "scottish"],
+      "keywords": ["golden promise", "simpsons", "scottish", "premium"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_amber_crisp",
+      "name": "Amber Malt",
+      "type": "specialty",
+      "producer": "Crisp",
+      "country": "UK",
+      "supplier": "Crisp",
+      "color": {
+        "ebc": {
+          "typical": 50,
+          "min": 45,
+          "max": 55
+        }
+      },
+      "extract": {
+        "fgdbPercent": 75.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 15,
+      "recommendedUsage": {
+        "min": 3,
+        "max": 10
+      },
+      "flavorNotes": ["toasty", "biscuity", "nutty", "dry"],
+      "styles": ["Brown Ale", "Porter", "ESB"],
+      "tags": ["specialty", "amber", "toasty"],
+      "keywords": ["amber", "toasty", "biscuit", "brown ale"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_aromatic_dingemans",
+      "name": "Aromatic Malt",
+      "type": "specialty",
+      "producer": "Dingemans",
+      "country": "BE",
+      "supplier": "Dingemans",
+      "color": {
+        "ebc": {
+          "typical": 50,
+          "min": 48,
+          "max": 52
+        }
+      },
+      "extract": {
+        "fgdbPercent": 76.0
+      },
+      "moisturePercent": 4.0,
+      "maxUsagePercent": 20,
+      "recommendedUsage": {
+        "min": 5,
+        "max": 15
+      },
+      "flavorNotes": ["malty", "aromatic", "sweet", "toasty"],
+      "styles": ["Belgian Ale", "Dubbel", "Tripel", "Amber Ale"],
+      "tags": ["specialty", "aromatic", "belgian"],
+      "keywords": ["aromatic", "belgian", "malty", "sweet"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_flaked_corn",
+      "name": "Flaked Corn",
+      "type": "adjunct",
+      "producer": "Generic",
+      "country": "US",
+      "supplier": "Generic",
+      "color": {
+        "ebc": {
+          "typical": 1.0,
+          "min": 0.5,
+          "max": 1.5
+        }
+      },
+      "extract": {
+        "fgdbPercent": 79.0
+      },
+      "moisturePercent": 10.0,
+      "proteinPercent": 8.0,
+      "maxUsagePercent": 40,
+      "recommendedUsage": {
+        "min": 10,
+        "max": 30
+      },
+      "flavorNotes": ["light", "sweet", "corn-like", "clean"],
+      "styles": ["American Lager", "Light Lager", "Cream Ale"],
+      "tags": ["adjunct", "corn", "light"],
+      "keywords": ["corn", "flaked", "adjunct", "light"],
+      "allergens": {
+        "gluten": false
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "internal",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_flaked_rye",
+      "name": "Flaked Rye",
+      "type": "adjunct",
+      "producer": "Generic",
+      "country": "US",
+      "supplier": "Generic",
+      "color": {
+        "ebc": {
+          "typical": 3.5,
+          "min": 3.0,
+          "max": 4.0
+        }
+      },
+      "extract": {
+        "fgdbPercent": 78.0
+      },
+      "moisturePercent": 8.0,
+      "proteinPercent": 12.0,
+      "maxUsagePercent": 30,
+      "recommendedUsage": {
+        "min": 5,
+        "max": 20
+      },
+      "flavorNotes": ["spicy", "peppery", "earthy", "dry"],
+      "styles": ["Rye IPA", "Roggenbier", "Rye Beer"],
+      "tags": ["adjunct", "rye", "spicy"],
+      "keywords": ["rye", "flaked", "spicy", "peppery"],
+      "allergens": {
+        "gluten": false
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "internal",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_crystal_10_crisp",
+      "name": "Crystal 10",
+      "type": "caramel",
+      "producer": "Crisp",
+      "country": "UK",
+      "supplier": "Crisp",
+      "color": {
+        "ebc": {
+          "typical": 10,
+          "min": 8,
+          "max": 12
+        }
+      },
+      "extract": {
+        "fgdbPercent": 75.5
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 20,
+      "flavorNotes": ["light caramel", "sweet", "honey"],
+      "styles": ["Pale Ale", "Blonde Ale", "Light Ale"],
+      "tags": ["caramel", "light"],
+      "keywords": ["crystal 10", "light caramel"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_crystal_40_crisp",
+      "name": "Crystal 40",
+      "type": "caramel",
+      "producer": "Crisp",
+      "country": "UK",
+      "supplier": "Crisp",
+      "color": {
+        "ebc": {
+          "typical": 40,
+          "min": 38,
+          "max": 42
+        }
+      },
+      "extract": {
+        "fgdbPercent": 74.5
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 20,
+      "flavorNotes": ["caramel", "toffee", "sweet"],
+      "styles": ["Amber Ale", "ESB", "Bitter"],
+      "tags": ["caramel", "amber"],
+      "keywords": ["crystal 40", "caramel", "toffee"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "malt_crystal_80_crisp",
+      "name": "Crystal 80",
+      "type": "caramel",
+      "producer": "Crisp",
+      "country": "UK",
+      "supplier": "Crisp",
+      "color": {
+        "ebc": {
+          "typical": 80,
+          "min": 75,
+          "max": 85
+        }
+      },
+      "extract": {
+        "fgdbPercent": 73.0
+      },
+      "moisturePercent": 5.0,
+      "maxUsagePercent": 15,
+      "flavorNotes": ["dark caramel", "raisin", "sweet"],
+      "styles": ["Porter", "Brown Ale", "Dark Ale"],
+      "tags": ["caramel", "dark"],
+      "keywords": ["crystal 80", "dark caramel", "raisin"],
+      "allergens": {
+        "gluten": true
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "source": "manufacturer spec sheet",
+        "updatedAt": "2025-12-15T00:00:00.000Z"
+      }
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

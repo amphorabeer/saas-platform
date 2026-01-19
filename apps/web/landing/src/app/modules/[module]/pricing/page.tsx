@@ -8,6 +8,18 @@ import { ArrowLeft } from "lucide-react";
 
 const modules = ["hotel", "restaurant", "beauty", "shop", "brewery", "winery", "distillery"];
 
+// Module-specific app URLs (production-ში ეს იქნება environment variables)
+const moduleAppUrls: Record<string, string> = {
+  hotel: process.env.NEXT_PUBLIC_HOTEL_URL || "http://localhost:3010",
+  brewery: process.env.NEXT_PUBLIC_BREWERY_URL || "http://localhost:3020",
+  winery: process.env.NEXT_PUBLIC_WINERY_URL || "http://localhost:3030",
+  // დანარჩენი მოდულები ჯერ არ არის deployed
+  restaurant: "",
+  beauty: "",
+  shop: "",
+  distillery: "",
+};
+
 const moduleData: Record<
   string,
   {
@@ -140,12 +152,26 @@ const moduleData: Record<
   },
 };
 
+// Helper function to get registration URL based on module
+function getRegistrationUrl(moduleSlug: string, plan: string): string {
+  const appUrl = moduleAppUrls[moduleSlug];
+  
+  // თუ მოდულს აქვს საკუთარი app URL, გადამისამართდეს იქ
+  if (appUrl) {
+    return `${appUrl}/register?plan=${plan}`;
+  }
+  
+  // თუ არა, გამოიყენოს landing-ის signup (მომავალი მოდულებისთვის)
+  return `/auth/signup?module=${moduleSlug}&plan=${plan}`;
+}
+
 export default function ModulePricingPage({ params }: { params: { module: string } }) {
   if (!modules.includes(params.module)) {
     notFound();
   }
 
   const data = moduleData[params.module];
+  const moduleSlug = params.module;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -195,7 +221,7 @@ export default function ModulePricingPage({ params }: { params: { module: string
                   ))}
                 </ul>
                 <Button className="w-full min-h-[44px]" variant="outline" asChild>
-                  <Link href={`/auth/signup?module=${params.module}&plan=STARTER`}>დაწყება</Link>
+                  <Link href={getRegistrationUrl(moduleSlug, "STARTER")}>დაწყება</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -225,7 +251,7 @@ export default function ModulePricingPage({ params }: { params: { module: string
                   ))}
                 </ul>
                 <Button className="w-full min-h-[44px]" asChild>
-                  <Link href={`/auth/signup?module=${params.module}&plan=PROFESSIONAL`}>არჩევა</Link>
+                  <Link href={getRegistrationUrl(moduleSlug, "PROFESSIONAL")}>არჩევა</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -250,7 +276,7 @@ export default function ModulePricingPage({ params }: { params: { module: string
                   ))}
                 </ul>
                 <Button className="w-full min-h-[44px]" variant="outline" asChild>
-                  <Link href={`/auth/signup?module=${params.module}&plan=ENTERPRISE`}>არჩევა</Link>
+                  <Link href={getRegistrationUrl(moduleSlug, "ENTERPRISE")}>არჩევა</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -320,4 +346,3 @@ export default function ModulePricingPage({ params }: { params: { module: string
     </div>
   );
 }
-

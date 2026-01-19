@@ -78,22 +78,46 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
     const tests = await prisma.qCTest.findMany({
       where,
       include: {
-        batch: {
-          select: {
-            id: true,
-            batchNumber: true,
+        Batch: {
+          include: {
             recipe: {
               select: {
                 id: true,
                 name: true,
               },
             },
+            LotBatch: {
+              include: {
+                Lot: {
+                  include: {
+                    LotBatch: {
+                      include: {
+                        Batch: {
+                          select: {
+                            id: true,
+                            batchNumber: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
-        lot: {
-          select: {
-            id: true,
-            lotCode: true,
+        Lot: {
+          include: {
+            LotBatch: {
+              include: {
+                Batch: {
+                  select: {
+                    id: true,
+                    batchNumber: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -113,13 +137,63 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
     ).length
 
     // Transform tests with readable names
-    const transformedTests = tests.map(test => ({
-      id: test.id,
-      batchId: test.batchId,
-      lotId: test.lotId,
-      batchNumber: test.batch.batchNumber,
-      recipeName: test.batch.recipe?.name || '',
-      lotCode: test.lot?.lotCode || null,
+    const transformedTests = tests.map(test => {
+      // ✅ FIX: For split/blend lots, use lot's batch number instead of direct batch number
+      let displayBatchNumber = test.Batch?.batchNumber || ''
+      let lot: any = test.Lot
+      
+      // ✅ If test doesn't have lotId, try to find lot from batch's LotBatch
+      if (!lot && test.Batch?.LotBatch && test.Batch.LotBatch.length > 0) {
+        lot = test.Batch.LotBatch[0]?.Lot
+      }
+      
+      if (lot) {
+        // ✅ Priority 1: For blend lots, use lot code (e.g., "BLEND-2026-0001")
+        if (lot.lotCode?.startsWith('BLEND-')) {
+          displayBatchNumber = lot.lotCode
+          console.log(`[QUALITY API] Blend lot detected: ${test.Batch?.batchNumber} → ${displayBatchNumber}`)
+        } else {
+          // ✅ Priority 2: For split lots, find the specific split batch that matches test's batchId (e.g., "BRWW-2026-0042-A")
+          // Find LotBatch that matches the test's batchId
+          const matchingLotBatch = lot.LotBatch?.find((lb: any) => lb.Batch?.id === test.batchId)
+          if (matchingLotBatch?.Batch?.batchNumber) {
+            displayBatchNumber = matchingLotBatch.Batch.batchNumber
+            // ✅ FIX: If batchNumber doesn't have -A, -B suffix, add it from lot's lotCode
+            if (displayBatchNumber && !displayBatchNumber.match(/-[A-Z]$/i) && lot.lotCode) {
+              // Extract suffix from lotCode (e.g., "FERM-20260118-K9GIAB-A" → "-A")
+              const lotCodeSuffix = lot.lotCode.match(/-([A-Z])$/i)
+              if (lotCodeSuffix) {
+                displayBatchNumber = `${displayBatchNumber}-${lotCodeSuffix[1]}`
+              }
+            }
+            console.log(`[QUALITY API] Split lot detected: ${test.Batch?.batchNumber} → ${displayBatchNumber} (matched by batchId)`)
+          } else {
+            // Fallback to first batch if no match
+            const lotBatch = lot.LotBatch?.[0]
+            if (lotBatch?.Batch?.batchNumber) {
+              displayBatchNumber = lotBatch.Batch.batchNumber
+              // ✅ FIX: Add suffix from lotCode if needed
+              if (displayBatchNumber && !displayBatchNumber.match(/-[A-Z]$/i) && lot.lotCode) {
+                const lotCodeSuffix = lot.lotCode.match(/-([A-Z])$/i)
+                if (lotCodeSuffix) {
+                  displayBatchNumber = `${displayBatchNumber}-${lotCodeSuffix[1]}`
+                }
+              }
+              console.log(`[QUALITY API] Split lot detected: ${test.Batch?.batchNumber} → ${displayBatchNumber} (fallback to first)`)
+            }
+          }
+        }
+      } else {
+        console.log(`[QUALITY API] No lot found for test ${test.id}, batch ${test.Batch?.batchNumber}, using batch number: ${displayBatchNumber}`)
+      }
+      
+      return {
+        id: test.id,
+        batchId: test.batchId,
+        lotId: test.lotId || lot?.id || null,
+        batchNumber: displayBatchNumber,
+        recipeName: test.Batch?.recipe?.name || '',
+        lotCode: lot?.lotCode || test.Lot?.lotCode || null,
       testType: test.testType,
       testName: TEST_TYPE_CONFIG[test.testType]?.name || test.testType,
       status: test.status,
@@ -136,7 +210,8 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       createdBy: test.createdBy,
       createdAt: test.createdAt.toISOString(),
       updatedAt: test.updatedAt.toISOString(),
-    }))
+      }
+    })
 
     return NextResponse.json({
       tests: transformedTests,
@@ -267,34 +342,101 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
         updatedAt: new Date(),
       },
       include: {
-        batch: {
-          select: {
-            id: true,
-            batchNumber: true,
+        Batch: {
+          include: {
             recipe: {
               select: {
                 id: true,
                 name: true,
               },
             },
+            LotBatch: {
+              include: {
+                Lot: {
+                  include: {
+                    LotBatch: {
+                      include: {
+                        Batch: {
+                          select: {
+                            id: true,
+                            batchNumber: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
-        lot: {
-          select: {
-            id: true,
-            lotCode: true,
+        Lot: {
+          include: {
+            LotBatch: {
+              include: {
+                Batch: {
+                  select: {
+                    id: true,
+                    batchNumber: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
     })
 
+    // ✅ FIX: For blend/split lots, use lot's batch number instead of direct batch number
+    let displayBatchNumber = test.Batch?.batchNumber || ''
+    let lot: any = test.Lot
+    
+    // ✅ If test doesn't have lotId, try to find lot from batch's LotBatch
+    if (!lot && test.Batch?.LotBatch && test.Batch.LotBatch.length > 0) {
+      lot = test.Batch.LotBatch[0]?.Lot
+    }
+    
+    if (lot) {
+      // ✅ Priority 1: For blend lots, use lot code (e.g., "BLEND-2026-0001")
+      if (lot.lotCode?.startsWith('BLEND-')) {
+        displayBatchNumber = lot.lotCode
+      } else {
+        // ✅ Priority 2: For split lots, find the specific split batch (e.g., "BRWW-2026-0042-A")
+        // Find LotBatch that matches the test's batchId
+        const matchingLotBatch = lot.LotBatch?.find((lb: any) => lb.Batch?.id === test.batchId)
+        if (matchingLotBatch?.Batch?.batchNumber) {
+          displayBatchNumber = matchingLotBatch.Batch.batchNumber
+          // ✅ FIX: If batchNumber doesn't have -A, -B suffix, add it from lot's lotCode
+          if (displayBatchNumber && !displayBatchNumber.match(/-[A-Z]$/i) && lot.lotCode) {
+            const lotCodeSuffix = lot.lotCode.match(/-([A-Z])$/i)
+            if (lotCodeSuffix) {
+              displayBatchNumber = `${displayBatchNumber}-${lotCodeSuffix[1]}`
+            }
+          }
+        } else {
+          // Fallback to first batch if no match
+          const lotBatch = lot.LotBatch?.[0]
+          if (lotBatch?.Batch?.batchNumber) {
+            displayBatchNumber = lotBatch.Batch.batchNumber
+            // ✅ FIX: Add suffix from lotCode if needed
+            if (displayBatchNumber && !displayBatchNumber.match(/-[A-Z]$/i) && lot.lotCode) {
+              const lotCodeSuffix = lot.lotCode.match(/-([A-Z])$/i)
+              if (lotCodeSuffix) {
+                displayBatchNumber = `${displayBatchNumber}-${lotCodeSuffix[1]}`
+              }
+            }
+          }
+        }
+      }
+    }
+    
     return NextResponse.json({
       id: test.id,
       batchId: test.batchId,
       lotId: test.lotId,
-      batchNumber: test.batch.batchNumber,
-      recipeName: test.batch.recipe?.name || '',
-      lotCode: test.lot?.lotCode || null,
+      batchNumber: displayBatchNumber,
+      recipeName: test.Batch?.recipe?.name || '',
+      lotCode: test.Lot?.lotCode || null,
       testType: test.testType,
       testName: TEST_TYPE_CONFIG[test.testType]?.name || test.testType,
       status: test.status,
@@ -399,34 +541,100 @@ export const PATCH = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       where: { id },
       data: updateData,
       include: {
-        batch: {
-          select: {
-            id: true,
-            batchNumber: true,
+        Batch: {
+          include: {
             recipe: {
               select: {
                 id: true,
                 name: true,
               },
             },
+            LotBatch: {
+              include: {
+                Lot: {
+                  include: {
+                    LotBatch: {
+                      include: {
+                        Batch: {
+                          select: {
+                            id: true,
+                            batchNumber: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
-        lot: {
-          select: {
-            id: true,
-            lotCode: true,
+        Lot: {
+          include: {
+            LotBatch: {
+              include: {
+                Batch: {
+                  select: {
+                    id: true,
+                    batchNumber: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
     })
 
+    // ✅ FIX: For blend/split lots, use lot's batch number instead of direct batch number
+    let displayBatchNumber = updatedTest.Batch?.batchNumber || ''
+    let lot: any = updatedTest.Lot
+    
+    // ✅ If test doesn't have lotId, try to find lot from batch's LotBatch
+    if (!lot && updatedTest.Batch?.LotBatch && updatedTest.Batch.LotBatch.length > 0) {
+      lot = updatedTest.Batch.LotBatch[0]?.Lot
+    }
+    
+    if (lot) {
+      // ✅ Priority 1: For blend lots, use lot code (e.g., "BLEND-2026-0001")
+      if (lot.lotCode?.startsWith('BLEND-')) {
+        displayBatchNumber = lot.lotCode
+      } else {
+        // ✅ Priority 2: For split lots, find the specific split batch (e.g., "BRWW-2026-0042-A")
+        const matchingLotBatch = lot.LotBatch?.find((lb: any) => lb.Batch?.id === updatedTest.batchId)
+        if (matchingLotBatch?.Batch?.batchNumber) {
+          displayBatchNumber = matchingLotBatch.Batch.batchNumber
+          // ✅ FIX: If batchNumber doesn't have -A, -B suffix, add it from lot's lotCode
+          if (displayBatchNumber && !displayBatchNumber.match(/-[A-Z]$/i) && lot.lotCode) {
+            const lotCodeSuffix = lot.lotCode.match(/-([A-Z])$/i)
+            if (lotCodeSuffix) {
+              displayBatchNumber = `${displayBatchNumber}-${lotCodeSuffix[1]}`
+            }
+          }
+        } else {
+          // Fallback to first batch if no match
+          const lotBatch = lot.LotBatch?.[0]
+          if (lotBatch?.Batch?.batchNumber) {
+            displayBatchNumber = lotBatch.Batch.batchNumber
+            // ✅ FIX: Add suffix from lotCode if needed
+            if (displayBatchNumber && !displayBatchNumber.match(/-[A-Z]$/i) && lot.lotCode) {
+              const lotCodeSuffix = lot.lotCode.match(/-([A-Z])$/i)
+              if (lotCodeSuffix) {
+                displayBatchNumber = `${displayBatchNumber}-${lotCodeSuffix[1]}`
+              }
+            }
+          }
+        }
+      }
+    }
+    
     return NextResponse.json({
       id: updatedTest.id,
       batchId: updatedTest.batchId,
       lotId: updatedTest.lotId,
-      batchNumber: updatedTest.batch.batchNumber,
-      recipeName: updatedTest.batch.recipe?.name || '',
-      lotCode: updatedTest.lot?.lotCode || null,
+      batchNumber: displayBatchNumber,
+      recipeName: updatedTest.Batch?.recipe?.name || '',
+      lotCode: updatedTest.Lot?.lotCode || null,
       testType: updatedTest.testType,
       testName: TEST_TYPE_CONFIG[updatedTest.testType]?.name || updatedTest.testType,
       status: updatedTest.status,

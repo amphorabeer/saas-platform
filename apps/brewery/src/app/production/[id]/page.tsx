@@ -108,6 +108,8 @@ interface BatchDetail {
   currentLotCode?: string | null
   isPartOfBlendLot?: boolean
   blendLotBatchCount?: number
+  // ✅ Resolved tank type for Unitank detection
+  resolvedTankType?: string | null
 }
 
 
@@ -385,6 +387,8 @@ export default function BatchDetailPage() {
           ingredients,
           // ✅ Split tanks from API
           splitTanks: apiBatch.splitTanks || [],
+          // ✅ Resolved tank type for Unitank detection
+          resolvedTankType: apiBatch.resolvedTankType || null,
           // ✅ Blend lot detection - use currentLot from API (now properly populated)
           currentLotId: apiBatch.currentLot?.id || apiBatch.LotBatch?.[0]?.lotId || null,
           currentLotCode: apiBatch.currentLot?.lotCode || apiBatch.LotBatch?.[0]?.Lot?.lotCode || null,
@@ -419,7 +423,7 @@ export default function BatchDetailPage() {
           setApiPackagingRecords(packagingRecords)
           console.log('[BatchDetailPage] Loaded packaging records:', packagingRecords.length, 'total volume:', packagingRecords.reduce((sum: number, pr: any) => sum + pr.volumeTotal, 0))
           console.log('[BatchDetailPage] Packaging records with lotNumbers:', 
-            packagingRecords.map(pr => ({ lotNumber: pr.lotNumber, volume: pr.volumeTotal })))
+            packagingRecords.map((pr: any) => ({ lotNumber: pr.lotNumber, volume: pr.volumeTotal })))
         }
       } catch (err) {
         console.error('[BatchDetailPage] Error fetching batch:', err)
@@ -592,6 +596,7 @@ export default function BatchDetailPage() {
     tankId: string
     tankName: string
     volume: number | null
+    tankType?: string  // ✅ Added for Unitank detection
   } | null>(null)
 
   // State for inventory from API (instead of Zustand)
@@ -1026,22 +1031,29 @@ export default function BatchDetailPage() {
     }
   }
 
-  const handleDeleteBatch = async () => {
-    if (!batch?.id) {
-      console.error('[handleDeleteBatch] No batch ID')
+  const handleDeleteBatch = async (batchIdToDelete?: string) => {
+    // Try multiple sources for batch ID: parameter, batch state, or URL params
+    const id = batchIdToDelete || batch?.id || (typeof params.id === 'string' ? params.id : null)
+    if (!id) {
+      console.error('[handleDeleteBatch] No batch ID', {
+        batchIdToDelete,
+        batchStateId: batch?.id,
+        paramsId: params.id
+      })
+      alert('შეცდომა: პარტიის ID ვერ მოიძებნა')
       return
     }
     
     // Confirmation
     const confirmed = window.confirm(
-      `ნამდვილად გსურთ "${batch.batchNumber}" პარტიის წაშლა? ეს მოქმედება შეუქცევადია.`
+      `ნამდვილად გსურთ "${batch?.batchNumber || 'ამ'}" პარტიის წაშლა? ეს მოქმედება შეუქცევადია.`
     )
     
     if (!confirmed) return
     
     try {
-      console.log('[handleDeleteBatch] Deleting:', batch.id)
-      await deleteBatch(batch.id)
+      console.log('[handleDeleteBatch] Deleting:', id)
+      await deleteBatch(id as string)
       
       // Redirect to production list
       router.push('/production')
@@ -1117,13 +1129,13 @@ export default function BatchDetailPage() {
               volume: apiBatch.volume ? Number(apiBatch.volume) : 0,
               brewDate,
               estimatedEndDate,
-              targetOG: apiBatch.targetOg ? Number(apiBatch.targetOg) : null,
-              targetFG: apiBatch.targetFg ? Number(apiBatch.targetFg) : null,
-              targetABV: apiBatch.targetOg && apiBatch.targetFg 
-                ? ((Number(apiBatch.targetOg) - Number(apiBatch.targetFg)) * 131.25)
-                : null,
-              actualOG: apiBatch.originalGravity ? Number(apiBatch.originalGravity) : null,
-              currentGravity: apiBatch.currentGravity ? Number(apiBatch.currentGravity) : apiBatch.originalGravity ? Number(apiBatch.originalGravity) : null,
+              targetOG: apiBatch.targetOg ? Number(apiBatch.targetOg) : 0,
+              targetFG: 0, // targetFg doesn't exist in schema
+              targetABV: apiBatch.targetOg 
+                ? ((Number(apiBatch.targetOg) - 1.010) * 131.25)
+                : 0,
+              actualOG: apiBatch.originalGravity ? Number(apiBatch.originalGravity) : 0,
+              currentGravity: apiBatch.currentGravity ? Number(apiBatch.currentGravity) : apiBatch.originalGravity ? Number(apiBatch.originalGravity) : 0,
               currentTemperature: apiBatch.temperature ? Number(apiBatch.temperature) : 0,
               progress: apiBatch.progress || 0,
               gravityReadings: (apiBatch.gravityReadings || []).map((reading: any) => ({
@@ -1155,6 +1167,9 @@ export default function BatchDetailPage() {
                 unit: ing.unit,
                 type: ing.type,
               })),
+              // ✅ Split tanks and resolved tank type from API
+              splitTanks: apiBatch.splitTanks || [],
+              resolvedTankType: apiBatch.resolvedTankType || null,
             })
           }
         }
@@ -1305,6 +1320,9 @@ export default function BatchDetailPage() {
               notes: apiBatch.notes || '',
               brewer: apiBatch.createdBy || 'Unknown',
               ingredients,
+              // ✅ Split tanks and resolved tank type from API
+              splitTanks: apiBatch.splitTanks || [],
+              resolvedTankType: apiBatch.resolvedTankType || null,
             })
             
             console.log('[handleConditioningComplete] ✅ Batch data refreshed, new status:', apiBatch.status)
@@ -1449,13 +1467,15 @@ export default function BatchDetailPage() {
                   {/* ✅ Show lot phase badge for focused lot */}
                   {focusedLot && (
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      focusedLot.status === 'COMPLETED' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
                       focusedLot.phase === 'FERMENTATION' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
                       focusedLot.phase === 'CONDITIONING' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' :
                       focusedLot.phase === 'BRIGHT' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
                       focusedLot.phase === 'PACKAGING' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
                       'bg-gray-500/20 text-gray-400 border border-gray-500/30'
                     }`}>
-                      {focusedLot.phase === 'FERMENTATION' ? 'ფერმენტაცია' :
+                      {focusedLot.status === 'COMPLETED' ? 'დასრულებული' :
+                       focusedLot.phase === 'FERMENTATION' ? 'ფერმენტაცია' :
                        focusedLot.phase === 'CONDITIONING' ? 'კონდიცირება' :
                        focusedLot.phase === 'BRIGHT' ? 'მზადაა' :
                        focusedLot.phase === 'PACKAGING' ? 'დაფასოება' :
@@ -1509,6 +1529,7 @@ export default function BatchDetailPage() {
                           tankId: focusedLot.tankId,
                           tankName: focusedLot.tankName,
                           volume: focusedLot.volume,
+                          tankType: focusedLot.tankType,  // ✅ Added for Unitank detection
                         })
                         setShowConditioningModal(true)
                       }}
@@ -1934,13 +1955,15 @@ export default function BatchDetailPage() {
                         'bg-gray-500'
                       }`} />
                       <span className={`${
+                        tank.status === 'COMPLETED' ? 'text-green-400' :
                         tank.phase === 'FERMENTATION' ? 'text-blue-400' :
                         tank.phase === 'CONDITIONING' ? 'text-cyan-400' :
                         tank.phase === 'BRIGHT' ? 'text-purple-400' :
                         tank.phase === 'PACKAGING' ? 'text-amber-400' :
                         'text-text-muted'
                       }`}>
-                        {tank.phase === 'FERMENTATION' ? '● ფერმენტაცია' : 
+                        {tank.status === 'COMPLETED' ? '✓ დასრულებული' :
+                         tank.phase === 'FERMENTATION' ? '● ფერმენტაცია' : 
                          tank.phase === 'CONDITIONING' ? '● კონდიცირება' : 
                          tank.phase === 'BRIGHT' ? '● მზადაა' :
                          tank.phase === 'PACKAGING' ? '● დაფასოება' :
@@ -1964,6 +1987,7 @@ export default function BatchDetailPage() {
                                 tankId: tank.tankId,
                                 tankName: tank.tankName,
                                 volume: tank.volume,
+                                tankType: tank.tankType,  // ✅ Added for Unitank detection
                               })
                               setShowConditioningModal(true)
                             }}
@@ -3136,7 +3160,7 @@ export default function BatchDetailPage() {
                     setApiPackagingRecords(packagingRecords)
                     console.log('[Packaging Refresh] Updated records count:', packagingRecords.length, 'totalVolume:', packagingRecords.reduce((sum: number, pr: any) => sum + pr.volumeTotal, 0))
                     console.log('[Packaging Refresh] Packaging records with lotNumbers:', 
-                      packagingRecords.map(pr => ({ lotNumber: pr.lotNumber, volume: pr.volumeTotal })))
+                      packagingRecords.map((pr: any) => ({ lotNumber: pr.lotNumber, volume: pr.volumeTotal })))
                   }
                   
                   // Update batch state
@@ -3163,9 +3187,25 @@ export default function BatchDetailPage() {
 
           availableLiters={batch.volume - apiPackagingRecords.reduce((sum, pr) => sum + (pr.volumeTotal || 0), 0)}
 
-          lotId={selectedSplitLot?.lotId || focusedLot?.lotId}        // ✅ ADD THIS
+          lotId={(() => {
+            if (selectedSplitLot && typeof selectedSplitLot === 'object' && selectedSplitLot !== null && 'lotId' in selectedSplitLot) {
+              return (selectedSplitLot as { lotId: string }).lotId
+            }
+            if (focusedLot && typeof focusedLot === 'object' && focusedLot !== null && 'lotId' in focusedLot) {
+              return focusedLot.lotId
+            }
+            return ''
+          })()}
 
-          lotCode={selectedSplitLot?.lotCode || focusedLot?.lotCode}    // ✅ ADD THIS
+          lotCode={(() => {
+            if (selectedSplitLot && typeof selectedSplitLot === 'object' && selectedSplitLot !== null && 'lotCode' in selectedSplitLot) {
+              return (selectedSplitLot as { lotCode: string }).lotCode
+            }
+            if (focusedLot && typeof focusedLot === 'object' && focusedLot !== null && 'lotCode' in focusedLot) {
+              return focusedLot.lotCode
+            }
+            return ''
+          })()}
 
         />
 
@@ -3223,11 +3263,11 @@ export default function BatchDetailPage() {
                     setBatch({
                       ...batch,
                       volume: apiBatch.volume ? Number(apiBatch.volume) : 0,
-                      targetOG: apiBatch.targetOg ? Number(apiBatch.targetOg) : null,
-                      targetFG: apiBatch.targetFg ? Number(apiBatch.targetFg) : null,
-                      targetABV: apiBatch.targetOg && apiBatch.targetFg 
-                        ? ((Number(apiBatch.targetOg) - Number(apiBatch.targetFg)) * 131.25)
-                        : null,
+                      targetOG: apiBatch.targetOg ? Number(apiBatch.targetOg) : 0,
+                      targetFG: 0, // targetFg doesn't exist in schema
+                      targetABV: apiBatch.targetOg 
+                        ? ((Number(apiBatch.targetOg) - 1.010) * 131.25)
+                        : 0,
                       notes: apiBatch.notes || '',
                       brewer: apiBatch.brewerName || apiBatch.createdBy,
                     })
@@ -3244,7 +3284,7 @@ export default function BatchDetailPage() {
               alert('შეცდომა პარტიის განახლებისას')
             }
           }}
-          onDelete={handleDeleteBatch}
+          onDelete={() => handleDeleteBatch(params.id as string)}
           batch={{
             id: batch.id,
             batchNumber: batch.batchNumber,
@@ -3309,6 +3349,8 @@ export default function BatchDetailPage() {
           recipeName={batch.recipe.name}
           currentVolume={selectedSplitLot?.volume || batch.volume || 100}
           currentTankType={
+            selectedSplitLot?.tankType ||
+            (batch as any).resolvedTankType ||
             (batch as any).currentTank?.type ||
             batch.tank?.type ||
             batch.splitTanks?.find((t: any) => t.phase === 'FERMENTATION')?.tankType

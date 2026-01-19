@@ -7,31 +7,37 @@ export default withAuth(
     const path = req.nextUrl.pathname
     
     // Allow public paths
-    if (path.startsWith('/login') || path.startsWith('/api/auth')) {
+    const publicPaths = ['/login', '/register', '/api/auth', '/api/register', '/api/tenants/validate-code']
+    if (publicPaths.some(p => path.startsWith(p))) {
       return NextResponse.next()
     }
     
     // Check if authenticated
     if (!token) {
-      return NextResponse.redirect(new URL('/login', req.url))
+      const loginUrl = new URL('/login', req.url)
+      loginUrl.searchParams.set('callbackUrl', path)
+      return NextResponse.redirect(loginUrl)
     }
     
-    // Check tenant is active (from token)
-    // In production: verify against DB periodically
+    // Add tenant ID to request headers for API routes
+    const response = NextResponse.next()
+    if (token.tenantId) {
+      response.headers.set('x-tenant-id', token.tenantId as string)
+    }
     
-    return NextResponse.next()
+    return response
   },
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow auth routes
-        if (req.nextUrl.pathname.startsWith('/api/auth')) {
+        const path = req.nextUrl.pathname
+        
+        // Allow public paths
+        const publicPaths = ['/login', '/register', '/api/auth', '/api/register', '/api/tenants/validate-code']
+        if (publicPaths.some(p => path.startsWith(p))) {
           return true
         }
-        // Allow login page
-        if (req.nextUrl.pathname === '/login') {
-          return true
-        }
+        
         // Require token for everything else
         return !!token
       },

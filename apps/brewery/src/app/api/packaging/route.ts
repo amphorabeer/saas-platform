@@ -327,6 +327,57 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
             createdBy: ctx.userId || 'system',
           },
         })
+        
+        // ✅ FIX: Check if ALL lots for this batch are completed, then complete the batch
+        // Get all lots linked to this batch
+        const batchLots = await prisma.lotBatch.findMany({
+          where: { batchId: primaryBatchId },
+          include: { Lot: { select: { id: true, status: true, parentLotId: true } } }
+        })
+        
+        // Filter to only child lots (those with parentLotId or those that are not parents)
+        const childLots = batchLots.filter(lb => {
+          if (!lb.Lot) return false
+          // If lot has parentLotId, it's a child
+          if (lb.Lot.parentLotId) return true
+          // If lot doesn't have any children, it's also relevant (single lot case)
+          const hasChildren = batchLots.some(other => other.Lot?.parentLotId === lb.Lot?.id)
+          return !hasChildren
+        })
+        
+        const allLotsCompleted = childLots.length > 0 && 
+          childLots.every(lb => lb.Lot?.status === 'COMPLETED')
+        
+        console.log('[PACKAGING] Batch completion check:', {
+          batchId: primaryBatchId,
+          totalLots: batchLots.length,
+          childLots: childLots.length,
+          allCompleted: allLotsCompleted,
+          lotStatuses: childLots.map(lb => ({ id: lb.Lot?.id, status: lb.Lot?.status }))
+        })
+        
+        if (allLotsCompleted) {
+          console.log('[PACKAGING] ✅ All lots completed, marking batch as COMPLETED:', primaryBatchId)
+          
+          await prisma.batch.update({
+            where: { id: primaryBatchId },
+            data: { 
+              status: 'COMPLETED',
+              completedAt: new Date()
+            }
+          })
+          
+          // Add batch completion timeline
+          await prisma.batchTimeline.create({
+            data: {
+              batchId: primaryBatchId,
+              type: 'PACKAGING_COMPLETE',  // ✅ Fixed: Use valid TimelineEventType
+              title: 'პარტია დასრულდა',
+              description: `ყველა ლოტი დაფასოებულია`,
+              createdBy: ctx.userId || 'system',
+            },
+          })
+        }
       }
     }
 

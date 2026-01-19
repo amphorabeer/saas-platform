@@ -94,13 +94,13 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
             },
           },
         },
-        // ✅ Include TankAssignment with Equipment relation
+        // ✅ Include TankAssignment with Tank relation
         TankAssignment: {
           orderBy: { createdAt: 'desc' },
           take: 1,
           include: {
-            // ✅ Use Equipment - this is the relation name in schema
-            Equipment: {
+            // ✅ FIX: Use Tank (not Equipment) - Prisma uses model name for relation
+            Tank: {
               select: { id: true, name: true, type: true, capacity: true },
             },
           },
@@ -111,14 +111,6 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
             lotCode: true,
           },
         },
-        other_Lot: {
-          select: { 
-            id: true, 
-            lotCode: true, 
-            status: true,
-            phase: true,
-          },
-        },
       },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -126,30 +118,66 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
 
     console.log('[LOTS API] Found', lots.length, 'lots')
 
+    // ✅ FIX: Build a set of parent lot IDs to filter them out
+    const parentLotIds = new Set<string>()
+    
+    // Method 1: Check parentLotId field
+    lots.forEach(lot => {
+      if (lot.parentLotId) {
+        parentLotIds.add(lot.parentLotId)
+      }
+    })
+    
+    // Method 2: Check lotCode patterns - if lot X exists and lot X-A or X-B exists, X is parent
+    const lotCodeMap = new Map<string, string>() // lotCode -> lotId
+    lots.forEach(lot => {
+      if (lot.lotCode) {
+        lotCodeMap.set(lot.lotCode, lot.id)
+      }
+    })
+    
+    lots.forEach(lot => {
+      if (lot.lotCode) {
+        // Check if this lot's code ends with -A, -B, etc.
+        const match = lot.lotCode.match(/^(.+)-([A-Z])$/)
+        if (match) {
+          const parentLotCode = match[1]
+          const parentLotId = lotCodeMap.get(parentLotCode)
+          if (parentLotId) {
+            parentLotIds.add(parentLotId)
+          }
+        }
+      }
+    })
+    
+    console.log('[LOTS API] Found parent lot IDs to filter:', Array.from(parentLotIds))
+
     // Transform
     const transformed = lots
       .filter(lot => {
-        // ✅ FIX: Filter out ALL parent lots that have children (regardless of child status)
-        const hasChildren = lot.other_Lot && lot.other_Lot.length > 0
+        // ✅ FIX: Filter out ALL parent lots that have children
+        // A lot is a parent if its ID appears as parentLotId in any other lot
+        // OR if its lotCode has children with -A, -B suffixes
+        const isParentLot = parentLotIds.has(lot.id)
         
-        if (hasChildren) {
-          console.log('[LOTS API] Filtering out parent lot:', lot.lotCode)
+        if (isParentLot) {
+          console.log('[LOTS API] Filtering out parent lot:', lot.lotCode, '(id:', lot.id, ')')
           return false
         }
         return true
       })
-      .map(lot => {
+      .map((lot: any) => {
         // Get first active/planned tank assignment
         const activeAssignment = lot.TankAssignment?.find((ta: any) => 
           ta.status === 'ACTIVE' || ta.status === 'PLANNED'
         ) || lot.TankAssignment?.[0]
         
-        // ✅ Get tank from Equipment relation
-        const tank = (activeAssignment as any)?.Equipment
+        // ✅ FIX: Get tank from Tank relation (not Equipment)
+        const tank = activeAssignment?.Tank
         
         // Detect lot type
         const batchCount = lot.LotBatch.length
-        const isBlendResult = lot.isBlendResult === true || batchCount > 1
+        const isBlendResult = batchCount > 1
         const isSplitChild = !!lot.parentLotId
         const lotType: 'single' | 'blend' | 'split' = 
           isBlendResult ? 'blend' : 
@@ -157,6 +185,27 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
           'single'
 
         const firstBatch = lot.LotBatch[0]?.Batch
+        
+        // ✅ FIX: Get recipe name from first batch, with fallback to all batches
+        let recipeName = 'Unknown'
+        let recipeStyle = ''
+        let recipeId: string | null = null
+        
+        if (firstBatch?.recipe?.name) {
+          recipeName = firstBatch.recipe.name
+          recipeStyle = firstBatch.recipe.style || ''
+          recipeId = firstBatch.recipe.id || null
+        } else {
+          // Fallback: try to find recipe from any batch in the lot
+          for (const lb of lot.LotBatch) {
+            if (lb.Batch?.recipe?.name) {
+              recipeName = lb.Batch.recipe.name
+              recipeStyle = lb.Batch.recipe.style || ''
+              recipeId = lb.Batch.recipe.id || null
+              break
+            }
+          }
+        }
         
         // Source info for splits
         let sourceBatchNumber: string | null = null
@@ -167,7 +216,7 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
         // Source lots for blends
         let sourceLots: { batchNumber: string; volume: number }[] = []
         if (isBlendResult) {
-          sourceLots = lot.LotBatch.map(lb => ({
+          sourceLots = lot.LotBatch.map((lb: any) => ({
             batchNumber: lb.Batch?.batchNumber || '',
             volume: lb.volumeContribution ? Number(lb.volumeContribution) : 0,
           }))
@@ -176,7 +225,7 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
         // Calculate metrics
         const totalVolume = lot.actualVolume 
           ? Number(lot.actualVolume) 
-          : lot.LotBatch.reduce((sum, lb) => sum + (lb.volumeContribution ? Number(lb.volumeContribution) : 0), 0)
+          : lot.LotBatch.reduce((sum: number, lb: any) => sum + (lb.volumeContribution ? Number(lb.volumeContribution) : 0), 0)
 
         const packagedVolume = 0 // Will add when Prisma client is regenerated
 
@@ -189,7 +238,7 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
           : null
 
         // Progress
-        const lotPhase = lot.phase || (activeAssignment as any)?.phase
+        const lotPhase = lot.phase || activeAssignment?.phase
         let progress = 0
         
         if (lot.status === 'COMPLETED') {
@@ -221,9 +270,9 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
           sourceLots,
           parentLotId: lot.parentLotId,
           
-          recipeName: firstBatch?.recipe?.name || 'Unknown',
-          recipeStyle: firstBatch?.recipe?.style || '',
-          recipeId: firstBatch?.recipe?.id || null,
+          recipeName,
+          recipeStyle,
+          recipeId,
           
           totalVolume,
           plannedVolume: lot.plannedVolume ? Number(lot.plannedVolume) : null,
@@ -234,7 +283,7 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
           originalGravity,
           currentGravity,
           
-          // ✅ Include tank info from Equipment relation
+          // ✅ Include tank info from Tank relation
           tank: tank ? {
             id: tank.id,
             name: tank.name,
@@ -246,19 +295,17 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
           
           createdAt: lot.createdAt,
           updatedAt: lot.updatedAt,
-          blendedAt: lot.blendedAt,
-          splitAt: lot.splitAt,
           
           notes: lot.notes,
           
           batchCount,
-          batches: lot.LotBatch.map(lb => ({
+          batches: lot.LotBatch.map((lb: any) => ({
             id: lb.Batch?.id || lb.batchId,
             batchNumber: lb.Batch?.batchNumber || '',
             status: lb.Batch?.status || 'ACTIVE',
             volume: lb.Batch?.volume ? Number(lb.Batch.volume) : null,
             volumeContribution: lb.volumeContribution ? Number(lb.volumeContribution) : null,
-            batchPercentage: lb.batchPercentage ? Number(lb.batchPercentage) : 100,
+            batchPercentage: lb.BatchPercentage ? Number(lb.BatchPercentage) : 100,
             recipeName: lb.Batch?.recipe?.name || null,
             recipeStyle: lb.Batch?.recipe?.style || null,
             originalGravity: lb.Batch?.originalGravity ? Number(lb.Batch.originalGravity) : null,
@@ -286,7 +333,7 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
           })),
           
           // ✅ Add aggregated packaging runs at lot level
-          packagingRuns: lot.LotBatch.flatMap(lb => 
+          packagingRuns: lot.LotBatch.flatMap((lb: any) => 
             (lb.Batch?.packagingRuns || []).map((pr: any) => ({
               id: pr.id,
               batchNumber: lb.Batch?.batchNumber || '',

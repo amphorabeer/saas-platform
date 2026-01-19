@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withPermission, RouteContext } from '@/lib/api-middleware'
 import { prisma } from '@saas-platform/database'
 
-// GET /api/batches - List batches (requires batch:read)
+// GET /api/batches - List batches (requires Batch:read)
 export const GET = withPermission('batch:read', async (req: NextRequest, ctx: RouteContext) => {
   try {
     console.log('[BATCHES API] Starting request...')
@@ -58,8 +58,8 @@ export const GET = withPermission('batch:read', async (req: NextRequest, ctx: Ro
                   orderBy: { createdAt: 'desc' },
                   // ✅ REMOVED take: 1 - need all assignments for history
                   include: {
-                    // ✅ FIX: Use Equipment (not Tank) - this is the relation name in schema
-                    Equipment: { select: { id: true, name: true, type: true } },
+                    // ✅ FIX: Use Tank (not Equipment) - Prisma uses model name for relation
+                    Tank: { select: { id: true, name: true, type: true } },
                   },
                 },
                 // ✅ ADD: Count how many batches are in this lot
@@ -125,16 +125,16 @@ export const GET = withPermission('batch:read', async (req: NextRequest, ctx: Ro
       const allLots = lotBatches.map((lb: any) => {
         const assignments = lb?.Lot?.TankAssignment || []
         const ta = assignments[0] // First assignment for current tank
-        // ✅ FIX: Use Equipment (not Tank)
-        const equipment = ta?.Equipment
+        // ✅ FIX: Use Tank (not Equipment)
+        const tankInfo = ta?.Tank
         
         // ✅ Build all assignments array for history
         const allAssignments = assignments.map((a: any) => ({
           id: a.id,
           tankId: a.tankId,
-          // ✅ FIX: Use Equipment (not Tank)
-          tankName: a.Equipment?.name,
-          tankType: a.Equipment?.type,
+          // ✅ FIX: Use Tank (not Equipment)
+          tankName: a.Tank?.name,
+          tankType: a.Tank?.type,
           phase: a.phase,     // ✅ FERMENTATION or CONDITIONING
           status: a.status,   // ✅ ACTIVE or COMPLETED
           plannedStart: a.plannedStart,
@@ -149,7 +149,7 @@ export const GET = withPermission('batch:read', async (req: NextRequest, ctx: Ro
           phase: lb.Lot?.phase,
           status: lb.Lot?.status,
           volume: lb.Lot?.actualVolume || lb.Lot?.plannedVolume,
-          tank: equipment ? { id: equipment.id, name: equipment.name, type: equipment.type } : null,
+          tank: tankInfo ? { id: tankInfo.id, name: tankInfo.name, type: tankInfo.type } : null,
           assignments: allAssignments,  // ✅ All assignments for history
           parentLotId: (lb.Lot as any)?.parentLotId || null,  // ✅ Add parentLotId for parent detection
           batchCount: lb.Lot?._count?.LotBatch || 0,  // ✅ ADD batch count
@@ -189,9 +189,9 @@ export const GET = withPermission('batch:read', async (req: NextRequest, ctx: Ro
           ta.phase === expectedPhase && ta.status !== 'COMPLETED'
         )
         
-        // ✅ FIX: Use Equipment (not Tank)
-        if (matchingAssignment?.Equipment?.name) {
-          tankName = matchingAssignment.Equipment.name
+        // ✅ FIX: Use Tank (not Equipment)
+        if (matchingAssignment?.Tank?.name) {
+          tankName = matchingAssignment.Tank.name
           break
         }
         
@@ -200,9 +200,9 @@ export const GET = withPermission('batch:read', async (req: NextRequest, ctx: Ro
           const activeAssignment = assignments.find((ta: any) => 
             ta.status === 'ACTIVE' || ta.status === 'PLANNED'
           ) as any
-          // ✅ FIX: Use Equipment (not Tank)
-          if (activeAssignment?.Equipment?.name) {
-            tankName = activeAssignment.Equipment.name
+          // ✅ FIX: Use Tank (not Equipment)
+          if (activeAssignment?.Tank?.name) {
+            tankName = activeAssignment.Tank.name
           }
         }
       }
@@ -279,7 +279,7 @@ export const GET = withPermission('batch:read', async (req: NextRequest, ctx: Ro
   }
 })
 
-// POST /api/batches - Create batch (requires batch:create)
+// POST /api/batches - Create batch (requires Batch:create)
 export const POST = withPermission('batch:create', async (req: NextRequest, ctx: RouteContext) => {
   try {
     const body = await req.json()
@@ -353,7 +353,7 @@ export const POST = withPermission('batch:create', async (req: NextRequest, ctx:
       },
     })
 
-    console.log('[POST /api/batches] ✅ Created batch:', batch.batchNumber)
+    console.log('[POST /api/batches] ✅ Created Batch:', batch.batchNumber)
 
     return NextResponse.json(batch, { status: 201 })
 

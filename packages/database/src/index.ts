@@ -1,55 +1,12 @@
-import { PrismaClient } from '@prisma/client'
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-// Check if we're in build phase
-const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
-
-function createPrismaClient(): PrismaClient {
-  // During build, return a mock that doesn't connect
-  if (isBuildPhase) {
-    console.log('[Prisma] Build phase detected, skipping initialization')
-    return new Proxy({} as PrismaClient, {
-      get() {
-        return () => Promise.resolve(null)
-      }
-    })
-  }
-  
-  return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  })
-}
-
-export function getPrisma(): PrismaClient {
-  if (typeof window !== 'undefined') {
-    throw new Error('PrismaClient cannot be used in the browser')
-  }
-  
-  if (isBuildPhase) {
-    return createPrismaClient()
-  }
-  
-  if (process.env.NODE_ENV === 'production') {
-    return createPrismaClient()
-  }
-  
-  if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = createPrismaClient()
-  }
-  
-  return globalForPrisma.prisma
-}
+// Import and re-export from client.ts which has proper initialization
+import { prisma, withTenant, withTransaction, withRetry } from './client'
+export { prisma, withTenant, withTransaction, withRetry }
+export type { PrismaTransactionClient } from './client'
 
 // For backward compatibility
-export const prisma = new Proxy({} as PrismaClient, {
-  get(target, prop) {
-    const client = getPrisma()
-    return (client as any)[prop]
-  }
-})
+export function getPrisma() {
+  return prisma
+}
 
 // Export only types, not values (prevents build-time evaluation)
 export type { Prisma, PrismaClient } from '@prisma/client'

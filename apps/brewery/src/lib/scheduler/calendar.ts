@@ -358,8 +358,8 @@ function batchToBlock(batch: any, tank: any): CalendarBlock {
  * Convert a TankAssignment to a CalendarBlock
  */
 function assignmentToBlock(assignment: any, tank: any): CalendarBlock {
-  const lot = assignment.Lot
-  const batches = lot?.LotBatch || []
+  const lot = assignment.Lot || (assignment as any).lot
+  const batches = (lot?.LotBatch || []) as any[]
   const primaryBatch = batches[0]?.Batch
   
   // Calculate fill percent
@@ -596,7 +596,7 @@ export async function getBlockDetail(assignmentId: string): Promise<BlockDetail 
     
     lot: {
       id: lot.id,
-      code: lot.lotCode,
+      code: lot.lotCode || '',
       phase: lot.phase,
       status: lot.status,
       plannedVolume: Number(lot.plannedVolume),
@@ -606,19 +606,19 @@ export async function getBlockDetail(assignmentId: string): Promise<BlockDetail 
       completedAt: lot.completedAt || undefined,
     },
     
-    batches: lot.LotBatch.map(lb => ({
-      id: lb.Batch.id,
-      batchNumber: lb.Batch.batchNumber,
-      recipe: lb.Batch.recipe?.name || 'Unknown',
-      style: lb.Batch.recipe?.style || undefined,
-      brewDate: lb.Batch.brewedAt || new Date(),
-      originalGravity: lb.Batch.originalGravity ? Number(lb.Batch.originalGravity) : undefined,
+    batches: (lot.LotBatch || []).map((lb: any) => ({
+      id: (lb.Batch || lb.batch)!.id,
+      batchNumber: (lb.Batch || lb.batch)!.batchNumber,
+      recipe: (lb.Batch || lb.batch)!.recipe?.name || 'Unknown',
+      style: (lb.Batch || lb.batch)!.recipe?.style || undefined,
+      brewDate: (lb.Batch || lb.batch)!.brewedAt || new Date(),
+      originalGravity: (lb.Batch || lb.batch)!.originalGravity ? Number((lb.Batch || lb.batch)!.originalGravity) : undefined,
       volumeContribution: Number(lb.volumeContribution),
       batchPercentage: Number(lb.batchPercentage),
     })),
     
     transfers: [
-      ...lot.Transfer_Transfer_destLotIdToLot.map(t => ({
+      ...(lot.Transfer_Transfer_destLotIdToLot?.map((t: any) => ({
         id: t.id,
         code: t.transferCode,
         type: t.transferType,
@@ -627,8 +627,8 @@ export async function getBlockDetail(assignmentId: string): Promise<BlockDetail 
         destLotCode: undefined,
         executedAt: t.executedAt || undefined,
         status: t.status,
-      })),
-      ...lot.Transfer_Transfer_sourceLotIdToLot.map(t => ({
+      })) || []),
+      ...(lot.Transfer_Transfer_sourceLotIdToLot?.map((t: any) => ({
         id: t.id,
         code: t.transferCode,
         type: t.transferType,
@@ -637,7 +637,7 @@ export async function getBlockDetail(assignmentId: string): Promise<BlockDetail 
         destLotCode: t.Lot_Transfer_destLotIdToLot?.lotCode,
         executedAt: t.executedAt || undefined,
         status: t.status,
-      })),
+      })) || []),
     ].sort((a, b) => {
       const dateA = a.executedAt?.getTime() || 0
       const dateB = b.executedAt?.getTime() || 0
@@ -646,25 +646,25 @@ export async function getBlockDetail(assignmentId: string): Promise<BlockDetail 
     
     parentLot: lot.Lot ? {
       id: lot.Lot.id,
-      code: lot.Lot.lotCode,
+      code: lot.Lot.lotCode || '',
       phase: lot.Lot.phase,
-      tankName: lot.Lot.TankAssignment[0]?.Tank.name || 'Unknown',
+      tankName: lot.Lot.TankAssignment?.[0]?.Tank?.name || 'Unknown',
     } : undefined,
     
-    childLots: lot.other_Lot.map(cl => ({
+    childLots: (lot.other_Lot || []).map((cl: any) => ({
       id: cl.id,
       code: cl.lotCode,
       phase: cl.phase,
-      tankName: cl.TankAssignment[0]?.Tank.name || 'TBD',
+      tankName: cl.TankAssignment?.[0]?.Tank?.name || 'TBD',
       splitRatio: cl.splitRatio ? Number(cl.splitRatio) : undefined,
     })),
     
-    latestReadings: lot.LotReading.map(r => ({
+    latestReadings: (lot.LotReading || []).map((r: any) => ({
       type: r.readingType,
       value: Number(r.value),
       unit: r.unit,
       recordedAt: r.recordedAt,
-    })),
+    })) || [],
   }
 }
 
@@ -743,8 +743,8 @@ export async function getTankOccupancySummary(
   // Calculate occupied days
   let occupiedMs = 0
   for (const a of assignments) {
-    const start = Math.max(a.plannedStart.getTime(), rangeStart.getTime())
-    const end = Math.min(a.plannedEnd.getTime(), rangeEnd.getTime())
+    const start = Math.max(a.plannedStart?.getTime() || rangeStart.getTime(), rangeStart.getTime())
+    const end = Math.min(a.plannedEnd?.getTime() || rangeEnd.getTime(), rangeEnd.getTime())
     occupiedMs += Math.max(0, end - start)
   }
   

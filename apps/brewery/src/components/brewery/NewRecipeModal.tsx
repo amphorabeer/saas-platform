@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Button } from '@/components/ui'
 import type { Recipe, Ingredient, BrewingStep } from '@/app/recipes/page'
-import InventoryIngredientPicker from './InventoryIngredientPicker'
+import InventoryIngredientPicker from '../recipes/InventoryIngredientPicker'
 import libraryData from '@/data/ingredient-library.eu.json'
 import { formatGravity } from '@/utils'
 

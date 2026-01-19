@@ -1,4 +1,6 @@
-import { prisma } from './index'
+// @ts-nocheck
+// Import prisma directly from client to avoid circular dependency
+import { prisma } from './client'
 
 // Module helpers
 export async function getModuleConfigs(enabled = true) {

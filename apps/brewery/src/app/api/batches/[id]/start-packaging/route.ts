@@ -53,7 +53,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
         return NextResponse.json({
           success: true,
           batchId,
-          batch: {
+          Batch: {
             ...batch,
             recipe: batch.recipe || { id: '', name: '', style: '' },
             tank: batch.tank || { id: '', name: '', type: '' },
@@ -72,13 +72,13 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       
       console.log('[START_PACKAGING] ✅ Split batch - lot phase check passed:', lot.phase)
     } else {
-      // ✅ Non-split batch: check batch status
+      // ✅ Non-split Batch: check batch status
       if (batch.status === 'PACKAGING') {
         console.log('[START_PACKAGING] Already PACKAGING, returning current batch')
         return NextResponse.json({
           success: true,
           batchId,
-          batch: {
+          Batch: {
             ...batch,
             recipe: batch.recipe || { id: '', name: '', style: '' },
             tank: batch.tank || { id: '', name: '', type: '' },
@@ -279,7 +279,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
     return NextResponse.json({
       success: true,
       batchId,
-      batch: updatedBatch,
+      Batch: updatedBatch,
       batchNumber: updatedBatch?.batchNumber,
       blendedBatchesUpdated: allBatchIds.length,
     })

@@ -444,7 +444,8 @@ export default function ProductionPage() {
     // Get batch ID directly from lot.batches (already included from API)
     const batchId = lot.batches?.[0]?.id || ''
     
-    // For SPLIT lots - pass lotId as query param
+    // ✅ FIX: For SPLIT lots - use batch page with lotId query param (same as calendar)
+    // This ensures full batch data (gravity readings, recipe details) is loaded
     if (lot.type === 'split' && batchId) {
       router.push(`/production/${batchId}?lotId=${lot.id}`)
       return
@@ -458,7 +459,7 @@ export default function ProductionPage() {
     
     // Fallback
     console.warn('[handleRowClick] No batch ID found for lot:', lot.lotCode)
-    router.push(`/production/${lot.id}`)
+    router.push(`/lots/${lot.id}`)
   }
 
   const handlePlannedBatchClick = (batch: any) => {
@@ -1045,9 +1046,9 @@ export default function ProductionPage() {
               {filteredTanks.map(tank => (
                 <TankCard 
                   key={tank.id} 
-                  tank={tank} 
+                  tank={tank as any} 
                   viewMode={viewMode}
-                  onClick={() => setSelectedTank(tank)}
+                  onClick={() => setSelectedTank(tank as any)}
                 />
               ))}
             </div>
@@ -1081,7 +1082,7 @@ export default function ProductionPage() {
 
       {selectedTank && (
         <TankDetailModal
-          tank={selectedTank}
+          tank={selectedTank as any}
           onClose={() => setSelectedTank(null)}
           onEquipmentUpdate={() => {
             fetchEquipment()

@@ -74,6 +74,22 @@ interface LotReportModalProps {
       actualVolume: number | null
     } | null
   }
+  qcTests?: Array<{
+    id: string
+    testType: string
+    status: string
+    scheduledDate: Date | string
+    completedDate?: Date | string
+    minValue?: number
+    maxValue?: number
+    result?: number
+    unit?: string
+    performedBy?: string
+    notes?: string
+    testName?: string
+    batchId?: string
+    lotId?: string
+  }>
   isOpen: boolean
   onClose: () => void
 }
@@ -150,7 +166,7 @@ const getGravityUnit = (): 'SG' | 'PLATO' => {
   return 'PLATO'
 }
 
-export function LotReportModal({ lot, isOpen, onClose }: LotReportModalProps) {
+export function LotReportModal({ lot, qcTests = [], isOpen, onClose }: LotReportModalProps) {
   const printRef = useRef<HTMLDivElement>(null)
   
   // ✅ Check gravity unit preference
@@ -460,6 +476,81 @@ export function LotReportModal({ lot, isOpen, onClose }: LotReportModalProps) {
           </div>
         </div>
         
+        {/* ✅ Quality Tests Section */}
+        {qcTests.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-3">🧪 ხარისხის ტესტები</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-dark-700">
+                    <th className="p-2 text-left">თარიღი</th>
+                    <th className="p-2 text-left">ტესტი</th>
+                    <th className="p-2 text-right">შედეგი</th>
+                    <th className="p-2 text-left">დიაპაზონი</th>
+                    <th className="p-2 text-left">სტატუსი</th>
+                    <th className="p-2 text-left">შემსრულებელი</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {qcTests.map(test => {
+                    const statusConfig: Record<string, { label: string; class: string }> = {
+                      SCHEDULED: { label: '⏳ დაგეგმილი', class: 'text-gray-400' },
+                      IN_PROGRESS: { label: '🔄 მიმდინარე', class: 'text-blue-400' },
+                      PASSED: { label: '✅ წარმატებული', class: 'text-green-400' },
+                      WARNING: { label: '⚠️ გაფრთხილება', class: 'text-amber-400' },
+                      FAILED: { label: '❌ ჩაჭრილი', class: 'text-red-400' },
+                      CANCELLED: { label: '🚫 გაუქმებული', class: 'text-gray-400' },
+                    }
+                    const testNames: Record<string, string> = {
+                      GRAVITY: 'სიმკვრივე (SG)',
+                      TEMPERATURE: 'ტემპერატურა',
+                      PH: 'pH დონე',
+                      DISSOLVED_O2: 'გახსნილი O₂',
+                      TURBIDITY: 'სიმღვრივე',
+                      COLOR: 'ფერი (SRM)',
+                      BITTERNESS: 'სიმწარე (IBU)',
+                      ALCOHOL: 'ალკოჰოლი (ABV)',
+                      CARBONATION: 'კარბონიზაცია',
+                      APPEARANCE: 'გარეგნობა',
+                      AROMA: 'არომატი',
+                      TASTE: 'გემო',
+                      MICROBIOLOGICAL: 'მიკრობიოლოგიური',
+                    }
+                    const status = statusConfig[test.status] || statusConfig.SCHEDULED
+                    const testName = test.testName || testNames[test.testType] || test.testType
+                    const testDate = test.completedDate || test.scheduledDate
+                    return (
+                      <tr key={test.id} className="border-t border-border">
+                        <td className="p-2 text-sm">
+                          {testDate instanceof Date ? formatDate(testDate.toISOString()) : formatDate(new Date(testDate).toISOString())}
+                        </td>
+                        <td className="p-2 text-sm">{testName}</td>
+                        <td className="p-2 text-sm text-right font-mono">
+                          {test.result ? `${Number(test.result).toFixed(3)} ${test.unit || ''}` : '-'}
+                        </td>
+                        <td className="p-2 text-sm text-text-muted">
+                          {test.minValue != null || test.maxValue != null
+                            ? `${test.minValue ?? '-'} - ${test.maxValue ?? '-'}`
+                            : '-'}
+                        </td>
+                        <td className={`p-2 text-sm ${status.class}`}>{status.label}</td>
+                        <td className="p-2 text-sm">{test.performedBy || '-'}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {/* QC Summary */}
+            <div className="mt-3 flex gap-4 text-sm">
+              <span>✅ წარმატებული: <strong className="text-green-400">{qcTests.filter(t => t.status === 'PASSED').length}</strong></span>
+              <span>⚠️ გაფრთხილება: <strong className="text-amber-400">{qcTests.filter(t => t.status === 'WARNING').length}</strong></span>
+              <span>❌ ჩაჭრილი: <strong className="text-red-400">{qcTests.filter(t => t.status === 'FAILED').length}</strong></span>
+            </div>
+          </div>
+        )}
+
         {/* All Readings Table */}
         <div>
           <h2 className="text-lg font-semibold mb-3">📈 ყველა გაზომვა და მოვლენები</h2>

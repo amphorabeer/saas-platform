@@ -170,7 +170,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
     return NextResponse.json({
       success: true,
       batchId,
-      batch: updatedBatch,
+      Batch: updatedBatch,
       batchNumber: updatedBatch?.batchNumber,
       blendedBatchesUpdated: allBatchIds.length,
     })

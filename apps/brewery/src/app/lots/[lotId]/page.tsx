@@ -117,6 +117,10 @@ export default function LotDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
+  // ✅ Quality tests state
+  const [qcTests, setQcTests] = useState<any[]>([])
+  const [loadingTests, setLoadingTests] = useState(false)
+  
   // Active tab state
   const [activeTab, setActiveTab] = useState<TabKey>('overview')
   
@@ -259,6 +263,71 @@ export default function LotDetailPage() {
       fetchLot()
     }
   }, [lotId])
+
+  // ✅ Fetch quality tests for the lot
+  useEffect(() => {
+    const fetchQualityTests = async () => {
+      if (!lot?.id) return
+      
+      try {
+        setLoadingTests(true)
+        // Fetch tests for all batches in the lot
+        const batchIds = lot.batches.map(b => b.id)
+        const allTests: any[] = []
+        
+        for (const batchId of batchIds) {
+          try {
+            const res = await fetch(`/api/quality?batchId=${batchId}`)
+            if (res.ok) {
+              const data = await res.json()
+              const tests = (data.tests || []).map((test: any) => ({
+                ...test,
+                batchId,
+              }))
+              allTests.push(...tests)
+            }
+          } catch (e) {
+            console.error(`Failed to fetch tests for batch ${batchId}:`, e)
+          }
+        }
+        
+        // Also fetch tests directly linked to the lot
+        try {
+          const res = await fetch(`/api/quality?lotId=${lot.id}`)
+          if (res.ok) {
+            const data = await res.json()
+            const lotTests = data.tests || []
+            // Merge, avoiding duplicates
+            const existingTestIds = new Set(allTests.map(t => t.id))
+            lotTests.forEach((test: any) => {
+              if (!existingTestIds.has(test.id)) {
+                allTests.push(test)
+              }
+            })
+          }
+        } catch (e) {
+          console.error(`Failed to fetch tests for lot ${lot.id}:`, e)
+        }
+        
+        // Sort by scheduled date (newest first)
+        allTests.sort((a, b) => {
+          const dateA = new Date(a.scheduledDate || a.completedDate || 0).getTime()
+          const dateB = new Date(b.scheduledDate || b.completedDate || 0).getTime()
+          return dateB - dateA
+        })
+        
+        setQcTests(allTests)
+      } catch (error) {
+        console.error('[LOT DETAIL] Error fetching quality tests:', error)
+      } finally {
+        setLoadingTests(false)
+      }
+    }
+    
+    if (lot?.id) {
+      fetchQualityTests()
+    }
+  }, [lot?.id, lot?.batches])
 
   // ✅ Track if gravity readings have been fetched
   const readingsFetchedRef = useRef<string | null>(null)
@@ -1680,6 +1749,85 @@ export default function LotDetailPage() {
                     </tbody>
                   </table>
                 )}
+
+                {/* ✅ Quality Tests Section - Same as batch detail page */}
+                <Card className="mt-6">
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <span>🧪 ხარისხის ტესტები</span>
+                      <a href="/quality" className="text-sm text-copper-light hover:text-copper">
+                        ყველას ნახვა →
+                      </a>
+                    </div>
+                  </CardHeader>
+                  <CardBody>
+                    {loadingTests ? (
+                      <p className="text-text-muted text-center py-8">იტვირთება...</p>
+                    ) : qcTests.length > 0 ? (
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-border text-left text-sm text-text-muted">
+                            <th className="pb-3">თარიღი</th>
+                            <th className="pb-3">ტესტი</th>
+                            <th className="pb-3">შედეგი</th>
+                            <th className="pb-3">დიაპაზონი</th>
+                            <th className="pb-3">სტატუსი</th>
+                            <th className="pb-3">შემსრულებელი</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {qcTests.map((test: any) => {
+                            const statusConfig: Record<string, { label: string; class: string }> = {
+                              SCHEDULED: { label: '⏳ დაგეგმილი', class: 'text-gray-400' },
+                              IN_PROGRESS: { label: '🔄 მიმდინარე', class: 'text-blue-400' },
+                              PASSED: { label: '✅ წარმატებული', class: 'text-green-400' },
+                              WARNING: { label: '⚠️ გაფრთხილება', class: 'text-amber-400' },
+                              FAILED: { label: '❌ ჩაჭრილი', class: 'text-red-400' },
+                              CANCELLED: { label: '🚫 გაუქმებული', class: 'text-gray-400' },
+                            }
+                            const testNames: Record<string, string> = {
+                              GRAVITY: 'სიმკვრივე (SG)',
+                              TEMPERATURE: 'ტემპერატურა',
+                              PH: 'pH დონე',
+                              DISSOLVED_O2: 'გახსნილი O₂',
+                              TURBIDITY: 'სიმღვრივე',
+                              COLOR: 'ფერი (SRM)',
+                              BITTERNESS: 'სიმწარე (IBU)',
+                              ALCOHOL: 'ალკოჰოლი (ABV)',
+                              CARBONATION: 'კარბონიზაცია',
+                              APPEARANCE: 'გარეგნობა',
+                              AROMA: 'არომატი',
+                              TASTE: 'გემო',
+                              MICROBIOLOGICAL: 'მიკრობიოლოგიური',
+                            }
+                            const status = statusConfig[test.status] || statusConfig.SCHEDULED
+                            const testName = test.testName || testNames[test.testType] || test.testType
+                            return (
+                              <tr key={test.id} className="border-b border-border/50">
+                                <td className="py-3">
+                                  <p>{formatDate(new Date(test.completedDate || test.scheduledDate))}</p>
+                                </td>
+                                <td className="py-3">{testName}</td>
+                                <td className="py-3 font-mono text-lg">
+                                  {test.result ? `${Number(test.result).toFixed(3)} ${test.unit || ''}` : '-'}
+                                </td>
+                                <td className="py-3 text-sm text-text-muted">
+                                  {test.minValue != null || test.maxValue != null
+                                    ? `${test.minValue ?? '-'} - ${test.maxValue ?? '-'}`
+                                    : '-'}
+                                </td>
+                                <td className={`py-3 text-sm ${status.class}`}>{status.label}</td>
+                                <td className="py-3 text-sm">{test.performedBy || '-'}</td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p className="text-text-muted text-center py-8">ხარისხის ტესტები არ არის</p>
+                    )}
+                  </CardBody>
+                </Card>
               </div>
             ) : (
               <div className="text-center py-12 text-text-muted">
@@ -2152,6 +2300,7 @@ export default function LotDetailPage() {
       {lot && (
         <LotReportModal
           lot={lot}
+          qcTests={qcTests}
           isOpen={showReportModal}
           onClose={() => setShowReportModal(false)}
         />

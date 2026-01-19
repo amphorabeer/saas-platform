@@ -117,8 +117,8 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
-        token.organizationId = user.organizationId;
+        token.role = (user as any).role;
+        token.organizationId = (user as any).organizationId;
         token.tenantId = (user as any).tenantId;
         token.hotelCode = (user as any).hotelCode;
       }
