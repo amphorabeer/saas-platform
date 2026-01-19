@@ -1,7 +1,7 @@
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
-  output        = "../node_modules/.prisma/client"
+  output        = "./generated/prisma"
 }
 
 datasource db {
@@ -77,8 +77,9 @@ model Organization {
   bankAccount       String?
 
   // Multi-tenancy
-  tenantId          String             @unique @default(cuid())
-  hotelCode         String             @unique
+  tenantId          String?            @unique // ID from Neon Tenant table (for breweries)
+  tenantCode        String?            // BREW-XXXX format code (for breweries)
+  hotelCode         String?            @unique // 4-digit code (for hotels)
   databaseUrl       String?
 
   // Relations
@@ -93,6 +94,7 @@ model Organization {
 
   @@index([slug])
   @@index([tenantId])
+  @@index([tenantCode])
 }
 
 model User {
