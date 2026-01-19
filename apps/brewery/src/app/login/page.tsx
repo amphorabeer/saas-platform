@@ -1,16 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
   
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [credentials, setCredentials] = useState({
+    tenantCode: '',
+    email: '',
+    password: '',
+  })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   
@@ -19,21 +23,28 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     
+    if (!credentials.tenantCode || !credentials.email || !credentials.password) {
+      setError('შეავსეთ ყველა ველი')
+      setLoading(false)
+      return
+    }
+    
     try {
       const result = await signIn('credentials', {
-        email,
-        password,
+        tenantCode: credentials.tenantCode,
+        email: credentials.email,
+        password: credentials.password,
         redirect: false,
       })
       
       if (result?.error) {
-        setError(result.error)
-      } else {
+        setError('არასწორი მონაცემები. შეამოწმეთ კოდი, ელ-ფოსტა და პაროლი.')
+      } else if (result?.ok) {
         router.push(callbackUrl)
         router.refresh()
       }
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError('სისტემური შეცდომა. სცადეთ თავიდან.')
     } finally {
       setLoading(false)
     }
@@ -57,15 +68,44 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
+                კომპანიის კოდი
+              </label>
+              <input
+                type="text"
+                value={credentials.tenantCode}
+                onChange={(e) => {
+                  // Format: BREW-XXXX (uppercase, auto-format)
+                  const value = e.target.value.toUpperCase().replace(/[^BREW0-9-]/g, '')
+                  // Auto-format: BREW-XXXX
+                  let formatted = value
+                  if (value.startsWith('BREW') && !value.includes('-') && value.length > 4) {
+                    formatted = `BREW-${value.slice(4)}`
+                  }
+                  setCredentials({ ...credentials, tenantCode: formatted.slice(0, 9) })
+                }}
+                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-amber-500 text-center text-xl tracking-widest font-mono"
+                placeholder="BREW-0000"
+                maxLength={9}
+                required
+                disabled={loading}
+              />
+              <p className="text-xs text-slate-400 mt-1 text-center">
+                4 ნიშნა კოდი რომელიც მიიღეთ რეგისტრაციისას
+              </p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 ელ-ფოსტა
               </label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={credentials.email}
+                onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-amber-500"
-                placeholder="admin@demo.com"
+                placeholder="your@email.com"
                 required
+                disabled={loading}
               />
             </div>
             
@@ -75,11 +115,12 @@ export default function LoginPage() {
               </label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={credentials.password}
+                onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-amber-500"
                 placeholder="••••••••"
                 required
+                disabled={loading}
               />
             </div>
             
@@ -93,8 +134,10 @@ export default function LoginPage() {
           </form>
           
           <div className="mt-6 text-center text-sm text-slate-400">
-            <p>Demo credentials:</p>
-            <p className="text-slate-300">admin@demo.com / demo123</p>
+            <p>არ გაქვთ ანგარიში?</p>
+            <Link href="/register" className="text-amber-400 hover:underline font-medium">
+              დარეგისტრირდით აქ
+            </Link>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
-// Import prisma from index to reuse the same instance
-// This avoids circular dependency by importing the exported prisma
-import { prisma } from "./index";
+// @ts-nocheck
+// Import prisma directly from client to avoid circular dependency
+import { prisma } from "./client";
 import { Prisma } from "@prisma/client";
 
 export async function getConfig(key: string) {

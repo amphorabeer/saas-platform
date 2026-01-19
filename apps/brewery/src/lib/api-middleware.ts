@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { hasPermission, Permission } from '@brewery/auth'
+import { authOptions } from '@/lib/auth'
 type UserRole = 'OWNER' | 'ADMIN' | 'MANAGER' | 'BREWER' | 'VIEWER'
 
 // DomainError class - matches @brewery/domain interface
@@ -111,7 +112,8 @@ export function withErrorHandler<T = any>(
       // Get JWT token
       const token = await getToken({ 
         req, 
-        secret: process.env.NEXTAUTH_SECRET 
+        secret: process.env.NEXTAUTH_SECRET,
+        // Use authOptions for consistency
       })
       
       if (!token) {

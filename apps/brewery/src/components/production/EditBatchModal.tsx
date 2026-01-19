@@ -7,7 +7,7 @@ interface EditBatchModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (data: BatchEditData) => void
-  onDelete?: () => void
+  onDelete?: (batchId: string) => void
   batch: {
     id: string
     batchNumber: string
@@ -168,7 +168,7 @@ export function EditBatchModal({ isOpen, onClose, onSubmit, onDelete, batch }: E
                   <p className="text-red-400 text-sm mr-2">დარწმუნებული ხარ?</p>
                   <Button size="sm" variant="secondary" onClick={() => setShowDeleteConfirm(false)}>არა</Button>
                   <Button size="sm" className="bg-red-600" onClick={() => {
-                    onDelete()
+                    onDelete?.(batch.id)
                     setShowDeleteConfirm(false)
                     onClose()
                   }}>დიახ, წაშალე</Button>

@@ -1,5 +1,7 @@
 'use client'
 
+import { signOut } from 'next-auth/react'
+
 interface SettingsSidebarProps {
   activeTab: string
   onTabChange: (tab: string) => void
@@ -19,8 +21,8 @@ const settingsTabs = [
 
 export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps) {
   return (
-    <div className="w-64 bg-bg-card border-r border-border h-full">
-      <div className="p-4 space-y-1">
+    <div className="w-64 bg-bg-card border-r border-border h-full flex flex-col">
+      <div className="p-4 space-y-1 flex-1">
         {settingsTabs.map((tab) => (
           <button
             key={tab.id}
@@ -36,7 +38,17 @@ export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps
           </button>
         ))}
       </div>
+      
+      {/* Logout button at bottom */}
+      <div className="p-4 border-t border-border">
+        <button
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors text-red-400 hover:bg-red-500/10"
+        >
+          <span className="text-lg">🚪</span>
+          <span className="text-sm">გამოსვლა</span>
+        </button>
+      </div>
     </div>
   )
 }
-

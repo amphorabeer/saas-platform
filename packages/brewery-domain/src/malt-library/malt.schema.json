@@ -1,0 +1,222 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Malt Library Schema",
+  "type": "object",
+  "required": ["library", "items"],
+  "properties": {
+    "library": {
+      "type": "object",
+      "required": ["name", "version", "generatedAt"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "defaults": {
+          "type": "object",
+          "properties": {
+            "allergens": {
+              "type": "object",
+              "properties": {
+                "gluten": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "type", "color"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": ["base", "caramel", "roasted", "specialty", "adjunct"]
+          },
+          "producer": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "supplier": {
+            "type": "string"
+          },
+          "color": {
+            "type": "object",
+            "required": ["ebc"],
+            "properties": {
+              "ebc": {
+                "type": "object",
+                "required": ["typical"],
+                "properties": {
+                  "typical": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "min": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "max": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          },
+          "extract": {
+            "type": "object",
+            "properties": {
+              "fgdbPercent": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          },
+          "yield": {
+            "type": "object",
+            "properties": {
+              "percent": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          },
+          "diastaticPower": {
+            "type": "object",
+            "properties": {
+              "wk": {
+                "type": "number",
+                "minimum": 0
+              },
+              "lintner": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          },
+          "moisturePercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "proteinPercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "maxUsagePercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "recommendedUsage": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "max": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          },
+          "flavorNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "styles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allergens": {
+            "type": "object",
+            "properties": {
+              "gluten": {
+                "type": "boolean"
+              }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -50,12 +50,11 @@ interface CalendarEvent {
 }
 
 // Helpers
+// ✅ FIX: Center current day in the week view (3 days before, 3 days after)
 const getWeekStart = (date: Date): Date => {
   const d = new Date(date)
-  const day = d.getDay()
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-  d.setDate(diff)
-  d.setHours(12, 0, 0, 0)  // ✅ Use noon for consistency
+  d.setDate(d.getDate() - 3)  // 3 days before current day
+  d.setHours(12, 0, 0, 0)  // Use noon for consistency
   return d
 }
 
@@ -440,7 +439,12 @@ function CalendarContent() {
         const fermAssignment = myBlendItem?.fermAssignment
         
         if (fermentationLot && fermAssignment) {
-          const combinedName = blendItems.map(i => i.batch.batchNumber).join(' + ')
+          const combinedBatchNames = blendItems.map(i => i.batch.batchNumber).join(' + ')
+          // ✅ Add BLEND lot code if available
+          const blendLotCode = fermentationLot.lotCode?.startsWith('BLEND-') ? fermentationLot.lotCode : null
+          const combinedName = blendLotCode 
+            ? `${blendLotCode} = ${combinedBatchNames}` 
+            : combinedBatchNames
           const combinedRecipe = [...new Set(blendItems.map(i => i.batch.recipe?.name || i.batch.recipeName))].join(' + ')
           
           const toLocalDate = (dateInput: any): Date | null => {
@@ -631,7 +635,12 @@ function CalendarContent() {
         
         // ✅ Process CONDITIONING/BRIGHT only for first batch (with combined name)
         if (isFirstBatch && conditioningLot && condAssignment) {
-          const combinedName = blendItems.map(i => i.batch.batchNumber).join(' + ')
+          const combinedBatchNames = blendItems.map(i => i.batch.batchNumber).join(' + ')
+          // ✅ Add BLEND lot code if available
+          const blendLotCode = conditioningLot.lotCode?.startsWith('BLEND-') ? conditioningLot.lotCode : null
+          const combinedName = blendLotCode 
+            ? `${blendLotCode} = ${combinedBatchNames}` 
+            : combinedBatchNames
           const combinedRecipe = [...new Set(blendItems.map(i => i.batch.recipe?.name || i.batch.recipeName))].join(' + ')
           
           const toLocalDate = (dateInput: any): Date | null => {
@@ -792,7 +801,7 @@ function CalendarContent() {
           // ✅ Create event for EACH assignment (FERMENTATION history + CONDITIONING current)
           if (lot.assignments && lot.assignments.length > 0) {
             lot.assignments.forEach((assignment: any) => {
-              const isCompleted = assignment.status === 'COMPLETED'
+              const isAssignmentCompleted = assignment.status === 'COMPLETED'
               // ✅ FIX: Use lot's actual phase for status, not batch status
               // ✅ FIX: Convert BRIGHT to READY for BATCH_PHASE_CONFIG compatibility
               const lotPhase = lot.phase?.toUpperCase() === 'FERMENTATION' ? 'FERMENTING' : 
@@ -802,6 +811,14 @@ function CalendarContent() {
               const assignmentPhase = assignment.phase === 'FERMENTATION' ? 'FERMENTING' : 
                                       assignment.phase === 'CONDITIONING' ? 'CONDITIONING' : 
                                       assignment.phase === 'BRIGHT' ? 'READY' : lotPhase  // ✅ NEW
+              
+              // ✅ FIX: Special case for split batch -B lot still in fermentation
+              // If lot is ACTIVE and lot.phase matches assignment.phase, treat as ACTIVE even if assignment says COMPLETED
+              // This handles the case where split creates two child lots but marks all fermentation assignments as COMPLETED
+              const isLotStillInSamePhase = lot.status === 'ACTIVE' && 
+                                            lot.phase?.toUpperCase() === assignment.phase?.toUpperCase()
+              const isCompleted = isAssignmentCompleted && !isLotStillInSamePhase
+              
               // ✅ For completed assignments, show as completed; for active, use lot's phase
               const displayStatus = isCompleted ? 'COMPLETED' : assignmentPhase
               
@@ -841,8 +858,8 @@ function CalendarContent() {
               }
               
               let endDate: Date
-              // ✅ FIX: Check if THIS specific lot/assignment is completed, not the batch
-              const isThisLotCompleted = lot.status === 'COMPLETED' || assignment.status === 'COMPLETED'
+              // ✅ FIX: Use isCompleted which accounts for lot still being in same phase
+              const isThisLotCompleted = isCompleted
               
               if (isThisLotCompleted) {
                 // ✅ For completed lots/assignments, use actual end time or batch completedAt

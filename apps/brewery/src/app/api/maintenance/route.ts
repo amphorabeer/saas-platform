@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withTenant, RouteContext } from '@/lib/api-middleware'
 import { prisma } from '@saas-platform/database'
+import { randomUUID } from 'crypto'
 
 // GET /api/maintenance
 export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
   try {
     const maintenanceLogs = await prisma.maintenanceLog.findMany({
       where: {
-        // ✅ FIX: Use Equipment (capital E) - this is the Prisma relation name
+        // ✅ FIX: Use Equipment (PascalCase) - this is the Prisma relation field name
         Equipment: {
           tenantId: ctx.tenantId,
         },
       },
       include: {
-        // ✅ FIX: Use Equipment (capital E)
+        // ✅ FIX: Use Equipment (PascalCase)
         Equipment: {
           select: {
             id: true,
@@ -29,8 +30,7 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
     // Transform to match expected format (lowercase equipment for API response)
     const transformed = maintenanceLogs.map(log => ({
       ...log,
-      equipment: log.Equipment,
-      Equipment: undefined,
+      Equipment: log.Equipment,
     }))
 
     return NextResponse.json({ maintenanceLogs: transformed })
@@ -79,10 +79,11 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
 
     const maintenanceLog = await prisma.maintenanceLog.create({
       data: {
+        id: randomUUID(),
         equipmentId,
         type,
-        status: status || 'SCHEDULED',
-        priority: priority || 'MEDIUM',
+        status: status || 'PENDING',
+        priority: priority || null,
         scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
         completedDate: completedDate ? new Date(completedDate) : null,
         duration: duration ? parseInt(String(duration)) : null,
@@ -90,6 +91,8 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
         cost: cost ? parseFloat(String(cost)) : null,
         partsUsed: partsUsed || [],
         description: description || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       include: {
         Equipment: {
@@ -100,7 +103,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
 
     return NextResponse.json({
       ...maintenanceLog,
-      equipment: maintenanceLog.Equipment,
+      Equipment: maintenanceLog.Equipment,
     }, { status: 201 })
   } catch (error) {
     console.error('[POST /api/maintenance] Error:', error)
@@ -155,7 +158,7 @@ export const PATCH = withTenant(async (req: NextRequest, ctx: RouteContext) => {
 
     return NextResponse.json({
       ...updated,
-      equipment: updated.Equipment,
+      Equipment: updated.Equipment,
     })
   } catch (error) {
     console.error('[PATCH /api/maintenance] Error:', error)

@@ -37,6 +37,11 @@ export default function LoginPage() {
     }
     
     try {
+      console.log('🔐 Attempting login with:', { 
+        hotelCode: credentials.hotelCode, 
+        email: credentials.email 
+      })
+      
       const result = await signIn('credentials', {
         hotelCode: credentials.hotelCode,
         email: credentials.email,
@@ -44,17 +49,26 @@ export default function LoginPage() {
         redirect: false,
       })
       
-      if (result?.error) {
-        setError('არასწორი მონაცემები. შეამოწმეთ სასტუმროს კოდი, ელ-ფოსტა და პაროლი.')
-        setLoading(false)
-      } else if (result?.ok) {
+      console.log('📋 SignIn result:', result)
+      
+      // Check ok FIRST, then error (NextAuth sometimes returns error: 'undefined' even on success)
+      if (result?.ok) {
+        console.log('✅ Login successful, redirecting to:', callbackUrl)
         localStorage.removeItem('currentUser')
         localStorage.removeItem('hotelRooms')
         localStorage.removeItem('hotelFolios')
         router.push(callbackUrl)
         router.refresh()
+      } else if (result?.error && result.error !== 'undefined') {
+        console.log('❌ Error from signIn:', result.error)
+        setError('არასწორი მონაცემები. შეამოწმეთ სასტუმროს კოდი, ელ-ფოსტა და პაროლი.')
+        setLoading(false)
+      } else {
+        setError('შესვლა ვერ მოხერხდა. სცადეთ თავიდან.')
+        setLoading(false)
       }
     } catch (err) {
+      console.error('💥 Login exception:', err)
       setError('სისტემური შეცდომა. სცადეთ თავიდან.')
       setLoading(false)
     }
@@ -137,7 +151,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>არ გაქვთ ანგარიში?</p>
           <a 
-            href="/auth/signup?module=hotel" 
+            href="http://localhost:3000/auth/signup" 
             className="text-blue-600 hover:underline font-medium"
           >
             დარეგისტრირდით აქ

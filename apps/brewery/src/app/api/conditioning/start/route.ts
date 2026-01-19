@@ -315,8 +315,6 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
           where: { id: body.targetLotId },
           data: {
             lotCode: blendCode,
-            isBlendResult: true,
-            blendedAt: new Date(),
           },
         })
         console.log('[CONDITIONING/START] ✅ Updated target lot to BLEND code:', blendCode)
@@ -529,6 +527,75 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
     const result = await prisma.$transaction(async (tx) => {
       console.log('[CONDITIONING/START] ⚡⚡⚡ INSIDE TRANSACTION - conditioningStartTime:', conditioningStartTime.toISOString())
       
+      // ✅ CRITICAL FIX: Complete ALL fermentation assignments FIRST, before any lot updates
+      // This ensures fermentation tanks show as COMPLETED in calendar/production history
+      if (!body.stayInSameTank) {
+        console.log('[CONDITIONING/START] 🔍 Finding and completing ALL fermentation assignments for batch:', body.batchId)
+        
+        // Find ALL fermentation lots for this batch
+        const fermentationLots = await tx.lot.findMany({
+          where: {
+            LotBatch: {
+              some: { batchId: body.batchId }
+            },
+            phase: 'FERMENTATION',
+          },
+          include: {
+            TankAssignment: {
+              where: {
+                phase: 'FERMENTATION',
+                status: { in: ['PLANNED', 'ACTIVE'] }
+              }
+            }
+          }
+        })
+        
+        console.log('[CONDITIONING/START] Found', fermentationLots.length, 'fermentation lots')
+        
+        // Complete ALL fermentation TankAssignments
+        for (const fermLot of fermentationLots) {
+          console.log('[CONDITIONING/START] Processing fermentation lot:', fermLot.lotCode, 'assignments:', fermLot.TankAssignment.length)
+          
+          for (const assignment of fermLot.TankAssignment) {
+            console.log('[CONDITIONING/START] ✅ Completing fermentation assignment:', assignment.id, 'tank:', assignment.tankId)
+            
+            await tx.tankAssignment.update({
+              where: { id: assignment.id },
+              data: { 
+                status: 'COMPLETED',
+                actualEnd: conditioningStartTime,
+              },
+            })
+            
+            // Free old tanks ONLY if not reused in new allocations
+            const isReused = body.allocations?.some(a => a.tankId === assignment.tankId)
+            if (!isReused) {
+              await tx.equipment.update({
+                where: { id: assignment.tankId },
+                data: { 
+                  status: 'NEEDS_CIP',
+                  currentBatchId: null,
+                  nextCIP: new Date(),
+                },
+              }).catch(e => console.log('[CONDITIONING/START] Equipment update error:', e.message))
+              
+              await tx.tank.update({
+                where: { id: assignment.tankId },
+                data: {
+                  status: 'AVAILABLE',
+                  currentLotId: null,
+                  currentPhase: null,
+                },
+              }).catch(() => {})
+              
+              console.log('[CONDITIONING/START] ✅ Released fermentation tank:', assignment.tankId)
+            } else {
+              console.log('[CONDITIONING/START] Tank', assignment.tankId, 'will be reused for conditioning')
+            }
+          }
+        }
+      }
+      
       // ✅ Check if source lot is a blend (has multiple batches)
       const sourceLotBatch = await tx.lotBatch.findFirst({
         where: { batchId: body.batchId },
@@ -565,8 +632,7 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
         if (needsBlendCode) {
           const blendCode = await generateBlendLotCode(ctx.tenantId)
           updateData.lotCode = blendCode
-          updateData.isBlendResult = true
-          updateData.blendedAt = new Date()
+          // isBlendResult and blendedAt fields removed - not in schema
           console.log('[CONDITIONING/START] ✅ Generating BLEND code for existing blend lot:', blendCode)
         }
         
@@ -1607,7 +1673,7 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
           },
         })
         
-        console.log('[CONDITIONING/START] Remaining FERMENTATION lots for batch:', remainingFermLots.length, remainingFermLots.map(l => l.lotCode))
+        console.log('[CONDITIONING/START] Remaining FERMENTATION lots for Batch:', remainingFermLots.length, remainingFermLots.map(l => l.lotCode))
         
         if (remainingFermLots.length > 0) {
           console.log('[CONDITIONING/START] Batch still has', remainingFermLots.length, 'lots in FERMENTATION, keeping status FERMENTING')

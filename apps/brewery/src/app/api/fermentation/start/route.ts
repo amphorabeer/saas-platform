@@ -643,7 +643,7 @@ async function handleBlendStart(
             where: { status: { in: ['PLANNED', 'ACTIVE'] } },
             take: 1,
             include: {
-              Equipment: { select: { id: true, name: true } }
+              Tank: { select: { id: true, name: true } }
             } as any
           },
         },
@@ -655,7 +655,7 @@ async function handleBlendStart(
 
       existingAssignment = (targetLot.TankAssignment[0] as any)
       targetTankId = existingAssignment?.tankId
-      targetTankName = existingAssignment?.Equipment?.name
+      targetTankName = existingAssignment?.Tank?.name
       
       console.log('[BLEND] Using existing lot:', targetLot.id)
       console.log('[BLEND] Target tank:', targetTankName)

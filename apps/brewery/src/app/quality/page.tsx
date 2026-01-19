@@ -52,7 +52,6 @@ const mapStatus = (status: string): QCTest['status'] => {
     PASSED: 'passed',
     WARNING: 'warning',
     FAILED: 'failed',
-    // CANCELLED: 'cancelled', // Removed - 'cancelled' not in TestStatus type
   }
   return statusMap[status] || 'pending'
 }
@@ -71,7 +70,7 @@ const mapPriority = (priority: string): QCTest['priority'] => {
 const mapTestType = (apiType: string): QCTest['testType'] => {
   const typeMap: Record<string, QCTest['testType']> = {
     GRAVITY: 'gravity',
-    TEMPERATURE: 'gravity', // Map to gravity for compatibility
+    TEMPERATURE: 'gravity',
     PH: 'ph',
     DISSOLVED_O2: 'gravity',
     TURBIDITY: 'gravity',
@@ -156,7 +155,11 @@ export default function QualityPage() {
         const res = await fetch('/api/batches?limit=100')
         if (res.ok) {
           const data = await res.json()
-          setBatches(data.batches || [])
+          // ✅ FIX: Filter out completed batches
+          const activeBatches = (data.batches || []).filter((batch: BatchAPI) => 
+            batch.status !== 'COMPLETED' && batch.status !== 'completed'
+          )
+          setBatches(activeBatches)
         }
       } catch (error) {
         console.error('Failed to fetch batches:', error)
@@ -199,6 +202,7 @@ export default function QualityPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           batchId: testData.batchId,
+          lotId: testData.lotId || null, // ✅ Send lotId if selected
           testType: testData.testType.toUpperCase(),
           priority: testData.priority.toUpperCase(),
           scheduledDate: testData.scheduledDate.toISOString(),

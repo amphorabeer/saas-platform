@@ -3,7 +3,8 @@ import { Noto_Sans_Georgian } from 'next/font/google'
 import { ToastContainer } from '@/components/ui/Toast'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
-import { ThemeProvider } from '@/components/providers'
+import { ThemeProvider, SessionProvider } from '@/components/providers'
+import { TenantProvider } from '@/contexts/TenantContext'
 import './globals.css'
 
 const notoSans = Noto_Sans_Georgian({ 
@@ -29,14 +30,18 @@ export default function RootLayout({
   return (
     <html lang="ka" className={notoSans.variable}>
       <body className={`${notoSans.className} dark`}>
-        <ThemeProvider>
-          <ErrorBoundary>
-            <div className="ambient-bg" />
-            {children}
-            <ToastContainer />
-            <ConfirmDialog />
-          </ErrorBoundary>
-        </ThemeProvider>
+        <SessionProvider>
+          <TenantProvider>
+            <ThemeProvider>
+              <ErrorBoundary>
+                <div className="ambient-bg" />
+                {children}
+                <ToastContainer />
+                <ConfirmDialog />
+              </ErrorBoundary>
+            </ThemeProvider>
+          </TenantProvider>
+        </SessionProvider>
       </body>
     </html>
   )

@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3020",
-    "build": "prisma generate && next build",
+    "build": "prisma generate --schema=../../packages/database/prisma/schema.prisma && next build",
     "start": "next start -p 3020",
     "lint": "next lint",
-    "postinstall": "prisma generate --schema=./prisma/schema.prisma"
+    "postinstall": "prisma generate --schema=../../packages/database/prisma/schema.prisma"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.10",
@@ -22,6 +22,8 @@
     "@saas-platform/types": "workspace:*",
     "@saas-platform/ui": "workspace:*",
     "@saas-platform/utils": "workspace:*",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^2.4.3",
     "chart.js": "^4.4.1",
     "clsx": "^2.0.0",
     "lucide-react": "^0.303.0",

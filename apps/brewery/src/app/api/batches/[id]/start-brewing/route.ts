@@ -77,7 +77,7 @@ export const POST = withTenant(async (
 
     return NextResponse.json({ 
       success: true, 
-      batch: updatedBatch 
+      Batch: updatedBatch 
     })
 
   } catch (error) {

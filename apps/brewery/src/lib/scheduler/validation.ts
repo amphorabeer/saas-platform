@@ -335,11 +335,11 @@ export async function validateBlending(
   if (config.maxAgeDifferenceHours > 0) {
     const startDates = sourceLots
       .flatMap(l => l.TankAssignment.map(a => a.actualStart || a.plannedStart))
-      .filter(Boolean)
+      .filter(Boolean) as Date[]
     
     if (startDates.length > 1) {
-      const minDate = Math.min(...startDates.map(d => d.getTime()))
-      const maxDate = Math.max(...startDates.map(d => d.getTime()))
+      const minDate = Math.min(...startDates.filter(d => d !== null).map(d => d!.getTime()))
+      const maxDate = Math.max(...startDates.filter(d => d !== null).map(d => d!.getTime()))
       const diffHours = (maxDate - minDate) / (1000 * 60 * 60)
       
       if (diffHours > config.maxAgeDifferenceHours) {
@@ -664,7 +664,7 @@ export async function generateLotCode(
   
   let sequence = 1
   if (lastLot) {
-    const match = lastLot.lotCode.match(/(\d+)$/)
+    const match = lastLot.lotCode?.match(/(\d+)$/)
     if (match) {
       sequence = parseInt(match[1], 10) + 1
     }

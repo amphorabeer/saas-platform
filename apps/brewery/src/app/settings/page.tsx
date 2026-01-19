@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { signOut } from 'next-auth/react'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui'
@@ -58,6 +59,8 @@ export default function SettingsPage() {
 
   // Hydration state
   const [isHydrated, setIsHydrated] = useState(false)
+  const [tenantLoading, setTenantLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
 
   // State for each tab
   const [companySettings, setCompanySettings] = useState(mockCompanySettings)
@@ -92,6 +95,40 @@ export default function SettingsPage() {
   // Hydration: მონიშნე რომ client-side render-ია
   useEffect(() => {
     setIsHydrated(true)
+  }, [])
+
+  // Fetch tenant data from API
+  useEffect(() => {
+    const fetchTenant = async () => {
+      try {
+        const res = await fetch('/api/tenant')
+        if (res.ok) {
+          const data = await res.json()
+          const tenant = data.tenant
+          
+          // განაახლე companySettings state რეალური მონაცემებით
+          setCompanySettings(prev => ({
+            ...prev,
+            name: tenant.name || prev.name,
+            legalName: tenant.legalName || prev.legalName,
+            taxId: tenant.taxId || prev.taxId,
+            address: tenant.address || prev.address,
+            phone: tenant.phone || prev.phone,
+            email: tenant.email || prev.email,
+            website: tenant.website || prev.website,
+            bankName: tenant.bankName || prev.bankName,
+            bankAccount: tenant.bankAccount || prev.bankAccount,
+            bankSwift: tenant.bankSwift || prev.bankSwift,
+          }))
+        }
+      } catch (err) {
+        console.error('Failed to fetch tenant:', err)
+      } finally {
+        setTenantLoading(false)
+      }
+    }
+    
+    fetchTenant()
   }, [])
 
   // Hydration: store-დან ჩატვირთვა client-side
@@ -162,35 +199,63 @@ export default function SettingsPage() {
     }
   }, [activeTab])
 
-  const handleSave = () => {
-    // შეინახე კომპანიის პარამეტრები store-ში
-    saveCompanySettings({
-      name: companySettings.name,
-      legalName: companySettings.legalName,
-      taxId: companySettings.taxId,
-      address: companySettings.address,
-      phone: companySettings.phone,
-      email: companySettings.email,
-      website: companySettings.website || '',
-      bankName: companySettings.bankName,
-      bankAccount: companySettings.bankAccount,
-      bankSwift: companySettings.bankSwift,
-    })
-    
-    // შეინახე გარეგნობის პარამეტრები store-ში
-    saveAppearanceSettings({
-      theme: appearanceSettings.theme,
-      accentColor: appearanceSettings.accentColor,
-      language: appearanceSettings.language,
-      dateFormat: appearanceSettings.dateFormat,
-      currency: appearanceSettings.currency,
-      numberFormat: appearanceSettings.numberFormat,
-    })
-    
-    console.log('Settings saved to store')
-    
-    // შეტყობინება მომხმარებელს
-    alert('პარამეტრები შენახულია!')
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      // შეინახე Tenant მონაცემები DB-ში
+      const res = await fetch('/api/tenant', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: companySettings.name,
+          legalName: companySettings.legalName,
+          taxId: companySettings.taxId,
+          address: companySettings.address,
+          phone: companySettings.phone,
+          email: companySettings.email,
+          website: companySettings.website,
+          bankName: companySettings.bankName,
+          bankAccount: companySettings.bankAccount,
+          bankSwift: companySettings.bankSwift,
+        }),
+      })
+
+      if (res.ok) {
+        // შეინახე ლოკალურ store-შიც კეშირებისთვის
+        saveCompanySettings({
+          name: companySettings.name,
+          legalName: companySettings.legalName,
+          taxId: companySettings.taxId,
+          address: companySettings.address,
+          phone: companySettings.phone,
+          email: companySettings.email,
+          website: companySettings.website || '',
+          bankName: companySettings.bankName,
+          bankAccount: companySettings.bankAccount,
+          bankSwift: companySettings.bankSwift,
+        })
+        
+        // შეინახე გარეგნობის პარამეტრები store-ში
+        saveAppearanceSettings({
+          theme: appearanceSettings.theme,
+          accentColor: appearanceSettings.accentColor,
+          language: appearanceSettings.language,
+          dateFormat: appearanceSettings.dateFormat,
+          currency: appearanceSettings.currency,
+          numberFormat: appearanceSettings.numberFormat,
+        })
+        
+        alert('პარამეტრები შენახულია!')
+      } else {
+        const data = await res.json()
+        alert(data.error || 'შენახვა ვერ მოხერხდა')
+      }
+    } catch (err) {
+      console.error('Failed to save:', err)
+      alert('შენახვა ვერ მოხერხდა')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleDeleteUser = (userId: string) => {
@@ -393,11 +458,14 @@ export default function SettingsPage() {
                           </td>
                         </tr>
                       ) : (users.length > 0 ? users : mockUsers).map((user, index) => {
-                        const role = roleConfig[user.role]
+                        const roleKey = user.role?.toLowerCase() || 'operator'
+                        const role = roleConfig[roleKey as keyof typeof roleConfig] || { icon: '👤', name: user.role || 'User', color: 'text-text-muted' }
                         return (
                           <tr key={user.id} className="border-b border-border hover:bg-bg-tertiary/50">
                             <td className="py-3 px-4 text-text-muted">{index + 1}</td>
-                            <td className="py-3 px-4 text-text-primary">{user.firstName} {user.lastName}</td>
+                            <td className="py-3 px-4 text-text-primary">
+                              {user.firstName} {user.lastName}
+                            </td>
                             <td className="py-3 px-4 text-text-primary">{user.email}</td>
                             <td className="py-3 px-4">
                               <span className="inline-flex items-center gap-1">
@@ -1504,6 +1572,16 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 </div>
+
+                <div className="pt-4 border-t border-border">
+                  <Button 
+                    variant="secondary" 
+                    className="w-full"
+                    onClick={() => signOut({ callbackUrl: '/login' })}
+                  >
+                    🚪 სისტემიდან გამოსვლა
+                  </Button>
+                </div>
               </CardBody>
             </Card>
           </div>
@@ -1522,7 +1600,9 @@ export default function SettingsPage() {
           <div className="max-w-4xl mx-auto">
             {renderTabContent()}
             <div className="mt-6 pt-6 border-t border-border flex justify-end">
-              <Button onClick={handleSave}>შენახვა</Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? 'ინახება...' : 'შენახვა'}
+              </Button>
             </div>
           </div>
         </div>

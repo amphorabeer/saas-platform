@@ -1,5 +1,9 @@
 import NextAuth, { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import bcrypt from "bcryptjs"
+import { PrismaClient } from '../../../../node_modules/.prisma/client'
+
+const prisma = new PrismaClient()
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -15,41 +19,50 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.email || !credentials?.password || !credentials?.hotelCode) {
           throw new Error("Invalid credentials")
         }
         
         try {
-          const { PrismaClient } = require('@prisma/client')
-          const prisma = new PrismaClient()
-          const bcrypt = require('bcryptjs')
+          console.log('🔍 Searching for organization with hotelCode:', credentials.hotelCode)
           
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
+          // Find organization by hotelCode
+          const organization = await prisma.organization.findUnique({
+            where: { hotelCode: credentials.hotelCode },
+          })
+          
+          console.log('🏢 Organization found:', organization ? 'Yes' : 'No')
+          
+          if (!organization) {
+            throw new Error("Invalid hotel code")
+          }
+          
+          // Find user with organizationId and email
+          const user = await prisma.user.findFirst({
+            where: { 
+              organizationId: organization.id,
+              email: credentials.email
+            },
             include: { organization: true },
           })
           
-          await prisma.$disconnect()
+          console.log('👤 User found:', user ? 'Yes' : 'No')
           
           if (!user) throw new Error("Invalid credentials")
           
-          if (credentials.hotelCode) {
-            if (!user.organization || user.organization.hotelCode !== credentials.hotelCode) {
-              throw new Error("Invalid credentials")
-            }
-          }
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password || '')
+          if (!isPasswordValid) throw new Error("Invalid password")
           
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
-          if (!isPasswordValid) throw new Error("Invalid credentials")
+          console.log('✅ Authentication successful for:', user.email)
           
           return {
             id: user.id,
             email: user.email,
-            name: user.name,
+            name: user.name || '',
             role: user.role,
             organizationId: user.organizationId,
-            tenantId: user.organization?.tenantId,
-            hotelCode: user.organization?.hotelCode,
+            hotelCode: organization.hotelCode,
+            tenantId: organization.tenantId,
           }
         } catch (error) {
           console.error('Auth error:', error)
@@ -87,4 +100,3 @@ export const authOptions: NextAuthOptions = {
 }
 
 export default NextAuth(authOptions)
-

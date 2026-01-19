@@ -50,7 +50,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       return NextResponse.json({ error: 'Batch not found' }, { status: 404 })
     }
 
-    console.log('[START_FERMENTATION] Found batch:', batch.batchNumber)
+    console.log('[START_FERMENTATION] Found Batch:', batch.batchNumber)
 
     // ═══════════════════════════════════════════════════════════
     // გაყოფის რეჟიმი
@@ -107,7 +107,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
           data: { currentBatchId: newBatch.id },
         }).catch(() => {})
 
-        console.log('[START_FERMENTATION] Created split batch:', newBatch.batchNumber)
+        console.log('[START_FERMENTATION] Created split Batch:', newBatch.batchNumber)
       }
 
       // Timeline
@@ -199,7 +199,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
     return NextResponse.json({
       success: true,
       batchId,
-      batch: updatedBatch,
+      Batch: updatedBatch,
       batchNumber: updatedBatch.batchNumber,
     })
 

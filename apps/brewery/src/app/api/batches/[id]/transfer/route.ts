@@ -118,7 +118,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       }
     })
 
-    return NextResponse.json({ success: true, batch: updatedBatch })
+    return NextResponse.json({ success: true, Batch: updatedBatch })
   } catch (error) {
     console.error('[transfer] Error:', error)
     return NextResponse.json({ error: 'Failed', details: String(error) }, { status: 500 })

@@ -11,7 +11,7 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
     const body = await req.json().catch(() => ({}))
     const { lotId } = body
     
-    console.log('[COMPLETE_BATCH] Starting for batch:', batchId, 'lotId:', lotId)
+    console.log('[COMPLETE_BATCH] Starting for Batch:', batchId, 'lotId:', lotId)
     
     const completedAt = new Date()
 
@@ -213,7 +213,7 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
       },
     })
 
-    console.log('[COMPLETE_BATCH] ✅ Successfully completed batch:', {
+    console.log('[COMPLETE_BATCH] ✅ Successfully completed Batch:', {
       batchId,
       batchNumber: batch.batchNumber,
       status: batch.status,

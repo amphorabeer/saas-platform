@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withTenant, RouteContext } from '@/lib/api-middleware'
 import { prisma } from '@saas-platform/database'
+import { randomUUID } from 'crypto'
 
 // GET /api/cip-logs
 export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
   try {
     const cipLogs = await prisma.cIPLog.findMany({
       where: {
-        // ✅ FIX: Use Equipment (capital E) - this is the Prisma relation name
         Equipment: {
           tenantId: ctx.tenantId,
         },
       },
       include: {
-        // ✅ FIX: Use Equipment (capital E)
         Equipment: {
           select: {
             id: true,
@@ -30,7 +29,6 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
     const transformed = cipLogs.map(log => ({
       ...log,
       equipment: log.Equipment,
-      Equipment: undefined,
     }))
 
     return NextResponse.json({ cipLogs: transformed })
@@ -67,6 +65,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
 
     const cipLog = await prisma.cIPLog.create({
       data: {
+        id: randomUUID(),
         equipmentId,
         cipType,
         date: date ? new Date(date) : new Date(),
@@ -76,6 +75,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
         performedBy,
         result: result || 'PASSED',
         notes: notes || null,
+        createdAt: new Date(),
       },
       include: {
         Equipment: {
@@ -86,7 +86,7 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
 
     return NextResponse.json({
       ...cipLog,
-      equipment: cipLog.Equipment,
+      equipment: cipLog.Equipment,  // ✅ FIX: Equipment not equipment
     }, { status: 201 })
   } catch (error) {
     console.error('[POST /api/cip-logs] Error:', error)

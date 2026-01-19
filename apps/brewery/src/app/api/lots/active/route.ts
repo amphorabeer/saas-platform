@@ -43,13 +43,11 @@ export const GET = withTenant<any>(async (req: NextRequest, ctx: RouteContext) =
             status: { in: ['PLANNED', 'ACTIVE'] },  // ✅ PLANNED-იც!
           },
           include: {
-            // ✅ FIX: Changed from Tank to Equipment (correct relation name)
-            Equipment: {
+            // ✅ FIX: Use Equipment (PascalCase) - this is the relation name in TankAssignment schema
+            Tank: {
               select: {
                 id: true,
                 name: true,
-                type: true,
-                capacity: true,
               },
             },
           },
@@ -62,23 +60,23 @@ export const GET = withTenant<any>(async (req: NextRequest, ctx: RouteContext) =
 
     // Format response with tank info - matching what StartFermentationModalV2 expects
     const transformed = activeLots
-      .map(lot => {
+      .map((lot: any) => {
         const assignment = lot.TankAssignment[0] as any
         
         // ✅ FIX: Filter out LotBatch entries where Batch is deleted OR COMPLETED
-        const validLotBatches = lot.LotBatch.filter(lb => {
+        const validLotBatches = lot.LotBatch.filter((lb: any) => {
           if (!lb.Batch) return false
           // ✅ Exclude COMPLETED batches from blending
           const batchStatus = (lb.Batch as any).status?.toUpperCase()
           if (batchStatus === 'COMPLETED') {
-            console.log(`[LOTS/ACTIVE] Filtering out completed batch: ${lb.Batch.batchNumber}`)
+            console.log(`[LOTS/ACTIVE] Filtering out completed Batch: ${lb.Batch.batchNumber}`)
             return false
           }
           return true
         })
         
         const totalVolume = validLotBatches.reduce(
-          (sum, lb) => sum + parseFloat(lb.volumeContribution.toString()),
+          (sum: number, lb: any) => sum + parseFloat(lb.volumeContribution.toString()),
           0
         )
         const batch = validLotBatches[0]?.Batch
@@ -92,24 +90,24 @@ export const GET = withTenant<any>(async (req: NextRequest, ctx: RouteContext) =
           // ✅ Fields expected by StartFermentationModalV2 dropdown
           batchNumber: batch?.batchNumber || '-',
           recipeName: batch?.recipe?.name || '-',
-          // ✅ FIX: Changed from Tank to Equipment
-          tankName: assignment?.Equipment?.name || '-',
+          // ✅ FIX: Use equipment (camelCase)
+          tankName: assignment?.Tank?.name || '-',
           totalVolume: totalVolume,
           
           // Batch info (detailed)
-          batches: validLotBatches.map(lb => ({
+          batches: validLotBatches.map((lb: any) => ({
             id: lb.Batch!.id,
             batchNumber: lb.Batch!.batchNumber,
             recipeName: lb.Batch!.recipe?.name,
             volume: lb.volumeContribution,
           })),
           
-          // Tank info - ✅ FIX: Changed from Tank to Equipment
-          Tank: assignment?.Equipment || null,
+          // Tank info - ✅ FIX: Use Equipment (PascalCase)
+          Tank: assignment?.Tank || null,
           tankId: assignment?.tankId || null,
-          tankCapacity: assignment?.Equipment?.capacity || 0,
+          tankCapacity: assignment?.Tank?.capacity || 0,
           remainingCapacity: assignment 
-            ? (parseFloat(assignment.Equipment?.capacity?.toString() || '0')) - totalVolume
+            ? (parseFloat(assignment.Tank?.capacity?.toString() || '0')) - totalVolume
             : 0,
           
           // Volume info

@@ -18,8 +18,9 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.7.1",
-    "@prisma/extension-accelerate": "^3.0.1"
+    "@prisma/client": "^5.22.0",
+    "@prisma/extension-accelerate": "^3.0.1",
+    "cuid": "^3.0.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
         } as any
       })
 
-      console.log('[BLEND] Created batch:', newBatch.id)
+      console.log('[BLEND] Created Batch:', newBatch.id)
 
       // 2. Create new Blend Lot with BLEND code
       const newLot = await tx.lot.create({
@@ -270,14 +270,14 @@ export async function POST(request: NextRequest) {
         } as any
       })
 
-      return { batch: newBatch, lot: newLot }
+      return { Batch: newBatch, lot: newLot }
     })
 
     console.log('[BLEND] Success:', result)
 
     return NextResponse.json({
       success: true,
-      batch: result.batch,
+      Batch: result.Batch,
       lot: result.lot,
       message: `Blend created from ${sourceLots.length} lots`
     })
