@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { generateTenantCode, generateSlug } from '@/lib/tenant'
+import { sendEmail, generateWelcomeEmail } from '@/lib/email'
 import { z } from 'zod'
 
 const prisma = new PrismaClient()
@@ -173,7 +174,22 @@ export async function POST(req: NextRequest) {
     }
 
     // ========================================
-    // 6. Return success response
+    // 6. Send welcome email
+    // ========================================
+    try {
+      const welcomeHtml = generateWelcomeEmail(tenantCode, validated.name, validated.email, validated.password)
+      await sendEmail({
+        to: validated.email,
+        subject: 'მოგესალმებით BrewMaster PRO-ში! 🍺',
+        html: welcomeHtml,
+      })
+      console.log('✅ [Register] Welcome email sent')
+    } catch (emailError) {
+      console.error('⚠️ [Register] Welcome email failed:', emailError)
+    }
+
+    // ========================================
+    // 7. Return success response
     // ========================================
     return NextResponse.json({
       success: true,

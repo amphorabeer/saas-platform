@@ -89,7 +89,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         email: org.email,
         slug: org.slug,
         // Support both hotel and brewery codes
-        hotelCode: org.hotelCode || '',
+        hotelCode: org.tenantCode || org.hotelCode || '',
         tenantCode: (org as any).tenantCode || '',
         tenantId: (org as any).tenantId || '',
         // Company info

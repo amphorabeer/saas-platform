@@ -110,9 +110,14 @@ export default function LoginPage() {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                პაროლი
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-slate-300">
+                  პაროლი
+                </label>
+                <Link href="/forgot-password" className="text-sm text-amber-400 hover:text-amber-300">
+                  პაროლის აღდგენა
+                </Link>
+              </div>
               <input
                 type="password"
                 value={credentials.password}
