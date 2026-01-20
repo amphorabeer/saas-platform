@@ -7,7 +7,7 @@ export default withAuth(
     const path = req.nextUrl.pathname
     
     // Allow public paths
-    const publicPaths = ['/login', '/register', '/api/auth', '/api/register', '/api/tenants/validate-code']
+    const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/api/auth', '/api/register', '/api/tenants/validate-code']
     if (publicPaths.some(p => path.startsWith(p))) {
       return NextResponse.next()
     }
@@ -33,7 +33,7 @@ export default withAuth(
         const path = req.nextUrl.pathname
         
         // Allow public paths
-        const publicPaths = ['/login', '/register', '/api/auth', '/api/register', '/api/tenants/validate-code']
+        const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/api/auth', '/api/register', '/api/tenants/validate-code']
         if (publicPaths.some(p => path.startsWith(p))) {
           return true
         }
