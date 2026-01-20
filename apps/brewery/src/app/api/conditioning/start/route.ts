@@ -340,7 +340,7 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
         if (totalAfterBlend > tankCapacity) {
           return NextResponse.json(
             { 
-              error: `ტანკი "${blendTank?.name}" გადაივსება შერევის შემდეგ!`,
+              error: `ავზი "${blendTank?.name}" გადაივსება შერევის შემდეგ!`,
               details: `ტევადობა: ${tankCapacity}L, შერევის შემდეგ: ${totalAfterBlend}L (უკვე არის ${currentVolume}L + ახალი ${addingVolume}L)`,
               code: 'TANK_OVERFLOW'
             },
@@ -457,7 +457,7 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
       if (totalAfterTransfer > tankCapacity) {
         return NextResponse.json(
           { 
-            error: `ტანკი "${tank.name}" გადაივსება!`,
+            error: `ავზი "${tank.name}" გადაივსება!`,
             details: `ტევადობა: ${tankCapacity}L, მოთხოვნილი: ${totalAfterTransfer}L (უკვე არის ${currentVolumeInTank}L + ახალი ${requestedVolume}L)`,
             code: 'TANK_OVERFLOW'
           },

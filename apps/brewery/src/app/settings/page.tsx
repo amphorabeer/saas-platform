@@ -1602,8 +1602,8 @@ export default function SettingsPage() {
                 <div className="bg-copper/10 border border-copper/30 rounded-xl p-4">
                   <h3 className="font-semibold text-copper mb-3">🚀 სწრაფი დაწყება</h3>
                   <ol className="space-y-2 text-sm text-text-primary list-decimal list-inside">
-                    <li>დაამატეთ აღჭურვილობა (ტანკები, კეტლები)</li>
-                    <li>შეიყვანეთ მარაგები (ალაო, ჰოპი, საფუარი)</li>
+                    <li>დაამატეთ აღჭურვილობა (ავზი, ლუდსახარში ქვაბი)</li>
+                    <li>შეიყვანეთ მარაგები (ალაო, სვია, საფუარი)</li>
                     <li>შექმენით რეცეპტი</li>
                     <li>დაიწყეთ ახალი პარტია</li>
                   </ol>
@@ -1661,8 +1661,7 @@ export default function SettingsPage() {
                   <h3 className="font-semibold text-text-primary mb-4">💡 სასარგებლო რჩევები</h3>
                   <ul className="space-y-2 text-sm text-text-muted">
                     <li>✅ რეგულარულად შეიყვანეთ გრავიტი და ტემპერატურა</li>
-                    <li>✅ ყოველ ტანკზე გაირეცხეთ გამოყენების შემდეგ (CIP)</li>
-                    <li>✅ შეამოწმეთ რეორდერის წერტილები მარაგებში</li>
+                    <li>✅ ყოველ ავზზე გაირეცხეთ გამოყენების შემდეგ (CIP)</li>
                     <li>✅ ყოველ პარტიაზე გააკეთეთ ხარისხის ტესტები</li>
                   </ul>
                 </div>
@@ -1671,8 +1670,8 @@ export default function SettingsPage() {
                 <div className="pt-4 border-t border-border">
                   <h3 className="font-semibold text-text-primary mb-4">📞 კონტაქტი</h3>
                   <div className="space-y-2 text-sm">
-                    <p className="text-text-muted">📧 Email: <a href="mailto:support@brewery.geobiz.app" className="text-copper hover:underline">support@brewery.geobiz.app</a></p>
-                    <p className="text-text-muted">📱 ტელეფონი: +995 XXX XXX XXX</p>
+                    <p className="text-text-muted">📧 Email: <a href="mailto:zzedginidze@gmail.com" className="text-copper hover:underline">zzedginidze@gmail.com</a></p>
+                    <p className="text-text-muted">📱 ტელეფონი: +995 599946500</p>
                     <p className="text-text-muted">🕐 სამუშაო საათები: ორშ-პარ, 09:00-18:00</p>
                   </div>
                 </div>

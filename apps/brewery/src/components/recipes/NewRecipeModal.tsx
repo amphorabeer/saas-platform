@@ -1147,7 +1147,7 @@ export function NewRecipeModal({ onClose, onSave, editingRecipe }: NewRecipeModa
               {/* Batch Parameters */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">მოცულობა (L)</label>
+                  <label className="block text-sm text-slate-400 mb-1">პარტიის რაოდენობა (L)</label>
                   <input
                     type="number"
                     value={batchSize}

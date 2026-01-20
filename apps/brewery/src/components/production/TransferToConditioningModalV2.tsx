@@ -395,7 +395,7 @@ export function TransferToConditioningModalV2({
           const requestedVolume = parseFloat(allocation.volume?.toString() || '0')
           
           if (requestedVolume > tankCapacity) {
-            setError(`ტანკი ${tank.name} გადაივსება! ტევადობა: ${tankCapacity}L, მოთხოვნილი: ${requestedVolume}L`)
+            setError(`ავზი ${tank.name} გადაივსება! ტევადობა: ${tankCapacity}L, მოთხოვნილი: ${requestedVolume}L`)
             return
           }
         }

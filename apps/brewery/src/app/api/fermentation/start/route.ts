@@ -143,7 +143,7 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
       const tank = tankMap.get(allocation.tankId)
       if (!tank) {
         return NextResponse.json(
-          { error: `ტანკი ვერ მოიძებნა: ${allocation.tankId}`, code: 'TANK_NOT_FOUND' },
+          { error: `ავზი ვერ მოიძებნა: ${allocation.tankId}`, code: 'TANK_NOT_FOUND' },
           { status: 404 }
         )
       }
@@ -171,7 +171,7 @@ export const POST = withTenant<any>(async (req: NextRequest, ctx: RouteContext) 
       if (totalAfterTransfer > tankCapacity) {
         return NextResponse.json(
           { 
-            error: `ტანკი "${tank.name}" გადაივსება!`,
+            error: `ავზი "${tank.name}" გადაივსება!`,
             details: `ტევადობა: ${tankCapacity}L, მოთხოვნილი: ${totalAfterTransfer}L (უკვე არის ${currentVolumeInTank}L + ახალი ${requestedVolume}L)`,
             code: 'TANK_OVERFLOW'
           },
@@ -804,7 +804,7 @@ async function handleBlendStart(
       
       if (totalAfterBlend > tankCapacity) {
         throw new Error(
-          `ტანკი "${blendTank?.name}" გადაივსება შერევის შემდეგ! ტევადობა: ${tankCapacity}L, შერევის შემდეგ: ${totalAfterBlend}L`
+          `ავზი "${blendTank?.name}" გადაივსება შერევის შემდეგ! ტევადობა: ${tankCapacity}L, შერევის შემდეგ: ${totalAfterBlend}L`
         )
       }
       
