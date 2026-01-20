@@ -409,7 +409,7 @@ export function NewTestModal({ isOpen, onClose, onAdd, batches = [] }: NewTestMo
                           </div>
                         )}
                         <div className="text-xs text-text-muted mt-1">
-                          ტანკი: {selectedLot.tankName} • მოცულობა: {selectedLot.totalVolume}L
+                          ავზი: {selectedLot.tankName} • მოცულობა: {selectedLot.totalVolume}L
                         </div>
                       </div>
                     </div>
