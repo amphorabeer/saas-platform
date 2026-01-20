@@ -1,6 +1,7 @@
 'use client'
 
 import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface SettingsSidebarProps {
   activeTab: string
@@ -20,6 +21,8 @@ const settingsTabs = [
 ]
 
 export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps) {
+  const router = useRouter()
+
   return (
     <div className="w-64 bg-bg-card border-r border-border h-full flex flex-col">
       <div className="p-4 space-y-1 flex-1">
@@ -37,10 +40,17 @@ export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps
             <span className="text-sm">{tab.label}</span>
           </button>
         ))}
-      </div>
-      
-      {/* Logout button at bottom */}
-      <div className="p-4 border-t border-border">
+        
+        {/* Help - navigates to /help page */}
+        <button
+          onClick={() => router.push('/help')}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors text-text-muted hover:bg-bg-tertiary hover:text-text-primary"
+        >
+          <span className="text-lg">❓</span>
+          <span className="text-sm">დახმარება</span>
+        </button>
+        
+        {/* Logout button */}
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors text-red-400 hover:bg-red-500/10"
