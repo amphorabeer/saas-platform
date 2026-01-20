@@ -21,13 +21,14 @@ import {
 import { useBreweryStore } from '@/store'
 import { InventoryItem } from '@/lib/api-client'
 
-type IngredientCategory = 'all' | 'grain' | 'hop' | 'yeast' | 'adjunct' | 'water_chemistry' | 'cleaning' | 'packaging'
+type IngredientCategory = 'all' | 'grain' | 'hop' | 'yeast' | 'adjunct' | 'water_chemistry' | 'packaging'
 type StockStatus = 'ok' | 'low' | 'critical' | 'out'
 
 export interface Ingredient {
   id: string
   name: string
   category: IngredientCategory
+  ingredientType?: string
   currentStock: number
   minStock: number
   unit: string
@@ -78,31 +79,53 @@ const CATEGORY_CONFIG: Record<IngredientCategory, { label: string; icon: string 
   grain: { label: 'მარცვლეული', icon: '🌾' },
   hop: { label: 'სვია', icon: '🌿' },
   yeast: { label: 'საფუარი', icon: '🧪' },
-  adjunct: { label: 'დანამატები', icon: '⚗️' },
+  adjunct: { label: 'დანამატები', icon: '🧫' },
   water_chemistry: { label: 'წყლის ქიმია', icon: '💧' },
-  cleaning: { label: 'რეცხვის საშუალებები', icon: '🧹' },
   packaging: { label: 'შეფუთვა', icon: '📦' },
 }
 
 // Helper function to detect ingredient icon from name/category
-const getIngredientIconFromName = (name: string, category?: string): string => {
-  const lowerName = name.toLowerCase()
+const getIngredientIconFromName = (name: string, category?: string, ingredientType?: string): string => {
+  const lowerName = (name || '').toLowerCase()
   const lowerCategory = (category || '').toLowerCase()
+  const lowerIngredientType = (ingredientType || '').toLowerCase()
   
-  // IMPORTANT: Check name patterns FIRST before category, as category might be generic/wrong
+  // 1. FIRST: Check ingredientType field (most reliable from API)
+  if (lowerIngredientType === 'malt') return '🌾'
+  if (lowerIngredientType === 'hops') return '🌿'
+  if (lowerIngredientType === 'yeast') return '🧪'
+  if (lowerIngredientType === 'adjunct') return '🧫'
+  if (lowerIngredientType === 'water_chemistry') return '💧'
   
-  // Hop varieties - check first as they often don't have "hop" in name
+  // 2. Check category directly (handles API responses)
+  if (lowerCategory === 'malt' || lowerCategory === 'grain') return '🌾'
+  if (lowerCategory === 'hops' || lowerCategory === 'hop') return '🌿'
+  if (lowerCategory === 'yeast') return '🧪'
+  if (lowerCategory === 'adjunct') return '🧫'
+  if (lowerCategory === 'water_chemistry' || lowerCategory === 'water') return '💧'
+  if (lowerCategory === 'packaging') return '📦'
+  
+  // 3. Georgian category names (from CategorySelectorModal)
+  if (lowerCategory === 'მარცვლეული') return '🌾'
+  if (lowerCategory === 'სვია') return '🌿'
+  if (lowerCategory === 'საფუარი') return '🧪'
+  if (lowerCategory === 'დანამატები') return '🧫'
+  if (lowerCategory === 'წყლის ქიმია') return '💧'
+  
+  // 4. Check name patterns - Hops FIRST (comprehensive list)
   const hopNames = [
     'magnum', 'cascade', 'centennial', 'citra', 'mosaic', 'simcoe', 'amarillo',
     'saaz', 'hallertau', 'hallertauer', 'tettnang', 'spalt', 'perle', 'hersbrucker', 'premiant',
     'sládek', 'fuggle', 'golding', 'challenger', 'northdown', 'target',
     'nelson sauvin', 'motueka', 'galaxy', 'vic secret', 'ella',
     'sorachi', 'mittelfrüh', 'mittelfruh', 'tradition', 'mandarina', 'huell melon',
-    'polaris', 'herkules', 'columbus', 'chinook', 'warrior', 'nugget', 'willamette', 'northern brewer'
+    'polaris', 'herkules', 'columbus', 'chinook', 'warrior', 'nugget', 'willamette', 'northern brewer',
+    'სვია'  // Georgian word for hops
   ]
   if (hopNames.some(h => lowerName.includes(h))) return '🌿'
+  if (lowerName.includes('hop')) return '🌿'
   
-  // Yeast strains - check before generic patterns
+  // 5. Yeast strains
   const yeastNames = [
     'safale', 'saflager', 'safbrew', 'safcider',
     'wlp', 'wyeast', 'omega', 'imperial',
@@ -111,64 +134,41 @@ const getIngredientIconFromName = (name: string, category?: string): string => {
     'nottingham', 'windsor', 'london ale',
     'us-05', 'us-04', 's-04', 's-23', 's-33', 'w-34', 'k-97', 'm-44',
     't-58', 'be-256', 'be-134', 'wb-06',
-    'belle saison', 'abbaye', 'verdant'
+    'belle saison', 'abbaye', 'verdant',
+    'საფუარი'  // Georgian word for yeast
   ]
   if (yeastNames.some(y => lowerName.includes(y))) return '🧪'
-  
-  // Generic name-based fallbacks (check before category)
-  if (lowerName.includes('hop')) return '🌿'
   if (lowerName.includes('yeast')) return '🧪'
   
-  // Category-based detection (fallback after name checks)
-  if (lowerCategory === 'hop' || lowerCategory === 'hops') return '🌿'
-  if (lowerCategory === 'yeast') return '🧪'
-  if (lowerCategory === 'grain' || lowerCategory === 'malt') {
-    // For grains, check if it's actually a malt name
-    const maltNames = [
-      'malt', 'pilsner', 'pilsen', 'munich', 'vienna', 'pale ale',
-      'wheat', 'rye', 'oat', 'barley',
-      'caramel', 'crystal', 'cara', 'chocolate', 'black', 'roast',
-      'biscuit', 'aromatic', 'melanoidin', 'honey malt', 'victory',
-      'special b', 'abbey', 'smoked', 'rauch', 'peated'
-    ]
-    if (maltNames.some(m => lowerName.includes(m))) return '🌾'
-    return '🌾' // Default for grain category
-  }
-  if (lowerCategory === 'adjunct') {
-    // For adjuncts, check if it's actually an adjunct name
-    const adjunctNames = [
-      'sugar', 'dextrose', 'honey', 'molasses', 'candi',
-      'lactose', 'maltodextrin',
-      'gypsum', 'calcium', 'chloride', 'sulfate', 'acid',
-      'irish moss', 'whirlfloc', 'gelatin', 'biofine',
-      'coriander', 'orange peel', 'spice'
-    ]
-    if (adjunctNames.some(a => lowerName.includes(a))) return '🧫'
-    return '🧫' // Default for adjunct category
-  }
-  if (lowerCategory === 'water' || lowerCategory === 'water_chemistry') return '💧'
-  if (lowerCategory === 'packaging') return '📦'
-  
-  // Final fallback - check malt/adjunct patterns for uncategorized items
+  // 6. Malt patterns
   const maltNames = [
     'malt', 'pilsner', 'pilsen', 'munich', 'vienna', 'pale ale',
     'wheat', 'rye', 'oat', 'barley',
     'caramel', 'crystal', 'cara', 'chocolate', 'black', 'roast',
     'biscuit', 'aromatic', 'melanoidin', 'honey malt', 'victory',
-    'special b', 'abbey', 'smoked', 'rauch', 'peated'
+    'special b', 'abbey', 'smoked', 'rauch', 'peated',
+    'ალაო', 'მარცვლეული'  // Georgian words for malt/grain
   ]
   if (maltNames.some(m => lowerName.includes(m))) return '🌾'
   
+  // 7. Water chemistry
+  const waterChemNames = [
+    'gypsum', 'calcium', 'chloride', 'sulfate', 'acid', 'lactic',
+    'phosphoric', 'campden', 'salt', 'magnesium', 'bicarbonate', 'chalk',
+    'წყლის ქიმია', 'წყალი'
+  ]
+  if (waterChemNames.some(w => lowerName.includes(w))) return '💧'
+  
+  // 8. Adjuncts
   const adjunctNames = [
     'sugar', 'dextrose', 'honey', 'molasses', 'candi',
     'lactose', 'maltodextrin',
-    'gypsum', 'calcium', 'chloride', 'sulfate', 'acid',
     'irish moss', 'whirlfloc', 'gelatin', 'biofine',
     'coriander', 'orange peel', 'spice'
   ]
   if (adjunctNames.some(a => lowerName.includes(a))) return '🧫'
   
-  return '📦' // Default
+  return '📦' // Default fallback
 }
 
 const STATUS_CONFIG: Record<StockStatus, { label: string; color: string; bgColor: string }> = {
@@ -234,6 +234,7 @@ export default function InventoryPage() {
   }, [activeTab])
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [selectedIngredientCategory, setSelectedIngredientCategory] = useState<IngredientCategoryType | null>(null)
+  const [preselectedCategory, setPreselectedCategory] = useState<IngredientCategoryType | null>(null)
   const [showPickerModal, setShowPickerModal] = useState(false)
   const [showAddIngredientModal, setShowAddIngredientModal] = useState(false)
   const [selectedCatalogItem, setSelectedCatalogItem] = useState<InventoryItem | null>(null)
@@ -310,6 +311,7 @@ export default function InventoryPage() {
       id: item.id, // Use real database ID (CUID)
       name: item.name,
       category: pageCategory,
+      ingredientType: item.ingredientType || undefined,
       currentStock: item.balance || 0,
       minStock: item.reorderPoint || 0,
       unit: item.unit,
@@ -939,9 +941,6 @@ export default function InventoryPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <span>📦 მარაგები ({filteredIngredients.length})</span>
-                <Button onClick={() => openPurchaseModal()} variant="secondary" size="sm">
-                  📦 შესყიდვა
-                </Button>
               </div>
             </CardHeader>
 
@@ -1005,7 +1004,7 @@ export default function InventoryPage() {
 
                           <div className="flex items-center gap-3">
 
-                            <span className="text-xl">{getIngredientIconFromName(ing.name, ing.category)}</span>
+                            <span className="text-xl">{getIngredientIconFromName(ing.name, ing.category, ing.ingredientType)}</span>
 
                             <div>
 
@@ -1080,16 +1079,6 @@ export default function InventoryPage() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
-                                openPurchaseModal(ing)
-                              }}
-                              className="text-text-muted hover:text-amber-400 transition-colors p-1"
-                              title="შესყიდვა"
-                            >
-                              📦
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
                                 router.push(`/inventory/${ing.id}`)
                               }}
                               className="text-text-muted hover:text-copper-light transition-colors"
@@ -1141,6 +1130,7 @@ export default function InventoryPage() {
         onClose={() => setShowCategoryModal(false)}
         onSelectCategory={(category) => {
           setSelectedIngredientCategory(category)
+          setPreselectedCategory(category)
           setShowCategoryModal(false)
           setShowPickerModal(true)
         }}
@@ -1202,6 +1192,7 @@ export default function InventoryPage() {
             setSelectedItemForEdit(null)
             setSelectedCatalogItem(null)
             setSelectedIngredientCategory(null) // Reset category when closing
+            setPreselectedCategory(null) // Reset preselected category
           }}
           onBack={() => {
             setShowAddIngredientModal(false)
@@ -1209,6 +1200,7 @@ export default function InventoryPage() {
           }}
           selectedCatalogItem={selectedCatalogItem}
           existingItem={selectedItemForEdit}
+          preselectedCategory={preselectedCategory}
           onSave={async (formData: IngredientFormData) => {
             try {
               console.log('[page.tsx] Saving ingredient:', formData)
@@ -1232,7 +1224,7 @@ export default function InventoryPage() {
               let response: Response
               
               if (isEditing && selectedItemForEdit?.id) {
-                // Update existing item
+                // Update existing item - no expense creation
                 const payload = {
                   name: formData.name,
                   category: mapCategoryToApi(formData.category || 'RAW_MATERIAL'),
@@ -1249,37 +1241,91 @@ export default function InventoryPage() {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(payload),
                 })
+                
+                if (!response.ok) {
+                  const error = await response.json()
+                  console.error('[page.tsx] API error:', error)
+                  throw new Error(error.error || error.message || 'შენახვა ვერ მოხერხდა')
+                }
+                
               } else {
                 // Create new item
                 const sku = `ING-${Date.now()}`
-                const payload = {
+                const createPayload = {
                   sku: sku,
                   name: formData.name,
                   category: mapCategoryToApi(formData.category || 'RAW_MATERIAL'),
+                  ingredientType: formData.ingredientType || undefined,
                   unit: formData.unit || 'kg',
                   supplier: formData.supplier || undefined,
                   reorderPoint: formData.reorderPoint ? Number(formData.reorderPoint) : undefined,
                   costPerUnit: formData.costPerUnit ? Number(formData.costPerUnit) : undefined,
-                  quantity: formData.inventoryAmount ? Number(formData.inventoryAmount) : undefined, // Include initial quantity
+                  // Don't include quantity here - we'll add it via purchase API
+                  quantity: 0,
                 }
                 
-                console.log('[page.tsx] POST payload:', payload)
+                console.log('[page.tsx] POST payload (create item):', createPayload)
                 
+                // Step 1: Create the inventory item first
                 response = await fetch('/api/inventory', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(payload),
+                  body: JSON.stringify(createPayload),
                 })
+                
+                if (!response.ok) {
+                  const error = await response.json()
+                  console.error('[page.tsx] API error:', error)
+                  throw new Error(error.error || error.message || 'შენახვა ვერ მოხერხდა')
+                }
+                
+                const createResult = await response.json()
+                console.log('[page.tsx] Item created:', createResult)
+                
+                // Step 2: If there's initial quantity, create purchase record (with optional expense)
+                if (formData.inventoryAmount && formData.inventoryAmount > 0) {
+                  const itemId = createResult.item?.id || createResult.id
+                  
+                  if (!itemId) {
+                    console.error('[page.tsx] No item ID returned from create')
+                    throw new Error('ინგრედიენტი შეიქმნა, მაგრამ ID ვერ მოიძებნა')
+                  }
+                  
+                  const purchasePayload = {
+                    itemId: itemId,
+                    quantity: Number(formData.inventoryAmount),
+                    unitPrice: formData.costPerUnit ? Number(formData.costPerUnit) : 0,
+                    totalAmount: formData.costPerUnit 
+                      ? Number(formData.inventoryAmount) * Number(formData.costPerUnit) 
+                      : 0,
+                    supplierId: formData.supplierId || undefined,
+                    date: new Date().toISOString().split('T')[0],
+                    invoiceNumber: formData.invoiceNumber || undefined,
+                    notes: formData.notes || `საწყისი მარაგი: ${formData.name}`,
+                    createExpense: formData.createExpense ?? false,
+                    isPaid: formData.isPaid ?? false,
+                    paymentMethod: formData.paymentMethod || 'BANK_TRANSFER',
+                  }
+                  
+                  console.log('[page.tsx] Purchase payload:', purchasePayload)
+                  
+                  const purchaseResponse = await fetch('/api/inventory/purchase', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(purchasePayload),
+                  })
+                  
+                  if (!purchaseResponse.ok) {
+                    const purchaseError = await purchaseResponse.json()
+                    console.error('[page.tsx] Purchase API error:', purchaseError)
+                    // Item was created but purchase failed - show warning but don't throw
+                    alert(`⚠️ ინგრედიენტი შეიქმნა, მაგრამ შესყიდვის დაფიქსირება ვერ მოხერხდა: ${purchaseError.error || 'Unknown error'}`)
+                  } else {
+                    const purchaseResult = await purchaseResponse.json()
+                    console.log('[page.tsx] Purchase recorded:', purchaseResult)
+                  }
+                }
               }
-              
-              if (!response.ok) {
-                const error = await response.json()
-                console.error('[page.tsx] API error:', error)
-                throw new Error(error.error || error.message || 'შენახვა ვერ მოხერხდა')
-              }
-              
-              const result = await response.json()
-              console.log('[page.tsx] Item saved successfully:', result)
               
               // Close modal and reset state
               setShowAddIngredientModal(false)
@@ -1295,6 +1341,8 @@ export default function InventoryPage() {
               alert(error instanceof Error ? error.message : 'შენახვა ვერ მოხერხდა')
             }
           }}
+          suppliers={suppliers}
+          onSupplierCreated={fetchSuppliers}
         />
       )}
 

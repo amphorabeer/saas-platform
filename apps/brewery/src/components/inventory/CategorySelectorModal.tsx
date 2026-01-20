@@ -1,6 +1,6 @@
 'use client'
 
-export type IngredientCategoryType = 'MALT' | 'HOPS' | 'YEAST' | 'ADJUNCT' | 'WATER_CHEMISTRY' | 'CLEANING'
+export type IngredientCategoryType = 'MALT' | 'HOPS' | 'YEAST' | 'ADJUNCT' | 'WATER_CHEMISTRY'
 
 interface CategorySelectorModalProps {
   isOpen: boolean
@@ -33,11 +33,6 @@ const CATEGORY_CONFIG: Record<IngredientCategoryType, { label: string; icon: str
     label: 'წყლის ქიმია', 
     icon: '💧',
     description: 'წყლის მომზადება და ქიმიკატები'
-  },
-  CLEANING: { 
-    label: 'რეცხვის საშუალებები', 
-    icon: '🧹',
-    description: 'CIP, სანიტარიზაცია და გაწმენდა'
   },
 }
 

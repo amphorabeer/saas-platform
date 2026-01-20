@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui'
 import { InventoryItem } from '@/lib/api-client'
+import { formatCurrency } from '@/lib/utils'
 
 // Extended type for catalog items with specs
 interface CatalogItemSpecs {
@@ -23,19 +24,29 @@ interface CatalogItemSpecs {
   adjunctType?: string
 }
 
+interface Supplier {
+  id: string
+  name: string
+  category: string | null
+}
+
 interface AddIngredientModalProps {
   isOpen: boolean
   onClose: () => void
   onBack?: () => void
   onSave: (data: IngredientFormData) => void
-  onDelete?: () => void // Optional delete handler - only shown when editing
+  onDelete?: () => void
   existingItem?: InventoryItem | null
   selectedCatalogItem?: (InventoryItem & CatalogItemSpecs) | null
+  suppliers?: Supplier[]
+  onSupplierCreated?: () => void
+  preselectedCategory?: 'MALT' | 'HOPS' | 'YEAST' | 'ADJUNCT' | 'WATER_CHEMISTRY' | null
 }
 
 export interface IngredientFormData {
   name: string
   category: string
+  ingredientType?: string
   supplier?: string
   origin?: string
   fermentableType?: 'grain' | 'sugar' | 'liquid_extract' | 'dry_extract' | 'adjunct' | 'other'
@@ -55,6 +66,12 @@ export interface IngredientFormData {
   reorderPoint?: number
   unit: string
   notes?: string
+  // Expense-related fields (for new items)
+  supplierId?: string
+  invoiceNumber?: string
+  createExpense?: boolean
+  isPaid?: boolean
+  paymentMethod?: string
 }
 
 // Category icon mapping
@@ -87,6 +104,13 @@ const ORIGIN_FLAGS: Record<string, string> = {
   'france': '🇫🇷',
 }
 
+const paymentMethods = [
+  { value: 'BANK_TRANSFER', label: '🏦 გადარიცხვა' },
+  { value: 'CASH', label: '💵 ნაღდი' },
+  { value: 'CARD', label: '💳 ბარათი' },
+  { value: 'CHECK', label: '📝 ჩეკი' },
+]
+
 export function AddIngredientModal({
   isOpen,
   onClose,
@@ -95,15 +119,19 @@ export function AddIngredientModal({
   onDelete,
   existingItem,
   selectedCatalogItem,
+  suppliers = [],
+  onSupplierCreated,
+  preselectedCategory,
 }: AddIngredientModalProps) {
   
   // Determine the source item (catalog or existing)
   const sourceItem = selectedCatalogItem || existingItem
   const isEditing = !!existingItem
   const isFromCatalog = !!selectedCatalogItem && !existingItem
-  const isManualEntry = !sourceItem  // No catalog item, no existing item
+  const isManualEntry = !sourceItem
+  const isNewItem = !isEditing // New item (either from catalog or manual entry)
   
-  // Form state - only user-editable fields
+  // Form state
   const [formData, setFormData] = useState({
     inventoryAmount: 0,
     costPerUnit: '',
@@ -116,14 +144,23 @@ export function AddIngredientModal({
     manualCategory: 'malt' as 'malt' | 'hops' | 'yeast' | 'adjunct' | 'water_chemistry',
     manualSupplier: '',
     manualUnit: 'kg',
+    // Expense fields (for new items)
+    supplierId: '',
+    invoiceNumber: '',
+    createExpense: true,
+    isPaid: false,
+    paymentMethod: 'BANK_TRANSFER',
   })
+  
+  const [showNewSupplierInput, setShowNewSupplierInput] = useState(false)
+  const [newSupplierName, setNewSupplierName] = useState('')
   
   // Initialize/reset form when modal opens or item changes
   useEffect(() => {
     if (!isOpen) return
     
     if (existingItem) {
-      // Editing existing - load current values
+      // Editing existing - load current values (no expense options)
       const category = ((existingItem as any).category || '').toLowerCase()
       const mappedCategory = category === 'grain' || category === 'raw_material' ? 'malt' : 
                             category === 'hop' ? 'hops' : category || 'malt'
@@ -138,9 +175,15 @@ export function AddIngredientModal({
         manualCategory: mappedCategory as any,
         manualSupplier: existingItem.supplier || '',
         manualUnit: existingItem.unit || 'kg',
+        // No expense options when editing
+        supplierId: '',
+        invoiceNumber: '',
+        createExpense: false,
+        isPaid: false,
+        paymentMethod: 'BANK_TRANSFER',
       })
     } else if (selectedCatalogItem) {
-      // New item from catalog - start fresh
+      // New item from catalog - show expense options
       const category = ((selectedCatalogItem as any).category || '').toLowerCase()
       const mappedCategory = category === 'malt' ? 'malt' :
                             category === 'hops' ? 'hops' :
@@ -158,9 +201,28 @@ export function AddIngredientModal({
         manualCategory: mappedCategory as any,
         manualSupplier: '',
         manualUnit: selectedCatalogItem.unit || 'kg',
+        // Expense options enabled by default for new items
+        supplierId: '',
+        invoiceNumber: '',
+        createExpense: true,
+        isPaid: false,
+        paymentMethod: 'BANK_TRANSFER',
       })
     } else {
-      // Manual entry mode - reset all
+      // Manual entry mode - reset all with expense options
+      // Map preselected category to form category
+      const mapPreselectedToFormCategory = (cat: string | null | undefined): 'malt' | 'hops' | 'yeast' | 'adjunct' | 'water_chemistry' => {
+        if (!cat) return 'malt'
+        const mapping: Record<string, 'malt' | 'hops' | 'yeast' | 'adjunct' | 'water_chemistry'> = {
+          'MALT': 'malt',
+          'HOPS': 'hops',
+          'YEAST': 'yeast',
+          'ADJUNCT': 'adjunct',
+          'WATER_CHEMISTRY': 'water_chemistry',
+        }
+        return mapping[cat] || 'malt'
+      }
+      
       setFormData({
         inventoryAmount: 0,
         costPerUnit: '',
@@ -169,12 +231,21 @@ export function AddIngredientModal({
         lotNumber: '',
         notes: '',
         manualName: '',
-        manualCategory: 'malt',
+        manualCategory: mapPreselectedToFormCategory(preselectedCategory),
         manualSupplier: '',
         manualUnit: 'kg',
+        // Expense options enabled by default for new items
+        supplierId: '',
+        invoiceNumber: '',
+        createExpense: true,
+        isPaid: false,
+        paymentMethod: 'BANK_TRANSFER',
       })
     }
-  }, [isOpen, existingItem, selectedCatalogItem])
+    
+    setShowNewSupplierInput(false)
+    setNewSupplierName('')
+  }, [isOpen, existingItem, selectedCatalogItem, preselectedCategory])
   
   // Handle ESC key
   useEffect(() => {
@@ -195,7 +266,6 @@ export function AddIngredientModal({
   
   // Get category icon based on item data
   const getCategoryIcon = (): string => {
-    // For manual entry, use the selected category
     if (isManualEntry) {
       return CATEGORY_ICONS[formData.manualCategory] || '📦'
     }
@@ -205,14 +275,12 @@ export function AddIngredientModal({
     const category = ((sourceItem as any)?.category || '').toLowerCase()
     const name = (sourceItem?.name || '').toLowerCase()
     
-    // Check category field first
     if (category === 'malt' || category === 'grain') return '🌾'
     if (category === 'hops' || category === 'hop') return '🌿'
     if (category === 'yeast') return '🧪'
     if (category === 'adjunct') return '🧫'
     if (category === 'water_chemistry' || category === 'water') return '💧'
     
-    // Hop varieties by name (check before generic patterns)
     const hopNames = [
       'magnum', 'cascade', 'centennial', 'citra', 'mosaic', 'simcoe', 'amarillo',
       'saaz', 'hallertau', 'hallertauer', 'tettnang', 'spalt', 'perle', 'hersbrucker',
@@ -221,7 +289,6 @@ export function AddIngredientModal({
     ]
     if (hopNames.some(h => name.includes(h))) return '🌿'
     
-    // Yeast strains by name (check before generic patterns)
     const yeastNames = [
       'safale', 'saflager', 'safbrew', 'wlp', 'wyeast', 'fermentis',
       'lallemand', 'lalbrew', 'nottingham', 'windsor',
@@ -230,16 +297,13 @@ export function AddIngredientModal({
     ]
     if (yeastNames.some(y => name.includes(y))) return '🧪'
     
-    // Malt by name
     if (name.includes('malt') || name.includes('pilsner') || name.includes('munich') || 
         name.includes('vienna') || name.includes('wheat') || name.includes('cara') ||
         name.includes('crystal') || name.includes('caramel')) return '🌾'
     
-    // Generic fallbacks
     if (name.includes('hop')) return '🌿'
     if (name.includes('yeast')) return '🧪'
     
-    // Fallback to category icon mapping
     return CATEGORY_ICONS[category] || CATEGORY_ICONS[(sourceItem as any)?.category] || '📦'
   }
   
@@ -247,7 +311,6 @@ export function AddIngredientModal({
   const sourceItemWithSpecs = sourceItem as (InventoryItem & CatalogItemSpecs) | null
   const originFlag = sourceItemWithSpecs?.origin ? ORIGIN_FLAGS[sourceItemWithSpecs.origin.toLowerCase()] || '' : ''
   
-  // Get category from source item or manual entry (for specs display)
   const itemCategory = isManualEntry 
     ? formData.manualCategory 
     : ((sourceItem as any)?.category?.toLowerCase() || 'malt')
@@ -287,6 +350,46 @@ export function AddIngredientModal({
   const specs = getSpecs()
   const unit = isManualEntry ? formData.manualUnit : (sourceItem?.unit || 'kg')
   
+  // Calculate total amount for expense
+  const totalAmount = formData.inventoryAmount * (parseFloat(formData.costPerUnit) || 0)
+  
+  // Handle create new supplier
+  const handleCreateSupplier = async () => {
+    if (!newSupplierName.trim()) return
+    
+    try {
+      const response = await fetch('/api/finances/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newSupplierName.trim(),
+          category: 'ingredients',
+        }),
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create supplier')
+      }
+      
+      const data = await response.json()
+      
+      setFormData(prev => ({ ...prev, supplierId: data.supplier.id }))
+      setShowNewSupplierInput(false)
+      setNewSupplierName('')
+      
+      if (onSupplierCreated) {
+        onSupplierCreated()
+      }
+      
+      alert('✅ მომწოდებელი დაემატა!')
+      
+    } catch (err: any) {
+      console.error('Create supplier error:', err)
+      alert(err.message || 'მომწოდებლის დამატება ვერ მოხერხდა')
+    }
+  }
+  
   // Handle save
   const handleSave = () => {
     // Validation
@@ -303,6 +406,12 @@ export function AddIngredientModal({
       if (!formData.inventoryAmount) return
     }
     
+    // Validate expense fields if expense is enabled
+    if (isNewItem && formData.createExpense && (!formData.costPerUnit || parseFloat(formData.costPerUnit) <= 0)) {
+      alert('ხარჯის დასაფიქსირებლად საჭიროა ფასის მითითება')
+      return
+    }
+    
     // Map manual category to API category format
     const mapCategoryToApi = (cat: string): string => {
       const categoryMap: Record<string, string> = {
@@ -315,10 +424,22 @@ export function AddIngredientModal({
       return categoryMap[cat] || 'RAW_MATERIAL'
     }
     
+    // Map form category to API ingredientType
+    const mapCategoryToIngredientType = (cat: string): string => {
+      const mapping: Record<string, string> = {
+        'malt': 'MALT',
+        'hops': 'HOPS', 
+        'yeast': 'YEAST',
+        'adjunct': 'ADJUNCT',
+        'water_chemistry': 'WATER_CHEMISTRY',
+      }
+      return mapping[cat] || 'ADJUNCT'
+    }
+    
     const data: IngredientFormData = {
-      // For manual entry, use form fields; otherwise use source item
       name: isManualEntry ? formData.manualName : (sourceItem?.name || 'New Ingredient'),
       category: isManualEntry ? mapCategoryToApi(formData.manualCategory) : ((sourceItem as any)?.category || 'RAW_MATERIAL'),
+      ingredientType: isManualEntry ? mapCategoryToIngredientType(formData.manualCategory) : ((sourceItem as any)?.ingredientType || undefined),
       supplier: isManualEntry ? formData.manualSupplier : (sourceItem?.supplier || undefined),
       origin: (sourceItem as any)?.origin,
       color: (sourceItem as any)?.color,
@@ -335,6 +456,14 @@ export function AddIngredientModal({
       lotNumber: formData.lotNumber || undefined,
       unit: isManualEntry ? formData.manualUnit : unit,
       notes: formData.notes || undefined,
+      // Expense fields (only for new items)
+      ...(isNewItem && {
+        supplierId: formData.supplierId || undefined,
+        invoiceNumber: formData.invoiceNumber || undefined,
+        createExpense: formData.createExpense,
+        isPaid: formData.isPaid,
+        paymentMethod: formData.isPaid ? formData.paymentMethod : undefined,
+      }),
     }
     
     onSave(data)
@@ -403,22 +532,37 @@ export function AddIngredientModal({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-slate-400 mb-2">
-                    კატეგორია <span className="text-red-400">*</span>
+                    კატეგორია {!preselectedCategory && <span className="text-red-400">*</span>}
                   </label>
-                  <select
-                    value={formData.manualCategory}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      manualCategory: e.target.value as typeof formData.manualCategory 
-                    }))}
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-copper focus:outline-none"
-                  >
-                    <option value="malt">🌾 მარცვლეული</option>
-                    <option value="hops">🌿 სვია</option>
-                    <option value="yeast">🧪 საფუარი</option>
-                    <option value="adjunct">🧫 დანამატები</option>
-                    <option value="water_chemistry">💧 წყლის ქიმია</option>
-                  </select>
+                  {preselectedCategory ? (
+                    // Read-only display when preselected
+                    <div className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white flex items-center gap-2">
+                      <span>{CATEGORY_ICONS[formData.manualCategory] || '📦'}</span>
+                      <span>
+                        {formData.manualCategory === 'malt' && 'მარცვლეული'}
+                        {formData.manualCategory === 'hops' && 'სვია'}
+                        {formData.manualCategory === 'yeast' && 'საფუარი'}
+                        {formData.manualCategory === 'adjunct' && 'დანამატები'}
+                        {formData.manualCategory === 'water_chemistry' && 'წყლის ქიმია'}
+                      </span>
+                    </div>
+                  ) : (
+                    // Editable dropdown when not preselected
+                    <select
+                      value={formData.manualCategory}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        manualCategory: e.target.value as typeof formData.manualCategory 
+                      }))}
+                      className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-copper focus:outline-none"
+                    >
+                      <option value="malt">🌾 მარცვლეული</option>
+                      <option value="hops">🌿 სვია</option>
+                      <option value="yeast">🧪 საფუარი</option>
+                      <option value="adjunct">🧫 დანამატები</option>
+                      <option value="water_chemistry">💧 წყლის ქიმია</option>
+                    </select>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm text-slate-400 mb-2">
@@ -436,20 +580,6 @@ export function AddIngredientModal({
                     <option value="pcs">ცალი (pcs)</option>
                   </select>
                 </div>
-              </div>
-              
-              {/* Supplier */}
-              <div>
-                <label className="block text-sm text-slate-400 mb-2">
-                  მომწოდებელი
-                </label>
-                <input
-                  type="text"
-                  value={formData.manualSupplier}
-                  onChange={(e) => setFormData(prev => ({ ...prev, manualSupplier: e.target.value }))}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-copper focus:outline-none"
-                  placeholder="მაგ: Weyermann"
-                />
               </div>
             </div>
           )}
@@ -519,7 +649,7 @@ export function AddIngredientModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-slate-400 mb-2">
-                ფასი (₾/{isManualEntry ? formData.manualUnit : unit})
+                ფასი (₾/{isManualEntry ? formData.manualUnit : unit}) {isNewItem && formData.createExpense && <span className="text-red-400">*</span>}
               </label>
               <input
                 type="number"
@@ -546,6 +676,143 @@ export function AddIngredientModal({
               />
             </div>
           </div>
+          
+          {/* Expense Options - Only for new items */}
+          {isNewItem && (
+            <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-xl space-y-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="createExpense"
+                  checked={formData.createExpense}
+                  onChange={(e) => setFormData(prev => ({ ...prev, createExpense: e.target.checked }))}
+                  className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-copper focus:ring-copper"
+                />
+                <label htmlFor="createExpense" className="text-sm font-medium text-white cursor-pointer">
+                  📊 ხარჯად დაფიქსირება
+                </label>
+              </div>
+
+              {formData.createExpense && (
+                <>
+                  {/* Supplier Selection */}
+                  <div>
+                    <label className="block text-sm text-slate-400 mb-2">
+                      მომწოდებელი
+                    </label>
+                    <div className="flex gap-2">
+                      <select
+                        value={formData.supplierId}
+                        onChange={(e) => setFormData(prev => ({ ...prev, supplierId: e.target.value }))}
+                        className="flex-1 px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-copper focus:outline-none"
+                      >
+                        <option value="">-- აირჩიეთ მომწოდებელი --</option>
+                        {suppliers.map(s => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setShowNewSupplierInput(true)}
+                        className="px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white hover:bg-slate-700 transition-colors"
+                        title="ახალი მომწოდებელი"
+                      >
+                        ➕
+                      </button>
+                    </div>
+                    
+                    {/* New Supplier Input */}
+                    {showNewSupplierInput && (
+                      <div className="mt-3 p-3 bg-slate-900/50 rounded-lg border border-slate-600">
+                        <label className="block text-sm font-medium text-slate-400 mb-2">
+                          ახალი მომწოდებლის სახელი
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={newSupplierName}
+                            onChange={(e) => setNewSupplierName(e.target.value)}
+                            placeholder="მაგ: BestMalz, Barth-Haas"
+                            className="flex-1 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-copper focus:outline-none"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && newSupplierName.trim()) {
+                                handleCreateSupplier()
+                              }
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={handleCreateSupplier}
+                            disabled={!newSupplierName.trim()}
+                          >
+                            შენახვა
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setShowNewSupplierInput(false)
+                              setNewSupplierName('')
+                            }}
+                          >
+                            ✕
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Invoice Number */}
+                  <div>
+                    <label className="block text-sm text-slate-400 mb-2">
+                      ინვოისის ნომერი
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.invoiceNumber}
+                      onChange={(e) => setFormData(prev => ({ ...prev, invoiceNumber: e.target.value }))}
+                      placeholder="მაგ: INV-2024-001"
+                      className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-copper focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Is Paid */}
+                  <div className="flex items-center gap-3 ml-6">
+                    <input
+                      type="checkbox"
+                      id="isPaid"
+                      checked={formData.isPaid}
+                      onChange={(e) => setFormData(prev => ({ ...prev, isPaid: e.target.checked }))}
+                      className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-copper focus:ring-copper"
+                    />
+                    <label htmlFor="isPaid" className="text-sm font-medium text-white cursor-pointer">
+                      ✅ გადახდილია
+                    </label>
+                  </div>
+
+                  {/* Payment Method */}
+                  {formData.isPaid && (
+                    <div className="ml-6">
+                      <label className="block text-sm text-slate-400 mb-2">
+                        გადახდის მეთოდი
+                      </label>
+                      <select
+                        value={formData.paymentMethod}
+                        onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                        className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-copper focus:outline-none"
+                      >
+                        {paymentMethods.map(m => (
+                          <option key={m.value} value={m.value}>{m.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
           
           {/* Expiry Date and Lot Number - 2 columns */}
           <div className="grid grid-cols-2 gap-4">
@@ -587,6 +854,22 @@ export function AddIngredientModal({
               placeholder="დამატებითი ინფორმაცია..."
             />
           </div>
+          
+          {/* Summary - Only for new items with expense */}
+          {isNewItem && formData.createExpense && totalAmount > 0 && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400">ჯამი:</span>
+                <span className="text-2xl font-bold text-amber-400">
+                  ₾{totalAmount.toFixed(2)}
+                </span>
+              </div>
+              <div className="text-sm text-slate-400 space-y-1">
+                <div>📦 {isManualEntry ? formData.manualName || 'ახალი ინგრედიენტი' : sourceItem?.name}: +{formData.inventoryAmount} {unit}</div>
+                <div className="text-red-400">💸 ხარჯი: ₾{totalAmount.toFixed(2)}</div>
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Footer - Delete on left, Cancel/Save on right */}
@@ -625,4 +908,3 @@ export function AddIngredientModal({
     </div>
   )
 }
-

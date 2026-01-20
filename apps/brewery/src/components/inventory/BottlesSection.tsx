@@ -13,6 +13,12 @@ interface Bottle {
   location?: string
 }
 
+interface Supplier {
+  id: string
+  name: string
+  category: string | null
+}
+
 const bottleTypes: Record<string, { name: string; icon: string; volume: number }> = {
   bottle_500: { name: 'ბოთლი 500ml', icon: '🍾', volume: 0.5 },
   bottle_330: { name: 'ბოთლი 330ml', icon: '🍾', volume: 0.33 },
@@ -26,6 +32,13 @@ const bottleColors: Record<string, { name: string; color: string }> = {
   clear: { name: 'გამჭვირვალე', color: 'bg-slate-400' },
 }
 
+const paymentMethods = [
+  { value: 'BANK_TRANSFER', label: '🏦 გადარიცხვა' },
+  { value: 'CASH', label: '💵 ნაღდი' },
+  { value: 'CARD', label: '💳 ბარათი' },
+  { value: 'CHECK', label: '📝 ჩეკი' },
+]
+
 export function BottlesSection() {
   const [bottles, setBottles] = useState<Bottle[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,15 +46,14 @@ export function BottlesSection() {
   const [filterType, setFilterType] = useState<string>('all')
   const [filterColor, setFilterColor] = useState<string>('all')
   const [showLowStockOnly, setShowLowStockOnly] = useState(false)
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
 
   // Fetch bottles from API
   const fetchBottles = async () => {
     try {
-      // Fetch PACKAGING category items and filter by metadata type
       const res = await fetch('/api/inventory?category=PACKAGING')
       if (res.ok) {
         const data = await res.json()
-        // Filter bottles and cans from metadata
         const allItems = (data.items || []).filter((item: any) => {
           const metadata = item.metadata || {}
           const nameLower = (item.name || '').toLowerCase()
@@ -53,7 +65,6 @@ export function BottlesSection() {
                  nameLower.includes('can')
         })
         
-        // Transform InventoryItem to Bottle format
         const transformedBottles = allItems.map((item: any) => {
           const metadata = item.metadata || {}
           return {
@@ -75,8 +86,22 @@ export function BottlesSection() {
     }
   }
 
+  // Fetch suppliers
+  const fetchSuppliers = async () => {
+    try {
+      const res = await fetch('/api/finances/suppliers')
+      if (res.ok) {
+        const data = await res.json()
+        setSuppliers(data.suppliers || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch suppliers:', err)
+    }
+  }
+
   useEffect(() => {
     fetchBottles()
+    fetchSuppliers()
   }, [])
 
   // Add bottle
@@ -85,6 +110,7 @@ export function BottlesSection() {
       const typeInfo = bottleTypes[data.type]
       const isCan = data.type.startsWith('can')
       
+      // Step 1: Create inventory item
       const res = await fetch('/api/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -93,9 +119,9 @@ export function BottlesSection() {
           name: typeInfo?.name || data.type,
           category: 'PACKAGING',
           unit: 'ცალი',
-          quantity: data.quantity,
+          quantity: 0, // Start with 0, will add via purchase
           reorderPoint: data.minStock,
-          supplier: data.supplier || undefined,
+          costPerUnit: data.costPerUnit || undefined,
           metadata: {
             type: isCan ? 'can' : 'bottle',
             bottleType: data.type,
@@ -106,13 +132,46 @@ export function BottlesSection() {
           }
         })
       })
-      if (res.ok) {
-        fetchBottles()
-        setShowAddModal(false)
-      } else {
+
+      if (!res.ok) {
         const errorData = await res.json()
         alert(errorData.error || 'ტარის დამატება ვერ მოხერხდა')
+        return
       }
+
+      const createResult = await res.json()
+      const itemId = createResult.item?.id || createResult.id
+
+      // Step 2: Create purchase record if quantity > 0
+      if (data.quantity > 0 && itemId) {
+        const purchasePayload = {
+          itemId: itemId,
+          quantity: data.quantity,
+          unitPrice: data.costPerUnit || 0,
+          totalAmount: data.quantity * (data.costPerUnit || 0),
+          supplierId: data.supplierId || undefined,
+          date: new Date().toISOString().split('T')[0],
+          invoiceNumber: data.invoiceNumber || undefined,
+          notes: `საწყისი მარაგი: ${typeInfo?.name || data.type}`,
+          createExpense: data.createExpense ?? false,
+          isPaid: data.isPaid ?? false,
+          paymentMethod: data.paymentMethod || 'BANK_TRANSFER',
+        }
+
+        const purchaseRes = await fetch('/api/inventory/purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(purchasePayload),
+        })
+
+        if (!purchaseRes.ok) {
+          console.error('Purchase record failed')
+          alert('ტარა დაემატა, მაგრამ შესყიდვის ჩაწერა ვერ მოხერხდა')
+        }
+      }
+
+      fetchBottles()
+      setShowAddModal(false)
     } catch (error) {
       console.error('Failed to add bottle:', error)
       alert('ტარის დამატება ვერ მოხერხდა')
@@ -127,11 +186,10 @@ export function BottlesSection() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           quantity,
-          type: 'ADJUSTMENT', // Direct adjustment
+          type: 'ADJUSTMENT',
         })
       })
       if (res.ok) {
-        // Refresh bottles to get updated data
         fetchBottles()
       } else {
         const errorData = await res.json()
@@ -306,23 +364,79 @@ export function BottlesSection() {
         <AddBottleModal
           onClose={() => setShowAddModal(false)}
           onAdd={handleAddBottle}
+          suppliers={suppliers}
+          onSupplierCreated={fetchSuppliers}
         />
       )}
     </div>
   )
 }
 
-function AddBottleModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: any) => void }) {
+function AddBottleModal({ 
+  onClose, 
+  onAdd,
+  suppliers,
+  onSupplierCreated,
+}: { 
+  onClose: () => void
+  onAdd: (data: any) => void
+  suppliers: Supplier[]
+  onSupplierCreated: () => void
+}) {
   const [type, setType] = useState<string>('bottle_500')
   const [color, setColor] = useState<'brown' | 'green' | 'clear'>('brown')
   const [quantity, setQuantity] = useState(1000)
   const [minStock, setMinStock] = useState(500)
   const [supplier, setSupplier] = useState('')
   const [location, setLocation] = useState('')
+  
+  // Expense fields
+  const [costPerUnit, setCostPerUnit] = useState('')
+  const [supplierId, setSupplierId] = useState('')
+  const [invoiceNumber, setInvoiceNumber] = useState('')
+  const [createExpense, setCreateExpense] = useState(true)
+  const [isPaid, setIsPaid] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState('BANK_TRANSFER')
+  
+  // New supplier
+  const [showNewSupplierInput, setShowNewSupplierInput] = useState(false)
+  const [newSupplierName, setNewSupplierName] = useState('')
+
+  const totalAmount = quantity * (parseFloat(costPerUnit) || 0)
+
+  const handleCreateSupplier = async () => {
+    if (!newSupplierName.trim()) return
+    
+    try {
+      const response = await fetch('/api/finances/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newSupplierName.trim(),
+          category: 'packaging',
+        }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setSupplierId(data.supplier.id)
+        setShowNewSupplierInput(false)
+        setNewSupplierName('')
+        onSupplierCreated()
+        alert('✅ მომწოდებელი დაემატა!')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'მომწოდებლის დამატება ვერ მოხერხდა')
+      }
+    } catch (err) {
+      console.error('Create supplier error:', err)
+      alert('მომწოდებლის დამატება ვერ მოხერხდა')
+    }
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-slate-800 rounded-xl p-6 w-full max-w-md">
+      <div className="bg-slate-800 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">🍾 ტარის დამატება</h2>
 
         <div className="space-y-4">
@@ -378,13 +492,118 @@ function AddBottleModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data:
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-2">მომწოდებელი</label>
+            <label className="block text-sm text-slate-400 mb-2">
+              ფასი (₾/ცალი) {createExpense && <span className="text-red-400">*</span>}
+            </label>
             <input
-              type="text"
-              value={supplier}
-              onChange={(e) => setSupplier(e.target.value)}
+              type="number"
+              step="0.01"
+              value={costPerUnit}
+              onChange={(e) => setCostPerUnit(e.target.value)}
+              placeholder="0.00"
               className="w-full px-4 py-2 bg-slate-700 rounded-lg"
             />
+          </div>
+
+          {/* Expense Options */}
+          <div className="p-4 bg-slate-700/50 rounded-lg space-y-4">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="createExpense"
+                checked={createExpense}
+                onChange={(e) => setCreateExpense(e.target.checked)}
+                className="w-5 h-5 rounded border-slate-600"
+              />
+              <label htmlFor="createExpense" className="text-sm font-medium text-white cursor-pointer">
+                📊 ხარჯად დაფიქსირება
+              </label>
+            </div>
+
+            {createExpense && (
+              <>
+                {/* Supplier Selection */}
+                <div>
+                  <label className="block text-sm text-slate-400 mb-2">მომწოდებელი</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={supplierId}
+                      onChange={(e) => setSupplierId(e.target.value)}
+                      className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                    >
+                      <option value="">-- აირჩიეთ --</option>
+                      {suppliers.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewSupplierInput(true)}
+                      className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white hover:bg-slate-600"
+                    >
+                      ➕
+                    </button>
+                  </div>
+                  
+                  {showNewSupplierInput && (
+                    <div className="mt-2 p-3 bg-slate-800 rounded-lg border border-slate-600">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newSupplierName}
+                          onChange={(e) => setNewSupplierName(e.target.value)}
+                          placeholder="ახალი მომწოდებელი"
+                          className="flex-1 px-3 py-2 bg-slate-700 rounded-lg text-white text-sm"
+                        />
+                        <Button size="sm" onClick={handleCreateSupplier}>შენახვა</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setShowNewSupplierInput(false)}>✕</Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Invoice */}
+                <div>
+                  <label className="block text-sm text-slate-400 mb-2">ინვოისის ნომერი</label>
+                  <input
+                    type="text"
+                    value={invoiceNumber}
+                    onChange={(e) => setInvoiceNumber(e.target.value)}
+                    placeholder="INV-2024-001"
+                    className="w-full px-4 py-2 bg-slate-700 rounded-lg"
+                  />
+                </div>
+
+                {/* Is Paid */}
+                <div className="flex items-center gap-3 ml-4">
+                  <input
+                    type="checkbox"
+                    id="isPaid"
+                    checked={isPaid}
+                    onChange={(e) => setIsPaid(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-600"
+                  />
+                  <label htmlFor="isPaid" className="text-sm font-medium text-white cursor-pointer">
+                    ✅ გადახდილია
+                  </label>
+                </div>
+
+                {isPaid && (
+                  <div className="ml-4">
+                    <label className="block text-sm text-slate-400 mb-2">გადახდის მეთოდი</label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-full px-4 py-2 bg-slate-700 rounded-lg"
+                    >
+                      {paymentMethods.map(m => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           <div>
@@ -396,6 +615,21 @@ function AddBottleModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data:
               className="w-full px-4 py-2 bg-slate-700 rounded-lg"
             />
           </div>
+
+          {/* Summary */}
+          {createExpense && totalAmount > 0 && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400">ჯამი:</span>
+                <span className="text-2xl font-bold text-amber-400">
+                  ₾{totalAmount.toFixed(2)}
+                </span>
+              </div>
+              <div className="text-sm text-slate-400">
+                {bottleTypes[type]?.icon} {quantity.toLocaleString()} x {bottleTypes[type]?.name}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
@@ -407,6 +641,12 @@ function AddBottleModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data:
             minStock,
             supplier,
             location,
+            costPerUnit: costPerUnit ? parseFloat(costPerUnit) : undefined,
+            supplierId: supplierId || undefined,
+            invoiceNumber: invoiceNumber || undefined,
+            createExpense,
+            isPaid,
+            paymentMethod,
           })}>
             დამატება
           </Button>

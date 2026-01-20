@@ -13,6 +13,12 @@ interface Cap {
   supplier?: string
 }
 
+interface Supplier {
+  id: string
+  name: string
+  category: string | null
+}
+
 const capSizes = {
   '26mm': { name: '26mm', description: 'სტანდარტული (ბოთლი 330-500ml)' },
   '29mm': { name: '29mm', description: 'დიდი (ბოთლი 750ml+)' },
@@ -27,21 +33,27 @@ const capColors: Record<string, { name: string; color: string }> = {
   white: { name: 'თეთრი', color: 'bg-white border border-gray-300' },
 }
 
+const paymentMethods = [
+  { value: 'BANK_TRANSFER', label: '🏦 გადარიცხვა' },
+  { value: 'CASH', label: '💵 ნაღდი' },
+  { value: 'CARD', label: '💳 ბარათი' },
+  { value: 'CHECK', label: '📝 ჩეკი' },
+]
+
 export function CapsSection() {
   const [caps, setCaps] = useState<Cap[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
   const [filterSize, setFilterSize] = useState<string>('all')
   const [showLowStockOnly, setShowLowStockOnly] = useState(false)
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
 
   const fetchCaps = async () => {
     try {
-      // Use PACKAGING category and filter by metadata.type='cap'
       const res = await fetch('/api/inventory?category=PACKAGING')
       if (res.ok) {
         const data = await res.json()
         const items = data.items || []
-        // Filter only caps
         const capItems = items.filter((item: any) => 
           item.metadata?.type === 'cap' || 
           (item.name || '').toLowerCase().includes('თავსახური')
@@ -64,8 +76,21 @@ export function CapsSection() {
     }
   }
 
+  const fetchSuppliers = async () => {
+    try {
+      const res = await fetch('/api/finances/suppliers')
+      if (res.ok) {
+        const data = await res.json()
+        setSuppliers(data.suppliers || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch suppliers:', err)
+    }
+  }
+
   useEffect(() => {
     fetchCaps()
+    fetchSuppliers()
   }, [])
 
   const handleAddCap = async (data: any) => {
@@ -78,8 +103,9 @@ export function CapsSection() {
           sku: `CAP-${data.size}-${Date.now()}`,
           category: 'PACKAGING',
           unit: 'ცალი',
-          quantity: data.quantity,
+          quantity: 0,
           reorderPoint: data.minStock,
+          costPerUnit: data.costPerUnit || undefined,
           metadata: {
             type: 'cap',
             size: data.size,
@@ -88,14 +114,42 @@ export function CapsSection() {
           }
         })
       })
-      if (res.ok) {
-        fetchCaps()
-        setShowAddModal(false)
-      } else {
+
+      if (!res.ok) {
         const err = await res.json()
-        console.error('Failed to add cap:', err)
-        alert('დამატება ვერ მოხერხდა: ' + (err.error || err.message || 'Unknown error'))
+        alert('დამატება ვერ მოხერხდა: ' + (err.error || 'Unknown error'))
+        return
       }
+
+      const createResult = await res.json()
+      const itemId = createResult.item?.id || createResult.id
+
+      if (data.quantity > 0 && itemId) {
+        const purchaseRes = await fetch('/api/inventory/purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            itemId,
+            quantity: data.quantity,
+            unitPrice: data.costPerUnit || 0,
+            totalAmount: data.quantity * (data.costPerUnit || 0),
+            supplierId: data.supplierId || undefined,
+            date: new Date().toISOString().split('T')[0],
+            invoiceNumber: data.invoiceNumber || undefined,
+            notes: `საწყისი მარაგი: ${data.name || `თავსახური ${data.size}`}`,
+            createExpense: data.createExpense ?? false,
+            isPaid: data.isPaid ?? false,
+            paymentMethod: data.paymentMethod || 'BANK_TRANSFER',
+          }),
+        })
+
+        if (!purchaseRes.ok) {
+          alert('თავსახური დაემატა, მაგრამ შესყიდვის ჩაწერა ვერ მოხერხდა')
+        }
+      }
+
+      fetchCaps()
+      setShowAddModal(false)
     } catch (error) {
       console.error('Failed to add cap:', error)
       alert('დამატება ვერ მოხერხდა')
@@ -107,20 +161,15 @@ export function CapsSection() {
       const res = await fetch(`/api/inventory/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          quantity,
-          type: 'ADJUSTMENT',
-        })
+        body: JSON.stringify({ quantity, type: 'ADJUSTMENT' })
       })
       if (res.ok) {
-        // Refresh caps to get updated data
         fetchCaps()
       } else {
         const errorData = await res.json()
         alert(errorData.error || 'რაოდენობის განახლება ვერ მოხერხდა')
       }
     } catch (error) {
-      console.error('Failed to update cap:', error)
       alert('რაოდენობის განახლება ვერ მოხერხდა')
     }
   }
@@ -136,7 +185,6 @@ export function CapsSection() {
         alert(errorData.error || 'წაშლა ვერ მოხერხდა')
       }
     } catch (error) {
-      console.error('Failed to delete cap:', error)
       alert('წაშლა ვერ მოხერხდა')
     }
   }
@@ -147,18 +195,12 @@ export function CapsSection() {
     return true
   })
 
-  const totalCaps = caps.reduce((sum, c) => sum + c.quantity, 0)
-  const caps26mm = caps.filter(c => c.size === '26mm').reduce((sum, c) => sum + c.quantity, 0)
-  const caps29mm = caps.filter(c => c.size === '29mm').reduce((sum, c) => sum + c.quantity, 0)
-  const lowStockCount = caps.filter(c => c.quantity < c.minStock).length
-
   if (loading) {
     return <div className="text-center py-12">იტვირთება...</div>
   }
 
   return (
     <div className="space-y-6">
-      {/* Filters & Actions */}
       <div className="flex justify-between items-center">
         <div className="flex gap-3">
           <select
@@ -188,7 +230,6 @@ export function CapsSection() {
         </Button>
       </div>
 
-      {/* Caps Table */}
       <div className="bg-bg-card border border-border rounded-xl overflow-hidden">
         <table className="w-full">
           <thead className="bg-bg-tertiary">
@@ -223,9 +264,7 @@ export function CapsSection() {
                       <span className={`px-2 py-1 rounded text-sm ${colorInfo.color} ${cap.color === 'white' ? 'text-black' : 'text-white'}`}>
                         {colorInfo.name}
                       </span>
-                    ) : (
-                      <span className="text-slate-400">-</span>
-                    )}
+                    ) : '-'}
                   </td>
                   <td className="p-4">
                     <span className="font-bold">{cap.quantity.toLocaleString()}</span>
@@ -248,7 +287,6 @@ export function CapsSection() {
                       <button
                         onClick={() => handleDeleteCap(cap.id)}
                         className="px-2 py-1 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded transition-colors"
-                        title="წაშლა"
                       >
                         🗑️
                       </button>
@@ -273,25 +311,75 @@ export function CapsSection() {
         )}
       </div>
 
-      {/* Add Modal */}
       {showAddModal && (
-        <AddCapModal onClose={() => setShowAddModal(false)} onAdd={handleAddCap} />
+        <AddCapModal 
+          onClose={() => setShowAddModal(false)} 
+          onAdd={handleAddCap}
+          suppliers={suppliers}
+          onSupplierCreated={fetchSuppliers}
+        />
       )}
     </div>
   )
 }
 
-function AddCapModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: any) => void }) {
+function AddCapModal({ 
+  onClose, 
+  onAdd,
+  suppliers,
+  onSupplierCreated,
+}: { 
+  onClose: () => void
+  onAdd: (data: any) => void
+  suppliers: Supplier[]
+  onSupplierCreated: () => void
+}) {
   const [name, setName] = useState('')
   const [size, setSize] = useState<string>('26mm')
   const [color, setColor] = useState<string>('gold')
   const [quantity, setQuantity] = useState(5000)
   const [minStock, setMinStock] = useState(1000)
   const [supplier, setSupplier] = useState('')
+  
+  // Expense fields
+  const [costPerUnit, setCostPerUnit] = useState('')
+  const [supplierId, setSupplierId] = useState('')
+  const [invoiceNumber, setInvoiceNumber] = useState('')
+  const [createExpense, setCreateExpense] = useState(true)
+  const [isPaid, setIsPaid] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState('BANK_TRANSFER')
+  
+  const [showNewSupplierInput, setShowNewSupplierInput] = useState(false)
+  const [newSupplierName, setNewSupplierName] = useState('')
+
+  const totalAmount = quantity * (parseFloat(costPerUnit) || 0)
+
+  const handleCreateSupplier = async () => {
+    if (!newSupplierName.trim()) return
+    try {
+      const response = await fetch('/api/finances/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newSupplierName.trim(), category: 'packaging' }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setSupplierId(data.supplier.id)
+        setShowNewSupplierInput(false)
+        setNewSupplierName('')
+        onSupplierCreated()
+        alert('✅ მომწოდებელი დაემატა!')
+      } else {
+        alert('მომწოდებლის დამატება ვერ მოხერხდა')
+      }
+    } catch (err) {
+      alert('მომწოდებლის დამატება ვერ მოხერხდა')
+    }
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-slate-800 rounded-xl p-6 w-full max-w-md">
+      <div className="bg-slate-800 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">🧢 თავსახურის დამატება</h2>
 
         <div className="space-y-4">
@@ -359,15 +447,127 @@ function AddCapModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: an
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-2">მომწოდებელი</label>
+            <label className="block text-sm text-slate-400 mb-2">
+              ფასი (₾/ცალი) {createExpense && <span className="text-red-400">*</span>}
+            </label>
             <input
-              type="text"
-              value={supplier}
-              onChange={(e) => setSupplier(e.target.value)}
-              placeholder="მაგ: BottleCap Georgia"
+              type="number"
+              step="0.001"
+              value={costPerUnit}
+              onChange={(e) => setCostPerUnit(e.target.value)}
+              placeholder="0.00"
               className="w-full px-4 py-2 bg-slate-700 rounded-lg"
             />
           </div>
+
+          {/* Expense Options */}
+          <div className="p-4 bg-slate-700/50 rounded-lg space-y-4">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="createExpense"
+                checked={createExpense}
+                onChange={(e) => setCreateExpense(e.target.checked)}
+                className="w-5 h-5 rounded border-slate-600"
+              />
+              <label htmlFor="createExpense" className="text-sm font-medium text-white cursor-pointer">
+                📊 ხარჯად დაფიქსირება
+              </label>
+            </div>
+
+            {createExpense && (
+              <>
+                <div>
+                  <label className="block text-sm text-slate-400 mb-2">მომწოდებელი</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={supplierId}
+                      onChange={(e) => setSupplierId(e.target.value)}
+                      className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                    >
+                      <option value="">-- აირჩიეთ --</option>
+                      {suppliers.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewSupplierInput(true)}
+                      className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white hover:bg-slate-600"
+                    >
+                      ➕
+                    </button>
+                  </div>
+                  
+                  {showNewSupplierInput && (
+                    <div className="mt-2 p-3 bg-slate-800 rounded-lg border border-slate-600">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newSupplierName}
+                          onChange={(e) => setNewSupplierName(e.target.value)}
+                          placeholder="ახალი მომწოდებელი"
+                          className="flex-1 px-3 py-2 bg-slate-700 rounded-lg text-white text-sm"
+                        />
+                        <Button size="sm" onClick={handleCreateSupplier}>შენახვა</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setShowNewSupplierInput(false)}>✕</Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-400 mb-2">ინვოისის ნომერი</label>
+                  <input
+                    type="text"
+                    value={invoiceNumber}
+                    onChange={(e) => setInvoiceNumber(e.target.value)}
+                    placeholder="INV-2024-001"
+                    className="w-full px-4 py-2 bg-slate-700 rounded-lg"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 ml-4">
+                  <input
+                    type="checkbox"
+                    id="isPaid"
+                    checked={isPaid}
+                    onChange={(e) => setIsPaid(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-600"
+                  />
+                  <label htmlFor="isPaid" className="text-sm font-medium text-white cursor-pointer">
+                    ✅ გადახდილია
+                  </label>
+                </div>
+
+                {isPaid && (
+                  <div className="ml-4">
+                    <label className="block text-sm text-slate-400 mb-2">გადახდის მეთოდი</label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-full px-4 py-2 bg-slate-700 rounded-lg"
+                    >
+                      {paymentMethods.map(m => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Summary */}
+          {createExpense && totalAmount > 0 && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400">ჯამი:</span>
+                <span className="text-2xl font-bold text-amber-400">₾{totalAmount.toFixed(2)}</span>
+              </div>
+              <div className="text-sm text-slate-400">🧢 {quantity.toLocaleString()} თავსახური</div>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
@@ -379,6 +579,12 @@ function AddCapModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: an
             quantity,
             minStock,
             supplier,
+            costPerUnit: costPerUnit ? parseFloat(costPerUnit) : undefined,
+            supplierId: supplierId || undefined,
+            invoiceNumber: invoiceNumber || undefined,
+            createExpense,
+            isPaid,
+            paymentMethod,
           })}>
             დამატება
           </Button>

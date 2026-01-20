@@ -17,6 +17,12 @@ interface CleaningSupply {
   lastUpdated?: Date
 }
 
+interface Supplier {
+  id: string
+  name: string
+  category: string | null
+}
+
 type StockStatus = 'ok' | 'low' | 'critical' | 'out'
 
 const getStockStatus = (current: number, min: number): StockStatus => {
@@ -33,7 +39,13 @@ const STATUS_CONFIG: Record<StockStatus, { label: string; color: string; bgColor
   out: { label: 'ამოწურული', color: 'text-red-400', bgColor: 'bg-red-400/20' },
 }
 
-// Icon helper for cleaning supplies
+const paymentMethods = [
+  { value: 'BANK_TRANSFER', label: '🏦 გადარიცხვა' },
+  { value: 'CASH', label: '💵 ნაღდი' },
+  { value: 'CARD', label: '💳 ბარათი' },
+  { value: 'CHECK', label: '📝 ჩეკი' },
+]
+
 const getCleaningIcon = (name: string): string => {
   const lowerName = name.toLowerCase()
   if (lowerName.includes('კაუსტიკ') || lowerName.includes('caustic') || lowerName.includes('naoh')) return '🧴'
@@ -47,6 +59,7 @@ const getCleaningIcon = (name: string): string => {
 export function CleaningSuppliesSection() {
   const router = useRouter()
   const [supplies, setSupplies] = useState<CleaningSupply[]>([])
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
@@ -59,9 +72,14 @@ export function CleaningSuppliesSection() {
     unit: 'კგ',
     supplier: '',
     pricePerUnit: '',
+    // Expense fields
+    supplierId: '',
+    invoiceNumber: '',
+    createExpense: true,
+    isPaid: false,
+    paymentMethod: 'BANK_TRANSFER',
   })
 
-  // Fetch cleaning supplies
   const fetchSupplies = async () => {
     try {
       setIsLoading(true)
@@ -89,55 +107,104 @@ export function CleaningSuppliesSection() {
     }
   }
 
+  const fetchSuppliers = async () => {
+    try {
+      const res = await fetch('/api/finances/suppliers')
+      if (res.ok) {
+        const data = await res.json()
+        setSuppliers(data.suppliers || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch suppliers:', err)
+    }
+  }
+
   useEffect(() => {
     fetchSupplies()
+    fetchSuppliers()
   }, [])
 
-  // Filter supplies
   const filteredSupplies = supplies.filter(s => 
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.sku.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  // Handle form submission
   const handleSave = async () => {
     try {
+      const isEditing = !!editingSupply
+      
+      // Step 1: Create or update the inventory item
       const payload = {
         name: formData.name,
         sku: formData.sku || `CL-${Date.now()}`,
-        currentStock: Number(formData.currentStock) || 0,
+        currentStock: isEditing ? Number(formData.currentStock) || 0 : 0, // Start with 0 for new items
         minStock: Number(formData.minStock) || 0,
         unit: formData.unit,
         supplier: formData.supplier,
         pricePerUnit: Number(formData.pricePerUnit) || 0,
       }
 
-      const url = editingSupply 
+      const url = isEditing 
         ? `/api/inventory/cleaning/${editingSupply.id}` 
         : '/api/inventory/cleaning'
       
       const response = await fetch(url, {
-        method: editingSupply ? 'PUT' : 'POST',
+        method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
 
-      if (response.ok) {
-        setShowAddModal(false)
-        setEditingSupply(null)
-        setFormData({ name: '', sku: '', currentStock: '', minStock: '', unit: 'კგ', supplier: '', pricePerUnit: '' })
-        fetchSupplies()
-      } else {
+      if (!response.ok) {
         const error = await response.json()
         alert(`შეცდომა: ${error.error || 'შენახვა ვერ მოხერხდა'}`)
+        return
       }
+
+      const result = await response.json()
+      
+      // Step 2: If new item with quantity and expense enabled, create purchase
+      if (!isEditing && Number(formData.currentStock) > 0) {
+        const itemId = result.supply?.id || result.id
+        
+        if (itemId) {
+          const purchaseRes = await fetch('/api/inventory/purchase', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              itemId,
+              quantity: Number(formData.currentStock),
+              unitPrice: Number(formData.pricePerUnit) || 0,
+              totalAmount: Number(formData.currentStock) * (Number(formData.pricePerUnit) || 0),
+              supplierId: formData.supplierId || undefined,
+              date: new Date().toISOString().split('T')[0],
+              invoiceNumber: formData.invoiceNumber || undefined,
+              notes: `საწყისი მარაგი: ${formData.name}`,
+              createExpense: formData.createExpense,
+              isPaid: formData.isPaid,
+              paymentMethod: formData.paymentMethod,
+            }),
+          })
+
+          if (!purchaseRes.ok) {
+            alert('რეცხვის საშუალება დაემატა, მაგრამ შესყიდვის ჩაწერა ვერ მოხერხდა')
+          }
+        }
+      }
+
+      setShowAddModal(false)
+      setEditingSupply(null)
+      setFormData({ 
+        name: '', sku: '', currentStock: '', minStock: '', unit: 'კგ', 
+        supplier: '', pricePerUnit: '', supplierId: '', invoiceNumber: '',
+        createExpense: true, isPaid: false, paymentMethod: 'BANK_TRANSFER'
+      })
+      fetchSupplies()
     } catch (error) {
       console.error('Error saving supply:', error)
       alert('შეცდომა შენახვისას')
     }
   }
 
-  // Open edit modal
   const handleEdit = (supply: CleaningSupply) => {
     setEditingSupply(supply)
     setFormData({
@@ -148,18 +215,45 @@ export function CleaningSuppliesSection() {
       unit: supply.unit,
       supplier: supply.supplier,
       pricePerUnit: supply.pricePerUnit.toString(),
+      supplierId: '',
+      invoiceNumber: '',
+      createExpense: false, // No expense when editing
+      isPaid: false,
+      paymentMethod: 'BANK_TRANSFER',
     })
     setShowAddModal(true)
   }
 
-  // Navigate to detail page
   const handleViewDetail = (supply: CleaningSupply) => {
     router.push(`/inventory/${supply.id}`)
   }
 
+  const handleCreateSupplier = async (newName: string, callback: (id: string) => void) => {
+    if (!newName.trim()) return
+    try {
+      const response = await fetch('/api/finances/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName.trim(), category: 'cleaning' }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        callback(data.supplier.id)
+        fetchSuppliers()
+        alert('✅ მომწოდებელი დაემატა!')
+      } else {
+        alert('მომწოდებლის დამატება ვერ მოხერხდა')
+      }
+    } catch (err) {
+      alert('მომწოდებლის დამატება ვერ მოხერხდა')
+    }
+  }
+
+  const totalAmount = Number(formData.currentStock) * (Number(formData.pricePerUnit) || 0)
+  const isNewItem = !editingSupply
+
   return (
     <div className="space-y-6">
-      {/* Filters and Actions */}
       <div className="flex justify-between items-center">
         <div className="relative">
           <input
@@ -176,7 +270,11 @@ export function CleaningSuppliesSection() {
           size="sm"
           onClick={() => {
             setEditingSupply(null)
-            setFormData({ name: '', sku: '', currentStock: '', minStock: '', unit: 'კგ', supplier: '', pricePerUnit: '' })
+            setFormData({ 
+              name: '', sku: '', currentStock: '', minStock: '', unit: 'კგ', 
+              supplier: '', pricePerUnit: '', supplierId: '', invoiceNumber: '',
+              createExpense: true, isPaid: false, paymentMethod: 'BANK_TRANSFER'
+            })
             setShowAddModal(true)
           }}
         >
@@ -184,7 +282,6 @@ export function CleaningSuppliesSection() {
         </Button>
       </div>
 
-      {/* Supplies Table */}
       <Card>
         <CardHeader>
           <span>🧹 რეცხვის საშუალებები ({filteredSupplies.length})</span>
@@ -268,14 +365,12 @@ export function CleaningSuppliesSection() {
                           <button 
                             onClick={(e) => { e.stopPropagation(); handleEdit(supply) }}
                             className="text-text-muted hover:text-copper-light"
-                            title="რედაქტირება"
                           >
                             ✏️
                           </button>
                           <button 
                             onClick={(e) => { e.stopPropagation(); handleViewDetail(supply) }}
                             className="text-text-muted hover:text-copper-light"
-                            title="დეტალები"
                           >
                             →
                           </button>
@@ -292,91 +387,239 @@ export function CleaningSuppliesSection() {
 
       {/* Add/Edit Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
-          <div className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="px-6 py-4 border-b border-border">
-              <h3 className="text-lg font-display font-semibold">
-                {editingSupply ? '✏️ რედაქტირება' : '🧹 ახალი რეცხვის საშუალება'}
-              </h3>
+        <AddCleaningModal
+          formData={formData}
+          setFormData={setFormData}
+          isEditing={!!editingSupply}
+          suppliers={suppliers}
+          onClose={() => setShowAddModal(false)}
+          onSave={handleSave}
+          onCreateSupplier={handleCreateSupplier}
+          totalAmount={totalAmount}
+        />
+      )}
+    </div>
+  )
+}
+
+function AddCleaningModal({
+  formData,
+  setFormData,
+  isEditing,
+  suppliers,
+  onClose,
+  onSave,
+  onCreateSupplier,
+  totalAmount,
+}: {
+  formData: any
+  setFormData: (fn: any) => void
+  isEditing: boolean
+  suppliers: Supplier[]
+  onClose: () => void
+  onSave: () => void
+  onCreateSupplier: (name: string, callback: (id: string) => void) => void
+  totalAmount: number
+}) {
+  const [showNewSupplierInput, setShowNewSupplierInput] = useState(false)
+  const [newSupplierName, setNewSupplierName] = useState('')
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-display font-semibold">
+            {isEditing ? '✏️ რედაქტირება' : '🧹 ახალი რეცხვის საშუალება'}
+          </h3>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">დასახელება *</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, name: e.target.value }))}
+              placeholder="მაგ: კაუსტიკ სოდა"
+              className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl focus:border-copper focus:outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">მარაგი</label>
+              <input
+                type="number"
+                value={formData.currentStock}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, currentStock: e.target.value }))}
+                placeholder="0"
+                className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl font-mono focus:border-copper focus:outline-none"
+              />
             </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">დასახელება *</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="მაგ: კაუსტიკ სოდა"
-                  className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl focus:border-copper focus:outline-none"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">მარაგი</label>
-                  <input
-                    type="number"
-                    value={formData.currentStock}
-                    onChange={(e) => setFormData(prev => ({ ...prev, currentStock: e.target.value }))}
-                    placeholder="0"
-                    className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl font-mono focus:border-copper focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">ერთეული</label>
-                  <select
-                    value={formData.unit}
-                    onChange={(e) => setFormData(prev => ({ ...prev, unit: e.target.value }))}
-                    className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl focus:border-copper focus:outline-none"
-                  >
-                    <option value="კგ">კგ</option>
-                    <option value="ლ">ლ</option>
-                    <option value="ც">ც (ცალი)</option>
-                    <option value="მლ">მლ</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">მინ. მარაგი</label>
-                  <input
-                    type="number"
-                    value={formData.minStock}
-                    onChange={(e) => setFormData(prev => ({ ...prev, minStock: e.target.value }))}
-                    placeholder="0"
-                    className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl font-mono focus:border-copper focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">ფასი (₾)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.pricePerUnit}
-                    onChange={(e) => setFormData(prev => ({ ...prev, pricePerUnit: e.target.value }))}
-                    placeholder="0.00"
-                    className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl font-mono focus:border-copper focus:outline-none"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">მომწოდებელი</label>
-                <input
-                  type="text"
-                  value={formData.supplier}
-                  onChange={(e) => setFormData(prev => ({ ...prev, supplier: e.target.value }))}
-                  placeholder="მაგ: ქიმია შპს"
-                  className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl focus:border-copper focus:outline-none"
-                />
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-border flex justify-end gap-3">
-              <Button variant="secondary" onClick={() => setShowAddModal(false)}>გაუქმება</Button>
-              <Button variant="primary" onClick={handleSave} disabled={!formData.name}>შენახვა</Button>
+            <div>
+              <label className="block text-sm font-medium mb-2">ერთეული</label>
+              <select
+                value={formData.unit}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, unit: e.target.value }))}
+                className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl focus:border-copper focus:outline-none"
+              >
+                <option value="კგ">კგ</option>
+                <option value="ლ">ლ</option>
+                <option value="ც">ც (ცალი)</option>
+                <option value="მლ">მლ</option>
+              </select>
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">მინ. მარაგი</label>
+              <input
+                type="number"
+                value={formData.minStock}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, minStock: e.target.value }))}
+                placeholder="0"
+                className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl font-mono focus:border-copper focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">ფასი (₾)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.pricePerUnit}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, pricePerUnit: e.target.value }))}
+                placeholder="0.00"
+                className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl font-mono focus:border-copper focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Expense Options - Only for new items */}
+          {!isEditing && (
+            <div className="p-4 bg-slate-700/30 rounded-xl space-y-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="createExpense"
+                  checked={formData.createExpense}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, createExpense: e.target.checked }))}
+                  className="w-5 h-5 rounded border-slate-600"
+                />
+                <label htmlFor="createExpense" className="text-sm font-medium cursor-pointer">
+                  📊 ხარჯად დაფიქსირება
+                </label>
+              </div>
+
+              {formData.createExpense && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">მომწოდებელი</label>
+                    <div className="flex gap-2">
+                      <select
+                        value={formData.supplierId}
+                        onChange={(e) => setFormData((prev: any) => ({ ...prev, supplierId: e.target.value }))}
+                        className="flex-1 px-4 py-3 bg-bg-tertiary border border-border rounded-xl"
+                      >
+                        <option value="">-- აირჩიეთ --</option>
+                        {suppliers.map(s => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setShowNewSupplierInput(true)}
+                        className="px-4 py-3 bg-bg-tertiary border border-border rounded-xl hover:bg-slate-600"
+                      >
+                        ➕
+                      </button>
+                    </div>
+                    
+                    {showNewSupplierInput && (
+                      <div className="mt-2 p-3 bg-slate-800 rounded-lg border border-slate-600">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={newSupplierName}
+                            onChange={(e) => setNewSupplierName(e.target.value)}
+                            placeholder="ახალი მომწოდებელი"
+                            className="flex-1 px-3 py-2 bg-slate-700 rounded-lg text-sm"
+                          />
+                          <Button 
+                            size="sm" 
+                            onClick={() => {
+                              onCreateSupplier(newSupplierName, (id) => {
+                                setFormData((prev: any) => ({ ...prev, supplierId: id }))
+                                setShowNewSupplierInput(false)
+                                setNewSupplierName('')
+                              })
+                            }}
+                          >
+                            შენახვა
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setShowNewSupplierInput(false)}>✕</Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">ინვოისის ნომერი</label>
+                    <input
+                      type="text"
+                      value={formData.invoiceNumber}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, invoiceNumber: e.target.value }))}
+                      placeholder="INV-2024-001"
+                      className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3 ml-4">
+                    <input
+                      type="checkbox"
+                      id="isPaid"
+                      checked={formData.isPaid}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, isPaid: e.target.checked }))}
+                      className="w-5 h-5 rounded border-slate-600"
+                    />
+                    <label htmlFor="isPaid" className="text-sm font-medium cursor-pointer">
+                      ✅ გადახდილია
+                    </label>
+                  </div>
+
+                  {formData.isPaid && (
+                    <div className="ml-4">
+                      <label className="block text-sm font-medium mb-2">გადახდის მეთოდი</label>
+                      <select
+                        value={formData.paymentMethod}
+                        onChange={(e) => setFormData((prev: any) => ({ ...prev, paymentMethod: e.target.value }))}
+                        className="w-full px-4 py-3 bg-bg-tertiary border border-border rounded-xl"
+                      >
+                        {paymentMethods.map(m => (
+                          <option key={m.value} value={m.value}>{m.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Summary */}
+          {!isEditing && formData.createExpense && totalAmount > 0 && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400">ჯამი:</span>
+                <span className="text-2xl font-bold text-amber-400">₾{totalAmount.toFixed(2)}</span>
+              </div>
+              <div className="text-sm text-slate-400">🧹 {formData.currentStock} {formData.unit}</div>
+            </div>
+          )}
         </div>
-      )}
+        <div className="px-6 py-4 border-t border-border flex justify-end gap-3">
+          <Button variant="secondary" onClick={onClose}>გაუქმება</Button>
+          <Button variant="primary" onClick={onSave} disabled={!formData.name}>შენახვა</Button>
+        </div>
+      </div>
     </div>
   )
 }
