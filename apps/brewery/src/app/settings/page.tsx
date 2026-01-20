@@ -1587,6 +1587,101 @@ export default function SettingsPage() {
           </div>
         )
 
+
+      case 'help':
+        return (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <h2 className="text-xl font-bold text-text-primary">❓ დახმარება</h2>
+                <p className="text-text-muted">სისტემის გამოყენების სახელმძღვანელო</p>
+              </CardHeader>
+              <CardBody className="space-y-6">
+                
+                {/* Quick Start */}
+                <div className="bg-copper/10 border border-copper/30 rounded-xl p-4">
+                  <h3 className="font-semibold text-copper mb-3">🚀 სწრაფი დაწყება</h3>
+                  <ol className="space-y-2 text-sm text-text-primary list-decimal list-inside">
+                    <li>დაამატეთ აღჭურვილობა (ტანკები, კეტლები)</li>
+                    <li>შეიყვანეთ მარაგები (ალაო, ჰოპი, საფუარი)</li>
+                    <li>შექმენით რეცეპტი</li>
+                    <li>დაიწყეთ ახალი პარტია</li>
+                  </ol>
+                </div>
+                
+                {/* Main Sections */}
+                <div>
+                  <h3 className="font-semibold text-text-primary mb-4">📚 ძირითადი სექციები</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-bg-tertiary rounded-lg p-4">
+                      <h4 className="font-medium text-text-primary mb-2">🍺 წარმოება</h4>
+                      <p className="text-sm text-text-muted">პარტიების მართვა: ხარშვა → ფერმენტაცია → კონდიცირება → დაფასოება</p>
+                    </div>
+                    <div className="bg-bg-tertiary rounded-lg p-4">
+                      <h4 className="font-medium text-text-primary mb-2">📦 მარაგები</h4>
+                      <p className="text-sm text-text-muted">ინგრედიენტები, კეგები, შესაფუთი მასალები</p>
+                    </div>
+                    <div className="bg-bg-tertiary rounded-lg p-4">
+                      <h4 className="font-medium text-text-primary mb-2">📝 რეცეპტები</h4>
+                      <p className="text-sm text-text-muted">რეცეპტების შექმნა და მართვა</p>
+                    </div>
+                    <div className="bg-bg-tertiary rounded-lg p-4">
+                      <h4 className="font-medium text-text-primary mb-2">💰 გაყიდვები</h4>
+                      <p className="text-sm text-text-muted">კლიენტები, შეკვეთები, ინვოისები</p>
+                    </div>
+                    <div className="bg-bg-tertiary rounded-lg p-4">
+                      <h4 className="font-medium text-text-primary mb-2">🛢️ ავზები</h4>
+                      <p className="text-sm text-text-muted">ტანკების მართვა და CIP რეცხვა</p>
+                    </div>
+                    <div className="bg-bg-tertiary rounded-lg p-4">
+                      <h4 className="font-medium text-text-primary mb-2">📅 კალენდარი</h4>
+                      <p className="text-sm text-text-muted">წარმოების განრიგი და დაგეგმვა</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Production Cycle */}
+                <div>
+                  <h3 className="font-semibold text-text-primary mb-4">🔄 წარმოების ციკლი</h3>
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <span className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full">1. ხარშვა</span>
+                    <span className="text-text-muted">→</span>
+                    <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full">2. ფერმენტაცია</span>
+                    <span className="text-text-muted">→</span>
+                    <span className="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full">3. კონდიცირება</span>
+                    <span className="text-text-muted">→</span>
+                    <span className="bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full">4. მზადა</span>
+                    <span className="text-text-muted">→</span>
+                    <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full">5. დაფასოება</span>
+                  </div>
+                </div>
+                
+                {/* Tips */}
+                <div>
+                  <h3 className="font-semibold text-text-primary mb-4">💡 სასარგებლო რჩევები</h3>
+                  <ul className="space-y-2 text-sm text-text-muted">
+                    <li>✅ რეგულარულად შეიყვანეთ გრავიტი და ტემპერატურა</li>
+                    <li>✅ ყოველ ტანკზე გაირეცხეთ გამოყენების შემდეგ (CIP)</li>
+                    <li>✅ შეამოწმეთ რეორდერის წერტილები მარაგებში</li>
+                    <li>✅ ყოველ პარტიაზე გააკეთეთ ხარისხის ტესტები</li>
+                  </ul>
+                </div>
+                
+                {/* Contact */}
+                <div className="pt-4 border-t border-border">
+                  <h3 className="font-semibold text-text-primary mb-4">📞 კონტაქტი</h3>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-text-muted">📧 Email: <a href="mailto:support@brewery.geobiz.app" className="text-copper hover:underline">support@brewery.geobiz.app</a></p>
+                    <p className="text-text-muted">📱 ტელეფონი: +995 XXX XXX XXX</p>
+                    <p className="text-text-muted">🕐 სამუშაო საათები: ორშ-პარ, 09:00-18:00</p>
+                  </div>
+                </div>
+                
+              </CardBody>
+            </Card>
+          </div>
+        )
+
       default:
         return null
     }
