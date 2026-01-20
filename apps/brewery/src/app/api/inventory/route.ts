@@ -8,6 +8,7 @@ const createItemSchema = z.object({
   sku: z.string().min(1),
   name: z.string().min(1),
   category: z.enum(['RAW_MATERIAL', 'PACKAGING', 'FINISHED_GOOD', 'CONSUMABLE']),
+  ingredientType: z.enum(['MALT', 'HOPS', 'YEAST', 'ADJUNCT', 'WATER_CHEMISTRY']).optional(),
   unit: z.string().min(1),
   reorderPoint: z.number().optional(),
   supplier: z.string().optional(),
@@ -326,26 +327,30 @@ export const POST = withPermission('inventory:create', async (req: NextRequest, 
     
     console.log('[POST /api/inventory] Creating item with initial quantity:', initialQuantity)
     
-    // Detect ingredient type from SKU or name
-    let ingredientType: string | null = null
-    const nameLower = input.name.toLowerCase()
-    const skuUpper = input.sku.toUpperCase()
+    // Use ingredientType from request body if provided, otherwise detect from SKU or name
+    let ingredientType: string | null = input.ingredientType || null
     
-    const hopNames = [
-      'citra', 'cascade', 'centennial', 'simcoe', 'mosaic', 'amarillo',
-      'hallertau', 'hallertauer', 'saaz', 'fuggle', 'golding', 'tettnang',
-      'chinook', 'columbus', 'warrior', 'magnum', 'perle', 'hop'
-    ]
-    const yeastNames = ['yeast', 'safale', 'fermentis', 'wyeast', 'white labs', 'lallemand', 'mangrove']
-    
-    if (skuUpper.includes('HOP') || hopNames.some(h => nameLower.includes(h))) {
-      ingredientType = 'HOPS'
-    } else if (skuUpper.includes('YEAST') || yeastNames.some(y => nameLower.includes(y))) {
-      ingredientType = 'YEAST'
-    } else if (skuUpper.includes('MALT') || skuUpper.includes('GRAIN') || nameLower.includes('malt') || nameLower.includes('pilsner') || nameLower.includes('munich')) {
-      ingredientType = 'MALT'
-    } else if (skuUpper.includes('ADJUNCT') || nameLower.includes('adjunct')) {
-      ingredientType = 'ADJUNCT'
+    if (!ingredientType) {
+      // Fallback: Detect ingredient type from SKU or name
+      const nameLower = input.name.toLowerCase()
+      const skuUpper = input.sku.toUpperCase()
+      
+      const hopNames = [
+        'citra', 'cascade', 'centennial', 'simcoe', 'mosaic', 'amarillo',
+        'hallertau', 'hallertauer', 'saaz', 'fuggle', 'golding', 'tettnang',
+        'chinook', 'columbus', 'warrior', 'magnum', 'perle', 'hop'
+      ]
+      const yeastNames = ['yeast', 'safale', 'fermentis', 'wyeast', 'white labs', 'lallemand', 'mangrove']
+      
+      if (skuUpper.includes('HOP') || hopNames.some(h => nameLower.includes(h))) {
+        ingredientType = 'HOPS'
+      } else if (skuUpper.includes('YEAST') || yeastNames.some(y => nameLower.includes(y))) {
+        ingredientType = 'YEAST'
+      } else if (skuUpper.includes('MALT') || skuUpper.includes('GRAIN') || nameLower.includes('malt') || nameLower.includes('pilsner') || nameLower.includes('munich')) {
+        ingredientType = 'MALT'
+      } else if (skuUpper.includes('ADJUNCT') || nameLower.includes('adjunct')) {
+        ingredientType = 'ADJUNCT'
+      }
     }
     
     // Use transaction to ensure both item and ledger entry are created atomically

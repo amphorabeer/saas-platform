@@ -16,12 +16,19 @@ interface Keg {
   notes: string | null
 }
 
+interface Supplier {
+  id: string
+  name: string
+  category: string | null
+}
+
 export function KegManagementSection() {
   const [kegs, setKegs] = useState<Keg[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
   const [filterSize, setFilterSize] = useState<number | 'all'>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
   
   // Fetch kegs from API
   useEffect(() => {
@@ -40,6 +47,23 @@ export function KegManagementSection() {
       }
     }
     fetchKegs()
+  }, [])
+
+  // Fetch suppliers
+  const fetchSuppliers = async () => {
+    try {
+      const res = await fetch('/api/finances/suppliers')
+      if (res.ok) {
+        const data = await res.json()
+        setSuppliers(data.suppliers || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch suppliers:', err)
+    }
+  }
+
+  useEffect(() => {
+    fetchSuppliers()
   }, [])
   
   // Status mapping: API enum → UI display
@@ -81,7 +105,17 @@ export function KegManagementSection() {
     by50L: kegs.filter(k => k.size === 50).length,
   }
   
-  const handleAddKeg = async (kegData: { size: number; quantity: number; notes?: string }) => {
+  const handleAddKeg = async (kegData: { 
+    size: number
+    quantity: number
+    notes?: string
+    costPerUnit?: number
+    supplierId?: string
+    invoiceNumber?: string
+    createExpense?: boolean
+    isPaid?: boolean
+    paymentMethod?: string
+  }) => {
     try {
       const promises = []
       for (let i = 0; i < kegData.quantity; i++) {
@@ -104,7 +138,38 @@ export function KegManagementSection() {
       
       if (failedCount > 0) {
         alert(`${failedCount} კეგის დამატება ვერ მოხერხდა`)
-      } else {
+      }
+
+      // Create expense if enabled and has cost
+      if (kegData.createExpense && kegData.costPerUnit && kegData.costPerUnit > 0) {
+        const totalAmount = kegData.quantity * kegData.costPerUnit
+        
+        try {
+          const expenseRes = await fetch('/api/finances/expenses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              category: 'EQUIPMENT',
+              amount: totalAmount,
+              date: new Date().toISOString().split('T')[0],
+              description: `კეგების შესყიდვა: ${kegData.quantity} x ${kegData.size}L`,
+              supplierId: kegData.supplierId || null,
+              invoiceNumber: kegData.invoiceNumber || null,
+              isPaid: kegData.isPaid || false,
+              paymentMethod: kegData.isPaid ? (kegData.paymentMethod || 'BANK_TRANSFER') : null,
+            }),
+          })
+          
+          if (!expenseRes.ok) {
+            console.error('Failed to create expense for kegs')
+            alert('კეგები დაემატა, მაგრამ ხარჯის ჩაწერა ვერ მოხერხდა')
+          }
+        } catch (expErr) {
+          console.error('Expense creation error:', expErr)
+        }
+      }
+
+      if (failedCount === 0) {
         alert(`${kegData.quantity} კეგი დამატებულია!`)
       }
       
@@ -134,7 +199,6 @@ export function KegManagementSection() {
       })
       
       if (res.ok) {
-        // Refresh kegs
         const refreshRes = await fetch('/api/kegs')
         if (refreshRes.ok) {
           const data = await refreshRes.json()
@@ -159,7 +223,6 @@ export function KegManagementSection() {
       })
       
       if (res.ok) {
-        // Refresh kegs list
         const refreshRes = await fetch('/api/kegs')
         if (refreshRes.ok) {
           const data = await refreshRes.json()
@@ -286,7 +349,6 @@ export function KegManagementSection() {
             )}
           </tbody>
         </table>
-        
       </div>
       
       {/* Add Keg Modal */}
@@ -294,32 +356,119 @@ export function KegManagementSection() {
         <AddKegModal 
           onClose={() => setShowAddModal(false)}
           onAdd={handleAddKeg}
+          suppliers={suppliers}
+          onSupplierCreated={fetchSuppliers}
         />
       )}
     </div>
   )
 }
 
-// Add Keg Modal
-function AddKegModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: { size: number; quantity: number; notes?: string }) => Promise<void> }) {
+// Add Keg Modal with Expense Options
+function AddKegModal({ 
+  onClose, 
+  onAdd,
+  suppliers,
+  onSupplierCreated,
+}: { 
+  onClose: () => void
+  onAdd: (data: {
+    size: number
+    quantity: number
+    notes?: string
+    costPerUnit?: number
+    supplierId?: string
+    invoiceNumber?: string
+    createExpense?: boolean
+    isPaid?: boolean
+    paymentMethod?: string
+  }) => Promise<void>
+  suppliers: Supplier[]
+  onSupplierCreated: () => void
+}) {
   const [size, setSize] = useState<number>(30)
   const [quantity, setQuantity] = useState(1)
   const [notes, setNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Expense fields
+  const [costPerUnit, setCostPerUnit] = useState('')
+  const [supplierId, setSupplierId] = useState('')
+  const [invoiceNumber, setInvoiceNumber] = useState('')
+  const [createExpense, setCreateExpense] = useState(true)
+  const [isPaid, setIsPaid] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState('BANK_TRANSFER')
+  
+  // New supplier
+  const [showNewSupplierInput, setShowNewSupplierInput] = useState(false)
+  const [newSupplierName, setNewSupplierName] = useState('')
+
+  const paymentMethods = [
+    { value: 'BANK_TRANSFER', label: '🏦 გადარიცხვა' },
+    { value: 'CASH', label: '💵 ნაღდი' },
+    { value: 'CARD', label: '💳 ბარათი' },
+    { value: 'CHECK', label: '📝 ჩეკი' },
+  ]
+
+  const totalAmount = quantity * (parseFloat(costPerUnit) || 0)
+
+  const handleCreateSupplier = async () => {
+    if (!newSupplierName.trim()) return
+    
+    try {
+      const response = await fetch('/api/finances/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newSupplierName.trim(),
+          category: 'equipment',
+        }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setSupplierId(data.supplier.id)
+        setShowNewSupplierInput(false)
+        setNewSupplierName('')
+        onSupplierCreated()
+        alert('✅ მომწოდებელი დაემატა!')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'მომწოდებლის დამატება ვერ მოხერხდა')
+      }
+    } catch (err) {
+      console.error('Create supplier error:', err)
+      alert('მომწოდებლის დამატება ვერ მოხერხდა')
+    }
+  }
   
   const handleAdd = async () => {
     if (quantity < 1) {
       alert('რაოდენობა უნდა იყოს მინიმუმ 1')
       return
     }
+    if (createExpense && (!costPerUnit || parseFloat(costPerUnit) <= 0)) {
+      alert('ხარჯის დასაფიქსირებლად საჭიროა ფასის მითითება')
+      return
+    }
     setIsSubmitting(true)
-    await onAdd({ size, quantity, notes })
+    await onAdd({ 
+      size, 
+      quantity, 
+      notes,
+      costPerUnit: costPerUnit ? parseFloat(costPerUnit) : undefined,
+      supplierId: supplierId || undefined,
+      invoiceNumber: invoiceNumber || undefined,
+      createExpense,
+      isPaid,
+      paymentMethod,
+    })
     setIsSubmitting(false)
   }
   
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-slate-800 rounded-xl p-6 w-full max-w-md">
+      <div className="bg-slate-800 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-white">🛢️ კეგის დამატება</h2>
         
         <div className="space-y-4">
@@ -350,6 +499,122 @@ function AddKegModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: { 
               className="w-full px-4 py-2 bg-slate-700 rounded-lg text-white"
             />
           </div>
+
+          <div>
+            <label className="block text-sm text-slate-400 mb-2">
+              ფასი (₾/კეგი) {createExpense && <span className="text-red-400">*</span>}
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={costPerUnit}
+              onChange={(e) => setCostPerUnit(e.target.value)}
+              placeholder="0.00"
+              className="w-full px-4 py-2 bg-slate-700 rounded-lg text-white"
+            />
+          </div>
+
+          {/* Expense Options */}
+          <div className="p-4 bg-slate-700/50 rounded-lg space-y-4">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="createExpense"
+                checked={createExpense}
+                onChange={(e) => setCreateExpense(e.target.checked)}
+                className="w-5 h-5 rounded border-slate-600"
+              />
+              <label htmlFor="createExpense" className="text-sm font-medium text-white cursor-pointer">
+                📊 ხარჯად დაფიქსირება
+              </label>
+            </div>
+
+            {createExpense && (
+              <>
+                {/* Supplier */}
+                <div>
+                  <label className="block text-sm text-slate-400 mb-2">მომწოდებელი</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={supplierId}
+                      onChange={(e) => setSupplierId(e.target.value)}
+                      className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                    >
+                      <option value="">-- აირჩიეთ --</option>
+                      {suppliers.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewSupplierInput(true)}
+                      className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white hover:bg-slate-600"
+                    >
+                      ➕
+                    </button>
+                  </div>
+                  
+                  {showNewSupplierInput && (
+                    <div className="mt-2 p-3 bg-slate-800 rounded-lg border border-slate-600">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newSupplierName}
+                          onChange={(e) => setNewSupplierName(e.target.value)}
+                          placeholder="ახალი მომწოდებელი"
+                          className="flex-1 px-3 py-2 bg-slate-700 rounded-lg text-white text-sm"
+                        />
+                        <Button size="sm" onClick={handleCreateSupplier}>შენახვა</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setShowNewSupplierInput(false)}>✕</Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Invoice */}
+                <div>
+                  <label className="block text-sm text-slate-400 mb-2">ინვოისის ნომერი</label>
+                  <input
+                    type="text"
+                    value={invoiceNumber}
+                    onChange={(e) => setInvoiceNumber(e.target.value)}
+                    placeholder="INV-2024-001"
+                    className="w-full px-4 py-2 bg-slate-700 rounded-lg text-white"
+                  />
+                </div>
+
+                {/* Is Paid */}
+                <div className="flex items-center gap-3 ml-4">
+                  <input
+                    type="checkbox"
+                    id="isPaid"
+                    checked={isPaid}
+                    onChange={(e) => setIsPaid(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-600"
+                  />
+                  <label htmlFor="isPaid" className="text-sm font-medium text-white cursor-pointer">
+                    ✅ გადახდილია
+                  </label>
+                </div>
+
+                {isPaid && (
+                  <div className="ml-4">
+                    <label className="block text-sm text-slate-400 mb-2">გადახდის მეთოდი</label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-full px-4 py-2 bg-slate-700 rounded-lg text-white"
+                    >
+                      {paymentMethods.map(m => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
           
           <div>
             <label className="block text-sm text-slate-400 mb-2">შენიშვნა</label>
@@ -361,6 +626,21 @@ function AddKegModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: { 
               className="w-full px-4 py-2 bg-slate-700 rounded-lg text-white placeholder-slate-400 resize-none"
             />
           </div>
+
+          {/* Summary */}
+          {createExpense && totalAmount > 0 && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400">ჯამი:</span>
+                <span className="text-2xl font-bold text-amber-400">
+                  ₾{totalAmount.toFixed(2)}
+                </span>
+              </div>
+              <div className="text-sm text-slate-400">
+                🛢️ {quantity} x {size}L კეგი
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="flex justify-end gap-3 mt-6">
@@ -373,12 +653,3 @@ function AddKegModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: { 
     </div>
   )
 }
-
-
-
-
-
-
-
-
-

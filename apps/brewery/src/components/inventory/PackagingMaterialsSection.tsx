@@ -21,6 +21,12 @@ interface Recipe {
   style?: string
 }
 
+interface Supplier {
+  id: string
+  name: string
+  category: string | null
+}
+
 interface InventoryItem {
   id: string
   name: string
@@ -47,6 +53,13 @@ const subTabConfig: Record<SubTab, { label: string; icon: any; color: string; ad
   caps: { label: 'თავსახურები', icon: CircleDot, color: 'text-amber-400', addLabel: 'თავსახურის დამატება' },
 }
 
+const paymentMethods = [
+  { value: 'BANK_TRANSFER', label: '🏦 გადარიცხვა' },
+  { value: 'CASH', label: '💵 ნაღდი' },
+  { value: 'CARD', label: '💳 ბარათი' },
+  { value: 'CHECK', label: '📝 ჩეკი' },
+]
+
 export function PackagingMaterialsSection() {
   const router = useRouter()
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('bottles')
@@ -61,6 +74,7 @@ export function PackagingMaterialsSection() {
   })
   const [loading, setLoading] = useState(true)
   const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
   
   // Add modal state
   const [showAddModal, setShowAddModal] = useState(false)
@@ -70,8 +84,17 @@ export function PackagingMaterialsSection() {
     quantity: '',
     reorderPoint: '',
     selectedRecipes: [] as string[],
+    // Expense fields
+    costPerUnit: '',
+    supplierId: '',
+    invoiceNumber: '',
+    createExpense: true,
+    isPaid: false,
+    paymentMethod: 'BANK_TRANSFER',
   })
   const [saving, setSaving] = useState(false)
+  const [showNewSupplierInput, setShowNewSupplierInput] = useState(false)
+  const [newSupplierName, setNewSupplierName] = useState('')
 
   // Fetch recipes
   const fetchRecipes = async () => {
@@ -86,23 +109,33 @@ export function PackagingMaterialsSection() {
     }
   }
 
+  // Fetch suppliers
+  const fetchSuppliers = async () => {
+    try {
+      const res = await fetch('/api/finances/suppliers')
+      if (res.ok) {
+        const data = await res.json()
+        setSuppliers(data.suppliers || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch suppliers:', err)
+    }
+  }
+
   // Fetch all packaging materials
   const fetchItems = async () => {
     setLoading(true)
     try {
-      // Fetch all PACKAGING category items
       const packagingRes = await fetch('/api/inventory?category=PACKAGING')
       const packagingData = packagingRes.ok ? await packagingRes.json() : { items: [] }
       
       const allItems = packagingData.items || []
       console.log('[PackagingMaterials] Fetched items:', allItems)
       
-      // Helper to get quantity from various possible fields
       const getQuantity = (item: any) => {
         return item.quantity ?? item.cachedBalance ?? item.balance ?? item.currentStock ?? 0
       }
       
-      // Filter by metadata.type
       const bottles = allItems.filter((item: any) => {
         const type = item.metadata?.type || ''
         const bottleType = item.metadata?.bottleType || ''
@@ -122,7 +155,6 @@ export function PackagingMaterialsSection() {
         metadata: item.metadata,
       }))
       
-      // Filter labels by metadata.type
       const labels = allItems.filter((item: any) => {
         const type = item.metadata?.type || ''
         const name = (item.name || '').toLowerCase()
@@ -140,7 +172,6 @@ export function PackagingMaterialsSection() {
         metadata: item.metadata,
       }))
       
-      // Filter caps by metadata.type
       const caps = allItems.filter((item: any) => {
         const type = item.metadata?.type || ''
         const name = (item.name || '').toLowerCase()
@@ -158,11 +189,7 @@ export function PackagingMaterialsSection() {
         metadata: item.metadata,
       }))
       
-      setItems({
-        bottles,
-        labels,
-        caps,
-      })
+      setItems({ bottles, labels, caps })
     } catch (error) {
       console.error('Failed to fetch packaging materials:', error)
     } finally {
@@ -178,7 +205,15 @@ export function PackagingMaterialsSection() {
       quantity: '',
       reorderPoint: '',
       selectedRecipes: [],
+      costPerUnit: '',
+      supplierId: '',
+      invoiceNumber: '',
+      createExpense: true,
+      isPaid: false,
+      paymentMethod: 'BANK_TRANSFER',
     })
+    setShowNewSupplierInput(false)
+    setNewSupplierName('')
     setShowAddModal(true)
   }
 
@@ -192,17 +227,54 @@ export function PackagingMaterialsSection() {
     }))
   }
 
+  // Create new supplier
+  const handleCreateSupplier = async () => {
+    if (!newSupplierName.trim()) return
+    
+    try {
+      const response = await fetch('/api/finances/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newSupplierName.trim(),
+          category: 'packaging',
+        }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setAddForm(prev => ({ ...prev, supplierId: data.supplier.id }))
+        setShowNewSupplierInput(false)
+        setNewSupplierName('')
+        fetchSuppliers()
+        alert('✅ მომწოდებელი დაემატა!')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'მომწოდებლის დამატება ვერ მოხერხდა')
+      }
+    } catch (err) {
+      console.error('Create supplier error:', err)
+      alert('მომწოდებლის დამატება ვერ მოხერხდა')
+    }
+  }
+
   // Submit new item
   const submitAdd = async () => {
     if (!addForm.name) {
       alert('სახელი აუცილებელია')
       return
     }
+
+    // Validate expense fields
+    if (addForm.createExpense && addForm.quantity && parseInt(addForm.quantity) > 0) {
+      if (!addForm.costPerUnit || parseFloat(addForm.costPerUnit) <= 0) {
+        alert('ხარჯის დასაფიქსირებლად საჭიროა ფასის მითითება')
+        return
+      }
+    }
     
     setSaving(true)
     try {
-      // All packaging materials use PACKAGING category
-      // Type is stored in metadata
       let metadata: any = {
         recipeIds: addForm.selectedRecipes,
         size: addForm.size,
@@ -210,7 +282,6 @@ export function PackagingMaterialsSection() {
       
       if (activeSubTab === 'bottles') {
         metadata.type = 'bottle'
-        // Set bottleType for packaging compatibility
         if (addForm.size === '500ml') metadata.bottleType = 'bottle_500'
         else if (addForm.size === '330ml') metadata.bottleType = 'bottle_330'
         else if (addForm.size === '750ml') metadata.bottleType = 'bottle_750'
@@ -223,7 +294,7 @@ export function PackagingMaterialsSection() {
           metadata.bottleType = 'can_330'
           metadata.type = 'can'
         }
-        else metadata.bottleType = 'bottle_500' // default
+        else metadata.bottleType = 'bottle_500'
       } else if (activeSubTab === 'labels') {
         metadata.type = 'label'
       } else if (activeSubTab === 'caps') {
@@ -233,30 +304,66 @@ export function PackagingMaterialsSection() {
       const payload: any = {
         name: addForm.name,
         sku: `PKG-${Date.now()}`,
-        category: 'PACKAGING', // Always PACKAGING for all types
+        category: 'PACKAGING',
         unit: 'ცალი',
-        quantity: addForm.quantity ? parseInt(addForm.quantity) : 0,
+        quantity: 0, // Start with 0, will add via purchase
+        costPerUnit: addForm.costPerUnit ? parseFloat(addForm.costPerUnit) : undefined,
         metadata,
       }
       
-      // Only add reorderPoint if it's a valid number
       if (addForm.reorderPoint && parseInt(addForm.reorderPoint) > 0) {
         payload.reorderPoint = parseInt(addForm.reorderPoint)
       }
       
+      // Step 1: Create inventory item
       const res = await fetch('/api/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
       
-      if (res.ok) {
-        setShowAddModal(false)
-        fetchItems()
-      } else {
+      if (!res.ok) {
         const error = await res.json()
         alert(error.error || 'დამატება ვერ მოხერხდა')
+        return
       }
+
+      const createResult = await res.json()
+      const itemId = createResult.item?.id || createResult.id
+
+      // Step 2: Create purchase record if quantity > 0
+      if (addForm.quantity && parseInt(addForm.quantity) > 0 && itemId) {
+        const quantity = parseInt(addForm.quantity)
+        const unitPrice = addForm.costPerUnit ? parseFloat(addForm.costPerUnit) : 0
+
+        const purchasePayload = {
+          itemId: itemId,
+          quantity: quantity,
+          unitPrice: unitPrice,
+          totalAmount: quantity * unitPrice,
+          supplierId: addForm.supplierId || undefined,
+          date: new Date().toISOString().split('T')[0],
+          invoiceNumber: addForm.invoiceNumber || undefined,
+          notes: `საწყისი მარაგი: ${addForm.name}`,
+          createExpense: addForm.createExpense,
+          isPaid: addForm.isPaid,
+          paymentMethod: addForm.paymentMethod,
+        }
+
+        const purchaseRes = await fetch('/api/inventory/purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(purchasePayload),
+        })
+
+        if (!purchaseRes.ok) {
+          console.error('Purchase record failed')
+          alert('მასალა დაემატა, მაგრამ შესყიდვის ჩაწერა ვერ მოხერხდა')
+        }
+      }
+
+      setShowAddModal(false)
+      fetchItems()
     } catch (error) {
       console.error('Failed to add item:', error)
       alert('დამატება ვერ მოხერხდა')
@@ -273,12 +380,16 @@ export function PackagingMaterialsSection() {
   useEffect(() => {
     fetchItems()
     fetchRecipes()
+    fetchSuppliers()
   }, [])
 
   // Get current tab items
   const currentItems = items[activeSubTab]
   const currentConfig = subTabConfig[activeSubTab]
   const total = currentItems.reduce((sum, i) => sum + i.quantity, 0)
+
+  // Calculate total amount for summary
+  const totalAmount = (parseInt(addForm.quantity) || 0) * (parseFloat(addForm.costPerUnit) || 0)
 
   // Get recipe names for item
   const getRecipeNames = (item: InventoryItem): string[] => {
@@ -305,7 +416,6 @@ export function PackagingMaterialsSection() {
           {(Object.keys(subTabConfig) as SubTab[]).map(tab => {
             const config = subTabConfig[tab]
             const count = items[tab].length
-            const tabTotal = items[tab].reduce((sum, i) => sum + i.quantity, 0)
             
             return (
               <button
@@ -517,7 +627,7 @@ export function PackagingMaterialsSection() {
                 </select>
               </div>
 
-              {/* Quantity */}
+              {/* Quantity and Min Stock */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-text-secondary mb-1">
@@ -546,6 +656,148 @@ export function PackagingMaterialsSection() {
                   />
                 </div>
               </div>
+
+              {/* Cost per unit */}
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">
+                  ფასი (₾/ცალი) {addForm.createExpense && addForm.quantity && <span className="text-red-400">*</span>}
+                </label>
+                <input
+                  type="number"
+                  step="0.001"
+                  value={addForm.costPerUnit}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, costPerUnit: e.target.value }))}
+                  className="w-full px-4 py-2 rounded-lg bg-bg-card border border-border focus:border-copper focus:ring-1 focus:ring-copper outline-none"
+                  placeholder="0.00"
+                  min="0"
+                />
+              </div>
+
+              {/* Expense Options */}
+              <div className="p-4 bg-slate-700/30 rounded-xl space-y-4">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="createExpense"
+                    checked={addForm.createExpense}
+                    onChange={(e) => setAddForm(prev => ({ ...prev, createExpense: e.target.checked }))}
+                    className="w-5 h-5 rounded border-slate-600"
+                  />
+                  <label htmlFor="createExpense" className="text-sm font-medium cursor-pointer">
+                    📊 ხარჯად დაფიქსირება
+                  </label>
+                </div>
+
+                {addForm.createExpense && (
+                  <>
+                    {/* Supplier Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-text-secondary mb-1">
+                        მომწოდებელი
+                      </label>
+                      <div className="flex gap-2">
+                        <select
+                          value={addForm.supplierId}
+                          onChange={(e) => setAddForm(prev => ({ ...prev, supplierId: e.target.value }))}
+                          className="flex-1 px-4 py-2 rounded-lg bg-bg-card border border-border focus:border-copper outline-none"
+                        >
+                          <option value="">-- აირჩიეთ --</option>
+                          {suppliers.map(s => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => setShowNewSupplierInput(true)}
+                          className="px-4 py-2 bg-bg-card border border-border rounded-lg hover:bg-bg-tertiary transition-colors"
+                        >
+                          ➕
+                        </button>
+                      </div>
+                      
+                      {showNewSupplierInput && (
+                        <div className="mt-2 p-3 bg-bg-tertiary rounded-lg border border-border">
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={newSupplierName}
+                              onChange={(e) => setNewSupplierName(e.target.value)}
+                              placeholder="ახალი მომწოდებელი"
+                              className="flex-1 px-3 py-2 bg-bg-card border border-border rounded-lg text-sm"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && newSupplierName.trim()) {
+                                  handleCreateSupplier()
+                                }
+                              }}
+                            />
+                            <Button size="sm" onClick={handleCreateSupplier}>შენახვა</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setShowNewSupplierInput(false)}>✕</Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Invoice Number */}
+                    <div>
+                      <label className="block text-sm font-medium text-text-secondary mb-1">
+                        ინვოისის ნომერი
+                      </label>
+                      <input
+                        type="text"
+                        value={addForm.invoiceNumber}
+                        onChange={(e) => setAddForm(prev => ({ ...prev, invoiceNumber: e.target.value }))}
+                        className="w-full px-4 py-2 rounded-lg bg-bg-card border border-border focus:border-copper outline-none"
+                        placeholder="INV-2024-001"
+                      />
+                    </div>
+
+                    {/* Is Paid */}
+                    <div className="flex items-center gap-3 ml-4">
+                      <input
+                        type="checkbox"
+                        id="isPaid"
+                        checked={addForm.isPaid}
+                        onChange={(e) => setAddForm(prev => ({ ...prev, isPaid: e.target.checked }))}
+                        className="w-5 h-5 rounded border-slate-600"
+                      />
+                      <label htmlFor="isPaid" className="text-sm font-medium cursor-pointer">
+                        ✅ გადახდილია
+                      </label>
+                    </div>
+
+                    {/* Payment Method */}
+                    {addForm.isPaid && (
+                      <div className="ml-4">
+                        <label className="block text-sm font-medium text-text-secondary mb-1">
+                          გადახდის მეთოდი
+                        </label>
+                        <select
+                          value={addForm.paymentMethod}
+                          onChange={(e) => setAddForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                          className="w-full px-4 py-2 rounded-lg bg-bg-card border border-border focus:border-copper outline-none"
+                        >
+                          {paymentMethods.map(m => (
+                            <option key={m.value} value={m.value}>{m.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Summary */}
+              {addForm.createExpense && totalAmount > 0 && (
+                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-text-muted">ჯამი:</span>
+                    <span className="text-2xl font-bold text-amber-400">₾{totalAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="text-sm text-text-muted">
+                    {currentConfig.label}: {parseInt(addForm.quantity || '0').toLocaleString()} ცალი
+                  </div>
+                </div>
+              )}
 
               {/* Recipe Selection */}
               <div>

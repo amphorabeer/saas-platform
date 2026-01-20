@@ -221,15 +221,14 @@ const mockMovements: StockMovement[] = [
 
 
 const CATEGORY_ICONS: Record<string, string> = {
-
   grain: '🌾',
-
+  malt: '🌾',
   hop: '🌿',
-
+  hops: '🌿',
   yeast: '🧪',
-
-  adjunct: '⚗️',
-
+  adjunct: '🧫',
+  water_chemistry: '💧',
+  water: '💧',
   packaging: '📦',
 
 }
@@ -266,66 +265,90 @@ const findIngredientSpecs = (item: any) => {
 }
 
 // Helper function to detect ingredient icon from name/category/sku
+// Helper function to detect ingredient icon from name/category/sku
 const getIngredientIcon = (item: any): string => {
   const name = (item?.name || '').toLowerCase()
   const category = (item?.category || '').toLowerCase()
+  const ingredientType = (item?.ingredientType || '').toLowerCase()
   const sku = (item?.sku || item?.id || '').toLowerCase()
   
-  // Check SKU prefix first
-  if (sku.startsWith('hop_')) return '🌿'
-  if (sku.startsWith('yeast_')) return '🧪'
-  if (sku.startsWith('malt_')) return '🌾'
-  if (sku.startsWith('adjunct_') || sku.startsWith('water_chem')) return '🧫'
+  // 1. First check ingredientType field (most reliable from API)
+  if (ingredientType === 'malt') return '🌾'
+  if (ingredientType === 'hops') return '🌿'
+  if (ingredientType === 'yeast') return '🧪'
+  if (ingredientType === 'adjunct') return '🧫'
+  if (ingredientType === 'water_chemistry') return '💧'
   
-  // Check category
+  // 2. Check API category format (lowercase)
+  if (category === 'malt' || category === 'grain') return '🌾'
   if (category === 'hops' || category === 'hop') return '🌿'
   if (category === 'yeast') return '🧪'
-  if (category === 'malt' || category === 'grain') return '🌾'
   if (category === 'adjunct') return '🧫'
-  if (category === 'water_chemistry') return '💧'
+  if (category === 'water_chemistry' || category === 'water') return '💧'
+  if (category === 'packaging') return '📦'
   
-  // Hop varieties
+  // 3. Check SKU prefix
+  if (sku.startsWith('hop_') || sku.startsWith('hops_')) return '🌿'
+  if (sku.startsWith('yeast_')) return '🧪'
+  if (sku.startsWith('malt_') || sku.startsWith('grain_')) return '🌾'
+  if (sku.startsWith('adjunct_')) return '🧫'
+  if (sku.startsWith('water_')) return '💧'
+  
+  // 4. Check name patterns - Hops
   const hopNames = [
     'magnum', 'cascade', 'centennial', 'citra', 'mosaic', 'simcoe', 'amarillo',
-    'saaz', 'hallertau', 'tettnang', 'spalt', 'perle', 'hersbrucker', 'premiant',
-    'sládek', 'fuggle', 'golding', 'mittelfrüh', 'mittelfruh', 'tradition',
-    'mandarina', 'polaris', 'herkules', 'columbus', 'chinook', 'warrior', 'nugget'
+    'saaz', 'hallertau', 'hallertauer', 'tettnang', 'spalt', 'perle', 'hersbrucker',
+    'premiant', 'sládek', 'mittelfrüh', 'mittelfruh', 'fuggle', 'golding',
+    'tradition', 'mandarina', 'polaris', 'herkules', 'columbus', 'chinook',
+    'warrior', 'nugget', 'willamette', 'northern brewer',
+    'სვია'
   ]
   if (hopNames.some(h => name.includes(h))) return '🌿'
+  if (name.includes('hop')) return '🌿'
   
-  // Yeast strains
+  // 5. Yeast strains
   const yeastNames = [
-    'safale', 'saflager', 'safbrew', 'wlp', 'wyeast', 'lallemand', 'lalbrew',
-    'fermentis', 'nottingham', 'us-05', 'us-04', 's-04', 's-23', 'w-34',
-    't-58', 'be-256', 'wb-06', 'belle saison', 'abbaye'
+    'safale', 'saflager', 'safbrew', 'safcider', 'wlp', 'wyeast', 'omega',
+    'lallemand', 'lalbrew', 'lalvin', 'fermentis', 'mangrove jack',
+    'nottingham', 'windsor', 'london ale', 'us-05', 'us-04', 's-04',
+    's-23', 's-33', 'w-34', 'k-97', 'm-44', 't-58', 'be-256', 'be-134',
+    'wb-06', 'belle saison', 'abbaye', 'verdant',
+    'საფუარი'
   ]
   if (yeastNames.some(y => name.includes(y))) return '🧪'
+  if (name.includes('yeast')) return '🧪'
   
-  // Malt patterns
+  // 6. Malt patterns
   const maltNames = [
-    'malt', 'pilsner', 'munich', 'vienna', 'pale ale', 'wheat',
-    'caramel', 'crystal', 'cara', 'chocolate', 'black', 'roast',
-    'biscuit', 'aromatic', 'melanoidin'
+    'malt', 'pilsner', 'pilsen', 'munich', 'vienna', 'pale ale',
+    'wheat', 'rye', 'oat', 'barley', 'caramel', 'crystal', 'cara',
+    'chocolate', 'black', 'roast', 'biscuit', 'aromatic', 'melanoidin',
+    'ალაო', 'მარცვლეული'
   ]
   if (maltNames.some(m => name.includes(m))) return '🌾'
   
-  // Adjuncts
+  // 7. Water chemistry
+  const waterChemNames = [
+    'gypsum', 'calcium', 'chloride', 'sulfate', 'acid', 'lactic',
+    'phosphoric', 'campden', 'salt', 'magnesium', 'bicarbonate', 'chalk',
+    'წყლის ქიმია'
+  ]
+  if (waterChemNames.some(w => name.includes(w))) return '💧'
+  
+  // 8. Adjuncts
   const adjunctNames = [
-    'sugar', 'dextrose', 'honey', 'gypsum', 'calcium', 'chloride',
-    'irish moss', 'whirlfloc', 'gelatin', 'coriander', 'orange peel'
+    'sugar', 'dextrose', 'honey', 'molasses', 'candi', 'lactose',
+    'maltodextrin', 'irish moss', 'whirlfloc', 'gelatin', 'biofine',
+    'coriander', 'orange peel', 'spice'
   ]
   if (adjunctNames.some(a => name.includes(a))) return '🧫'
   
-  // Generic fallbacks
-  if (name.includes('hop')) return '🌿'
-  if (name.includes('yeast')) return '🧪'
-  
-  // Fallback to category config if available
+  // 10. Fallback to category config if available
   if (item?.category && CATEGORY_ICONS[item.category]) {
     return CATEGORY_ICONS[item.category]
   }
   
-  return '📦'
+  return '📦' // Default
 }
 
 
@@ -416,17 +439,46 @@ export default function IngredientDetailPage() {
           id: apiItem.id,
           name: apiItem.name,
           category: (() => {
-            // Map database category to page category
+            // 1. First check ingredientType field (most reliable from API)
+            const ingredientType = (apiItem.ingredientType || '').toUpperCase()
+            if (ingredientType === 'MALT') return 'grain'
+            if (ingredientType === 'HOPS') return 'hop'
+            if (ingredientType === 'YEAST') return 'yeast'
+            if (ingredientType === 'ADJUNCT') return 'adjunct'
+            if (ingredientType === 'WATER_CHEMISTRY') return 'water_chemistry'
+            
+            // 2. Check direct category mapping
             const cat = (apiItem.category || '').toLowerCase()
+            if (cat === 'malt' || cat === 'grain') return 'grain'
+            if (cat === 'hops' || cat === 'hop') return 'hop'
+            if (cat === 'yeast') return 'yeast'
+            if (cat === 'adjunct') return 'adjunct'
+            if (cat === 'water_chemistry') return 'water_chemistry'
+            if (cat === 'packaging') return 'packaging'
+            
+            // 3. Fallback: detect from name
             if (cat === 'raw_material') {
-              // Determine sub-category from name
               const name = (apiItem.name || '').toLowerCase()
-              if (name.includes('malt') || name.includes('grain') || name.includes('pilsner') || name.includes('munich') || name.includes('vienna')) return 'grain'
-              if (name.includes('hop') || name.includes('magnum') || name.includes('cascade')) return 'hop'
-              if (name.includes('yeast') || name.includes('safale') || name.includes('saflager')) return 'yeast'
+              
+              // Hops
+              const hopNames = ['hop', 'magnum', 'cascade', 'citra', 'mosaic', 'saaz', 'hallertau', 'სვია']
+              if (hopNames.some(h => name.includes(h))) return 'hop'
+              
+              // Yeast
+              const yeastNames = ['yeast', 'safale', 'saflager', 'fermentis', 'საფუარი']
+              if (yeastNames.some(y => name.includes(y))) return 'yeast'
+              
+              // Malt
+              const maltNames = ['malt', 'pilsner', 'munich', 'ალაო', 'მარცვლეული']
+              if (maltNames.some(m => name.includes(m))) return 'grain'
+              
+              // Water chemistry
+              const waterNames = ['gypsum', 'calcium', 'წყლის ქიმია']
+              if (waterNames.some(w => name.includes(w))) return 'water_chemistry'
+              
               return 'adjunct'
             }
-            if (cat === 'packaging') return 'packaging'
+            
             return 'adjunct'
           })() as any,
           currentStock: apiItem.balance || 0,
@@ -629,15 +681,46 @@ export default function IngredientDetailPage() {
           id: apiItem.id,
           name: apiItem.name,
           category: (() => {
+            // 1. First check ingredientType field (most reliable from API)
+            const ingredientType = (apiItem.ingredientType || '').toUpperCase()
+            if (ingredientType === 'MALT') return 'grain'
+            if (ingredientType === 'HOPS') return 'hop'
+            if (ingredientType === 'YEAST') return 'yeast'
+            if (ingredientType === 'ADJUNCT') return 'adjunct'
+            if (ingredientType === 'WATER_CHEMISTRY') return 'water_chemistry'
+            
+            // 2. Check direct category mapping
             const cat = (apiItem.category || '').toLowerCase()
+            if (cat === 'malt' || cat === 'grain') return 'grain'
+            if (cat === 'hops' || cat === 'hop') return 'hop'
+            if (cat === 'yeast') return 'yeast'
+            if (cat === 'adjunct') return 'adjunct'
+            if (cat === 'water_chemistry') return 'water_chemistry'
+            if (cat === 'packaging') return 'packaging'
+            
+            // 3. Fallback: detect from name
             if (cat === 'raw_material') {
               const name = (apiItem.name || '').toLowerCase()
-              if (name.includes('malt') || name.includes('grain') || name.includes('pilsner') || name.includes('munich') || name.includes('vienna')) return 'grain'
-              if (name.includes('hop') || name.includes('magnum') || name.includes('cascade')) return 'hop'
-              if (name.includes('yeast') || name.includes('safale') || name.includes('saflager')) return 'yeast'
+              
+              // Hops
+              const hopNames = ['hop', 'magnum', 'cascade', 'citra', 'mosaic', 'saaz', 'hallertau', 'სვია']
+              if (hopNames.some(h => name.includes(h))) return 'hop'
+              
+              // Yeast
+              const yeastNames = ['yeast', 'safale', 'saflager', 'fermentis', 'საფუარი']
+              if (yeastNames.some(y => name.includes(y))) return 'yeast'
+              
+              // Malt
+              const maltNames = ['malt', 'pilsner', 'munich', 'ალაო', 'მარცვლეული']
+              if (maltNames.some(m => name.includes(m))) return 'grain'
+              
+              // Water chemistry
+              const waterNames = ['gypsum', 'calcium', 'წყლის ქიმია']
+              if (waterNames.some(w => name.includes(w))) return 'water_chemistry'
+              
               return 'adjunct'
             }
-            if (cat === 'packaging') return 'packaging'
+            
             return 'adjunct'
           })() as any,
           currentStock: apiItem.balance || 0,
