@@ -126,7 +126,10 @@ export async function POST(req: NextRequest) {
     let superAdminError = null
 
     try {
-      const superAdminResponse = await fetch(`${SUPER_ADMIN_API_URL}/api/organizations`, {
+      const url = `${SUPER_ADMIN_API_URL}/api/organizations`
+      console.log('[Register] Calling Super Admin API:', url)
+      
+      const superAdminResponse = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,9 +142,8 @@ export async function POST(req: NextRequest) {
           plan: validated.plan,
           status: 'trial',
           modules: ['BREWERY'],
-          // დამატებითი ინფორმაცია Super Admin-ისთვის
-          tenantId: result.tenant.id, // Neon-ის tenant ID
-          tenantCode: tenantCode,     // BREW-XXXX კოდი
+          tenantId: result.tenant.id,
+          tenantCode: tenantCode,
           company: validated.company,
           taxId: validated.taxId,
           phone: validated.phone,
@@ -152,6 +154,7 @@ export async function POST(req: NextRequest) {
           bankName: validated.bankName,
           bankAccount: validated.bankAccount,
         }),
+        signal: AbortSignal.timeout(10000), // 10 second timeout
       })
 
       if (superAdminResponse.ok) {
