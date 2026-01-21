@@ -71,7 +71,15 @@ const mockRecipes: Recipe[] = centralRecipes.map((r, index) => ({
   ingredients: r.ingredients.map((ing, i) => ({
     id: String(i + 1),
     name: ing.name,
-    type: ing.category === 'malt' ? 'grain' : ing.category === 'hops' ? 'hop' : ing.category as 'yeast' | 'adjunct' | 'water',
+    type: (() => {
+      const cat = (ing.category || '').toLowerCase()
+      const ingType = ((ing as any).ingredientType || '').toUpperCase()
+      if (ingType === 'YEAST' || cat === 'yeast') return 'yeast'
+      if (ingType === 'HOPS' || cat === 'hops' || cat === 'hop') return 'hop'
+      if (ingType === 'MALT' || cat === 'malt' || cat === 'grain') return 'grain'
+      if (ingType === 'WATER_CHEMISTRY' || cat === 'water_chemistry' || cat === 'water') return 'water'
+      return 'adjunct'
+    })(),
     amount: ing.amount,
     unit: ing.unit,
     addTime: ing.additionTime ? `${ing.additionTime} წთ` : undefined,
@@ -113,15 +121,54 @@ export default function RecipesPage() {
         const data = await response.json()
         const fetchedRecipes = data.recipes || data || []
         console.log('[RecipesPage] Fetched recipes:', fetchedRecipes.length)
-        setRecipes(fetchedRecipes)
+        
+        // Transform API recipes to match our Recipe interface
+        const transformedRecipes: Recipe[] = fetchedRecipes.map((r: any) => ({
+          ...r,
+          ingredients: (r.ingredients || []).map((ing: any, i: number) => ({
+            id: ing.id || String(i + 1),
+            name: ing.name,
+            type: (() => {
+              const cat = (ing.category || '').toLowerCase()
+              const ingType = (ing.ingredientType || '').toUpperCase()
+              const name = (ing.name || '').toLowerCase()
+              
+              // Check ingredientType first
+              if (ingType === 'YEAST') return 'yeast'
+              if (ingType === 'HOPS') return 'hop'
+              if (ingType === 'MALT') return 'grain'
+              if (ingType === 'WATER_CHEMISTRY') return 'water'
+              if (ingType === 'ADJUNCT') return 'adjunct'
+              
+              // Check category
+              if (cat === 'yeast') return 'yeast'
+              if (cat === 'hops' || cat === 'hop') return 'hop'
+              if (cat === 'malt' || cat === 'grain') return 'grain'
+              if (cat === 'water_chemistry' || cat === 'water') return 'water'
+              if (cat === 'adjunct') return 'adjunct'
+              
+              // Fallback: check name patterns
+              const yeastNames = ['safale', 'saflager', 'safbrew', 'yeast', 'fermentis', 'lallemand', 'wyeast', 'wlp', 'us-05', 's-04', 'w-34', 't-58', 'საფუარი']
+              if (yeastNames.some(y => name.includes(y))) return 'yeast'
+              
+              const hopNames = ['hop', 'cascade', 'citra', 'mosaic', 'saaz', 'magnum', 'hallertau', 'სვია']
+              if (hopNames.some(h => name.includes(h))) return 'hop'
+              
+              return 'grain'
+            })(),
+            amount: ing.amount,
+            unit: ing.unit,
+            addTime: ing.additionTime ? `${ing.additionTime} წთ` : undefined,
+          })),
+        }))
+        
+        setRecipes(transformedRecipes)
       } else {
         console.error('[RecipesPage] Failed to fetch recipes:', response.status)
-        // Fallback to mock data if API fails
         setRecipes(mockRecipes)
       }
     } catch (error) {
       console.error('[RecipesPage] Fetch recipes error:', error)
-      // Fallback to mock data on error
       setRecipes(mockRecipes)
     } finally {
       setIsLoading(false)

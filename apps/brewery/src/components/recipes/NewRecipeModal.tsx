@@ -428,9 +428,29 @@ export function NewRecipeModal({ onClose, onSave, editingRecipe }: NewRecipeModa
       }
       
       // Check name for yeast
-      const yeastNames = ['yeast', 'safale', 'fermentis', 'wyeast', 'white labs', 'lallemand', 'mangrove']
+      const yeastNames = [
+        'yeast', 'safale', 'saflager', 'safbrew', 'fermentis', 'wyeast', 'white labs', 'lallemand', 'mangrove',
+        'us-05', 'us05', 's-04', 's04', 'w-34', 'w34', 't-58', 't58', 's-23', 's23', 'k-97', 'k97',
+        'wlp', 'საფუარი'
+      ]
       if (yeastNames.some(y => name.includes(y))) {
         detectedType = 'yeast'
+      }
+      
+      // Also check item.ingredientType if available (from database)
+      if (item.ingredientType) {
+        const typeMap: Record<string, Ingredient['type']> = {
+          'YEAST': 'yeast',
+          'HOPS': 'hop',
+          'HOP': 'hop',
+          'MALT': 'grain',
+          'GRAIN': 'grain',
+          'ADJUNCT': 'adjunct',
+          'OTHER': 'adjunct'
+        }
+        if (typeMap[item.ingredientType]) {
+          detectedType = typeMap[item.ingredientType]
+        }
       }
       
       // If item has category from inventory, use it
@@ -529,7 +549,7 @@ export function NewRecipeModal({ onClose, onSave, editingRecipe }: NewRecipeModa
         if (specs.flocculation) setIngredientFlocculation(specs.flocculation)
       }
       
-      console.log('✅ Populated form with ingredient:', item.name, 'as', detectedType)
+      console.log('✅ Populated form with ingredient:', item.name, 'as', detectedType, '(ingredientType:', item.ingredientType || 'N/A', ')')
       
       // Close picker and show form (user will enter amount and click "დამატება")
       setShowIngredientPicker(false)
