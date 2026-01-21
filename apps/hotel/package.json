@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3010",
-    "build": "prisma generate && next build --no-lint",
+    "build": "prisma generate --schema=./prisma/schema.prisma && next build --no-lint",
     "start": "next start",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate --schema=./prisma/schema.prisma",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },
