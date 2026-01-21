@@ -10,6 +10,9 @@ const nextConfig = {
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
+    outputFileTracingIncludes: {
+      '/api/**/*': ['./node_modules/.prisma/**/*'],
+    },
   },
 }
 
