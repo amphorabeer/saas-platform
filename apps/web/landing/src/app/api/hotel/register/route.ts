@@ -1,13 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-import { PrismaClient } from '../../../node_modules/.prisma/client'
-import { sendEmail, generateHotelWelcomeEmail } from '../../lib/email'
-
-// Create Prisma client directly (using local landing schema)
-const prisma = new PrismaClient()
-console.log('🔍 Prisma models:', Object.keys(prisma).filter(k => !k.startsWith('_') && !k.startsWith('$')).sort())
-console.log('🔍 Has organization?', 'organization' in prisma)
+import { sendEmail, generateHotelWelcomeEmail } from '@/lib/email'
 
 // Generate unique 4-digit hotel code
 async function generateUniqueHotelCode(): Promise<string> {
@@ -25,27 +20,22 @@ async function generateUniqueHotelCode(): Promise<string> {
   return code
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Handle OPTIONS preflight
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end()
-  }
-  
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
-  
+export async function POST(req: NextRequest) {
   try {
+    const body = await req.json()
     const { 
       name, email, password, organizationName, module, plan,
       company, taxId, address, city, country, phone, website, bankName, bankAccount
-    } = req.body
+    } = body
 
     console.log('📥 Registration request:', { name, email, organizationName })
 
     // Validation
     if (!name || !email || !password || !organizationName) {
-      return res.status(400).json({ error: 'ყველა ველის შევსება აუცილებელია' })
+      return NextResponse.json(
+        { error: 'ყველა ველის შევსება აუცილებელია' },
+        { status: 400 }
+      )
     }
 
     // Check if email already exists
@@ -54,7 +44,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
 
     if (existingUser) {
-      return res.status(400).json({ error: 'ეს ელ-ფოსტა უკვე რეგისტრირებულია' })
+      return NextResponse.json(
+        { error: 'ეს ელ-ფოსტა უკვე რეგისტრირებულია' },
+        { status: 400 }
+      )
     }
 
     // Generate unique hotel code
@@ -169,18 +162,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // არ ვაბრუნებთ error-ს - მომხმარებელი მაინც დარეგისტრირდა
     }
 
-    return res.status(201).json({
+    return NextResponse.json({
       success: true,
       userId: result.user.id,
       organizationId: result.organization.id,
       tenantId: result.organization.tenantId,
       hotelCode: result.organization.hotelCode,
       message: `რეგისტრაცია წარმატებით დასრულდა! თქვენი სასტუმროს კოდია: ${hotelCode}`
-    })
+    }, { status: 201 })
 
   } catch (error: any) {
     console.error('❌ Registration error:', error)
-    return res.status(500).json({ error: 'რეგისტრაციის შეცდომა: ' + error.message })
+    return NextResponse.json(
+      { error: 'რეგისტრაციის შეცდომა: ' + error.message },
+      { status: 500 }
+    )
   }
 }
-

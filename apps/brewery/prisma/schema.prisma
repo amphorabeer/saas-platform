@@ -8,36 +8,56 @@ datasource db {
 }
 
 model Tenant {
-  id        String          @id @default(cuid())
-  name      String
-  slug      String          @unique
-  plan      PlanType        @default(STARTER)
-  isActive  Boolean         @default(true)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  batches   Batch[]
-  customers Customer[]
-  equipment Equipment[]
-  inventory InventoryItem[]
-  recipes   Recipe[]
-  orders    SalesOrder[]
-  tanks     Tank[]
-  users     User[]
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  plan        PlanType        @default(STARTER)
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  code        String          @unique
+  legalName   String?
+  taxId       String?
+  phone       String?
+  email       String?
+  address     String?
+  website     String?
+  bankName    String?
+  bankAccount String?
+  bankSwift   String?
+  batches     Batch[]
+  Budget      Budget[]
+  customers   Customer[]
+  equipment   Equipment[]
+  Expense     Expense[]
+  inventory   InventoryItem[]
+  Invoice     Invoice[]
+  Keg         Keg[]
+  Payment     Payment[]
+  recipes     Recipe[]
+  orders      SalesOrder[]
+  Supplier    Supplier[]
+  tanks       Tank[]
+  Transaction Transaction[]
+  users       User[]
 
   @@index([slug])
+  @@index([code])
 }
 
 model User {
-  id        String   @id @default(cuid())
-  tenantId  String
-  email     String
-  name      String
-  role      UserRole @default(OPERATOR)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  password  String?
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  id               String    @id @default(cuid())
+  tenantId         String
+  email            String
+  name             String
+  role             UserRole  @default(OPERATOR)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  password         String?
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  tenant           Tenant    @relation(fields: [tenantId], references: [id])
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -52,8 +72,8 @@ model Recipe {
   abv         Decimal?           @db.Decimal(4, 2)
   ibu         Int?
   color       Int?
-  og          Decimal?           @db.Decimal(6, 3)
-  fg          Decimal?           @db.Decimal(6, 3)
+  og          Decimal?           @db.Decimal(5, 4)
+  fg          Decimal?           @db.Decimal(5, 4)
   batchSize   Decimal?           @db.Decimal(10, 2)
   boilTime    Int?
   efficiency  Decimal?           @db.Decimal(5, 2)
@@ -144,9 +164,10 @@ model Batch {
   recipeId              String
   status                BatchStatus       @default(PLANNED)
   volume                Decimal           @db.Decimal(10, 2)
-  originalGravity       Decimal?          @db.Decimal(6, 3)
-  currentGravity        Decimal?          @db.Decimal(6, 3)
-  finalGravity          Decimal?          @db.Decimal(6, 3)
+  packagedVolume        Decimal?          @default(0) @db.Decimal(10, 2)
+  originalGravity       Decimal?          @db.Decimal(5, 4)
+  currentGravity        Decimal?          @db.Decimal(5, 4)
+  finalGravity          Decimal?          @db.Decimal(5, 4)
   abv                   Decimal?          @db.Decimal(4, 2)
   tankId                String?
   plannedDate           DateTime
@@ -159,7 +180,8 @@ model Batch {
   notes                 String?
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
-  targetOg              Decimal?          @db.Decimal(6, 3)
+  targetOg              Decimal?          @db.Decimal(5, 4)
+  fermentationTankId    String?
   recipe                Recipe            @relation(fields: [recipeId], references: [id])
   tank                  Tank?             @relation(fields: [tankId], references: [id])
   tenant                Tenant            @relation(fields: [tenantId], references: [id])
@@ -167,6 +189,7 @@ model Batch {
   timeline              BatchTimeline[]
   gravityReadings       GravityReading[]
   ledgerEntries         InventoryLedger[]
+  Keg                   Keg[]
   LotBatch              LotBatch[]
   packagingRuns         PackagingRun[]
   qcTests               QCTest[]
@@ -195,7 +218,7 @@ model BatchIngredient {
 model GravityReading {
   id          String   @id @default(cuid())
   batchId     String
-  gravity     Decimal  @db.Decimal(6, 3)
+  gravity     Decimal  @db.Decimal(5, 4)
   temperature Decimal  @db.Decimal(4, 1)
   notes       String?
   recordedBy  String
@@ -279,20 +302,25 @@ model PackagingRun {
 }
 
 model Customer {
-  id        String       @id @default(cuid())
-  tenantId  String
-  name      String
-  type      CustomerType @default(RETAIL)
-  email     String?
-  phone     String?
-  address   String?
-  city      String?
-  taxId     String?
-  isActive  Boolean      @default(true)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  tenant    Tenant       @relation(fields: [tenantId], references: [id])
-  orders    SalesOrder[]
+  id                 String        @id @default(cuid())
+  tenantId           String
+  name               String
+  type               CustomerType  @default(RETAIL)
+  email              String?
+  phone              String?
+  address            String?
+  city               String?
+  taxId              String?
+  kegReturnDays      Int           @default(14)
+  kegDepositRequired Boolean       @default(true)
+  isActive           Boolean       @default(true)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  tenant             Tenant        @relation(fields: [tenantId], references: [id])
+  Invoice            Invoice[]
+  Keg                Keg[]
+  orders             SalesOrder[]
+  Transaction        Transaction[]
 
   @@unique([tenantId, name])
   @@index([tenantId, isActive])
@@ -306,15 +334,19 @@ model SalesOrder {
   status        OrderStatus   @default(PENDING)
   paymentStatus PaymentStatus @default(PENDING)
   totalAmount   Decimal       @db.Decimal(12, 2)
+  paidAmount    Decimal       @default(0) @db.Decimal(12, 2)
   notes         String?
   orderedAt     DateTime      @default(now())
   shippedAt     DateTime?
   deliveredAt   DateTime?
   createdBy     String
   updatedAt     DateTime      @updatedAt
+  Invoice       Invoice?
   items         OrderItem[]
+  Payment       Payment[]
   customer      Customer      @relation(fields: [customerId], references: [id])
   tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  Transaction   Transaction[]
 
   @@unique([tenantId, orderNumber])
   @@index([tenantId, status])
@@ -373,8 +405,8 @@ model Equipment {
   id                     String           @id @default(cuid())
   tenantId               String
   name                   String
-  type                   EquipmentType
-  status                 EquipmentStatus  @default(OPERATIONAL)
+  type                   String
+  status                 String           @default("OPERATIONAL")
   capacity               Int?
   model                  String?
   manufacturer           String?
@@ -383,7 +415,6 @@ model Equipment {
   workingPressure        Float?
   currentTemp            Float?
   currentPressure        Float?
-  capabilities           TankCapability[]
   installationDate       DateTime?
   warrantyDate           DateTime?
   lastCIP                DateTime?
@@ -398,6 +429,8 @@ model Equipment {
   notes                  String?
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
+  purchaseDate           DateTime?
+  capabilities           String[]         @default([])
   cipLogs                CIPLog[]
   tenant                 Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   maintenanceLogs        MaintenanceLog[]
@@ -484,7 +517,7 @@ model BlendingConfig {
 model Lot {
   id                                 String           @id
   tenantId                           String
-  lotCode                            String
+  lotCode                            String?
   phase                              LotPhase         @default(FERMENTATION)
   status                             LotStatus        @default(PLANNED)
   plannedVolume                      Decimal          @db.Decimal(10, 2)
@@ -496,14 +529,18 @@ model Lot {
   createdAt                          DateTime         @default(now())
   updatedAt                          DateTime         @default(now())
   completedAt                        DateTime?
+  lotNumber                          String?
+  blendedAt                          DateTime?
+  isBlendResult                      Boolean?         @default(false)
+  splitAt                            DateTime?
   Lot                                Lot?             @relation("LotToLot", fields: [parentLotId], references: [id])
   other_Lot                          Lot[]            @relation("LotToLot")
   LotBatch                           LotBatch[]
   LotReading                         LotReading[]
+  QCTest                             QCTest[]
   TankAssignment                     TankAssignment[]
   Transfer_Transfer_destLotIdToLot   Transfer[]       @relation("Transfer_destLotIdToLot")
   Transfer_Transfer_sourceLotIdToLot Transfer[]       @relation("Transfer_sourceLotIdToLot")
-  QCTest                             QCTest[]
 
   @@unique([tenantId, lotCode])
   @@index([tenantId, status])
@@ -544,18 +581,21 @@ model TankAssignment {
   tankId        String
   lotId         String
   phase         LotPhase
-  plannedStart  DateTime
-  plannedEnd    DateTime
+  plannedStart  DateTime?
+  plannedEnd    DateTime?
   actualStart   DateTime?
   actualEnd     DateTime?
   status        AssignmentStatus @default(PLANNED)
-  plannedVolume Decimal          @db.Decimal(10, 2)
+  plannedVolume Decimal?         @db.Decimal(10, 2)
   actualVolume  Decimal?         @db.Decimal(10, 2)
   isBlendTarget Boolean          @default(false)
   isSplitSource Boolean          @default(false)
-  createdBy     String
+  createdBy     String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @default(now())
+  startTime     DateTime?        @default(now())
+  endTime       DateTime?        @default(now())
+  notes         String?
   Lot           Lot              @relation(fields: [lotId], references: [id], onDelete: Cascade)
   Tank          Tank             @relation(fields: [tankId], references: [id], onDelete: Cascade)
 
@@ -588,6 +628,263 @@ model Transfer {
   Tank_Transfer_sourceTankIdToTank Tank           @relation("Transfer_sourceTankIdToTank", fields: [sourceTankId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, transferCode])
+}
+
+model QCTest {
+  id            String         @id @default(cuid())
+  tenantId      String
+  batchId       String
+  lotId         String?
+  testType      QCTestType
+  status        QCTestStatus   @default(SCHEDULED)
+  priority      QCTestPriority @default(MEDIUM)
+  scheduledDate DateTime
+  completedDate DateTime?
+  minValue      Decimal?       @db.Decimal(10, 4)
+  maxValue      Decimal?       @db.Decimal(10, 4)
+  targetValue   Decimal?       @db.Decimal(10, 4)
+  result        Decimal?       @db.Decimal(10, 4)
+  unit          String?
+  notes         String?
+  performedBy   String?
+  createdBy     String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  batch         Batch          @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  lot           Lot?           @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, batchId])
+  @@index([scheduledDate])
+}
+
+model Budget {
+  id        String          @id
+  tenantId  String
+  category  ExpenseCategory
+  year      Int
+  month     Int?
+  amount    Decimal         @db.Decimal(12, 2)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime
+  Tenant    Tenant          @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, category, year, month])
+  @@index([tenantId, year])
+}
+
+model Expense {
+  id            String          @id
+  tenantId      String
+  category      ExpenseCategory
+  supplierId    String?
+  amount        Decimal         @db.Decimal(12, 2)
+  date          DateTime        @default(now())
+  description   String?
+  invoiceNumber String?
+  invoiceId     String?
+  isPaid        Boolean         @default(false)
+  paidAt        DateTime?
+  paymentMethod PaymentMethod?
+  receiptUrl    String?
+  notes         String?
+  createdBy     String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime
+  Supplier      Supplier?       @relation(fields: [supplierId], references: [id])
+  Tenant        Tenant          @relation(fields: [tenantId], references: [id])
+  Transaction   Transaction[]
+
+  @@index([tenantId, category])
+  @@index([tenantId, date])
+  @@index([tenantId, isPaid])
+  @@index([tenantId, supplierId])
+}
+
+model Invoice {
+  id            String        @id
+  tenantId      String
+  invoiceNumber String
+  type          InvoiceType
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime?
+  paidAt        DateTime?
+  customerId    String?
+  supplierId    String?
+  orderId       String?       @unique
+  subtotal      Decimal       @db.Decimal(12, 2)
+  discount      Decimal       @default(0) @db.Decimal(12, 2)
+  tax           Decimal       @default(0) @db.Decimal(12, 2)
+  total         Decimal       @db.Decimal(12, 2)
+  paidAmount    Decimal       @default(0) @db.Decimal(12, 2)
+  notes         String?
+  terms         String?
+  createdBy     String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime
+  Customer      Customer?     @relation(fields: [customerId], references: [id])
+  SalesOrder    SalesOrder?   @relation(fields: [orderId], references: [id])
+  Supplier      Supplier?     @relation(fields: [supplierId], references: [id])
+  Tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  InvoiceItem   InvoiceItem[]
+  Payment       Payment[]
+  Transaction   Transaction[]
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId, customerId])
+  @@index([tenantId, dueDate])
+  @@index([tenantId, status])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, type])
+}
+
+model InvoiceItem {
+  id          String       @id
+  invoiceId   String
+  description String
+  quantity    Decimal      @db.Decimal(10, 3)
+  unit        String?      @default("ცალი")
+  unitPrice   Decimal      @db.Decimal(10, 2)
+  total       Decimal      @db.Decimal(12, 2)
+  productName String?
+  packageType PackageType?
+  batchId     String?
+  sortOrder   Int          @default(0)
+  Invoice     Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model Keg {
+  id          String        @id
+  tenantId    String
+  kegNumber   String
+  size        Int
+  status      KegStatus     @default(AVAILABLE)
+  condition   KegCondition  @default(GOOD)
+  batchId     String?
+  filledAt    DateTime?
+  productName String?
+  lotNumber   String?
+  customerId  String?
+  orderId     String?
+  sentAt      DateTime?
+  returnedAt  DateTime?
+  deposit     Decimal       @default(150) @db.Decimal(10, 2)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
+  Batch       Batch?        @relation(fields: [batchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Customer    Customer?     @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  KegMovement KegMovement[]
+
+  @@unique([tenantId, kegNumber])
+  @@index([tenantId, customerId])
+  @@index([tenantId, status])
+}
+
+model KegMovement {
+  id           String    @id
+  tenantId     String
+  kegId        String
+  action       KegAction
+  fromStatus   KegStatus
+  toStatus     KegStatus
+  productId    String?
+  productName  String?
+  customerId   String?
+  customerName String?
+  orderId      String?
+  batchId      String?
+  notes        String?
+  createdAt    DateTime  @default(now())
+  createdBy    String?
+  Keg          Keg       @relation(fields: [kegId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, customerId])
+  @@index([tenantId, kegId])
+}
+
+model Payment {
+  id         String        @id
+  tenantId   String
+  invoiceId  String?
+  orderId    String?
+  amount     Decimal       @db.Decimal(12, 2)
+  method     PaymentMethod @default(BANK_TRANSFER)
+  date       DateTime      @default(now())
+  reference  String?
+  notes      String?
+  createdBy  String
+  createdAt  DateTime      @default(now())
+  Invoice    Invoice?      @relation(fields: [invoiceId], references: [id])
+  SalesOrder SalesOrder?   @relation(fields: [orderId], references: [id])
+  Tenant     Tenant        @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, date])
+  @@index([tenantId, invoiceId])
+  @@index([tenantId, orderId])
+}
+
+model Supplier {
+  id          String        @id
+  tenantId    String
+  name        String
+  category    String?
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  taxId       String?
+  bankAccount String?
+  notes       String?
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  Expense     Expense[]
+  Invoice     Invoice[]
+  Tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  Transaction Transaction[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model Transaction {
+  id              String           @id
+  tenantId        String
+  type            TransactionType
+  date            DateTime         @default(now())
+  amount          Decimal          @db.Decimal(12, 2)
+  incomeCategory  IncomeCategory?
+  expenseCategory ExpenseCategory?
+  description     String?
+  customerId      String?
+  supplierId      String?
+  orderId         String?
+  invoiceId       String?
+  expenseId       String?
+  paymentId       String?
+  paymentMethod   PaymentMethod?
+  reference       String?
+  notes           String?
+  createdBy       String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime
+  Customer        Customer?        @relation(fields: [customerId], references: [id])
+  Expense         Expense?         @relation(fields: [expenseId], references: [id])
+  Invoice         Invoice?         @relation(fields: [invoiceId], references: [id])
+  SalesOrder      SalesOrder?      @relation(fields: [orderId], references: [id])
+  Supplier        Supplier?        @relation(fields: [supplierId], references: [id])
+  Tenant          Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, customerId])
+  @@index([tenantId, date])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, type])
 }
 
 enum PlanType {
@@ -811,10 +1108,6 @@ enum TransferType {
   SPLIT
 }
 
-// ═══════════════════════════════════════════════════════════
-// QC (Quality Control) Models
-// ═══════════════════════════════════════════════════════════
-
 enum QCTestType {
   GRAVITY
   TEMPERATURE
@@ -846,30 +1139,76 @@ enum QCTestPriority {
   LOW
 }
 
-model QCTest {
-  id            String         @id @default(cuid())
-  tenantId      String
-  batchId       String
-  lotId         String?
-  testType      QCTestType
-  status        QCTestStatus   @default(SCHEDULED)
-  priority      QCTestPriority @default(MEDIUM)
-  scheduledDate DateTime
-  completedDate DateTime?
-  minValue      Decimal?       @db.Decimal(10, 4)
-  maxValue      Decimal?       @db.Decimal(10, 4)
-  targetValue   Decimal?       @db.Decimal(10, 4)
-  result        Decimal?       @db.Decimal(10, 4)
-  unit          String?
-  notes         String?
-  performedBy   String?
-  createdBy     String
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  batch         Batch          @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  lot           Lot?           @relation(fields: [lotId], references: [id], onDelete: Cascade)
+enum ExpenseCategory {
+  INGREDIENTS
+  PACKAGING
+  EQUIPMENT
+  UTILITIES
+  SALARY
+  RENT
+  MARKETING
+  MAINTENANCE
+  TRANSPORT
+  OTHER
+}
 
-  @@index([tenantId, status])
-  @@index([tenantId, batchId])
-  @@index([scheduledDate])
+enum IncomeCategory {
+  SALE
+  DEPOSIT
+  REFUND
+  OTHER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIAL
+  OVERDUE
+  CANCELLED
+}
+
+enum InvoiceType {
+  OUTGOING
+  INCOMING
+}
+
+enum KegAction {
+  CREATED
+  FILLED
+  SHIPPED
+  RETURNED
+  CLEANED
+  DAMAGED
+  LOST
+  REPAIRED
+}
+
+enum KegCondition {
+  GOOD
+  NEEDS_CLEANING
+  DAMAGED
+}
+
+enum KegStatus {
+  AVAILABLE
+  FILLED
+  WITH_CUSTOMER
+  IN_TRANSIT
+  CLEANING
+  DAMAGED
+  LOST
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  CHECK
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
 }
