@@ -1613,30 +1613,48 @@ export default function SettingsPage() {
                 <div>
                   <h3 className="font-semibold text-text-primary mb-4">📚 ძირითადი სექციები</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-bg-tertiary rounded-lg p-4">
+                    <button
+                      onClick={() => window.location.href = '/production'}
+                      className="bg-bg-tertiary rounded-lg p-4 text-left hover:bg-bg-tertiary/80 transition-colors cursor-pointer"
+                    >
                       <h4 className="font-medium text-text-primary mb-2">🍺 წარმოება</h4>
                       <p className="text-sm text-text-muted">პარტიების მართვა: ხარშვა → ფერმენტაცია → კონდიცირება → დაფასოება</p>
-                    </div>
-                    <div className="bg-bg-tertiary rounded-lg p-4">
+                    </button>
+                    <button
+                      onClick={() => window.location.href = '/inventory'}
+                      className="bg-bg-tertiary rounded-lg p-4 text-left hover:bg-bg-tertiary/80 transition-colors cursor-pointer"
+                    >
                       <h4 className="font-medium text-text-primary mb-2">📦 მარაგები</h4>
                       <p className="text-sm text-text-muted">ინგრედიენტები, კეგები, შესაფუთი მასალები</p>
-                    </div>
-                    <div className="bg-bg-tertiary rounded-lg p-4">
+                    </button>
+                    <button
+                      onClick={() => window.location.href = '/recipes'}
+                      className="bg-bg-tertiary rounded-lg p-4 text-left hover:bg-bg-tertiary/80 transition-colors cursor-pointer"
+                    >
                       <h4 className="font-medium text-text-primary mb-2">📝 რეცეპტები</h4>
                       <p className="text-sm text-text-muted">რეცეპტების შექმნა და მართვა</p>
-                    </div>
-                    <div className="bg-bg-tertiary rounded-lg p-4">
+                    </button>
+                    <button
+                      onClick={() => window.location.href = '/sales'}
+                      className="bg-bg-tertiary rounded-lg p-4 text-left hover:bg-bg-tertiary/80 transition-colors cursor-pointer"
+                    >
                       <h4 className="font-medium text-text-primary mb-2">💰 გაყიდვები</h4>
                       <p className="text-sm text-text-muted">კლიენტები, შეკვეთები, ინვოისები</p>
-                    </div>
-                    <div className="bg-bg-tertiary rounded-lg p-4">
+                    </button>
+                    <button
+                      onClick={() => window.location.href = '/fermentation'}
+                      className="bg-bg-tertiary rounded-lg p-4 text-left hover:bg-bg-tertiary/80 transition-colors cursor-pointer"
+                    >
                       <h4 className="font-medium text-text-primary mb-2">🛢️ ავზები</h4>
-                      <p className="text-sm text-text-muted">ტანკების მართვა და CIP რეცხვა</p>
-                    </div>
-                    <div className="bg-bg-tertiary rounded-lg p-4">
+                      <p className="text-sm text-text-muted">ავზების მართვა და CIP რეცხვა</p>
+                    </button>
+                    <button
+                      onClick={() => window.location.href = '/calendar'}
+                      className="bg-bg-tertiary rounded-lg p-4 text-left hover:bg-bg-tertiary/80 transition-colors cursor-pointer"
+                    >
                       <h4 className="font-medium text-text-primary mb-2">📅 კალენდარი</h4>
                       <p className="text-sm text-text-muted">წარმოების განრიგი და დაგეგმვა</p>
-                    </div>
+                    </button>
                   </div>
                 </div>
                 
