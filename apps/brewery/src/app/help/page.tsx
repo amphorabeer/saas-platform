@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
-import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react'
+import { Button } from '@/components/ui'
+import { ChevronDown, ChevronRight, ExternalLink, ArrowLeft } from 'lucide-react'
 
 interface Section {
   id: string
@@ -432,8 +433,21 @@ export default function HelpPage() {
       <div className="max-w-4xl mx-auto p-6 space-y-4">
         <Card>
           <CardHeader>
-            <h1 className="text-2xl font-bold text-text-primary">📚 მომხმარებლის სახელმძღვანელო</h1>
-            <p className="text-text-muted">BrewMaster PRO-ს სრული დოკუმენტაცია</p>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h1 className="text-2xl font-bold text-text-primary">📚 მომხმარებლის სახელმძღვანელო</h1>
+                <p className="text-text-muted">BrewMaster PRO-ს სრული დოკუმენტაცია</p>
+              </div>
+              <Button
+                onClick={() => router.back()}
+                variant="secondary"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                უკან დაბრუნება
+              </Button>
+            </div>
           </CardHeader>
           <CardBody>
             <p className="text-text-muted mb-4">დააკლიკეთ სექციაზე დეტალური ინფორმაციის სანახავად. ისრის ღილაკით გადახვალთ შესაბამის გვერდზე.</p>

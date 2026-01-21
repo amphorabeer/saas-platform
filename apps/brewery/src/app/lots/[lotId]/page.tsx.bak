@@ -20,9 +20,9 @@ const formatGravity = (sg: number | null | undefined, usePlato: boolean = true):
   if (sg == null || sg === 0) return '-'
   if (usePlato) {
     const plato = sgToPlato(sg)
-    return `${(plato || 0).toFixed(1)}°P`
+    return `${plato.toFixed(1)}°P`
   }
-  return (sg || 0).toFixed(3)
+  return sg.toFixed(3)
 }
 
 // Lot data from API
@@ -1009,12 +1009,12 @@ export default function LotDetailPage() {
               <div className="p-4 bg-slate-700/50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-text-muted">დაფასოვებული:</span>
-                  <span className="text-green-400 font-bold">{(packagedVolume || 0).toFixed(1)}L</span>
+                  <span className="text-green-400 font-bold">{packagedVolume.toFixed(1)}L</span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-text-muted">დარჩენილი ავზში:</span>
                   <span className={`font-bold ${remainingVolume > 0 ? 'text-amber-400' : 'text-green-400'}`}>
-                    {(remainingVolume || 0).toFixed(1)}L
+                    {remainingVolume.toFixed(1)}L
                   </span>
                 </div>
                 <div className="w-full bg-slate-600 rounded-full h-2 mt-2">
@@ -1025,7 +1025,7 @@ export default function LotDetailPage() {
                 </div>
                 {progressPercent > 0 && (
                   <div className="text-center mt-2 text-sm text-text-muted">
-                    {(progressPercent || 0).toFixed(0)}% დაფასოებული
+                    {progressPercent.toFixed(0)}% დაფასოებული
                   </div>
                 )}
               </div>
@@ -1070,7 +1070,7 @@ export default function LotDetailPage() {
         <div className="bg-bg-card border border-border rounded-xl p-4">
           <p className="text-2xl font-bold font-display text-purple-400">
             {isBlend && blendStats 
-              ? (blendStats.abv || 0).toFixed(1)
+              ? blendStats.abv.toFixed(1)
               : (totals.avgOG > 0 && totals.avgSG > 0 ? ((totals.avgOG - totals.avgSG) * 131.25).toFixed(1) : '0.0')}%
           </p>
           <p className="text-xs text-text-muted">ABV (მიმდ.)</p>
@@ -1080,7 +1080,7 @@ export default function LotDetailPage() {
         <div className="bg-bg-card border border-border rounded-xl p-4">
           <p className="text-2xl font-bold font-display text-copper-light">
             {isBlend && blendStats 
-              ? (blendStats.attenuation || 0).toFixed(0)
+              ? blendStats.attenuation.toFixed(0)
               : (totals.avgOG > 0 && totals.avgSG > 0 ? ((1 - totals.avgSG / totals.avgOG) * 100).toFixed(0) : '0')}%
           </p>
           <p className="text-xs text-text-muted">ატენუაცია</p>
@@ -1152,7 +1152,7 @@ export default function LotDetailPage() {
                   <p className="font-mono text-lg">
                     {batch.volumeContribution || batch.volume}L
                     {batch.batchPercentage && (
-                      <span className="text-text-muted text-sm ml-1">({(batch.batchPercentage || 0).toFixed(1)}%)</span>
+                      <span className="text-text-muted text-sm ml-1">({batch.batchPercentage.toFixed(1)}%)</span>
                     )}
                   </p>
                 </div>
@@ -1163,7 +1163,7 @@ export default function LotDetailPage() {
             <div className="mt-4 pt-4 border-t border-border">
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">სულ მოცულობა</span>
-                <span className="font-mono font-medium">{(totals.volume || 0).toFixed(1)}L</span>
+                <span className="font-mono font-medium">{totals.volume.toFixed(1)}L</span>
               </div>
             </div>
           </CardBody>
@@ -1402,9 +1402,9 @@ export default function LotDetailPage() {
                       <div className="relative h-24 bg-bg-secondary rounded-lg p-2">
                         {/* Y-axis labels */}
                         <div className="absolute left-0 top-0 bottom-0 w-12 flex flex-col justify-between text-xs text-text-muted py-2">
-                          <span>{(maxTemp || 0).toFixed(0)}°</span>
-                          <span>{(((maxTemp || 0) + (minTemp || 0)) / 2).toFixed(0)}°</span>
-                          <span>{(minTemp || 0).toFixed(0)}°</span>
+                          <span>{maxTemp.toFixed(0)}°</span>
+                          <span>{((maxTemp + minTemp) / 2).toFixed(0)}°</span>
+                          <span>{minTemp.toFixed(0)}°</span>
                         </div>
                         {/* Chart area */}
                         <div className="ml-14 h-full">
