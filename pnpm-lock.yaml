@@ -366,6 +366,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@18.3.1)(react@18.3.1)
+      nodemailer:
+        specifier: ^6.10.1
+        version: 6.10.1
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -382,6 +385,9 @@ importers:
       '@types/node':
         specifier: ^20.10.6
         version: 20.19.30
+      '@types/nodemailer':
+        specifier: ^6.4.21
+        version: 6.4.21
       '@types/react':
         specifier: ^18.2.46
         version: 18.3.27

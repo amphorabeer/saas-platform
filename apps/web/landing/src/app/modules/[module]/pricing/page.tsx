@@ -10,7 +10,7 @@ const modules = ["hotel", "restaurant", "beauty", "shop", "brewery", "winery", "
 
 // Module-specific app URLs (production-ში ეს იქნება environment variables)
 const moduleAppUrls: Record<string, string> = {
-  hotel: process.env.NEXT_PUBLIC_HOTEL_URL || "http://localhost:3010",
+  hotel: "",
   brewery: process.env.NEXT_PUBLIC_BREWERY_URL || "http://localhost:3020",
   winery: process.env.NEXT_PUBLIC_WINERY_URL || "http://localhost:3030",
   // დანარჩენი მოდულები ჯერ არ არის deployed

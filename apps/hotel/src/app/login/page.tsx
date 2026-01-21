@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -119,9 +120,14 @@ export default function LoginPage() {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              პაროლი
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                პაროლი
+              </label>
+              <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+                პაროლის აღდგენა
+              </Link>
+            </div>
             <input
               type="password"
               value={credentials.password}
@@ -151,7 +157,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>არ გაქვთ ანგარიში?</p>
           <a 
-            href="http://localhost:3000/auth/signup" 
+            href="https://geobiz.app/modules/hotel/pricing" 
             className="text-blue-600 hover:underline font-medium"
           >
             დარეგისტრირდით აქ
