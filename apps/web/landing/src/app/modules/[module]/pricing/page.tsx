@@ -107,9 +107,9 @@ const moduleData: Record<
     description: "წარმოების, ინვენტარისა და გაყიდვების მართვა",
     icon: "🍺",
     features: {
-      starter: ["1 ლოკაცია", "10 რეცეპტი", "წარმოების მართვა", "ძირითადი ანალიტიკა"],
-      professional: ["1 ლოკაცია", "ულიმიტო რეცეპტი", "ყველა ფუნქცია", "ბარელების მართვა", "ანალიტიკა"],
-      enterprise: ["მრავალი ლოკაცია", "ულიმიტო რეცეპტი", "Custom features", "Quality control", "API access"],
+      starter: ["მაქს. 5 ავზი", "წარმოების ძირითადი მართვა", "პარტიები, რეცეპტები", "Cloud access"],
+      professional: ["6 – 14 ავზი", "წარმოების სრული მართვა", "მარაგები (ნედლეული, შეფუთვა, მზა პროდუქცია)", "CIP / ავზების რეცხვა", "კეგების მენეჯმენტი", "ფინანსები", "ანგარიშები და ანალიტიკა"],
+      enterprise: ["15+ ავზი", "შეუზღუდავი ფუნქციები", "მომხმარებლის როლები", "გაფართოებული ანალიტიკა", "პრიორიტეტული მხარდაჭერა"],
     },
     faq: [
       {
@@ -204,13 +204,13 @@ export default function ModulePricingPage({ params }: { params: { module: string
             {/* Starter */}
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <CardTitle className="text-2xl">Starter</CardTitle>
-                <CardDescription>დაწყებისთვის</CardDescription>
+                <CardTitle className="text-2xl">🟢 STARTER — პატარა წარმოება</CardTitle>
+                <CardDescription>👉 მცირე ლუდსახარში / brewpub</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">უფასო</span>
-                  <p className="text-muted-foreground mt-2">15 დღე საცდელი</p>
+                  <span className="text-4xl font-bold">29 ₾</span>
+                  <span className="text-muted-foreground"> / თვე</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {data.features.starter.map((feature, index) => (
@@ -234,13 +234,13 @@ export default function ModulePricingPage({ params }: { params: { module: string
                 </span>
               </div>
               <CardHeader>
-                <CardTitle className="text-2xl">Professional</CardTitle>
-                <CardDescription>პროფესიონალური ბიზნესისთვის</CardDescription>
+                <CardTitle className="text-2xl">🔵 PRO ⭐ — საშუალო წარმოება</CardTitle>
+                <CardDescription></CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">₾99</span>
-                  <span className="text-muted-foreground">/თვე</span>
+                  <span className="text-4xl font-bold">59 ₾</span>
+                  <span className="text-muted-foreground"> / თვე</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {data.features.professional.map((feature, index) => (
@@ -259,13 +259,13 @@ export default function ModulePricingPage({ params }: { params: { module: string
             {/* Enterprise */}
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <CardTitle className="text-2xl">Enterprise</CardTitle>
-                <CardDescription>დიდი ბიზნესისთვის</CardDescription>
+                <CardTitle className="text-2xl">ENTERPRISE — დიდი წარმოება</CardTitle>
+                <CardDescription></CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">₾299</span>
-                  <span className="text-muted-foreground">/თვე</span>
+                  <span className="text-4xl font-bold">99 ₾</span>
+                  <span className="text-muted-foreground"> / თვე</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {data.features.enterprise.map((feature, index) => (
