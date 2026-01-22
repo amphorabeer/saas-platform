@@ -19459,6 +19459,7 @@ export namespace Prisma {
     id?: string
     slug?: string
     tenantId?: string
+    tenantCode?: string
     hotelCode?: string
     AND?: OrganizationWhereInput | OrganizationWhereInput[]
     OR?: OrganizationWhereInput[]
@@ -19475,7 +19476,6 @@ export namespace Prisma {
     website?: StringNullableFilter<"Organization"> | string | null
     bankName?: StringNullableFilter<"Organization"> | string | null
     bankAccount?: StringNullableFilter<"Organization"> | string | null
-    tenantCode?: StringNullableFilter<"Organization"> | string | null
     databaseUrl?: StringNullableFilter<"Organization"> | string | null
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
@@ -19483,7 +19483,7 @@ export namespace Prisma {
     users?: UserListRelationFilter
     modules?: ModuleAccessListRelationFilter
     tickets?: SupportTicketListRelationFilter
-  }, "id" | "slug" | "tenantId" | "hotelCode">
+  }, "id" | "slug" | "tenantId" | "tenantCode" | "hotelCode">
 
   export type OrganizationOrderByWithAggregationInput = {
     id?: SortOrder

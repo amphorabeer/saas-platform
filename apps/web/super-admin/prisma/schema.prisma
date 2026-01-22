@@ -78,7 +78,7 @@ model Organization {
 
   // Multi-tenancy
   tenantId          String?            @unique // ID from Neon Tenant table (for breweries)
-  tenantCode        String?            // BREW-XXXX format code (for breweries)
+  tenantCode        String?            @unique // BREW-XXXX format code (for breweries)
   hotelCode         String?            @unique // 4-digit code (for hotels)
   databaseUrl       String?
 
