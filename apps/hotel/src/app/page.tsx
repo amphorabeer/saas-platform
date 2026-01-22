@@ -27,6 +27,7 @@ import { SystemLockService } from '../lib/systemLockService'
 import { ActivityLogger } from '../lib/activityLogger'
 import { FolioService } from '../services/FolioService'
 import { RESERVATION_STATUS, ROOM_STATUS } from '../constants/statusConstants'
+import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
 
 interface Room {
   id: string
@@ -134,7 +135,12 @@ export default function HotelDashboard() {
       const savedHotelInfo = localStorage.getItem('hotelInfo')
       if (savedHotelInfo) {
         try {
-          setHotelInfo(JSON.parse(savedHotelInfo))
+          const parsed = JSON.parse(savedHotelInfo)
+          if (parsed && typeof parsed === 'object') {
+            setHotelInfo({ ...parsed, logo: sanitizeLogo(parsed.logo) })
+          } else {
+            setHotelInfo(parsed)
+          }
         } catch (e) {
           console.error('Error loading hotel info:', e)
         }
@@ -277,13 +283,13 @@ export default function HotelDashboard() {
       case 'dashboard': return '🏠 Dashboard'
       case 'calendar': return '📅 კალენდარი'
       case 'rooms': return '🏨 ნომრები'
-      case 'folios': return '💰 Folios'
+      case 'folios': return '💰 ანგარიშები'
       case 'housekeeping': return '🧹 დასუფთავება'
       case 'roomgrid': return '🏨 ოთახები'
       case 'reports': return '📊 რეპორტები'
-      case 'new-night-audit': return '🌙 Night Audit'
+      case 'new-night-audit': return '🌙 დღის დახურვა'
       case 'cashier': return '💰 სალარო'
-      case 'financial': return '💰 Financial Dashboard'
+      case 'financial': return '💰 ფინანსური დეშბორდი'
       case 'settings-new': return '⚙️ პარამეტრები'
       default: return ''
     }
@@ -892,15 +898,17 @@ export default function HotelDashboard() {
                 onClick={() => setActiveTab('dashboard')}
                 className="flex items-center gap-3 text-xl md:text-2xl font-bold hover:text-blue-600 transition"
               >
-                {hotelInfo?.logo && (
-                  <img 
-                    src={hotelInfo.logo} 
-                    alt="Logo" 
+                {hasDisplayableLogo(hotelInfo?.logo) ? (
+                  <img
+                    src={hotelInfo!.logo}
+                    alt="Logo"
                     className="h-8 w-8 object-contain"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none'
                     }}
                   />
+                ) : (
+                  <span className="text-2xl" aria-hidden>🏨</span>
                 )}
                 {hotelInfo?.name || 'Hotel Dashboard'}
               </button>
@@ -910,12 +918,12 @@ export default function HotelDashboard() {
                   if (canCloseDay) {
                     addTabFromMenu('new-night-audit')
                   } else {
-                    alert('❌ არ გაქვთ Night Audit-ის უფლება')
+                    alert('❌ არ გაქვთ დღის დახურვის უფლება')
                   }
                 }}
                 className="px-3 py-2 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 ml-2"
               >
-                🌙 Night Audit
+                🌙 დღის დახურვა
               </button>
             </div>
             
@@ -979,7 +987,7 @@ export default function HotelDashboard() {
                         onClick={() => addTabFromMenu('financial')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
                       >
-                        💰 Financial Dashboard
+                        💰 ფინანსური დეშბორდი
                       </button>
                       <button
                         onClick={() => addTabFromMenu('settings-new')}
@@ -1238,8 +1246,8 @@ export default function HotelDashboard() {
                 className="bg-green-500 text-white p-6 rounded-lg hover:bg-green-600 transition-all transform hover:scale-105 shadow-lg text-left relative"
               >
                 <div className="text-4xl mb-2">✅</div>
-                <div className="text-xl font-bold">Check-in</div>
-                <div className="text-sm opacity-75">Process arrivals</div>
+                <div className="text-xl font-bold">შემოსვლა</div>
+                <div className="text-sm opacity-75">სტუმრების მიღება</div>
                 {todayArrivalsReservations.length > 0 && (
                   <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     {todayArrivalsReservations.length}
@@ -1252,8 +1260,8 @@ export default function HotelDashboard() {
                 className="bg-orange-500 text-white p-6 rounded-lg hover:bg-orange-600 transition-all transform hover:scale-105 shadow-lg text-left relative"
               >
                 <div className="text-4xl mb-2">📤</div>
-                <div className="text-xl font-bold">Check-out</div>
-                <div className="text-sm opacity-75">Process departures</div>
+                <div className="text-xl font-bold">გასვლა</div>
+                <div className="text-sm opacity-75">სტუმრების გაწერა</div>
                 {todayDeparturesReservations.length > 0 && (
                   <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     {todayDeparturesReservations.length}
@@ -1266,8 +1274,8 @@ export default function HotelDashboard() {
                 className="bg-purple-500 text-white p-6 rounded-lg hover:bg-purple-600 transition-all transform hover:scale-105 shadow-lg text-left"
               >
                 <div className="text-4xl mb-2">💰</div>
-                <div className="text-xl font-bold">Folios</div>
-                <div className="text-sm opacity-75">Manage charges & payments</div>
+                <div className="text-xl font-bold">ანგარიშები</div>
+                <div className="text-sm opacity-75">დარიცხვებისა და გადახდების მართვა</div>
               </button>
               
               <button
@@ -1275,8 +1283,8 @@ export default function HotelDashboard() {
                 className="bg-indigo-500 text-white p-6 rounded-lg hover:bg-indigo-600 transition-all transform hover:scale-105 shadow-lg text-left"
               >
                 <div className="text-4xl mb-2">📊</div>
-                <div className="text-xl font-bold">Financial Reports</div>
-                <div className="text-sm opacity-75">Revenue & statistics</div>
+                <div className="text-xl font-bold">ფინანსური ანგარიშები</div>
+                <div className="text-sm opacity-75">შემოსავლები და სტატისტიკა</div>
               </button>
               
               <button
@@ -1284,14 +1292,14 @@ export default function HotelDashboard() {
                   if (canCloseDay) {
                     addTabFromMenu('new-night-audit')
                   } else {
-                    alert('❌ არ გაქვთ Night Audit-ის უფლება')
+                    alert('❌ არ გაქვთ დღის დახურვის უფლება')
                   }
                 }}
                 className="bg-gray-700 text-white p-6 rounded-lg hover:bg-gray-800 transition-all transform hover:scale-105 shadow-lg text-left"
               >
                 <div className="text-4xl mb-2">🌙</div>
-                <div className="text-xl font-bold">Night Audit</div>
-                <div className="text-sm opacity-75">Close business day</div>
+                <div className="text-xl font-bold">დღის დახურვა</div>
+                <div className="text-sm opacity-75">სამუშაო დღის დახურვა</div>
               </button>
               
               {/* Housekeeping */}
@@ -1312,7 +1320,7 @@ export default function HotelDashboard() {
                 >
                   <div className="text-4xl mb-2">📈</div>
                   <div className="text-xl font-bold">რეპორტები</div>
-                  <div className="text-sm opacity-75">Reports & Analytics</div>
+                  <div className="text-sm opacity-75">ანგარიშები და ანალიტიკა</div>
                 </button>
               )}
               
@@ -1412,7 +1420,7 @@ export default function HotelDashboard() {
                 <div className="text-2xl font-bold text-green-600">{stats.vacant}</div>
               </div>
               <div className="bg-white p-4 rounded-lg shadow">
-                <div className="text-sm text-gray-600">Occupancy Rate</div>
+                <div className="text-sm text-gray-600">დატვირთულობა</div>
                 <div className="text-2xl font-bold text-blue-600">{stats.occupancyRate}%</div>
               </div>
             </div>
@@ -1660,7 +1668,7 @@ export default function HotelDashboard() {
                     activeTab === 'financial' ? 'bg-blue-50 text-blue-600' : ''
                   }`}
                 >
-                  💰 Financial Dashboard
+                  💰 ფინანსური დეშბორდი
                 </button>
               <div className="border-t pt-2 mt-4">
                 <div className="px-3 py-2 text-sm text-gray-600">

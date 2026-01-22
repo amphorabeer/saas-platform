@@ -12,6 +12,7 @@ import PaymentHistory from './PaymentHistory'
 import Invoice from './Invoice'
 import { ActivityLogger } from '../lib/activityLogger'
 import { validateReservationDates, isClosedDay as isClosedDayHelper, getBusinessDay as getBusinessDayHelper } from '../utils/dateValidation'
+import { sanitizeLogo } from '@/lib/logo'
 
 interface RoomCalendarProps {
   rooms: any[]
@@ -4776,7 +4777,8 @@ function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, on
     const saved = localStorage.getItem('hotelInfo')
     if (saved) {
       try {
-        setHotelInfo(JSON.parse(saved))
+        const parsed = JSON.parse(saved)
+        setHotelInfo({ ...parsed, logo: sanitizeLogo(parsed?.logo) })
       } catch (e) {
         console.error('Failed to load hotel info:', e)
       }

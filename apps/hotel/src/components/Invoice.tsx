@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import moment from 'moment'
 import { ActivityLogger } from '../lib/activityLogger'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
+import { hasDisplayableLogo } from '@/lib/logo'
 
 export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: any) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
@@ -181,7 +182,7 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
       <body>
         <div class="invoice-container">
           <div class="header">
-            ${hotelInfo?.logo ? `<img src="${hotelInfo.logo}" class="logo" alt="Logo">` : '<div></div>'}
+            ${hasDisplayableLogo(hotelInfo?.logo) ? `<img src="${hotelInfo!.logo}" class="logo" alt="Logo">` : '<div></div>'}
             <div class="company-info">
               <h2>${hotelInfo?.name || 'Hotel Tbilisi'}</h2>
               ${hotelInfo?.company ? `<p><strong>${hotelInfo.company}</strong></p>` : ''}

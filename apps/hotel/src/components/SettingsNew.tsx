@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
 import { ExtraChargesService } from '../services/ExtraChargesService'
+import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
 
 // ==================== TYPES ====================
 interface HotelInfo {
@@ -244,7 +245,7 @@ export default function SettingsNew() {
           website: orgData.website || '',
           bankName: orgData.bankName || '',
           bankAccount: orgData.bankAccount || '',
-          logo: orgData.logo || ''
+          logo: sanitizeLogo(orgData.logo)
         })
         console.log('✅ Loaded hotel info from API:', orgData)
       }
@@ -254,7 +255,8 @@ export default function SettingsNew() {
       const savedHotelInfo = localStorage.getItem('hotelInfo')
       if (savedHotelInfo) {
         try {
-          setHotelInfo({ ...hotelInfo, ...JSON.parse(savedHotelInfo) })
+          const parsed = JSON.parse(savedHotelInfo)
+          setHotelInfo({ ...hotelInfo, ...parsed, logo: sanitizeLogo(parsed?.logo) })
         } catch (e2) {
           console.error('Error loading hotel info from localStorage:', e2)
         }
@@ -868,17 +870,19 @@ function HotelInfoSection({ hotelInfo, setHotelInfo, onSave, isSaving }: {
               />
               <p className="text-xs text-gray-500 mt-1">შეიყვანეთ ლოგოს URL მისამართი (PNG, JPG ან SVG)</p>
             </div>
-            {hotelInfo.logo && (
+            {hasDisplayableLogo(hotelInfo.logo) ? (
               <div className="w-24 h-24 border rounded-lg overflow-hidden bg-white flex items-center justify-center">
                 <img 
                   src={hotelInfo.logo} 
                   alt="Hotel Logo" 
                   className="max-w-full max-h-full object-contain"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🏨</text></svg>'
+                    (e.target as HTMLImageElement).style.display = 'none'
                   }}
                 />
               </div>
+            ) : (
+              <div className="w-24 h-24 border rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center text-4xl" aria-hidden>🏨</div>
             )}
           </div>
         </div>

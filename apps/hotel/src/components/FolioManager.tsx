@@ -9,6 +9,7 @@ import ExtraChargesPanel from './ExtraChargesPanel'
 import QuickChargeButtons from './QuickChargeButtons'
 import FolioRoutingManager from './FolioRoutingManager'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
+import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
 
 interface FolioManagerProps {
   reservationId: string
@@ -89,7 +90,7 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
     if (savedInfo) {
       try {
         const info = JSON.parse(savedInfo)
-        setHotelInfo(info)
+        setHotelInfo({ ...info, logo: sanitizeLogo(info.logo) })
       } catch (e) {
         console.error('Error loading hotel info:', e)
       }
@@ -394,7 +395,7 @@ export default function FolioManager({ reservationId, onClose }: FolioManagerPro
       {/* Hotel Header */}
       <div className="text-center border-b pb-4 mb-4">
         {/* Logo */}
-        {hotelInfo.logo ? (
+        {hasDisplayableLogo(hotelInfo.logo) ? (
           <img 
             src={hotelInfo.logo} 
             alt={hotelInfo.name} 

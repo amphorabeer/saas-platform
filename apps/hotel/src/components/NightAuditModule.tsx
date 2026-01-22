@@ -9,6 +9,7 @@ import { FinancialReportsService } from '../services/FinancialReportsService'
 import NightAuditPostingSummary from './NightAuditPostingSummary'
 import CheckOutModal from './CheckOutModal'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
+import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
 
 // ============================================
 // Reusable Report Header Component
@@ -37,7 +38,7 @@ const ReportHeader = ({
         const data = JSON.parse(saved)
         setHotelInfo({
           name: data.name || data.hotelName || data.companyName || 'Hotel',
-          logo: data.logo || data.logoUrl || '',
+          logo: sanitizeLogo(data.logo || data.logoUrl),
           address: data.address || ''
         })
       } catch (e) {
@@ -49,13 +50,12 @@ const ReportHeader = ({
   return (
     <div className="text-center border-b pb-4 mb-4">
       {/* Logo */}
-      {hotelInfo.logo ? (
+      {hasDisplayableLogo(hotelInfo.logo) ? (
         <img 
           src={hotelInfo.logo} 
           alt={hotelInfo.name} 
           className="h-16 mx-auto mb-2"
           onError={(e) => {
-            // Fallback to emoji if image fails to load
             const target = e.target as HTMLImageElement
             target.style.display = 'none'
             const fallback = target.nextElementSibling as HTMLElement
@@ -63,7 +63,7 @@ const ReportHeader = ({
           }}
         />
       ) : null}
-      {!hotelInfo.logo && (
+      {!hasDisplayableLogo(hotelInfo.logo) && (
         <div className="text-4xl mb-2">🏨</div>
       )}
       
@@ -186,7 +186,7 @@ export default function NightAuditModule() {
         const data = JSON.parse(saved)
         setHotelInfo({
           name: data.name || data.hotelName || data.companyName || 'Hotel',
-          logo: data.logo || data.logoUrl || '',
+          logo: sanitizeLogo(data.logo || data.logoUrl),
           address: data.address || '',
           phone: data.phone || data.telephone || '',
           email: data.email || ''
@@ -446,8 +446,8 @@ export default function NightAuditModule() {
       <body>
         <div class="header">
           <div class="logo">
-            ${hotelInfo.logo ? `<img src="${hotelInfo.logo}" alt="${hotelInfo.name}" style="height: 60px; margin-bottom: 10px;">` : '🏨'}
-            <div style="font-size: 24px; font-weight: bold; margin-top: ${hotelInfo.logo ? '10px' : '0'};">${hotelInfo.name}</div>
+            ${hasDisplayableLogo(hotelInfo.logo) ? `<img src="${hotelInfo.logo}" alt="${hotelInfo.name}" style="height: 60px; margin-bottom: 10px;">` : '🏨'}
+            <div style="font-size: 24px; font-weight: bold; margin-top: ${hasDisplayableLogo(hotelInfo.logo) ? '10px' : '0'};">${hotelInfo.name}</div>
             ${hotelInfo.address ? `<div style="font-size: 12px; color: #666; margin-top: 5px;">${hotelInfo.address}</div>` : ''}
           </div>
           <div class="date">
@@ -4211,7 +4211,7 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
         const data = JSON.parse(saved)
         setHotelInfo({
           name: data.name || data.hotelName || data.companyName || 'Hotel',
-          logo: data.logo || data.logoUrl || '',
+          logo: sanitizeLogo(data.logo || data.logoUrl),
           address: data.address || ''
         })
       } catch (e) {
@@ -4246,7 +4246,7 @@ function ManagerReportModal({ date, onClose, generateReport }: { date: string; o
           </head>
           <body>
             <div class="header">
-              ${hotelInfo.logo ? `<img src="${hotelInfo.logo}" alt="${hotelInfo.name}" />` : '<div style="font-size: 40px;">🏨</div>'}
+              ${hasDisplayableLogo(hotelInfo.logo) ? `<img src="${hotelInfo.logo}" alt="${hotelInfo.name}" />` : '<div style="font-size: 40px;">🏨</div>'}
               <h1>${hotelInfo.name}</h1>
               ${hotelInfo.address ? `<p class="address">${hotelInfo.address}</p>` : ''}
               <h2>Manager's Daily Report</h2>

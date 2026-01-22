@@ -5,6 +5,7 @@ import moment from 'moment'
 import { PostingService } from '../services/PostingService'
 import { ActivityLogger } from '../lib/activityLogger'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
+import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
 
 interface FolioViewModalProps {
   reservation: any
@@ -30,7 +31,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     if (savedInfo) {
       try {
         const info = JSON.parse(savedInfo)
-        setHotelInfo(info)
+        setHotelInfo({ ...info, logo: sanitizeLogo(info.logo) })
       } catch (e) {
         console.error('Error loading hotel info:', e)
       }
@@ -297,7 +298,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
               <div className="flex-1">
                 {/* Logo and Hotel Name */}
                 <div className="flex items-center gap-3 mb-2">
-                  {hotelInfo.logo ? (
+                  {hasDisplayableLogo(hotelInfo.logo) ? (
                     <img 
                       src={hotelInfo.logo} 
                       alt={hotelInfo.name} 
