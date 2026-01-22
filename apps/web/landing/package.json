@@ -6,7 +6,7 @@
     "dev": "next dev -p 3000",
     "build": "prisma generate --schema=./prisma/schema.prisma && next build --no-lint",
     "start": "next start",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate --schema=./prisma/schema.prisma",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },

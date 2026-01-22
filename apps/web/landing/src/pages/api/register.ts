@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { randomUUID } from 'crypto'
 import bcrypt from 'bcryptjs'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../../../prisma/generated/client'
 import { sendEmail, generateHotelWelcomeEmail } from '../../lib/email'
 
 // Super Admin API URL
@@ -9,10 +9,8 @@ const SUPER_ADMIN_API_URL = process.env.SUPER_ADMIN_API_URL || 'http://localhost
 // Internal API key for secure communication between services
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || 'internal-api-key-change-in-production'
 
-// Create Prisma client directly (using local landing schema)
+// Create Prisma client from Landing schema (Organization, Subscription, etc.)
 const prisma = new PrismaClient()
-console.log('🔍 Prisma models:', Object.keys(prisma).filter(k => !k.startsWith('_') && !k.startsWith('$')).sort())
-console.log('🔍 Has organization?', 'organization' in prisma)
 
 // Generate unique 4-digit hotel code
 async function generateUniqueHotelCode(): Promise<string> {
