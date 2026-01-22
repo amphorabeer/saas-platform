@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import moment from 'moment'
 import { ExtraChargesService } from '../services/ExtraChargesService'
 import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
@@ -631,11 +631,23 @@ export default function SettingsNew() {
   // NEW: Save Pricing
   const savePricing = () => {
     setIsSaving(true)
+    
+    // Save room rates from localStorage (RoomRatesEditor saves them automatically)
+    const roomRates = JSON.parse(localStorage.getItem('roomRates') || '[]')
+    
     localStorage.setItem('hotelSeasons', JSON.stringify(seasons))
     localStorage.setItem('hotelExtraServices', JSON.stringify(extraServices))
     localStorage.setItem('hotelPackages', JSON.stringify(packages))
     localStorage.setItem('hotelTaxes', JSON.stringify(taxes))
     localStorage.setItem('hotelQuickCharges', JSON.stringify(quickCharges))
+    localStorage.setItem('roomRates', JSON.stringify(roomRates)) // Ensure roomRates is saved
+    
+    // Also save weekday prices and special dates if they exist
+    const weekdayPrices = JSON.parse(localStorage.getItem('hotelWeekdayPrices') || '[]')
+    const specialDates = JSON.parse(localStorage.getItem('hotelSpecialDates') || '[]')
+    localStorage.setItem('hotelWeekdayPrices', JSON.stringify(weekdayPrices))
+    localStorage.setItem('hotelSpecialDates', JSON.stringify(specialDates))
+    
     setTimeout(() => {
       setIsSaving(false)
       showMessage('success', '✅ ფასების პარამეტრები შენახულია!')
@@ -2554,6 +2566,7 @@ function RoomPricingSection({ roomTypes, seasons, setSeasons, extraServices, set
   isSaving: boolean
 }) {
   const [activeTab, setActiveTab] = useState<'export' | 'rates' | 'seasons' | 'weekdays' | 'special' | 'bulk' | 'taxes'>('rates')
+  const roomRatesSaveRef = useRef<(() => void) | null>(null)
   
   return (
     <div className="space-y-6">
@@ -2620,7 +2633,11 @@ function RoomPricingSection({ roomTypes, seasons, setSeasons, extraServices, set
           
           {/* Room Rates Tab */}
           {activeTab === 'rates' && (
-            <RoomRatesEditor roomTypes={roomTypes} />
+            <RoomRatesEditor 
+              roomTypes={roomTypes} 
+              onSave={onSave}
+              onSaveRef={(saveFn) => { roomRatesSaveRef.current = saveFn }}
+            />
           )}
           
           {/* Seasons Tab */}
@@ -2660,7 +2677,14 @@ function RoomPricingSection({ roomTypes, seasons, setSeasons, extraServices, set
         
         {/* Save Button */}
         <div className="border-t px-6 py-4 bg-gray-50 flex justify-end">
-          <button onClick={onSave} disabled={isSaving} className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 font-medium">
+          <button onClick={() => {
+            // First save room rates if we're on rates tab
+            if (activeTab === 'rates' && roomRatesSaveRef.current) {
+              roomRatesSaveRef.current()
+            }
+            // Then call parent onSave
+            onSave()
+          }} disabled={isSaving} className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 font-medium">
             {isSaving ? '⏳ ინახება...' : '💾 ყველაფრის შენახვა'}
           </button>
         </div>
@@ -3815,7 +3839,7 @@ function SeasonsEditor({ seasons, setSeasons, roomTypes, onSave }: {
 
 // Room Rates Editor
 // Room Rates Editor - Connected to Room Types
-function RoomRatesEditor({ roomTypes }: { roomTypes: RoomType[] }) {
+function RoomRatesEditor({ roomTypes, onSave, onSaveRef }: { roomTypes: RoomType[], onSave?: () => void, onSaveRef?: (saveFn: () => void) => void }) {
   const [rates, setRates] = useState<{ 
     id: string
     type: string
@@ -3873,6 +3897,20 @@ function RoomRatesEditor({ roomTypes }: { roomTypes: RoomType[] }) {
       alert('✅ ფასები შენახულია!')
     }, 500)
   }
+  
+  // Expose handleSave to parent via ref callback
+  useEffect(() => {
+    if (onSaveRef) {
+      onSaveRef(handleSave)
+    }
+  }, [rates, roomTypes, onSaveRef]) // Re-expose when rates or roomTypes change
+  
+  // Expose handleSave to parent via ref callback
+  useEffect(() => {
+    if (onSaveRef) {
+      onSaveRef(handleSave)
+    }
+  }, [rates, roomTypes]) // Re-expose when rates or roomTypes change
   
   // Calculate weekend difference
   const getWeekendDiff = (weekday: number, weekend: number) => {
