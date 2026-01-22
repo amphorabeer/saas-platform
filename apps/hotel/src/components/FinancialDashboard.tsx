@@ -56,7 +56,7 @@ export default function FinancialDashboard() {
       {/* Header */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">💰 Financial Dashboard</h1>
+          <h1 className="text-2xl font-bold">💰 ფინანსური დეშბორდი</h1>
           <input
             type="date"
             value={selectedDate}
@@ -69,25 +69,25 @@ export default function FinancialDashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <KPICard
-          title="Revenue"
+          title="შემოსავალი"
           value={`₾${revenueReport.revenue.total.toFixed(2)}`}
           icon="💰"
           color="green"
         />
         <KPICard
-          title="Occupancy"
+          title="დატვირთულობა"
           value={managerReport.kpis.occupancyRate}
           icon="🏨"
           color="blue"
         />
         <KPICard
-          title="ADR"
+          title="საშუალო დღიური ტარიფი"
           value={`₾${managerReport.kpis.adr}`}
           icon="📊"
           color="purple"
         />
         <KPICard
-          title="RevPAR"
+          title="შემოსავალი ხელმისაწვდომ ნომერზე"
           value={`₾${managerReport.kpis.revpar}`}
           icon="📈"
           color="orange"
