@@ -80,20 +80,30 @@ export default function HotelDashboard() {
     }
   }, [status, session, router])
   
-  // Fetch subscription status
+  // Fetch subscription status (initial + refetch when tab visible, so Super Admin ACTIVE updates are reflected)
   useEffect(() => {
     const fetchSubscriptionStatus = async () => {
       try {
         const res = await fetch('/api/auth/subscription')
         if (res.ok) {
           const data = await res.json()
-          setSubscriptionStatus(data.status || 'trial')
+          const s = (data.status || 'trial').toLowerCase()
+          setSubscriptionStatus(s)
         }
       } catch (error) {
         console.log('Could not fetch subscription status')
       }
     }
     fetchSubscriptionStatus()
+    const interval = setInterval(fetchSubscriptionStatus, 2 * 60 * 1000) // refetch every 2 min
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') fetchSubscriptionStatus()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [])
   
   // Role-based permissions

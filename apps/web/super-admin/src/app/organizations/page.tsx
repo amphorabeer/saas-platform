@@ -151,19 +151,23 @@ export default function OrganizationsPage() {
         ? `/api/organizations/${editingOrg.id}`
         : "/api/organizations";
       const method = editingOrg ? "PUT" : "POST";
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        slug: formData.slug,
+        plan: formData.plan,
+        status: formData.status,
+        modules: [formData.module],
+      };
+      console.log("[Organizations] handleSave →", method, url, { payload, statusInPayload: payload.status });
 
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          slug: formData.slug,
-          plan: formData.plan,
-          status: formData.status,
-          modules: [formData.module],
-        }),
+        body: JSON.stringify(payload),
       });
+
+      console.log("[Organizations] handleSave response →", response.status, response.ok, url);
 
       if (response.ok) {
         toast.success(editingOrg ? "განახლდა" : "შეიქმნა");
@@ -510,7 +514,7 @@ export default function OrganizationsPage() {
                   >
                     გაუქმება
                   </Button>
-                  <Button onClick={handleSave}>
+                  <Button type="button" onClick={handleSave}>
                     {editingOrg ? "განახლება" : "შექმნა"}
                   </Button>
                 </div>
