@@ -62,38 +62,33 @@ export default async function handler(
 
       let organization: Awaited<ReturnType<typeof prisma.organization.update>> | null = null
       await prisma.$transaction(async (tx) => {
-        // 1. Update organization
+        // 1. Update organization – ONLY name, email, slug. Status is NEVER on Organization.
         organization = await tx.organization.update({
           where: { id },
           data: { name, email, slug }
         })
 
-        // 2. Update or create Subscription (shared Hotel DB – Hotel app reads Subscription.status)
-        if (plan != null || status != null) {
+        // 2. Update or create SUBSCRIPTION (Hotel app reads Subscription.status – we must update this table)
+        const rawStatus = status != null ? String(status).trim().toUpperCase() : ''
+        const validStatus = rawStatus && VALID_STATUS.includes(rawStatus as any) ? rawStatus : null
+        const rawPlan = plan != null ? String(plan).trim().toUpperCase() : ''
+        const newPlan = rawPlan && ['STARTER', 'PROFESSIONAL', 'ENTERPRISE'].includes(rawPlan) ? rawPlan : null
+
+        if (validStatus != null || newPlan != null) {
           const existingSubscription = await tx.subscription.findFirst({
             where: { organizationId: id }
           })
 
-          const newStatus = status != null && String(status).trim() !== ''
-            ? String(status).toUpperCase()
-            : null
-          const validStatus = newStatus && VALID_STATUS.includes(newStatus as any)
-            ? newStatus
-            : null
-          const newPlan = plan != null && String(plan).trim() !== ''
-            ? String(plan).toUpperCase()
-            : null
-
           if (existingSubscription) {
-            const data: { plan?: string; status?: string } = {}
-            if (newPlan) data.plan = newPlan
-            if (validStatus) data.status = validStatus
-            if (Object.keys(data).length > 0) {
+            const updateData: { plan?: string; status?: string } = {}
+            if (newPlan) updateData.plan = newPlan
+            if (validStatus) updateData.status = validStatus
+            if (Object.keys(updateData).length > 0) {
               await tx.subscription.update({
                 where: { id: existingSubscription.id },
-                data: data as any
+                data: updateData as any
               })
-              console.log(`[Organizations API] Updated Subscription for org ${id}: ${JSON.stringify(data)}`)
+              console.log(`[Organizations API] Subscription.update id=${existingSubscription.id}`, updateData)
             }
           } else {
             const now = new Date()
@@ -112,7 +107,7 @@ export default async function handler(
                 trialEnd: trialEnd
               }
             })
-            console.log(`[Organizations API] Created Subscription for org ${id}: plan=${subPlan}, status=${subStatus}`)
+            console.log(`[Organizations API] Subscription.create for org ${id}`, { plan: subPlan, status: subStatus })
           }
         }
 
@@ -133,7 +128,19 @@ export default async function handler(
         }
       })
 
-      return res.status(200).json({ success: true, organization: organization! })
+      // Refetch org with subscription so response includes current Subscription.status ( Hotel reads this )
+      const updated = await prisma.organization.findUnique({
+        where: { id },
+        include: { subscription: true }
+      })
+      const resOrg = updated
+        ? {
+            ...updated,
+            status: updated.subscription?.status?.toLowerCase() ?? 'trial',
+            plan: updated.subscription?.plan ?? 'STARTER'
+          }
+        : organization!
+      return res.status(200).json({ success: true, organization: resOrg })
     } catch (error: any) {
       console.error('Failed to update organization:', error)
       return res.status(500).json({ error: error.message })
