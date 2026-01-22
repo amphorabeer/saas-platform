@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '../../../lib/prisma'
+import { PrismaClient } from '@prisma/client'
 
 const VALID_STATUS = ['TRIAL', 'ACTIVE', 'PAST_DUE', 'CANCELLED', 'EXPIRED'] as const
 function getPlanPrice(plan: string): number {
@@ -9,6 +10,13 @@ function getPlanPrice(plan: string): number {
     case 'ENTERPRISE': return 299
     default: return 0
   }
+}
+
+// Hotel database client for syncing subscription status
+function getHotelPrisma() {
+  const hotelDbUrl = process.env.HOTEL_DATABASE_URL
+  if (!hotelDbUrl) return null
+  return new PrismaClient({ datasources: { db: { url: hotelDbUrl } } })
 }
 
 export default async function handler(
@@ -60,7 +68,21 @@ export default async function handler(
       const { name, email, slug, plan, status, modules } = body
       console.log('[Organizations API] PUT /api/organizations/' + id, { body, status, plan })
 
+      // Get hotelCode for syncing to Hotel database
+      const orgForHotelCode = await prisma.organization.findUnique({
+        where: { id },
+        select: { hotelCode: true, tenantCode: true }
+      })
+      const hotelCode = orgForHotelCode?.tenantCode?.startsWith('HOTEL-') ? orgForHotelCode.tenantCode.replace('HOTEL-', '') : orgForHotelCode?.hotelCode
+
       let organization: Awaited<ReturnType<typeof prisma.organization.update>> | null = null
+      
+      // Prepare status and plan values
+      const rawStatus = status != null ? String(status).trim().toUpperCase() : ''
+      const validStatus = rawStatus && VALID_STATUS.includes(rawStatus as any) ? rawStatus : null
+      const rawPlan = plan != null ? String(plan).trim().toUpperCase() : ''
+      const newPlan = rawPlan && ['STARTER', 'PROFESSIONAL', 'ENTERPRISE'].includes(rawPlan) ? rawPlan : null
+
       await prisma.$transaction(async (tx) => {
         // 1. Update organization – ONLY name, email, slug. Status is NEVER on Organization.
         organization = await tx.organization.update({
@@ -69,11 +91,6 @@ export default async function handler(
         })
 
         // 2. Update or create SUBSCRIPTION (Hotel app reads Subscription.status – we must update this table)
-        const rawStatus = status != null ? String(status).trim().toUpperCase() : ''
-        const validStatus = rawStatus && VALID_STATUS.includes(rawStatus as any) ? rawStatus : null
-        const rawPlan = plan != null ? String(plan).trim().toUpperCase() : ''
-        const newPlan = rawPlan && ['STARTER', 'PROFESSIONAL', 'ENTERPRISE'].includes(rawPlan) ? rawPlan : null
-
         if (validStatus != null || newPlan != null) {
           const existingSubscription = await tx.subscription.findFirst({
             where: { organizationId: id }
@@ -128,6 +145,60 @@ export default async function handler(
         }
       })
 
+      // 4. SYNC to Hotel database if hotelCode exists and status/plan changed
+      if (hotelCode && (validStatus || newPlan)) {
+        const hotelPrisma = getHotelPrisma()
+        if (hotelPrisma) {
+          try {
+            // Find organization in Hotel DB by hotelCode
+            const hotelOrg = await hotelPrisma.organization.findUnique({
+              where: { hotelCode },
+              include: { subscription: true }
+            })
+
+            if (hotelOrg) {
+              const hotelSub = hotelOrg.subscription
+              if (hotelSub) {
+                const updateData: { plan?: string; status?: string } = {}
+                if (newPlan) updateData.plan = newPlan
+                if (validStatus) updateData.status = validStatus
+                if (Object.keys(updateData).length > 0) {
+                  await hotelPrisma.subscription.update({
+                    where: { id: hotelSub.id },
+                    data: updateData as any
+                  })
+                  console.log(`[Hotel DB Sync] Updated subscription for hotelCode=${hotelCode}`, updateData)
+                }
+              } else {
+                // Create subscription in Hotel DB
+                const now = new Date()
+                const trialEnd = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000)
+                await hotelPrisma.subscription.create({
+                  data: {
+                    organizationId: hotelOrg.id,
+                    plan: (newPlan || 'STARTER') as any,
+                    status: (validStatus || 'TRIAL') as any,
+                    price: getPlanPrice(newPlan || 'STARTER'),
+                    currentPeriodStart: now,
+                    currentPeriodEnd: trialEnd,
+                    trialStart: now,
+                    trialEnd: trialEnd
+                  }
+                })
+                console.log(`[Hotel DB Sync] Created subscription for hotelCode=${hotelCode}`)
+              }
+            } else {
+              console.log(`[Hotel DB Sync] Organization not found in Hotel DB for hotelCode=${hotelCode}`)
+            }
+          } catch (syncError) {
+            console.error('[Hotel DB Sync] Error syncing to Hotel database:', syncError)
+            // Don't fail the request, just log the error
+          } finally {
+            await hotelPrisma.$disconnect()
+          }
+        }
+      }
+
       // Refetch org with subscription so response includes current Subscription.status ( Hotel reads this )
       const updated = await prisma.organization.findUnique({
         where: { id },
@@ -170,4 +241,3 @@ export default async function handler(
 
   return res.status(405).json({ error: 'Method not allowed' })
 }
-
