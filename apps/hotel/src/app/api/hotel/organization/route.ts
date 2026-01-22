@@ -2,10 +2,12 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export async function GET() {
   try {
-    // Lazy import to prevent build-time evaluation
     const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
@@ -13,9 +15,6 @@ export async function GET() {
       return unauthorizedResponse()
     }
     
-    const { getPrismaClient } = await import('@/lib/prisma')
-    const prisma = getPrismaClient()
-    // Get organization by tenantId
     const organization = await prisma.organization.findUnique({
       where: { tenantId },
       select: {
@@ -56,7 +55,6 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    // Lazy import to prevent build-time evaluation
     const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
@@ -64,11 +62,8 @@ export async function PUT(request: NextRequest) {
       return unauthorizedResponse()
     }
     
-    const { getPrismaClient } = await import('@/lib/prisma')
-    const prisma = getPrismaClient()
     const body = await request.json()
     
-    // Update organization
     const organization = await prisma.organization.update({
       where: { tenantId },
       data: {
@@ -113,8 +108,3 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
-
-
-
-
-
