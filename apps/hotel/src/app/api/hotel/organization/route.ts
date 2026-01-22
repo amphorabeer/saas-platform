@@ -4,7 +4,10 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 
+console.log('🔍 PrismaClient:', PrismaClient)
 const prisma = new PrismaClient()
+console.log('🔍 prisma instance:', prisma)
+console.log('🔍 prisma.organization:', prisma.organization)
 
 export async function GET() {
   try {
