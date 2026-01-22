@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.json({ status: 'trial' })
     }
     
-    const { PrismaClient } = require('@prisma/client')
+    const { PrismaClient } = require('../../../../prisma/generated/client')
     const prisma = new PrismaClient()
     
     const organization = await prisma.organization.findFirst({
