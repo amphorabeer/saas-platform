@@ -1237,8 +1237,8 @@ export default function HotelDashboard() {
                 className="bg-blue-500 text-white p-6 rounded-lg hover:bg-blue-600 transition-all transform hover:scale-105 shadow-lg text-left"
               >
                 <div className="text-4xl mb-2">📅</div>
-                <div className="text-xl font-bold">Room Calendar</div>
-                <div className="text-sm opacity-75">View & manage reservations</div>
+                <div className="text-xl font-bold">კალენდარი</div>
+                <div className="text-sm opacity-75">ჯავშნების ნახვა და მართვა</div>
               </button>
               
               <button
