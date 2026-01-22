@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../../../../prisma/generated/client'
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 
