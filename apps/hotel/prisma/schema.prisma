@@ -107,6 +107,8 @@ model User {
 
   // Auth
   emailVerified     DateTime?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
   sessions          Session[]
   accounts          Account[]
 
