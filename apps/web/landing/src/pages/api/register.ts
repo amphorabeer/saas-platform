@@ -4,6 +4,11 @@ import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
 import { sendEmail, generateHotelWelcomeEmail } from '../../lib/email'
 
+// Super Admin API URL
+const SUPER_ADMIN_API_URL = process.env.SUPER_ADMIN_API_URL || 'http://localhost:3001'
+// Internal API key for secure communication between services
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || 'internal-api-key-change-in-production'
+
 // Create Prisma client directly (using local landing schema)
 const prisma = new PrismaClient()
 console.log('🔍 Prisma models:', Object.keys(prisma).filter(k => !k.startsWith('_') && !k.startsWith('$')).sort())
@@ -149,6 +154,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
 
     // ========================================
+    // Register in Super Admin (Organization)
+    // ========================================
+    let superAdminRegistered = false
+    let superAdminError: string | null = null
+
+    try {
+      const url = `${SUPER_ADMIN_API_URL}/api/organizations`
+      console.log('[Hotel Register] Calling Super Admin API:', url)
+
+      const superAdminResponse = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Internal-API-Key': INTERNAL_API_KEY,
+        },
+        body: JSON.stringify({
+          name: organizationName,
+          email: email,
+          slug: slug,
+          plan: plan || 'STARTER',
+          status: 'trial',
+          modules: ['HOTEL'],
+          tenantId: result.organization.tenantId,
+          tenantCode: `HOTEL-${hotelCode}`,
+          hotelCode: hotelCode,
+          company: company || null,
+          taxId: taxId || null,
+          phone: phone || null,
+          address: address || null,
+          city: city || null,
+          country: country || 'Georgia',
+          website: website || null,
+          bankName: bankName || null,
+          bankAccount: bankAccount || null,
+        }),
+        signal: AbortSignal.timeout(10000), // 10 second timeout
+      })
+
+      if (superAdminResponse.ok) {
+        superAdminRegistered = true
+        console.log('✅ [Hotel Register] Organization created in Super Admin')
+      } else {
+        const errorData = await superAdminResponse.json()
+        superAdminError = errorData.error || 'Super Admin registration failed'
+        console.error('⚠️ [Hotel Register] Super Admin registration failed:', superAdminError)
+      }
+    } catch (err: any) {
+      superAdminError = err.message
+      console.error('⚠️ [Hotel Register] Super Admin API call failed:', err.message)
+      // არ ვაბრუნებთ error-ს - მომხმარებელი მაინც დარეგისტრირდა
+    }
+
+    // ========================================
     // Send welcome email
     // ========================================
     try {
@@ -175,7 +233,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       organizationId: result.organization.id,
       tenantId: result.organization.tenantId,
       hotelCode: result.organization.hotelCode,
-      message: `რეგისტრაცია წარმატებით დასრულდა! თქვენი სასტუმროს კოდია: ${hotelCode}`
+      superAdminRegistered,
+      ...(superAdminError && { superAdminWarning: 'ორგანიზაცია ვერ დარეგისტრირდა Super Admin-ში. ეს არ აფერხებს თქვენს მუშაობას.' }),
+      message: `რეგისტრაცია წარმატებით დასრულდა! თქვენი სასტუმროს კოდი: ${hotelCode}`
     })
 
   } catch (error: any) {
