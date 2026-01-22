@@ -18,12 +18,27 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const id = params.id
     const updates = await request.json()
     
+    // First, find the room and verify tenantId
+    const existingRoom = await prisma.hotelRoom.findUnique({
+      where: { id }
+    })
+    
+    if (!existingRoom) {
+      return NextResponse.json({ error: 'Room not found' }, { status: 404 })
+    }
+    
+    // Verify tenant isolation
+    if (existingRoom.tenantId !== tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+    
+    // Remove tenantId from updates if present (should not be updated)
+    const { tenantId: _, ...safeUpdates } = updates
+    
+    // Update the room
     const updatedRoom = await prisma.hotelRoom.update({
-      where: {
-        id,
-        tenantId, // Ensure tenant isolation
-      },
-      data: updates,
+      where: { id },
+      data: safeUpdates,
     })
     
     return NextResponse.json(updatedRoom)

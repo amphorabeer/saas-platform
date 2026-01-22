@@ -1838,22 +1838,63 @@ function RoomsListEditor({ rooms, setRooms, roomTypes, floors, onSave }: {
       try {
         let response
         if (editingRoom) {
-          response = await fetch(`/api/hotel/rooms/${editingRoom.id}`, {
+          // For editing, we need to find the correct room ID from API
+          // because localStorage ID might not match database ID
+          let roomIdToUpdate = editingRoom.id
+          
+          // Try to find room by roomNumber in API to get correct ID
+          try {
+            const apiRoomsResponse = await fetch('/api/hotel/rooms')
+            if (apiRoomsResponse.ok) {
+              const apiRooms = await apiRoomsResponse.json()
+              const matchingRoom = apiRooms.find((r: any) => 
+                r.roomNumber === editingRoom.roomNumber || r.id === editingRoom.id
+              )
+              if (matchingRoom) {
+                roomIdToUpdate = matchingRoom.id
+              }
+            }
+          } catch (e) {
+            console.warn('Could not fetch rooms to find ID:', e)
+          }
+          
+          // Prepare update data - ensure we have all required fields
+          const updateData = {
+            roomNumber: roomData.roomNumber,
+            roomType: roomData.roomType,
+            floor: roomData.floor,
+            basePrice: roomData.basePrice,
+            status: roomData.status,
+            amenities: roomData.amenities,
+            maxOccupancy: editingRoom.maxOccupancy || 2
+          }
+          
+          console.log('Updating room:', roomIdToUpdate, updateData)
+          
+          response = await fetch(`/api/hotel/rooms/${roomIdToUpdate}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(roomData) // Send only roomData, not editingRoom
+            body: JSON.stringify(updateData)
           })
         } else {
+          // For new room, add maxOccupancy from room type
+          const roomTypeInfo = getRoomTypeInfo(roomData.roomType)
+          const newRoomData = {
+            ...roomData,
+            maxOccupancy: roomTypeInfo.maxGuests || 2
+          }
+          
           response = await fetch('/api/hotel/rooms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(roomData)
+            body: JSON.stringify(newRoomData)
           })
         }
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-          throw new Error(errorData.error || `API error: ${response.status}`)
+          const errorMessage = errorData.error || errorData.details || `API error: ${response.status}`
+          throw new Error(errorMessage)
         }
         
         // If API succeeded, reload rooms from API to ensure sync
