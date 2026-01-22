@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { randomUUID } from 'crypto'
 import bcrypt from 'bcryptjs'
-import { PrismaClient } from '../../../node_modules/.prisma/client'
+import { PrismaClient } from '@prisma/client'
 import { sendEmail, generateHotelWelcomeEmail } from '../../lib/email'
 
 // Create Prisma client directly (using local landing schema)
