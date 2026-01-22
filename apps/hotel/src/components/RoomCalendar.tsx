@@ -375,7 +375,24 @@ export default function RoomCalendar({
     
     // Find room type - check both 'type' and 'roomType' for compatibility
     const roomTypeName = room.type || room.roomType || 'Standard'
-    const rate = roomRates.find(r => r.type === roomTypeName)
+    
+    // Find rate - try exact match first (case-insensitive), then partial match
+    let rate = roomRates.find(r => r.type === roomTypeName)
+    
+    // If no exact match, try case-insensitive match
+    if (!rate) {
+      rate = roomRates.find(r => r.type.toLowerCase() === roomTypeName.toLowerCase())
+    }
+    
+    // If still no match, try partial match (e.g., "Deluxe2" matches "Deluxe")
+    if (!rate && roomTypeName.length > 0) {
+      // Try to find a rate where the room type starts with the rate type or vice versa
+      rate = roomRates.find(r => {
+        const rateTypeLower = r.type.toLowerCase()
+        const roomTypeLower = roomTypeName.toLowerCase()
+        return roomTypeLower.startsWith(rateTypeLower) || rateTypeLower.startsWith(roomTypeLower)
+      })
+    }
     
     if (!rate) {
       // Fallback to room basePrice or default
@@ -884,7 +901,24 @@ export default function RoomCalendar({
     modifiers: { icon: string; label: string; value: string }[]
   } => {
     const roomTypeName = room.type || room.roomType || 'Standard'
-    const rate = roomRates.find(r => r.type === roomTypeName)
+    
+    // Find rate - try exact match first (case-insensitive), then partial match
+    let rate = roomRates.find(r => r.type === roomTypeName)
+    
+    // If no exact match, try case-insensitive match
+    if (!rate) {
+      rate = roomRates.find(r => r.type.toLowerCase() === roomTypeName.toLowerCase())
+    }
+    
+    // If still no match, try partial match (e.g., "Deluxe2" matches "Deluxe")
+    if (!rate && roomTypeName.length > 0) {
+      // Try to find a rate where the room type starts with the rate type or vice versa
+      rate = roomRates.find(r => {
+        const rateTypeLower = r.type.toLowerCase()
+        const roomTypeLower = roomTypeName.toLowerCase()
+        return roomTypeLower.startsWith(rateTypeLower) || rateTypeLower.startsWith(roomTypeLower)
+      })
+    }
     
     // Base price (weekday/weekend)
     const dayOfWeek = moment(date).day()
