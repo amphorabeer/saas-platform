@@ -1796,9 +1796,25 @@ function RoomsListEditor({ rooms, setRooms, roomTypes, floors, onSave }: {
             : r
         )
       } else {
-        // Check for duplicate room number
-        const exists = existingRooms.some(r => r.roomNumber === newRoom.roomNumber)
-        if (exists) {
+        // Check for duplicate room number - check both localStorage and API
+        const existsInLocal = existingRooms.some(r => r.roomNumber === newRoom.roomNumber)
+        
+        // Also check API to ensure we don't have deleted rooms in localStorage
+        let existsInAPI = false
+        try {
+          const apiResponse = await fetch('/api/hotel/rooms')
+          if (apiResponse.ok) {
+            const apiRooms = await apiResponse.json()
+            existsInAPI = apiRooms.some((r: any) => r.roomNumber === newRoom.roomNumber)
+            // Sync localStorage with API (remove deleted rooms from localStorage)
+            localStorage.setItem('hotelRooms', JSON.stringify(apiRooms))
+            existingRooms = apiRooms
+          }
+        } catch (e) {
+          console.warn('Could not check API for duplicates:', e)
+        }
+        
+        if (existsInLocal || existsInAPI) {
           alert('❌ ოთახი ამ ნომრით უკვე არსებობს!')
           return
         }
@@ -1818,23 +1834,39 @@ function RoomsListEditor({ rooms, setRooms, roomTypes, floors, onSave }: {
       // Update local state
       setRooms(updatedRooms)
       
-      // Also try API (optional, don't fail if it errors)
+      // Also try API - IMPORTANT: Check response and handle errors
       try {
+        let response
         if (editingRoom) {
-          await fetch(`/api/hotel/rooms/${editingRoom.id}`, {
+          response = await fetch(`/api/hotel/rooms/${editingRoom.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...editingRoom, ...roomData })
+            body: JSON.stringify(roomData) // Send only roomData, not editingRoom
           })
         } else {
-          await fetch('/api/hotel/rooms', {
+          response = await fetch('/api/hotel/rooms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...roomData, id: `room-${Date.now()}` })
+            body: JSON.stringify(roomData)
           })
         }
-      } catch (apiError) {
-        console.warn('API save failed, using localStorage:', apiError)
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          throw new Error(errorData.error || `API error: ${response.status}`)
+        }
+        
+        // If API succeeded, reload rooms from API to ensure sync
+        const apiResponse = await fetch('/api/hotel/rooms')
+        if (apiResponse.ok) {
+          const apiRooms = await apiResponse.json()
+          setRooms(apiRooms)
+          localStorage.setItem('hotelRooms', JSON.stringify(apiRooms))
+        }
+      } catch (apiError: any) {
+        console.error('API save failed:', apiError)
+        // Show error but don't block - localStorage already saved
+        alert(`⚠️ API-ზე შენახვა ვერ მოხერხდა, მაგრამ localStorage-ში შენახულია. ${apiError.message || ''}`)
       }
       
       // Reload and reset
@@ -1853,7 +1885,30 @@ function RoomsListEditor({ rooms, setRooms, roomTypes, floors, onSave }: {
     if (!confirm('ნამდვილად გსურთ ოთახის წაშლა?')) return
     
     try {
-      // Delete from localStorage
+      // Delete from API first
+      try {
+        const response = await fetch(`/api/hotel/rooms/${roomId}`, { method: 'DELETE' })
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          throw new Error(errorData.error || `API error: ${response.status}`)
+        }
+        
+        // If API delete succeeded, reload rooms from API to ensure sync
+        const apiResponse = await fetch('/api/hotel/rooms')
+        if (apiResponse.ok) {
+          const apiRooms = await apiResponse.json()
+          setRooms(apiRooms)
+          localStorage.setItem('hotelRooms', JSON.stringify(apiRooms))
+          onSave()
+          return
+        }
+      } catch (apiError: any) {
+        console.error('API delete failed:', apiError)
+        // If API fails, still try to delete from localStorage
+        alert(`⚠️ API-ზე წაშლა ვერ მოხერხდა: ${apiError.message || ''}. წაიშლება მხოლოდ localStorage-დან.`)
+      }
+      
+      // Fallback: Delete from localStorage if API failed
       const existingRooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
       const updatedRooms = existingRooms.filter((r: any) => r.id !== roomId)
       localStorage.setItem('hotelRooms', JSON.stringify(updatedRooms))
@@ -1861,18 +1916,11 @@ function RoomsListEditor({ rooms, setRooms, roomTypes, floors, onSave }: {
       // Update local state
       setRooms(updatedRooms)
       
-      // Also try API
-      try {
-        await fetch(`/api/hotel/rooms/${roomId}`, { method: 'DELETE' })
-      } catch (e) {
-        console.warn('API delete failed:', e)
-      }
-      
       onSave()
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting room:', error)
-      alert('❌ შეცდომა ოთახის წაშლისას')
+      alert(`❌ შეცდომა ოთახის წაშლისას: ${error.message || ''}`)
     }
   }
   
