@@ -13,7 +13,7 @@ const nextConfig = {
   experimental: {
     instrumentationHook: true,
     outputFileTracingIncludes: {
-      '/api/**/*': ['./node_modules/.prisma/**/*'],
+      '/api/**/*': ['./node_modules/.prisma/**/*', './prisma/generated/**/*'],
     },
   },
   async headers() {
