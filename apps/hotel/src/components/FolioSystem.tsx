@@ -54,16 +54,47 @@ export default function FolioSystem({ onSelectFolio, onClose }: FolioSystemProps
     loadFolios()
   }, [])
 
-  const loadFolios = () => {
+  const loadFolios = async () => {
     setLoading(true)
     try {
+      // Try API first
+      const response = await fetch('/api/folios')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.folios && data.folios.length > 0) {
+          // Transform API data to component format
+          const apiFolios = data.folios.map((f: any) => ({
+            id: f.id,
+            folioNumber: f.folioNumber,
+            reservationId: f.reservationId || '',
+            guestName: f.guestName,
+            roomNumber: f.roomNumber || '',
+            checkIn: f.checkIn || '',
+            checkOut: f.checkOut || '',
+            transactions: f.charges || f.folioData?.transactions || [],
+            balance: f.balance || 0,
+            status: f.status || 'open',
+            createdAt: f.createdAt,
+            closedAt: f.closedAt,
+          }))
+          setFolios(apiFolios)
+          setFilteredFolios(apiFolios)
+          console.log('[FolioSystem] Loaded from API:', apiFolios.length)
+          return
+        }
+      }
+      
+      // Fallback to localStorage
       const saved = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
       setFolios(saved)
       setFilteredFolios(saved)
+      console.log('[FolioSystem] Loaded from localStorage:', saved.length)
     } catch (error) {
       console.error('Error loading folios:', error)
-      setFolios([])
-      setFilteredFolios([])
+      // Fallback to localStorage on error
+      const saved = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      setFolios(saved)
+      setFilteredFolios(saved)
     } finally {
       setLoading(false)
     }
@@ -149,6 +180,16 @@ export default function FolioSystem({ onSelectFolio, onClose }: FolioSystemProps
     )
     setFolios(updated)
     localStorage.setItem('hotelFolios', JSON.stringify(updated))
+    
+    // Also save to API
+    const closedFolio = updated.find(f => f.id === folioId)
+    if (closedFolio) {
+      fetch('/api/folios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(closedFolio),
+      }).catch(err => console.error('[FolioSystem] API save error:', err))
+    }
   }
 
   // Reopen folio
@@ -160,6 +201,16 @@ export default function FolioSystem({ onSelectFolio, onClose }: FolioSystemProps
     )
     setFolios(updated)
     localStorage.setItem('hotelFolios', JSON.stringify(updated))
+    
+    // Also save to API
+    const reopenedFolio = updated.find(f => f.id === folioId)
+    if (reopenedFolio) {
+      fetch('/api/folios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reopenedFolio),
+      }).catch(err => console.error('[FolioSystem] API save error:', err))
+    }
   }
 
   // Print folio
