@@ -129,6 +129,25 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
   const getNightAuditsKey = () => getStorageKey("nightAudits")
   const getLastAuditDateKey = () => getStorageKey("lastNightAuditDate")
 
+  // Helper function to load folios from API or localStorage
+  const loadFolios = async (): Promise<any[]> => {
+    try {
+      const response = await fetch('/api/folios')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.folios && data.folios.length > 0) {
+          return data.folios.map((f: any) => ({
+            ...f,
+            transactions: f.folioData?.transactions || f.charges || []
+          }))
+        }
+      }
+    } catch (error) {
+      console.error('[NightAuditModule] Folios API error:', error)
+    }
+    return JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+  }
+
   const [currentStep, setCurrentStep] = useState(0)
   const [isAuditRunning, setIsAuditRunning] = useState(false)
   const [showPreChecks, setShowPreChecks] = useState(true)
