@@ -352,6 +352,20 @@ exports.Prisma.ConfigurationScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ContactRequestScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  message: 'message',
+  module: 'module',
+  status: 'status',
+  notes: 'notes',
+  repliedAt: 'repliedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -443,7 +457,8 @@ exports.Prisma.ModelName = {
   ActivityLog: 'ActivityLog',
   HotelRoom: 'HotelRoom',
   HotelReservation: 'HotelReservation',
-  Configuration: 'Configuration'
+  Configuration: 'Configuration',
+  ContactRequest: 'ContactRequest'
 };
 
 /**

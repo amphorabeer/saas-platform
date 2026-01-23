@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { SidebarWithState } from "../components/SidebarWithState";
 import { DashboardContent } from "../components/DashboardContent";
 import { LandingEditor } from "../components/LandingEditor";
+import { ContactRequestsManager } from "../components/ContactRequestsManager";
 import { FinancialSection } from "../components/FinancialSection";
 import { ReportsSection } from "../components/ReportsSection";
 import { MarketingSection } from "../components/MarketingSection";
@@ -63,6 +64,8 @@ export default function SuperAdminDashboard() {
         return <ReportsSection />;
       case "marketing":
         return <MarketingSection />;
+      case "contact-requests":
+        return <ContactRequestsManager />;
       case "support":
         return <SupportSection />;
       case "integrations":

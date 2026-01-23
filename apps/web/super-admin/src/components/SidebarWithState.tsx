@@ -16,6 +16,7 @@ const sidebarItems = [
   { label: "რეპორტები", id: "reports", icon: "📋" },
   { label: "მარკეტინგი", id: "marketing", icon: "📢" },
   { label: "Support", id: "support", icon: "🎧", badge: "5", badgeColor: "destructive" },
+  { label: "Contact Requests", id: "contact-requests", icon: "📬", badge: "NEW" },
   { label: "ინტეგრაციები", id: "integrations", icon: "🔌" },
   { label: "პარამეტრები", id: "settings", icon: "⚙️" },
 ];

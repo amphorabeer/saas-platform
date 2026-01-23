@@ -434,3 +434,22 @@ model Configuration {
 
   @@index([key])
 }
+
+// Contact Form Submissions from Landing Page
+model ContactRequest {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String   @db.Text
+  module    String?  // რომელი მოდულიდან მოვიდა (hotel, brewery...)
+  status    String   @default("NEW")  // NEW, READ, REPLIED, ARCHIVED
+  notes     String?  @db.Text  // ადმინის შენიშვნები
+  repliedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([module])
+  @@index([createdAt])
+}
