@@ -61,20 +61,41 @@ export default function CashierModule() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   }
   
-  // Load cashier transactions from all folios
-  const loadCashierTransactions = () => {
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-    const today = getBusinessDate()
+  // Load cashier transactions from API or folios
+  const loadCashierTransactions = async () => {
+    let folios: any[] = []
     
+    // Try API first
+    try {
+      const response = await fetch('/api/folios')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.folios && data.folios.length > 0) {
+          folios = data.folios.map((f: any) => ({
+            ...f,
+            transactions: f.folioData?.transactions || f.charges || []
+          }))
+          console.log('[CashierModule] Loaded folios from API:', folios.length)
+        }
+      }
+    } catch (error) {
+      console.error('[CashierModule] API error:', error)
+    }
+    
+    // Fallback to localStorage
+    if (folios.length === 0) {
+      folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      console.log('[CashierModule] Loaded folios from localStorage:', folios.length)
+    }
+    
+    const today = getBusinessDate()
     const todayTransactions: any[] = []
     
     folios.forEach((folio: any) => {
       if (!folio.transactions) return
       
       folio.transactions.forEach((t: any) => {
-        // Use transaction date directly
         const txDate = t.date
-        
         const isPayment = t.credit > 0
         const isToday = txDate === today
         
@@ -124,51 +145,69 @@ export default function CashierModule() {
   
   // SINGLE useEffect - Load data on mount ONLY
   useEffect(() => {
-    // Load shift
-    const savedShift = localStorage.getItem('currentCashierShift')
-    if (savedShift) {
-      setCurrentShift(JSON.parse(savedShift))
+    const loadData = async () => {
+      // Load shift from API first, then localStorage
+      try {
+        const shiftResponse = await fetch('/api/cashier?current=true')
+        if (shiftResponse.ok) {
+          const shiftData = await shiftResponse.json()
+          if (shiftData.shift) {
+            setCurrentShift(shiftData.shift)
+            console.log('[CashierModule] Loaded shift from API')
+          } else {
+            // Fallback to localStorage
+            const savedShift = localStorage.getItem('currentCashierShift')
+            if (savedShift) {
+              setCurrentShift(JSON.parse(savedShift))
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[CashierModule] Shift API error:', error)
+        const savedShift = localStorage.getItem('currentCashierShift')
+        if (savedShift) {
+          setCurrentShift(JSON.parse(savedShift))
+        }
+      }
+      
+      // Load shifts history from API
+      try {
+        const historyResponse = await fetch('/api/cashier')
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json()
+          if (historyData.shifts && historyData.shifts.length > 0) {
+            setShifts(historyData.shifts)
+            console.log('[CashierModule] Loaded shifts history from API:', historyData.shifts.length)
+          } else {
+            const allShifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
+            setShifts(allShifts)
+          }
+        }
+      } catch (error) {
+        const allShifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
+        setShifts(allShifts)
+      }
+      
+      // Load folio transactions
+      const todayTx = await loadCashierTransactions()
+      
+      // Load manual transactions
+      const today = getBusinessDate()
+      const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+      const todayManual = savedManual.filter((t: any) => t.date === today)
+      
+      // Add manual INCOME transactions to main list
+      const manualIncomes = todayManual.filter((t: any) => t.type === 'income')
+      const allIncomes = [...todayTx, ...manualIncomes]
+      
+      // Set expenses separately
+      const manualExpenses = todayManual.filter((t: any) => t.type === 'expense')
+      
+      setTransactions(allIncomes)
+      setManualTransactions(manualExpenses)
     }
     
-    // Load shifts history
-    const allShifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
-    setShifts(allShifts)
-    
-    // Load folio transactions
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-    const today = getBusinessDate()
-    
-    const todayTx: any[] = []
-    folios.forEach((folio: any) => {
-      folio.transactions?.forEach((t: any) => {
-        if (t.credit > 0 && t.date === today) {
-          todayTx.push({
-            id: t.id || Math.random().toString(),
-            time: t.time || '00:00',
-            description: `${folio.guestName} - Room ${folio.roomNumber}`,
-            amount: t.credit,
-            method: t.paymentMethod || 'cash',
-            type: 'income',
-            manual: false
-          })
-        }
-      })
-    })
-    
-    // Load manual transactions
-    const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
-    const todayManual = savedManual.filter((t: any) => t.date === today)
-    
-    // Add manual INCOME transactions to main list
-    const manualIncomes = todayManual.filter((t: any) => t.type === 'income')
-    const allIncomes = [...todayTx, ...manualIncomes]
-    
-    // Set expenses separately
-    const manualExpenses = todayManual.filter((t: any) => t.type === 'expense')
-    
-    setTransactions(allIncomes)
-    setManualTransactions(manualExpenses)
-    
+    loadData()
   }, [])
 
   // REMOVED: Real-time updates useEffect - was conflicting and clearing transactions
@@ -325,7 +364,7 @@ export default function CashierModule() {
   }
   
   // Open new shift
-  const openShift = (openingBalance: number) => {
+  const openShift = async (openingBalance: number) => {
     const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('currentUser') || '{}') : {}
     
     const newShift: CashierShift = {
@@ -347,6 +386,24 @@ export default function CashierModule() {
     
     setCurrentShift(newShift)
     localStorage.setItem('currentCashierShift', JSON.stringify(newShift))
+    
+    // Also save to API
+    try {
+      await fetch('/api/cashier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shiftNumber: `SH-${newShift.id}`,
+          cashierName: newShift.userName,
+          cashierId: newShift.userId,
+          openingBalance: newShift.openingBalance,
+          shiftData: newShift,
+        }),
+      })
+      console.log('[CashierModule] Shift saved to API')
+    } catch (error) {
+      console.error('[CashierModule] API error saving shift:', error)
+    }
   }
   
   // Add manual transaction
@@ -416,7 +473,7 @@ export default function CashierModule() {
   }
   
   // Handle close shift
-  const handleCloseShift = () => {
+  const handleCloseShift = async () => {
     if (!currentShift) return
     
     const expectedCash = (currentShift.openingBalance || 0) + calculatedTotals.cash - calculatedTotals.expenses
@@ -464,6 +521,29 @@ export default function CashierModule() {
     const history = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
     history.push(closedShift)
     localStorage.setItem('cashierShifts', JSON.stringify(history))
+    
+    // Also update in API
+    try {
+      await fetch('/api/cashier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: currentShift.id,
+          status: 'closed',
+          closedAt: closedShift.closedAt,
+          closingBalance: closeFormData.nextDayBalance,
+          totalCashIn: calculatedTotals.cash,
+          totalCashOut: calculatedTotals.expenses,
+          totalCard: calculatedTotals.card,
+          totalBank: calculatedTotals.bank,
+          transactions: closedShift.transactions,
+          shiftData: closedShift,
+        }),
+      })
+      console.log('[CashierModule] Shift closed in API')
+    } catch (error) {
+      console.error('[CashierModule] API error closing shift:', error)
+    }
     
     // Clear current shift
     localStorage.removeItem('currentCashierShift')

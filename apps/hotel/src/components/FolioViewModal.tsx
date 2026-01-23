@@ -42,17 +42,32 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     loadOrCreateFolio()
   }, [reservation.id])
   
-  const loadOrCreateFolio = () => {
+  const loadOrCreateFolio = async () => {
     try {
       setLoading(true)
       if (typeof window === 'undefined') return
       
-      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      // Try API first
+      let folios: any[] = []
+      try {
+        const response = await fetch('/api/folios')
+        if (response.ok) {
+          const data = await response.json()
+          folios = data.folios || []
+        }
+      } catch (error) {
+        console.error('[FolioViewModal] API error:', error)
+      }
+      
+      // Fallback to localStorage
+      if (folios.length === 0) {
+        folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      }
+      
       let existingFolio = folios.find((f: any) => f.reservationId === reservation.id)
       
       if (!existingFolio) {
         // Create new folio
-        // Get room number (convert roomId to roomNumber if needed)
         const roomNumberForFolio = PostingService.getRoomNumber(reservation.roomNumber || reservation.roomId)
         const roomNumberForFolioNumber = roomNumberForFolio.length <= 4 && /^\d+$/.test(roomNumberForFolio) 
           ? roomNumberForFolio 
@@ -74,6 +89,18 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
         
         folios.push(existingFolio)
         localStorage.setItem('hotelFolios', JSON.stringify(folios))
+        
+        // Also save to API
+        try {
+          await fetch('/api/folios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(existingFolio),
+          })
+          console.log('[FolioViewModal] New folio saved to API')
+        } catch (error) {
+          console.error('[FolioViewModal] API error saving folio:', error)
+        }
       }
       
       setFolio(existingFolio)
@@ -84,7 +111,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     }
   }
   
-  const handlePostCharge = (charge: any) => {
+  const handlePostCharge = async (charge: any) => {
     if (!folio) return
     
     const transaction = {
@@ -122,6 +149,17 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
       localStorage.setItem('hotelFolios', JSON.stringify(folios))
     }
     
+    // Also save to API
+    try {
+      await fetch('/api/folios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFolio),
+      })
+    } catch (error) {
+      console.error('[FolioViewModal] API error:', error)
+    }
+    
     // Log activity
     ActivityLogger.log('FOLIO_CHARGE_POSTED', {
       folioNumber: folio.folioNumber,
@@ -134,7 +172,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     setShowPostCharge(false)
   }
   
-  const handlePayment = (payment: any) => {
+  const handlePayment = async (payment: any) => {
     if (!folio) return
     
     const transaction = {
@@ -170,6 +208,17 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     
     if (typeof window !== 'undefined') {
       localStorage.setItem('hotelFolios', JSON.stringify(folios))
+    }
+    
+    // Also save to API
+    try {
+      await fetch('/api/folios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFolio),
+      })
+    } catch (error) {
+      console.error('[FolioViewModal] API error:', error)
     }
     
     // Log activity

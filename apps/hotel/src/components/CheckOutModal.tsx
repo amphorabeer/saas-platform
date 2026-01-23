@@ -39,7 +39,23 @@ export default function CheckOutModal({
       setLoading(true)
       if (typeof window === 'undefined') return
       
-      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      // Try API first
+      let folios: any[] = []
+      try {
+        const response = await fetch('/api/folios')
+        if (response.ok) {
+          const data = await response.json()
+          folios = data.folios || []
+        }
+      } catch (error) {
+        console.error('[CheckOutModal] API error:', error)
+      }
+      
+      // Fallback to localStorage
+      if (folios.length === 0) {
+        folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      }
+      
       let resFolio = folios.find((f: any) => f.reservationId === reservation.id)
       
       if (!resFolio) {
@@ -101,7 +117,7 @@ export default function CheckOutModal({
       balance: folio.balance - paymentAmount
     }
     
-    // Save
+    // Save to localStorage
     const folios = typeof window !== 'undefined' 
       ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
       : []
@@ -110,6 +126,27 @@ export default function CheckOutModal({
     
     if (typeof window !== 'undefined') {
       localStorage.setItem('hotelFolios', JSON.stringify(folios))
+    }
+    
+    // Also save to API
+    try {
+      await fetch('/api/folios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folioNumber: updatedFolio.folioNumber,
+          guestName: updatedFolio.guestName,
+          roomNumber: updatedFolio.roomNumber,
+          reservationId: updatedFolio.reservationId,
+          status: updatedFolio.status,
+          balance: updatedFolio.balance,
+          charges: updatedFolio.transactions,
+          folioData: updatedFolio,
+        }),
+      })
+      console.log('[CheckOutModal] Folio saved to API')
+    } catch (error) {
+      console.error('[CheckOutModal] API error saving folio:', error)
     }
     
     // Log activity
