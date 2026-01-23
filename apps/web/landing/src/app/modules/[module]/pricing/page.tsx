@@ -84,11 +84,6 @@ function getRegistrationUrl(moduleSlug: string, plan: string): string {
   }
   // All other modules (including hotel) use Landing's signup
   return `/auth/signup?module=${moduleSlug}&plan=${plan}`;
-  const appUrl = moduleAppUrls[moduleSlug];
-  if (appUrl) {
-    return `${appUrl}/register?plan=${plan}`;
-  }
-  return `/auth/signup?module=${moduleSlug}&plan=${plan}`;
 }
 
 export default function ModulePricingPage({ params }: { params: { module: string } }) {
