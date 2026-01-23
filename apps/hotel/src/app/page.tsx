@@ -1545,7 +1545,7 @@ export default function HotelDashboard() {
         )}
         
         {activeTab === 'new-night-audit' && (
-          <NightAuditModule rooms={rooms} />
+          <NightAuditModule rooms={rooms} hotelCode={session?.user?.hotelCode || ""} organizationId={session?.user?.organizationId || ""} />
         )}
         
         {activeTab === 'cashier' && (
