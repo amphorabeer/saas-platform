@@ -123,7 +123,12 @@ const getNextAuditDate = (): string => {
   return moment().subtract(1, 'day').format('YYYY-MM-DD')
 }
 
-export default function NightAuditModule() {
+export default function NightAuditModule({ rooms, hotelCode, organizationId }: { rooms?: any[]; hotelCode?: string; organizationId?: string }) {
+  // Helper functions for hotel-specific localStorage keys
+  const getStorageKey = (key: string) => hotelCode ? `${key}_${hotelCode}` : key
+  const getNightAuditsKey = () => getStorageKey("nightAudits")
+  const getLastAuditDateKey = () => getStorageKey("lastNightAuditDate")
+
   const [currentStep, setCurrentStep] = useState(0)
   const [isAuditRunning, setIsAuditRunning] = useState(false)
   const [showPreChecks, setShowPreChecks] = useState(true)
@@ -216,7 +221,7 @@ export default function NightAuditModule() {
     if (typeof window === 'undefined') return null
     
     // Priority 1: lastNightAuditDate (plain string YYYY-MM-DD)
-    const lastNightAudit = localStorage.getItem('lastNightAuditDate')
+    const lastNightAudit = localStorage.getItem(getLastAuditDateKey())
     if (lastNightAudit) {
       return lastNightAudit
     }
@@ -814,7 +819,27 @@ export default function NightAuditModule() {
   }
   
   const loadAuditHistory = async () => {
-    const history = JSON.parse(localStorage.getItem('nightAudits') || '[]')
+    // Try to load from API first, fallback to localStorage
+    let history: any[] = []
+    
+    if (organizationId) {
+      try {
+        const response = await fetch('/api/night-audit')
+        if (response.ok) {
+          const data = await response.json()
+          history = data.audits || []
+          console.log("[NightAudit] Loaded from API:", history.length, "audits")
+        }
+      } catch (error) {
+        console.error("[NightAudit] API error, using localStorage:", error)
+      }
+    }
+    
+    // Fallback to localStorage if API failed or no organizationId
+    if (history.length === 0) {
+      history = JSON.parse(localStorage.getItem(getNightAuditsKey()) || '[]')
+      console.log("[NightAudit] Loaded from localStorage:", history.length, "audits")
+    }
     
     // Recalculate statistics for each audit date from actual reservations
     const enrichedHistory = await Promise.all(
@@ -856,14 +881,8 @@ export default function NightAuditModule() {
       
       if (lastCompleted) {
         const nextDate = moment(lastCompleted.date).add(1, 'day')
-        const today = moment()
-        
-        // Set to next unclosed date, but not future
-        if (nextDate.isBefore(today, 'day')) {
+        if (nextDate.isBefore(moment(), 'day')) {
           setSelectedDate(nextDate.format('YYYY-MM-DD'))
-        } else {
-          // If next date is today, we can close yesterday at most
-          setSelectedDate(moment().subtract(1, 'day').format('YYYY-MM-DD'))
         }
       }
     }
@@ -1061,7 +1080,7 @@ export default function NightAuditModule() {
     
     // GUARD 4: Check localStorage directly for completed audit
     const historyFromStorage = typeof window !== 'undefined' 
-      ? JSON.parse(localStorage.getItem('nightAudits') || '[]')
+      ? JSON.parse(localStorage.getItem(getNightAuditsKey()) || '[]')
       : []
     
     const existingAudit = historyFromStorage.find((a: any) => 
@@ -1154,7 +1173,7 @@ export default function NightAuditModule() {
     
     // Check 2: Verify audit hasn't been completed while countdown was running
     const historyFromStorage = typeof window !== 'undefined' 
-      ? JSON.parse(localStorage.getItem('nightAudits') || '[]')
+      ? JSON.parse(localStorage.getItem(getNightAuditsKey()) || '[]')
       : []
     
     const existingAudit = historyFromStorage.find((a: any) => 
@@ -2057,7 +2076,7 @@ This is an automated report from Night Audit System.
     const nextDay = moment(selectedDate).add(1, 'day').format('YYYY-MM-DD')
     localStorage.setItem('currentBusinessDate', nextDay)
     // Set both: lastNightAuditDate (preferred) and lastAuditDate (legacy for backward compatibility)
-    localStorage.setItem('lastNightAuditDate', selectedDate)
+    localStorage.setItem(getLastAuditDateKey(), selectedDate)
     localStorage.setItem('lastAuditDate', JSON.stringify(selectedDate))
     addToLog(`📅 Business Day: ${selectedDate} → ${nextDay}`)
   }
@@ -2067,7 +2086,7 @@ This is an automated report from Night Audit System.
     localStorage.removeItem(AUDIT_LOCK_KEY)
     
     // CRITICAL: Final check before completing - prevent race conditions
-    const historyBeforeSave = JSON.parse(localStorage.getItem('nightAudits') || '[]')
+    const historyBeforeSave = JSON.parse(localStorage.getItem(getNightAuditsKey()) || '[]')
     const alreadyExists = historyBeforeSave.find((h: any) => 
       h.date === auditResult.date && 
       h.status === 'completed' &&
@@ -2101,7 +2120,7 @@ This is an automated report from Night Audit System.
     addToLog('🔓 სისტემა განბლოკილია')
     
     // Save to history - use atomic operation to prevent duplicates
-    const history = JSON.parse(localStorage.getItem('nightAudits') || '[]')
+    const history = JSON.parse(localStorage.getItem(getNightAuditsKey()) || '[]')
     
     // Final duplicate check before saving
     const exists = history.find((h: any) => 
@@ -2211,7 +2230,27 @@ This is an automated report from Night Audit System.
         roomChargeFailed: auditResult.roomChargeFailed || 0,
         roomChargeSkipped: auditResult.roomChargeSkipped || 0
       })
-      localStorage.setItem('nightAudits', JSON.stringify(history))
+      localStorage.setItem(getNightAuditsKey(), JSON.stringify(history))
+      
+      // Also save to API/database
+      if (organizationId) {
+        try {
+          await fetch('/api/night-audit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              date: auditResult.date,
+              organizationId,
+              ...auditResult
+            }),
+          })
+          addToLog('✅ Night Audit შენახულია database-ში')
+        } catch (error) {
+          console.error('[NightAudit] Failed to save to API:', error)
+          addToLog('⚠️ Database-ში შენახვა ვერ მოხერხდა')
+        }
+      }
+      
       addToLog('✅ Night Audit შენახულია history-ში')
     } else {
       // If duplicate detected, log warning but don't save
@@ -2230,7 +2269,7 @@ This is an automated report from Night Audit System.
     
     // Set audit date properly (always update, even if duplicate)
     localStorage.setItem('lastAuditDate', JSON.stringify(auditResult.date))
-    localStorage.setItem('lastNightAuditDate', auditResult.date)
+    localStorage.setItem(getLastAuditDateKey(), auditResult.date)
     localStorage.setItem('currentBusinessDate', moment(auditResult.date).add(1, 'day').format('YYYY-MM-DD'))
     
     addToLog('✅ Night Audit დასრულდა')
@@ -2274,7 +2313,7 @@ This is an automated report from Night Audit System.
       return
     }
     
-    const history = JSON.parse(localStorage.getItem('nightAudits') || '[]')
+    const history = JSON.parse(localStorage.getItem(getNightAuditsKey()) || '[]')
     const updatedHistory = history.map((audit: any) => {
       if (audit.date === date && audit.status === 'completed') {
         return {
@@ -2288,11 +2327,23 @@ This is an automated report from Night Audit System.
       return audit
     })
     
-    localStorage.setItem('nightAudits', JSON.stringify(updatedHistory))
+    localStorage.setItem(getNightAuditsKey(), JSON.stringify(updatedHistory))
+    
+    // Also update in API/database
+    if (organizationId) {
+      try {
+        await fetch(`/api/night-audit?date=${date}`, {
+          method: 'DELETE',
+        })
+        console.log('[NightAudit] Reversed in database')
+      } catch (error) {
+        console.error('[NightAudit] Failed to reverse in API:', error)
+      }
+    }
     
     // Update business date back
     localStorage.setItem('currentBusinessDate', date)
-    localStorage.setItem('lastNightAuditDate', moment(date).subtract(1, 'day').format('YYYY-MM-DD'))
+    localStorage.setItem(getLastAuditDateKey(), moment(date).subtract(1, 'day').format('YYYY-MM-DD'))
     
     alert(`✅ თარიღი ${date} გახსნილია!\nახლა შეგიძლიათ თავიდან გაუშვათ Night Audit.`)
     setShowReverseModal(false)
