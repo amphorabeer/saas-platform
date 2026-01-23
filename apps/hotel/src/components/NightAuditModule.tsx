@@ -145,6 +145,8 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
     } catch (error) {
       console.error('[NightAuditModule] Folios API error:', error)
     }
+    // Fallback to localStorage
+    if (typeof window === 'undefined') return []
     return JSON.parse(localStorage.getItem('hotelFolios') || '[]')
   }
 
@@ -160,6 +162,9 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
   const [isCountdownActive, setIsCountdownActive] = useState(false)
   const [showReportDetails, setShowReportDetails] = useState<any>(null)
   const [isFirstAudit, setIsFirstAudit] = useState(true)
+  
+  // Folios cache for API data
+  const [foliosCache, setFoliosCache] = useState<any[]>([])
   
   // NEW: Enhanced features state
   const [showReverseModal, setShowReverseModal] = useState(false)
@@ -235,6 +240,43 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
     loadHotelInfo()
   }, [])
 
+  // Load folios cache from API on mount and when needed
+  const loadFoliosCache = async () => {
+    try {
+      const response = await fetch('/api/folios')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.folios && data.folios.length > 0) {
+          const mappedFolios = data.folios.map((f: any) => ({
+            ...f,
+            transactions: f.folioData?.transactions || f.charges || f.transactions || []
+          }))
+          setFoliosCache(mappedFolios)
+          console.log('[NightAuditModule] Loaded folios from API:', mappedFolios.length)
+          return mappedFolios
+        }
+      }
+    } catch (error) {
+      console.error('[NightAuditModule] Folios API error:', error)
+    }
+    // Fallback to localStorage
+    const localFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    setFoliosCache(localFolios)
+    return localFolios
+  }
+
+  // Load folios cache on mount
+  useEffect(() => {
+    loadFoliosCache()
+  }, [])
+
+  // Get folios - use cache or localStorage fallback
+  const getFolios = (): any[] => {
+    if (foliosCache.length > 0) return foliosCache
+    if (typeof window === 'undefined') return []
+    return JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+  }
+
   // Helper: Get last audit date with correct priority (same as getBusinessDay)
   const getLastAuditDate = (): string | null => {
     if (typeof window === 'undefined') return null
@@ -267,7 +309,7 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
       return { checkIns: 0, checkOuts: 0 }
     }
     
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = getFolios()
     
     let checkIns = 0
     let checkOuts = 0
@@ -295,7 +337,7 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
       return 0
     }
     
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = getFolios()
     let revenue = 0
     
     folios.forEach((folio: any) => {
@@ -314,7 +356,7 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
   const enrichPostingResultsWithAmounts = (postingResults: any[], auditDate: string) => {
     if (typeof window === 'undefined') return postingResults
     
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = getFolios()
     
     return postingResults.map(p => {
       // If amount is 0 but it was skipped/prePosted, get amount from folio
@@ -1739,7 +1781,7 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
         })
       
       // Get payments and charges from folios (transactions, not payments!)
-      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      const folios = getFolios()
       folios.forEach((folio: any) => {
         if (folio.transactions && Array.isArray(folio.transactions)) {
           // Get PAYMENTS from transactions
@@ -1793,7 +1835,7 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
       // Get all data for report
       const reservations = await fetch('/api/hotel/reservations').then(r => r.json()).catch(() => [])
       const rooms = await fetch('/api/hotel/rooms').then(r => r.json()).catch(() => [])
-      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      const folios = getFolios()
       
       // Calculate statistics
       const checkIns = reservations.filter((r: any) => 
@@ -2150,7 +2192,7 @@ This is an automated report from Night Audit System.
     
     if (!exists) {
       // Collect operations and payments before saving
-      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      const folios = getFolios()
       let paymentsTotal = 0
       let roomChargesTotal = 0
       const operations: any[] = []
@@ -2398,7 +2440,7 @@ This is an automated report from Night Audit System.
     }
     
     // Source 1: Folio payment transactions for this date (exact date match like Cashier)
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = getFolios()
     folios.forEach((folio: any) => {
       (folio.transactions || []).forEach((t: any) => {
         if (t.type === 'payment' || t.credit > 0) {
@@ -2507,7 +2549,7 @@ This is an automated report from Night Audit System.
   // UNIFIED DATA LOADER: Load all audit data from same sources
   // ============================================
   const loadAuditDataForDate = (targetDate: string) => {
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = getFolios()
     const reservations = JSON.parse(localStorage.getItem('hotelReservations') || '[]')
     const manualTx = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
     
@@ -2617,7 +2659,7 @@ This is an automated report from Night Audit System.
     try {
       const reservations = await fetch('/api/hotel/reservations').then(r => r.json()).catch(() => [])
       const rooms = await fetch('/api/hotel/rooms').then(r => r.json()).catch(() => [])
-      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      const folios = getFolios()
       
       // Calculate comprehensive statistics
       const totalRooms = rooms.length || 15
@@ -2930,7 +2972,7 @@ This is an automated report from Night Audit System.
       }
     }
     
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = getFolios()
     const audits = JSON.parse(localStorage.getItem('nightAudits') || '[]')
     
     const postedCharges: any[] = []
@@ -3548,7 +3590,7 @@ This is an automated report from Night Audit System.
                     <div className="font-bold text-blue-400 mb-1">სტატისტიკა</div>
                     {(() => {
                       // Use FOLIOS instead of reservations (reservations not in localStorage)
-                      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+                      const folios = getFolios()
                       const rooms = JSON.parse(localStorage.getItem('hotelRooms') || '[]')
                       const businessDate = zReport?.businessDate || selectedDate
                       
@@ -3947,7 +3989,7 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
   // Get folio balance
   const getFolioBalance = (reservationId: string) => {
     if (typeof window === 'undefined') return 0
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = getFolios()
     const folio = folios.find((f: any) => f.reservationId === reservationId)
     return folio?.balance || 0
   }
@@ -3956,7 +3998,7 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
   const handleCheckIn = async (reservation: any) => {
     try {
       // Create folio first (same as Dashboard createFolioForReservation)
-      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      const folios = getFolios()
       
       // Check if folio already exists
       const existingFolio = folios.find((f: any) => f.reservationId === reservation.id)
@@ -4016,6 +4058,20 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
         
         folios.push(newFolio)
         localStorage.setItem('hotelFolios', JSON.stringify(folios))
+        
+        // Also save to API
+        try {
+          await fetch('/api/folios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newFolio),
+          })
+          console.log('[NightAuditModule] Folio saved to API')
+          // Refresh cache
+          await loadFoliosCache()
+        } catch (error) {
+          console.error('[NightAuditModule] API error saving folio:', error)
+        }
       }
       
       // Update reservation status via API (same as Dashboard)
