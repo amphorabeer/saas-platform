@@ -58,6 +58,7 @@ export default function RoomCalendar({
   const [blockedDates, setBlockedDates] = useState<any>({})
   const [maintenanceRooms, setMaintenanceRooms] = useState<string[]>([])
   const [folioUpdateKey, setFolioUpdateKey] = useState(0) // Force re-render when folio updates
+  const [foliosCache, setFoliosCache] = useState<any[]>([]) // Cache for API folios
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [collapsedFloors, setCollapsedFloors] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -146,6 +147,42 @@ export default function RoomCalendar({
       }
     }
   }, [])
+
+  // Load folios from API
+  const loadFoliosCache = async () => {
+    try {
+      const response = await fetch('/api/folios')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.folios && data.folios.length > 0) {
+          const mappedFolios = data.folios.map((f: any) => ({
+            ...f,
+            transactions: f.folioData?.transactions || f.charges || f.transactions || []
+          }))
+          setFoliosCache(mappedFolios)
+          console.log('[RoomCalendar] Loaded folios from API:', mappedFolios.length)
+          return mappedFolios
+        }
+      }
+    } catch (error) {
+      console.error('[RoomCalendar] Folios API error:', error)
+    }
+    const localFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    setFoliosCache(localFolios)
+    return localFolios
+  }
+
+  // Load folios cache on mount
+  useEffect(() => {
+    loadFoliosCache()
+  }, [])
+
+  // Get folios - use cache or localStorage fallback
+  const getFolios = (): any[] => {
+    if (foliosCache.length > 0) return foliosCache
+    if (typeof window === 'undefined') return []
+    return JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+  }
   
   // Load calendar settings from Settings page
   useEffect(() => {
@@ -1406,72 +1443,80 @@ export default function RoomCalendar({
       // ==========================================
       if (roomChanged) {
         try {
-          const foliosData = localStorage.getItem('hotelFolios')
-          if (foliosData) {
-            const folios = JSON.parse(foliosData)
-            const folioIndex = folios.findIndex((f: any) => f.reservationId === currentDraggedReservation.id)
+          const folios = getFolios()
+          const folioIndex = folios.findIndex((f: any) => f.reservationId === currentDraggedReservation.id)
+          
+          if (folioIndex !== -1) {
+            const folio = folios[folioIndex]
             
-            if (folioIndex !== -1) {
-              const folio = folios[folioIndex]
-              
-              // Update room info in folio
-              folio.roomId = targetRoom.id
-              folio.roomNumber = targetRoom.roomNumber
-              
-              // Update room charges in folio transactions
-              // Calculate price per night for each night (considering seasons/special dates)
-              const roomChargeTransactions = folio.transactions.filter((t: any) => 
-                t.type === 'charge' && t.category === 'room'
-              )
-              
-              // Calculate price for each night
-              let currentDate = moment(newCheckIn)
-              const endDate = moment(newCheckOut)
-              const nightPrices: { date: string; price: number }[] = []
-              
-              while (currentDate.isBefore(endDate)) {
-                const dateStr = currentDate.format('YYYY-MM-DD')
-                const price = calculatePricePerNight(targetRoom, dateStr)
-                nightPrices.push({ date: dateStr, price })
-                currentDate.add(1, 'day')
-              }
-              
-              // Update each room charge transaction
-              // Try to match by date first, then by index
-              folio.transactions = folio.transactions.map((t: any) => {
-                if (t.type === 'charge' && t.category === 'room') {
-                  // Try to find matching night by date
-                  const transactionDate = t.date || t.nightAuditDate
-                  const matchingNight = transactionDate 
-                    ? nightPrices.find(np => np.date === moment(transactionDate).format('YYYY-MM-DD'))
-                    : null
-                  
-                  // Use matching night price, or average per night
-                  const price = matchingNight 
-                    ? matchingNight.price 
-                    : (newTotalAmount / nights)
-                  
-                  return {
-                    ...t,
-                    debit: price,
-                    amount: price,
-                    description: `ოთახის ღირებულება - ${targetRoom.roomNumber}`,
-                    // Keep original date if it exists
-                    date: transactionDate || t.date
-                  }
+            // Update room info in folio
+            folio.roomId = targetRoom.id
+            folio.roomNumber = targetRoom.roomNumber
+            
+            // Update room charges in folio transactions
+            // Calculate price per night for each night (considering seasons/special dates)
+            const roomChargeTransactions = folio.transactions.filter((t: any) => 
+              t.type === 'charge' && t.category === 'room'
+            )
+            
+            // Calculate price for each night
+            let currentDate = moment(newCheckIn)
+            const endDate = moment(newCheckOut)
+            const nightPrices: { date: string; price: number }[] = []
+            
+            while (currentDate.isBefore(endDate)) {
+              const dateStr = currentDate.format('YYYY-MM-DD')
+              const price = calculatePricePerNight(targetRoom, dateStr)
+              nightPrices.push({ date: dateStr, price })
+              currentDate.add(1, 'day')
+            }
+            
+            // Update each room charge transaction
+            // Try to match by date first, then by index
+            folio.transactions = folio.transactions.map((t: any) => {
+              if (t.type === 'charge' && t.category === 'room') {
+                // Try to find matching night by date
+                const transactionDate = t.date || t.nightAuditDate
+                const matchingNight = transactionDate 
+                  ? nightPrices.find(np => np.date === moment(transactionDate).format('YYYY-MM-DD'))
+                  : null
+                
+                // Use matching night price, or average per night
+                const price = matchingNight 
+                  ? matchingNight.price 
+                  : (newTotalAmount / nights)
+                
+                return {
+                  ...t,
+                  debit: price,
+                  amount: price,
+                  description: `ოთახის ღირებულება - ${targetRoom.roomNumber}`,
+                  // Keep original date if it exists
+                  date: transactionDate || t.date
                 }
-                return t
+              }
+              return t
+            })
+            
+            // Recalculate folio balance
+            folio.balance = folio.transactions.reduce((sum: number, t: any) => {
+              return sum + Number(t.debit || 0) - Number(t.credit || 0)
+            }, 0)
+            
+            // Save updated folio
+            folios[folioIndex] = folio
+            localStorage.setItem('hotelFolios', JSON.stringify(folios))
+            
+            // Also save to API
+            try {
+              await fetch('/api/folios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(folio),
               })
-              
-              // Recalculate folio balance
-              folio.balance = folio.transactions.reduce((sum: number, t: any) => {
-                return sum + Number(t.debit || 0) - Number(t.credit || 0)
-              }, 0)
-              
-              // Save updated folio
-              folios[folioIndex] = folio
-              localStorage.setItem('hotelFolios', JSON.stringify(folios))
-              
+              loadFoliosCache()
+            } catch (apiError) {
+              console.error('[RoomCalendar] API error saving folio:', apiError)
             }
           }
         } catch (error) {
@@ -1700,70 +1745,79 @@ export default function RoomCalendar({
       // UPDATE FOLIO AFTER RESIZE
       // ==========================================
       try {
-        const foliosData = localStorage.getItem('hotelFolios')
-        if (foliosData) {
-          const folios = JSON.parse(foliosData)
-          const folioIndex = folios.findIndex((f: any) => f.reservationId === currentDraggedReservation.id)
+        const folios = getFolios()
+        const folioIndex = folios.findIndex((f: any) => f.reservationId === currentDraggedReservation.id)
+        
+        if (folioIndex !== -1) {
+          const folio = folios[folioIndex]
+          const newNights = moment(updates.checkOut || currentCheckOut).diff(
+            moment(updates.checkIn || currentCheckIn), 'days'
+          )
           
-          if (folioIndex !== -1) {
-            const folio = folios[folioIndex]
-            const newNights = moment(updates.checkOut || currentCheckOut).diff(
-              moment(updates.checkIn || currentCheckIn), 'days'
+          // Update initialRoomCharge if exists
+          if (folio.initialRoomCharge) {
+            const rate = folio.initialRoomCharge.rate || (updates.totalAmount / newNights)
+            folio.initialRoomCharge.nights = newNights
+            folio.initialRoomCharge.totalAmount = updates.totalAmount
+          }
+          
+          // Update transactions if exists
+          if (folio.transactions && Array.isArray(folio.transactions)) {
+            const roomChargeTransaction = folio.transactions.find((t: any) => 
+              t.description?.includes('ოთახის ღირებულება') ||
+              t.description?.includes('Room') ||
+              t.type === 'ROOM_CHARGE' ||
+              t.category === 'ROOM'
             )
             
-            // Update initialRoomCharge if exists
-            if (folio.initialRoomCharge) {
-              const rate = folio.initialRoomCharge.rate || (updates.totalAmount / newNights)
-              folio.initialRoomCharge.nights = newNights
-              folio.initialRoomCharge.totalAmount = updates.totalAmount
+            if (roomChargeTransaction) {
+              roomChargeTransaction.amount = updates.totalAmount
+              roomChargeTransaction.description = `ოთახის ღირებულება (${newNights} ღამე)`
             }
-            
-            // Update transactions if exists
-            if (folio.transactions && Array.isArray(folio.transactions)) {
-              const roomChargeTransaction = folio.transactions.find((t: any) => 
-                t.description?.includes('ოთახის ღირებულება') ||
-                t.description?.includes('Room') ||
-                t.type === 'ROOM_CHARGE' ||
-                t.category === 'ROOM'
-              )
-              
-              if (roomChargeTransaction) {
-                roomChargeTransaction.amount = updates.totalAmount
-                roomChargeTransaction.description = `ოთახის ღირებულება (${newNights} ღამე)`
-              }
-            }
-            
-            // Update charges if exists (alternative structure)
-            if (folio.charges && Array.isArray(folio.charges)) {
-              const roomChargeIndex = folio.charges.findIndex((c: any) => 
-                c.description?.includes('ოთახის ღირებულება') ||
-                c.type === 'ROOM'
-              )
-              
-              if (roomChargeIndex !== -1) {
-                folio.charges[roomChargeIndex].amount = updates.totalAmount
-                folio.charges[roomChargeIndex].description = `ოთახის ღირებულება (${newNights} ღამე)`
-              }
-            }
-            
-            // Recalculate balance
-            // Balance = Total Room Charge - Payments
-            const totalRoomCharge = folio.initialRoomCharge?.totalAmount || updates.totalAmount
-            const totalPayments = (folio.payments || []).reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
-            folio.balance = totalRoomCharge - totalPayments
-            
-            // Save folio
-            folios[folioIndex] = folio
-            localStorage.setItem('hotelFolios', JSON.stringify(folios))
-            
-            // Dispatch event to refresh UI
-            window.dispatchEvent(new CustomEvent('folioUpdated', { 
-              detail: { reservationId: currentDraggedReservation.id } 
-            }))
-            
-            // Force re-render
-            setFolioUpdateKey(prev => prev + 1)
           }
+          
+          // Update charges if exists (alternative structure)
+          if (folio.charges && Array.isArray(folio.charges)) {
+            const roomChargeIndex = folio.charges.findIndex((c: any) => 
+              c.description?.includes('ოთახის ღირებულება') ||
+              c.type === 'ROOM'
+            )
+            
+            if (roomChargeIndex !== -1) {
+              folio.charges[roomChargeIndex].amount = updates.totalAmount
+              folio.charges[roomChargeIndex].description = `ოთახის ღირებულება (${newNights} ღამე)`
+            }
+          }
+          
+          // Recalculate balance
+          // Balance = Total Room Charge - Payments
+          const totalRoomCharge = folio.initialRoomCharge?.totalAmount || updates.totalAmount
+          const totalPayments = (folio.payments || []).reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
+          folio.balance = totalRoomCharge - totalPayments
+          
+          // Save folio
+          folios[folioIndex] = folio
+          localStorage.setItem('hotelFolios', JSON.stringify(folios))
+          
+          // Also save to API
+          try {
+            await fetch('/api/folios', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(folio),
+            })
+            loadFoliosCache()
+          } catch (apiError) {
+            console.error('[RoomCalendar] API error saving folio:', apiError)
+          }
+          
+          // Dispatch event to refresh UI
+          window.dispatchEvent(new CustomEvent('folioUpdated', { 
+            detail: { reservationId: currentDraggedReservation.id } 
+          }))
+          
+          // Force re-render
+          setFolioUpdateKey(prev => prev + 1)
         }
       } catch (e) {
         console.error('Error updating folio after resize:', e)
@@ -1984,7 +2038,7 @@ export default function RoomCalendar({
   const createFolioOnCheckIn = async (reservation: any) => {
     if (typeof window === 'undefined') return
     
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = getFolios()
     const existingFolio = folios.find((f: any) => f.reservationId === reservation.id)
     
     if (!existingFolio) {
@@ -2034,6 +2088,18 @@ export default function RoomCalendar({
       
       folios.push(newFolio)
       localStorage.setItem('hotelFolios', JSON.stringify(folios))
+      
+      // Also save to API
+      try {
+        await fetch('/api/folios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newFolio),
+        })
+        loadFoliosCache()
+      } catch (apiError) {
+        console.error('[RoomCalendar] API error saving folio:', apiError)
+      }
       
       ActivityLogger.log('FOLIO_CREATED_ON_CHECKIN', {
         folioNumber: newFolio.folioNumber,
@@ -2688,7 +2754,7 @@ export default function RoomCalendar({
     let roomChargePosted = false
     
     if (typeof window !== 'undefined') {
-      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      const folios = getFolios()
       folio = folios.find((f: any) => f.reservationId === reservation.id)
       
       // Check if room charge posted for today
@@ -4087,7 +4153,7 @@ export default function RoomCalendar({
         
         // Get folio to check if paid
         const folios = typeof window !== 'undefined' 
-          ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+          ? getFolios()
           : []
         const folio = folios.find((f: any) => f.reservationId === selectedReservation.id)
         const paidAmount = folio?.payments?.reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0
@@ -4825,7 +4891,7 @@ function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, on
   const loadFolioData = () => {
     if (typeof window === 'undefined') return
     
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('hotelFolios') || '[]') : []
     
     // Find folio by reservationId ONLY (each reservation has its own folio)
     const foundFolio = folios.find((f: any) => f.reservationId === reservation.id)

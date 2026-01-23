@@ -125,6 +125,7 @@ export default function NightAuditView({ rooms, reservations, onAuditComplete }:
   const [selectedReservation, setSelectedReservation] = useState<any>(null)
   const [showCheckInModal, setShowCheckInModal] = useState(false)
   const [showCheckOutModal, setShowCheckOutModal] = useState(false)
+  const [foliosCache, setFoliosCache] = useState<any[]>([])
   const [checklist, setChecklist] = useState([
     { id: 1, task: 'დღევანდელი Check-in დასრულებულია', completed: false },
     { id: 2, task: 'დღევანდელი Check-out დასრულებულია', completed: false },
@@ -141,6 +142,42 @@ export default function NightAuditView({ rooms, reservations, onAuditComplete }:
     const today = moment().format('YYYY-MM-DD')
     const yesterday = moment().subtract(1, 'day').format('YYYY-MM-DD')
     return yesterday // Can only close up to yesterday, not today
+  }
+
+  // Load folios cache from API
+  const loadFoliosCache = async () => {
+    try {
+      const response = await fetch('/api/folios')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.folios && data.folios.length > 0) {
+          const mappedFolios = data.folios.map((f: any) => ({
+            ...f,
+            transactions: f.folioData?.transactions || f.charges || f.transactions || []
+          }))
+          setFoliosCache(mappedFolios)
+          console.log('[NightAuditView] Loaded folios from API:', mappedFolios.length)
+          return mappedFolios
+        }
+      }
+    } catch (error) {
+      console.error('[NightAuditView] Folios API error:', error)
+    }
+    const localFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    setFoliosCache(localFolios)
+    return localFolios
+  }
+
+  // Load folios on mount
+  useEffect(() => {
+    loadFoliosCache()
+  }, [])
+
+  // Get folios - use cache or localStorage fallback
+  const getFolios = (): any[] => {
+    if (foliosCache.length > 0) return foliosCache
+    if (typeof window === 'undefined') return []
+    return JSON.parse(localStorage.getItem('hotelFolios') || '[]')
   }
   
   // Check if day is already closed
@@ -315,8 +352,24 @@ export default function NightAuditView({ rooms, reservations, onAuditComplete }:
     })
     
     // Save folios
-    const existingFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-    localStorage.setItem('hotelFolios', JSON.stringify([...existingFolios, ...results.foliosGenerated]))
+    const existingFolios = getFolios()
+    const allFolios = [...existingFolios, ...results.foliosGenerated]
+    localStorage.setItem('hotelFolios', JSON.stringify(allFolios))
+    
+    // Also save new folios to API
+    for (const folio of results.foliosGenerated) {
+      try {
+        await fetch('/api/folios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(folio),
+        })
+      } catch (error) {
+        console.error('[NightAuditView] API error saving folio:', error)
+      }
+    }
+    // Refresh cache
+    await loadFoliosCache()
     
     // Save updated reservations
     localStorage.setItem('hotelReservations', JSON.stringify(allReservations))
@@ -1500,13 +1553,13 @@ function PendingOperationsSection({ auditDate, reservations, rooms, onRefresh }:
   // Get folio balance for a reservation
   const getFolioBalance = (reservationId: string) => {
     if (typeof window === 'undefined') return 0
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const folios = getFolios()
     const folio = folios.find((f: any) => f.reservationId === reservationId)
     return folio?.balance || 0
   }
 
   // Create folio for reservation (same logic as Dashboard)
-  const createFolioForReservation = (reservation: any) => {
+  const createFolioForReservation = async (reservation: any) => {
     const nights = moment(reservation.checkOut).diff(moment(reservation.checkIn), 'days') || 1
     const roomRate = reservation.totalAmount ? reservation.totalAmount / nights : 150
     
@@ -1554,9 +1607,23 @@ function PendingOperationsSection({ auditDate, reservations, rooms, onRefresh }:
     }
     
     // Save to localStorage
-    const existingFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    const existingFolios = getFolios()
     existingFolios.push(newFolio)
     localStorage.setItem('hotelFolios', JSON.stringify(existingFolios))
+    
+    // Also save to API
+    try {
+      await fetch('/api/folios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newFolio),
+      })
+      console.log('[NightAuditView] Folio saved to API')
+      // Refresh cache
+      loadFoliosCache()
+    } catch (error) {
+      console.error('[NightAuditView] API error saving folio:', error)
+    }
     
     return newFolio
   }
@@ -1565,7 +1632,7 @@ function PendingOperationsSection({ auditDate, reservations, rooms, onRefresh }:
   const handleCheckIn = async (reservation: any) => {
     try {
       // Create folio
-      const newFolio = createFolioForReservation(reservation)
+      const newFolio = await createFolioForReservation(reservation)
       
       // Update reservation status
       const response = await fetch(`/api/hotel/reservations/${reservation.id}`, {
