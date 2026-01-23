@@ -100,8 +100,24 @@ export default function NightAuditAutoClose({ onComplete }: { onComplete: () => 
         )
         
         // Generate folios (simplified - would use FolioSystem logic)
-        const existingFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-        todayCheckouts.forEach((r: any) => {
+        // Try API first
+        let existingFolios: any[] = []
+        try {
+          const response = await fetch('/api/folios')
+          if (response.ok) {
+            const data = await response.json()
+            existingFolios = data.folios || []
+          }
+        } catch (error) {
+          console.error('[NightAuditAutoClose] API error:', error)
+        }
+        
+        // Fallback to localStorage
+        if (existingFolios.length === 0) {
+          existingFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+        }
+        
+        for (const r of todayCheckouts) {
           const folio = {
             folioNumber: `F${Date.now().toString().slice(-8)}`,
             reservationId: r.id,
@@ -115,7 +131,19 @@ export default function NightAuditAutoClose({ onComplete }: { onComplete: () => 
             createdAt: new Date().toISOString()
           }
           existingFolios.push(folio)
-        })
+          
+          // Save to API
+          try {
+            await fetch('/api/folios', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(folio),
+            })
+          } catch (error) {
+            console.error('[NightAuditAutoClose] API save error:', error)
+          }
+        }
+        
         localStorage.setItem('hotelFolios', JSON.stringify(existingFolios))
         await new Promise(resolve => setTimeout(resolve, 3000))
       }

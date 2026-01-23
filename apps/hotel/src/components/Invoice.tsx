@@ -66,10 +66,26 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
   }, [reservation.id, reservation.invoiceNumber, reservation.roomNumber])
   
   // Load ALL charges from folio
-  const getInvoiceData = () => {
+  const getInvoiceData = async () => {
     if (typeof window === 'undefined') return null
     
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    // Try API first
+    let folios: any[] = []
+    try {
+      const response = await fetch('/api/folios')
+      if (response.ok) {
+        const data = await response.json()
+        folios = data.folios || []
+      }
+    } catch (error) {
+      console.error('[Invoice] API error:', error)
+    }
+    
+    // Fallback to localStorage
+    if (folios.length === 0) {
+      folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    }
+    
     const folio = folios.find((f: any) => f.reservationId === reservation.id)
     
     if (!folio) {

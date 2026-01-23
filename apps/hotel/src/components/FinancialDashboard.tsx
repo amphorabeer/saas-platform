@@ -288,16 +288,34 @@ const PaymentHistory = ({ selectedDate }: { selectedDate: string }) => {
     loadPayments()
   }, [dateFilter])
   
-  const loadPayments = () => {
+  const loadPayments = async () => {
     if (typeof window === 'undefined') return
     
     const targetDate = moment(dateFilter).format('YYYY-MM-DD')
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    
+    // Try API first for folios
+    let folios: any[] = []
+    try {
+      const response = await fetch('/api/folios')
+      if (response.ok) {
+        const data = await response.json()
+        folios = data.folios || []
+        console.log('[FinancialDashboard] Loaded folios from API:', folios.length)
+      }
+    } catch (error) {
+      console.error('[FinancialDashboard] API error:', error)
+    }
+    
+    // Fallback to localStorage
+    if (folios.length === 0) {
+      folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    }
+    
     const paymentHistory = JSON.parse(localStorage.getItem('paymentHistory') || '[]')
     
     // Get all payment transactions from folios for the selected date
     const folioPayments = folios.flatMap((f: any) => 
-      (f.transactions || [])
+      (f.transactions || f.folioData?.transactions || [])
         .filter((t: any) => {
           if (t.type !== 'payment' && t.type !== 'refund') return false
           const txDate = moment(t.date).format('YYYY-MM-DD')
