@@ -87,14 +87,17 @@ const ReportHeader = ({
 }
 
 // Helper function to get next audit date
-const getNextAuditDate = (): string => {
+const getNextAuditDate = (hotelCode?: string): string => {
   if (typeof window === 'undefined') {
     return moment().subtract(1, 'day').format('YYYY-MM-DD')
   }
   
+  // Use hotel-specific keys if hotelCode is provided
+  const getKey = (key: string) => hotelCode ? `${key}_${hotelCode}` : key
+  
   // Check last completed audit date
-  const lastAuditDate = localStorage.getItem('lastNightAuditDate')
-  const audits = JSON.parse(localStorage.getItem('nightAudits') || '[]')
+  const lastAuditDate = localStorage.getItem(getKey('lastNightAuditDate'))
+  const audits = JSON.parse(localStorage.getItem(getKey('nightAudits')) || '[]')
   
   // Find the most recent completed audit
   const completedAudits = audits
@@ -154,7 +157,7 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
   const [isAuditRunning, setIsAuditRunning] = useState(false)
   const [showPreChecks, setShowPreChecks] = useState(true)
   const [auditLog, setAuditLog] = useState<string[]>([])
-  const [selectedDate, setSelectedDate] = useState(getNextAuditDate())
+  const [selectedDate, setSelectedDate] = useState(() => getNextAuditDate(hotelCode))
   const [auditHistory, setAuditHistory] = useState<any[]>([])
   const [showUserWarning, setShowUserWarning] = useState(false)
   const [countdown, setCountdown] = useState(30)
@@ -162,6 +165,14 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
   const [isCountdownActive, setIsCountdownActive] = useState(false)
   const [showReportDetails, setShowReportDetails] = useState<any>(null)
   const [isFirstAudit, setIsFirstAudit] = useState(true)
+  
+  // Update selectedDate when hotelCode becomes available
+  useEffect(() => {
+    if (hotelCode) {
+      const correctDate = getNextAuditDate(hotelCode)
+      setSelectedDate(correctDate)
+    }
+  }, [hotelCode])
   
   // Folios cache for API data
   const [foliosCache, setFoliosCache] = useState<any[]>([])

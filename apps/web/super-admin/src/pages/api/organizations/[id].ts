@@ -244,6 +244,11 @@ export default async function handler(
 
   if (req.method === 'DELETE') {
     try {
+      // First delete all users belonging to this organization
+      await prisma.user.deleteMany({
+        where: { organizationId: id }
+      })
+
       await prisma.moduleAccess.deleteMany({
         where: { organizationId: id }
       })
