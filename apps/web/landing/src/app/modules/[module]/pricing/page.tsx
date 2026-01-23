@@ -26,6 +26,11 @@ const moduleData: Record<
     name: string;
     description: string;
     icon: string;
+    pricing?: {
+      starter: { title: string; subtitle: string; price: string; duration: string };
+      professional: { title: string; subtitle: string; price: string; duration: string };
+      enterprise: { title: string; subtitle: string; price: string; duration: string };
+    };
     features: {
       starter: string[];
       professional: string[];
@@ -38,9 +43,14 @@ const moduleData: Record<
     name: "სასტუმროს მართვის სისტემა",
     description: "სრულყოფილი გადაწყვეტა სასტუმროების მართვისთვის",
     icon: "🏨",
+    pricing: {
+      starter: { title: "Starter", subtitle: "დაწყებისთვის", price: "უფასო", duration: "15 დღე საცდელი" },
+      professional: { title: "Professional", subtitle: "პროფესიონალური ბიზნესისთვის", price: "₾99", duration: "/თვე" },
+      enterprise: { title: "Enterprise", subtitle: "დიდი ბიზნესისთვის", price: "₾299", duration: "/თვე" },
+    },
     features: {
-      starter: ["1 ლოკაცია", "20 ოთახი", "რეზერვაციების მართვა", "ძირითადი ანალიტიკა"],
-      professional: ["1 ლოკაცია", "50 ოთახი", "ყველა ფუნქცია", "24/7 მხარდაჭერა", "ინტეგრაციები"],
+      starter: ["1 ლოკაცია", "10 ოთახი", "რეზერვაციების მართვა", "ძირითადი ანალიტიკა"],
+      professional: ["1 ლოკაცია", "25 ოთახი", "ყველა ფუნქცია", "24/7 მხარდაჭერა", "ინტეგრაციები"],
       enterprise: ["მრავალი ლოკაცია", "ულიმიტო ოთახები", "Custom features", "Dedicated support", "API access"],
     },
     faq: [
@@ -58,6 +68,11 @@ const moduleData: Record<
     name: "რესტორნის მართვის სისტემა",
     description: "რესტორნის ყველა ასპექტის მართვა ერთ ადგილას",
     icon: "🍽️",
+    pricing: {
+      starter: { title: "Starter", subtitle: "დაწყებისთვის", price: "უფასო", duration: "15 დღე საცდელი" },
+      professional: { title: "Professional", subtitle: "პროფესიონალური ბიზნესისთვის", price: "₾99", duration: "/თვე" },
+      enterprise: { title: "Enterprise", subtitle: "დიდი ბიზნესისთვის", price: "₾299", duration: "/თვე" },
+    },
     features: {
       starter: ["1 ლოკაცია", "20 მაგიდა", "შეკვეთების მართვა", "ძირითადი მენიუ"],
       professional: ["1 ლოკაცია", "50 მაგიდა", "ყველა ფუნქცია", "POS ინტეგრაცია", "ანალიტიკა"],
@@ -74,6 +89,11 @@ const moduleData: Record<
     name: "სილამაზის სალონის მართვა",
     description: "კლიენტების, ვიზიტებისა და ფინანსების მართვა",
     icon: "💅",
+    pricing: {
+      starter: { title: "Starter", subtitle: "დაწყებისთვის", price: "უფასო", duration: "15 დღე საცდელი" },
+      professional: { title: "Professional", subtitle: "პროფესიონალური ბიზნესისთვის", price: "₾99", duration: "/თვე" },
+      enterprise: { title: "Enterprise", subtitle: "დიდი ბიზნესისთვის", price: "₾299", duration: "/თვე" },
+    },
     features: {
       starter: ["1 ლოკაცია", "500 კლიენტი", "ვიზიტების მართვა", "ძირითადი ანალიტიკა"],
       professional: ["1 ლოკაცია", "ულიმიტო კლიენტი", "ყველა ფუნქცია", "SMS შეტყობინებები", "ანალიტიკა"],
@@ -90,6 +110,11 @@ const moduleData: Record<
     name: "მაღაზიის მართვის სისტემა",
     description: "ინვენტარის, გაყიდვებისა და მომხმარებლების მართვა",
     icon: "🛍️",
+    pricing: {
+      starter: { title: "Starter", subtitle: "დაწყებისთვის", price: "უფასო", duration: "15 დღე საცდელი" },
+      professional: { title: "Professional", subtitle: "პროფესიონალური ბიზნესისთვის", price: "₾99", duration: "/თვე" },
+      enterprise: { title: "Enterprise", subtitle: "დიდი ბიზნესისთვის", price: "₾299", duration: "/თვე" },
+    },
     features: {
       starter: ["1 ლოკაცია", "1000 პროდუქტი", "ინვენტარის მართვა", "ძირითადი ანალიტიკა"],
       professional: ["1 ლოკაცია", "ულიმიტო პროდუქტი", "ყველა ფუნქცია", "POS ინტეგრაცია", "ანალიტიკა"],
@@ -106,6 +131,11 @@ const moduleData: Record<
     name: "ლუდსახარშის მართვა",
     description: "წარმოების, ინვენტარისა და გაყიდვების მართვა",
     icon: "🍺",
+    pricing: {
+      starter: { title: "🟢 STARTER — პატარა წარმოება", subtitle: "👉 მცირე ლუდსახარში / brewpub", price: "29 ₾", duration: " / თვე" },
+      professional: { title: "🔵 PRO ⭐ — საშუალო წარმოება", subtitle: "", price: "59 ₾", duration: " / თვე" },
+      enterprise: { title: "ENTERPRISE — დიდი წარმოება", subtitle: "", price: "99 ₾", duration: " / თვე" },
+    },
     features: {
       starter: ["მაქს. 5 ავზი", "წარმოების ძირითადი მართვა", "პარტიები, რეცეპტები", "Cloud access"],
       professional: ["6 – 14 ავზი", "წარმოების სრული მართვა", "მარაგები (ნედლეული, შეფუთვა, მზა პროდუქცია)", "CIP / ავზების რეცხვა", "კეგების მენეჯმენტი", "ფინანსები", "ანგარიშები და ანალიტიკა"],
@@ -122,6 +152,11 @@ const moduleData: Record<
     name: "ღვინის მარანის მართვა",
     description: "ვენახების, წარმოებისა და ბარელების მართვა",
     icon: "🍷",
+    pricing: {
+      starter: { title: "Starter", subtitle: "დაწყებისთვის", price: "უფასო", duration: "15 დღე საცდელი" },
+      professional: { title: "Professional", subtitle: "პროფესიონალური ბიზნესისთვის", price: "₾99", duration: "/თვე" },
+      enterprise: { title: "Enterprise", subtitle: "დიდი ბიზნესისთვის", price: "₾299", duration: "/თვე" },
+    },
     features: {
       starter: ["1 ლოკაცია", "10 ვარიანტი", "წარმოების მართვა", "ძირითადი ანალიტიკა"],
       professional: ["1 ლოკაცია", "ულიმიტო ვარიანტი", "ყველა ფუნქცია", "ბარელების მართვა", "ანალიტიკა"],
@@ -138,6 +173,11 @@ const moduleData: Record<
     name: "არყის საწარმოს მართვა",
     description: "დისტილაციის, ბარელებისა და გაყიდვების მართვა",
     icon: "🥃",
+    pricing: {
+      starter: { title: "Starter", subtitle: "დაწყებისთვის", price: "უფასო", duration: "15 დღე საცდელი" },
+      professional: { title: "Professional", subtitle: "პროფესიონალური ბიზნესისთვის", price: "₾99", duration: "/თვე" },
+      enterprise: { title: "Enterprise", subtitle: "დიდი ბიზნესისთვის", price: "₾299", duration: "/თვე" },
+    },
     features: {
       starter: ["1 ლოკაცია", "10 რეცეპტი", "წარმოების მართვა", "ძირითადი ანალიტიკა"],
       professional: ["1 ლოკაცია", "ულიმიტო რეცეპტი", "ყველა ფუნქცია", "ბარელების მართვა", "ანალიტიკა"],
@@ -204,13 +244,13 @@ export default function ModulePricingPage({ params }: { params: { module: string
             {/* Starter */}
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <CardTitle className="text-2xl">🟢 STARTER — პატარა წარმოება</CardTitle>
-                <CardDescription>👉 მცირე ლუდსახარში / brewpub</CardDescription>
+                <CardTitle className="text-2xl">{data.pricing?.starter.title || "Starter"}</CardTitle>
+                <CardDescription>{data.pricing?.starter.subtitle || "დაწყებისთვის"}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">29 ₾</span>
-                  <span className="text-muted-foreground"> / თვე</span>
+                  <span className="text-4xl font-bold">{data.pricing?.starter.price || "უფასო"}</span>
+                  <span className="text-muted-foreground">{data.pricing?.starter.duration || "15 დღე საცდელი"}</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {data.features.starter.map((feature, index) => (
@@ -220,8 +260,18 @@ export default function ModulePricingPage({ params }: { params: { module: string
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full min-h-[44px]" variant="outline" asChild>
-                  <Link href={getRegistrationUrl(moduleSlug, "STARTER")}>დაწყება</Link>
+                <Button 
+                  className="w-full min-h-[44px]" 
+                  variant="outline" 
+                  disabled={moduleSlug !== 'brewery' && moduleSlug !== 'hotel'}
+                  asChild={moduleSlug === 'brewery' || moduleSlug === 'hotel'}
+                  onClick={moduleSlug !== 'brewery' && moduleSlug !== 'hotel' ? (e) => e.preventDefault() : undefined}
+                >
+                  {moduleSlug === 'brewery' || moduleSlug === 'hotel' ? (
+                    <Link href={getRegistrationUrl(moduleSlug, "STARTER")}>დაწყება</Link>
+                  ) : (
+                    <span>დაწყება</span>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -234,13 +284,13 @@ export default function ModulePricingPage({ params }: { params: { module: string
                 </span>
               </div>
               <CardHeader>
-                <CardTitle className="text-2xl">🔵 PRO ⭐ — საშუალო წარმოება</CardTitle>
-                <CardDescription></CardDescription>
+                <CardTitle className="text-2xl">{data.pricing?.professional.title || "Professional"}</CardTitle>
+                <CardDescription>{data.pricing?.professional.subtitle || "პროფესიონალური ბიზნესისთვის"}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">59 ₾</span>
-                  <span className="text-muted-foreground"> / თვე</span>
+                  <span className="text-4xl font-bold">{data.pricing?.professional.price || "₾99"}</span>
+                  <span className="text-muted-foreground">{data.pricing?.professional.duration || "/თვე"}</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {data.features.professional.map((feature, index) => (
@@ -250,8 +300,17 @@ export default function ModulePricingPage({ params }: { params: { module: string
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full min-h-[44px]" asChild>
-                  <Link href={getRegistrationUrl(moduleSlug, "PROFESSIONAL")}>არჩევა</Link>
+                <Button 
+                  className="w-full min-h-[44px]" 
+                  disabled={moduleSlug !== 'brewery' && moduleSlug !== 'hotel'}
+                  asChild={moduleSlug === 'brewery' || moduleSlug === 'hotel'}
+                  onClick={moduleSlug !== 'brewery' && moduleSlug !== 'hotel' ? (e) => e.preventDefault() : undefined}
+                >
+                  {moduleSlug === 'brewery' || moduleSlug === 'hotel' ? (
+                    <Link href={getRegistrationUrl(moduleSlug, "PROFESSIONAL")}>არჩევა</Link>
+                  ) : (
+                    <span>არჩევა</span>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -259,13 +318,13 @@ export default function ModulePricingPage({ params }: { params: { module: string
             {/* Enterprise */}
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <CardTitle className="text-2xl">ENTERPRISE — დიდი წარმოება</CardTitle>
-                <CardDescription></CardDescription>
+                <CardTitle className="text-2xl">{data.pricing?.enterprise.title || "Enterprise"}</CardTitle>
+                <CardDescription>{data.pricing?.enterprise.subtitle || "დიდი ბიზნესისთვის"}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">99 ₾</span>
-                  <span className="text-muted-foreground"> / თვე</span>
+                  <span className="text-4xl font-bold">{data.pricing?.enterprise.price || "₾299"}</span>
+                  <span className="text-muted-foreground">{data.pricing?.enterprise.duration || "/თვე"}</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {data.features.enterprise.map((feature, index) => (
@@ -275,8 +334,18 @@ export default function ModulePricingPage({ params }: { params: { module: string
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full min-h-[44px]" variant="outline" asChild>
-                  <Link href={getRegistrationUrl(moduleSlug, "ENTERPRISE")}>არჩევა</Link>
+                <Button 
+                  className="w-full min-h-[44px]" 
+                  variant="outline" 
+                  disabled={moduleSlug !== 'brewery' && moduleSlug !== 'hotel'}
+                  asChild={moduleSlug === 'brewery' || moduleSlug === 'hotel'}
+                  onClick={moduleSlug !== 'brewery' && moduleSlug !== 'hotel' ? (e) => e.preventDefault() : undefined}
+                >
+                  {moduleSlug === 'brewery' || moduleSlug === 'hotel' ? (
+                    <Link href={getRegistrationUrl(moduleSlug, "ENTERPRISE")}>არჩევა</Link>
+                  ) : (
+                    <span>არჩევა</span>
+                  )}
                 </Button>
               </CardContent>
             </Card>
