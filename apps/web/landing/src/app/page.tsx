@@ -108,235 +108,7 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [dataSource, setDataSource] = useState<"api" | "localStorage" | "defaults">("defaults");
 
-  // Track if we've already logged to avoid spam
-  const hasLoggedRef = useRef(false);
-
-  // Load configuration from API (modules API or database) or localStorage
-  const loadConfig = useCallback(async () => {
-    try {
-      if (typeof window === "undefined") return;
-
-      // Try to load from new modules API first
-      try {
-        const modulesApiResponse = await fetch("/api/modules");
-        if (modulesApiResponse.ok) {
-          const modulesApiData = await modulesApiResponse.json();
-          console.log("📡 Modules API Response:", {
-            hasModules: !!modulesApiData.modules,
-            modulesCount: modulesApiData.modules?.length || 0,
-          });
-
-          if (modulesApiData.modules && Array.isArray(modulesApiData.modules)) {
-            const enabledModules = modulesApiData.modules
-              .filter((m: any) => m && m.enabled !== false)
-              .map((m: any) => ({
-                name: m.name || "",
-                slug: m.id || m.slug || "",
-                description: m.description || "",
-                icon: m.icon || "📦",
-              }))
-              .filter((m: any) => m.name && m.slug);
-
-            console.log("✅ Enabled modules from /api/modules:", enabledModules.length, enabledModules);
-
-            if (enabledModules.length > 0) {
-              console.log("✅ Setting modules state from /api/modules:", enabledModules.length);
-              setModules(enabledModules);
-              setDataSource("api");
-              return; // Successfully loaded from modules API
-            }
-          }
-        }
-      } catch (modulesApiError) {
-        console.warn("⚠️ Modules API fetch failed, trying database API:", modulesApiError);
-      }
-
-      // Fallback to database API
-      try {
-        const [modulesResponse, heroResponse] = await Promise.all([
-          fetch("/api/config?key=landing-modules"),
-          fetch("/api/config?key=landing-hero"),
-        ]);
-
-        if (modulesResponse.ok) {
-          const modulesData = await modulesResponse.json();
-          console.log("📡 API Response for modules:", {
-            key: modulesData.key,
-            hasValue: modulesData.value !== null && modulesData.value !== undefined,
-            valueType: typeof modulesData.value,
-            isArray: Array.isArray(modulesData.value),
-            valueLength: Array.isArray(modulesData.value) ? modulesData.value.length : "N/A"
-          });
-          
-          // Check if we got valid data from API
-          if (modulesData.value !== null && modulesData.value !== undefined) {
-            if (Array.isArray(modulesData.value)) {
-              const parsed = modulesData.value;
-              console.log("📦 Parsed modules from API:", parsed.length, parsed);
-              
-              const enabledModules = parsed
-                .filter((m: any) => m && m.enabled !== false)
-                .map((m: any) => ({
-                  name: m.name || "",
-                  slug: m.id || m.slug || "",
-                  description: m.description || "",
-                  icon: m.icon || "📦",
-                }))
-                .filter((m: any) => m.name && m.slug);
-
-              console.log("✅ Enabled modules after filtering:", enabledModules.length, enabledModules);
-
-              if (enabledModules.length > 0) {
-                console.log("✅ Setting modules state from database:", enabledModules.length);
-                setModules(enabledModules);
-                setDataSource("api");
-                // Also save to localStorage for faster future loads
-                localStorage.setItem("landing-modules", JSON.stringify(parsed));
-                console.log("💾 Saved to localStorage for cache");
-                return; // Successfully loaded from database
-              } else {
-                console.warn("⚠️ No enabled modules found after filtering");
-              }
-            } else {
-              console.warn("⚠️ API returned non-array value:", typeof modulesData.value);
-            }
-          } else {
-            // API returned null (database permission issue or no data)
-            console.warn("⚠️ API returned null/undefined, falling back to localStorage");
-          }
-        } else {
-          console.warn("⚠️ API request failed with status:", modulesResponse.status);
-        }
-
-        if (heroResponse.ok) {
-          const heroData = await heroResponse.json();
-          if (heroData.value && typeof heroData.value === "object") {
-            setHeroContent(heroData.value);
-            localStorage.setItem("landing-hero", JSON.stringify(heroData.value));
-          }
-        }
-      } catch (apiError) {
-        console.warn("⚠️ API fetch failed, trying localStorage:", apiError);
-      }
-
-      // Fallback to localStorage if API fails
-      const savedModules = localStorage.getItem("landing-modules");
-      console.log("💾 Checking localStorage:", {
-        hasData: !!savedModules,
-        dataLength: savedModules ? savedModules.length : 0
-      });
-      
-      if (savedModules) {
-        try {
-          const parsedModules = JSON.parse(savedModules);
-          console.log("📦 Parsed modules from localStorage:", {
-            isArray: Array.isArray(parsedModules),
-            length: Array.isArray(parsedModules) ? parsedModules.length : "N/A",
-            data: parsedModules
-          });
-          
-          // Ensure it's an array
-          if (Array.isArray(parsedModules)) {
-            // Filter only enabled modules and map to display format
-            const enabledModules = parsedModules
-              .filter((m: any) => m && m.enabled !== false) // Allow undefined as enabled
-              .map((m: any) => ({
-                name: m.name || "",
-                slug: m.id || m.slug || "",
-                description: m.description || "",
-                icon: m.icon || "📦",
-              }))
-              .filter((m: any) => m.name && m.slug); // Remove invalid entries
-            
-            console.log("✅ Enabled modules from localStorage:", enabledModules.length, enabledModules);
-            
-            if (enabledModules.length > 0) {
-              console.log("✅ Setting modules state from localStorage:", enabledModules.length);
-              setModules(enabledModules);
-              setDataSource("localStorage");
-            } else {
-              console.warn("⚠️ No enabled modules found after filtering, using defaults");
-              setDataSource("defaults");
-            }
-          } else {
-            console.warn("⚠️ Saved modules is not an array:", typeof parsedModules);
-            setDataSource("defaults");
-          }
-        } catch (error) {
-          console.error("❌ Error parsing saved modules:", error);
-          setDataSource("defaults");
-        }
-      } else {
-        // No data in API or localStorage, use defaults
-        setDataSource("defaults");
-        console.log("ℹ️ No saved modules found (checked API and localStorage), using defaults");
-        console.log("💡 Save modules from Super Admin (http://localhost:3001) → Landing Editor");
-        console.log("💡 Note: Super Admin and Landing Page are on different origins, so localStorage is not shared");
-      }
-    } catch (error) {
-      console.error("❌ Error in loadConfig:", error);
-    }
-  }, []);
-
-  // Check localStorage for saved configuration (for same-tab updates)
-  const checkStorage = useCallback(() => {
-    try {
-      if (typeof window === "undefined") return;
-
-      // Load modules from localStorage
-      const savedModules = localStorage.getItem("landing-modules");
-      if (savedModules) {
-        try {
-          const parsedModules = JSON.parse(savedModules);
-          console.log("📦 [checkStorage] Loading modules from localStorage:", parsedModules);
-          
-          if (Array.isArray(parsedModules)) {
-            const enabledModules = parsedModules
-              .filter((m: any) => m && m.enabled !== false)
-              .map((m: any) => ({
-                name: m.name || "",
-                slug: m.id || m.slug || "",
-                description: m.description || "",
-                icon: m.icon || "📦",
-              }))
-              .filter((m: any) => m.name && m.slug);
-            
-            console.log("✅ [checkStorage] Enabled modules:", enabledModules.length, enabledModules);
-            
-            if (enabledModules.length > 0) {
-              setModules(enabledModules);
-              setDataSource("localStorage");
-            }
-          }
-        } catch (error) {
-          console.error("❌ [checkStorage] Error parsing saved modules:", error);
-        }
-      }
-
-      // Load hero content from localStorage
-      const savedHero = localStorage.getItem("landing-hero");
-      if (savedHero) {
-        try {
-          const parsedHero = JSON.parse(savedHero);
-          if (parsedHero && typeof parsedHero === "object") {
-            setHeroContent(parsedHero);
-          }
-        } catch (error) {
-          console.error("❌ [checkStorage] Error parsing saved hero content:", error);
-        }
-      }
-
-      // Load last updated timestamp
-      const savedLastUpdated = localStorage.getItem("landing-last-updated");
-      if (savedLastUpdated) {
-        setLastUpdated(savedLastUpdated);
-      }
-    } catch (error) {
-      console.error("❌ [checkStorage] Error in checkStorage:", error);
-      // Don't break the page if localStorage fails
-    }
-  }, []);
-
+  // Load modules from API on mount (once only)
   useEffect(() => {
     async function loadModules() {
       try {
@@ -354,9 +126,10 @@ export default function Home() {
               }))
               .filter((m: any) => m.name && m.slug);
             
-            setModules(enabledModules);
-            setDataSource("api");
-            console.log("✅ Loaded modules from API:", enabledModules.length);
+            if (enabledModules.length > 0) {
+              setModules(enabledModules);
+              setDataSource("api");
+            }
           }
         }
       } catch (error) {
@@ -364,14 +137,64 @@ export default function Home() {
       }
     }
     
-    // Load initially
+    // Load only once on mount
     loadModules()
-    
-    // Check for updates every 2 seconds
-    const interval = setInterval(loadModules, 2000)
-
-    return () => clearInterval(interval)
   }, [])
+
+  // Check localStorage for saved configuration (for same-tab updates)
+  const checkStorage = useCallback(() => {
+    try {
+      if (typeof window === "undefined") return;
+
+      // Load modules from localStorage
+      const savedModules = localStorage.getItem("landing-modules");
+      if (savedModules) {
+        try {
+          const parsedModules = JSON.parse(savedModules);
+          
+          if (Array.isArray(parsedModules)) {
+            const enabledModules = parsedModules
+              .filter((m: any) => m && m.enabled !== false)
+              .map((m: any) => ({
+                name: m.name || "",
+                slug: m.id || m.slug || "",
+                description: m.description || "",
+                icon: m.icon || "📦",
+              }))
+              .filter((m: any) => m.name && m.slug);
+            
+            if (enabledModules.length > 0) {
+              setModules(enabledModules);
+              setDataSource("localStorage");
+            }
+          }
+        } catch (error) {
+          console.error("Error parsing saved modules:", error);
+        }
+      }
+
+      // Load hero content from localStorage
+      const savedHero = localStorage.getItem("landing-hero");
+      if (savedHero) {
+        try {
+          const parsedHero = JSON.parse(savedHero);
+          if (parsedHero && typeof parsedHero === "object") {
+            setHeroContent(parsedHero);
+          }
+        } catch (error) {
+          console.error("Error parsing saved hero content:", error);
+        }
+      }
+
+      // Load last updated timestamp
+      const savedLastUpdated = localStorage.getItem("landing-last-updated");
+      if (savedLastUpdated) {
+        setLastUpdated(savedLastUpdated);
+      }
+    } catch (error) {
+      console.error("Error in checkStorage:", error);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
