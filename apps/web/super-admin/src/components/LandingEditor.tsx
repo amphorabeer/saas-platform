@@ -322,7 +322,7 @@ export function LandingEditor() {
       let landingPageApiSaved = false;
       try {
         console.log("📤 Sending modules to Landing Page API...");
-        const landingPageResponse = await fetch("http://localhost:3000/api/modules", {
+        const landingPageResponse = await fetch(`${process.env.NEXT_PUBLIC_LANDING_URL || "http://localhost:3000"}/api/modules`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -446,7 +446,7 @@ export function LandingEditor() {
   };
 
   const openPreview = () => {
-    window.open("http://localhost:3000", "_blank");
+    window.open(process.env.NEXT_PUBLIC_LANDING_URL || "http://localhost:3000", "_blank");
   };
 
   return (
