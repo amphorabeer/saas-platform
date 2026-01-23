@@ -4000,7 +4000,7 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
   // Get folio balance
   const getFolioBalance = (reservationId: string) => {
     if (typeof window === 'undefined') return 0
-    const folios = getFolios()
+    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
     const folio = folios.find((f: any) => f.reservationId === reservationId)
     return folio?.balance || 0
   }
@@ -4009,7 +4009,7 @@ function PreCheckItem({ check, onRefresh, onRefreshAuditHistory }: { check: any;
   const handleCheckIn = async (reservation: any) => {
     try {
       // Create folio first (same as Dashboard createFolioForReservation)
-      const folios = getFolios()
+      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
       
       // Check if folio already exists
       const existingFolio = folios.find((f: any) => f.reservationId === reservation.id)
