@@ -88,13 +88,33 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
     })
   }, [reservations, startDate, endDate])
   
-  // Load folios from localStorage
+  // Load folios from API or localStorage
   const [folios, setFolios] = useState<any[]>([])
   useEffect(() => {
-    const savedFolios = localStorage.getItem('hotelFolios')
-    if (savedFolios) {
-      setFolios(JSON.parse(savedFolios))
+    const loadFolios = async () => {
+      try {
+        const response = await fetch('/api/folios')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.folios && data.folios.length > 0) {
+            setFolios(data.folios.map((f: any) => ({
+              ...f,
+              transactions: f.folioData?.transactions || f.charges || f.transactions || []
+            })))
+            console.log('[Reports] Loaded folios from API:', data.folios.length)
+            return
+          }
+        }
+      } catch (error) {
+        console.error('[Reports] API error:', error)
+      }
+      // Fallback to localStorage
+      const savedFolios = localStorage.getItem('hotelFolios')
+      if (savedFolios) {
+        setFolios(JSON.parse(savedFolios))
+      }
     }
+    loadFolios()
   }, [])
   
   // =============== REVENUE REPORT ===============
