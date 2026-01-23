@@ -13,9 +13,6 @@ export function Navigation() {
   const menuItems = [
     { label: "მთავარი", href: "/" },
     { label: "მოდულები", href: "#modules" },
-    { label: "ფასები", href: "/pricing" },
-    { label: "ჩვენს შესახებ", href: "/about" },
-    { label: "კონტაქტი", href: "/contact" },
   ];
 
   return (
