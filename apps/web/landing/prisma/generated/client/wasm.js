@@ -148,14 +148,14 @@ exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   password: 'password',
   avatar: 'avatar',
-  role: 'role',
-  organizationId: 'organizationId',
   emailVerified: 'emailVerified',
   lastLoginAt: 'lastLoginAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  organizationId: 'organizationId',
+  role: 'role'
 };
 
 exports.Prisma.AccountScalarFieldEnum = {
@@ -226,16 +226,16 @@ exports.Prisma.ModuleFeatureScalarFieldEnum = {
 
 exports.Prisma.InvoiceScalarFieldEnum = {
   id: 'id',
-  subscriptionId: 'subscriptionId',
   invoiceNumber: 'invoiceNumber',
-  amount: 'amount',
-  currency: 'currency',
-  status: 'status',
   dueDate: 'dueDate',
   paidAt: 'paidAt',
-  invoiceUrl: 'invoiceUrl',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  amount: 'amount',
+  currency: 'currency',
+  invoiceUrl: 'invoiceUrl',
+  subscriptionId: 'subscriptionId',
+  status: 'status'
 };
 
 exports.Prisma.ModuleConfigScalarFieldEnum = {
@@ -351,6 +351,14 @@ exports.Prisma.ConfigurationScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.SiteConfigScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -442,7 +450,8 @@ exports.Prisma.ModelName = {
   ActivityLog: 'ActivityLog',
   HotelRoom: 'HotelRoom',
   HotelReservation: 'HotelReservation',
-  Configuration: 'Configuration'
+  Configuration: 'Configuration',
+  SiteConfig: 'SiteConfig'
 };
 
 /**

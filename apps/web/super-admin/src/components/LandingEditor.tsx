@@ -30,9 +30,9 @@ interface Module {
   icon: string;
   organizations: number;
   pricing: {
-    starter: { price: string; duration: string; features: string[] };
-    professional: { price: string; popular: boolean; features: string[] };
-    enterprise: { price: string; features: string[] };
+    starter: { name: string; price: string; duration: string; features: string[] };
+    professional: { name: string; price: string; popular: boolean; features: string[] };
+    enterprise: { name: string; price: string; features: string[] };
   };
 }
 
@@ -46,13 +46,15 @@ const defaultModules: Module[] = [
     icon: "🏨",
     organizations: 124,
     pricing: {
-      starter: { price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "20 ოთახი", "რეზერვაციების მართვა"] },
+      starter: { name: "Starter", price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "20 ოთახი", "რეზერვაციების მართვა"] },
       professional: {
+        name: "Professional",
         price: "₾99",
         popular: true,
         features: ["1 ლოკაცია", "50 ოთახი", "ყველა ფუნქცია", "24/7 მხარდაჭერა"],
       },
       enterprise: {
+        name: "Enterprise",
         price: "₾299",
         features: ["მრავალი ლოკაცია", "ულიმიტო ოთახები", "Custom features", "Dedicated support"],
       },
@@ -67,13 +69,15 @@ const defaultModules: Module[] = [
     icon: "🍽️",
     organizations: 89,
     pricing: {
-      starter: { price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "20 მაგიდა", "შეკვეთების მართვა"] },
+      starter: { name: "Starter", price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "20 მაგიდა", "შეკვეთების მართვა"] },
       professional: {
+        name: "Professional",
         price: "₾99",
         popular: true,
         features: ["1 ლოკაცია", "50 მაგიდა", "ყველა ფუნქცია", "POS ინტეგრაცია"],
       },
       enterprise: {
+        name: "Enterprise",
         price: "₾299",
         features: ["მრავალი ლოკაცია", "ულიმიტო მაგიდები", "Custom features", "Multi-language"],
       },
@@ -88,13 +92,15 @@ const defaultModules: Module[] = [
     icon: "💅",
     organizations: 67,
     pricing: {
-      starter: { price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "500 კლიენტი", "ვიზიტების მართვა"] },
+      starter: { name: "Starter", price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "500 კლიენტი", "ვიზიტების მართვა"] },
       professional: {
+        name: "Professional",
         price: "₾99",
         popular: true,
         features: ["1 ლოკაცია", "ულიმიტო კლიენტი", "ყველა ფუნქცია", "SMS შეტყობინებები"],
       },
       enterprise: {
+        name: "Enterprise",
         price: "₾299",
         features: ["მრავალი ლოკაცია", "ულიმიტო კლიენტი", "Custom features", "Marketing tools"],
       },
@@ -109,13 +115,15 @@ const defaultModules: Module[] = [
     icon: "🛍️",
     organizations: 45,
     pricing: {
-      starter: { price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "1000 პროდუქტი", "ინვენტარის მართვა"] },
+      starter: { name: "Starter", price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "1000 პროდუქტი", "ინვენტარის მართვა"] },
       professional: {
+        name: "Professional",
         price: "₾99",
         popular: true,
         features: ["1 ლოკაცია", "ულიმიტო პროდუქტი", "ყველა ფუნქცია", "POS ინტეგრაცია"],
       },
       enterprise: {
+        name: "Enterprise",
         price: "₾299",
         features: ["მრავალი ლოკაცია", "ულიმიტო პროდუქტი", "Custom features", "Multi-warehouse"],
       },
@@ -130,13 +138,15 @@ const defaultModules: Module[] = [
     icon: "🍺",
     organizations: 23,
     pricing: {
-      starter: { price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "10 რეცეპტი", "წარმოების მართვა"] },
+      starter: { name: "Starter", price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "10 რეცეპტი", "წარმოების მართვა"] },
       professional: {
+        name: "Professional",
         price: "₾99",
         popular: true,
         features: ["1 ლოკაცია", "ულიმიტო რეცეპტი", "ყველა ფუნქცია", "ბარელების მართვა"],
       },
       enterprise: {
+        name: "Enterprise",
         price: "₾299",
         features: ["მრავალი ლოკაცია", "ულიმიტო რეცეპტი", "Custom features", "Quality control"],
       },
@@ -151,13 +161,15 @@ const defaultModules: Module[] = [
     icon: "🍷",
     organizations: 18,
     pricing: {
-      starter: { price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "10 ვარიანტი", "წარმოების მართვა"] },
+      starter: { name: "Starter", price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "10 ვარიანტი", "წარმოების მართვა"] },
       professional: {
+        name: "Professional",
         price: "₾99",
         popular: true,
         features: ["1 ლოკაცია", "ულიმიტო ვარიანტი", "ყველა ფუნქცია", "ბარელების მართვა"],
       },
       enterprise: {
+        name: "Enterprise",
         price: "₾299",
         features: ["მრავალი ლოკაცია", "ულიმიტო ვარიანტი", "Custom features", "Aging tracking"],
       },
@@ -172,13 +184,15 @@ const defaultModules: Module[] = [
     icon: "🥃",
     organizations: 12,
     pricing: {
-      starter: { price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "10 რეცეპტი", "წარმოების მართვა"] },
+      starter: { name: "Starter", price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "10 რეცეპტი", "წარმოების მართვა"] },
       professional: {
+        name: "Professional",
         price: "₾99",
         popular: true,
         features: ["1 ლოკაცია", "ულიმიტო რეცეპტი", "ყველა ფუნქცია", "ბარელების მართვა"],
       },
       enterprise: {
+        name: "Enterprise",
         price: "₾299",
         features: ["მრავალი ლოკაცია", "ულიმიტო რეცეპტი", "Custom features", "Aging tracking"],
       },
@@ -419,13 +433,13 @@ export function LandingEditor() {
     }
   };
 
-  const handlePricingSave = (updatedPricing: Module["pricing"]) => {
+  const handlePricingSave = (updates: { name: string; pricing: Module["pricing"] }) => {
     if (editingModule) {
-      updateModule(editingModule.id, { pricing: updatedPricing });
+      updateModule(editingModule.id, { name: updates.name, pricing: updates.pricing });
       setShowPricingModal(false);
       setEditingModule(null);
       toast.success("ფასები განახლებულია!", {
-        description: `${editingModule.name} - ფასების ინფორმაცია შეიცვალა`,
+        description: `${updates.name} - ფასების ინფორმაცია შეიცვალა`,
         duration: 3000,
       });
     }
@@ -610,8 +624,8 @@ export function LandingEditor() {
                     className="w-full"
                     onClick={() => {
                       // Create a fresh copy of the module to avoid state issues
-                      setEditingModule({ ...module });
-                      setShowPricingModal(true);
+                      console.log("Setting module:", module.name); setEditingModule({ ...module });
+                      setShowPricingModal(true); console.log("showPricingModal set to true");
                     }}
                   >
                     ფასების რედაქტირება
@@ -671,21 +685,35 @@ function PricingModal({
   onClose,
 }: {
   module: Module;
-  onSave: (pricing: Module["pricing"]) => void;
+  onSave: (updates: { name: string; pricing: Module["pricing"] }) => void;
   onClose: () => void;
 }) {
+  const [moduleName, setModuleName] = useState(module.name);
   const [pricing, setPricing] = useState(module.pricing);
 
-  // Update pricing when module changes
+  // Update state when module changes
   useEffect(() => {
+    setModuleName(module.name);
     setPricing(module.pricing);
-  }, [module.pricing]);
+  }, [module]);
+
+  const handleSave = () => {
+    onSave({ name: moduleName, pricing });
+  };
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{module.name} - ფასების რედაქტირება</DialogTitle>
+          {/* რედაქტირებადი სათაური */}
+          <div className="space-y-2">
+            <Label>მოდულის სახელი</Label>
+            <Input
+              value={moduleName}
+              onChange={(e) => setModuleName(e.target.value)}
+              className="text-lg font-semibold"
+            />
+          </div>
           <DialogDescription>რედაქტირეთ სამი გეგმის ფასები და ფუნქციები</DialogDescription>
         </DialogHeader>
 
@@ -693,7 +721,15 @@ function PricingModal({
           {/* Starter Plan */}
           <Card>
             <CardHeader>
-              <CardTitle>Starter</CardTitle>
+              {/* რედაქტირებადი plan name */}
+              <Input
+                value={pricing.starter.name || "Starter"}
+                onChange={(e) =>
+                  setPricing({ ...pricing, starter: { ...pricing.starter, name: e.target.value } })
+                }
+                className="text-xl font-bold border-none p-0 h-auto focus-visible:ring-0"
+                placeholder="Plan Name"
+              />
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -733,7 +769,14 @@ function PricingModal({
           {/* Professional Plan */}
           <Card className="border-2 border-primary">
             <CardHeader>
-              <CardTitle>Professional</CardTitle>
+              <Input
+                value={pricing.professional.name || "Professional"}
+                onChange={(e) =>
+                  setPricing({ ...pricing, professional: { ...pricing.professional, name: e.target.value } })
+                }
+                className="text-xl font-bold border-none p-0 h-auto focus-visible:ring-0"
+                placeholder="Plan Name"
+              />
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -779,7 +822,14 @@ function PricingModal({
           {/* Enterprise Plan */}
           <Card>
             <CardHeader>
-              <CardTitle>Enterprise</CardTitle>
+              <Input
+                value={pricing.enterprise.name || "Enterprise"}
+                onChange={(e) =>
+                  setPricing({ ...pricing, enterprise: { ...pricing.enterprise, name: e.target.value } })
+                }
+                className="text-xl font-bold border-none p-0 h-auto focus-visible:ring-0"
+                placeholder="Plan Name"
+              />
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -815,7 +865,7 @@ function PricingModal({
           <Button variant="outline" onClick={onClose}>
             გაუქმება
           </Button>
-          <Button onClick={() => onSave(pricing)}>შენახვა</Button>
+          <Button onClick={handleSave}>შენახვა</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
