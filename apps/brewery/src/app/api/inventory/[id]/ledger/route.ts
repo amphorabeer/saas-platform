@@ -1,14 +1,18 @@
 // /api/inventory/[id]/ledger/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { withPermission, RouteContext } from '@/lib/api-middleware'
 
-export async function GET(
+export const GET = withPermission('inventory:read')(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  ctx: RouteContext
+) => {
   try {
-    const tenantId = request.headers.get('x-tenant-id') || 'tenant1'
-    const itemId = params.id
+    const tenantId = ctx.tenantId
+    // Extract itemId from URL
+    const url = new URL(request.url)
+    const pathParts = url.pathname.split('/')
+    const itemId = pathParts[pathParts.indexOf('inventory') + 1]
     
     console.log('[INVENTORY LEDGER] Fetching ledger for item:', itemId)
     
@@ -76,16 +80,19 @@ export async function GET(
     console.error('[INVENTORY LEDGER] Error:', error)
     return NextResponse.json({ error: 'Failed to fetch ledger' }, { status: 500 })
   }
-}
+})
 
 // POST - Add manual ledger entry
-export async function POST(
+export const POST = withPermission('inventory:write')(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  ctx: RouteContext
+) => {
   try {
-    const tenantId = request.headers.get('x-tenant-id') || 'tenant1'
-    const itemId = params.id
+    const tenantId = ctx.tenantId
+    // Extract itemId from URL
+    const url = new URL(request.url)
+    const pathParts = url.pathname.split('/')
+    const itemId = pathParts[pathParts.indexOf('inventory') + 1]
     const body = await request.json()
     
     const { quantity, type, notes, createdBy = 'სისტემა' } = body
@@ -148,4 +155,4 @@ export async function POST(
     console.error('[INVENTORY LEDGER] Error creating entry:', error)
     return NextResponse.json({ error: 'Failed to create ledger entry' }, { status: 500 })
   }
-}
+})
