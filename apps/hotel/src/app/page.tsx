@@ -28,6 +28,9 @@ import { ActivityLogger } from '../lib/activityLogger'
 import { FolioService } from '../services/FolioService'
 import { RESERVATION_STATUS, ROOM_STATUS } from '../constants/statusConstants'
 import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
+import { usePlan } from '@/lib/usePlan'
+import { UpgradeModal } from '@/components/UpgradeModal'
+import { PLAN_NAMES, PlanFeatures } from '@/lib/plan-features'
 
 interface Room {
   id: string
@@ -63,6 +66,11 @@ export default function HotelDashboard() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
   const [maintenanceRooms, setMaintenanceRooms] = useState<string[]>([])
   const [hotelInfo, setHotelInfo] = useState<any>({ name: 'Hotel Tbilisi', logo: '' })
+  
+  // Plan-based features
+  const { plan, hasFeature, getRequiredPlan } = usePlan()
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [upgradeFeature, setUpgradeFeature] = useState<{ name: string; feature: keyof PlanFeatures['features'] } | null>(null)
   
   // Auth check - NextAuth
   const { data: session, status } = useSession()
@@ -956,39 +964,104 @@ export default function HotelDashboard() {
                   </button>
                   
                   {showQuickMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border z-50">
-                      <button
-                        onClick={() => addTabFromMenu('housekeeping')}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
-                      >
-                        🧹 დასუფთავება
-                      </button>
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border z-50">
+                      {/* Housekeeping - PROFESSIONAL+ */}
+                      {hasFeature('housekeeping') ? (
+                        <button
+                          onClick={() => addTabFromMenu('housekeeping')}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
+                        >
+                          🧹 დასუფთავება
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setUpgradeFeature({ name: 'Housekeeping', feature: 'housekeeping' })
+                            setShowUpgradeModal(true)
+                            setShowQuickMenu(false)
+                          }}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-gray-400"
+                        >
+                          🧹 დასუფთავება
+                          <span className="ml-auto text-xs">🔒</span>
+                        </button>
+                      )}
+                      
                       <button
                         onClick={() => addTabFromMenu('roomgrid')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
                       >
                         🏨 ოთახები
                       </button>
+                      
+                      {/* Reports/Analytics - ENTERPRISE */}
                       {canViewReports && (
+                        hasFeature('analytics') ? (
+                          <button
+                            onClick={() => addTabFromMenu('reports')}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
+                          >
+                            📊 რეპორტები
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setUpgradeFeature({ name: 'ანალიტიკა & რეპორტები', feature: 'analytics' })
+                              setShowUpgradeModal(true)
+                              setShowQuickMenu(false)
+                            }}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-gray-400"
+                          >
+                            📊 რეპორტები
+                            <span className="ml-auto text-xs">🔒</span>
+                          </button>
+                        )
+                      )}
+                      
+                      {/* Cashier - PROFESSIONAL+ (finances) */}
+                      {hasFeature('finances') ? (
                         <button
-                          onClick={() => addTabFromMenu('reports')}
+                          onClick={() => addTabFromMenu('cashier')}
                           className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
                         >
-                          📊 რეპორტები
+                          💰 სალარო
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setUpgradeFeature({ name: 'სალარო', feature: 'finances' })
+                            setShowUpgradeModal(true)
+                            setShowQuickMenu(false)
+                          }}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-gray-400"
+                        >
+                          💰 სალარო
+                          <span className="ml-auto text-xs">🔒</span>
                         </button>
                       )}
-                      <button
-                        onClick={() => addTabFromMenu('cashier')}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
-                      >
-                        💰 სალარო
-                      </button>
-                      <button
-                        onClick={() => addTabFromMenu('financial')}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
-                      >
-                        💰 ფინანსური დეშბორდი
-                      </button>
+                      
+                      {/* Financial Dashboard - PROFESSIONAL+ */}
+                      {hasFeature('finances') ? (
+                        <button
+                          onClick={() => addTabFromMenu('financial')}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
+                        >
+                          💰 ფინანსური დეშბორდი
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setUpgradeFeature({ name: 'ფინანსური დეშბორდი', feature: 'finances' })
+                            setShowUpgradeModal(true)
+                            setShowQuickMenu(false)
+                          }}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-gray-400"
+                        >
+                          💰 ფინანსური დეშბორდი
+                          <span className="ml-auto text-xs">🔒</span>
+                        </button>
+                      )}
+                      
                       <button
                         onClick={() => addTabFromMenu('settings-new')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
@@ -1231,26 +1304,56 @@ export default function HotelDashboard() {
                 <div className="text-sm opacity-75">სამუშაო დღის დახურვა</div>
               </button>
               
-              {/* Housekeeping */}
-              <button
-                onClick={() => addTabFromMenu('housekeeping')}
-                className="bg-teal-500 text-white p-6 rounded-lg hover:bg-teal-600 transition-all transform hover:scale-105 shadow-lg text-left"
-              >
-                <div className="text-4xl mb-2">🧹</div>
-                <div className="text-xl font-bold">დასუფთავება</div>
-                <div className="text-sm opacity-75">Housekeeping tasks</div>
-              </button>
-              
-              {/* Reports */}
-              {canViewReports && (
+              {/* Housekeeping - PROFESSIONAL+ */}
+              {hasFeature('housekeeping') ? (
                 <button
-                  onClick={() => addTabFromMenu('reports')}
-                  className="bg-pink-500 text-white p-6 rounded-lg hover:bg-pink-600 transition-all transform hover:scale-105 shadow-lg text-left"
+                  onClick={() => addTabFromMenu('housekeeping')}
+                  className="bg-teal-500 text-white p-6 rounded-lg hover:bg-teal-600 transition-all transform hover:scale-105 shadow-lg text-left"
                 >
-                  <div className="text-4xl mb-2">📈</div>
-                  <div className="text-xl font-bold">რეპორტები</div>
-                  <div className="text-sm opacity-75">ანგარიშები და ანალიტიკა</div>
+                  <div className="text-4xl mb-2">🧹</div>
+                  <div className="text-xl font-bold">დასუფთავება</div>
+                  <div className="text-sm opacity-75">Housekeeping tasks</div>
                 </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setUpgradeFeature({ name: 'Housekeeping', feature: 'housekeeping' })
+                    setShowUpgradeModal(true)
+                  }}
+                  className="bg-gray-300 text-gray-500 p-6 rounded-lg transition-all shadow-lg text-left relative"
+                >
+                  <div className="text-4xl mb-2 opacity-50">🧹</div>
+                  <div className="text-xl font-bold">დასუფთავება</div>
+                  <div className="text-sm opacity-75">Housekeeping tasks</div>
+                  <div className="absolute top-2 right-2 text-lg">🔒</div>
+                </button>
+              )}
+              
+              {/* Reports - ENTERPRISE */}
+              {canViewReports && (
+                hasFeature('analytics') ? (
+                  <button
+                    onClick={() => addTabFromMenu('reports')}
+                    className="bg-pink-500 text-white p-6 rounded-lg hover:bg-pink-600 transition-all transform hover:scale-105 shadow-lg text-left"
+                  >
+                    <div className="text-4xl mb-2">📈</div>
+                    <div className="text-xl font-bold">რეპორტები</div>
+                    <div className="text-sm opacity-75">ანგარიშები და ანალიტიკა</div>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setUpgradeFeature({ name: 'ანალიტიკა & რეპორტები', feature: 'analytics' })
+                      setShowUpgradeModal(true)
+                    }}
+                    className="bg-gray-300 text-gray-500 p-6 rounded-lg transition-all shadow-lg text-left relative"
+                  >
+                    <div className="text-4xl mb-2 opacity-50">📈</div>
+                    <div className="text-xl font-bold">რეპორტები</div>
+                    <div className="text-sm opacity-75">ანგარიშები და ანალიტიკა</div>
+                    <div className="absolute top-2 right-2 text-lg">🔒</div>
+                  </button>
+                )
               )}
               
               {/* Cashier Card */}
@@ -1299,6 +1402,28 @@ export default function HotelDashboard() {
                 const cashierTotals = { cash, card, total }
                 
                 if (!cashierSettings?.cashierEnabled) return null
+                
+                // Plan restriction for finances
+                if (!hasFeature('finances')) {
+                  return (
+                    <button
+                      onClick={() => {
+                        setUpgradeFeature({ name: 'სალარო', feature: 'finances' })
+                        setShowUpgradeModal(true)
+                      }}
+                      className="bg-gray-300 text-gray-500 p-6 rounded-lg transition-all shadow-lg text-left relative"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-3xl opacity-50">💰</span>
+                        <h3 className="text-xl font-bold">სალარო</h3>
+                      </div>
+                      <div className="text-sm opacity-75">
+                        სალაროს მართვა
+                      </div>
+                      <div className="absolute top-2 right-2 text-lg">🔒</div>
+                    </button>
+                  )
+                }
                 
                 return (
                   <button
@@ -1924,6 +2049,20 @@ export default function HotelDashboard() {
             await loadRooms()
           }}
           onReservationUpdate={updateReservation}
+        />
+      )}
+
+      {/* Upgrade Modal for Plan Restrictions */}
+      {showUpgradeModal && upgradeFeature && (
+        <UpgradeModal
+          isOpen={showUpgradeModal}
+          onClose={() => {
+            setShowUpgradeModal(false)
+            setUpgradeFeature(null)
+          }}
+          feature={upgradeFeature.name}
+          requiredPlan={getRequiredPlan(upgradeFeature.feature)}
+          currentPlan={plan}
         />
       )}
     </div>

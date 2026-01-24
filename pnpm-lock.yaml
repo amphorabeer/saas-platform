@@ -418,6 +418,8 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  apps/web/landing/prisma/generated/client: {}
+
   apps/web/super-admin:
     dependencies:
       '@prisma/client':
