@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "@saas-platform/ui";
@@ -20,57 +20,209 @@ const moduleAppUrls: Record<string, string> = {
   distillery: "",
 };
 
-// Default fallback data (used if API doesn't return data)
-const defaultModuleData: Record<string, {
+// ============================================
+// HARDCODED MODULE DATA - შეცვლა კოდში
+// ============================================
+const moduleData: Record<string, {
   name: string;
   description: string;
   icon: string;
+  pricing: {
+    starter: { name: string; price: string; duration: string; features: string[] };
+    professional: { name: string; price: string; popular: boolean; features: string[] };
+    enterprise: { name: string; price: string; features: string[] };
+  };
   faq: { question: string; answer: string }[];
 }> = {
   hotel: {
-    name: "სასტუმროს მართვის სისტემა",
+    name: "სასტუმროს მართვა",
     description: "სრულყოფილი გადაწყვეტა სასტუმროების მართვისთვის",
     icon: "🏨",
+    pricing: {
+      starter: {
+        name: "Starter",
+        price: "უფასო",
+        duration: "15 დღე",
+        features: ["1 ლოკაცია", "10 ოთახი", "რეზერვაციების მართვა"],
+      },
+      professional: {
+        name: "Professional",
+        price: "₾59",
+        popular: true,
+        features: ["1 ლოკაცია", "25 ოთახი", "ყველა ფუნქცია", "24/7 მხარდაჭერა"],
+      },
+      enterprise: {
+        name: "Enterprise",
+        price: "₾102",
+        features: ["მრავალი ლოკაცია", "ულიმიტო ოთახები", "Custom features", "Dedicated support"],
+      },
+    },
     faq: [
       { question: "როგორ მუშაობს რეზერვაციების სისტემა?", answer: "ჩვენი სისტემა საშუალებას გაძლევთ მარტივად მართოთ ოთახების რეზერვაციები, ჩეკ-ინ/ჩეკ-აუთი და მეტი." },
       { question: "შემიძლია სხვადასხვა ლოკაციის მართვა?", answer: "Enterprise გეგმაში შედის მრავალი ლოკაციის მართვის შესაძლებლობა." },
+    ],
+  },
+  brewery: {
+    name: "ლუდსახარშის მართვა",
+    description: "წარმოების, ინვენტარისა და გაყიდვების მართვა",
+    icon: "🍺",
+    pricing: {
+      starter: {
+        name: "Starter",
+        price: "₾25",
+        duration: "15 დღე",
+        features: ["მაქს. 5 აზბი", "წარმოების ძირითადი მართვა", "პარტიები, რეცეპტები", "Cloud access"],
+      },
+      professional: {
+        name: "Professional",
+        price: "₾69",
+        popular: true,
+        features: ["6 - 14 აზბი", "წარმოების სრული მართვა", "მარაგები (წედლეული, შეფუთვა, მზა პროდუქცია)", "CIP / აზბების რეცხვა", "კეგების მენეჯმენტი"],
+      },
+      enterprise: {
+        name: "Enterprise",
+        price: "₾99",
+        features: ["15+ აზბი", "შეუზღუდავი ფუნქციები", "მომხმარებლის როლები", "გაფართოებული ანალიტიკა", "პრიორიტეტული მხარდაჭერა"],
+      },
+    },
+    faq: [
+      { question: "როგორ მუშაობს რეცეპტების მართვა?", answer: "სისტემა საშუალებას გაძლევთ შექმნათ და მართოთ ლუდის რეცეპტები, ინგრედიენტები და წარმოების პროცესები." },
     ],
   },
   restaurant: {
     name: "რესტორნის მართვის სისტემა",
     description: "რესტორნის ყველა ასპექტის მართვა ერთ ადგილას",
     icon: "🍽️",
-    faq: [{ question: "როგორ მუშაობს მაგიდების რეზერვაცია?", answer: "სისტემა საშუალებას გაძლევთ მარტივად მართოთ მაგიდების რეზერვაციები და შეკვეთები." }],
+    pricing: {
+      starter: {
+        name: "Starter",
+        price: "უფასო",
+        duration: "15 დღე",
+        features: ["1 ლოკაცია", "20 მაგიდა", "შეკვეთების მართვა"],
+      },
+      professional: {
+        name: "Professional",
+        price: "₾99",
+        popular: true,
+        features: ["1 ლოკაცია", "50 მაგიდა", "ყველა ფუნქცია", "POS ინტეგრაცია"],
+      },
+      enterprise: {
+        name: "Enterprise",
+        price: "₾299",
+        features: ["მრავალი ლოკაცია", "ულიმიტო მაგიდები", "Custom features", "Multi-language"],
+      },
+    },
+    faq: [
+      { question: "როგორ მუშაობს მაგიდების რეზერვაცია?", answer: "სისტემა საშუალებას გაძლევთ მარტივად მართოთ მაგიდების რეზერვაციები და შეკვეთები." },
+    ],
   },
   beauty: {
     name: "სილამაზის სალონის მართვა",
     description: "კლიენტების, ვიზიტებისა და ფინანსების მართვა",
     icon: "💅",
-    faq: [{ question: "შემიძლია SMS შეტყობინებების გაგზავნა?", answer: "დიახ, Professional და Enterprise გეგმებში შედის SMS შეტყობინებების ფუნქცია." }],
+    pricing: {
+      starter: {
+        name: "Starter",
+        price: "უფასო",
+        duration: "15 დღე",
+        features: ["1 ლოკაცია", "500 კლიენტი", "ვიზიტების მართვა"],
+      },
+      professional: {
+        name: "Professional",
+        price: "₾99",
+        popular: true,
+        features: ["1 ლოკაცია", "ულიმიტო კლიენტი", "ყველა ფუნქცია", "SMS შეტყობინებები"],
+      },
+      enterprise: {
+        name: "Enterprise",
+        price: "₾299",
+        features: ["მრავალი ლოკაცია", "ულიმიტო თანამშრომლები", "Custom features", "API access"],
+      },
+    },
+    faq: [
+      { question: "შემიძლია SMS შეტყობინებების გაგზავნა?", answer: "დიახ, Professional და Enterprise გეგმებში შედის SMS შეტყობინებების ფუნქცია." },
+    ],
   },
   shop: {
     name: "მაღაზიის მართვის სისტემა",
     description: "ინვენტარის, გაყიდვებისა და მომხმარებლების მართვა",
     icon: "🛍️",
-    faq: [{ question: "როგორ მუშაობს ინვენტარის მართვა?", answer: "სისტემა ავტომატურად აკონტროლებს ინვენტარს და გაგზავნის შეტყობინებებს დაბალი მარაგის შემთხვევაში." }],
-  },
-  brewery: {
-    name: "ლუდსახარშის მართვა",
-    description: "წარმოების, ინვენტარისა და გაყიდვების მართვა",
-    icon: "🍺",
-    faq: [{ question: "როგორ მუშაობს რეცეპტების მართვა?", answer: "სისტემა საშუალებას გაძლევთ შექმნათ და მართოთ ლუდის რეცეპტები, ინგრედიენტები და წარმოების პროცესები." }],
+    pricing: {
+      starter: {
+        name: "Starter",
+        price: "უფასო",
+        duration: "15 დღე",
+        features: ["1 ლოკაცია", "100 პროდუქტი", "გაყიდვების მართვა"],
+      },
+      professional: {
+        name: "Professional",
+        price: "₾99",
+        popular: true,
+        features: ["1 ლოკაცია", "ულიმიტო პროდუქტი", "ყველა ფუნქცია", "ბარკოდის სკანერი"],
+      },
+      enterprise: {
+        name: "Enterprise",
+        price: "₾299",
+        features: ["მრავალი ლოკაცია", "ულიმიტო მომხმარებლები", "Custom features", "E-commerce ინტეგრაცია"],
+      },
+    },
+    faq: [
+      { question: "როგორ მუშაობს ინვენტარის მართვა?", answer: "სისტემა ავტომატურად აკონტროლებს ინვენტარს და გაგზავნის შეტყობინებებს დაბალი მარაგის შემთხვევაში." },
+    ],
   },
   winery: {
     name: "ღვინის მარანის მართვა",
     description: "ვენახების, წარმოებისა და ბარელების მართვა",
     icon: "🍷",
-    faq: [{ question: "როგორ მუშაობს ბარელების მართვა?", answer: "სისტემა საშუალებას გაძლევთ მართოთ ბარელები, მათი ასაკი და ლოკაცია." }],
+    pricing: {
+      starter: {
+        name: "Starter",
+        price: "უფასო",
+        duration: "15 დღე",
+        features: ["1 მარანი", "50 ბარელი", "წარმოების მართვა"],
+      },
+      professional: {
+        name: "Professional",
+        price: "₾99",
+        popular: true,
+        features: ["1 მარანი", "200 ბარელი", "ყველა ფუნქცია", "ლაბორატორიის ანალიზი"],
+      },
+      enterprise: {
+        name: "Enterprise",
+        price: "₾299",
+        features: ["მრავალი მარანი", "ულიმიტო ბარელები", "Custom features", "ექსპორტის დოკუმენტაცია"],
+      },
+    },
+    faq: [
+      { question: "როგორ მუშაობს ბარელების მართვა?", answer: "სისტემა საშუალებას გაძლევთ მართოთ ბარელები, მათი ასაკი და ლოკაცია." },
+    ],
   },
   distillery: {
     name: "არყის საწარმოს მართვა",
     description: "დისტილაციის, ბარელებისა და გაყიდვების მართვა",
     icon: "🥃",
-    faq: [{ question: "როგორ მუშაობს დისტილაციის პროცესების მართვა?", answer: "სისტემა საშუალებას გაძლევთ მართოთ დისტილაციის პროცესები, რეცეპტები და ბარელების ასაკი." }],
+    pricing: {
+      starter: {
+        name: "Starter",
+        price: "უფასო",
+        duration: "15 დღე",
+        features: ["1 საწარმო", "დისტილაციის მართვა", "ძირითადი ფუნქციები"],
+      },
+      professional: {
+        name: "Professional",
+        price: "₾99",
+        popular: true,
+        features: ["1 საწარმო", "ბარელების მართვა", "ყველა ფუნქცია", "ხარისხის კონტროლი"],
+      },
+      enterprise: {
+        name: "Enterprise",
+        price: "₾299",
+        features: ["მრავალი საწარმო", "ულიმიტო ბარელები", "Custom features", "რეგულაციების შესაბამისობა"],
+      },
+    },
+    faq: [
+      { question: "როგორ მუშაობს დისტილაციის პროცესების მართვა?", answer: "სისტემა საშუალებას გაძლევთ მართოთ დისტილაციის პროცესები, რეცეპტები და ბარელების ასაკი." },
+    ],
   },
 };
 
@@ -92,58 +244,14 @@ export default function ModulePricingPage({ params }: { params: { module: string
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   
   const moduleSlug = params.module;
-  const defaultData = defaultModuleData[moduleSlug];
-  
-  // Dynamic data from API
-  const [moduleName, setModuleName] = useState(defaultData?.name || "");
-  const [moduleDescription, setModuleDescription] = useState(defaultData?.description || "");
-  const [moduleIcon, setModuleIcon] = useState(defaultData?.icon || "📦");
-  const [pricing, setPricing] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Load data from API
-  useEffect(() => {
-    async function loadModuleData() {
-      try {
-        const response = await fetch("/api/modules");
-        if (response.ok) {
-          const data = await response.json();
-          if (data.modules && Array.isArray(data.modules)) {
-            // Find this module's data
-            const moduleData = data.modules.find((m: any) => m.id === moduleSlug || m.slug === moduleSlug);
-            if (moduleData) {
-              console.log("✅ Loaded module data from API for", moduleSlug, moduleData);
-              
-              // Update module info
-              if (moduleData.name) setModuleName(moduleData.name);
-              if (moduleData.description) setModuleDescription(moduleData.description);
-              if (moduleData.icon) setModuleIcon(moduleData.icon);
-              
-              // Update pricing
-              if (moduleData.pricing) {
-                console.log("✅ Loaded pricing:", moduleData.pricing);
-                setPricing(moduleData.pricing);
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Failed to load module data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadModuleData();
-  }, [moduleSlug]);
 
   if (!modules.includes(params.module)) {
     notFound();
   }
 
-  // Get pricing data - from API or fallback
-  const starterPricing = pricing?.starter || { price: "უფასო", duration: "15 დღე", features: ["1 ლოკაცია", "ძირითადი ფუნქციები"] };
-  const professionalPricing = pricing?.professional || { price: "₾99", features: ["ყველა ფუნქცია", "24/7 მხარდაჭერა"] };
-  const enterprisePricing = pricing?.enterprise || { price: "₾299", features: ["მრავალი ლოკაცია", "Custom features"] };
+  // Get module data directly from hardcoded object
+  const data = moduleData[moduleSlug];
+  const { pricing, faq } = data;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,8 +287,8 @@ export default function ModulePricingPage({ params }: { params: { module: string
       <Navigation />
       <div className="pt-16">
         {/* Back Button */}
-        <div className="container mx-auto px-4 py-6">
-          <Button variant="ghost" asChild className="mb-4">
+        <div className="container mx-auto px-4 py-4">
+          <Button variant="ghost" asChild className="mb-2">
             <Link href="/">
               <ArrowLeft className="h-4 w-4 mr-2" />
               უკან
@@ -188,134 +296,131 @@ export default function ModulePricingPage({ params }: { params: { module: string
           </Button>
         </div>
 
-        {/* Hero Section */}
-        <section className="container mx-auto px-4 py-12 md:py-16">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="text-6xl mb-6">{moduleIcon}</div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {moduleName}
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">{moduleDescription}</p>
+        {/* Hero Section - შემცირებული padding */}
+        <section className="container mx-auto px-4 py-4 md:py-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <span className="text-5xl mb-3 block">{data.icon}</span>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">{data.name}</h1>
+            <p className="text-lg text-muted-foreground mb-4">{data.description}</p>
           </div>
         </section>
 
-        {/* Pricing Cards */}
-        <section className="container mx-auto px-4 py-12">
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {/* Starter */}
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-2xl">{starterPricing.name || "Starter"}</CardTitle>
-                  <CardDescription>დაწყებისთვის</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold">{starterPricing.price}</span>
-                    <span className="text-muted-foreground">{starterPricing.duration ? ` ${starterPricing.duration}` : ""}</span>
-                  </div>
-                  <ul className="space-y-3 mb-6">
-                    {(starterPricing.features || []).map((feature: string, index: number) => (
-                      <li key={index} className="flex items-center">
-                        <span className="text-green-600 mr-2">✓</span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    className="w-full min-h-[44px]"
-                    variant="outline"
-                    disabled={moduleSlug !== "brewery" && moduleSlug !== "hotel"}
-                    asChild={moduleSlug === "brewery" || moduleSlug === "hotel"}
-                  >
-                    {moduleSlug === "brewery" || moduleSlug === "hotel" ? (
-                      <Link href={getRegistrationUrl(moduleSlug, "STARTER")}>დაწყება</Link>
-                    ) : (
-                      <span>დაწყება</span>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
+        {/* Pricing Section - შემცირებული padding */}
+        <section className="container mx-auto px-4 py-6">
+          <h2 className="text-2xl font-bold text-center mb-2">ფასები</h2>
+          <p className="text-center text-muted-foreground mb-8">აირჩიეთ თქვენთვის შესაფერისი გეგმა</p>
 
-              {/* Professional */}
-              <Card className="hover:shadow-lg transition-shadow border-2 border-primary relative">
-                {professionalPricing.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
-                      ყველაზე პოპულარული
-                    </span>
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="text-2xl">{professionalPricing.name || "Professional"}</CardTitle>
-                  <CardDescription>პროფესიონალური ბიზნესისთვის</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold">{professionalPricing.price}</span>
-                    <span className="text-muted-foreground">/თვე</span>
-                  </div>
-                  <ul className="space-y-3 mb-6">
-                    {(professionalPricing.features || []).map((feature: string, index: number) => (
-                      <li key={index} className="flex items-center">
-                        <span className="text-green-600 mr-2">✓</span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    className="w-full min-h-[44px]"
-                    disabled={moduleSlug !== "brewery" && moduleSlug !== "hotel"}
-                    asChild={moduleSlug === "brewery" || moduleSlug === "hotel"}
-                  >
-                    {moduleSlug === "brewery" || moduleSlug === "hotel" ? (
-                      <Link href={getRegistrationUrl(moduleSlug, "PROFESSIONAL")}>არჩევა</Link>
-                    ) : (
-                      <span>არჩევა</span>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Starter */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-2xl">{pricing.starter.name}</CardTitle>
+                <CardDescription>დამწყებთათვის</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">{pricing.starter.price}</span>
+                  {pricing.starter.duration && (
+                    <span className="text-muted-foreground ml-2">/ {pricing.starter.duration}</span>
+                  )}
+                </div>
+                <ul className="space-y-3 mb-6">
+                  {pricing.starter.features.map((feature, index) => (
+                    <li key={index} className="flex items-center">
+                      <span className="text-green-600 mr-2">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className="w-full min-h-[44px]"
+                  variant="outline"
+                  disabled={moduleSlug !== "brewery" && moduleSlug !== "hotel"}
+                  asChild={moduleSlug === "brewery" || moduleSlug === "hotel"}
+                >
+                  {moduleSlug === "brewery" || moduleSlug === "hotel" ? (
+                    <Link href={getRegistrationUrl(moduleSlug, "STARTER")}>დაწყება</Link>
+                  ) : (
+                    <span>დაწყება</span>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
 
-              {/* Enterprise */}
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-2xl">{enterprisePricing.name || "Enterprise"}</CardTitle>
-                  <CardDescription>დიდი ბიზნესისთვის</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold">{enterprisePricing.price}</span>
-                    <span className="text-muted-foreground">/თვე</span>
-                  </div>
-                  <ul className="space-y-3 mb-6">
-                    {(enterprisePricing.features || []).map((feature: string, index: number) => (
-                      <li key={index} className="flex items-center">
-                        <span className="text-green-600 mr-2">✓</span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    className="w-full min-h-[44px]"
-                    variant="outline"
-                    disabled={moduleSlug !== "brewery" && moduleSlug !== "hotel"}
-                    asChild={moduleSlug === "brewery" || moduleSlug === "hotel"}
-                  >
-                    {moduleSlug === "brewery" || moduleSlug === "hotel" ? (
-                      <Link href={getRegistrationUrl(moduleSlug, "ENTERPRISE")}>არჩევა</Link>
-                    ) : (
-                      <span>არჩევა</span>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+            {/* Professional */}
+            <Card className="hover:shadow-lg transition-shadow border-2 border-primary relative">
+              {pricing.professional.popular && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
+                    ყველაზე პოპულარული
+                  </span>
+                </div>
+              )}
+              <CardHeader>
+                <CardTitle className="text-2xl">{pricing.professional.name}</CardTitle>
+                <CardDescription>პროფესიონალური ბიზნესისთვის</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">{pricing.professional.price}</span>
+                  <span className="text-muted-foreground">/თვე</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  {pricing.professional.features.map((feature, index) => (
+                    <li key={index} className="flex items-center">
+                      <span className="text-green-600 mr-2">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className="w-full min-h-[44px]"
+                  disabled={moduleSlug !== "brewery" && moduleSlug !== "hotel"}
+                  asChild={moduleSlug === "brewery" || moduleSlug === "hotel"}
+                >
+                  {moduleSlug === "brewery" || moduleSlug === "hotel" ? (
+                    <Link href={getRegistrationUrl(moduleSlug, "PROFESSIONAL")}>არჩევა</Link>
+                  ) : (
+                    <span>არჩევა</span>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Enterprise */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-2xl">{pricing.enterprise.name}</CardTitle>
+                <CardDescription>დიდი ბიზნესისთვის</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">{pricing.enterprise.price}</span>
+                  <span className="text-muted-foreground">/თვე</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  {pricing.enterprise.features.map((feature, index) => (
+                    <li key={index} className="flex items-center">
+                      <span className="text-green-600 mr-2">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className="w-full min-h-[44px]"
+                  variant="outline"
+                  disabled={moduleSlug !== "brewery" && moduleSlug !== "hotel"}
+                  asChild={moduleSlug === "brewery" || moduleSlug === "hotel"}
+                >
+                  {moduleSlug === "brewery" || moduleSlug === "hotel" ? (
+                    <Link href={getRegistrationUrl(moduleSlug, "ENTERPRISE")}>არჩევა</Link>
+                  ) : (
+                    <span>არჩევა</span>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </section>
 
         {/* FAQ Section */}
@@ -323,7 +428,7 @@ export default function ModulePricingPage({ params }: { params: { module: string
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-8">ხშირად დასმული კითხვები</h2>
             <div className="space-y-4">
-              {(defaultData?.faq || []).map((item, index) => (
+              {faq.map((item, index) => (
                 <Card key={index}>
                   <CardHeader>
                     <CardTitle className="text-lg">{item.question}</CardTitle>
