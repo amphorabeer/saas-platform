@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-
 import { getServerSession } from 'next-auth'
-
+import { prisma } from '@/lib/prisma'
 import { authOptions } from './[...nextauth]'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -22,15 +21,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.json({ status: 'trial' })
     }
     
-    const { PrismaClient } = require('@prisma/client')
-    const prisma = new PrismaClient()
-    
     const organization = await prisma.organization.findFirst({
       where: { tenantId },
       include: { subscription: true }
     })
-    
-    await prisma.$disconnect()
     
     const status = organization?.subscription?.status?.toLowerCase() || 'trial'
     
@@ -42,6 +36,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.json({ status: 'trial' })
   }
 }
-
-
-
