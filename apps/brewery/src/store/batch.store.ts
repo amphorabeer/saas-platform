@@ -1,6 +1,5 @@
-// @ts-nocheck
 import { create } from 'zustand'
-type BatchStatus = 'PLANNED' | 'BREWING' | 'FERMENTING' | 'CONDITIONING' | 'READY' | 'PACKAGING' | 'COMPLETED' | 'CANCELLED'
+import { BatchStatus } from './types'
 import { apiClient, ApiError, BatchListItem, BatchDetail, CreateBatchInput } from '@/lib/api-client'
 import { BatchState, LoadingState, PendingOperation } from './types'
 import { useUIStore } from './ui.store'
@@ -396,12 +395,3 @@ export const useBatchStore = create<BatchState & BatchActions>((set, get) => ({
     set(initialState)
   },
 }))
-
-
-
-
-
-
-
-
-

@@ -1,9 +1,9 @@
 // /api/inventory/deduct/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { withPermission, RouteContext } from '@/lib/api-middleware'
+import { withTenant, RouteContext } from '@/lib/api-middleware'
 
-export const POST = withPermission('inventory:write')(async (
+export const POST = withTenant(async (
   request: NextRequest,
   ctx: RouteContext
 ) => {

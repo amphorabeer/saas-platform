@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { create } from 'zustand'
 import { apiClient, InventoryItem, LedgerEntry } from '@/lib/api-client'
 import { InventoryState, LoadingState } from './types'
@@ -324,12 +323,3 @@ export const useInventoryStore = create<InventoryState & InventoryActions>((set,
     }
   },
 }))
-
-
-
-
-
-
-
-
-

@@ -1,9 +1,9 @@
 // /api/inventory/[id]/ledger/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { withPermission, RouteContext } from '@/lib/api-middleware'
+import { withTenant, RouteContext } from '@/lib/api-middleware'
 
-export const GET = withPermission('inventory:read')(async (
+export const GET = withTenant(async (
   request: NextRequest,
   ctx: RouteContext
 ) => {
@@ -83,7 +83,7 @@ export const GET = withPermission('inventory:read')(async (
 })
 
 // POST - Add manual ledger entry
-export const POST = withPermission('inventory:write')(async (
+export const POST = withTenant(async (
   request: NextRequest,
   ctx: RouteContext
 ) => {
