@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import prisma from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
 
 // Force dynamic - არ დაკეშოს
 export const dynamic = 'force-dynamic';
+
+const prisma = new PrismaClient();
 
 export async function GET() {
   try {
