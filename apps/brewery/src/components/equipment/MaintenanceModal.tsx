@@ -1,123 +1,117 @@
 'use client'
 
-
-
-import { useState } from 'react'
-
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui'
-
 import { formatDate } from '@/lib/utils'
+import { maintenanceTypeConfig, mockSpareParts, type MaintenanceType, type Priority } from '@/data/equipmentData'
 
-import { maintenanceTypeConfig, mockTesters, mockSpareParts, type MaintenanceType, type Priority } from '@/data/equipmentData'
-
-
-
-interface MaintenanceModalProps {
-
-  isOpen: boolean
-
-  onClose: () => void
-
-  onSave: (maintenanceData: any) => void
-
-  equipmentId?: string
-
-  equipmentName?: string
-
+interface User {
+  id: string
+  name: string
+  email: string
+  role?: string
 }
 
-
+interface MaintenanceModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSave: (maintenanceData: any) => void
+  equipmentId?: string
+  equipmentName?: string
+}
 
 export function MaintenanceModal({ isOpen, onClose, onSave, equipmentId, equipmentName }: MaintenanceModalProps) {
-
   const [maintenanceType, setMaintenanceType] = useState<MaintenanceType | ''>('')
-
   const [status, setStatus] = useState<'scheduled' | 'completed'>('scheduled')
-
   const [scheduledDate, setScheduledDate] = useState<string>(new Date().toISOString().split('T')[0])
-
   const [completedDate, setCompletedDate] = useState<string>(new Date().toISOString().split('T')[0])
-
   const [duration, setDuration] = useState<string>('')
-
   const [performedBy, setPerformedBy] = useState<string>('')
-
   const [cost, setCost] = useState<string>('')
-
   const [partsUsed, setPartsUsed] = useState<string[]>([])
-
   const [priority, setPriority] = useState<Priority>('medium')
-
   const [description, setDescription] = useState<string>('')
+  const [users, setUsers] = useState<User[]>([])
+  const [equipmentList, setEquipmentList] = useState<{id: string, name: string}[]>([])
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>(equipmentId || '')
+  const [selectedEquipmentName, setSelectedEquipmentName] = useState<string>(equipmentName || '')
 
+  // Fetch users and equipment from API
+  useEffect(() => {
+    if (isOpen) {
+      // Fetch users
+      fetch('/api/users')
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+          const userList = data.users || data || []
+          setUsers(userList)
+        })
+        .catch(err => {
+          console.log('[MaintenanceModal] Could not fetch users:', err)
+          setUsers([])
+        })
 
+      // Fetch equipment
+      fetch('/api/equipment')
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+          const eqList = data.equipment || data || []
+          setEquipmentList(eqList)
+        })
+        .catch(err => {
+          console.log('[MaintenanceModal] Could not fetch equipment:', err)
+          setEquipmentList([])
+        })
+
+      // Set initial equipment if provided
+      if (equipmentId) {
+        setSelectedEquipmentId(equipmentId)
+        setSelectedEquipmentName(equipmentName || '')
+      }
+    }
+  }, [isOpen, equipmentId, equipmentName])
 
   if (!isOpen) return null
 
 
 
   const handleSubmit = (e: React.FormEvent) => {
-
     e.preventDefault()
-
     if (!maintenanceType) return
-
-
+    if (!selectedEquipmentId) {
+      alert('აირჩიეთ აღჭურვილობა')
+      return
+    }
 
     onSave({
-
-      equipmentId,
-
-      equipmentName,
-
+      equipmentId: selectedEquipmentId,
+      equipmentName: selectedEquipmentName,
       type: maintenanceType,
-
       status,
-
       scheduledDate: new Date(scheduledDate),
-
       completedDate: status === 'completed' ? new Date(completedDate) : undefined,
-
       duration: duration ? parseInt(duration) : undefined,
-
       performedBy: performedBy || undefined,
-
       cost: cost ? parseFloat(cost) : undefined,
-
       partsUsed: partsUsed.length > 0 ? partsUsed : undefined,
-
       priority,
-
       description: description || undefined,
-
     })
 
-
-
     // Reset form
-
     setMaintenanceType('')
-
     setStatus('scheduled')
-
     setScheduledDate(new Date().toISOString().split('T')[0])
-
     setCompletedDate(new Date().toISOString().split('T')[0])
-
     setDuration('')
-
     setPerformedBy('')
-
     setCost('')
-
     setPartsUsed([])
-
     setPriority('medium')
-
     setDescription('')
-
+    setSelectedEquipmentId('')
+    setSelectedEquipmentName('')
     onClose()
-
   }
 
 
@@ -162,7 +156,27 @@ export function MaintenanceModal({ isOpen, onClose, onSave, equipmentId, equipme
 
           )}
 
-
+          {/* Equipment Selection - show if not pre-selected */}
+          {!equipmentId && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">აღჭურვილობა *</label>
+              <select
+                value={selectedEquipmentId}
+                onChange={(e) => {
+                  const eq = equipmentList.find(eq => eq.id === e.target.value)
+                  setSelectedEquipmentId(e.target.value)
+                  setSelectedEquipmentName(eq?.name || '')
+                }}
+                className="w-full px-4 py-2 bg-bg-card border border-border rounded-lg text-sm"
+                required
+              >
+                <option value="">აირჩიეთ აღჭურვილობა</option>
+                {equipmentList.map(eq => (
+                  <option key={eq.id} value={eq.id}>{eq.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Maintenance Type */}
 
@@ -405,17 +419,11 @@ export function MaintenanceModal({ isOpen, onClose, onSave, equipmentId, equipme
                   >
 
                     <option value="">აირჩიეთ</option>
-
-                    {mockTesters.map(tester => (
-
-                      <option key={tester.id} value={tester.name}>
-
-                        {tester.name} - {tester.role}
-
+                    {users.map(user => (
+                      <option key={user.id} value={user.name || user.email}>
+                        {user.name || user.email}
                       </option>
-
                     ))}
-
                   </select>
 
                 </div>
@@ -547,4 +555,3 @@ export function MaintenanceModal({ isOpen, onClose, onSave, equipmentId, equipme
   )
 
 }
-

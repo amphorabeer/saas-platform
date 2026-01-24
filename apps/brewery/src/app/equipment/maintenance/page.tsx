@@ -1,20 +1,20 @@
 'use client'
 
-
-
-import { useState } from 'react'
-
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-
 import { DashboardLayout } from '@/components/layout'
-
 import { Card, CardHeader, CardBody, Button } from '@/components/ui'
-
 import { MaintenanceModal } from '@/components/equipment'
-
-import { mockMaintenanceRecords, mockEquipment, maintenanceTypeConfig, type MaintenanceRecord, type Priority } from '@/data/equipmentData'
-
+import { maintenanceTypeConfig, type MaintenanceRecord, type Priority } from '@/data/equipmentData'
 import { formatDate } from '@/lib/utils'
+
+// Equipment type for API response
+interface Equipment {
+  id: string
+  name: string
+  type: string
+  status: string
+}
 
 
 
@@ -59,18 +59,136 @@ const getStatusBadge = (status: MaintenanceRecord['status']) => {
 
 
 export default function MaintenancePage() {
-
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false)
-
-  const [records, setRecords] = useState<MaintenanceRecord[]>(mockMaintenanceRecords)
-
+  const [showCompleteModal, setShowCompleteModal] = useState(false)
+  const [selectedRecord, setSelectedRecord] = useState<MaintenanceRecord | null>(null)
+  const [records, setRecords] = useState<MaintenanceRecord[]>([])
+  const [equipment, setEquipment] = useState<Equipment[]>([])
+  const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
-
   const [filterEquipment, setFilterEquipment] = useState<string>('all')
-
   const [filterType, setFilterType] = useState<string>('all')
 
+  // Fetch equipment and maintenance records from API
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        // Fetch equipment
+        const eqResponse = await fetch('/api/equipment')
+        if (eqResponse.ok) {
+          const eqData = await eqResponse.json()
+          const equipmentList = eqData.equipment || eqData || []
+          setEquipment(equipmentList)
 
+          // Fetch maintenance logs for each equipment
+          const allRecords: MaintenanceRecord[] = []
+          for (const eq of equipmentList) {
+            try {
+              const maintResponse = await fetch(`/api/equipment/${eq.id}/maintenance`)
+              if (maintResponse.ok) {
+                const logs = await maintResponse.json()
+                const logsArray = Array.isArray(logs) ? logs : []
+                
+                for (const log of logsArray) {
+                  // Determine status based on dates
+                  let status: 'scheduled' | 'completed' | 'overdue' = 'scheduled'
+                  if (log.status === 'completed' || log.completedDate) {
+                    status = 'completed'
+                  } else if (log.scheduledDate && new Date(log.scheduledDate) < new Date()) {
+                    status = 'overdue'
+                  }
+
+                  allRecords.push({
+                    id: log.id,
+                    equipmentId: eq.id,
+                    equipmentName: eq.name,
+                    type: log.type?.toLowerCase() || 'other',
+                    status,
+                    scheduledDate: new Date(log.scheduledDate || log.createdAt),
+                    completedDate: log.completedDate ? new Date(log.completedDate) : undefined,
+                    duration: log.duration,
+                    performedBy: log.performedBy,
+                    cost: log.cost,
+                    partsUsed: log.partsUsed || [],
+                    description: log.description,
+                    priority: (log.priority?.toLowerCase() || 'medium') as Priority,
+                  })
+                }
+              }
+            } catch (err) {
+              console.log(`[MaintenancePage] No maintenance logs for ${eq.name}`)
+            }
+          }
+          setRecords(allRecords)
+          console.log(`[MaintenancePage] Loaded ${allRecords.length} maintenance records from API`)
+        }
+      } catch (error) {
+        console.error('[MaintenancePage] Error fetching data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  // Open complete modal for a maintenance record
+  const handleOpenCompleteModal = (record: MaintenanceRecord) => {
+    setSelectedRecord(record)
+    setShowCompleteModal(true)
+  }
+
+  // Handle completing a maintenance record (called from modal)
+  const handleCompleteRecord = async (completionData: {
+    performedBy?: string
+    duration?: number
+    cost?: number
+    notes?: string
+  }) => {
+    if (!selectedRecord) return
+    
+    try {
+      // Call API to update maintenance record in database
+      const response = await fetch(`/api/equipment/${selectedRecord.equipmentId}/maintenance`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          maintenanceId: selectedRecord.id,
+          status: 'completed',
+          completedDate: new Date().toISOString(),
+          performedBy: completionData.performedBy,
+          duration: completionData.duration,
+          cost: completionData.cost,
+        }),
+      })
+
+      if (response.ok) {
+        // Update local state
+        setRecords(prevRecords => 
+          prevRecords.map(rec => 
+            rec.id === selectedRecord.id 
+              ? { 
+                  ...rec, 
+                  status: 'completed' as const, 
+                  completedDate: new Date(),
+                  performedBy: completionData.performedBy,
+                  duration: completionData.duration,
+                  cost: completionData.cost,
+                }
+              : rec
+          )
+        )
+        console.log(`[MaintenancePage] Marked record ${selectedRecord.id} as completed`)
+        setShowCompleteModal(false)
+        setSelectedRecord(null)
+      } else {
+        console.error('[MaintenancePage] Failed to update maintenance record')
+      }
+    } catch (error) {
+      console.error('[MaintenancePage] Error completing record:', error)
+    }
+  }
 
   const filteredRecords = records.filter(rec => {
 
@@ -142,7 +260,15 @@ export default function MaintenancePage() {
 
   }
 
-
+  if (loading) {
+    return (
+      <DashboardLayout title="📅 ტექ. მომსახურების გრაფიკი" breadcrumb="მთავარი / აღჭურვილობა / მოვლა">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-text-muted">იტვირთება...</div>
+        </div>
+      </DashboardLayout>
+    )
+  }
 
   return (
 
@@ -199,11 +325,8 @@ export default function MaintenancePage() {
           >
 
             <option value="all">ყველა აღჭურვილობა</option>
-
-            {mockEquipment.map(eq => (
-
+            {equipment.map(eq => (
               <option key={eq.id} value={eq.id}>{eq.name}</option>
-
             ))}
 
           </select>
@@ -338,8 +461,11 @@ export default function MaintenancePage() {
 
                     </div>
 
-                    <Button variant="secondary" size="sm">
-
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={() => handleOpenCompleteModal(rec)}
+                    >
                       შესრულება
 
                     </Button>
@@ -425,13 +551,13 @@ export default function MaintenancePage() {
                       <td className="py-3 px-4 text-sm">{getStatusBadge(rec.status)}</td>
 
                       <td className="py-3 px-4 text-sm">
-
-                        <Button variant="secondary" size="sm">
-
+                        <Button 
+                          variant="secondary" 
+                          size="sm"
+                          onClick={() => handleOpenCompleteModal(rec)}
+                        >
                           შესრულება
-
                         </Button>
-
                       </td>
 
                     </tr>
@@ -515,36 +641,188 @@ export default function MaintenancePage() {
 
 
       {/* Modals */}
-
       <MaintenanceModal
-
         isOpen={showMaintenanceModal}
-
         onClose={() => setShowMaintenanceModal(false)}
+        onSave={async (data) => {
+          try {
+            // Save to API
+            const response = await fetch(`/api/equipment/${data.equipmentId}/maintenance`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: data.type,
+                status: data.status || 'scheduled',
+                priority: data.priority || 'medium',
+                scheduledDate: data.scheduledDate,
+                completedDate: data.completedDate,
+                duration: data.duration,
+                performedBy: data.performedBy,
+                cost: data.cost,
+                partsUsed: data.partsUsed,
+                description: data.description,
+              }),
+            })
 
-        onSave={(data) => {
-
-          const newRecord: MaintenanceRecord = {
-
-            id: `maint-${Date.now()}`,
-
-            ...data,
-
-            status: data.status || 'scheduled',
-
-            priority: data.priority || 'medium',
-
+            if (response.ok) {
+              const savedRecord = await response.json()
+              // Find equipment name
+              const eq = equipment.find(e => e.id === data.equipmentId)
+              
+              const newRecord: MaintenanceRecord = {
+                id: savedRecord.id || `maint-${Date.now()}`,
+                equipmentId: data.equipmentId,
+                equipmentName: eq?.name || data.equipmentName,
+                type: data.type,
+                status: data.status || 'scheduled',
+                priority: data.priority || 'medium',
+                scheduledDate: new Date(data.scheduledDate),
+                completedDate: data.completedDate ? new Date(data.completedDate) : undefined,
+                duration: data.duration,
+                performedBy: data.performedBy,
+                cost: data.cost,
+                partsUsed: data.partsUsed,
+                description: data.description,
+              }
+              setRecords([...records, newRecord])
+              setShowMaintenanceModal(false)
+            } else {
+              console.error('[MaintenancePage] Failed to save maintenance record')
+            }
+          } catch (error) {
+            console.error('[MaintenancePage] Error saving maintenance:', error)
           }
-
-          setRecords([...records, newRecord])
-
         }}
-
       />
 
+      {/* Complete Maintenance Modal */}
+      {showCompleteModal && selectedRecord && (
+        <CompleteMaintenanceModal
+          isOpen={showCompleteModal}
+          onClose={() => {
+            setShowCompleteModal(false)
+            setSelectedRecord(null)
+          }}
+          record={selectedRecord}
+          onComplete={handleCompleteRecord}
+        />
+      )}
     </DashboardLayout>
-
   )
-
 }
 
+// Complete Maintenance Modal Component
+function CompleteMaintenanceModal({ 
+  isOpen, 
+  onClose, 
+  record, 
+  onComplete 
+}: { 
+  isOpen: boolean
+  onClose: () => void
+  record: MaintenanceRecord
+  onComplete: (data: { performedBy?: string; duration?: number; cost?: number; notes?: string }) => void
+}) {
+  const [performedBy, setPerformedBy] = useState('')
+  const [duration, setDuration] = useState('')
+  const [cost, setCost] = useState('')
+  const [notes, setNotes] = useState('')
+  const [users, setUsers] = useState<{id: string, name: string, email: string}[]>([])
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch('/api/users')
+        .then(res => res.ok ? res.json() : [])
+        .then(data => setUsers(data.users || data || []))
+        .catch(() => setUsers([]))
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onComplete({
+      performedBy: performedBy || undefined,
+      duration: duration ? parseInt(duration) : undefined,
+      cost: cost ? parseFloat(cost) : undefined,
+      notes: notes || undefined,
+    })
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-bg-secondary rounded-xl p-6 w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4">✅ მოვლის შესრულება</h2>
+        
+        <div className="mb-4 p-3 bg-bg-card rounded-lg">
+          <p className="text-sm text-text-muted">აღჭურვილობა:</p>
+          <p className="font-medium">{record.equipmentName}</p>
+          <p className="text-sm text-text-muted mt-2">მოვლის ტიპი:</p>
+          <p className="font-medium">{maintenanceTypeConfig[record.type]?.name || record.type}</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">შემსრულებელი</label>
+            <select
+              value={performedBy}
+              onChange={(e) => setPerformedBy(e.target.value)}
+              className="w-full px-4 py-2 bg-bg-card border border-border rounded-lg text-sm"
+            >
+              <option value="">აირჩიეთ</option>
+              {users.map(user => (
+                <option key={user.id} value={user.name || user.email}>
+                  {user.name || user.email}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">ხანგრძლივობა (წუთი)</label>
+            <input
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              className="w-full px-4 py-2 bg-bg-card border border-border rounded-lg text-sm"
+              placeholder="მაგ: 30"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">ხარჯი (₾)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={cost}
+              onChange={(e) => setCost(e.target.value)}
+              className="w-full px-4 py-2 bg-bg-card border border-border rounded-lg text-sm"
+              placeholder="მაგ: 50.00"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">შენიშვნა</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full px-4 py-2 bg-bg-card border border-border rounded-lg text-sm"
+              rows={3}
+              placeholder="დამატებითი ინფორმაცია..."
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
+              გაუქმება
+            </Button>
+            <Button type="submit" variant="primary" className="flex-1">
+              ✅ შესრულება
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}

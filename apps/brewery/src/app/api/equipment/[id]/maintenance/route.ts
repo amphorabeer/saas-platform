@@ -133,3 +133,63 @@ export const GET = withTenant(async (
     )
   }
 })
+
+// PATCH - Update maintenance log (mark as completed, etc.)
+export const PATCH = withTenant(async (
+  req: NextRequest,
+  ctx: RouteContext
+) => {
+  try {
+    const url = new URL(req.url)
+    const pathParts = url.pathname.split('/')
+    const equipmentId = pathParts[pathParts.length - 2]
+    
+    const body = await req.json()
+    const { maintenanceId, status, completedDate, performedBy, duration, cost } = body
+    
+    if (!maintenanceId) {
+      return NextResponse.json(
+        { error: 'Maintenance ID is required' },
+        { status: 400 }
+      )
+    }
+    
+    // Verify equipment belongs to tenant
+    const existing = await prisma.equipment.findFirst({
+      where: {
+        id: equipmentId,
+        tenantId: ctx.tenantId,
+      },
+    })
+    
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Equipment not found' },
+        { status: 404 }
+      )
+    }
+    
+    // Update the maintenance log
+    const updatedLog = await prisma.maintenanceLog.update({
+      where: { id: maintenanceId },
+      data: {
+        status: status || 'completed',
+        completedDate: completedDate ? new Date(completedDate) : new Date(),
+        performedBy: performedBy || null,
+        duration: duration ? parseInt(String(duration)) : null,
+        cost: cost ? parseFloat(String(cost)) : null,
+        updatedAt: new Date(),
+      }
+    })
+    
+    console.log(`[PATCH /api/equipment/:id/maintenance] Updated maintenance ${maintenanceId} to ${status}`)
+    
+    return NextResponse.json(updatedLog)
+  } catch (error) {
+    console.error('[PATCH /api/equipment/:id/maintenance] Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to update maintenance log' },
+      { status: 500 }
+    )
+  }
+})
