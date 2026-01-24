@@ -674,7 +674,7 @@ export default function InventoryPage() {
   const labelStats = {
     total: labels.reduce((sum, l) => sum + l.quantity, 0),
     types: labels.length,
-    lowStock: labels.filter(l => l.quantity < (l.minStock || 0)).length,
+    lowStock: labels.filter(l => l.quantity < l.minStock).length,
   }
   
   // Bottle stats (for when bottles tab is active)
@@ -1380,3 +1380,4 @@ export default function InventoryPage() {
   )
 
 }
+
