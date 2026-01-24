@@ -152,7 +152,7 @@ export default function RegisterPage() {
               <p className="text-lg font-semibold text-amber-400">{planNames[formData.plan as PlanType]}</p>
             </div>
             <Link 
-              href="/modules/brewery/pricing"
+              href="https://geobiz.app/modules/brewery/pricing"
               className="text-sm text-amber-400 hover:text-amber-300 underline"
             >
               შეცვლა
