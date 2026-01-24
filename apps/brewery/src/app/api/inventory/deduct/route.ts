@@ -1,10 +1,14 @@
 // /api/inventory/deduct/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { withPermission, RouteContext } from '@/lib/api-middleware'
 
-export async function POST(request: NextRequest) {
+export const POST = withPermission('inventory:write')(async (
+  request: NextRequest,
+  ctx: RouteContext
+) => {
   try {
-    const tenantId = request.headers.get('x-tenant-id') || 'tenant1'
+    const tenantId = ctx.tenantId
     const body = await request.json()
     
     const { category, type, quantity, itemId, batchId, notes } = body
@@ -161,4 +165,4 @@ export async function POST(request: NextRequest) {
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
-}
+})
