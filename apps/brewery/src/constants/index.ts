@@ -1,16 +1,29 @@
-export const NAV_ITEMS = [
-  { href: '/', label: 'დეშბორდი', icon: '📊' },
-  { href: '/production', label: 'წარმოება', icon: '🍺' },
-  // ფერმენტაცია წაშლილია - გადავიდა წარმოებაში ტაბად
-  { href: '/recipes', label: 'რეცეპტები', icon: '📋' },
-  { href: '/calendar', label: 'კალენდარი', icon: '📅' },
-  { href: '/inventory', label: 'მარაგები', icon: '📦' },
-  { href: '/sales', label: 'გაყიდვები', icon: '💰' },
-  { href: '/quality', label: 'ხარისხი', icon: '✅' },
-  { href: '/equipment', label: 'აღჭურვილობა', icon: '⚙️' },
-  { href: '/reports', label: 'რეპორტები', icon: '📈' },
-  { href: '/finances', label: 'ფინანსები', icon: '💵' },
-  { href: '/settings', label: 'პარამეტრები', icon: '🔧' },
+import { PlanFeatures } from '@/lib/plan-features';
+
+// Feature type for type safety
+type FeatureKey = keyof PlanFeatures['features'];
+
+interface NavItem {
+  href: string;
+  label: string;
+  icon: string;
+  requiredFeature?: FeatureKey; // რომელი feature უნდა ჰქონდეს
+  alwaysShow?: boolean; // ყოველთვის აჩვენოს (დეშბორდი, პარამეტრები)
+}
+
+export const NAV_ITEMS: NavItem[] = [
+  { href: '/', label: 'დეშბორდი', icon: '📊', alwaysShow: true },
+  { href: '/production', label: 'წარმოება', icon: '🍺', requiredFeature: 'production' },
+  { href: '/recipes', label: 'რეცეპტები', icon: '📋', requiredFeature: 'production' },
+  { href: '/calendar', label: 'კალენდარი', icon: '📅', alwaysShow: true },
+  { href: '/inventory', label: 'მარაგები', icon: '📦', requiredFeature: 'rawMaterials' },
+  { href: '/sales', label: 'გაყიდვები', icon: '💰', requiredFeature: 'finances' },
+  { href: '/quality', label: 'ხარისხი', icon: '✅', alwaysShow: true },
+  { href: '/equipment', label: 'აღჭურვილობა', icon: '⚙️', alwaysShow: true },
+  { href: '/equipment/cip', label: 'CIP რეცხვა', icon: '🧹', requiredFeature: 'cip' },
+  { href: '/reports', label: 'რეპორტები', icon: '📈', requiredFeature: 'analytics' },
+  { href: '/finances', label: 'ფინანსები', icon: '💵', requiredFeature: 'finances' },
+  { href: '/settings', label: 'პარამეტრები', icon: '🔧', alwaysShow: true },
 ]
 
 export const BATCH_STATUS = {
