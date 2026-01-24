@@ -1,0 +1,105 @@
+'use client';
+
+import { PlanType, PLAN_NAMES } from '@/lib/plan-features';
+
+interface UpgradeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  feature: string;
+  requiredPlan: PlanType;
+  currentPlan: PlanType | null;
+}
+
+export function UpgradeModal({ isOpen, onClose, feature, requiredPlan, currentPlan }: UpgradeModalProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+        <div className="text-center">
+          <div className="text-5xl mb-4">🔒</div>
+          <h2 className="text-xl font-bold text-white mb-2">ფუნქცია შეზღუდულია</h2>
+          <p className="text-slate-400 mb-4">
+            <span className="text-amber-400 font-semibold">{feature}</span> ხელმისაწვდომია{' '}
+            <span className="text-amber-400 font-semibold">{PLAN_NAMES[requiredPlan]}</span> პაკეტიდან
+          </p>
+          
+          {currentPlan && (
+            <p className="text-sm text-slate-500 mb-6">
+              თქვენი ამჟამინდელი პაკეტი: <span className="text-slate-300">{PLAN_NAMES[currentPlan]}</span>
+            </p>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition"
+            >
+              დახურვა
+            </button>
+            <a
+              href="https://geobiz.app/modules/brewery/pricing"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition text-center font-medium"
+            >
+              განახლება
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Simple locked feature badge
+export function LockedBadge({ plan }: { plan: PlanType }) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-700 text-slate-400 text-xs rounded-full">
+      🔒 {PLAN_NAMES[plan]}
+    </span>
+  );
+}
+
+// Feature gate wrapper component
+interface FeatureGateProps {
+  children: React.ReactNode;
+  feature: string;
+  hasAccess: boolean;
+  requiredPlan: PlanType;
+  currentPlan: PlanType | null;
+  fallback?: React.ReactNode;
+}
+
+export function FeatureGate({ children, feature, hasAccess, requiredPlan, currentPlan, fallback }: FeatureGateProps) {
+  if (hasAccess) {
+    return <>{children}</>;
+  }
+
+  if (fallback) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <div className="relative">
+      <div className="opacity-50 pointer-events-none blur-[1px]">
+        {children}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 rounded-lg">
+        <div className="text-center p-4">
+          <div className="text-3xl mb-2">🔒</div>
+          <p className="text-sm text-slate-300 mb-2">{feature}</p>
+          <p className="text-xs text-amber-400">
+            საჭიროა {PLAN_NAMES[requiredPlan]} პაკეტი
+          </p>
+          <a
+            href="https://geobiz.app/modules/brewery/pricing"
+            className="mt-2 inline-block text-xs text-amber-400 hover:text-amber-300 underline"
+          >
+            განახლება →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
