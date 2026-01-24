@@ -20,7 +20,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/sales', label: 'გაყიდვები', icon: '💰', requiredFeature: 'finances' },
   { href: '/quality', label: 'ხარისხი', icon: '✅', alwaysShow: true },
   { href: '/equipment', label: 'აღჭურვილობა', icon: '⚙️', alwaysShow: true },
-  { href: '/equipment/cip', label: 'CIP რეცხვა', icon: '🧹', requiredFeature: 'cip' },
   { href: '/reports', label: 'რეპორტები', icon: '📈', requiredFeature: 'analytics' },
   { href: '/finances', label: 'ფინანსები', icon: '💵', requiredFeature: 'finances' },
   { href: '/settings', label: 'პარამეტრები', icon: '🔧', alwaysShow: true },
