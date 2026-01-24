@@ -6,13 +6,14 @@ import prisma from '@/lib/prisma';
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
+    const user = session?.user as { tenantId?: string } | undefined;
     
-    if (!session?.user?.tenantId) {
+    if (!user?.tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const tenant = await prisma.tenant.findUnique({
-      where: { id: session.user.tenantId },
+      where: { id: user.tenantId },
       select: {
         id: true,
         name: true,
