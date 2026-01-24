@@ -19,6 +19,13 @@ function getHotelPool() {
   return new Pool({ connectionString: hotelDbUrl, ssl: { rejectUnauthorized: false } })
 }
 
+// Brewery database pool for syncing
+function getBreweryPool() {
+  const breweryDbUrl = process.env.BREWERY_DATABASE_URL
+  if (!breweryDbUrl) return null
+  return new Pool({ connectionString: breweryDbUrl, ssl: { rejectUnauthorized: false } })
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -219,6 +226,58 @@ export default async function handler(
             console.error('[Hotel DB Sync] Error:', syncError)
           } finally {
             await pool.end()
+          }
+        }
+      }
+
+      // 5. SYNC to Brewery database if this is a brewery organization
+      const isBreweryOrg = modules?.includes('BREWERY') || orgForSync?.tenantCode?.startsWith('BREWERY-')
+      const breweryTenantId = orgForSync?.tenantCode?.startsWith('BREWERY-') 
+        ? orgForSync.tenantCode.replace('BREWERY-', '') 
+        : null
+      
+      if (isBreweryOrg && breweryTenantId && (validStatus || newPlan)) {
+        const breweryPool = getBreweryPool()
+        if (breweryPool) {
+          try {
+            // Find tenant in Brewery DB by id
+            const tenantResult = await breweryPool.query(
+              'SELECT id FROM "Tenant" WHERE id = $1',
+              [breweryTenantId]
+            )
+            
+            if (tenantResult.rows.length > 0) {
+              // Update tenant's plan and isActive status
+              const updates: string[] = []
+              const values: any[] = []
+              let paramIndex = 1
+              
+              if (newPlan) {
+                updates.push(`"plan" = $${paramIndex++}`)
+                values.push(newPlan)
+              }
+              if (validStatus) {
+                // Convert status to isActive boolean
+                const isActive = validStatus === 'ACTIVE'
+                updates.push(`"isActive" = $${paramIndex++}`)
+                values.push(isActive)
+              }
+              
+              if (updates.length > 0) {
+                values.push(breweryTenantId)
+                await breweryPool.query(
+                  `UPDATE "Tenant" SET ${updates.join(', ')}, "updatedAt" = NOW() WHERE id = $${paramIndex}`,
+                  values
+                )
+                console.log(`[Brewery DB Sync] Updated tenant for tenantId=${breweryTenantId}`, { plan: newPlan, status: validStatus })
+              }
+            } else {
+              console.log(`[Brewery DB Sync] Tenant not found for tenantId=${breweryTenantId}`)
+            }
+          } catch (syncError) {
+            console.error('[Brewery DB Sync] Error:', syncError)
+          } finally {
+            await breweryPool.end()
           }
         }
       }
