@@ -1,6 +1,6 @@
-// @ts-nocheck
-type BatchStatus = 'PLANNED' | 'BREWING' | 'FERMENTING' | 'CONDITIONING' | 'READY' | 'PACKAGING' | 'COMPLETED' | 'CANCELLED'
-import { ApiError, BatchListItem, BatchDetail, InventoryItem } from '@/lib/api-client'
+// Re-export BatchStatus from centralData (lowercase values)
+export type { BatchStatus } from '@/data/centralData'
+import { ApiError, BatchListItem, BatchDetail, InventoryItem, LedgerEntry } from '@/lib/api-client'
 
 // ============================================
 // Common Types
@@ -152,3 +152,61 @@ export const INGREDIENT_TYPE_LABELS: Record<string, string> = {
   adjunct: 'დანამატი',
   water: 'წყლის ქიმია',
 }
+
+// ============================================
+// Re-export types from centralData for breweryStore
+// ============================================
+export type {
+  Batch,
+  Tank,
+  GravityReading,
+  CalendarEvent,
+  TimelineEvent,
+  BatchIngredient,
+  TimelineEventType,
+  TankCapability,
+  Order,
+  Keg,
+  Ingredient,
+} from '@/data/centralData'
+
+// ============================================
+// Types not in centralData - define here
+// ============================================
+
+export interface PackagingRecord {
+  id: string
+  batchId: string
+  batchNumber: string
+  date: Date
+  packagingType: 'keg' | 'bottle' | 'can'
+  size: number
+  quantity: number
+  totalVolume: number
+  performedBy: string
+  notes?: string
+}
+
+export interface Bottle {
+  id: string
+  size: number // ml
+  quantity: number
+  batchId?: string
+  batchNumber?: string
+  filledDate?: Date
+  bestBefore?: Date
+  labelId?: string
+}
+
+export interface Label {
+  id: string
+  name: string
+  recipeId?: string
+  recipeName?: string
+  quantity: number
+  design?: string
+}
+
+// Calendar specific types
+export type EventType = 'brewing' | 'fermentation' | 'conditioning' | 'packaging' | 'delivery' | 'maintenance' | 'other'
+export type EventStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
