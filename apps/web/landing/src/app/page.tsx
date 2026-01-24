@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas-platform/ui";
 import { Navigation } from "../components/navigation";
@@ -103,98 +103,9 @@ function AnimatedCard({ children, index }: { children: React.ReactNode; index: n
 }
 
 export default function Home() {
-  const [modules, setModules] = useState(defaultModules);
-  const [heroContent, setHeroContent] = useState(defaultHeroContent);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  const [dataSource, setDataSource] = useState<"api" | "localStorage" | "defaults">("defaults");
-
-  // Load modules from API on mount (once only)
-  useEffect(() => {
-    async function loadModules() {
-      try {
-        const response = await fetch('/api/modules')
-        if (response.ok) {
-          const data = await response.json()
-          if (data.modules && Array.isArray(data.modules)) {
-            const enabledModules = data.modules
-              .filter((m: any) => m && m.isEnabled !== false)
-              .map((m: any) => ({
-                name: m.name || "",
-                slug: m.id || m.slug || "",
-                description: m.description || "",
-                icon: m.icon || "📦",
-              }))
-              .filter((m: any) => m.name && m.slug);
-            
-            if (enabledModules.length > 0) {
-              setModules(enabledModules);
-              setDataSource("api");
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load modules:', error)
-      }
-    }
-    
-    // Load only once on mount
-    loadModules()
-  }, [])
-
-  // Check localStorage for saved configuration (for same-tab updates)
-  const checkStorage = useCallback(() => {
-    try {
-      if (typeof window === "undefined") return;
-
-      // Load modules from localStorage
-      const savedModules = localStorage.getItem("landing-modules");
-      if (savedModules) {
-        try {
-          const parsedModules = JSON.parse(savedModules);
-          
-          if (Array.isArray(parsedModules)) {
-            const enabledModules = parsedModules
-              .filter((m: any) => m && m.enabled !== false)
-              .map((m: any) => ({
-                name: m.name || "",
-                slug: m.id || m.slug || "",
-                description: m.description || "",
-                icon: m.icon || "📦",
-              }))
-              .filter((m: any) => m.name && m.slug);
-            
-            if (enabledModules.length > 0) {
-              setModules(enabledModules);
-              setDataSource("localStorage");
-            }
-          }
-        } catch (error) {
-          console.error("Error parsing saved modules:", error);
-        }
-      }
-
-      // Load hero content from localStorage
-      const savedHero = localStorage.getItem("landing-hero");
-      if (savedHero) {
-        try {
-          const parsedHero = JSON.parse(savedHero);
-          if (parsedHero && typeof parsedHero === "object") {
-            setHeroContent(parsedHero);
-          }
-        } catch (error) {
-          console.error("Error parsing saved hero content:", error);
-        }
-      }
-
-      // Load last updated timestamp
-      const savedLastUpdated = localStorage.getItem("landing-last-updated");
-      if (savedLastUpdated) {
-        setLastUpdated(savedLastUpdated);
-      }
-    } catch (error) {
-      console.error("Error in checkStorage:", error);
-    }
-  }, []);
+  // Hardcoded modules - არ იძახებს API-ს
+  const modules = defaultModules;
+  const heroContent = defaultHeroContent;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
