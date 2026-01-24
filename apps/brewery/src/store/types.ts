@@ -204,6 +204,7 @@ export interface Label {
   recipeId?: string
   recipeName?: string
   quantity: number
+  minStock?: number
   design?: string
 }
 
