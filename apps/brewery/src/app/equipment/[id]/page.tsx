@@ -103,6 +103,8 @@ export default function EquipmentDetailPage() {
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false)
   const [showProblemModal, setShowProblemModal] = useState(false)
   const [showCIPModal, setShowCIPModal] = useState(false)
+  const [showCompleteModal, setShowCompleteModal] = useState(false)
+  const [selectedMaintenanceLog, setSelectedMaintenanceLog] = useState<any>(null)
 
   // Fetch equipment from API
   const fetchEquipment = async () => {
@@ -127,6 +129,39 @@ export default function EquipmentDetailPage() {
       fetchEquipment()
     }
   }, [equipmentId])
+
+  // Handle completing a maintenance log
+  const handleCompleteMaintenance = async (completionData: {
+    performedBy?: string
+    duration?: number
+    cost?: number
+  }) => {
+    if (!selectedMaintenanceLog || !equipment) return
+    
+    try {
+      const response = await fetch(`/api/equipment/${equipment.id}/maintenance`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          maintenanceId: selectedMaintenanceLog.id,
+          status: 'completed',
+          completedDate: new Date().toISOString(),
+          performedBy: completionData.performedBy,
+          duration: completionData.duration,
+          cost: completionData.cost,
+        }),
+      })
+
+      if (response.ok) {
+        // Refresh equipment data
+        fetchEquipment()
+        setShowCompleteModal(false)
+        setSelectedMaintenanceLog(null)
+      }
+    } catch (error) {
+      console.error('Error completing maintenance:', error)
+    }
+  }
 
   // Handlers
   const handleUpdate = async (id: string, updates: Partial<Equipment>) => {
@@ -418,9 +453,20 @@ export default function EquipmentDetailPage() {
                         <span className="text-slate-400 text-sm">
                           {formatDate(log.completedDate || log.scheduledDate)}
                         </span>
-                        <span className={log.status === 'completed' ? 'text-green-400' : 'text-amber-400'}>
-                          {log.status === 'completed' ? '✅' : '⏳'}
-                        </span>
+                        {log.status === 'completed' ? (
+                          <span className="text-green-400">✅</span>
+                        ) : (
+                          <Button 
+                            variant="secondary" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedMaintenanceLog(log)
+                              setShowCompleteModal(true)
+                            }}
+                          >
+                            შესრულება
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -579,6 +625,125 @@ export default function EquipmentDetailPage() {
           }}
         />
       )}
+
+      {/* Complete Maintenance Modal */}
+      {showCompleteModal && selectedMaintenanceLog && (
+        <CompleteMaintenanceModal
+          isOpen={showCompleteModal}
+          onClose={() => {
+            setShowCompleteModal(false)
+            setSelectedMaintenanceLog(null)
+          }}
+          log={selectedMaintenanceLog}
+          equipmentName={equipment.name}
+          onComplete={handleCompleteMaintenance}
+        />
+      )}
     </DashboardLayout>
+  )
+}
+
+// Complete Maintenance Modal Component
+function CompleteMaintenanceModal({ 
+  isOpen, 
+  onClose, 
+  log,
+  equipmentName,
+  onComplete 
+}: { 
+  isOpen: boolean
+  onClose: () => void
+  log: any
+  equipmentName: string
+  onComplete: (data: { performedBy?: string; duration?: number; cost?: number }) => void
+}) {
+  const [performedBy, setPerformedBy] = useState('')
+  const [duration, setDuration] = useState('')
+  const [cost, setCost] = useState('')
+  const [users, setUsers] = useState<{id: string, name: string, email: string}[]>([])
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch('/api/users')
+        .then(res => res.ok ? res.json() : [])
+        .then(data => setUsers(data.users || data || []))
+        .catch(() => setUsers([]))
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onComplete({
+      performedBy: performedBy || undefined,
+      duration: duration ? parseInt(duration) : undefined,
+      cost: cost ? parseFloat(cost) : undefined,
+    })
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-slate-800 rounded-xl p-6 w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4">✅ მოვლის შესრულება</h2>
+        
+        <div className="mb-4 p-3 bg-slate-700/50 rounded-lg">
+          <p className="text-sm text-slate-400">აღჭურვილობა:</p>
+          <p className="font-medium">{equipmentName}</p>
+          <p className="text-sm text-slate-400 mt-2">მოვლის ტიპი:</p>
+          <p className="font-medium">{log.type}</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">შემსრულებელი</label>
+            <select
+              value={performedBy}
+              onChange={(e) => setPerformedBy(e.target.value)}
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-sm"
+            >
+              <option value="">აირჩიეთ</option>
+              {users.map(user => (
+                <option key={user.id} value={user.name || user.email}>
+                  {user.name || user.email}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">ხანგრძლივობა (წუთი)</label>
+            <input
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-sm"
+              placeholder="მაგ: 30"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">ხარჯი (₾)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={cost}
+              onChange={(e) => setCost(e.target.value)}
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-sm"
+              placeholder="მაგ: 50.00"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
+              გაუქმება
+            </Button>
+            <Button type="submit" variant="primary" className="flex-1">
+              ✅ შესრულება
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }

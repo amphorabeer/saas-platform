@@ -2434,6 +2434,3 @@ export default function IngredientDetailPage() {
     </DashboardLayout>
   )
 }
-
-
-
