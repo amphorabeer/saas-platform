@@ -75,10 +75,10 @@ export default async function handler(
       const { name, email, slug, plan, status, modules } = body
       console.log('[Organizations API] PUT /api/organizations/' + id, { body, status, plan })
 
-      // Get tenantCode for syncing to Hotel database
+      // Get tenantCode and tenantId for syncing
       const orgForSync = await prisma.organization.findUnique({
         where: { id },
-        select: { hotelCode: true, tenantCode: true }
+        select: { hotelCode: true, tenantCode: true, tenantId: true }
       })
       // Extract hotel code from tenantCode (HOTEL-2099 -> 2099)
       const hotelCodeForSync = orgForSync?.tenantCode?.startsWith('HOTEL-') 
@@ -231,10 +231,9 @@ export default async function handler(
       }
 
       // 5. SYNC to Brewery database if this is a brewery organization
-      const isBreweryOrg = modules?.includes('BREWERY') || orgForSync?.tenantCode?.startsWith('BREWERY-')
-      const breweryTenantId = orgForSync?.tenantCode?.startsWith('BREWERY-') 
-        ? orgForSync.tenantCode.replace('BREWERY-', '') 
-        : null
+      const isBreweryOrg = modules?.includes('BREWERY') || orgForSync?.tenantCode?.startsWith('BREW-')
+      // Use the actual tenantId from database (stored during registration)
+      const breweryTenantId = orgForSync?.tenantId || null
       
       if (isBreweryOrg && breweryTenantId && (validStatus || newPlan)) {
         const breweryPool = getBreweryPool()
