@@ -17,13 +17,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     const user = session.user as any
     const tenantId = user.tenantId
-    const odooOrganizationId = user.odooOrganizationId
+    const hotelCode = user.hotelCode
     
-    if (!tenantId && !odooOrganizationId) {
+    console.log(`[Subscription API] Checking: tenantId=${tenantId}, hotelCode=${hotelCode}`)
+    
+    if (!tenantId && !hotelCode) {
       return res.json({ status: 'trial' })
     }
     
-    // Try to find organization by tenantId first, then by odooOrganizationId (which is hotelCode)
+    // Try to find organization by tenantId first, then by hotelCode
     let organization = null
     
     if (tenantId) {
@@ -33,22 +35,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
     
-    // If not found by tenantId, try by hotelCode (odooOrganizationId)
-    if (!organization && odooOrganizationId) {
+    // If not found by tenantId, try by hotelCode
+    if (!organization && hotelCode) {
       organization = await prisma.organization.findFirst({
-        where: { hotelCode: odooOrganizationId },
+        where: { hotelCode },
         include: { subscription: true }
       })
     }
     
     const status = organization?.subscription?.status?.toLowerCase() || 'trial'
+    const plan = organization?.subscription?.plan || 'STARTER'
     
-    console.log(`[Subscription API] tenantId=${tenantId}, odooOrgId=${odooOrganizationId}, found=${!!organization}, status=${status}`)
+    console.log(`[Subscription API] Found org: ${!!organization}, status=${status}, plan=${plan}`)
     
-    return res.json({ 
-      status,
-      plan: organization?.subscription?.plan || 'STARTER'
-    })
+    return res.json({ status, plan })
   } catch (error) {
     console.error('[Subscription API] Error:', error)
     return res.json({ status: 'trial' })
