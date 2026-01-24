@@ -45,7 +45,7 @@ export const PLAN_FEATURES: Record<PlanType, PlanFeatures> = {
       packaging: false,
       finishedGoods: false,
       kegs: false,
-      cip: false,
+      cip: true,
       finances: false,
       invoices: false,
       analytics: false,
