@@ -1,9 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
+type PlanType = 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
+
+const planNames: Record<PlanType, string> = {
+  STARTER: 'Starter (საცდელი)',
+  PROFESSIONAL: 'Professional',
+  ENTERPRISE: 'Enterprise',
+}
+
 export default function RegisterPage() {
+  const searchParams = useSearchParams()
+  const planFromUrl = (searchParams.get('plan')?.toUpperCase() || 'STARTER') as PlanType
+  const validPlan = ['STARTER', 'PROFESSIONAL', 'ENTERPRISE'].includes(planFromUrl) ? planFromUrl : 'STARTER'
+
   const [formData, setFormData] = useState({
     // პირადი ინფორმაცია
     name: '',
@@ -23,10 +36,17 @@ export default function RegisterPage() {
     bankName: '',
     bankAccount: '',
     bankSwift: '',
+    // პაკეტი
+    plan: validPlan,
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState<{ tenantCode: string; breweryName: string } | null>(null)
+
+  // Update plan when URL changes
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, plan: validPlan }))
+  }, [validPlan])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -122,6 +142,22 @@ export default function RegisterPage() {
           <div className="text-5xl mb-2">🍺</div>
           <h1 className="text-2xl font-bold text-white">შექმენით თქვენი ლუდსახარშის ანგარიში</h1>
           <p className="text-slate-400 mt-2">წარმოების, ინვენტარისა და გაყიდვების მართვა</p>
+        </div>
+
+        {/* არჩეული პაკეტის ჩვენება */}
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-400">არჩეული პაკეტი:</p>
+              <p className="text-lg font-semibold text-amber-400">{planNames[formData.plan as PlanType]}</p>
+            </div>
+            <Link 
+              href="/modules/brewery/pricing"
+              className="text-sm text-amber-400 hover:text-amber-300 underline"
+            >
+              შეცვლა
+            </Link>
+          </div>
         </div>
 
         {error && (
