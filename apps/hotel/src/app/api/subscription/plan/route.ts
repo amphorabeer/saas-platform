@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { getAuthOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
+// Force dynamic - არ დაკეშოს
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const authOptions = await getAuthOptions();
