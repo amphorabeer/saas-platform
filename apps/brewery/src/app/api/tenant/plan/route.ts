@@ -3,13 +3,18 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
+// Force dynamic - არ დაკეშოს
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     const user = session?.user as { tenantId?: string } | undefined;
     
+    console.log('[Brewery Plan API] tenantId:', user?.tenantId);
+    
     if (!user?.tenantId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ plan: 'STARTER', isActive: true });
     }
 
     const tenant = await prisma.tenant.findUnique({
@@ -22,17 +27,19 @@ export async function GET() {
       },
     });
 
+    console.log('[Brewery Plan API] Found tenant:', !!tenant, 'plan:', tenant?.plan);
+
     if (!tenant) {
-      return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+      return NextResponse.json({ plan: 'STARTER', isActive: true });
     }
 
     return NextResponse.json({
-      plan: tenant.plan,
+      plan: tenant.plan || 'STARTER',
       tenantName: tenant.name,
-      isActive: tenant.isActive,
+      isActive: tenant.isActive ?? true,
     });
   } catch (error) {
-    console.error('Error fetching tenant plan:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('[Brewery Plan API] Error:', error);
+    return NextResponse.json({ plan: 'STARTER', isActive: true });
   }
 }
