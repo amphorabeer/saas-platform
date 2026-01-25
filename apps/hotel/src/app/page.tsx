@@ -1480,9 +1480,34 @@ export default function HotelDashboard() {
               </div>
             </div>
             
-            {/* KPI Alerts */}
-            <div className="mt-8">
-              <KPIAlerts rooms={rooms} reservations={reservations} />
+            {/* Night Audit Button + KPI Alerts Row */}
+            <div className="mt-8 flex flex-col lg:flex-row gap-4">
+              {/* Night Audit Button */}
+              <div className="lg:w-64 flex-shrink-0">
+                <button
+                  onClick={() => {
+                    if (canCloseDay) {
+                      addTabFromMenu('new-night-audit')
+                    } else {
+                      alert('❌ არ გაქვთ დღის დახურვის უფლება')
+                    }
+                  }}
+                  className="w-full bg-gradient-to-br from-gray-700 to-gray-900 text-white p-4 rounded-xl hover:from-gray-800 hover:to-black transition-all shadow-lg flex items-center gap-3"
+                >
+                  <div className="bg-gray-600 w-12 h-12 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">🌙</span>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-bold">დღის დახურვა</div>
+                    <div className="text-sm opacity-75">{hotelInfo?.name || 'Hotel'}</div>
+                  </div>
+                </button>
+              </div>
+              
+              {/* KPI Alerts - takes most space */}
+              <div className="flex-1">
+                <KPIAlerts rooms={rooms} reservations={reservations} />
+              </div>
             </div>
           </div>
         )}
