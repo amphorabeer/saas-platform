@@ -6715,6 +6715,13 @@ function ChannelManagerSection() {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Import URL Section */}
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h5 className="font-medium text-blue-800 mb-3">📥 Import URL (Booking.com-დან)</h5>
+                      <p className="text-xs text-blue-600 mb-3">ჩასვით Booking.com-ის iCal Export URL რომ მათი ჯავშნები თქვენს კალენდარშიც ჩანდეს</p>
+                      <ImportUrlInput connectionId={conn.id} currentUrl={conn.importUrl} onUpdate={loadData} />
+                    </div>
                   </div>
                 )}
               </div>
@@ -6793,6 +6800,54 @@ function ChannelManagerSection() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// Import URL Input Component
+function ImportUrlInput({ connectionId, currentUrl, onUpdate }: { connectionId: string; currentUrl?: string; onUpdate: () => void }) {
+  const [url, setUrl] = useState(currentUrl || '')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const handleSave = async () => {
+    if (!url.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/channels/connections/${connectionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ importUrl: url })
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2000)
+        onUpdate()
+      } else {
+        alert('შეცდომა შენახვისას')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
+    setSaving(false)
+  }
+
+  return (
+    <div className="flex gap-2">
+      <input
+        type="url"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder="https://ical.booking.com/v1/export?t=..."
+        className="flex-1 px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        onClick={handleSave}
+        disabled={saving || !url.trim()}
+        className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+      >
+        {saving ? '...' : saved ? '✓' : '💾 შენახვა'}
+      </button>
     </div>
   )
 }
