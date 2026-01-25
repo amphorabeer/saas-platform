@@ -194,77 +194,37 @@ export default function KPIAlerts({ rooms, reservations, folios = [] }: KPIAlert
   }, [safeRooms, safeReservations, safeFolios, dismissedAlerts])
   
   if (alerts.length === 0) {
-    // Show at least one info message if no alerts
+    // Show compact success message
     return (
-      <div className="mb-6 space-y-3">
-        <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
-          🔔 KPI შეტყობინებები
-        </h3>
-        <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl p-4 flex items-start gap-3">
-          <div className="bg-green-100 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-xl">✅</span>
-          </div>
-          <div className="flex-1">
-            <div className="font-medium">ყველაფერი წესრიგშია!</div>
-            <div className="text-sm opacity-80">ამჟამად აქტიური შეტყობინებები არ არის</div>
-          </div>
-        </div>
+      <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-xl">
+        <span className="text-xl">✅</span>
+        <span className="font-medium">ყველაფერი წესრიგშია!</span>
       </div>
     )
   }
   
   const typeStyles = {
-    danger: 'bg-red-50 border-red-200 text-red-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-800',
-    success: 'bg-green-50 border-green-200 text-green-800'
+    danger: 'bg-red-100 text-red-700',
+    warning: 'bg-yellow-100 text-yellow-700',
+    info: 'bg-blue-100 text-blue-700',
+    success: 'bg-green-100 text-green-700'
   }
   
-  const iconBg = {
-    danger: 'bg-red-100',
-    warning: 'bg-yellow-100',
-    info: 'bg-blue-100',
-    success: 'bg-green-100'
-  }
+  // Show first/most important alert as compact badge
+  const firstAlert = alerts[0]
   
   return (
-    <div className="mb-6 space-y-3">
-      <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
-        🔔 KPI შეტყობინებები
-      </h3>
-      
-      {alerts.map(alert => (
-        <div
-          key={alert.id}
-          className={`${typeStyles[alert.type]} border rounded-xl p-4 flex items-start gap-3 relative group`}
-        >
-          <div className={`${iconBg[alert.type]} w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0`}>
-            <span className="text-xl">{alert.icon}</span>
-          </div>
-          
-          <div className="flex-1">
-            <div className="font-medium">{alert.title}</div>
-            <div className="text-sm opacity-80">{alert.message}</div>
-            
-            {alert.action && (
-              <button
-                onClick={alert.action.onClick}
-                className="mt-2 text-sm font-medium underline hover:no-underline"
-              >
-                {alert.action.label}
-              </button>
-            )}
-          </div>
-          
-          <button
-            onClick={() => dismissAlert(alert.id)}
-            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
-            title="დახურვა"
-          >
-            ✕
-          </button>
-        </div>
-      ))}
+    <div className="flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer hover:opacity-90" 
+         style={{ backgroundColor: typeStyles[firstAlert.type].includes('red') ? '#FEE2E2' : 
+                                   typeStyles[firstAlert.type].includes('yellow') ? '#FEF3C7' : 
+                                   typeStyles[firstAlert.type].includes('blue') ? '#DBEAFE' : '#D1FAE5' }}
+         title={firstAlert.message}
+    >
+      <span className="text-xl">{firstAlert.icon}</span>
+      <span className="font-medium text-sm">{firstAlert.title}</span>
+      {alerts.length > 1 && (
+        <span className="bg-gray-600 text-white text-xs px-1.5 py-0.5 rounded-full">+{alerts.length - 1}</span>
+      )}
     </div>
   )
 }

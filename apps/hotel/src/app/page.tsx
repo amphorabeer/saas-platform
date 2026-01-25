@@ -1226,7 +1226,14 @@ export default function HotelDashboard() {
       <div className="flex-1 p-2 md:p-6 overflow-auto">
         {activeTab === 'dashboard' && (
           <div className="min-h-screen bg-gray-50 p-6">
-            <h1 className="text-3xl font-bold mb-6">🏨 Hotel PMS Dashboard</h1>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <h1 className="text-3xl font-bold">🏨 Hotel PMS Dashboard</h1>
+              
+              {/* KPI Alert Badge */}
+              <div className="flex-shrink-0">
+                <KPIAlerts rooms={rooms} reservations={reservations} />
+              </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Quick Actions */}
@@ -1478,11 +1485,6 @@ export default function HotelDashboard() {
                 <div className="text-sm text-gray-600">დატვირთულობა</div>
                 <div className="text-2xl font-bold text-blue-600">{stats.occupancyRate}%</div>
               </div>
-            </div>
-            
-            {/* KPI Alerts Section */}
-            <div className="mt-8">
-              <KPIAlerts rooms={rooms} reservations={reservations} />
             </div>
           </div>
         )}
