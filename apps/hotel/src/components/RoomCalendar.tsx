@@ -146,27 +146,28 @@ export default function RoomCalendar({
         if (connectionsRes.ok) {
           const connections = await connectionsRes.json()
           
-          // Sync each active connection in background
-          for (const conn of connections) {
-            if (conn.isActive) {
+          // Sync each active connection and wait for completion
+          const syncPromises = connections
+            .filter((conn: any) => conn.isActive)
+            .map((conn: any) => 
               fetch('/api/channels/sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ connectionId: conn.id, syncType: 'bookings' })
               }).catch(err => console.error('[RoomCalendar] Sync error:', err))
-            }
-          }
+            )
+          
+          // Wait for all syncs to complete
+          await Promise.all(syncPromises)
         }
         
-        // Then load channel bookings (with small delay to allow sync to complete)
-        setTimeout(async () => {
-          const response = await fetch('/api/channels/bookings?isProcessed=false')
-          if (response.ok) {
-            const data = await response.json()
-            setChannelBookings(data)
-            console.log('[RoomCalendar] Loaded channel bookings:', data.length)
-          }
-        }, 2000)
+        // Then load channel bookings after sync completes
+        const response = await fetch('/api/channels/bookings?isProcessed=false')
+        if (response.ok) {
+          const data = await response.json()
+          setChannelBookings(data)
+          console.log('[RoomCalendar] Loaded channel bookings:', data.length)
+        }
       } catch (error) {
         console.error('[RoomCalendar] Channel bookings error:', error)
       }
