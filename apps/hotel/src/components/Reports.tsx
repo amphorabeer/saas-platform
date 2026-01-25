@@ -3,6 +3,16 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import moment from 'moment'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
+import { 
+  RevenueChart, 
+  OccupancyChart, 
+  CombinedChart, 
+  SourcePieChart, 
+  CategoryBarChart,
+  PaymentsPieChart,
+  ComparisonChart,
+  KPICard 
+} from './ReportCharts'
 
 interface ReportsProps {
   reservations: any[]
@@ -19,6 +29,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
   const [customEndDate, setCustomEndDate] = useState(moment().format('YYYY-MM-DD'))
   const [isExporting, setIsExporting] = useState(false)
   const [selectedSource, setSelectedSource] = useState<string | null>(null)
+  const [revenueChartType, setRevenueChartType] = useState<'area' | 'bar' | 'line'>('area')
   
   // Helper function to get room number from roomId
   const getRoomNumber = (roomIdOrNumber: string | undefined): string => {
@@ -892,15 +903,36 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
                 </div>
               </div>
               
+              {/* Chart Type Selector */}
+              <div className="flex gap-2 mb-4">
+                <button 
+                  onClick={() => setRevenueChartType('area')}
+                  className={`px-3 py-1.5 text-sm rounded-lg ${revenueChartType === 'area' ? 'bg-green-500 text-white' : 'bg-gray-100'}`}
+                >
+                  📈 Area
+                </button>
+                <button 
+                  onClick={() => setRevenueChartType('bar')}
+                  className={`px-3 py-1.5 text-sm rounded-lg ${revenueChartType === 'bar' ? 'bg-green-500 text-white' : 'bg-gray-100'}`}
+                >
+                  📊 Bar
+                </button>
+                <button 
+                  onClick={() => setRevenueChartType('line')}
+                  className={`px-3 py-1.5 text-sm rounded-lg ${revenueChartType === 'line' ? 'bg-green-500 text-white' : 'bg-gray-100'}`}
+                >
+                  📉 Line
+                </button>
+              </div>
+              
               <h3 className="font-bold text-gray-700 mb-3">📈 დღიური შემოსავალი</h3>
-              <div className="bg-gray-50 rounded-xl p-4 overflow-x-auto">
-                <SimpleBarChart
-                  data={Object.entries(revenueData.daily).slice(-14).map(([date, amount]) => ({
-                    label: moment(date).format('DD/MM'),
+              <div className="bg-white rounded-xl p-4 border">
+                <RevenueChart 
+                  data={Object.entries(revenueData.daily).map(([date, amount]) => ({
+                    name: moment(date).format('DD/MM'),
                     value: amount
                   }))}
-                  maxValue={Math.max(...Object.values(revenueData.daily))}
-                  color="bg-green-500"
+                  type={revenueChartType}
                 />
               </div>
             </div>
@@ -925,14 +957,24 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
               </div>
               
               <h3 className="font-bold text-gray-700 mb-3">📈 დღიური დაკავებულობა</h3>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <SimpleBarChart
-                  data={Object.entries(occupancyData.daily).slice(-14).map(([date, data]) => ({
-                    label: moment(date).format('DD/MM'),
+              <div className="bg-white rounded-xl p-4 border">
+                <OccupancyChart 
+                  data={Object.entries(occupancyData.daily).map(([date, data]) => ({
+                    name: moment(date).format('DD/MM'),
                     value: data.percentage
                   }))}
-                  maxValue={100}
-                  color="bg-blue-500"
+                />
+              </div>
+              
+              {/* Combined Chart */}
+              <h3 className="font-bold text-gray-700 mb-3 mt-6">📊 შემოსავალი vs დაკავებულობა</h3>
+              <div className="bg-white rounded-xl p-4 border">
+                <CombinedChart 
+                  data={Object.entries(occupancyData.daily).map(([date, occData]) => ({
+                    name: moment(date).format('DD/MM'),
+                    revenue: revenueData.daily[date] || 0,
+                    occupancy: occData.percentage
+                  }))}
                 />
               </div>
             </div>
