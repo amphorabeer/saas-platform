@@ -437,7 +437,7 @@ async function getAvailability(orgId: string): Promise<string> {
     const rooms = await prisma.hotelRoom.findMany({
       where: { 
         tenantId: orgId,
-        status: 'available'
+        status: { in: ['VACANT', 'available', 'AVAILABLE', 'vacant'] }
       }
     })
     
@@ -517,9 +517,12 @@ async function createReservation(
     const checkInDate = new Date(y1, m1 - 1, d1)
     const checkOutDate = new Date(y2, m2 - 1, d2)
     
-    // Find available room
+    // Find available room (status can be 'VACANT', 'available', or 'AVAILABLE')
     const rooms = await prisma.hotelRoom.findMany({
-      where: { tenantId: orgId, status: 'available' }
+      where: { 
+        tenantId: orgId, 
+        status: { in: ['VACANT', 'available', 'AVAILABLE', 'vacant'] }
+      }
     })
     
     if (rooms.length === 0) {
