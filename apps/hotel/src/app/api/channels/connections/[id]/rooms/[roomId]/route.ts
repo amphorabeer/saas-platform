@@ -66,15 +66,15 @@ export async function PATCH(
         }
       },
       update: {
-        importUrl: body.importUrl,
+        icalImportUrl: body.importUrl,
         updatedAt: new Date()
       },
       create: {
         connectionId,
         roomId,
-        channelRoomId: `booking-${roomId}`, // Default channel room ID
-        importUrl: body.importUrl,
-        exportUrl: `${process.env.NEXTAUTH_URL || ''}/api/channels/ical/export/${connectionId}/${roomId}`
+        channelListingId: `booking-${roomId}`,
+        icalImportUrl: body.importUrl,
+        icalExportUrl: `${process.env.NEXTAUTH_URL || ''}/api/channels/ical/export/${connectionId}/${roomId}`
       }
     });
 

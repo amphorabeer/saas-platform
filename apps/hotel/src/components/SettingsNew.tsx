@@ -6883,7 +6883,7 @@ function RoomSyncRow({ room, connectionId, roomMappings, onUpdate, copiedUrl, on
             <ImportUrlInput 
               connectionId={connectionId} 
               roomId={room.id}
-              currentUrl={mapping?.importUrl || ''} 
+              currentUrl={mapping?.icalImportUrl || ''} 
               onUpdate={onUpdate} 
             />
           </div>
