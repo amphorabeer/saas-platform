@@ -685,6 +685,7 @@ export default function SettingsNew() {
     { id: 'users', label: 'მომხმარებლები', icon: '👥', description: 'წვდომა და უფლებები' },
     { id: 'housekeeping', label: 'დასუფთავება', icon: '🧹', description: 'Housekeeping ჩეკლისტი' },
     { id: 'cashier', label: 'სალარო', icon: '💰', description: 'სალაროს პარამეტრები' },
+    { id: 'channels', label: 'არხები', icon: '🔗', description: 'Booking.com, Airbnb' },
     { id: 'system', label: 'სისტემა', icon: '🖥️', description: 'სისტემის პარამეტრები' }
   ]
   
@@ -846,6 +847,11 @@ export default function SettingsNew() {
                 onSave={saveSystemSettings}
                 isSaving={isSaving}
               />
+            )}
+            
+            {/* Channels Section */}
+            {activeSection === 'channels' && (
+              <ChannelManagerSection />
             )}
           </div>
         </div>
@@ -6479,6 +6485,314 @@ function CashierSettingsSection({ settings, setSettings, onSave }: {
       >
         💾 შენახვა
       </button>
+    </div>
+  )
+}
+
+// ==================== CHANNEL MANAGER SECTION ====================
+function ChannelManagerSection() {
+  const [channels, setChannels] = useState<any[]>([])
+  const [connections, setConnections] = useState<any[]>([])
+  const [rooms, setRooms] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [syncing, setSyncing] = useState<string | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedChannel, setSelectedChannel] = useState<any>(null)
+  const [importUrl, setImportUrl] = useState('')
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null)
+  const [expandedConnection, setExpandedConnection] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      const [channelsRes, connectionsRes, roomsRes] = await Promise.all([
+        fetch('/api/channels'),
+        fetch('/api/channels/connections'),
+        fetch('/api/hotel/rooms')
+      ])
+      if (channelsRes.ok) setChannels(await channelsRes.json())
+      if (connectionsRes.ok) setConnections(await connectionsRes.json())
+      if (roomsRes.ok) setRooms(await roomsRes.json())
+    } catch (error) {
+      console.error('Error loading channel data:', error)
+    }
+    setLoading(false)
+  }
+
+  const handleAddConnection = async () => {
+    if (!selectedChannel) return
+    try {
+      const res = await fetch('/api/channels/connections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channelId: selectedChannel.id, importUrl: importUrl || undefined })
+      })
+      if (res.ok) {
+        setShowAddModal(false)
+        setSelectedChannel(null)
+        setImportUrl('')
+        loadData()
+      } else {
+        const error = await res.json()
+        alert(error.error || 'შეცდომა')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
+  const handleSync = async (connectionId: string) => {
+    setSyncing(connectionId)
+    try {
+      const res = await fetch('/api/channels/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId, syncType: 'bookings' })
+      })
+      if (res.ok) {
+        const result = await res.json()
+        alert(`სინქრონიზაცია: ${result.itemsSucceeded} წარმატებული`)
+        loadData()
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
+    setSyncing(null)
+  }
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedUrl(id)
+    setTimeout(() => setCopiedUrl(null), 2000)
+  }
+
+  const getChannelLogo = (type: string) => {
+    switch (type) {
+      case 'BOOKING_COM': return '🅱️'
+      case 'AIRBNB': return '🏠'
+      case 'EXPEDIA': return '✈️'
+      case 'AGODA': return '🌏'
+      case 'ICAL': return '📅'
+      default: return '🔗'
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ACTIVE': return 'bg-green-100 text-green-800'
+      case 'ERROR': return 'bg-red-100 text-red-800'
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getExportUrl = (connectionId: string, roomId?: string) => {
+    const baseUrl = window.location.origin
+    if (roomId) {
+      return `${baseUrl}/api/channels/ical/export/${connectionId}/${roomId}`
+    }
+    return `${baseUrl}/api/channels/ical/export/${connectionId}`
+  }
+
+  const availableChannels = channels.filter(ch => !connections.find(conn => conn.channelId === ch.id))
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-semibold">🔗 არხების მართვა</h2>
+          <p className="text-sm text-gray-500 mt-1">Booking.com, Airbnb და სხვა პლატფორმები</p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          disabled={availableChannels.length === 0}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        >
+          ➕ არხის დამატება
+        </button>
+      </div>
+
+      {/* Connections */}
+      <div className="bg-white rounded-xl border">
+        <div className="px-6 py-4 border-b">
+          <h3 className="font-medium">აქტიური კავშირები</h3>
+        </div>
+        
+        {connections.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            <div className="text-4xl mb-3">🔗</div>
+            <p>ჯერ არ გაქვთ დაკავშირებული არხები</p>
+          </div>
+        ) : (
+          <div className="divide-y">
+            {connections.map((conn: any) => (
+              <div key={conn.id} className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="text-3xl">{getChannelLogo(conn.channel?.type)}</div>
+                    <div>
+                      <h4 className="font-medium">{conn.channel?.name}</h4>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(conn.status)}`}>
+                        {conn.status === 'ACTIVE' ? 'აქტიური' : conn.status === 'ERROR' ? 'შეცდომა' : 'მოლოდინში'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setExpandedConnection(expandedConnection === conn.id ? null : conn.id)}
+                      className="px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
+                    >
+                      🚪 ოთახების URL-ები
+                    </button>
+                    <button
+                      onClick={() => handleSync(conn.id)}
+                      disabled={syncing === conn.id}
+                      className="px-3 py-1.5 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+                    >
+                      {syncing === conn.id ? '⟳' : '🔄'} სინქრონიზაცია
+                    </button>
+                  </div>
+                </div>
+
+                {/* Room-specific URLs - Expandable */}
+                {expandedConnection === conn.id && (
+                  <div className="mt-4 space-y-3">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h5 className="font-medium text-gray-700 mb-3">📤 ოთახების Export URL-ები</h5>
+                      <p className="text-xs text-gray-500 mb-4">თითოეული ოთახისთვის დააკოპირეთ შესაბამისი URL და ჩასვით Booking.com/Airbnb-ში</p>
+                      
+                      <div className="space-y-2">
+                        {rooms.map((room: any) => (
+                          <div key={room.id} className="flex items-center justify-between bg-white p-3 rounded-lg border">
+                            <div className="flex items-center gap-3">
+                              <span className="text-lg">🛏️</span>
+                              <div>
+                                <p className="font-medium text-sm">ოთახი {room.roomNumber}</p>
+                                <p className="text-xs text-gray-500">{room.roomType}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <code className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded max-w-[200px] truncate">
+                                .../{conn.id}/{room.id}
+                              </code>
+                              <button
+                                onClick={() => copyToClipboard(getExportUrl(conn.id, room.id), `${conn.id}-${room.id}`)}
+                                className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
+                              >
+                                {copiedUrl === `${conn.id}-${room.id}` ? '✓' : '📋'}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* All rooms URL */}
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-sm text-gray-700">🏨 ყველა ოთახი (საერთო)</p>
+                            <p className="text-xs text-gray-500">ყველა ოთახის ჯავშნები ერთ კალენდარში</p>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(getExportUrl(conn.id), `${conn.id}-all`)}
+                            className="px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
+                          >
+                            {copiedUrl === `${conn.id}-all` ? '✓ დაკოპირდა' : '📋 კოპირება'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* How it works */}
+      <div className="bg-blue-50 rounded-xl p-6">
+        <h3 className="font-medium mb-4">📚 როგორ მუშაობს</h3>
+        <div className="grid md:grid-cols-3 gap-4 text-sm">
+          <div className="bg-white rounded-lg p-4">
+            <div className="text-xl mb-2">1️⃣</div>
+            <p>დააჭირეთ "ოთახების URL-ები" და დააკოპირეთ თითოეული ოთახის URL</p>
+          </div>
+          <div className="bg-white rounded-lg p-4">
+            <div className="text-xl mb-2">2️⃣</div>
+            <p>Booking.com/Airbnb-ში შესაბამის ოთახზე ჩასვით URL</p>
+          </div>
+          <div className="bg-white rounded-lg p-4">
+            <div className="text-xl mb-2">3️⃣</div>
+            <p>კალენდრები სინქრონიზდება ავტომატურად</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Add Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl w-full max-w-lg mx-4">
+            <div className="p-6 border-b flex justify-between items-center">
+              <h3 className="text-lg font-semibold">არხის დამატება</h3>
+              <button onClick={() => { setShowAddModal(false); setSelectedChannel(null); setImportUrl(''); }} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div className="p-6">
+              {!selectedChannel ? (
+                <div className="space-y-3">
+                  {availableChannels.map((ch: any) => (
+                    <button
+                      key={ch.id}
+                      onClick={() => setSelectedChannel(ch)}
+                      className="w-full p-4 border rounded-lg hover:border-blue-300 hover:bg-blue-50 flex items-center gap-4 text-left"
+                    >
+                      <span className="text-3xl">{getChannelLogo(ch.type)}</span>
+                      <div>
+                        <p className="font-medium">{ch.name}</p>
+                        <p className="text-sm text-gray-500">{ch.description}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <span className="text-2xl">{getChannelLogo(selectedChannel.type)}</span>
+                    <p className="font-medium">{selectedChannel.name}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Import URL (არასავალდებულო)</label>
+                    <input
+                      type="url"
+                      value={importUrl}
+                      onChange={(e) => setImportUrl(e.target.value)}
+                      placeholder="https://www.airbnb.com/calendar/ical/..."
+                      className="w-full px-3 py-2 border rounded-lg"
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={() => { setSelectedChannel(null); setImportUrl(''); }} className="flex-1 px-4 py-2 border rounded-lg">უკან</button>
+                    <button onClick={handleAddConnection} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">დაკავშირება</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
