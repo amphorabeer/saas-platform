@@ -7,10 +7,10 @@ const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
-// PATCH - Update connection (e.g., import URL)
+// PATCH - Update or create room mapping with import URL
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string; roomId: string } }
 ) {
   try {
     const authOptions = await getAuthOptions();
@@ -21,12 +21,12 @@ export async function PATCH(
     }
 
     const user = session.user as { tenantId?: string; hotelCode?: string };
-    const { id } = params;
+    const { id: connectionId, roomId } = params;
     const body = await request.json();
 
     // Get connection and verify ownership
     const connection = await prisma.channelConnection.findUnique({
-      where: { id },
+      where: { id: connectionId },
       include: { organization: true }
     });
 
@@ -48,41 +48,47 @@ export async function PATCH(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Update allowed fields
-    const updateData: any = {};
-    
-    if (body.importUrl !== undefined) {
-      updateData.importUrl = body.importUrl;
-    }
-    
-    if (body.isActive !== undefined) {
-      updateData.isActive = body.isActive;
-    }
-    
-    if (body.syncIntervalMinutes !== undefined) {
-      updateData.syncIntervalMinutes = body.syncIntervalMinutes;
+    // Verify room exists
+    const room = await prisma.hotelRoom.findUnique({
+      where: { id: roomId }
+    });
+
+    if (!room) {
+      return NextResponse.json({ error: 'Room not found' }, { status: 404 });
     }
 
-    const updated = await prisma.channelConnection.update({
-      where: { id },
-      data: updateData,
-      include: {
-        channel: true,
-        roomMappings: true
+    // Upsert room mapping
+    const mapping = await prisma.channelRoomMapping.upsert({
+      where: {
+        connectionId_roomId: {
+          connectionId,
+          roomId
+        }
+      },
+      update: {
+        importUrl: body.importUrl,
+        updatedAt: new Date()
+      },
+      create: {
+        connectionId,
+        roomId,
+        channelRoomId: `booking-${roomId}`, // Default channel room ID
+        importUrl: body.importUrl,
+        exportUrl: `${process.env.NEXTAUTH_URL || ''}/api/channels/ical/export/${connectionId}/${roomId}`
       }
     });
 
-    return NextResponse.json(updated);
+    return NextResponse.json(mapping);
   } catch (error: any) {
-    console.error('[Connection PATCH API] Error:', error);
+    console.error('[Room Mapping PATCH API] Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-// DELETE - Remove connection
-export async function DELETE(
+// GET - Get room mapping
+export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string; roomId: string } }
 ) {
   try {
     const authOptions = await getAuthOptions();
@@ -92,41 +98,24 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = session.user as { tenantId?: string; hotelCode?: string };
-    const { id } = params;
+    const { id: connectionId, roomId } = params;
 
-    // Get connection and verify ownership
-    const connection = await prisma.channelConnection.findUnique({
-      where: { id },
-      include: { organization: true }
-    });
-
-    if (!connection) {
-      return NextResponse.json({ error: 'Connection not found' }, { status: 404 });
-    }
-
-    // Verify user has access
-    const organization = await prisma.organization.findFirst({
+    const mapping = await prisma.channelRoomMapping.findUnique({
       where: {
-        OR: [
-          { tenantId: user.tenantId },
-          { hotelCode: user.hotelCode }
-        ].filter(Boolean) as any[]
+        connectionId_roomId: {
+          connectionId,
+          roomId
+        }
       }
     });
 
-    if (!organization || connection.organizationId !== organization.id) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    if (!mapping) {
+      return NextResponse.json({ error: 'Mapping not found' }, { status: 404 });
     }
 
-    // Delete connection (cascades to room mappings, bookings, sync logs)
-    await prisma.channelConnection.delete({
-      where: { id }
-    });
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json(mapping);
   } catch (error: any) {
-    console.error('[Connection DELETE API] Error:', error);
+    console.error('[Room Mapping GET API] Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
