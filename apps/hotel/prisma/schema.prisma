@@ -4,11 +4,743 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// ENUMS
+model Organization {
+  id                  String               @id @default(cuid())
+  name                String
+  slug                String               @unique
+  email               String
+  phone               String?
+  address             String?
+  logo                String?
+  company             String?
+  taxId               String?
+  city                String?
+  country             String?              @default("Georgia")
+  website             String?
+  bankName            String?
+  bankAccount         String?
+  tenantId            String               @unique @default(cuid())
+  hotelCode           String               @unique
+  databaseUrl         String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  cashierShifts       CashierShift[]
+  channelConnections  ChannelConnection[]
+  chargeItems         ChargeItem[]
+  emailQueue          EmailQueue[]
+  facebookIntegration FacebookIntegration?
+  floors              Floor[]
+  folios              Folio[]
+  folioRoutingRules   FolioRoutingRule[]
+  hotelSettings       HotelSettings?
+  housekeepingTasks   HousekeepingTask[]
+  maintenanceRooms    MaintenanceRoom[]
+  modules             ModuleAccess[]
+  nightAudits         NightAudit[]
+  paymentTransactions PaymentTransaction[]
+  quickButtons        QuickButton[]
+  roomTypes           RoomType[]
+  subscription        Subscription?
+  tickets             SupportTicket[]
+  users               User[]
+
+  @@index([slug])
+  @@index([tenantId])
+}
+
+model User {
+  id               String        @id @default(cuid())
+  email            String        @unique
+  name             String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  password         String
+  avatar           String?
+  emailVerified    DateTime?
+  lastLoginAt      DateTime?
+  organizationId   String?
+  role             Role          @default(USER)
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  accounts         Account[]
+  activities       ActivityLog[]
+  sessions         Session[]
+  organization     Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([email])
+  @@index([organizationId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Subscription {
+  id                 String             @id @default(cuid())
+  organizationId     String             @unique
+  plan               PlanType           @default(STARTER)
+  status             SubscriptionStatus @default(TRIAL)
+  price              Decimal            @db.Decimal(10, 2)
+  currency           String             @default("GEL")
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean            @default(false)
+  trialStart         DateTime?
+  trialEnd           DateTime?
+  paymentMethod      String?
+  lastPaymentDate    DateTime?
+  nextBillingDate    DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  invoices           Invoice[]
+  organization       Organization       @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model ModuleAccess {
+  id             String          @id @default(cuid())
+  organizationId String
+  moduleType     ModuleType
+  isActive       Boolean         @default(true)
+  settings       Json?
+  maxUsers       Int?
+  maxRecords     Int?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  features       ModuleFeature[]
+
+  @@unique([organizationId, moduleType])
+  @@index([organizationId])
+  @@index([moduleType])
+}
+
+model ModuleFeature {
+  id             String       @id @default(cuid())
+  moduleAccessId String
+  name           String
+  isEnabled      Boolean      @default(true)
+  moduleAccess   ModuleAccess @relation(fields: [moduleAccessId], references: [id])
+
+  @@index([moduleAccessId])
+}
+
+model Invoice {
+  id             String       @id @default(cuid())
+  invoiceNumber  String       @unique @default(cuid())
+  dueDate        DateTime
+  paidAt         DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  amount         Decimal      @db.Decimal(10, 2)
+  currency       String       @default("GEL")
+  invoiceUrl     String?
+  subscriptionId String
+  status         String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId])
+  @@index([status])
+}
+
+model ModuleConfig {
+  id                   String     @id @default(cuid())
+  moduleType           ModuleType @unique
+  name                 String
+  nameEn               String?
+  nameRu               String?
+  description          String
+  descriptionEn        String?
+  descriptionRu        String?
+  icon                 String
+  color                String
+  isEnabled            Boolean    @default(true)
+  displayOrder         Int        @default(0)
+  starterPrice         Decimal?   @db.Decimal(10, 2)
+  starterDuration      String?    @default("15 დღე")
+  starterFeatures      String[]
+  professionalPrice    Decimal?   @db.Decimal(10, 2)
+  professionalDuration String?    @default("თვეში")
+  professionalFeatures String[]
+  enterprisePrice      Decimal?   @db.Decimal(10, 2)
+  enterpriseDuration   String?    @default("თვეში")
+  enterpriseFeatures   String[]
+  activeOrganizations  Int        @default(0)
+  totalUsers           Int        @default(0)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+}
+
+model LandingPageContent {
+  id                String   @id @default(cuid())
+  key               String   @unique
+  heroTitle         String?
+  heroSubtitle      String?
+  heroDescription   String?
+  statsBusinesses   Int?
+  statsTransactions Int?
+  statsUsers        Int?
+  statsUptime       Decimal? @db.Decimal(5, 2)
+  content           Json?
+  updatedAt         DateTime @updatedAt
+}
+
+model SupportTicket {
+  id             String         @id @default(cuid())
+  organizationId String
+  subject        String
+  description    String
+  priority       TicketPriority @default(MEDIUM)
+  status         TicketStatus   @default(OPEN)
+  assignedTo     String?
+  resolvedAt     DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([priority])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+}
+
+model HotelRoom {
+  id           String             @id @default(cuid())
+  tenantId     String
+  roomNumber   String
+  roomType     String
+  floor        Int
+  status       String
+  basePrice    Decimal            @db.Decimal(10, 2)
+  amenities    String[]
+  maxOccupancy Int
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  reservations HotelReservation[]
+
+  @@unique([tenantId, roomNumber])
+  @@index([tenantId])
+  @@index([status])
+}
+
+model HotelReservation {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  roomId             String
+  guestName          String
+  guestEmail         String?
+  guestPhone         String?
+  guestCountry       String?
+  checkIn            DateTime
+  checkOut           DateTime
+  adults             Int
+  children           Int       @default(0)
+  totalAmount        Decimal   @db.Decimal(10, 2)
+  paidAmount         Decimal   @default(0) @db.Decimal(10, 2)
+  status             String
+  source             String?   @default("Direct")
+  companyName        String?
+  companyTaxId       String?
+  companyAddress     String?
+  companyBank        String?
+  companyBankAccount String?
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  room               HotelRoom @relation(fields: [roomId], references: [id])
+
+  @@index([tenantId])
+  @@index([roomId])
+  @@index([status])
+}
+
+model Configuration {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([key])
+}
+
+model NightAudit {
+  id                String       @id @default(cuid())
+  organizationId    String
+  date              String
+  status            String       @default("completed")
+  completedAt       DateTime?
+  closedAt          DateTime?
+  closedBy          String?
+  user              String?
+  checkIns          Int          @default(0)
+  checkOuts         Int          @default(0)
+  noShows           Int          @default(0)
+  totalRooms        Int          @default(0)
+  occupiedRooms     Int          @default(0)
+  occupancy         Float        @default(0)
+  revenue           Float        @default(0)
+  roomChargesPosted Int          @default(0)
+  roomChargeTotal   Float        @default(0)
+  packagesPosted    Int          @default(0)
+  packageTotal      Float        @default(0)
+  foliosClosed      Int          @default(0)
+  paymentsTotal     Float        @default(0)
+  taxesTotal        Float        @default(0)
+  outstanding       Float        @default(0)
+  auditData         Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, date])
+  @@index([organizationId])
+  @@index([date])
+}
+
+model Folio {
+  id             String       @id @default(cuid())
+  organizationId String
+  folioNumber    String
+  guestName      String
+  roomNumber     String?
+  reservationId  String?
+  status         String       @default("open")
+  folioType      String       @default("guest")
+  totalCharges   Float        @default(0)
+  totalPayments  Float        @default(0)
+  balance        Float        @default(0)
+  checkIn        DateTime?
+  checkOut       DateTime?
+  closedAt       DateTime?
+  charges        Json?
+  payments       Json?
+  folioData      Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, folioNumber])
+  @@index([organizationId])
+  @@index([status])
+  @@index([roomNumber])
+}
+
+model CashierShift {
+  id             String       @id @default(cuid())
+  organizationId String
+  shiftNumber    String
+  cashierName    String
+  cashierId      String?
+  status         String       @default("open")
+  openedAt       DateTime     @default(now())
+  openingBalance Float        @default(0)
+  closedAt       DateTime?
+  closingBalance Float?
+  totalCashIn    Float        @default(0)
+  totalCashOut   Float        @default(0)
+  totalCard      Float        @default(0)
+  totalBank      Float        @default(0)
+  transactions   Json?
+  shiftData      Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model PaymentTransaction {
+  id                String       @id @default(cuid())
+  organizationId    String
+  transactionNumber String
+  folioId           String?
+  folioNumber       String?
+  type              String
+  method            String
+  amount            Float
+  guestName         String?
+  roomNumber        String?
+  description       String?
+  cashierShiftId    String?
+  cashierName       String?
+  transactionDate   DateTime     @default(now())
+  transactionData   Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([folioId])
+  @@index([transactionDate])
+}
+
+model ChargeItem {
+  id             String       @id @default(cuid())
+  organizationId String
+  code           String
+  name           String
+  nameEn         String?
+  category       String
+  price          Float        @default(0)
+  taxRate        Float        @default(0)
+  isActive       Boolean      @default(true)
+  itemData       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([category])
+}
+
+model FolioRoutingRule {
+  id               String       @id @default(cuid())
+  organizationId   String
+  name             String
+  sourceRoomNumber String?
+  targetFolioId    String?
+  chargeCategories String[]
+  isActive         Boolean      @default(true)
+  ruleData         Json?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model HotelSettings {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  hotelName      String?
+  address        String?
+  city           String?
+  country        String?
+  phone          String?
+  email          String?
+  website        String?
+  logo           String?
+  taxId          String?
+  bankName       String?
+  bankAccount    String?
+  currency       String       @default("GEL")
+  checkInTime    String?      @default("14:00")
+  checkOutTime   String?      @default("12:00")
+  timezone       String?      @default("Asia/Tbilisi")
+  settingsData   Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model RoomType {
+  id             String       @id @default(cuid())
+  organizationId String
+  code           String
+  name           String
+  nameEn         String?
+  basePrice      Float        @default(0)
+  maxOccupancy   Int          @default(2)
+  amenities      String[]
+  description    String?
+  isActive       Boolean      @default(true)
+  typeData       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+model Floor {
+  id             String       @id @default(cuid())
+  organizationId String
+  floorNumber    Int
+  name           String?
+  isActive       Boolean      @default(true)
+  floorData      Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, floorNumber])
+  @@index([organizationId])
+}
+
+model HousekeepingTask {
+  id             String       @id @default(cuid())
+  organizationId String
+  roomNumber     String
+  taskType       String
+  status         String       @default("pending")
+  assignedTo     String?
+  priority       String       @default("normal")
+  notes          String?
+  completedAt    DateTime?
+  completedBy    String?
+  taskDate       DateTime     @default(now())
+  taskData       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([roomNumber])
+  @@index([status])
+  @@index([taskDate])
+}
+
+model MaintenanceRoom {
+  id             String       @id @default(cuid())
+  organizationId String
+  roomNumber     String
+  reason         String
+  startDate      DateTime
+  endDate        DateTime?
+  status         String       @default("out_of_order")
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([roomNumber])
+  @@index([status])
+}
+
+model QuickButton {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  category       String
+  price          Float        @default(0)
+  position       Int          @default(0)
+  color          String?
+  icon           String?
+  isActive       Boolean      @default(true)
+  buttonData     Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model EmailQueue {
+  id             String       @id @default(cuid())
+  organizationId String
+  toEmail        String
+  subject        String
+  body           String
+  status         String       @default("pending")
+  sentAt         DateTime?
+  errorMessage   String?
+  emailData      Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model Channel {
+  id                   String              @id @default(cuid())
+  name                 String
+  type                 ChannelType         @unique
+  logo                 String?
+  description          String?
+  connectorType        String              @default("ical")
+  supportsRates        Boolean             @default(false)
+  supportsAvailability Boolean             @default(true)
+  supportsBookings     Boolean             @default(false)
+  isActive             Boolean             @default(true)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  connections          ChannelConnection[]
+}
+
+model ChannelConnection {
+  id                  String                  @id @default(cuid())
+  organizationId      String
+  channelId           String
+  status              ChannelConnectionStatus @default(PENDING)
+  importUrl           String?
+  exportUrl           String?
+  apiKey              String?
+  apiSecret           String?
+  propertyId          String?
+  syncDirection       SyncDirection           @default(BIDIRECTIONAL)
+  syncIntervalMinutes Int                     @default(30)
+  lastSyncAt          DateTime?
+  lastSyncStatus      String?
+  lastSyncError       String?
+  defaultRoomTypeId   String?
+  isActive            Boolean                 @default(true)
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  bookings            ChannelBooking[]
+  channel             Channel                 @relation(fields: [channelId], references: [id])
+  organization        Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  roomMappings        ChannelRoomMapping[]
+  syncLogs            ChannelSyncLog[]
+
+  @@unique([organizationId, channelId])
+  @@index([organizationId])
+  @@index([channelId])
+  @@index([status])
+}
+
+model ChannelRoomMapping {
+  id                 String            @id @default(cuid())
+  connectionId       String
+  roomId             String
+  channelListingId   String?
+  channelListingName String?
+  icalImportUrl      String?
+  icalExportUrl      String?
+  syncAvailability   Boolean           @default(true)
+  syncRates          Boolean           @default(false)
+  isActive           Boolean           @default(true)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  connection         ChannelConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, roomId])
+  @@unique([connectionId, channelListingId])
+  @@index([connectionId])
+  @@index([roomId])
+}
+
+model ChannelBooking {
+  id                 String               @id @default(cuid())
+  connectionId       String
+  channelBookingId   String
+  channelGuestName   String?
+  localReservationId String?
+  roomId             String?
+  checkIn            DateTime
+  checkOut           DateTime
+  guestName          String?
+  guestEmail         String?
+  guestPhone         String?
+  adults             Int                  @default(1)
+  children           Int                  @default(0)
+  totalAmount        Decimal?             @db.Decimal(10, 2)
+  currency           String?
+  status             ChannelBookingStatus @default(PENDING)
+  rawData            Json?
+  isProcessed        Boolean              @default(false)
+  processedAt        DateTime?
+  processingError    String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  connection         ChannelConnection    @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, channelBookingId])
+  @@index([connectionId])
+  @@index([status])
+  @@index([checkIn, checkOut])
+}
+
+model ChannelSyncLog {
+  id             String            @id @default(cuid())
+  connectionId   String
+  syncType       String
+  direction      SyncDirection
+  status         String
+  itemsProcessed Int               @default(0)
+  itemsSucceeded Int               @default(0)
+  itemsFailed    Int               @default(0)
+  startedAt      DateTime          @default(now())
+  completedAt    DateTime?
+  errorMessage   String?
+  details        Json?
+  connection     ChannelConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+  @@index([startedAt])
+}
+
+model FacebookIntegration {
+  id               String       @id @default(cuid())
+  organizationId   String       @unique
+  pageId           String       @unique
+  pageName         String?
+  pageAccessToken  String
+  verifyToken      String       @default(cuid())
+  isActive         Boolean      @default(true)
+  autoReply        Boolean      @default(true)
+  welcomeMessage   String?
+  botEnabled       Boolean      @default(true)
+  bookingEnabled   Boolean      @default(true)
+  messagesReceived Int          @default(0)
+  messagesSent     Int          @default(0)
+  bookingsCreated  Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+}
+
 enum Role {
   SUPER_ADMIN
   ORGANIZATION_OWNER
@@ -55,776 +787,6 @@ enum TicketStatus {
   CLOSED
 }
 
-// MODELS
-model Organization {
-  id                String             @id @default(cuid())
-  name              String
-  slug              String             @unique
-  email             String
-  phone             String?
-  address           String?
-  logo              String?
-  
-  // Hotel Info
-  company           String?
-  taxId             String?
-  city              String?
-  country           String?            @default("Georgia")
-  website           String?
-  bankName          String?
-  bankAccount       String?
-
-  // Multi-tenancy
-  tenantId          String             @unique @default(cuid())
-  hotelCode         String             @unique
-  databaseUrl       String?
-
-  // Relations
-  subscription      Subscription?
-  users             User[]
-  modules           ModuleAccess[]
-  tickets           SupportTicket[]
-  nightAudits       NightAudit[]
-  folios            Folio[]
-  cashierShifts     CashierShift[]
-  paymentTransactions PaymentTransaction[]
-  chargeItems       ChargeItem[]
-  folioRoutingRules FolioRoutingRule[]
-  hotelSettings     HotelSettings?
-  roomTypes         RoomType[]
-  floors            Floor[]
-  housekeepingTasks HousekeepingTask[]
-  maintenanceRooms  MaintenanceRoom[]
-  quickButtons      QuickButton[]
-  emailQueue        EmailQueue[]
-  channelConnections ChannelConnection[]
-  facebookIntegration FacebookIntegration?
-
-  // Timestamps
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  @@index([slug])
-  @@index([tenantId])
-}
-
-model User {
-  id                String             @id @default(cuid())
-  email             String             @unique
-  name              String?
-  password          String
-  avatar            String?
-  role              Role               @default(USER)
-
-  // Organization
-  organizationId    String?
-  organization      Organization?      @relation(fields: [organizationId], references: [id])
-
-  // Auth
-  emailVerified     DateTime?
-  sessions          Session[]
-  accounts          Account[]
-
-  // Password Reset
-  resetToken        String?
-  resetTokenExpiry  DateTime?
-
-  // Activity
-  lastLoginAt       DateTime?
-  activities        ActivityLog[]
-
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  @@index([email])
-  @@index([organizationId])
-}
-
-model Account {
-  id                String             @id @default(cuid())
-  userId            String
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?            @db.Text
-  access_token      String?            @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?            @db.Text
-  session_state     String?
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-}
-
-model Session {
-  id                String             @id @default(cuid())
-  sessionToken      String             @unique
-  userId            String
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expires           DateTime
-
-  @@index([userId])
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
-model Subscription {
-  id                String             @id @default(cuid())
-  organizationId    String             @unique
-  organization      Organization       @relation(fields: [organizationId], references: [id])
-
-  plan              PlanType           @default(STARTER)
-  status            SubscriptionStatus @default(TRIAL)
-
-  // Pricing
-  price             Decimal            @db.Decimal(10, 2)
-  currency          String             @default("GEL")
-
-  // Billing
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-  cancelAtPeriodEnd  Boolean           @default(false)
-
-  // Trial
-  trialStart        DateTime?
-  trialEnd          DateTime?
-
-  // Payment
-  paymentMethod     String?
-  lastPaymentDate   DateTime?
-  nextBillingDate   DateTime?
-
-  // Relations
-  invoices          Invoice[]
-
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  @@index([organizationId])
-  @@index([status])
-}
-
-model ModuleAccess {
-  id                String             @id @default(cuid())
-  organizationId    String
-  organization      Organization       @relation(fields: [organizationId], references: [id])
-
-  moduleType        ModuleType
-  isActive          Boolean            @default(true)
-
-  // Module-specific settings
-  settings          Json?
-
-  // Module limits
-  maxUsers          Int?
-  maxRecords        Int?
-
-  // Module features
-  features          ModuleFeature[]
-
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  @@unique([organizationId, moduleType])
-  @@index([organizationId])
-  @@index([moduleType])
-}
-
-model ModuleFeature {
-  id                String             @id @default(cuid())
-  moduleAccessId    String
-  moduleAccess      ModuleAccess       @relation(fields: [moduleAccessId], references: [id])
-
-  name              String
-  isEnabled         Boolean            @default(true)
-
-  @@index([moduleAccessId])
-}
-
-model Invoice {
-  id                String             @id @default(cuid())
-  subscriptionId    String
-  subscription      Subscription       @relation(fields: [subscriptionId], references: [id])
-
-  invoiceNumber     String             @unique @default(cuid())
-  amount            Decimal            @db.Decimal(10, 2)
-  currency          String             @default("GEL")
-  status            String
-
-  dueDate           DateTime
-  paidAt            DateTime?
-
-  invoiceUrl        String?
-
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  @@index([subscriptionId])
-  @@index([status])
-}
-
-// Landing Page Configuration
-model ModuleConfig {
-  id                String             @id @default(cuid())
-  moduleType        ModuleType         @unique
-  
-  // Display info
-  name              String
-  nameEn            String?
-  nameRu            String?
-  
-  description       String
-  descriptionEn     String?
-  descriptionRu     String?
-  
-  icon              String
-  color             String
-  isEnabled         Boolean            @default(true)
-  displayOrder      Int                @default(0)
-  
-  // Pricing
-  starterPrice      Decimal?           @db.Decimal(10, 2)
-  starterDuration   String?            @default("15 დღე")
-  starterFeatures   String[]
-  
-  professionalPrice Decimal?           @db.Decimal(10, 2)
-  professionalDuration String?         @default("თვეში")
-  professionalFeatures String[]
-  
-  enterprisePrice   Decimal?           @db.Decimal(10, 2)
-  enterpriseDuration String?           @default("თვეში")
-  enterpriseFeatures String[]
-  
-  // Stats
-  activeOrganizations Int              @default(0)
-  totalUsers        Int                @default(0)
-  
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-}
-
-model LandingPageContent {
-  id                String             @id @default(cuid())
-  key               String             @unique
-  
-  // Hero section
-  heroTitle         String?
-  heroSubtitle      String?
-  heroDescription   String?
-  
-  // Statistics
-  statsBusinesses   Int?
-  statsTransactions Int?
-  statsUsers        Int?
-  statsUptime       Decimal?           @db.Decimal(5, 2)
-  
-  // Other content
-  content           Json?
-  
-  updatedAt         DateTime           @updatedAt
-}
-
-model SupportTicket {
-  id                String             @id @default(cuid())
-  
-  organizationId    String
-  organization      Organization       @relation(fields: [organizationId], references: [id])
-  
-  subject           String
-  description       String             @db.Text
-  priority          TicketPriority     @default(MEDIUM)
-  status            TicketStatus       @default(OPEN)
-  
-  assignedTo        String?
-  resolvedAt        DateTime?
-  
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  
-  @@index([organizationId])
-  @@index([status])
-  @@index([priority])
-}
-
-model ActivityLog {
-  id                String             @id @default(cuid())
-  
-  userId            String
-  user              User               @relation(fields: [userId], references: [id])
-  
-  action            String
-  details           Json?
-  ipAddress         String?
-  userAgent         String?
-  
-  createdAt         DateTime           @default(now())
-  
-  @@index([userId])
-  @@index([action])
-}
-
-// Module-specific schemas
-model HotelRoom {
-  id                String             @id @default(cuid())
-  tenantId          String
-
-  roomNumber        String
-  roomType          String
-  floor             Int
-  status            String
-
-  basePrice         Decimal            @db.Decimal(10, 2)
-
-  amenities         String[]
-  maxOccupancy      Int
-
-  reservations      HotelReservation[]
-
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  @@unique([tenantId, roomNumber])
-  @@index([tenantId])
-  @@index([status])
-}
-
-model HotelReservation {
-  id                String             @id @default(cuid())
-  tenantId          String
-
-  roomId            String
-  room              HotelRoom          @relation(fields: [roomId], references: [id])
-
-  guestName         String
-  guestEmail        String?
-  guestPhone        String?
-  guestCountry      String?
-
-  checkIn           DateTime
-  checkOut          DateTime
-
-  adults            Int
-  children          Int                @default(0)
-
-  totalAmount       Decimal            @db.Decimal(10, 2)
-  paidAmount        Decimal            @db.Decimal(10, 2) @default(0)
-
-  status            String
-
-  // Booking source
-  source            String?            @default("Direct")
-
-  // Company fields
-  companyName       String?
-  companyTaxId      String?
-  companyAddress    String?
-  companyBank       String?
-  companyBankAccount String?
-
-  notes             String?
-
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  @@index([tenantId])
-  @@index([roomId])
-  @@index([status])
-}
-
-model Configuration {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     Json
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
-
-  @@index([key])
-}
-
-model NightAudit {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  date              String       // YYYY-MM-DD format
-  status            String       @default("completed") // completed, reversed
-  completedAt       DateTime?
-  closedAt          DateTime?
-  closedBy          String?
-  user              String?
-  
-  // Stats
-  checkIns          Int          @default(0)
-  checkOuts         Int          @default(0)
-  noShows           Int          @default(0)
-  totalRooms        Int          @default(0)
-  occupiedRooms     Int          @default(0)
-  occupancy         Float        @default(0)
-  revenue           Float        @default(0)
-  
-  // Posting details
-  roomChargesPosted Int          @default(0)
-  roomChargeTotal   Float        @default(0)
-  packagesPosted    Int          @default(0)
-  packageTotal      Float        @default(0)
-  foliosClosed      Int          @default(0)
-  
-  // Financial summary
-  paymentsTotal     Float        @default(0)
-  taxesTotal        Float        @default(0)
-  outstanding       Float        @default(0)
-  
-  // Full audit data as JSON
-  auditData         Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@unique([organizationId, date])
-  @@index([organizationId])
-  @@index([date])
-}
-
-// ============================================
-// FOLIO & FINANCIAL MODELS
-// ============================================
-
-model Folio {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  folioNumber       String
-  guestName         String
-  roomNumber        String?
-  reservationId     String?
-  
-  status            String       @default("open") // open, closed, checked_out
-  folioType         String       @default("guest") // guest, master, group
-  
-  // Financials
-  totalCharges      Float        @default(0)
-  totalPayments     Float        @default(0)
-  balance           Float        @default(0)
-  
-  // Dates
-  checkIn           DateTime?
-  checkOut          DateTime?
-  closedAt          DateTime?
-  
-  // Full data as JSON
-  charges           Json?
-  payments          Json?
-  folioData         Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@unique([organizationId, folioNumber])
-  @@index([organizationId])
-  @@index([status])
-  @@index([roomNumber])
-}
-
-model CashierShift {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  shiftNumber       String
-  cashierName       String
-  cashierId         String?
-  
-  status            String       @default("open") // open, closed
-  
-  // Opening
-  openedAt          DateTime     @default(now())
-  openingBalance    Float        @default(0)
-  
-  // Closing
-  closedAt          DateTime?
-  closingBalance    Float?
-  
-  // Totals
-  totalCashIn       Float        @default(0)
-  totalCashOut      Float        @default(0)
-  totalCard         Float        @default(0)
-  totalBank         Float        @default(0)
-  
-  // Transactions as JSON
-  transactions      Json?
-  shiftData         Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@index([organizationId])
-  @@index([status])
-}
-
-model PaymentTransaction {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  transactionNumber String
-  folioId           String?
-  folioNumber       String?
-  
-  type              String       // payment, refund, deposit
-  method            String       // cash, card, bank, other
-  amount            Float
-  
-  guestName         String?
-  roomNumber        String?
-  description       String?
-  
-  cashierShiftId    String?
-  cashierName       String?
-  
-  transactionDate   DateTime     @default(now())
-  transactionData   Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@index([organizationId])
-  @@index([folioId])
-  @@index([transactionDate])
-}
-
-model ChargeItem {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  code              String
-  name              String
-  nameEn            String?
-  category          String       // room, food, beverage, service, tax, other
-  
-  price             Float        @default(0)
-  taxRate           Float        @default(0)
-  isActive          Boolean      @default(true)
-  
-  itemData          Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@unique([organizationId, code])
-  @@index([organizationId])
-  @@index([category])
-}
-
-model FolioRoutingRule {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  name              String
-  sourceRoomNumber  String?
-  targetFolioId     String?
-  chargeCategories  String[]
-  
-  isActive          Boolean      @default(true)
-  ruleData          Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@index([organizationId])
-}
-
-// ============================================
-// HOTEL SETTINGS & CONFIGURATION
-// ============================================
-
-model HotelSettings {
-  id                String       @id @default(cuid())
-  organizationId    String       @unique
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  // Basic Info
-  hotelName         String?
-  address           String?
-  city              String?
-  country           String?
-  phone             String?
-  email             String?
-  website           String?
-  logo              String?
-  
-  // Tax & Financial
-  taxId             String?
-  bankName          String?
-  bankAccount       String?
-  currency          String       @default("GEL")
-  
-  // Operational
-  checkInTime       String?      @default("14:00")
-  checkOutTime      String?      @default("12:00")
-  timezone          String?      @default("Asia/Tbilisi")
-  
-  // All settings as JSON
-  settingsData      Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-}
-
-model RoomType {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  code              String
-  name              String
-  nameEn            String?
-  
-  basePrice         Float        @default(0)
-  maxOccupancy      Int          @default(2)
-  
-  amenities         String[]
-  description       String?
-  
-  isActive          Boolean      @default(true)
-  typeData          Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@unique([organizationId, code])
-  @@index([organizationId])
-}
-
-model Floor {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  floorNumber       Int
-  name              String?
-  
-  isActive          Boolean      @default(true)
-  floorData         Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@unique([organizationId, floorNumber])
-  @@index([organizationId])
-}
-
-model HousekeepingTask {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  roomNumber        String
-  taskType          String       // cleaning, turndown, inspection, maintenance
-  status            String       @default("pending") // pending, in_progress, completed
-  
-  assignedTo        String?
-  priority          String       @default("normal") // low, normal, high, urgent
-  
-  notes             String?
-  completedAt       DateTime?
-  completedBy       String?
-  
-  taskDate          DateTime     @default(now())
-  taskData          Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@index([organizationId])
-  @@index([roomNumber])
-  @@index([status])
-  @@index([taskDate])
-}
-
-model MaintenanceRoom {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  roomNumber        String
-  reason            String
-  
-  startDate         DateTime
-  endDate           DateTime?
-  
-  status            String       @default("out_of_order") // out_of_order, out_of_service
-  notes             String?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@index([organizationId])
-  @@index([roomNumber])
-  @@index([status])
-}
-
-model QuickButton {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  name              String
-  code              String
-  category          String
-  price             Float        @default(0)
-  
-  position          Int          @default(0)
-  color             String?
-  icon              String?
-  
-  isActive          Boolean      @default(true)
-  buttonData        Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@index([organizationId])
-}
-
-model EmailQueue {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  toEmail           String
-  subject           String
-  body              String       @db.Text
-  
-  status            String       @default("pending") // pending, sent, failed
-  
-  sentAt            DateTime?
-  errorMessage      String?
-  
-  emailData         Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@index([organizationId])
-  @@index([status])
-}
-
-// ========================================
-// CHANNEL MANAGER - OTA Integration
-// ========================================
-
 enum ChannelType {
   ICAL
   BOOKING_COM
@@ -854,218 +816,4 @@ enum SyncDirection {
   IMPORT
   EXPORT
   BIDIRECTIONAL
-}
-
-// Available channel definitions
-model Channel {
-  id                String       @id @default(cuid())
-  
-  name              String       // "Booking.com", "Airbnb", etc.
-  type              ChannelType
-  logo              String?      // URL to channel logo
-  description       String?
-  
-  // Connector configuration
-  connectorType     String       @default("ical") // ical, api, webhook
-  supportsRates     Boolean      @default(false)
-  supportsAvailability Boolean   @default(true)
-  supportsBookings  Boolean      @default(false)
-  
-  isActive          Boolean      @default(true)
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  // Relations
-  connections       ChannelConnection[]
-  
-  @@unique([type])
-}
-
-// Hotel's connection to a specific channel
-model ChannelConnection {
-  id                String       @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  channelId         String
-  channel           Channel      @relation(fields: [channelId], references: [id])
-  
-  // Connection details
-  status            ChannelConnectionStatus @default(PENDING)
-  
-  // iCal specific
-  importUrl         String?      // URL to import calendar from OTA
-  exportUrl         String?      // Generated URL for OTA to import (auto-generated)
-  
-  // API specific (for future)
-  apiKey            String?
-  apiSecret         String?
-  propertyId        String?      // Property ID on the channel
-  
-  // Sync settings
-  syncDirection     SyncDirection @default(BIDIRECTIONAL)
-  syncIntervalMinutes Int        @default(30)
-  lastSyncAt        DateTime?
-  lastSyncStatus    String?
-  lastSyncError     String?
-  
-  // Mapping settings
-  defaultRoomTypeId String?      // Default room type for imported bookings
-  
-  isActive          Boolean      @default(true)
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  // Relations
-  roomMappings      ChannelRoomMapping[]
-  bookings          ChannelBooking[]
-  syncLogs          ChannelSyncLog[]
-  
-  @@unique([organizationId, channelId])
-  @@index([organizationId])
-  @@index([channelId])
-  @@index([status])
-}
-
-// Maps hotel rooms to channel listings
-model ChannelRoomMapping {
-  id                String       @id @default(cuid())
-  
-  connectionId      String
-  connection        ChannelConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  
-  // Local room reference
-  roomId            String       // HotelRoom.id
-  
-  // Channel listing reference
-  channelListingId  String?      // ID on the channel (e.g., Airbnb listing ID)
-  channelListingName String?
-  
-  // iCal specific
-  icalImportUrl     String?      // Room-specific import URL
-  icalExportUrl     String?      // Room-specific export URL (auto-generated)
-  
-  // Sync settings
-  syncAvailability  Boolean      @default(true)
-  syncRates         Boolean      @default(false)
-  
-  isActive          Boolean      @default(true)
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@unique([connectionId, roomId])
-  @@unique([connectionId, channelListingId])
-  @@index([connectionId])
-  @@index([roomId])
-}
-
-// Bookings imported from channels
-model ChannelBooking {
-  id                String       @id @default(cuid())
-  
-  connectionId      String
-  connection        ChannelConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  
-  // Channel reference
-  channelBookingId  String       // Booking ID on the channel
-  channelGuestName  String?
-  
-  // Linked local reservation (if created)
-  localReservationId String?     // HotelReservation.id
-  
-  // Booking details from channel
-  roomId            String?      // Mapped room
-  checkIn           DateTime
-  checkOut          DateTime
-  
-  guestName         String?
-  guestEmail        String?
-  guestPhone        String?
-  
-  adults            Int          @default(1)
-  children          Int          @default(0)
-  
-  totalAmount       Decimal?     @db.Decimal(10, 2)
-  currency          String?
-  
-  status            ChannelBookingStatus @default(PENDING)
-  
-  // Raw data from channel
-  rawData           Json?
-  
-  // Processing
-  isProcessed       Boolean      @default(false)
-  processedAt       DateTime?
-  processingError   String?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@unique([connectionId, channelBookingId])
-  @@index([connectionId])
-  @@index([status])
-  @@index([checkIn, checkOut])
-}
-
-// Sync history and logs
-model ChannelSyncLog {
-  id                String       @id @default(cuid())
-  
-  connectionId      String
-  connection        ChannelConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  
-  syncType          String       // "availability", "rates", "bookings"
-  direction         SyncDirection
-  
-  status            String       // "success", "partial", "failed"
-  
-  itemsProcessed    Int          @default(0)
-  itemsSucceeded    Int          @default(0)
-  itemsFailed       Int          @default(0)
-  
-  startedAt         DateTime     @default(now())
-  completedAt       DateTime?
-  
-  errorMessage      String?
-  details           Json?
-  
-  @@index([connectionId])
-  @@index([startedAt])
-}
-
-// Facebook Messenger Integration
-model FacebookIntegration {
-  id                String       @id @default(cuid())
-  organizationId    String       @unique
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
-  // Facebook credentials
-  pageId            String       @unique  // Facebook Page ID
-  pageName          String?               // Page name for display
-  pageAccessToken   String       @db.Text // Encrypted token
-  
-  // Webhook verification
-  verifyToken       String       @default(cuid())
-  
-  // Settings
-  isActive          Boolean      @default(true)
-  autoReply         Boolean      @default(true)
-  welcomeMessage    String?      @db.Text
-  
-  // Bot configuration
-  botEnabled        Boolean      @default(true)
-  bookingEnabled    Boolean      @default(true)
-  
-  // Stats
-  messagesReceived  Int          @default(0)
-  messagesSent      Int          @default(0)
-  bookingsCreated   Int          @default(0)
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@index([pageId])
 }
