@@ -22,6 +22,7 @@ import NightAuditWarningBanner from '../components/NightAuditWarningBanner'
 import FolioSystem from '../components/FolioSystem'
 import CashierManagement from '../components/CashierModule'
 import FinancialDashboard from '../components/FinancialDashboard'
+import KPIAlerts from '../components/KPIAlerts'
 import SettingsNew from '../components/SettingsNew'
 import { SystemLockService } from '../lib/systemLockService'
 import { ActivityLogger } from '../lib/activityLogger'
@@ -1226,6 +1227,9 @@ export default function HotelDashboard() {
         {activeTab === 'dashboard' && (
           <div className="min-h-screen bg-gray-50 p-6">
             <h1 className="text-3xl font-bold mb-6">🏨 Hotel PMS Dashboard</h1>
+            
+            {/* KPI Alerts */}
+            <KPIAlerts rooms={rooms} reservations={reservations} />
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Quick Actions */}
