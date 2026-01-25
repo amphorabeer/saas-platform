@@ -97,6 +97,7 @@ model Organization {
   maintenanceRooms  MaintenanceRoom[]
   quickButtons      QuickButton[]
   emailQueue        EmailQueue[]
+  channelConnections ChannelConnection[]
 
   // Timestamps
   createdAt         DateTime           @default(now())
@@ -817,4 +818,219 @@ model EmailQueue {
   
   @@index([organizationId])
   @@index([status])
+}
+
+// ========================================
+// CHANNEL MANAGER - OTA Integration
+// ========================================
+
+enum ChannelType {
+  ICAL
+  BOOKING_COM
+  AIRBNB
+  EXPEDIA
+  AGODA
+  SITEMINDER
+  CLOUDBEDS
+  CUSTOM
+}
+
+enum ChannelConnectionStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  PENDING
+}
+
+enum ChannelBookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  MODIFIED
+}
+
+enum SyncDirection {
+  IMPORT
+  EXPORT
+  BIDIRECTIONAL
+}
+
+// Available channel definitions
+model Channel {
+  id                String       @id @default(cuid())
+  
+  name              String       // "Booking.com", "Airbnb", etc.
+  type              ChannelType
+  logo              String?      // URL to channel logo
+  description       String?
+  
+  // Connector configuration
+  connectorType     String       @default("ical") // ical, api, webhook
+  supportsRates     Boolean      @default(false)
+  supportsAvailability Boolean   @default(true)
+  supportsBookings  Boolean      @default(false)
+  
+  isActive          Boolean      @default(true)
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  // Relations
+  connections       ChannelConnection[]
+  
+  @@unique([type])
+}
+
+// Hotel's connection to a specific channel
+model ChannelConnection {
+  id                String       @id @default(cuid())
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  channelId         String
+  channel           Channel      @relation(fields: [channelId], references: [id])
+  
+  // Connection details
+  status            ChannelConnectionStatus @default(PENDING)
+  
+  // iCal specific
+  importUrl         String?      // URL to import calendar from OTA
+  exportUrl         String?      // Generated URL for OTA to import (auto-generated)
+  
+  // API specific (for future)
+  apiKey            String?
+  apiSecret         String?
+  propertyId        String?      // Property ID on the channel
+  
+  // Sync settings
+  syncDirection     SyncDirection @default(BIDIRECTIONAL)
+  syncIntervalMinutes Int        @default(30)
+  lastSyncAt        DateTime?
+  lastSyncStatus    String?
+  lastSyncError     String?
+  
+  // Mapping settings
+  defaultRoomTypeId String?      // Default room type for imported bookings
+  
+  isActive          Boolean      @default(true)
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  // Relations
+  roomMappings      ChannelRoomMapping[]
+  bookings          ChannelBooking[]
+  syncLogs          ChannelSyncLog[]
+  
+  @@unique([organizationId, channelId])
+  @@index([organizationId])
+  @@index([channelId])
+  @@index([status])
+}
+
+// Maps hotel rooms to channel listings
+model ChannelRoomMapping {
+  id                String       @id @default(cuid())
+  
+  connectionId      String
+  connection        ChannelConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  
+  // Local room reference
+  roomId            String       // HotelRoom.id
+  
+  // Channel listing reference
+  channelListingId  String?      // ID on the channel (e.g., Airbnb listing ID)
+  channelListingName String?
+  
+  // iCal specific
+  icalImportUrl     String?      // Room-specific import URL
+  icalExportUrl     String?      // Room-specific export URL (auto-generated)
+  
+  // Sync settings
+  syncAvailability  Boolean      @default(true)
+  syncRates         Boolean      @default(false)
+  
+  isActive          Boolean      @default(true)
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  @@unique([connectionId, roomId])
+  @@unique([connectionId, channelListingId])
+  @@index([connectionId])
+  @@index([roomId])
+}
+
+// Bookings imported from channels
+model ChannelBooking {
+  id                String       @id @default(cuid())
+  
+  connectionId      String
+  connection        ChannelConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  
+  // Channel reference
+  channelBookingId  String       // Booking ID on the channel
+  channelGuestName  String?
+  
+  // Linked local reservation (if created)
+  localReservationId String?     // HotelReservation.id
+  
+  // Booking details from channel
+  roomId            String?      // Mapped room
+  checkIn           DateTime
+  checkOut          DateTime
+  
+  guestName         String?
+  guestEmail        String?
+  guestPhone        String?
+  
+  adults            Int          @default(1)
+  children          Int          @default(0)
+  
+  totalAmount       Decimal?     @db.Decimal(10, 2)
+  currency          String?
+  
+  status            ChannelBookingStatus @default(PENDING)
+  
+  // Raw data from channel
+  rawData           Json?
+  
+  // Processing
+  isProcessed       Boolean      @default(false)
+  processedAt       DateTime?
+  processingError   String?
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  @@unique([connectionId, channelBookingId])
+  @@index([connectionId])
+  @@index([status])
+  @@index([checkIn, checkOut])
+}
+
+// Sync history and logs
+model ChannelSyncLog {
+  id                String       @id @default(cuid())
+  
+  connectionId      String
+  connection        ChannelConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  
+  syncType          String       // "availability", "rates", "bookings"
+  direction         SyncDirection
+  
+  status            String       // "success", "partial", "failed"
+  
+  itemsProcessed    Int          @default(0)
+  itemsSucceeded    Int          @default(0)
+  itemsFailed       Int          @default(0)
+  
+  startedAt         DateTime     @default(now())
+  completedAt       DateTime?
+  
+  errorMessage      String?
+  details           Json?
+  
+  @@index([connectionId])
+  @@index([startedAt])
 }

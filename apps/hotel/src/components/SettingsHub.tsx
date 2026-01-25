@@ -8,6 +8,7 @@ import ExtraServicesManager from './settings/ExtraServicesManager'
 import PackagesManager from './settings/PackagesManager'
 import QuickChargesManager from './settings/QuickChargesManager'
 import ActivityLogs from './settings/ActivityLogs'
+import ChannelManager from './settings/ChannelManager'
 import moment from 'moment'
 
 export default function SettingsHub() {
@@ -98,6 +99,17 @@ export default function SettingsHub() {
         { id: 'logs', label: 'Activity Logs', icon: '📋' },
         { id: 'backup', label: 'Backup', icon: '💾' },
         { id: 'integrations', label: 'Integrations', icon: '🔌' }
+      ]
+    },
+    {
+      id: 'channels',
+      title: 'არხების მართვა',
+      icon: '🔗',
+      description: 'Booking.com, Airbnb და სხვა',
+      color: 'cyan',
+      subsections: [
+        { id: 'connections', label: 'კავშირები', icon: '🌐' },
+        { id: 'bookings', label: 'იმპორტირებული ჯავშნები', icon: '📥' }
       ]
     }
   ]
@@ -250,6 +262,9 @@ export default function SettingsHub() {
           default:
             return <SystemSettings />
         }
+      
+      case 'channels':
+        return <ChannelManager />
       
       default:
         return <SettingsDashboard sections={settingsSections} onNavigate={(id) => { setActiveSection(id); trackUsage(id); }} />
@@ -551,4 +566,3 @@ const TaxesManager = () => (
     <ChargesSettings defaultTab="taxes" />
   </div>
 )
-
