@@ -42,8 +42,7 @@ export async function POST(request: NextRequest) {
         
         // Find integration for this page
         const integration = await prisma.facebookIntegration.findUnique({
-          where: { pageId },
-          include: { organization: true }
+          where: { pageId }
         })
         
         if (!integration || !integration.isActive) {
@@ -89,7 +88,7 @@ export async function POST(request: NextRequest) {
 // Handle incoming message and send response
 async function handleMessage(senderId: string, message: any, integration: any) {
   const text = message.text?.toLowerCase() || ''
-  const orgName = integration.organization?.name || 'სასტუმრო'
+  const orgName = integration.pageName || 'სასტუმრო'
   
   let responseText = ''
   
@@ -109,8 +108,7 @@ async function handleMessage(senderId: string, message: any, integration: any) {
     responseText = '💰 ფასების სანახავად ეწვიეთ ჩვენს ვებსაიტს ან დაგვიკავშირდით.'
   }
   else if (text.includes('3') || text.includes('კონტაქტ') || text.includes('contact')) {
-    const org = integration.organization
-    responseText = `📞 კონტაქტი:\n\n📱 ტელეფონი: ${org?.phone || 'N/A'}\n📧 Email: ${org?.email || 'N/A'}\n📍 მისამართი: ${org?.address || 'N/A'}`
+    responseText = `📞 დაგვიკავშირდით პირდაპირ Facebook Page-ზე ან ეწვიეთ ჩვენს ვებსაიტს.`
   }
   else {
     responseText = `🤔 ვერ გავიგე თქვენი მოთხოვნა.\n\nაირჩიეთ:\n1️⃣ ჯავშნის გაკეთება\n2️⃣ ფასების ნახვა\n3️⃣ კონტაქტი`
