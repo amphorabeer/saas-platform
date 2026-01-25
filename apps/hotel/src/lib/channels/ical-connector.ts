@@ -115,14 +115,44 @@ export class ICalConnector extends BaseConnector {
 
   /**
    * Fetch and parse iCal feed to extract bookings (blocked dates)
+   * Now supports room-level import URLs
    */
   async fetchBookings(dateRange?: DateRange): Promise<ChannelBooking[]> {
-    if (!this.config?.importUrl) {
-      return [];
+    const allBookings: ChannelBooking[] = [];
+    
+    // First, try connection-level import URL
+    if (this.config?.importUrl) {
+      try {
+        const bookings = await this.fetchFromUrl(this.config.importUrl, dateRange);
+        allBookings.push(...bookings);
+      } catch (error) {
+        console.error('[iCal] Error fetching connection-level URL:', error);
+      }
     }
 
+    // Then, fetch from room-level import URLs
+    if (this.config?.roomMappings) {
+      for (const mapping of this.config.roomMappings) {
+        if (mapping.icalImportUrl) {
+          try {
+            const bookings = await this.fetchFromUrl(mapping.icalImportUrl, dateRange, mapping.roomId);
+            allBookings.push(...bookings);
+          } catch (error) {
+            console.error(`[iCal] Error fetching room ${mapping.roomId} URL:`, error);
+          }
+        }
+      }
+    }
+
+    return allBookings;
+  }
+
+  /**
+   * Fetch and parse from a single URL
+   */
+  private async fetchFromUrl(url: string, dateRange?: DateRange, roomId?: string): Promise<ChannelBooking[]> {
     try {
-      const response = await fetch(this.config.importUrl, {
+      const response = await fetch(url, {
         headers: {
           'Accept': 'text/calendar'
         }
@@ -134,7 +164,14 @@ export class ICalConnector extends BaseConnector {
       }
 
       const icalData = await response.text();
-      return this.parseICalData(icalData, dateRange);
+      const bookings = this.parseICalData(icalData, dateRange);
+      
+      // Assign roomId if provided
+      if (roomId) {
+        bookings.forEach(b => b.roomId = roomId);
+      }
+      
+      return bookings;
     } catch (error) {
       console.error('[iCal] Fetch error:', error);
       return [];

@@ -56,6 +56,7 @@ export default function RoomCalendar({
   const [refundAmount, setRefundAmount] = useState(0)
   const [isProcessingCancel, setIsProcessingCancel] = useState(false)
   const [blockedDates, setBlockedDates] = useState<any>({})
+  const [channelBookings, setChannelBookings] = useState<any[]>([]) // Bookings from OTAs
   const [maintenanceRooms, setMaintenanceRooms] = useState<string[]>([])
   const [folioUpdateKey, setFolioUpdateKey] = useState(0) // Force re-render when folio updates
   const [foliosCache, setFoliosCache] = useState<any[]>([]) // Cache for API folios
@@ -134,6 +135,23 @@ export default function RoomCalendar({
         console.error('Failed to load blocked dates:', e)
       }
     }
+  }, [])
+  
+  // Load channel bookings from API (OTA imports)
+  useEffect(() => {
+    const loadChannelBookings = async () => {
+      try {
+        const response = await fetch('/api/channels/bookings?isProcessed=false')
+        if (response.ok) {
+          const data = await response.json()
+          setChannelBookings(data)
+          console.log('[RoomCalendar] Loaded channel bookings:', data.length)
+        }
+      } catch (error) {
+        console.error('[RoomCalendar] Channel bookings error:', error)
+      }
+    }
+    loadChannelBookings()
   }, [])
   
   // Load maintenance rooms from localStorage
@@ -3705,6 +3723,15 @@ export default function RoomCalendar({
                         const hasReservation = getReservationsForRoomAndDate(room.id, date).length > 0
                         const isClosed = !canBookOnDate(date)
                         
+                        // Check for channel bookings (OTA imports)
+                        const channelBooking = channelBookings.find((cb: any) => {
+                          if (cb.roomId !== room.id) return false
+                          const cbCheckIn = moment(cb.checkIn).format('YYYY-MM-DD')
+                          const cbCheckOut = moment(cb.checkOut).format('YYYY-MM-DD')
+                          return dateStr >= cbCheckIn && dateStr < cbCheckOut
+                        })
+                        const hasChannelBooking = !!channelBooking
+                        
                         const isToday = dateStr === moment(today).format('YYYY-MM-DD')
                         const isWeekend = [0, 6].includes(moment(date).day())
                         const cellBgColor = getCellBackgroundColor(dateStr)
@@ -3717,8 +3744,8 @@ export default function RoomCalendar({
                             className={`flex-1 border-r border-gray-100 date-cell relative ${
                               isClosed
                                 ? 'closed-date bg-gray-100/80 cursor-not-allowed' 
-                                : isBlocked 
-                                ? 'bg-red-100 cursor-not-allowed' 
+                                : isBlocked || hasChannelBooking
+                                ? 'bg-orange-100 cursor-not-allowed' 
                                 : isToday
                                 ? 'bg-blue-50/50'
                                 : isWeekend
@@ -3741,7 +3768,7 @@ export default function RoomCalendar({
                               
                               if (canBookOnDate(date) && !isClosed) {
                                 const hasReservation = getReservationsForRoomAndDate(room.id, date).length > 0
-                                if (!hasReservation && !isBlocked) {
+                                if (!hasReservation && !isBlocked && !hasChannelBooking) {
                                   handleSlotClick(room.id, date)
                                 }
                               }
@@ -3756,7 +3783,7 @@ export default function RoomCalendar({
                             onMouseLeave={handleCellMouseLeave}
                           >
                             {/* Season/Special Date Background Color Overlay */}
-                            {cellBgColor && !isClosed && !isBlocked && !hasReservation && (
+                            {cellBgColor && !isClosed && !isBlocked && !hasReservation && !hasChannelBooking && (
                               <div 
                                 className="absolute inset-0 pointer-events-none z-0"
                                 style={{ 
@@ -3767,8 +3794,15 @@ export default function RoomCalendar({
                               />
                             )}
                             
+                            {/* Show channel booking indicator */}
+                            {hasChannelBooking && !hasReservation && !isClosed && (
+                              <div className="h-full flex items-center justify-center relative z-5">
+                                <span className="text-orange-600 text-[9px] font-bold">🅱️ OTA</span>
+                              </div>
+                            )}
+                            
                             {/* Show blocked indicator */}
-                            {isBlocked && !hasReservation && !isClosed && (
+                            {isBlocked && !hasReservation && !isClosed && !hasChannelBooking && (
                               <div className="h-full flex items-center justify-center relative z-5">
                                 <span className="text-red-500 text-xs font-bold">BLOCKED</span>
                               </div>
