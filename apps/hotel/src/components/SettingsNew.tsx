@@ -6671,31 +6671,21 @@ function ChannelManagerSection() {
                 {expandedConnection === conn.id && (
                   <div className="mt-4 space-y-3">
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <h5 className="font-medium text-gray-700 mb-3">📤 ოთახების Export URL-ები</h5>
-                      <p className="text-xs text-gray-500 mb-4">თითოეული ოთახისთვის დააკოპირეთ შესაბამისი URL და ჩასვით Booking.com/Airbnb-ში</p>
+                      <h5 className="font-medium text-gray-700 mb-3">🔄 ოთახების სინქრონიზაცია</h5>
+                      <p className="text-xs text-gray-500 mb-4">თითოეული ოთახისთვის დააკოპირეთ Export URL და ჩასვით Import URL</p>
                       
-                      <div className="space-y-2">
+                      <div className="space-y-4">
                         {rooms.map((room: any) => (
-                          <div key={room.id} className="flex items-center justify-between bg-white p-3 rounded-lg border">
-                            <div className="flex items-center gap-3">
-                              <span className="text-lg">🛏️</span>
-                              <div>
-                                <p className="font-medium text-sm">ოთახი {room.roomNumber}</p>
-                                <p className="text-xs text-gray-500">{room.roomType}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <code className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded max-w-[200px] truncate">
-                                .../{conn.id}/{room.id}
-                              </code>
-                              <button
-                                onClick={() => copyToClipboard(getExportUrl(conn.id, room.id), `${conn.id}-${room.id}`)}
-                                className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
-                              >
-                                {copiedUrl === `${conn.id}-${room.id}` ? '✓' : '📋'}
-                              </button>
-                            </div>
-                          </div>
+                          <RoomSyncRow 
+                            key={room.id}
+                            room={room}
+                            connectionId={conn.id}
+                            roomMappings={conn.roomMappings || []}
+                            onUpdate={loadData}
+                            copiedUrl={copiedUrl}
+                            onCopy={copyToClipboard}
+                            getExportUrl={getExportUrl}
+                          />
                         ))}
                       </div>
                       
@@ -6703,7 +6693,7 @@ function ChannelManagerSection() {
                       <div className="mt-4 pt-4 border-t">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium text-sm text-gray-700">🏨 ყველა ოთახი (საერთო)</p>
+                            <p className="font-medium text-sm text-gray-700">🏨 ყველა ოთახი (საერთო Export)</p>
                             <p className="text-xs text-gray-500">ყველა ოთახის ჯავშნები ერთ კალენდარში</p>
                           </div>
                           <button
@@ -6714,13 +6704,6 @@ function ChannelManagerSection() {
                           </button>
                         </div>
                       </div>
-                    </div>
-                    
-                    {/* Import URL Section */}
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <h5 className="font-medium text-blue-800 mb-3">📥 Import URL (Booking.com-დან)</h5>
-                      <p className="text-xs text-blue-600 mb-3">ჩასვით Booking.com-ის iCal Export URL რომ მათი ჯავშნები თქვენს კალენდარშიც ჩანდეს</p>
-                      <ImportUrlInput connectionId={conn.id} currentUrl={conn.importUrl} onUpdate={loadData} />
                     </div>
                   </div>
                 )}
@@ -6805,7 +6788,7 @@ function ChannelManagerSection() {
 }
 
 // Import URL Input Component
-function ImportUrlInput({ connectionId, currentUrl, onUpdate }: { connectionId: string; currentUrl?: string; onUpdate: () => void }) {
+function ImportUrlInput({ connectionId, roomId, currentUrl, onUpdate }: { connectionId: string; roomId?: string; currentUrl?: string; onUpdate: () => void }) {
   const [url, setUrl] = useState(currentUrl || '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -6814,7 +6797,11 @@ function ImportUrlInput({ connectionId, currentUrl, onUpdate }: { connectionId: 
     if (!url.trim()) return
     setSaving(true)
     try {
-      const res = await fetch(`/api/channels/connections/${connectionId}`, {
+      const endpoint = roomId 
+        ? `/api/channels/connections/${connectionId}/rooms/${roomId}`
+        : `/api/channels/connections/${connectionId}`
+      
+      const res = await fetch(endpoint, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ importUrl: url })
@@ -6844,10 +6831,64 @@ function ImportUrlInput({ connectionId, currentUrl, onUpdate }: { connectionId: 
       <button
         onClick={handleSave}
         disabled={saving || !url.trim()}
-        className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
       >
-        {saving ? '...' : saved ? '✓' : '💾 შენახვა'}
+        {saving ? '...' : saved ? '✓' : '💾'}
       </button>
+    </div>
+  )
+}
+
+// Room Sync Row Component
+function RoomSyncRow({ room, connectionId, roomMappings, onUpdate, copiedUrl, onCopy, getExportUrl }: {
+  room: any
+  connectionId: string
+  roomMappings: any[]
+  onUpdate: () => void
+  copiedUrl: string | null
+  onCopy: (text: string, id: string) => void
+  getExportUrl: (connectionId: string, roomId?: string) => string
+}) {
+  const mapping = roomMappings.find((m: any) => m.roomId === room.id)
+  
+  return (
+    <div className="bg-white rounded-lg border p-4">
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-xl">🛏️</span>
+        <div>
+          <p className="font-medium">ოთახი {room.roomNumber}</p>
+          <p className="text-xs text-gray-500">{room.roomType}</p>
+        </div>
+      </div>
+      
+      <div className="space-y-2 ml-8">
+        {/* Export URL */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-green-700 w-16">📤 Export:</span>
+          <code className="flex-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded truncate">
+            .../{connectionId}/{room.id}
+          </code>
+          <button
+            onClick={() => onCopy(getExportUrl(connectionId, room.id), `${connectionId}-${room.id}`)}
+            className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
+          >
+            {copiedUrl === `${connectionId}-${room.id}` ? '✓' : '📋'}
+          </button>
+        </div>
+        
+        {/* Import URL */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-blue-700 w-16">📥 Import:</span>
+          <div className="flex-1">
+            <ImportUrlInput 
+              connectionId={connectionId} 
+              roomId={room.id}
+              currentUrl={mapping?.importUrl || ''} 
+              onUpdate={onUpdate} 
+            />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
