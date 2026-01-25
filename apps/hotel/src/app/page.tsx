@@ -934,6 +934,29 @@ export default function HotelDashboard() {
               >
                 🌙 დღის დახურვა
               </button>
+              
+              {/* KPI Status Badge - Dynamic based on occupancy */}
+              {stats.occupancyRate < 20 ? (
+                <div className="hidden md:flex items-center gap-2 ml-2 px-3 py-2 bg-red-100 text-red-700 rounded text-sm">
+                  <span>🚨</span>
+                  <span className="font-medium">დატვირთულობა {stats.occupancyRate}%</span>
+                </div>
+              ) : stats.occupancyRate < 50 ? (
+                <div className="hidden md:flex items-center gap-2 ml-2 px-3 py-2 bg-yellow-100 text-yellow-700 rounded text-sm">
+                  <span>⚠️</span>
+                  <span className="font-medium">დატვირთულობა {stats.occupancyRate}%</span>
+                </div>
+              ) : stats.occupancyRate >= 80 ? (
+                <div className="hidden md:flex items-center gap-2 ml-2 px-3 py-2 bg-green-100 text-green-700 rounded text-sm">
+                  <span>🎉</span>
+                  <span className="font-medium">მაღალი დატვირთულობა {stats.occupancyRate}%</span>
+                </div>
+              ) : (
+                <div className="hidden md:flex items-center gap-2 ml-2 px-3 py-2 bg-green-100 text-green-700 rounded text-sm">
+                  <span>✅</span>
+                  <span className="font-medium">წესრიგშია ({stats.occupancyRate}%)</span>
+                </div>
+              )}
             </div>
             
             <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
@@ -1480,35 +1503,6 @@ export default function HotelDashboard() {
               </div>
             </div>
             
-            {/* Night Audit Button + KPI Alerts Row */}
-            <div className="mt-8 flex flex-col lg:flex-row gap-4">
-              {/* Night Audit Button */}
-              <div className="lg:w-64 flex-shrink-0">
-                <button
-                  onClick={() => {
-                    if (canCloseDay) {
-                      addTabFromMenu('new-night-audit')
-                    } else {
-                      alert('❌ არ გაქვთ დღის დახურვის უფლება')
-                    }
-                  }}
-                  className="w-full bg-gradient-to-br from-gray-700 to-gray-900 text-white p-4 rounded-xl hover:from-gray-800 hover:to-black transition-all shadow-lg flex items-center gap-3"
-                >
-                  <div className="bg-gray-600 w-12 h-12 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">🌙</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-bold">დღის დახურვა</div>
-                    <div className="text-sm opacity-75">{hotelInfo?.name || 'Hotel'}</div>
-                  </div>
-                </button>
-              </div>
-              
-              {/* KPI Alerts - takes most space */}
-              <div className="flex-1">
-                <KPIAlerts rooms={rooms} reservations={reservations} />
-              </div>
-            </div>
           </div>
         )}
         
