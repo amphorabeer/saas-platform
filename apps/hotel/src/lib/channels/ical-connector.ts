@@ -226,18 +226,6 @@ export class ICalConnector extends BaseConnector {
       return null;
     }
 
-    // Skip CLOSED/blocked events - only import actual bookings
-    if (summary) {
-      const lowerSummary = summary.toLowerCase();
-      if (lowerSummary.includes('closed') || 
-          lowerSummary.includes('blocked') || 
-          lowerSummary.includes('not available') ||
-          lowerSummary.includes('unavailable')) {
-        console.log('[iCal] Skipping blocked/closed event:', summary);
-        return null;
-      }
-    }
-
     // Parse dates (handle both DATE and DATE-TIME formats)
     const checkIn = this.parseICalDate(dtstart);
     const checkOut = this.parseICalDate(dtend);
@@ -247,14 +235,18 @@ export class ICalConnector extends BaseConnector {
     }
 
     // Extract guest name from summary if available
-    let guestName = summary || 'OTA Booking';
+    // Booking.com uses "CLOSED - Not available" for both bookings and blocked dates
+    let guestName = 'OTA Booking';
     let status: ChannelBooking['status'] = 'confirmed';
 
-    // Check for cancelled bookings
     if (summary) {
       const lowerSummary = summary.toLowerCase();
       if (lowerSummary.includes('cancelled')) {
         status = 'cancelled';
+      }
+      // Use summary as guest name if it's not a generic closed message
+      if (!lowerSummary.includes('closed') && !lowerSummary.includes('not available')) {
+        guestName = summary;
       }
     }
 
