@@ -60,6 +60,8 @@ const moduleData: Record<string, {
           "ყველა Starter ფუნქცია",
           "ფინანსები & ანგარიშები",
           "Housekeeping მართვა",
+          "🔗 Channel Manager (Booking.com, Airbnb)",
+          "🤖 Facebook Messenger Bot",
           "5 მომხმარებელი",
         ],
       },
@@ -70,6 +72,8 @@ const moduleData: Record<string, {
           "31+ ოთახი (ულიმიტო)",
           "ყველა ფუნქცია",
           "ანალიტიკა & სტატისტიკა",
+          "🔗 Channel Manager (ყველა არხი)",
+          "🤖 Facebook Messenger Bot",
           "მრავალი ლოკაცია",
           "მომხმარებლის როლები",
           "ულიმიტო მომხმარებლები",
@@ -80,6 +84,8 @@ const moduleData: Record<string, {
       { question: "როგორ მუშაობს ჯავშნების სისტემა?", answer: "სისტემა საშუალებას გაძლევთ მარტივად მართოთ ოთახების ჯავშნები, ჩეკ-ინ/ჩეკ-აუთი კალენდარის ვიზუალური ინტერფეისით." },
       { question: "რა არის ღამის აუდიტი?", answer: "ღამის აუდიტი დღის ფინანსური ოპერაციების დახურვა და ანგარიშების გენერაციაა." },
       { question: "შემიძლია სხვადასხვა ფილიალის მართვა?", answer: "Enterprise პაკეტში შედის მრავალი ლოკაციის მართვის შესაძლებლობა ერთი პანელიდან." },
+      { question: "რა არის Channel Manager?", answer: "Channel Manager ავტომატურად სინქრონიზებს თქვენს კალენდარს Booking.com-თან და Airbnb-თან. ჯავშნები რეალურ დროში განახლდება და თავიდან აიცილებთ Double-booking-ს." },
+      { question: "როგორ მუშაობს Facebook Messenger Bot?", answer: "Bot 24/7 რეჟიმში პასუხობს თქვენს სტუმრებს Facebook Messenger-ში. აჩვენებს ფასებს, ამოწმებს availability-ს და ავტომატურად ქმნის ჯავშანს თქვენს კალენდარში." },
     ],
   },
   brewery: {
@@ -467,6 +473,86 @@ export default function ModulePricingPage({ params }: { params: { module: string
             </Card>
           </div>
         </section>
+
+        {/* Key Features Section - Only for Hotel */}
+        {moduleSlug === "hotel" && (
+          <section className="container mx-auto px-4 py-12 bg-muted/30">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-3xl font-bold text-center mb-4">🚀 ახალი ფუნქციები</h2>
+              <p className="text-center text-muted-foreground mb-10">
+                გაზარდეთ თქვენი სასტუმროს ეფექტურობა ჩვენი უახლესი ინტეგრაციებით
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Channel Manager */}
+                <Card className="hover:shadow-lg transition-shadow border-2 border-blue-200">
+                  <CardHeader>
+                    <div className="text-4xl mb-2">🔗</div>
+                    <CardTitle className="text-xl">Channel Manager</CardTitle>
+                    <CardDescription>Booking.com & Airbnb ინტეგრაცია</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      დააკავშირეთ თქვენი სასტუმრო Booking.com-თან და Airbnb-თან. 
+                      ჯავშნები ავტომატურად სინქრონიზდება - აღარ დაგჭირდებათ ხელით განახლება.
+                    </p>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center">
+                        <span className="text-green-600 mr-2">✓</span>
+                        ავტომატური კალენდრის სინქრონიზაცია
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-600 mr-2">✓</span>
+                        Double-booking პრევენცია
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-600 mr-2">✓</span>
+                        iCal იმპორტი/ექსპორტი
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-600 mr-2">✓</span>
+                        რეალურ დროში განახლება
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Messenger Bot */}
+                <Card className="hover:shadow-lg transition-shadow border-2 border-purple-200">
+                  <CardHeader>
+                    <div className="text-4xl mb-2">🤖</div>
+                    <CardTitle className="text-xl">Facebook Messenger Bot</CardTitle>
+                    <CardDescription>24/7 ავტომატური ჯავშანი</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      თქვენი სტუმრები შეძლებენ ოთახის დაჯავშნას პირდაპირ Facebook Messenger-იდან. 
+                      Bot ავტომატურად პასუხობს და ქმნის ჯავშანს თქვენს კალენდარში.
+                    </p>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center">
+                        <span className="text-green-600 mr-2">✓</span>
+                        24/7 ავტომატური პასუხი
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-600 mr-2">✓</span>
+                        ფასების ჩვენება
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-600 mr-2">✓</span>
+                        ონლაინ დაჯავშნა Messenger-იდან
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-600 mr-2">✓</span>
+                        ავტომატური რეზერვაცია PMS-ში
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* FAQ Section */}
         <section className="container mx-auto px-4 py-12">
