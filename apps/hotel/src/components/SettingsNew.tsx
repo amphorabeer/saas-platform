@@ -686,6 +686,7 @@ export default function SettingsNew() {
     { id: 'housekeeping', label: 'დასუფთავება', icon: '🧹', description: 'Housekeeping ჩეკლისტი' },
     { id: 'cashier', label: 'სალარო', icon: '💰', description: 'სალაროს პარამეტრები' },
     { id: 'channels', label: 'არხები', icon: '🔗', description: 'Booking.com, Airbnb' },
+    { id: 'facebook', label: 'Facebook Bot', icon: '📘', description: 'Messenger ჯავშნები' },
     { id: 'system', label: 'სისტემა', icon: '🖥️', description: 'სისტემის პარამეტრები' }
   ]
   
@@ -852,6 +853,11 @@ export default function SettingsNew() {
             {/* Channels Section */}
             {activeSection === 'channels' && (
               <ChannelManagerSection />
+            )}
+            
+            {/* Facebook Bot Section */}
+            {activeSection === 'facebook' && (
+              <FacebookBotSection />
             )}
           </div>
         </div>
@@ -6670,6 +6676,13 @@ function ChannelManagerSection() {
                 {/* Room-specific URLs - Expandable */}
                 {expandedConnection === conn.id && (
                   <div className="mt-4 space-y-3">
+                    {/* Tip for Booking.com */}
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                      <p className="text-xs text-yellow-800">
+                        💡 <strong>რჩევა:</strong> Booking.com-ზე Calendar Sync → Export calendar → აირჩიეთ <strong>"Booked dates only"</strong> თუ გინდათ მხოლოდ ჯავშნები (არა ხელით დახურული დღეები)
+                      </p>
+                    </div>
+                    
                     <div className="bg-gray-50 rounded-lg p-4">
                       <h5 className="font-medium text-gray-700 mb-3">🔄 ოთახების სინქრონიზაცია</h5>
                       <p className="text-xs text-gray-500 mb-4">თითოეული ოთახისთვის დააკოპირეთ Export URL და ჩასვით Import URL</p>
@@ -6888,6 +6901,423 @@ function RoomSyncRow({ room, connectionId, roomMappings, onUpdate, copiedUrl, on
             />
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// ==================== FACEBOOK BOT SECTION ====================
+function FacebookBotSection() {
+  const [integration, setIntegration] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  
+  // Form state
+  const [pageId, setPageId] = useState('')
+  const [pageAccessToken, setPageAccessToken] = useState('')
+  const [welcomeMessage, setWelcomeMessage] = useState('')
+  const [botEnabled, setBotEnabled] = useState(true)
+  const [bookingEnabled, setBookingEnabled] = useState(true)
+  const [showToken, setShowToken] = useState(false)
+  const [showInstructions, setShowInstructions] = useState(false)
+  
+  useEffect(() => {
+    loadIntegration()
+  }, [])
+  
+  const loadIntegration = async () => {
+    try {
+      const res = await fetch('/api/facebook')
+      const data = await res.json()
+      
+      if (data.integration) {
+        setIntegration(data.integration)
+        setPageId(data.integration.pageId || '')
+        setWelcomeMessage(data.integration.welcomeMessage || '')
+        setBotEnabled(data.integration.botEnabled)
+        setBookingEnabled(data.integration.bookingEnabled)
+      }
+    } catch (err) {
+      console.error('Error loading integration:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  const saveIntegration = async () => {
+    setError('')
+    setSuccess('')
+    setSaving(true)
+    
+    try {
+      const res = await fetch('/api/facebook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pageId,
+          pageAccessToken: pageAccessToken || undefined,
+          welcomeMessage,
+          botEnabled,
+          bookingEnabled,
+        })
+      })
+      
+      const data = await res.json()
+      
+      if (data.error) {
+        setError(data.error + (data.details ? `: ${data.details}` : ''))
+      } else {
+        setSuccess('Facebook ინტეგრაცია წარმატებით შეინახა!')
+        setIntegration(data.integration)
+        setPageAccessToken('')
+        loadIntegration()
+      }
+    } catch (err) {
+      setError('შეცდომა შენახვისას')
+    } finally {
+      setSaving(false)
+    }
+  }
+  
+  const deleteIntegration = async () => {
+    if (!confirm('დარწმუნებული ხართ რომ გსურთ Facebook ინტეგრაციის წაშლა?')) return
+    
+    try {
+      await fetch('/api/facebook', { method: 'DELETE' })
+      setIntegration(null)
+      setPageId('')
+      setPageAccessToken('')
+      setWelcomeMessage('')
+      setSuccess('Facebook ინტეგრაცია წაიშალა')
+    } catch (err) {
+      setError('შეცდომა წაშლისას')
+    }
+  }
+  
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
+        <div className="animate-spin text-4xl mb-4">⏳</div>
+        <p className="text-gray-500">იტვირთება...</p>
+      </div>
+    )
+  }
+  
+  return (
+    <div className="space-y-6">
+      {/* Header Card */}
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+            <span className="text-4xl">📘</span>
+          </div>
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold">Facebook Messenger Bot</h2>
+            <p className="text-blue-100">მომხმარებლებს შეუძლიათ Messenger-ით დაჯავშნა და კითხვების დასმა</p>
+          </div>
+          {integration && (
+            <div className={`px-4 py-2 rounded-full text-sm font-medium ${
+              integration.isActive ? 'bg-green-400 text-green-900' : 'bg-gray-200 text-gray-600'
+            }`}>
+              {integration.isActive ? '🟢 აქტიური' : '⚪ გამორთული'}
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Messages */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-2">
+          <span className="text-xl">❌</span> {error}
+        </div>
+      )}
+      
+      {success && (
+        <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 flex items-center gap-2">
+          <span className="text-xl">✅</span> {success}
+        </div>
+      )}
+      
+      {/* Stats */}
+      {integration && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl shadow-sm border p-6 text-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-2xl">📥</span>
+            </div>
+            <div className="text-3xl font-bold text-blue-600">{integration.messagesReceived || 0}</div>
+            <div className="text-sm text-gray-500">მიღებული შეტყობინება</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border p-6 text-center">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-2xl">📤</span>
+            </div>
+            <div className="text-3xl font-bold text-green-600">{integration.messagesSent || 0}</div>
+            <div className="text-sm text-gray-500">გაგზავნილი შეტყობინება</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border p-6 text-center">
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-2xl">📅</span>
+            </div>
+            <div className="text-3xl font-bold text-purple-600">{integration.bookingsCreated || 0}</div>
+            <div className="text-sm text-gray-500">შექმნილი ჯავშანი</div>
+          </div>
+        </div>
+      )}
+      
+      {/* Configuration Form */}
+      <div className="bg-white rounded-xl shadow-sm border p-6">
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <span>⚙️</span> კონფიგურაცია
+        </h3>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Facebook Page ID <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={pageId}
+              onChange={(e) => setPageId(e.target.value)}
+              placeholder="მაგ: 115181224815244"
+              className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Page Access Token {integration ? '(ახალი თუ გსურთ შეცვლა)' : '*'}
+            </label>
+            <div className="relative">
+              <input
+                type={showToken ? 'text' : 'password'}
+                value={pageAccessToken}
+                onChange={(e) => setPageAccessToken(e.target.value)}
+                placeholder={integration ? '••••••••••••••••' : 'EAAQqJsvothQBO...'}
+                className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowToken(!showToken)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showToken ? '🙈' : '👁️'}
+              </button>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              მისალმების შეტყობინება
+            </label>
+            <textarea
+              value={welcomeMessage}
+              onChange={(e) => setWelcomeMessage(e.target.value)}
+              placeholder="👋 გამარჯობა! ჩვენს სასტუმროში მოგესალმებით! რით შეგვიძლია დაგეხმაროთ?"
+              rows={3}
+              className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          
+          <div className="flex items-center gap-6 py-2">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={botEnabled}
+                onChange={(e) => setBotEnabled(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="flex items-center gap-2">
+                <span className="text-xl">🤖</span>
+                <span>ავტომატური პასუხები</span>
+              </span>
+            </label>
+            
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={bookingEnabled}
+                onChange={(e) => setBookingEnabled(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="flex items-center gap-2">
+                <span className="text-xl">📅</span>
+                <span>ჯავშნის ფუნქცია</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        
+        {/* Webhook Info */}
+        {integration && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+            <h4 className="font-medium mb-3 flex items-center gap-2">
+              <span>📋</span> Webhook კონფიგურაცია
+            </h4>
+            <p className="text-sm text-gray-500 mb-3">ეს მონაცემები ჩაწერეთ Facebook Developer Console-ში</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 text-sm w-28">Callback URL:</span>
+                <code className="flex-1 bg-white px-3 py-2 rounded-lg border text-sm font-mono">
+                  https://saas-hotel.vercel.app/api/messenger/webhook
+                </code>
+                <button
+                  onClick={() => navigator.clipboard.writeText('https://saas-hotel.vercel.app/api/messenger/webhook')}
+                  className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
+                >
+                  📋
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 text-sm w-28">Verify Token:</span>
+                <code className="flex-1 bg-white px-3 py-2 rounded-lg border text-sm font-mono">
+                  {integration.verifyToken}
+                </code>
+                <button
+                  onClick={() => navigator.clipboard.writeText(integration.verifyToken)}
+                  className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
+                >
+                  📋
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Action Buttons */}
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={saveIntegration}
+            disabled={saving || !pageId}
+            className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {saving ? (
+              <>
+                <span className="animate-spin">⏳</span>
+                <span>ინახება...</span>
+              </>
+            ) : (
+              <>
+                <span>💾</span>
+                <span>შენახვა</span>
+              </>
+            )}
+          </button>
+          
+          {integration && (
+            <button
+              onClick={deleteIntegration}
+              className="px-6 py-3 bg-red-100 text-red-600 rounded-xl font-medium hover:bg-red-200 flex items-center gap-2"
+            >
+              <span>🗑️</span>
+              <span>წაშლა</span>
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {/* Instructions */}
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <button
+          onClick={() => setShowInstructions(!showInstructions)}
+          className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">📖</span>
+            <span className="font-medium">როგორ დააკავშიროთ Facebook?</span>
+          </div>
+          <span className={`text-2xl transition-transform ${showInstructions ? 'rotate-180' : ''}`}>
+            ⌄
+          </span>
+        </button>
+        
+        {showInstructions && (
+          <div className="p-6 pt-0 border-t">
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">1</div>
+                <div>
+                  <h4 className="font-medium">შექმენით Facebook Developer App</h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    გახსენით <a href="https://developers.facebook.com/apps/" target="_blank" className="text-blue-500 underline">developers.facebook.com/apps</a> და შექმენით ახალი App
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">2</div>
+                <div>
+                  <h4 className="font-medium">დაამატეთ Messenger Product</h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    App-ის Dashboard-ზე დააჭირეთ "Add Product" → "Messenger" → "Set Up"
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">3</div>
+                <div>
+                  <h4 className="font-medium">დააკავშირეთ Facebook Page</h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    "Generate Access Tokens" სექციაში დააჭირეთ "Add Page" და აირჩიეთ თქვენი სასტუმროს Page
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">4</div>
+                <div>
+                  <h4 className="font-medium">დააგენერირეთ Token</h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Page-ის გვერდით დააჭირეთ "Generate" და დააკოპირეთ Access Token
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">5</div>
+                <div>
+                  <h4 className="font-medium">ჩაწერეთ Page ID და Token</h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    ზემოთ ფორმაში შეიყვანეთ Page ID (რიცხვი Page-ის ქვეშ) და Access Token, შემდეგ დააჭირეთ "შენახვა"
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">6</div>
+                <div>
+                  <h4 className="font-medium">Configure Webhooks</h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Facebook Developer Console-ში "Configure Webhooks" სექციაში ჩაწერეთ Callback URL და Verify Token (ზემოთ მოცემული)
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">7</div>
+                <div>
+                  <h4 className="font-medium">Add Subscriptions</h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    "Add Subscriptions" დააჭირეთ და მონიშნეთ: <code className="bg-gray-100 px-1 rounded">messages</code>, <code className="bg-gray-100 px-1 rounded">messaging_postbacks</code>
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-4 p-4 bg-green-50 rounded-xl">
+                <div className="flex items-center gap-2 text-green-700 font-medium">
+                  <span>🎉</span> მზადაა!
+                </div>
+                <p className="text-sm text-green-600 mt-1">
+                  ახლა მომხმარებლებს შეუძლიათ თქვენს Facebook Page-ზე Messenger-ით მოგწერონ და Bot ავტომატურად უპასუხებს!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

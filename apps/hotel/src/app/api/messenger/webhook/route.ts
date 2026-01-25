@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Verify Token - უნდა ემთხვეოდეს Facebook-ში ჩაწერილს
-const VERIFY_TOKEN = 'kurort_aspindza_2026'
-
-// Page Access Token from Facebook
-const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN || ''
+import { prisma } from '@/lib/prisma'
 
 // Facebook Webhook Verification (GET request)
 export async function GET(request: NextRequest) {
@@ -16,11 +11,16 @@ export async function GET(request: NextRequest) {
   
   console.log('[Messenger Webhook] Verification request:', { mode, token, challenge })
   
-  // Check if mode and token are correct
-  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-    console.log('[Messenger Webhook] Verification successful!')
-    // Return the challenge to verify
-    return new NextResponse(challenge, { status: 200 })
+  if (mode === 'subscribe' && token) {
+    // Find integration by verify token
+    const integration = await prisma.facebookIntegration.findFirst({
+      where: { verifyToken: token, isActive: true }
+    })
+    
+    if (integration) {
+      console.log('[Messenger Webhook] Verification successful for:', integration.pageName)
+      return new NextResponse(challenge, { status: 200 })
+    }
   }
   
   console.log('[Messenger Webhook] Verification failed!')
@@ -38,6 +38,25 @@ export async function POST(request: NextRequest) {
     if (body.object === 'page') {
       // Iterate over each entry
       for (const entry of body.entry || []) {
+        const pageId = entry.id
+        
+        // Find integration for this page
+        const integration = await prisma.facebookIntegration.findUnique({
+          where: { pageId },
+          include: { organization: true }
+        })
+        
+        if (!integration || !integration.isActive) {
+          console.log('[Messenger Webhook] No active integration for page:', pageId)
+          continue
+        }
+        
+        // Update stats
+        await prisma.facebookIntegration.update({
+          where: { pageId },
+          data: { messagesReceived: { increment: 1 } }
+        })
+        
         // Get the messaging array
         const messaging = entry.messaging || []
         
@@ -50,7 +69,9 @@ export async function POST(request: NextRequest) {
             console.log('[Messenger] Message text:', message.text)
             
             // Handle the message
-            await handleMessage(senderId, message)
+            if (integration.botEnabled) {
+              await handleMessage(senderId, message, integration)
+            }
           }
         }
       }
@@ -66,42 +87,50 @@ export async function POST(request: NextRequest) {
 }
 
 // Handle incoming message and send response
-async function handleMessage(senderId: string, message: any) {
+async function handleMessage(senderId: string, message: any, integration: any) {
   const text = message.text?.toLowerCase() || ''
+  const orgName = integration.organization?.name || 'სასტუმრო'
   
   let responseText = ''
   
-  // Simple bot logic
+  // Custom welcome message or default
   if (text.includes('გამარჯობა') || text.includes('hello') || text.includes('hi')) {
-    responseText = '👋 გამარჯობა! კურორტ ასპინძაში მოგესალმებით!\n\nრა გსურთ?\n1️⃣ ჯავშნის გაკეთება\n2️⃣ ფასების ნახვა\n3️⃣ კონტაქტი'
+    responseText = integration.welcomeMessage || 
+      `👋 გამარჯობა! ${orgName}-ში მოგესალმებით!\n\nრა გსურთ?\n1️⃣ ჯავშნის გაკეთება\n2️⃣ ფასების ნახვა\n3️⃣ კონტაქტი`
   } 
   else if (text.includes('1') || text.includes('ჯავშნ') || text.includes('book')) {
-    responseText = '📅 ჯავშნისთვის გთხოვთ მიუთითოთ:\n\n• შემოსვლის თარიღი\n• გასვლის თარიღი\n• სტუმრების რაოდენობა\n\nმაგალითად: "27 იანვარი - 29 იანვარი, 2 სტუმარი"'
+    if (integration.bookingEnabled) {
+      responseText = '📅 ჯავშნისთვის გთხოვთ მიუთითოთ:\n\n• შემოსვლის თარიღი\n• გასვლის თარიღი\n• სტუმრების რაოდენობა\n\nმაგალითად: "27 იანვარი - 29 იანვარი, 2 სტუმარი"'
+    } else {
+      responseText = '📞 ჯავშნისთვის გთხოვთ დაგვიკავშირდეთ ტელეფონით.'
+    }
   }
   else if (text.includes('2') || text.includes('ფას') || text.includes('price')) {
-    responseText = '💰 ჩვენი ფასები:\n\n🏠 Standard Room - ₾100/ღამე\n⭐ Deluxe Room - ₾150/ღამე\n👑 Suite - ₾200/ღამე\n\nფასში შედის საუზმე! 🍳'
+    responseText = '💰 ფასების სანახავად ეწვიეთ ჩვენს ვებსაიტს ან დაგვიკავშირდით.'
   }
   else if (text.includes('3') || text.includes('კონტაქტ') || text.includes('contact')) {
-    responseText = '📞 კონტაქტი:\n\n📱 ტელეფონი: +995 XXX XXX XXX\n📧 Email: info@kurortaspindza.ge\n📍 მისამართი: ასპინძა, საქართველო\n\n🌐 www.kurortaspindza.ge'
+    const org = integration.organization
+    responseText = `📞 კონტაქტი:\n\n📱 ტელეფონი: ${org?.phone || 'N/A'}\n📧 Email: ${org?.email || 'N/A'}\n📍 მისამართი: ${org?.address || 'N/A'}`
   }
   else {
-    responseText = '🤔 ვერ გავიგე თქვენი მოთხოვნა.\n\nაირჩიეთ:\n1️⃣ ჯავშნის გაკეთება\n2️⃣ ფასების ნახვა\n3️⃣ კონტაქტი'
+    responseText = `🤔 ვერ გავიგე თქვენი მოთხოვნა.\n\nაირჩიეთ:\n1️⃣ ჯავშნის გაკეთება\n2️⃣ ფასების ნახვა\n3️⃣ კონტაქტი`
   }
   
   // Send response
-  await sendMessage(senderId, responseText)
+  await sendMessage(senderId, responseText, integration.pageAccessToken)
+  
+  // Update sent messages count
+  await prisma.facebookIntegration.update({
+    where: { pageId: integration.pageId },
+    data: { messagesSent: { increment: 1 } }
+  })
 }
 
 // Send message via Facebook API
-async function sendMessage(recipientId: string, text: string) {
-  if (!PAGE_ACCESS_TOKEN) {
-    console.error('[Messenger] No PAGE_ACCESS_TOKEN configured!')
-    return
-  }
-  
+async function sendMessage(recipientId: string, text: string, accessToken: string) {
   try {
     const response = await fetch(
-      `https://graph.facebook.com/v18.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+      `https://graph.facebook.com/v18.0/me/messages?access_token=${accessToken}`,
       {
         method: 'POST',
         headers: {
