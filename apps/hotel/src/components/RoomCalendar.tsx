@@ -137,21 +137,41 @@ export default function RoomCalendar({
     }
   }, [])
   
-  // Load channel bookings from API (OTA imports)
+  // Load and sync channel bookings from API (OTA imports)
   useEffect(() => {
-    const loadChannelBookings = async () => {
+    const syncAndLoadChannelBookings = async () => {
       try {
-        const response = await fetch('/api/channels/bookings?isProcessed=false')
-        if (response.ok) {
-          const data = await response.json()
-          setChannelBookings(data)
-          console.log('[RoomCalendar] Loaded channel bookings:', data.length)
+        // First, get all connections and trigger sync
+        const connectionsRes = await fetch('/api/channels/connections')
+        if (connectionsRes.ok) {
+          const connections = await connectionsRes.json()
+          
+          // Sync each active connection in background
+          for (const conn of connections) {
+            if (conn.isActive) {
+              fetch('/api/channels/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ connectionId: conn.id, syncType: 'bookings' })
+              }).catch(err => console.error('[RoomCalendar] Sync error:', err))
+            }
+          }
         }
+        
+        // Then load channel bookings (with small delay to allow sync to complete)
+        setTimeout(async () => {
+          const response = await fetch('/api/channels/bookings?isProcessed=false')
+          if (response.ok) {
+            const data = await response.json()
+            setChannelBookings(data)
+            console.log('[RoomCalendar] Loaded channel bookings:', data.length)
+          }
+        }, 2000)
       } catch (error) {
         console.error('[RoomCalendar] Channel bookings error:', error)
       }
     }
-    loadChannelBookings()
+    syncAndLoadChannelBookings()
   }, [])
   
   // Load maintenance rooms from localStorage
