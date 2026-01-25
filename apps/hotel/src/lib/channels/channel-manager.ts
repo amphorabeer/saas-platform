@@ -152,6 +152,12 @@ export class ChannelManager {
       // Fetch bookings from channel
       const bookings = await connector.fetchBookings(dateRange);
       
+      // Delete old channel bookings for this connection before adding new ones
+      // This ensures calendar stays in sync even when bookings are removed from OTA
+      await prisma.channelBooking.deleteMany({
+        where: { connectionId }
+      });
+      
       let succeeded = 0;
       let failed = 0;
       const errors: string[] = [];
