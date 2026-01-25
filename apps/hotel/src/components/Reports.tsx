@@ -162,11 +162,44 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
     const totalRevenue = Object.values(dailyRevenue).reduce((sum, val) => sum + Number(val || 0), 0)
     const avgDaily = days > 0 ? totalRevenue / days : 0
     
+    // Calculate previous period revenue for comparison
+    const prevStartDate = startDate.clone().subtract(days, 'days')
+    const prevEndDate = startDate.clone().subtract(1, 'day')
+    const prevDailyRevenue: { [date: string]: number } = {}
+    
+    for (let i = 0; i < days; i++) {
+      const date = prevStartDate.clone().add(i, 'days').format('YYYY-MM-DD')
+      prevDailyRevenue[date] = 0
+    }
+    
+    folios.forEach((folio: any) => {
+      (folio.transactions || []).forEach((t: any) => {
+        if (t.type === 'charge') {
+          const chargeDate = t.date || t.nightAuditDate || moment(t.postedAt).format('YYYY-MM-DD')
+          const dateStr = moment(chargeDate).format('YYYY-MM-DD')
+          if (prevDailyRevenue.hasOwnProperty(dateStr)) {
+            if (t.id && t.id.startsWith('adj-')) return
+            prevDailyRevenue[dateStr] += Number(t.debit || t.amount || 0)
+          }
+        }
+      })
+    })
+    
+    const prevTotalRevenue = Object.values(prevDailyRevenue).reduce((sum, val) => sum + Number(val || 0), 0)
+    const changePercent = prevTotalRevenue > 0 
+      ? Math.round(((totalRevenue - prevTotalRevenue) / prevTotalRevenue) * 100) 
+      : 0
+    
     return {
       daily: dailyRevenue,
       total: totalRevenue,
       avgDaily,
-      days
+      days,
+      // Comparison data
+      prevTotal: prevTotalRevenue,
+      prevAvgDaily: days > 0 ? prevTotalRevenue / days : 0,
+      changePercent,
+      trend: totalRevenue > prevTotalRevenue ? 'up' : totalRevenue < prevTotalRevenue ? 'down' : 'neutral'
     }
   }, [folios, startDate, endDate])
   
@@ -195,11 +228,41 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
     
     const avgOccupancy = Object.values(dailyOccupancy).reduce((sum, d) => sum + d.percentage, 0) / days
     
+    // Calculate previous period occupancy for comparison
+    const prevStartDate = startDate.clone().subtract(days, 'days')
+    const prevDailyOccupancy: { [date: string]: { occupied: number; percentage: number } } = {}
+    
+    for (let i = 0; i < days; i++) {
+      const date = prevStartDate.clone().add(i, 'days')
+      const dateStr = date.format('YYYY-MM-DD')
+      
+      const occupiedCount = reservations.filter(res => {
+        if (['CANCELLED', 'NO_SHOW'].includes(res.status)) return false
+        const checkIn = moment(res.checkIn)
+        const checkOut = moment(res.checkOut)
+        return date.isSameOrAfter(checkIn, 'day') && date.isBefore(checkOut, 'day')
+      }).length
+      
+      prevDailyOccupancy[dateStr] = {
+        occupied: occupiedCount,
+        percentage: Math.round((occupiedCount / totalRooms) * 100)
+      }
+    }
+    
+    const prevAvgOccupancy = Object.values(prevDailyOccupancy).reduce((sum, d) => sum + d.percentage, 0) / days
+    const occupancyChange = prevAvgOccupancy > 0 
+      ? Math.round(((avgOccupancy - prevAvgOccupancy) / prevAvgOccupancy) * 100) 
+      : 0
+    
     return {
       daily: dailyOccupancy,
       avgOccupancy: Math.round(avgOccupancy),
       totalRooms,
-      days
+      days,
+      // Comparison data
+      prevAvgOccupancy: Math.round(prevAvgOccupancy),
+      changePercent: occupancyChange,
+      trend: avgOccupancy > prevAvgOccupancy ? 'up' : avgOccupancy < prevAvgOccupancy ? 'down' : 'neutral'
     }
   }, [reservations, rooms, startDate, endDate])
   
@@ -888,18 +951,34 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
           {/* REVENUE REPORT */}
           {activeReport === 'revenue' && (
             <div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
                   <div className="text-sm text-green-600 font-medium">💰 სულ შემოსავალი</div>
                   <div className="text-3xl font-bold text-green-700 mt-1">₾{revenueData.total.toLocaleString()}</div>
+                  {revenueData.changePercent !== 0 && (
+                    <div className={`text-sm mt-1 flex items-center gap-1 ${revenueData.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                      {revenueData.trend === 'up' ? '↑' : '↓'} {Math.abs(revenueData.changePercent)}% წინა პერიოდთან
+                    </div>
+                  )}
                 </div>
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
                   <div className="text-sm text-blue-600 font-medium">📊 საშუალო დღიური</div>
                   <div className="text-3xl font-bold text-blue-700 mt-1">₾{Number(revenueData.avgDaily || 0).toFixed(0)}</div>
+                  <div className="text-xs text-blue-500 mt-1">წინა: ₾{Number(revenueData.prevAvgDaily || 0).toFixed(0)}</div>
+                </div>
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4">
+                  <div className="text-sm text-gray-600 font-medium">📅 წინა პერიოდი</div>
+                  <div className="text-3xl font-bold text-gray-700 mt-1">₾{revenueData.prevTotal.toLocaleString()}</div>
+                  <div className="text-xs text-gray-500 mt-1">{revenueData.days} დღე</div>
                 </div>
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
-                  <div className="text-sm text-purple-600 font-medium">📅 დღეები</div>
-                  <div className="text-3xl font-bold text-purple-700 mt-1">{revenueData.days}</div>
+                  <div className="text-sm text-purple-600 font-medium">📈 ცვლილება</div>
+                  <div className={`text-3xl font-bold mt-1 ${revenueData.trend === 'up' ? 'text-green-600' : revenueData.trend === 'down' ? 'text-red-600' : 'text-gray-600'}`}>
+                    {revenueData.trend === 'up' ? '+' : ''}{revenueData.changePercent}%
+                  </div>
+                  <div className="text-xs text-purple-500 mt-1">
+                    {revenueData.trend === 'up' ? '📈 ზრდა' : revenueData.trend === 'down' ? '📉 კლება' : '➡️ უცვლელი'}
+                  </div>
                 </div>
               </div>
               
@@ -941,18 +1020,33 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
           {/* OCCUPANCY REPORT */}
           {activeReport === 'occupancy' && (
             <div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
                   <div className="text-sm text-blue-600 font-medium">🏨 საშუალო დაკავებულობა</div>
                   <div className="text-3xl font-bold text-blue-700 mt-1">{occupancyData.avgOccupancy}%</div>
+                  {occupancyData.changePercent !== 0 && (
+                    <div className={`text-sm mt-1 flex items-center gap-1 ${occupancyData.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                      {occupancyData.trend === 'up' ? '↑' : '↓'} {Math.abs(occupancyData.changePercent)}% წინა პერიოდთან
+                    </div>
+                  )}
+                </div>
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4">
+                  <div className="text-sm text-gray-600 font-medium">📅 წინა პერიოდი</div>
+                  <div className="text-3xl font-bold text-gray-700 mt-1">{occupancyData.prevAvgOccupancy}%</div>
+                  <div className="text-xs text-gray-500 mt-1">{occupancyData.days} დღე</div>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
                   <div className="text-sm text-green-600 font-medium">🚪 სულ ოთახები</div>
                   <div className="text-3xl font-bold text-green-700 mt-1">{occupancyData.totalRooms}</div>
                 </div>
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
-                  <div className="text-sm text-purple-600 font-medium">📅 ანალიზის პერიოდი</div>
-                  <div className="text-3xl font-bold text-purple-700 mt-1">{occupancyData.days} დღე</div>
+                  <div className="text-sm text-purple-600 font-medium">📈 ცვლილება</div>
+                  <div className={`text-3xl font-bold mt-1 ${occupancyData.trend === 'up' ? 'text-green-600' : occupancyData.trend === 'down' ? 'text-red-600' : 'text-gray-600'}`}>
+                    {occupancyData.trend === 'up' ? '+' : ''}{occupancyData.changePercent}%
+                  </div>
+                  <div className="text-xs text-purple-500 mt-1">
+                    {occupancyData.trend === 'up' ? '📈 ზრდა' : occupancyData.trend === 'down' ? '📉 კლება' : '➡️ უცვლელი'}
+                  </div>
                 </div>
               </div>
               
