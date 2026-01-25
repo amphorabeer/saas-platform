@@ -24,16 +24,25 @@ interface Alert {
 export default function KPIAlerts({ rooms, reservations, folios = [] }: KPIAlertsProps) {
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([])
   
+  // Safely handle undefined/null values
+  const safeRooms = rooms || []
+  const safeReservations = reservations || []
+  const safeFolios = folios || []
+  
   // Load dismissed alerts from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('dismissedKPIAlerts')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      // Only keep today's dismissals
-      const today = moment().format('YYYY-MM-DD')
-      if (parsed.date === today) {
-        setDismissedAlerts(parsed.alerts || [])
+    try {
+      const saved = localStorage.getItem('dismissedKPIAlerts')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // Only keep today's dismissals
+        const today = moment().format('YYYY-MM-DD')
+        if (parsed.date === today) {
+          setDismissedAlerts(parsed.alerts || [])
+        }
       }
+    } catch (e) {
+      console.error('[KPIAlerts] Error loading dismissed alerts:', e)
     }
   }, [])
   
@@ -49,10 +58,10 @@ export default function KPIAlerts({ rooms, reservations, folios = [] }: KPIAlert
   const alerts = useMemo(() => {
     const alertsList: Alert[] = []
     const today = moment()
-    const totalRooms = rooms.length || 1
+    const totalRooms = safeRooms.length || 1
     
     // Calculate today's occupancy
-    const occupiedToday = reservations.filter(res => {
+    const occupiedToday = safeReservations.filter(res => {
       if (['CANCELLED', 'NO_SHOW'].includes(res.status)) return false
       const checkIn = moment(res.checkIn)
       const checkOut = moment(res.checkOut)
@@ -64,7 +73,7 @@ export default function KPIAlerts({ rooms, reservations, folios = [] }: KPIAlert
     // Calculate week ahead occupancy
     const weekAhead = Array.from({ length: 7 }, (_, i) => {
       const date = moment().add(i + 1, 'days')
-      const occupied = reservations.filter(res => {
+      const occupied = safeReservations.filter(res => {
         if (['CANCELLED', 'NO_SHOW'].includes(res.status)) return false
         const checkIn = moment(res.checkIn)
         const checkOut = moment(res.checkOut)
@@ -77,16 +86,16 @@ export default function KPIAlerts({ rooms, reservations, folios = [] }: KPIAlert
     const lowOccupancyDays = weekAhead.filter(d => d.percentage < 30)
     
     // Today's arrivals and departures
-    const todayArrivals = reservations.filter(r => 
+    const todayArrivals = safeReservations.filter(r => 
       moment(r.checkIn).isSame(today, 'day') && r.status === 'CONFIRMED'
     ).length
     
-    const todayDepartures = reservations.filter(r => 
+    const todayDepartures = safeReservations.filter(r => 
       moment(r.checkOut).isSame(today, 'day') && r.status === 'CHECKED_IN'
     ).length
     
     // Outstanding balances
-    const outstandingBalance = folios
+    const outstandingBalance = safeFolios
       .filter((f: any) => f.status === 'open' && (f.balance || 0) > 0)
       .reduce((sum: number, f: any) => sum + (f.balance || 0), 0)
     
@@ -166,7 +175,7 @@ export default function KPIAlerts({ rooms, reservations, folios = [] }: KPIAlert
     }
     
     // 🔴 DANGER: No reservations this week
-    const weekReservations = reservations.filter(r => {
+    const weekReservations = safeReservations.filter(r => {
       const checkIn = moment(r.checkIn)
       return checkIn.isAfter(today) && checkIn.isBefore(moment().add(7, 'days')) && r.status !== 'CANCELLED'
     }).length
@@ -182,7 +191,7 @@ export default function KPIAlerts({ rooms, reservations, folios = [] }: KPIAlert
     }
     
     return alertsList.filter(alert => !dismissedAlerts.includes(alert.id))
-  }, [rooms, reservations, folios, dismissedAlerts])
+  }, [safeRooms, safeReservations, safeFolios, dismissedAlerts])
   
   if (alerts.length === 0) return null
   
