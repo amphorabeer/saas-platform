@@ -6927,9 +6927,20 @@ function FacebookBotSection() {
     loadIntegration()
   }, [])
   
+  // Get organizationId from localStorage
+  const getOrgId = () => {
+    if (typeof window !== 'undefined') {
+      const hotelInfo = JSON.parse(localStorage.getItem('hotelInfo') || '{}')
+      return hotelInfo.organizationId || 'default-org'
+    }
+    return 'default-org'
+  }
+  
   const loadIntegration = async () => {
     try {
-      const res = await fetch('/api/facebook')
+      const res = await fetch('/api/facebook', {
+        headers: { 'x-organization-id': getOrgId() }
+      })
       const data = await res.json()
       
       if (data.integration) {
@@ -6954,7 +6965,10 @@ function FacebookBotSection() {
     try {
       const res = await fetch('/api/facebook', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-organization-id': getOrgId()
+        },
         body: JSON.stringify({
           pageId,
           pageAccessToken: pageAccessToken || undefined,
@@ -6985,7 +6999,10 @@ function FacebookBotSection() {
     if (!confirm('დარწმუნებული ხართ რომ გსურთ Facebook ინტეგრაციის წაშლა?')) return
     
     try {
-      await fetch('/api/facebook', { method: 'DELETE' })
+      await fetch('/api/facebook', { 
+        method: 'DELETE',
+        headers: { 'x-organization-id': getOrgId() }
+      })
       setIntegration(null)
       setPageId('')
       setPageAccessToken('')

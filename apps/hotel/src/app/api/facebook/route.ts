@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 // GET - Get Facebook Integration settings
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.organizationId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Get organizationId from header (sent from client)
+    const organizationId = request.headers.get('x-organization-id')
+    
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Organization ID required' }, { status: 400 })
     }
 
     const integration = await prisma.facebookIntegration.findUnique({
-      where: { organizationId: session.user.organizationId },
+      where: { organizationId },
       select: {
         id: true,
         pageId: true,
@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
         bookingsCreated: true,
         createdAt: true,
         updatedAt: true,
-        // Don't return pageAccessToken for security
       }
     })
 
@@ -42,52 +41,71 @@ export async function GET(request: NextRequest) {
 // POST - Create/Update Facebook Integration
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.organizationId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const organizationId = request.headers.get('x-organization-id')
+    
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Organization ID required' }, { status: 400 })
     }
 
     const body = await request.json()
     const { pageId, pageName, pageAccessToken, welcomeMessage, botEnabled, bookingEnabled } = body
 
-    if (!pageId || !pageAccessToken) {
-      return NextResponse.json({ error: 'Page ID and Access Token required' }, { status: 400 })
+    if (!pageId) {
+      return NextResponse.json({ error: 'Page ID required' }, { status: 400 })
     }
 
-    // Verify the token works by calling Facebook API
-    const verifyResponse = await fetch(
-      `https://graph.facebook.com/v18.0/${pageId}?access_token=${pageAccessToken}&fields=name,id`
-    )
-    const verifyData = await verifyResponse.json()
+    // If new token provided, verify it works
+    if (pageAccessToken) {
+      const verifyResponse = await fetch(
+        `https://graph.facebook.com/v18.0/${pageId}?access_token=${pageAccessToken}&fields=name,id`
+      )
+      const verifyData = await verifyResponse.json()
 
-    if (verifyData.error) {
-      return NextResponse.json({ 
-        error: 'Invalid Page ID or Access Token', 
-        details: verifyData.error.message 
-      }, { status: 400 })
-    }
-
-    // Create or update integration
-    const integration = await prisma.facebookIntegration.upsert({
-      where: { organizationId: session.user.organizationId },
-      create: {
-        organizationId: session.user.organizationId,
-        pageId,
-        pageName: verifyData.name || pageName,
-        pageAccessToken,
-        welcomeMessage,
-        botEnabled: botEnabled ?? true,
-        bookingEnabled: bookingEnabled ?? true,
-      },
-      update: {
-        pageId,
-        pageName: verifyData.name || pageName,
-        pageAccessToken,
-        welcomeMessage,
-        botEnabled,
-        bookingEnabled,
+      if (verifyData.error) {
+        return NextResponse.json({ 
+          error: 'Invalid Page ID or Access Token', 
+          details: verifyData.error.message 
+        }, { status: 400 })
       }
+    }
+
+    // Check if integration exists
+    const existing = await prisma.facebookIntegration.findUnique({
+      where: { organizationId }
     })
+
+    let integration
+    if (existing) {
+      // Update
+      integration = await prisma.facebookIntegration.update({
+        where: { organizationId },
+        data: {
+          pageId,
+          pageName: pageName || existing.pageName,
+          ...(pageAccessToken && { pageAccessToken }),
+          welcomeMessage,
+          botEnabled: botEnabled ?? true,
+          bookingEnabled: bookingEnabled ?? true,
+        }
+      })
+    } else {
+      // Create - token required for new integration
+      if (!pageAccessToken) {
+        return NextResponse.json({ error: 'Access Token required for new integration' }, { status: 400 })
+      }
+      
+      integration = await prisma.facebookIntegration.create({
+        data: {
+          organizationId,
+          pageId,
+          pageName,
+          pageAccessToken,
+          welcomeMessage,
+          botEnabled: botEnabled ?? true,
+          bookingEnabled: bookingEnabled ?? true,
+        }
+      })
+    }
 
     return NextResponse.json({ 
       success: true, 
@@ -98,7 +116,7 @@ export async function POST(request: NextRequest) {
         verifyToken: integration.verifyToken,
         isActive: integration.isActive,
       },
-      webhookUrl: `${process.env.NEXTAUTH_URL || 'https://saas-hotel.vercel.app'}/api/messenger/webhook`,
+      webhookUrl: `https://saas-hotel.vercel.app/api/messenger/webhook`,
       message: 'Facebook integration saved successfully'
     })
   } catch (error) {
@@ -110,13 +128,14 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove Facebook Integration
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.organizationId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const organizationId = request.headers.get('x-organization-id')
+    
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Organization ID required' }, { status: 400 })
     }
 
     await prisma.facebookIntegration.delete({
-      where: { organizationId: session.user.organizationId }
+      where: { organizationId }
     })
 
     return NextResponse.json({ success: true, message: 'Facebook integration removed' })
