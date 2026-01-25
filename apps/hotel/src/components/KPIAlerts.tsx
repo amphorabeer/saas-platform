@@ -193,7 +193,25 @@ export default function KPIAlerts({ rooms, reservations, folios = [] }: KPIAlert
     return alertsList.filter(alert => !dismissedAlerts.includes(alert.id))
   }, [safeRooms, safeReservations, safeFolios, dismissedAlerts])
   
-  if (alerts.length === 0) return null
+  if (alerts.length === 0) {
+    // Show at least one info message if no alerts
+    return (
+      <div className="mb-6 space-y-3">
+        <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
+          🔔 KPI შეტყობინებები
+        </h3>
+        <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl p-4 flex items-start gap-3">
+          <div className="bg-green-100 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-xl">✅</span>
+          </div>
+          <div className="flex-1">
+            <div className="font-medium">ყველაფერი წესრიგშია!</div>
+            <div className="text-sm opacity-80">ამჟამად აქტიური შეტყობინებები არ არის</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
   
   const typeStyles = {
     danger: 'bg-red-50 border-red-200 text-red-800',
