@@ -98,6 +98,7 @@ model Organization {
   quickButtons      QuickButton[]
   emailQueue        EmailQueue[]
   channelConnections ChannelConnection[]
+  facebookIntegration FacebookIntegration?
 
   // Timestamps
   createdAt         DateTime           @default(now())
@@ -1033,4 +1034,38 @@ model ChannelSyncLog {
   
   @@index([connectionId])
   @@index([startedAt])
+}
+
+// Facebook Messenger Integration
+model FacebookIntegration {
+  id                String       @id @default(cuid())
+  organizationId    String       @unique
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Facebook credentials
+  pageId            String       @unique  // Facebook Page ID
+  pageName          String?               // Page name for display
+  pageAccessToken   String       @db.Text // Encrypted token
+  
+  // Webhook verification
+  verifyToken       String       @default(cuid())
+  
+  // Settings
+  isActive          Boolean      @default(true)
+  autoReply         Boolean      @default(true)
+  welcomeMessage    String?      @db.Text
+  
+  // Bot configuration
+  botEnabled        Boolean      @default(true)
+  bookingEnabled    Boolean      @default(true)
+  
+  // Stats
+  messagesReceived  Int          @default(0)
+  messagesSent      Int          @default(0)
+  bookingsCreated   Int          @default(0)
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  @@index([pageId])
 }
