@@ -54,7 +54,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Page ID required' }, { status: 400 })
     }
 
-    // If new token provided, verify it works
+    // If new token provided, verify it works (skip for now - can be enabled later)
+    // Note: Verification requires pages_read_engagement permission
+    /*
     if (pageAccessToken) {
       const verifyResponse = await fetch(
         `https://graph.facebook.com/v18.0/${pageId}?access_token=${pageAccessToken}&fields=name,id`
@@ -68,6 +70,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
     }
+    */
 
     // Check if integration exists
     const existing = await prisma.facebookIntegration.findUnique({
