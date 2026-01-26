@@ -6844,59 +6844,187 @@ function SystemSection({ systemSettings, setSystemSettings, activityLogs, onSave
   isSaving: boolean
 }) {
   const [activeTab, setActiveTab] = useState<'settings' | 'logs' | 'backup'>('settings')
+  const [isExporting, setIsExporting] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
   
-  const handleExportData = () => {
-    const data = {
-      hotelInfo: JSON.parse(localStorage.getItem('hotelInfo') || '{}'),
-      roomTypes: JSON.parse(localStorage.getItem('roomTypes') || '[]'),
-      users: JSON.parse(localStorage.getItem('hotelUsers') || '[]'),
-      checklist: JSON.parse(localStorage.getItem('housekeepingChecklist') || '[]'),
-      systemSettings: JSON.parse(localStorage.getItem('systemSettings') || '{}'),
-      floors: JSON.parse(localStorage.getItem('hotelFloors') || '[]'),
-      staff: JSON.parse(localStorage.getItem('hotelStaff') || '[]'),
-      seasons: JSON.parse(localStorage.getItem('hotelSeasons') || '[]'),
-      extraServices: JSON.parse(localStorage.getItem('hotelExtraServices') || '[]'),
-      packages: JSON.parse(localStorage.getItem('hotelPackages') || '[]'),
-      taxes: JSON.parse(localStorage.getItem('hotelTaxes') || '{}'),
-      quickCharges: JSON.parse(localStorage.getItem('hotelQuickCharges') || '[]'),
-      exportDate: new Date().toISOString()
+  const handleExportData = async () => {
+    setIsExporting(true)
+    try {
+      // Fetch all data from API
+      const [
+        floorsRes, roomTypesRes, staffRes, seasonsRes, servicesRes, 
+        packagesRes, taxesRes, systemRes, cashierRes, calendarRes,
+        checklistRes, chargeItemsRes, chargeCategoriesRes
+      ] = await Promise.all([
+        fetch('/api/hotel/floors'),
+        fetch('/api/hotel/room-types'),
+        fetch('/api/hotel/staff'),
+        fetch('/api/hotel/seasons'),
+        fetch('/api/hotel/services'),
+        fetch('/api/hotel/packages'),
+        fetch('/api/hotel/taxes'),
+        fetch('/api/hotel/system-settings'),
+        fetch('/api/hotel/cashier-settings'),
+        fetch('/api/hotel/calendar-settings'),
+        fetch('/api/hotel/housekeeping-checklist'),
+        fetch('/api/hotel/charge-items'),
+        fetch('/api/hotel/charge-categories')
+      ])
+      
+      const data = {
+        floors: floorsRes.ok ? await floorsRes.json() : [],
+        roomTypes: roomTypesRes.ok ? await roomTypesRes.json() : [],
+        staff: staffRes.ok ? await staffRes.json() : [],
+        seasons: seasonsRes.ok ? await seasonsRes.json() : [],
+        services: servicesRes.ok ? await servicesRes.json() : [],
+        packages: packagesRes.ok ? await packagesRes.json() : [],
+        taxes: taxesRes.ok ? await taxesRes.json() : {},
+        systemSettings: systemRes.ok ? await systemRes.json() : {},
+        cashierSettings: cashierRes.ok ? await cashierRes.json() : {},
+        calendarSettings: calendarRes.ok ? await calendarRes.json() : {},
+        checklist: checklistRes.ok ? await checklistRes.json() : [],
+        chargeItems: chargeItemsRes.ok ? await chargeItemsRes.json() : [],
+        chargeCategories: chargeCategoriesRes.ok ? await chargeCategoriesRes.json() : [],
+        // Also include hotelInfo from state
+        hotelInfo: {
+          name: systemSettings?.hotelName,
+          address: systemSettings?.hotelAddress,
+          phone: systemSettings?.hotelPhone,
+          email: systemSettings?.hotelEmail
+        },
+        exportDate: new Date().toISOString(),
+        version: '2.0'
+      }
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `hotel-backup-${moment().format('YYYY-MM-DD')}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      
+      alert('✅ მონაცემები წარმატებით ექსპორტირდა!')
+    } catch (error) {
+      console.error('Export error:', error)
+      alert('❌ ექსპორტის შეცდომა')
+    } finally {
+      setIsExporting(false)
     }
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `hotel-backup-${moment().format('YYYY-MM-DD')}.json`
-    a.click()
-    URL.revokeObjectURL(url)
   }
   
-  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportData = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     
+    setIsImporting(true)
     const reader = new FileReader()
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const data = JSON.parse(event.target?.result as string)
         
-        if (data.hotelInfo) localStorage.setItem('hotelInfo', JSON.stringify(data.hotelInfo))
-        if (data.roomTypes) localStorage.setItem('roomTypes', JSON.stringify(data.roomTypes))
-        if (data.users) localStorage.setItem('hotelUsers', JSON.stringify(data.users))
-        if (data.checklist) localStorage.setItem('housekeepingChecklist', JSON.stringify(data.checklist))
-        if (data.systemSettings) localStorage.setItem('systemSettings', JSON.stringify(data.systemSettings))
-        if (data.floors) localStorage.setItem('hotelFloors', JSON.stringify(data.floors))
-        if (data.staff) localStorage.setItem('hotelStaff', JSON.stringify(data.staff))
-        if (data.seasons) localStorage.setItem('hotelSeasons', JSON.stringify(data.seasons))
-        if (data.extraServices) localStorage.setItem('hotelExtraServices', JSON.stringify(data.extraServices))
-        if (data.packages) localStorage.setItem('hotelPackages', JSON.stringify(data.packages))
-        if (data.taxes) localStorage.setItem('hotelTaxes', JSON.stringify(data.taxes))
-        if (data.quickCharges) localStorage.setItem('hotelQuickCharges', JSON.stringify(data.quickCharges))
+        // Save to API endpoints
+        const savePromises = []
+        
+        if (data.floors?.length > 0) {
+          for (const floor of data.floors) {
+            savePromises.push(
+              fetch('/api/hotel/floors', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(floor)
+              })
+            )
+          }
+        }
+        
+        if (data.roomTypes?.length > 0) {
+          for (const rt of data.roomTypes) {
+            savePromises.push(
+              fetch('/api/hotel/room-types', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(rt)
+              })
+            )
+          }
+        }
+        
+        if (data.staff?.length > 0) {
+          for (const s of data.staff) {
+            savePromises.push(
+              fetch('/api/hotel/staff', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(s)
+              })
+            )
+          }
+        }
+        
+        if (data.seasons?.length > 0) {
+          for (const season of data.seasons) {
+            savePromises.push(
+              fetch('/api/hotel/seasons', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(season)
+              })
+            )
+          }
+        }
+        
+        if (data.packages?.length > 0) {
+          for (const pkg of data.packages) {
+            savePromises.push(
+              fetch('/api/hotel/packages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pkg)
+              })
+            )
+          }
+        }
+        
+        if (data.taxes) {
+          savePromises.push(
+            fetch('/api/hotel/taxes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data.taxes)
+            })
+          )
+        }
+        
+        if (data.systemSettings) {
+          savePromises.push(
+            fetch('/api/hotel/system-settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data.systemSettings)
+            })
+          )
+        }
+        
+        if (data.checklist?.length > 0) {
+          savePromises.push(
+            fetch('/api/hotel/housekeeping-checklist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items: data.checklist })
+            })
+          )
+        }
+        
+        await Promise.all(savePromises)
         
         alert('✅ მონაცემები წარმატებით აღდგა! გვერდი გადაიტვირთება.')
         window.location.reload()
       } catch (error) {
-        alert('❌ ფაილის წაკითხვის შეცდომა')
+        console.error('Import error:', error)
+        alert('❌ იმპორტის შეცდომა')
+      } finally {
+        setIsImporting(false)
       }
     }
     reader.readAsText(file)
@@ -7055,40 +7183,45 @@ function SystemSection({ systemSettings, setSystemSettings, activityLogs, onSave
             <div className="space-y-6">
               <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                 <h3 className="font-bold text-green-700 mb-2">📥 მონაცემების ექსპორტი</h3>
-                <p className="text-sm text-green-600 mb-4">ჩამოტვირთეთ ყველა პარამეტრის სარეზერვო ასლი JSON ფორმატში</p>
+                <p className="text-sm text-green-600 mb-4">ჩამოტვირთეთ ყველა პარამეტრის სარეზერვო ასლი JSON ფორმატში (API-დან)</p>
                 <button
                   onClick={handleExportData}
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  disabled={isExporting}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
                 >
-                  📥 ექსპორტი
+                  {isExporting ? '⏳ იტვირთება...' : '📥 ექსპორტი'}
                 </button>
               </div>
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                 <h3 className="font-bold text-blue-700 mb-2">📤 მონაცემების იმპორტი</h3>
-                <p className="text-sm text-blue-600 mb-4">აღადგინეთ პარამეტრები სარეზერვო ასლიდან</p>
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImportData}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-                />
+                <p className="text-sm text-blue-600 mb-4">აღადგინეთ პარამეტრები სარეზერვო ასლიდან (API-ში შეინახება)</p>
+                {isImporting ? (
+                  <div className="text-blue-600">⏳ იმპორტირება...</div>
+                ) : (
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImportData}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+                  />
+                )}
               </div>
               
               <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                <h3 className="font-bold text-red-700 mb-2">⚠️ მონაცემების წაშლა</h3>
-                <p className="text-sm text-red-600 mb-4">გაფრთხილება: ეს წაშლის ყველა ლოკალურ მონაცემს!</p>
+                <h3 className="font-bold text-red-700 mb-2">⚠️ ლოკალური cache-ის წაშლა</h3>
+                <p className="text-sm text-red-600 mb-4">ეს წაშლის მხოლოდ ლოკალურ cache-ს. სერვერის მონაცემები უცვლელი რჩება.</p>
                 <button
                   onClick={() => {
-                    if (confirm('ნამდვილად გსურთ ყველა მონაცემის წაშლა?\n\nეს მოქმედება შეუქცევადია!')) {
+                    if (confirm('ნამდვილად გსურთ ლოკალური cache-ის წაშლა?\n\nსერვერის მონაცემები შენარჩუნდება.')) {
                       localStorage.clear()
-                      alert('მონაცემები წაშლილია. გვერდი გადაიტვირთება.')
+                      alert('ლოკალური cache წაშლილია. გვერდი გადაიტვირთება.')
                       window.location.reload()
                     }
                   }}
                   className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                 >
-                  🗑️ ყველაფრის წაშლა
+                  🗑️ Cache-ის წაშლა
                 </button>
               </div>
             </div>
