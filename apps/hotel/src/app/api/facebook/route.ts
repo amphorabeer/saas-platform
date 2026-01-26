@@ -1,15 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
 
 // GET - Get Facebook Integration settings
 export async function GET(request: NextRequest) {
   try {
-    // Get organizationId from header (sent from client)
-    const organizationId = request.headers.get('x-organization-id')
+    // Get organizationId from tenant helper
+    const { getOrganizationId } = await import('@/lib/tenant')
+    let organizationId = await getOrganizationId()
+    
+    // Fallback to header if tenant helper returns null
+    if (!organizationId) {
+      organizationId = request.headers.get('x-organization-id')
+    }
+    
+    console.log('[Facebook API] GET - organizationId:', organizationId)
     
     if (!organizationId) {
-      return NextResponse.json({ error: 'Organization ID required' }, { status: 400 })
+      return NextResponse.json({ integration: null })
     }
+
+    // Try to import prisma dynamically
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
 
     const integration = await prisma.facebookIntegration.findUnique({
       where: { organizationId },
@@ -32,16 +45,25 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json({ integration })
-  } catch (error) {
-    console.error('[Facebook API] GET error:', error)
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+  } catch (error: any) {
+    console.error('[Facebook API] GET error:', error?.message || error)
+    return NextResponse.json({ integration: null, error: error?.message })
   }
 }
 
 // POST - Create/Update Facebook Integration
 export async function POST(request: NextRequest) {
   try {
-    const organizationId = request.headers.get('x-organization-id')
+    // Get organizationId from tenant helper
+    const { getOrganizationId } = await import('@/lib/tenant')
+    let organizationId = await getOrganizationId()
+    
+    // Fallback to header if tenant helper returns null
+    if (!organizationId) {
+      organizationId = request.headers.get('x-organization-id')
+    }
+    
+    console.log('[Facebook API] POST - organizationId:', organizationId)
     
     if (!organizationId) {
       return NextResponse.json({ error: 'Organization ID required' }, { status: 400 })
@@ -50,27 +72,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { pageId, pageName, pageAccessToken, welcomeMessage, botEnabled, bookingEnabled } = body
 
+    console.log('[Facebook API] POST - pageId:', pageId)
+
     if (!pageId) {
       return NextResponse.json({ error: 'Page ID required' }, { status: 400 })
     }
 
-    // If new token provided, verify it works (skip for now - can be enabled later)
-    // Note: Verification requires pages_read_engagement permission
-    /*
-    if (pageAccessToken) {
-      const verifyResponse = await fetch(
-        `https://graph.facebook.com/v18.0/${pageId}?access_token=${pageAccessToken}&fields=name,id`
-      )
-      const verifyData = await verifyResponse.json()
-
-      if (verifyData.error) {
-        return NextResponse.json({ 
-          error: 'Invalid Page ID or Access Token', 
-          details: verifyData.error.message 
-        }, { status: 400 })
-      }
-    }
-    */
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
 
     // Check if integration exists
     const existing = await prisma.facebookIntegration.findUnique({
@@ -122,28 +131,36 @@ export async function POST(request: NextRequest) {
       webhookUrl: `https://saas-hotel.vercel.app/api/messenger/webhook`,
       message: 'Facebook integration saved successfully'
     })
-  } catch (error) {
-    console.error('[Facebook API] POST error:', error)
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+  } catch (error: any) {
+    console.error('[Facebook API] POST error:', error?.message || error)
+    return NextResponse.json({ error: error?.message || 'Internal error' }, { status: 500 })
   }
 }
 
 // DELETE - Remove Facebook Integration
 export async function DELETE(request: NextRequest) {
   try {
-    const organizationId = request.headers.get('x-organization-id')
+    const { getOrganizationId } = await import('@/lib/tenant')
+    let organizationId = await getOrganizationId()
+    
+    if (!organizationId) {
+      organizationId = request.headers.get('x-organization-id')
+    }
     
     if (!organizationId) {
       return NextResponse.json({ error: 'Organization ID required' }, { status: 400 })
     }
+
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
 
     await prisma.facebookIntegration.delete({
       where: { organizationId }
     })
 
     return NextResponse.json({ success: true, message: 'Facebook integration removed' })
-  } catch (error) {
-    console.error('[Facebook API] DELETE error:', error)
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+  } catch (error: any) {
+    console.error('[Facebook API] DELETE error:', error?.message || error)
+    return NextResponse.json({ error: error?.message || 'Internal error' }, { status: 500 })
   }
 }
