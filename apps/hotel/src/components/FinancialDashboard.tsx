@@ -296,7 +296,7 @@ const PaymentHistory = ({ selectedDate }: { selectedDate: string }) => {
     // Try API first for folios
     let folios: any[] = []
     try {
-      const response = await fetch('/api/folios')
+      const response = await fetch('/api/hotel/folios')
       if (response.ok) {
         const data = await response.json()
         folios = data.folios || []

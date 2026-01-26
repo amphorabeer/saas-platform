@@ -104,7 +104,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
   useEffect(() => {
     const loadFolios = async () => {
       try {
-        const response = await fetch('/api/folios')
+        const response = await fetch('/api/hotel/folios')
         if (response.ok) {
           const data = await response.json()
           if (data.folios && data.folios.length > 0) {

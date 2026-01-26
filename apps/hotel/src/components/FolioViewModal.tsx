@@ -50,7 +50,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
       // Try API first
       let folios: any[] = []
       try {
-        const response = await fetch('/api/folios')
+        const response = await fetch('/api/hotel/folios')
         if (response.ok) {
           const data = await response.json()
           folios = data.folios || []
@@ -92,7 +92,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
         
         // Also save to API
         try {
-          await fetch('/api/folios', {
+          await fetch('/api/hotel/folios', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(existingFolio),
@@ -151,7 +151,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     
     // Also save to API
     try {
-      await fetch('/api/folios', {
+      await fetch('/api/hotel/folios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedFolio),
@@ -212,7 +212,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
     
     // Also save to API
     try {
-      await fetch('/api/folios', {
+      await fetch('/api/hotel/folios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedFolio),

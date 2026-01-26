@@ -103,7 +103,7 @@ export default function NightAuditAutoClose({ onComplete }: { onComplete: () => 
         // Try API first
         let existingFolios: any[] = []
         try {
-          const response = await fetch('/api/folios')
+          const response = await fetch('/api/hotel/folios')
           if (response.ok) {
             const data = await response.json()
             existingFolios = data.folios || []
@@ -134,7 +134,7 @@ export default function NightAuditAutoClose({ onComplete }: { onComplete: () => 
           
           // Save to API
           try {
-            await fetch('/api/folios', {
+            await fetch('/api/hotel/folios', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(folio),
