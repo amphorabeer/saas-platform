@@ -25,6 +25,15 @@ export class ActivityLogger {
       }
       
       localStorage.setItem('activityLogs', JSON.stringify(logs))
+      
+      // Also save to API (non-blocking)
+      fetch('/api/hotel/activity-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, details })
+      }).catch(err => {
+        console.warn('[ActivityLogger] API save failed:', err)
+      })
     } catch (error) {
       console.error('Failed to log activity:', error)
     }
@@ -67,10 +76,24 @@ export class ActivityLogger {
     }
   }
   
+  // Async version that fetches from API
+  static async getLogsAsync(limit = 100): Promise<any[]> {
+    try {
+      const response = await fetch(`/api/hotel/activity-logs?limit=${limit}`)
+      if (response.ok) {
+        const logs = await response.json()
+        // Update localStorage as cache
+        localStorage.setItem('activityLogs', JSON.stringify(logs))
+        return logs
+      }
+    } catch (error) {
+      console.error('[ActivityLogger] API fetch failed:', error)
+    }
+    // Fallback to localStorage
+    return this.getLogs()
+  }
+  
   static clearLogs() {
     localStorage.removeItem('activityLogs')
   }
 }
-
-
-
