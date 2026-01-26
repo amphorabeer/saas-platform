@@ -274,20 +274,54 @@ export default function SettingsNew() {
       console.error('Error loading rooms:', e)
     }
     
-    // Load Room Types
-    const savedRoomTypes = localStorage.getItem('roomTypes')
-    if (savedRoomTypes) {
-      try {
-        setRoomTypes(JSON.parse(savedRoomTypes))
-      } catch (e) {
-        console.error('Error loading room types:', e)
+    // Load Room Types from API first, fallback to localStorage
+    try {
+      const roomTypesRes = await fetch('/api/hotel/room-types')
+      if (roomTypesRes.ok) {
+        const roomTypesData = await roomTypesRes.json()
+        if (Array.isArray(roomTypesData) && roomTypesData.length > 0) {
+          // Map API data to component format
+          const mappedTypes = roomTypesData.map((t: any) => ({
+            id: t.id,
+            name: t.name,
+            basePrice: t.basePrice,
+            description: t.description || '',
+            maxGuests: t.maxOccupancy || 2,
+            icon: t.typeData?.icon || '🛏️'
+          }))
+          setRoomTypes(mappedTypes)
+        } else {
+          // No types in DB, check localStorage
+          const savedRoomTypes = localStorage.getItem('roomTypes')
+          if (savedRoomTypes) {
+            setRoomTypes(JSON.parse(savedRoomTypes))
+          } else {
+            setRoomTypes([
+              { id: 'standard', name: 'Standard', basePrice: 150, description: 'სტანდარტული ოთახი', maxGuests: 2, icon: '🛏️' },
+              { id: 'deluxe', name: 'Deluxe', basePrice: 200, description: 'დელუქს ოთახი', maxGuests: 2, icon: '🌟' },
+              { id: 'suite', name: 'Suite', basePrice: 350, description: 'სუიტა', maxGuests: 4, icon: '👑' }
+            ])
+          }
+        }
+      } else {
+        throw new Error('API request failed')
       }
-    } else {
-      setRoomTypes([
-        { id: 'standard', name: 'Standard', basePrice: 150, description: 'სტანდარტული ოთახი', maxGuests: 2, icon: '🛏️' },
-        { id: 'deluxe', name: 'Deluxe', basePrice: 200, description: 'დელუქს ოთახი', maxGuests: 2, icon: '🌟' },
-        { id: 'suite', name: 'Suite', basePrice: 350, description: 'სუიტა', maxGuests: 4, icon: '👑' }
-      ])
+    } catch (e) {
+      console.error('Error loading room types from API, falling back to localStorage:', e)
+      const savedRoomTypes = localStorage.getItem('roomTypes')
+      if (savedRoomTypes) {
+        try {
+          setRoomTypes(JSON.parse(savedRoomTypes))
+        } catch (e2) {
+          console.error('Error loading room types:', e2)
+        }
+      } else {
+        setRoomTypes([
+          { id: 'standard', name: 'Standard', basePrice: 150, description: 'სტანდარტული ოთახი', maxGuests: 2, icon: '🛏️' },
+          { id: 'deluxe', name: 'Deluxe', basePrice: 200, description: 'დელუქს ოთახი', maxGuests: 2, icon: '🌟' },
+          { id: 'suite', name: 'Suite', basePrice: 350, description: 'სუიტა', maxGuests: 4, icon: '👑' }
+        ])
+      }
     }
     
     // Load Users from API
@@ -328,54 +362,106 @@ export default function SettingsNew() {
       }
     }
     
-    // Load Checklist
-    const savedChecklist = localStorage.getItem('housekeepingChecklist')
-    if (savedChecklist) {
-      try {
-        setChecklist(JSON.parse(savedChecklist))
-      } catch (e) {
-        console.error('Error loading checklist:', e)
-        // If parse fails, use defaults and save them
-        const defaults = [
-          { id: '1', task: 'საწოლის თეთრეულის შეცვლა', category: 'საძინებელი', required: true },
-          { id: '2', task: 'აბაზანის დასუფთავება', category: 'აბაზანა', required: true },
-          { id: '3', task: 'იატაკის მტვერსასრუტით გაწმენდა', category: 'ზოგადი', required: true },
-          { id: '4', task: 'პირსახოცების შეცვლა', category: 'აბაზანა', required: true },
-          { id: '5', task: 'მინიბარის შევსება', category: 'მომსახურება', required: false }
-        ]
-        setChecklist(defaults)
-        localStorage.setItem('housekeepingChecklist', JSON.stringify(defaults))
+    // Load Checklist from API first
+    const defaultChecklist = [
+      { id: '1', task: 'საწოლის თეთრეულის შეცვლა', category: 'საძინებელი', required: true },
+      { id: '2', task: 'აბაზანის დასუფთავება', category: 'აბაზანა', required: true },
+      { id: '3', task: 'იატაკის მტვერსასრუტით გაწმენდა', category: 'ზოგადი', required: true },
+      { id: '4', task: 'პირსახოცების შეცვლა', category: 'აბაზანა', required: true },
+      { id: '5', task: 'მინიბარის შევსება', category: 'მომსახურება', required: false }
+    ]
+    try {
+      const checkRes = await fetch('/api/hotel/housekeeping-checklist')
+      if (checkRes.ok) {
+        const checkData = await checkRes.json()
+        if (Array.isArray(checkData) && checkData.length > 0) {
+          const mapped = checkData.map((item: any) => ({
+            id: item.id,
+            task: item.name,
+            category: item.category || 'ზოგადი',
+            required: item.isRequired ?? false
+          }))
+          setChecklist(mapped)
+        } else {
+          const savedChecklist = localStorage.getItem('housekeepingChecklist')
+          if (savedChecklist) {
+            setChecklist(JSON.parse(savedChecklist))
+          } else {
+            setChecklist(defaultChecklist)
+          }
+        }
+      } else {
+        throw new Error('API failed')
       }
-    } else {
-      // Default items - save them immediately
-      const defaults = [
-        { id: '1', task: 'საწოლის თეთრეულის შეცვლა', category: 'საძინებელი', required: true },
-        { id: '2', task: 'აბაზანის დასუფთავება', category: 'აბაზანა', required: true },
-        { id: '3', task: 'იატაკის მტვერსასრუტით გაწმენდა', category: 'ზოგადი', required: true },
-        { id: '4', task: 'პირსახოცების შეცვლა', category: 'აბაზანა', required: true },
-        { id: '5', task: 'მინიბარის შევსება', category: 'მომსახურება', required: false }
-      ]
-      setChecklist(defaults)
-      localStorage.setItem('housekeepingChecklist', JSON.stringify(defaults))
+    } catch (e) {
+      console.error('Error loading checklist from API:', e)
+      const savedChecklist = localStorage.getItem('housekeepingChecklist')
+      if (savedChecklist) {
+        try {
+          setChecklist(JSON.parse(savedChecklist))
+        } catch (e2) {
+          setChecklist(defaultChecklist)
+          localStorage.setItem('housekeepingChecklist', JSON.stringify(defaultChecklist))
+        }
+      } else {
+        setChecklist(defaultChecklist)
+        localStorage.setItem('housekeepingChecklist', JSON.stringify(defaultChecklist))
+      }
     }
     
-    // Load System Settings
-    const savedSystemSettings = localStorage.getItem('systemSettings')
-    if (savedSystemSettings) {
-      try {
-        setSystemSettings({ ...systemSettings, ...JSON.parse(savedSystemSettings) })
-      } catch (e) {
-        console.error('Error loading system settings:', e)
+    // Load System Settings from API first
+    try {
+      const sysRes = await fetch('/api/hotel/system-settings')
+      if (sysRes.ok) {
+        const sysData = await sysRes.json()
+        if (sysData && Object.keys(sysData).length > 0) {
+          setSystemSettings({ ...systemSettings, ...sysData })
+        } else {
+          const savedSystemSettings = localStorage.getItem('systemSettings')
+          if (savedSystemSettings) {
+            setSystemSettings({ ...systemSettings, ...JSON.parse(savedSystemSettings) })
+          }
+        }
+      } else {
+        throw new Error('API failed')
+      }
+    } catch (e) {
+      console.error('Error loading system settings from API:', e)
+      const savedSystemSettings = localStorage.getItem('systemSettings')
+      if (savedSystemSettings) {
+        try {
+          setSystemSettings({ ...systemSettings, ...JSON.parse(savedSystemSettings) })
+        } catch (e2) {
+          console.error('Error loading system settings:', e2)
+        }
       }
     }
     
-    // Load Cashier Settings
-    const savedCashierSettings = localStorage.getItem('cashierSettings')
-    if (savedCashierSettings) {
-      try {
-        setCashierSettings({ ...cashierSettings, ...JSON.parse(savedCashierSettings) })
-      } catch (e) {
-        console.error('Error loading cashier settings:', e)
+    // Load Cashier Settings from API first
+    try {
+      const cashRes = await fetch('/api/hotel/cashier-settings')
+      if (cashRes.ok) {
+        const cashData = await cashRes.json()
+        if (cashData && Object.keys(cashData).length > 0) {
+          setCashierSettings({ ...cashierSettings, ...cashData })
+        } else {
+          const savedCashierSettings = localStorage.getItem('cashierSettings')
+          if (savedCashierSettings) {
+            setCashierSettings({ ...cashierSettings, ...JSON.parse(savedCashierSettings) })
+          }
+        }
+      } else {
+        throw new Error('API failed')
+      }
+    } catch (e) {
+      console.error('Error loading cashier settings from API:', e)
+      const savedCashierSettings = localStorage.getItem('cashierSettings')
+      if (savedCashierSettings) {
+        try {
+          setCashierSettings({ ...cashierSettings, ...JSON.parse(savedCashierSettings) })
+        } catch (e2) {
+          console.error('Error loading cashier settings:', e2)
+        }
       }
     }
     
@@ -389,129 +475,347 @@ export default function SettingsNew() {
       }
     }
     
-    // NEW: Load Floors
-    const savedFloors = localStorage.getItem('hotelFloors')
-    if (savedFloors) {
-      try {
-        setFloors(JSON.parse(savedFloors))
-      } catch (e) {
-        console.error('Error loading floors:', e)
-      }
-    } else {
-      setFloors([
-        { id: '1', number: 1, name: 'პირველი სართული', description: 'ლობი და რეცეფცია', active: true },
-        { id: '2', number: 2, name: 'მეორე სართული', description: 'სტანდარტული ოთახები', active: true },
-        { id: '3', number: 3, name: 'მესამე სართული', description: 'დელუქს ოთახები', active: true }
-      ])
-    }
-    
-    // NEW: Load Staff
-    const savedStaff = localStorage.getItem('hotelStaff')
-    if (savedStaff) {
-      try {
-        setStaff(JSON.parse(savedStaff))
-      } catch (e) {
-        console.error('Error loading staff:', e)
-      }
-    } else {
-      setStaff([
-        { id: '1', firstName: 'მარიამ', lastName: 'გელაშვილი', position: 'Housekeeper', department: 'housekeeping', phone: '+995555123456', email: 'mariam@hotel.com', active: true, hireDate: '2024-01-15', notes: '' },
-        { id: '2', firstName: 'გიორგი', lastName: 'ბერიძე', position: 'Housekeeper', department: 'housekeeping', phone: '+995555234567', email: 'giorgi@hotel.com', active: true, hireDate: '2024-02-01', notes: '' }
-      ])
-    }
-    
-    // NEW: Load Seasons
-    const savedSeasons = localStorage.getItem('hotelSeasons')
-    if (savedSeasons) {
-      try {
-        setSeasons(JSON.parse(savedSeasons))
-      } catch (e) {
-        console.error('Error loading seasons:', e)
-      }
-    } else {
-      setSeasons([
-        { id: '1', name: 'დაბალი სეზონი', startDate: '2025-01-01', endDate: '2025-03-31', priceModifier: -20, color: '#10b981', active: true },
-        { id: '2', name: 'მაღალი სეზონი', startDate: '2025-06-01', endDate: '2025-08-31', priceModifier: 30, color: '#ef4444', active: true },
-        { id: '3', name: 'საშუალო სეზონი', startDate: '2025-04-01', endDate: '2025-05-31', priceModifier: 0, color: '#3b82f6', active: true }
-      ])
-    }
-    
-    // NEW: Load Extra Services
-    const savedServices = localStorage.getItem('hotelExtraServices')
-    if (savedServices) {
-      try {
-        setExtraServices(JSON.parse(savedServices))
-      } catch (e) {
-        console.error('Error loading extra services:', e)
-      }
-    } else {
-      setExtraServices([
-        { id: '1', name: 'საუზმე', code: 'BRK', price: 35, unit: 'person', category: 'F&B', available: true },
-        { id: '2', name: 'ტრანსფერი აეროპორტიდან', code: 'TRF', price: 60, unit: 'service', category: 'Transport', available: true },
-        { id: '3', name: 'SPA მასაჟი', code: 'SPA', price: 120, unit: 'hour', category: 'SPA', available: true },
-        { id: '4', name: 'მინიბარი - წყალი', code: 'MB-W', price: 3, unit: 'piece', category: 'Minibar', available: true },
-        { id: '5', name: 'სამრეცხაო', code: 'LND', price: 25, unit: 'service', category: 'Laundry', available: true }
-      ])
-    }
-    
-    // NEW: Load Packages
-    const savedPackages = localStorage.getItem('hotelPackages')
-    if (savedPackages) {
-      try {
-        setPackages(JSON.parse(savedPackages))
-      } catch (e) {
-        console.error('Error loading packages:', e)
-      }
-    } else {
-      setPackages([
-        { id: '1', name: 'რომანტიკული პაკეტი', description: 'ოთახი + საუზმე + შამპანური', price: 350, includedServices: ['BRK'], nights: 1, active: true },
-        { id: '2', name: 'ბიზნეს პაკეტი', description: 'ოთახი + საუზმე + ტრანსფერი', price: 280, includedServices: ['BRK', 'TRF'], nights: 1, active: true }
-      ])
-    }
-    
-    // NEW: Load Taxes
-    const savedTaxes = localStorage.getItem('hotelTaxes')
-    if (savedTaxes) {
-      try {
-        const parsed = JSON.parse(savedTaxes)
-        // Ensure all tax values are numbers, not undefined/null
-        const validated = {
-          VAT: parsed.VAT ?? 18,
-          CITY_TAX: parsed.CITY_TAX ?? 2,
-          TOURISM_TAX: parsed.TOURISM_TAX ?? 1,
-          SERVICE_CHARGE: parsed.SERVICE_CHARGE ?? 10
+    // NEW: Load Floors from API first, fallback to localStorage
+    try {
+      const floorsRes = await fetch('/api/hotel/floors')
+      if (floorsRes.ok) {
+        const floorsData = await floorsRes.json()
+        if (Array.isArray(floorsData) && floorsData.length > 0) {
+          // Map API data to component format
+          const mappedFloors = floorsData.map((f: any) => ({
+            id: f.id,
+            number: f.floorNumber,
+            name: f.name || `სართული ${f.floorNumber}`,
+            description: f.floorData?.description || '',
+            active: f.isActive
+          }))
+          setFloors(mappedFloors)
+        } else {
+          // No floors in DB, check localStorage
+          const savedFloors = localStorage.getItem('hotelFloors')
+          if (savedFloors) {
+            setFloors(JSON.parse(savedFloors))
+          } else {
+            setFloors([
+              { id: '1', number: 1, name: 'პირველი სართული', description: 'ლობი და რეცეფცია', active: true },
+              { id: '2', number: 2, name: 'მეორე სართული', description: 'სტანდარტული ოთახები', active: true },
+              { id: '3', number: 3, name: 'მესამე სართული', description: 'დელუქს ოთახები', active: true }
+            ])
+          }
         }
-        setTaxes(validated)
-      } catch (e) {
-        console.error('Error loading taxes:', e)
-        // Set defaults on error
+      } else {
+        throw new Error('API request failed')
+      }
+    } catch (e) {
+      console.error('Error loading floors from API, falling back to localStorage:', e)
+      const savedFloors = localStorage.getItem('hotelFloors')
+      if (savedFloors) {
+        try {
+          setFloors(JSON.parse(savedFloors))
+        } catch (e2) {
+          console.error('Error loading floors:', e2)
+        }
+      } else {
+        setFloors([
+          { id: '1', number: 1, name: 'პირველი სართული', description: 'ლობი და რეცეფცია', active: true },
+          { id: '2', number: 2, name: 'მეორე სართული', description: 'სტანდარტული ოთახები', active: true },
+          { id: '3', number: 3, name: 'მესამე სართული', description: 'დელუქს ოთახები', active: true }
+        ])
+      }
+    }
+    
+    // NEW: Load Staff from API first, fallback to localStorage
+    try {
+      const staffRes = await fetch('/api/hotel/staff')
+      if (staffRes.ok) {
+        const staffData = await staffRes.json()
+        if (Array.isArray(staffData) && staffData.length > 0) {
+          const mappedStaff = staffData.map((s: any) => ({
+            id: s.id,
+            firstName: s.firstName,
+            lastName: s.lastName,
+            position: s.position,
+            department: s.department,
+            phone: s.phone || '',
+            email: s.email || '',
+            active: s.isActive,
+            hireDate: s.hireDate ? s.hireDate.split('T')[0] : '',
+            notes: s.notes || ''
+          }))
+          setStaff(mappedStaff)
+        } else {
+          const savedStaff = localStorage.getItem('hotelStaff')
+          if (savedStaff) {
+            setStaff(JSON.parse(savedStaff))
+          } else {
+            setStaff([
+              { id: '1', firstName: 'მარიამ', lastName: 'გელაშვილი', position: 'Housekeeper', department: 'housekeeping', phone: '+995555123456', email: 'mariam@hotel.com', active: true, hireDate: '2024-01-15', notes: '' },
+              { id: '2', firstName: 'გიორგი', lastName: 'ბერიძე', position: 'Housekeeper', department: 'housekeeping', phone: '+995555234567', email: 'giorgi@hotel.com', active: true, hireDate: '2024-02-01', notes: '' }
+            ])
+          }
+        }
+      } else {
+        throw new Error('API request failed')
+      }
+    } catch (e) {
+      console.error('Error loading staff from API, falling back to localStorage:', e)
+      const savedStaff = localStorage.getItem('hotelStaff')
+      if (savedStaff) {
+        try {
+          setStaff(JSON.parse(savedStaff))
+        } catch (e2) {
+          console.error('Error loading staff:', e2)
+        }
+      } else {
+        setStaff([
+          { id: '1', firstName: 'მარიამ', lastName: 'გელაშვილი', position: 'Housekeeper', department: 'housekeeping', phone: '+995555123456', email: 'mariam@hotel.com', active: true, hireDate: '2024-01-15', notes: '' },
+          { id: '2', firstName: 'გიორგი', lastName: 'ბერიძე', position: 'Housekeeper', department: 'housekeeping', phone: '+995555234567', email: 'giorgi@hotel.com', active: true, hireDate: '2024-02-01', notes: '' }
+        ])
+      }
+    }
+    
+    // NEW: Load Seasons from API first, fallback to localStorage
+    try {
+      const seasonsRes = await fetch('/api/hotel/seasons')
+      if (seasonsRes.ok) {
+        const seasonsData = await seasonsRes.json()
+        if (Array.isArray(seasonsData) && seasonsData.length > 0) {
+          const mappedSeasons = seasonsData.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            startDate: s.startDate ? s.startDate.split('T')[0] : '',
+            endDate: s.endDate ? s.endDate.split('T')[0] : '',
+            priceModifier: Math.round(((s.priceMultiplier || 1) - 1) * 100),
+            color: s.seasonData?.color || '#3b82f6',
+            active: s.isActive
+          }))
+          setSeasons(mappedSeasons)
+        } else {
+          const savedSeasons = localStorage.getItem('hotelSeasons')
+          if (savedSeasons) {
+            setSeasons(JSON.parse(savedSeasons))
+          } else {
+            setSeasons([
+              { id: '1', name: 'დაბალი სეზონი', startDate: '2025-01-01', endDate: '2025-03-31', priceModifier: -20, color: '#10b981', active: true },
+              { id: '2', name: 'მაღალი სეზონი', startDate: '2025-06-01', endDate: '2025-08-31', priceModifier: 30, color: '#ef4444', active: true },
+              { id: '3', name: 'საშუალო სეზონი', startDate: '2025-04-01', endDate: '2025-05-31', priceModifier: 0, color: '#3b82f6', active: true }
+            ])
+          }
+        }
+      } else {
+        throw new Error('API request failed')
+      }
+    } catch (e) {
+      console.error('Error loading seasons from API, falling back to localStorage:', e)
+      const savedSeasons = localStorage.getItem('hotelSeasons')
+      if (savedSeasons) {
+        try {
+          setSeasons(JSON.parse(savedSeasons))
+        } catch (e2) {
+          console.error('Error loading seasons:', e2)
+        }
+      } else {
+        setSeasons([
+          { id: '1', name: 'დაბალი სეზონი', startDate: '2025-01-01', endDate: '2025-03-31', priceModifier: -20, color: '#10b981', active: true },
+          { id: '2', name: 'მაღალი სეზონი', startDate: '2025-06-01', endDate: '2025-08-31', priceModifier: 30, color: '#ef4444', active: true },
+          { id: '3', name: 'საშუალო სეზონი', startDate: '2025-04-01', endDate: '2025-05-31', priceModifier: 0, color: '#3b82f6', active: true }
+        ])
+      }
+    }
+    
+    // NEW: Load Extra Services from API first
+    try {
+      const servicesRes = await fetch('/api/hotel/services')
+      if (servicesRes.ok) {
+        const servicesData = await servicesRes.json()
+        if (Array.isArray(servicesData) && servicesData.length > 0) {
+          const mappedServices = servicesData.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            code: s.code,
+            price: s.price,
+            unit: s.serviceData?.unit || 'service',
+            category: s.category || 'Other',
+            available: s.isActive
+          }))
+          setExtraServices(mappedServices)
+        } else {
+          const savedServices = localStorage.getItem('hotelExtraServices')
+          if (savedServices) {
+            setExtraServices(JSON.parse(savedServices))
+          } else {
+            setExtraServices([
+              { id: '1', name: 'საუზმე', code: 'BRK', price: 35, unit: 'person', category: 'F&B', available: true },
+              { id: '2', name: 'ტრანსფერი აეროპორტიდან', code: 'TRF', price: 60, unit: 'service', category: 'Transport', available: true },
+              { id: '3', name: 'SPA მასაჟი', code: 'SPA', price: 120, unit: 'hour', category: 'SPA', available: true }
+            ])
+          }
+        }
+      } else {
+        throw new Error('API request failed')
+      }
+    } catch (e) {
+      console.error('Error loading services from API:', e)
+      const savedServices = localStorage.getItem('hotelExtraServices')
+      if (savedServices) {
+        setExtraServices(JSON.parse(savedServices))
+      } else {
+        setExtraServices([
+          { id: '1', name: 'საუზმე', code: 'BRK', price: 35, unit: 'person', category: 'F&B', available: true },
+          { id: '2', name: 'ტრანსფერი აეროპორტიდან', code: 'TRF', price: 60, unit: 'service', category: 'Transport', available: true },
+          { id: '3', name: 'SPA მასაჟი', code: 'SPA', price: 120, unit: 'hour', category: 'SPA', available: true }
+        ])
+      }
+    }
+    
+    // NEW: Load Packages from API first
+    try {
+      const packagesRes = await fetch('/api/hotel/packages')
+      if (packagesRes.ok) {
+        const packagesData = await packagesRes.json()
+        if (Array.isArray(packagesData) && packagesData.length > 0) {
+          const mappedPackages = packagesData.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            description: p.description || '',
+            price: p.price,
+            includedServices: p.includedItems || [],
+            nights: p.packageData?.nights || 1,
+            active: p.isActive
+          }))
+          setPackages(mappedPackages)
+        } else {
+          const savedPackages = localStorage.getItem('hotelPackages')
+          if (savedPackages) {
+            setPackages(JSON.parse(savedPackages))
+          } else {
+            setPackages([
+              { id: '1', name: 'რომანტიკული პაკეტი', description: 'ოთახი + საუზმე + შამპანური', price: 350, includedServices: ['BRK'], nights: 1, active: true },
+              { id: '2', name: 'ბიზნეს პაკეტი', description: 'ოთახი + საუზმე + ტრანსფერი', price: 280, includedServices: ['BRK', 'TRF'], nights: 1, active: true }
+            ])
+          }
+        }
+      } else {
+        throw new Error('API request failed')
+      }
+    } catch (e) {
+      console.error('Error loading packages from API:', e)
+      const savedPackages = localStorage.getItem('hotelPackages')
+      if (savedPackages) {
+        setPackages(JSON.parse(savedPackages))
+      } else {
+        setPackages([
+          { id: '1', name: 'რომანტიკული პაკეტი', description: 'ოთახი + საუზმე + შამპანური', price: 350, includedServices: ['BRK'], nights: 1, active: true },
+          { id: '2', name: 'ბიზნეს პაკეტი', description: 'ოთახი + საუზმე + ტრანსფერი', price: 280, includedServices: ['BRK', 'TRF'], nights: 1, active: true }
+        ])
+      }
+    }
+    
+    // NEW: Load Taxes from API first
+    try {
+      const taxesRes = await fetch('/api/hotel/taxes')
+      if (taxesRes.ok) {
+        const taxesData = await taxesRes.json()
+        if (Array.isArray(taxesData) && taxesData.length > 0) {
+          const taxObj: any = { VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 }
+          taxesData.forEach((t: any) => {
+            if (t.code) taxObj[t.code] = t.rate
+          })
+          setTaxes(taxObj)
+        } else {
+          const savedTaxes = localStorage.getItem('hotelTaxes')
+          if (savedTaxes) {
+            const parsed = JSON.parse(savedTaxes)
+            setTaxes({
+              VAT: parsed.VAT ?? 18,
+              CITY_TAX: parsed.CITY_TAX ?? 2,
+              TOURISM_TAX: parsed.TOURISM_TAX ?? 1,
+              SERVICE_CHARGE: parsed.SERVICE_CHARGE ?? 10
+            })
+          } else {
+            setTaxes({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 })
+          }
+        }
+      } else {
+        throw new Error('API request failed')
+      }
+    } catch (e) {
+      console.error('Error loading taxes from API:', e)
+      const savedTaxes = localStorage.getItem('hotelTaxes')
+      if (savedTaxes) {
+        try {
+          const parsed = JSON.parse(savedTaxes)
+          setTaxes({
+            VAT: parsed.VAT ?? 18,
+            CITY_TAX: parsed.CITY_TAX ?? 2,
+            TOURISM_TAX: parsed.TOURISM_TAX ?? 1,
+            SERVICE_CHARGE: parsed.SERVICE_CHARGE ?? 10
+          })
+        } catch (e2) {
+          setTaxes({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 })
+        }
+      } else {
         setTaxes({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 })
       }
-    } else {
-      // No saved taxes, use defaults
-      setTaxes({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 })
-      localStorage.setItem('hotelTaxes', JSON.stringify({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 }))
     }
     
-    // NEW: Load Quick Charges
-    const savedQuickCharges = localStorage.getItem('hotelQuickCharges')
-    if (savedQuickCharges) {
-      try {
-        setQuickCharges(JSON.parse(savedQuickCharges))
-      } catch (e) {
-        console.error('Error loading quick charges:', e)
+    // Load Quick Charges from API first
+    try {
+      const qcRes = await fetch('/api/hotel/quick-charges')
+      if (qcRes.ok) {
+        const qcData = await qcRes.json()
+        if (Array.isArray(qcData) && qcData.length > 0) {
+          setQuickCharges(qcData)
+        } else {
+          const savedQuickCharges = localStorage.getItem('hotelQuickCharges')
+          if (savedQuickCharges) {
+            setQuickCharges(JSON.parse(savedQuickCharges))
+          } else {
+            setQuickCharges(['1', '2', '4'])
+          }
+        }
+      } else {
+        throw new Error('API failed')
       }
-    } else {
-      setQuickCharges(['1', '2', '4'])
+    } catch (e) {
+      console.error('Error loading quick charges from API:', e)
+      const savedQuickCharges = localStorage.getItem('hotelQuickCharges')
+      if (savedQuickCharges) {
+        try {
+          setQuickCharges(JSON.parse(savedQuickCharges))
+        } catch (e2) {
+          setQuickCharges(['1', '2', '4'])
+        }
+      } else {
+        setQuickCharges(['1', '2', '4'])
+      }
     }
     
-    // Load Calendar Settings
-    const savedCalendarSettings = localStorage.getItem('calendarSettings')
-    if (savedCalendarSettings) {
-      try {
-        setCalendarSettings(prev => ({ ...prev, ...JSON.parse(savedCalendarSettings) }))
-      } catch (e) {
-        console.error('Error loading calendar settings:', e)
+    // Load Calendar Settings from API first
+    try {
+      const calRes = await fetch('/api/hotel/calendar-settings')
+      if (calRes.ok) {
+        const calData = await calRes.json()
+        if (calData && Object.keys(calData).length > 0) {
+          setCalendarSettings(prev => ({ ...prev, ...calData }))
+        } else {
+          const savedCalendarSettings = localStorage.getItem('calendarSettings')
+          if (savedCalendarSettings) {
+            setCalendarSettings(prev => ({ ...prev, ...JSON.parse(savedCalendarSettings) }))
+          }
+        }
+      } else {
+        throw new Error('API failed')
+      }
+    } catch (e) {
+      console.error('Error loading calendar settings from API:', e)
+      const savedCalendarSettings = localStorage.getItem('calendarSettings')
+      if (savedCalendarSettings) {
+        try {
+          setCalendarSettings(prev => ({ ...prev, ...JSON.parse(savedCalendarSettings) }))
+        } catch (e2) {
+          console.error('Error loading calendar settings:', e2)
+        }
       }
     }
   }
@@ -550,13 +854,58 @@ export default function SettingsNew() {
     }
   }
   
-  const saveRoomTypes = () => {
+  const saveRoomTypes = async () => {
     setIsSaving(true)
-    localStorage.setItem('roomTypes', JSON.stringify(roomTypes))
-    setTimeout(() => {
-      setIsSaving(false)
+    try {
+      // Get existing room types from API
+      const existingRes = await fetch('/api/hotel/room-types')
+      const existingTypes = existingRes.ok ? await existingRes.json() : []
+      const existingByName = new Map(existingTypes.map((t: any) => [t.name, t]))
+      
+      // Save each room type
+      for (const roomType of roomTypes) {
+        const existingType = existingByName.get(roomType.name)
+        
+        if (existingType) {
+          // Update existing
+          await fetch('/api/hotel/room-types', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: existingType.id,
+              name: roomType.name,
+              basePrice: roomType.basePrice,
+              maxOccupancy: roomType.maxGuests,
+              description: roomType.description,
+              typeData: { icon: roomType.icon }
+            })
+          })
+        } else {
+          // Create new
+          await fetch('/api/hotel/room-types', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: roomType.name,
+              basePrice: roomType.basePrice,
+              maxOccupancy: roomType.maxGuests,
+              description: roomType.description,
+              typeData: { icon: roomType.icon }
+            })
+          })
+        }
+      }
+      
+      // Also save to localStorage as backup
+      localStorage.setItem('roomTypes', JSON.stringify(roomTypes))
       showMessage('success', '✅ ოთახის ტიპები შენახულია!')
-    }, 500)
+    } catch (error) {
+      console.error('Error saving room types to API:', error)
+      localStorage.setItem('roomTypes', JSON.stringify(roomTypes))
+      showMessage('success', '✅ ოთახის ტიპები შენახულია (ლოკალურად)!')
+    } finally {
+      setIsSaving(false)
+    }
   }
   
   const saveUsers = async () => {
@@ -573,13 +922,33 @@ export default function SettingsNew() {
     }
   }
   
-  const saveChecklist = () => {
+  const saveChecklist = async () => {
     setIsSaving(true)
-    localStorage.setItem('housekeepingChecklist', JSON.stringify(checklist))
-    setTimeout(() => {
-      setIsSaving(false)
+    try {
+      // Convert to API format
+      const apiData = checklist.map((item, index) => ({
+        name: item.task,
+        category: item.category,
+        sortOrder: index,
+        isRequired: item.required,
+        isActive: true
+      }))
+      
+      await fetch('/api/hotel/housekeeping-checklist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiData)
+      })
+      
+      localStorage.setItem('housekeepingChecklist', JSON.stringify(checklist))
       showMessage('success', '✅ ჩეკლისტი შენახულია!')
-    }, 500)
+    } catch (e) {
+      console.error('Error saving checklist to API:', e)
+      localStorage.setItem('housekeepingChecklist', JSON.stringify(checklist))
+      showMessage('success', '✅ ჩეკლისტი შენახულია (ლოკალურად)!')
+    } finally {
+      setIsSaving(false)
+    }
   }
   
   // Auto-save checklist when it changes
@@ -593,79 +962,316 @@ export default function SettingsNew() {
     }
   }, [checklist])
   
-  const saveSystemSettings = () => {
+  const saveSystemSettings = async () => {
     setIsSaving(true)
-    localStorage.setItem('systemSettings', JSON.stringify(systemSettings))
-    localStorage.setItem('nightAuditSettings', JSON.stringify({
-      autoAuditTime: systemSettings.nightAuditTime,
-      enableAutoAudit: systemSettings.autoNightAudit,
-      emailRecipients: systemSettings.emailRecipients,
-      sendEmailOnComplete: systemSettings.emailNotifications
-    }))
-    setTimeout(() => {
-      setIsSaving(false)
+    try {
+      await fetch('/api/hotel/system-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(systemSettings)
+      })
+      
+      localStorage.setItem('systemSettings', JSON.stringify(systemSettings))
+      localStorage.setItem('nightAuditSettings', JSON.stringify({
+        autoAuditTime: systemSettings.nightAuditTime,
+        enableAutoAudit: systemSettings.autoNightAudit,
+        emailRecipients: systemSettings.emailRecipients,
+        sendEmailOnComplete: systemSettings.emailNotifications
+      }))
       showMessage('success', '✅ სისტემის პარამეტრები შენახულია!')
-    }, 500)
+    } catch (e) {
+      console.error('Error saving system settings to API:', e)
+      localStorage.setItem('systemSettings', JSON.stringify(systemSettings))
+      showMessage('success', '✅ სისტემის პარამეტრები შენახულია (ლოკალურად)!')
+    } finally {
+      setIsSaving(false)
+    }
   }
   
-  // NEW: Save Floors
-  const saveFloors = () => {
+  // NEW: Save Floors to API
+  const saveFloors = async () => {
     setIsSaving(true)
-    localStorage.setItem('hotelFloors', JSON.stringify(floors))
-    setTimeout(() => {
+    try {
+      // First, get existing floors from API to compare by floorNumber
+      const existingRes = await fetch('/api/hotel/floors')
+      const existingFloors = existingRes.ok ? await existingRes.json() : []
+      const existingByNumber = new Map(existingFloors.map((f: any) => [f.floorNumber, f]))
+      
+      // Save each floor
+      for (const floor of floors) {
+        const existingFloor = existingByNumber.get(floor.number)
+        
+        if (existingFloor) {
+          // Update existing floor (use database ID)
+          const floorData = {
+            id: existingFloor.id,
+            floorNumber: floor.number,
+            name: floor.name,
+            isActive: floor.active,
+            floorData: { description: floor.description }
+          }
+          await fetch('/api/hotel/floors', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(floorData)
+          })
+        } else {
+          // Create new floor
+          const floorData = {
+            floorNumber: floor.number,
+            name: floor.name,
+            isActive: floor.active,
+            floorData: { description: floor.description }
+          }
+          await fetch('/api/hotel/floors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(floorData)
+          })
+        }
+      }
+      
+      // Also save to localStorage as backup
+      localStorage.setItem('hotelFloors', JSON.stringify(floors))
+      
       setIsSaving(false)
       showMessage('success', '✅ სართულები შენახულია!')
-    }, 500)
+    } catch (error) {
+      console.error('Error saving floors to API:', error)
+      // Fallback to localStorage
+      localStorage.setItem('hotelFloors', JSON.stringify(floors))
+      setIsSaving(false)
+      showMessage('success', '✅ სართულები შენახულია (ლოკალურად)!')
+    }
   }
   
-  // NEW: Save Staff
-  const saveStaff = () => {
+  // NEW: Save Staff to API
+  const saveStaff = async () => {
     setIsSaving(true)
-    localStorage.setItem('hotelStaff', JSON.stringify(staff))
-    setTimeout(() => {
-      setIsSaving(false)
+    try {
+      const existingRes = await fetch('/api/hotel/staff')
+      const existingStaff = existingRes.ok ? await existingRes.json() : []
+      const existingById = new Map(existingStaff.map((s: any) => [s.id, s]))
+      const existingByName = new Map(existingStaff.map((s: any) => [`${s.firstName}-${s.lastName}`, s]))
+      
+      for (const member of staff) {
+        const existingMember = existingById.get(member.id) || existingByName.get(`${member.firstName}-${member.lastName}`)
+        
+        if (existingMember) {
+          await fetch('/api/hotel/staff', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: existingMember.id,
+              firstName: member.firstName,
+              lastName: member.lastName,
+              position: member.position,
+              department: member.department,
+              phone: member.phone,
+              email: member.email,
+              isActive: member.active,
+              hireDate: member.hireDate,
+              notes: member.notes
+            })
+          })
+        } else {
+          await fetch('/api/hotel/staff', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              firstName: member.firstName,
+              lastName: member.lastName,
+              position: member.position,
+              department: member.department,
+              phone: member.phone,
+              email: member.email,
+              isActive: member.active,
+              hireDate: member.hireDate,
+              notes: member.notes
+            })
+          })
+        }
+      }
+      
+      localStorage.setItem('hotelStaff', JSON.stringify(staff))
       showMessage('success', '✅ თანამშრომლები შენახულია!')
-    }, 500)
+    } catch (error) {
+      console.error('Error saving staff to API:', error)
+      localStorage.setItem('hotelStaff', JSON.stringify(staff))
+      showMessage('success', '✅ თანამშრომლები შენახულია (ლოკალურად)!')
+    } finally {
+      setIsSaving(false)
+    }
   }
   
-  // NEW: Save Pricing
-  const savePricing = () => {
+  // NEW: Save Pricing to API
+  const savePricing = async () => {
     setIsSaving(true)
     
-    // Save room rates from localStorage (RoomRatesEditor saves them automatically)
-    const roomRates = JSON.parse(localStorage.getItem('roomRates') || '[]')
-    
-    localStorage.setItem('hotelSeasons', JSON.stringify(seasons))
-    localStorage.setItem('hotelExtraServices', JSON.stringify(extraServices))
-    localStorage.setItem('hotelPackages', JSON.stringify(packages))
-    localStorage.setItem('hotelTaxes', JSON.stringify(taxes))
-    localStorage.setItem('hotelQuickCharges', JSON.stringify(quickCharges))
-    localStorage.setItem('roomRates', JSON.stringify(roomRates)) // Ensure roomRates is saved
-    
-    // Also save weekday prices and special dates if they exist
-    const weekdayPrices = JSON.parse(localStorage.getItem('hotelWeekdayPrices') || '[]')
-    const specialDates = JSON.parse(localStorage.getItem('hotelSpecialDates') || '[]')
-    localStorage.setItem('hotelWeekdayPrices', JSON.stringify(weekdayPrices))
-    localStorage.setItem('hotelSpecialDates', JSON.stringify(specialDates))
-    
-    setTimeout(() => {
-      setIsSaving(false)
+    try {
+      // Save Seasons to API
+      const existingSeasonsRes = await fetch('/api/hotel/seasons')
+      const existingSeasons = existingSeasonsRes.ok ? await existingSeasonsRes.json() : []
+      const existingSeasonsByName = new Map(existingSeasons.map((s: any) => [s.name, s]))
+      
+      for (const season of seasons) {
+        const existingSeason = existingSeasonsByName.get(season.name)
+        const seasonData = {
+          name: season.name,
+          startDate: season.startDate,
+          endDate: season.endDate,
+          priceMultiplier: 1 + (season.priceModifier / 100),
+          isActive: season.active,
+          seasonData: { color: season.color }
+        }
+        
+        if (existingSeason) {
+          await fetch('/api/hotel/seasons', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: existingSeason.id, ...seasonData })
+          })
+        } else {
+          await fetch('/api/hotel/seasons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(seasonData)
+          })
+        }
+      }
+      
+      // Save Services to API
+      const existingServicesRes = await fetch('/api/hotel/services')
+      const existingServices = existingServicesRes.ok ? await existingServicesRes.json() : []
+      const existingServicesByCode = new Map(existingServices.map((s: any) => [s.code, s]))
+      
+      for (const service of extraServices) {
+        const existingService = existingServicesByCode.get(service.code)
+        const serviceData = {
+          name: service.name,
+          code: service.code,
+          price: service.price,
+          category: service.category,
+          isActive: service.available,
+          serviceData: { unit: service.unit }
+        }
+        
+        if (existingService) {
+          await fetch('/api/hotel/services', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: existingService.id, ...serviceData })
+          })
+        } else {
+          await fetch('/api/hotel/services', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(serviceData)
+          })
+        }
+      }
+      
+      // Save Packages to API
+      const existingPackagesRes = await fetch('/api/hotel/packages')
+      const existingPackages = existingPackagesRes.ok ? await existingPackagesRes.json() : []
+      const existingPackagesByName = new Map(existingPackages.map((p: any) => [p.name, p]))
+      
+      for (const pkg of packages) {
+        const existingPkg = existingPackagesByName.get(pkg.name)
+        const pkgData = {
+          name: pkg.name,
+          description: pkg.description,
+          price: pkg.price,
+          includedItems: pkg.includedServices,
+          isActive: pkg.active,
+          packageData: { nights: pkg.nights }
+        }
+        
+        if (existingPkg) {
+          await fetch('/api/hotel/packages', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: existingPkg.id, ...pkgData })
+          })
+        } else {
+          await fetch('/api/hotel/packages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pkgData)
+          })
+        }
+      }
+      
+      // Save Taxes to API
+      const taxEntries = [
+        { code: 'VAT', name: 'დღგ', rate: taxes.VAT },
+        { code: 'CITY_TAX', name: 'ქალაქის გადასახადი', rate: taxes.CITY_TAX },
+        { code: 'TOURISM_TAX', name: 'ტურიზმის გადასახადი', rate: taxes.TOURISM_TAX },
+        { code: 'SERVICE_CHARGE', name: 'მომსახურების საფასური', rate: taxes.SERVICE_CHARGE }
+      ]
+      
+      const existingTaxesRes = await fetch('/api/hotel/taxes')
+      const existingTaxes = existingTaxesRes.ok ? await existingTaxesRes.json() : []
+      const existingTaxesByCode = new Map(existingTaxes.map((t: any) => [t.code, t]))
+      
+      for (const tax of taxEntries) {
+        const existingTax = existingTaxesByCode.get(tax.code)
+        
+        if (existingTax) {
+          await fetch('/api/hotel/taxes', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: existingTax.id, ...tax })
+          })
+        } else {
+          await fetch('/api/hotel/taxes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tax)
+          })
+        }
+      }
+      
+      // Also save to localStorage as backup
+      localStorage.setItem('hotelSeasons', JSON.stringify(seasons))
+      localStorage.setItem('hotelExtraServices', JSON.stringify(extraServices))
+      localStorage.setItem('hotelPackages', JSON.stringify(packages))
+      localStorage.setItem('hotelTaxes', JSON.stringify(taxes))
+      localStorage.setItem('hotelQuickCharges', JSON.stringify(quickCharges))
+      
       showMessage('success', '✅ ფასების პარამეტრები შენახულია!')
-    }, 500)
+    } catch (error) {
+      console.error('Error saving pricing to API:', error)
+      // Fallback to localStorage
+      localStorage.setItem('hotelSeasons', JSON.stringify(seasons))
+      localStorage.setItem('hotelExtraServices', JSON.stringify(extraServices))
+      localStorage.setItem('hotelPackages', JSON.stringify(packages))
+      localStorage.setItem('hotelTaxes', JSON.stringify(taxes))
+      localStorage.setItem('hotelQuickCharges', JSON.stringify(quickCharges))
+      showMessage('success', '✅ ფასების პარამეტრები შენახულია (ლოკალურად)!')
+    } finally {
+      setIsSaving(false)
+    }
   }
   
   // Save Calendar Settings
   const saveCalendarSettings = async () => {
     try {
       setIsSaving(true)
+      
+      await fetch('/api/hotel/calendar-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(calendarSettings)
+      })
+      
       localStorage.setItem('calendarSettings', JSON.stringify(calendarSettings))
-      setTimeout(() => {
-        setIsSaving(false)
-        showMessage('success', '✅ კალენდრის პარამეტრები შენახულია!')
-      }, 500)
+      showMessage('success', '✅ კალენდრის პარამეტრები შენახულია!')
     } catch (e) {
       console.error('Error saving calendar settings:', e)
-      showMessage('error', '❌ შეცდომა შენახვისას')
+      localStorage.setItem('calendarSettings', JSON.stringify(calendarSettings))
+      showMessage('success', '✅ კალენდრის პარამეტრები შენახულია (ლოკალურად)!')
+    } finally {
       setIsSaving(false)
     }
   }
@@ -1141,41 +1747,117 @@ function StaffSection({ staff, setStaff, onSave, isSaving }: {
     { id: 'other', label: 'სხვა', icon: '👤' }
   ]
   
-  const handleSaveStaff = () => {
+  const handleSaveStaff = async () => {
     if (!newStaff.firstName || !newStaff.lastName) {
       alert('შეავსეთ სახელი და გვარი')
       return
     }
     
     if (editingStaff) {
-      setStaff(staff.map(s => s.id === editingStaff.id 
+      // Update existing - save to API immediately
+      const updatedStaff = staff.map(s => s.id === editingStaff.id 
         ? { ...editingStaff, ...newStaff } 
         : s
-      ))
+      )
+      setStaff(updatedStaff)
+      
+      // Save to API
+      try {
+        await fetch('/api/hotel/staff', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: editingStaff.id,
+            firstName: newStaff.firstName,
+            lastName: newStaff.lastName,
+            position: newStaff.position,
+            department: newStaff.department,
+            phone: newStaff.phone,
+            email: newStaff.email,
+            isActive: true,
+            notes: newStaff.notes
+          })
+        })
+      } catch (e) {
+        console.error('Error updating staff:', e)
+      }
     } else {
+      // Add new - save to API immediately
       const member: StaffMember = {
         id: `staff-${Date.now()}`,
         ...newStaff,
         active: true,
         hireDate: new Date().toISOString().split('T')[0]
       }
-      setStaff([...staff, member])
+      
+      // Save to API first
+      try {
+        const res = await fetch('/api/hotel/staff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: member.firstName,
+            lastName: member.lastName,
+            position: member.position,
+            department: member.department,
+            phone: member.phone,
+            email: member.email,
+            isActive: true,
+            hireDate: member.hireDate,
+            notes: member.notes
+          })
+        })
+        
+        if (res.ok) {
+          const saved = await res.json()
+          // Use the ID from API
+          setStaff([...staff, { ...member, id: saved.id }])
+        } else {
+          // Fallback to local ID
+          setStaff([...staff, member])
+        }
+      } catch (e) {
+        console.error('Error adding staff:', e)
+        setStaff([...staff, member])
+      }
     }
     setShowAddStaff(false)
     setEditingStaff(null)
     setNewStaff({ firstName: '', lastName: '', position: '', department: 'housekeeping', phone: '', email: '', notes: '' })
-    onSave()
   }
   
-  const handleDeleteStaff = (staffId: string) => {
+  const handleDeleteStaff = async (staffId: string) => {
     if (!confirm('ნამდვილად გსურთ თანამშრომლის წაშლა?')) return
+    
+    // Delete from API
+    try {
+      await fetch(`/api/hotel/staff?id=${staffId}`, { method: 'DELETE' })
+    } catch (e) {
+      console.error('Error deleting staff:', e)
+    }
+    
     setStaff(staff.filter(s => s.id !== staffId))
-    onSave()
   }
   
-  const handleToggleActive = (staffId: string) => {
+  const handleToggleActive = async (staffId: string) => {
+    const member = staff.find(s => s.id === staffId)
+    if (!member) return
+    
+    // Update API
+    try {
+      await fetch('/api/hotel/staff', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: staffId,
+          isActive: !member.active
+        })
+      })
+    } catch (e) {
+      console.error('Error toggling staff active:', e)
+    }
+    
     setStaff(staff.map(s => s.id === staffId ? { ...s, active: !s.active } : s))
-    onSave()
   }
   
   const filteredStaff = filterDepartment 
@@ -1502,14 +2184,54 @@ function RoomTypesEditor({ roomTypes, setRoomTypes, onSave, isSaving }: {
     icon: '🛏️'
   })
   
-  const handleSaveType = () => {
+  const handleSaveType = async () => {
     if (editingType) {
-      // Update existing
+      // Update existing - save to API immediately
+      try {
+        await fetch('/api/hotel/room-types', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: editingType.id,
+            name: newType.name,
+            basePrice: newType.basePrice,
+            maxOccupancy: newType.maxGuests,
+            description: newType.description,
+            typeData: { icon: newType.icon, beds: newType.beds }
+          })
+        })
+      } catch (e) {
+        console.error('Error updating room type:', e)
+      }
+      
       setRoomTypes(roomTypes.map(t => t.id === editingType.id ? newType : t))
     } else {
-      // Add new
+      // Add new - save to API immediately
       const typeWithId = { ...newType, id: `type-${Date.now()}` }
-      setRoomTypes([...roomTypes, typeWithId])
+      
+      try {
+        const res = await fetch('/api/hotel/room-types', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: newType.name,
+            basePrice: newType.basePrice,
+            maxOccupancy: newType.maxGuests,
+            description: newType.description,
+            typeData: { icon: newType.icon, beds: newType.beds }
+          })
+        })
+        
+        if (res.ok) {
+          const saved = await res.json()
+          setRoomTypes([...roomTypes, { ...typeWithId, id: saved.id }])
+        } else {
+          setRoomTypes([...roomTypes, typeWithId])
+        }
+      } catch (e) {
+        console.error('Error adding room type:', e)
+        setRoomTypes([...roomTypes, typeWithId])
+      }
     }
     setEditingType(null)
     setShowAddModal(false)
@@ -1522,8 +2244,15 @@ function RoomTypesEditor({ roomTypes, setRoomTypes, onSave, isSaving }: {
     setShowAddModal(true)
   }
   
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('ნამდვილად გსურთ ტიპის წაშლა?')) {
+      // Delete from API
+      try {
+        await fetch(`/api/hotel/room-types?id=${id}`, { method: 'DELETE' })
+      } catch (e) {
+        console.error('Error deleting room type:', e)
+      }
+      
       setRoomTypes(roomTypes.filter(t => t.id !== id))
     }
   }
@@ -2328,13 +3057,30 @@ function FloorsEditor({ floors, setFloors, onSave, isSaving }: {
   const [editingFloor, setEditingFloor] = useState<Floor | null>(null)
   const [newFloor, setNewFloor] = useState({ number: 1, name: '', description: '' })
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editingFloor) {
-      setFloors(floors.map(f => f.id === editingFloor.id 
-        ? { ...editingFloor, ...newFloor, name: newFloor.name || `სართული ${newFloor.number}`, active: true } 
-        : f
-      ))
+      // Update existing - save to API immediately
+      const updatedFloor = { ...editingFloor, ...newFloor, name: newFloor.name || `სართული ${newFloor.number}`, active: true }
+      
+      try {
+        await fetch('/api/hotel/floors', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: editingFloor.id,
+            floorNumber: newFloor.number,
+            name: newFloor.name || `სართული ${newFloor.number}`,
+            isActive: true,
+            floorData: { description: newFloor.description }
+          })
+        })
+      } catch (e) {
+        console.error('Error updating floor:', e)
+      }
+      
+      setFloors(floors.map(f => f.id === editingFloor.id ? updatedFloor : f))
     } else {
+      // Add new - save to API immediately
       const floor: Floor = {
         id: `floor-${Date.now()}`,
         number: newFloor.number,
@@ -2342,21 +3088,65 @@ function FloorsEditor({ floors, setFloors, onSave, isSaving }: {
         description: newFloor.description,
         active: true
       }
-      setFloors([...floors, floor].sort((a, b) => a.number - b.number))
+      
+      try {
+        const res = await fetch('/api/hotel/floors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            floorNumber: floor.number,
+            name: floor.name,
+            isActive: true,
+            floorData: { description: floor.description }
+          })
+        })
+        
+        if (res.ok) {
+          const saved = await res.json()
+          setFloors([...floors, { ...floor, id: saved.id }].sort((a, b) => a.number - b.number))
+        } else {
+          setFloors([...floors, floor].sort((a, b) => a.number - b.number))
+        }
+      } catch (e) {
+        console.error('Error adding floor:', e)
+        setFloors([...floors, floor].sort((a, b) => a.number - b.number))
+      }
     }
     closeModal()
-    onSave()
   }
 
-  const handleDelete = (floorId: string) => {
+  const handleDelete = async (floorId: string) => {
     if (!confirm('ნამდვილად გსურთ სართულის წაშლა?')) return
+    
+    // Delete from API
+    try {
+      await fetch(`/api/hotel/floors?id=${floorId}`, { method: 'DELETE' })
+    } catch (e) {
+      console.error('Error deleting floor:', e)
+    }
+    
     setFloors(floors.filter(f => f.id !== floorId))
-    onSave()
   }
 
-  const handleToggleActive = (floorId: string) => {
+  const handleToggleActive = async (floorId: string) => {
+    const floor = floors.find(f => f.id === floorId)
+    if (!floor) return
+    
+    // Update API
+    try {
+      await fetch('/api/hotel/floors', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: floorId,
+          isActive: !floor.active
+        })
+      })
+    } catch (e) {
+      console.error('Error toggling floor active:', e)
+    }
+    
     setFloors(floors.map(f => f.id === floorId ? { ...f, active: !f.active } : f))
-    onSave()
   }
 
   const openAddModal = () => {
@@ -2591,8 +3381,6 @@ function RoomPricingSection({ roomTypes, seasons, setSeasons, extraServices, set
               { id: 'rates', label: '💵 Room Rates', count: null },
               { id: 'seasons', label: '🌞 Seasons', count: seasons.length },
               { id: 'weekdays', label: '📅 Weekdays', count: null },
-              { id: 'special', label: '⭐ Special Dates', count: null },
-              { id: 'bulk', label: '📝 Bulk Edit', count: null },
               { id: 'taxes', label: '📊 Taxes', count: null }
             ].map(tab => (
               <button
@@ -2667,16 +3455,6 @@ function RoomPricingSection({ roomTypes, seasons, setSeasons, extraServices, set
             <WeekdaysEditor roomTypes={roomTypes} />
           )}
           
-          {/* Special Dates Tab */}
-          {activeTab === 'special' && (
-            <SpecialDatesEditor roomTypes={roomTypes} />
-          )}
-          
-          {/* Bulk Edit Tab */}
-          {activeTab === 'bulk' && (
-            <BulkEditEditor roomTypes={roomTypes} />
-          )}
-          
           {/* Taxes Tab */}
           {activeTab === 'taxes' && (
             <TaxesEditor 
@@ -2731,45 +3509,147 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
     loadSettings()
   }, [])
   
-  const loadSettings = () => {
+  const loadSettings = async () => {
     if (typeof window === 'undefined') return
     
-    const savedCategories = localStorage.getItem('chargeCategories')
-    const savedItems = localStorage.getItem('chargeItems')
-    
-    if (savedCategories) {
-      setCategories(JSON.parse(savedCategories))
-    } else {
-      const defaultCategories = ExtraChargesService.CATEGORIES
-      setCategories(defaultCategories)
-      localStorage.setItem('chargeCategories', JSON.stringify(defaultCategories))
+    // Load categories from API first
+    try {
+      const catRes = await fetch('/api/hotel/charge-categories')
+      if (catRes.ok) {
+        const apiCats = await catRes.json()
+        if (Array.isArray(apiCats) && apiCats.length > 0) {
+          setCategories(apiCats.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            code: c.code,
+            icon: c.icon
+          })))
+        } else {
+          const savedCategories = localStorage.getItem('chargeCategories')
+          if (savedCategories) {
+            setCategories(JSON.parse(savedCategories))
+          } else {
+            const defaultCategories = ExtraChargesService.CATEGORIES
+            setCategories(defaultCategories)
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error loading categories from API:', e)
+      const savedCategories = localStorage.getItem('chargeCategories')
+      if (savedCategories) {
+        setCategories(JSON.parse(savedCategories))
+      } else {
+        const defaultCategories = ExtraChargesService.CATEGORIES
+        setCategories(defaultCategories)
+      }
     }
     
-    if (savedItems) {
-      setItems(JSON.parse(savedItems))
-    } else {
-      const defaultItems = ExtraChargesService.ITEMS
-      setItems(defaultItems)
-      localStorage.setItem('chargeItems', JSON.stringify(defaultItems))
+    // Load items from API first
+    try {
+      const itemsRes = await fetch('/api/hotel/charge-items')
+      if (itemsRes.ok) {
+        const apiItems = await itemsRes.json()
+        if (Array.isArray(apiItems) && apiItems.length > 0) {
+          setItems(apiItems.map((i: any) => ({
+            id: i.id,
+            name: i.name,
+            code: i.code,
+            price: i.price,
+            category: i.category,
+            department: i.department,
+            unit: i.unit || 'piece',
+            stock: i.stock,
+            available: i.isActive
+          })))
+        } else {
+          const savedItems = localStorage.getItem('chargeItems')
+          if (savedItems) {
+            setItems(JSON.parse(savedItems))
+          } else {
+            const defaultItems = ExtraChargesService.ITEMS
+            setItems(defaultItems)
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error loading items from API:', e)
+      const savedItems = localStorage.getItem('chargeItems')
+      if (savedItems) {
+        setItems(JSON.parse(savedItems))
+      } else {
+        const defaultItems = ExtraChargesService.ITEMS
+        setItems(defaultItems)
+      }
     }
   }
   
-  const saveItem = (item: any) => {
+  const saveItem = async (item: any) => {
     if (!item.name || !item.code) {
       alert('გთხოვთ შეიყვანოთ Name და Code')
       return
     }
     
+    // Convert categoryId to category code if needed
+    let categoryCode = item.category
+    if (item.categoryId && !categoryCode) {
+      const cat = categories.find(c => c.id === item.categoryId)
+      categoryCode = cat?.code || item.categoryId
+    }
+    
     let updatedItems = [...items]
     
-    if (item.id) {
+    if (item.id && !item.id.startsWith('ITEM-')) {
+      // Update existing in API
+      try {
+        await fetch('/api/hotel/charge-items', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: item.id,
+            name: item.name,
+            code: item.code,
+            price: item.price || item.unitPrice || 0,
+            category: categoryCode,
+            department: item.department,
+            unit: item.unit,
+            stock: item.stock || item.currentStock,
+            isActive: item.available
+          })
+        })
+      } catch (e) {
+        console.error('Error updating item:', e)
+      }
       const index = updatedItems.findIndex(i => i.id === item.id)
       if (index >= 0) {
-        updatedItems[index] = item
+        updatedItems[index] = { ...item, category: categoryCode, price: item.price || item.unitPrice || 0 }
       }
     } else {
-      item.id = `ITEM-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      updatedItems.push(item)
+      // Create new in API
+      try {
+        const res = await fetch('/api/hotel/charge-items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: item.name,
+            code: item.code,
+            price: item.price || item.unitPrice || 0,
+            category: categoryCode,
+            department: item.department,
+            unit: item.unit,
+            stock: item.stock || item.currentStock,
+            isActive: item.available ?? true
+          })
+        })
+        if (res.ok) {
+          const saved = await res.json()
+          item.id = saved.id
+        }
+      } catch (e) {
+        console.error('Error creating item:', e)
+        item.id = `ITEM-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      }
+      updatedItems.push({ ...item, category: categoryCode, price: item.price || item.unitPrice || 0 })
     }
     
     setItems(updatedItems)
@@ -2778,14 +3658,39 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
     setShowAddModal(false)
   }
   
-  const deleteItem = (id: string) => {
+  const deleteItem = async (id: string) => {
     if (!confirm('Are you sure you want to delete this item?')) return
+    
+    // Delete from API
+    try {
+      await fetch(`/api/hotel/charge-items?id=${id}`, { method: 'DELETE' })
+    } catch (e) {
+      console.error('Error deleting item:', e)
+    }
+    
     const updatedItems = items.filter(i => i.id !== id)
     setItems(updatedItems)
     localStorage.setItem('chargeItems', JSON.stringify(updatedItems))
   }
   
-  const toggleItemActive = (id: string) => {
+  const toggleItemActive = async (id: string) => {
+    const item = items.find(i => i.id === id)
+    if (!item) return
+    
+    // Update API
+    try {
+      await fetch('/api/hotel/charge-items', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          isActive: !item.available
+        })
+      })
+    } catch (e) {
+      console.error('Error toggling item:', e)
+    }
+    
     const updatedItems = items.map(i => 
       i.id === id ? { ...i, available: !i.available } : i
     )
@@ -2793,7 +3698,7 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
     localStorage.setItem('chargeItems', JSON.stringify(updatedItems))
   }
   
-  const saveCategory = (category: any) => {
+  const saveCategory = async (category: any) => {
     if (!category.name || !category.code) {
       alert('გთხოვთ შეიყვანოთ Name და Code')
       return
@@ -2801,13 +3706,45 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
     
     let updatedCategories = [...categories]
     
-    if (category.id) {
+    if (category.id && !category.id.startsWith('CAT-')) {
+      // Update existing in API
+      try {
+        await fetch('/api/hotel/charge-categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: category.code,
+            name: category.name,
+            icon: category.icon
+          })
+        })
+      } catch (e) {
+        console.error('Error updating category:', e)
+      }
       const index = updatedCategories.findIndex(c => c.id === category.id)
       if (index >= 0) {
         updatedCategories[index] = category
       }
     } else {
-      category.id = `CAT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      // Create new in API
+      try {
+        const res = await fetch('/api/hotel/charge-categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: category.code,
+            name: category.name,
+            icon: category.icon
+          })
+        })
+        if (res.ok) {
+          const saved = await res.json()
+          category.id = saved.id
+        }
+      } catch (e) {
+        console.error('Error creating category:', e)
+        category.id = `CAT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      }
       updatedCategories.push(category)
     }
     
@@ -2817,8 +3754,16 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
     setEditingCategory(null)
   }
   
-  const deleteCategory = (id: string) => {
+  const deleteCategory = async (id: string) => {
     if (!confirm('ნამდვილად გსურთ ამ კატეგორიის წაშლა? კატეგორიაში არსებული ნივთები არ წაიშლება.')) return
+    
+    // Delete from API
+    try {
+      await fetch(`/api/hotel/charge-categories?id=${id}`, { method: 'DELETE' })
+    } catch (e) {
+      console.error('Error deleting category:', e)
+    }
+    
     const updatedCategories = categories.filter(c => c.id !== id)
     setCategories(updatedCategories)
     localStorage.setItem('chargeCategories', JSON.stringify(updatedCategories))
@@ -2827,7 +3772,7 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.code?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = !categoryFilter || item.categoryId === categoryFilter
+    const matchesCategory = !categoryFilter || item.category === categoryFilter || item.categoryId === categoryFilter
     const matchesStatus = statusFilter === 'all' || 
                          (statusFilter === 'active' && item.available) ||
                          (statusFilter === 'inactive' && !item.available)
@@ -2930,7 +3875,7 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
                     <ItemCard
                       key={item.id}
                       item={item}
-                      category={categories.find(c => c.id === item.categoryId)}
+                      category={categories.find(c => c.code === item.category || c.id === item.categoryId)}
                       onEdit={() => {
                         setEditingItem(item)
                         setShowAddModal(true)
@@ -3362,13 +4307,13 @@ const ItemEditModal = ({ item, categories, onSave, onClose }: {
             <div>
               <label className="block text-sm font-medium mb-1">კატეგორია *</label>
               <select
-                value={formData.categoryId}
-                onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
+                value={formData.categoryId || formData.category || ''}
+                onChange={(e) => setFormData({...formData, categoryId: e.target.value, category: e.target.value})}
                 className="w-full border rounded px-3 py-2"
                 required
               >
                 {categories.map((cat: any) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  <option key={cat.id || cat.code} value={cat.code}>{cat.name}</option>
                 ))}
               </select>
             </div>
@@ -3831,13 +4776,15 @@ function SeasonsEditor({ seasons, setSeasons, roomTypes, onSave }: {
                   {season.priceModifier > 0 ? '+' : ''}{season.priceModifier}%
                 </span>
                 <button onClick={() => { setEditing(season); setForm({ name: season.name, startDate: season.startDate, endDate: season.endDate, priceModifier: season.priceModifier, color: season.color, roomTypes: season.roomTypes || [] }); setShowAdd(true) }} className="p-2 hover:bg-gray-100 rounded-lg">✏️</button>
-                <button onClick={() => { 
+                <button onClick={async () => { 
                   if (confirm('წავშალოთ?')) {
+                    // Delete from API
+                    try {
+                      await fetch(`/api/hotel/seasons?id=${season.id}`, { method: 'DELETE' })
+                    } catch (e) {
+                      console.error('Error deleting season:', e)
+                    }
                     setSeasons(seasons.filter(s => s.id !== season.id))
-                    // AUTO-SAVE after delete
-                    setTimeout(() => {
-                      if (onSave) onSave()
-                    }, 100)
                   }
                 }} className="p-2 hover:bg-red-50 rounded-lg text-red-500">🗑️</button>
               </div>
@@ -5018,117 +5965,106 @@ function TaxesEditor({ taxes, setTaxes, onSave }: {
   }
   
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Try to load from hotelTaxes first (unified key)
-      let savedTaxList = localStorage.getItem('taxList')
-      let savedHotelTaxes = localStorage.getItem('hotelTaxes')
+    // Load from API first, fallback to localStorage
+    const loadTaxes = async () => {
+      try {
+        const res = await fetch('/api/hotel/taxes')
+        if (res.ok) {
+          const apiTaxes = await res.json()
+          if (Array.isArray(apiTaxes) && apiTaxes.length > 0) {
+            const list = apiTaxes.map((tax: any, index: number) => ({
+              id: tax.id || `tax-${index}`,
+              key: tax.code || tax.key,
+              label: tax.name || defaultTaxLabels[tax.code]?.label || tax.code,
+              description: tax.taxData?.description || defaultTaxLabels[tax.code]?.description || '',
+              value: tax.rate ?? 0
+            }))
+            setTaxList(list)
+            // Also save to localStorage for compatibility
+            localStorage.setItem('taxList', JSON.stringify(list))
+            return
+          }
+        }
+      } catch (e) {
+        console.error('Error loading taxes from API:', e)
+      }
       
-      // If hotelTaxes exists, use it to initialize taxList
-      if (savedHotelTaxes) {
-        try {
-          const parsed = JSON.parse(savedHotelTaxes)
-          // Check if it's an array (taxList format) or object (taxes format)
-          if (Array.isArray(parsed)) {
-            // Already in taxList format
+      // Fallback to localStorage
+      if (typeof window !== 'undefined') {
+        let savedTaxList = localStorage.getItem('taxList')
+        let savedHotelTaxes = localStorage.getItem('hotelTaxes')
+        
+        if (savedHotelTaxes) {
+          try {
+            const parsed = JSON.parse(savedHotelTaxes)
+            if (Array.isArray(parsed)) {
+              const validated = parsed.map((tax: any) => ({
+                ...tax,
+                value: tax.value ?? tax.rate ?? tax.percentage ?? 0
+              }))
+              setTaxList(validated)
+              return
+            } else {
+              const list = Object.entries(parsed).map(([key, value], index) => ({
+                id: `tax-${index}`,
+                key,
+                label: defaultTaxLabels[key]?.label || key,
+                description: defaultTaxLabels[key]?.description || '',
+                value: typeof value === 'number' ? value : 0
+              }))
+              setTaxList(list)
+              localStorage.setItem('taxList', JSON.stringify(list))
+              return
+            }
+          } catch (e) {
+            console.error('Error loading hotelTaxes:', e)
+          }
+        }
+        
+        if (savedTaxList) {
+          try {
+            const parsed = JSON.parse(savedTaxList)
             const validated = parsed.map((tax: any) => ({
               ...tax,
               value: tax.value ?? tax.rate ?? tax.percentage ?? 0
             }))
             setTaxList(validated)
-            return
-          } else {
-            // Convert from taxes object format to taxList array format
-            const list = Object.entries(parsed).map(([key, value], index) => ({
+          } catch (e) {
+            console.error('Error loading tax list:', e)
+            const list = Object.entries(taxes).map(([key, value], index) => ({
               id: `tax-${index}`,
               key,
               label: defaultTaxLabels[key]?.label || key,
               description: defaultTaxLabels[key]?.description || '',
-              value: typeof value === 'number' ? value : 0
+              value: value ?? 0
             }))
             setTaxList(list)
-            // Save in taxList format for future use
-            localStorage.setItem('taxList', JSON.stringify(list))
-            // Also save to hotelTaxes in array format with rate property
-            const taxesArray = list.map(tax => ({
-              id: tax.id,
-              key: tax.key,
-              name: tax.label,
-              label: tax.label,
-              description: tax.description,
-              rate: tax.value,
-              value: tax.value
-            }))
-            localStorage.setItem('hotelTaxes', JSON.stringify(taxesArray))
-            return
           }
-        } catch (e) {
-          console.error('Error loading hotelTaxes:', e)
-        }
-      }
-      
-      // Fallback to taxList if hotelTaxes doesn't exist
-      if (savedTaxList) {
-        try {
-          const parsed = JSON.parse(savedTaxList)
-          // Ensure all taxes have valid values
-          const validated = parsed.map((tax: any) => ({
-            ...tax,
-            value: tax.value ?? tax.rate ?? tax.percentage ?? 0
-          }))
-          setTaxList(validated)
-        } catch (e) {
-          console.error('Error loading tax list:', e)
-          // Initialize from default taxes
+        } else {
+          const defaultTaxValues: Record<string, number> = {
+            VAT: 18,
+            CITY_TAX: 2,
+            TOURISM_TAX: 1,
+            SERVICE_CHARGE: 10
+          }
           const list = Object.entries(taxes).map(([key, value], index) => ({
             id: `tax-${index}`,
             key,
             label: defaultTaxLabels[key]?.label || key,
             description: defaultTaxLabels[key]?.description || '',
-            value: value ?? 0
+            value: value ?? defaultTaxValues[key] ?? 0
           }))
           setTaxList(list)
+          localStorage.setItem('taxList', JSON.stringify(list))
         }
-      } else {
-        // Initialize from default taxes with proper defaults
-        const defaultTaxValues: Record<string, number> = {
-          VAT: 18,
-          CITY_TAX: 2,
-          TOURISM_TAX: 1,
-          SERVICE_CHARGE: 10
-        }
-        const list = Object.entries(taxes).map(([key, value], index) => ({
-          id: `tax-${index}`,
-          key,
-          label: defaultTaxLabels[key]?.label || key,
-          description: defaultTaxLabels[key]?.description || '',
-          value: value ?? defaultTaxValues[key] ?? 0
-        }))
-        setTaxList(list)
-        // Save initial tax list to both keys for compatibility
-        localStorage.setItem('taxList', JSON.stringify(list))
-        // Also save to hotelTaxes in array format with rate property (for ExtraChargesPanel)
-        const taxesArray = list.map(tax => ({
-          id: tax.id,
-          key: tax.key,
-          name: tax.label,
-          label: tax.label,
-          description: tax.description,
-          rate: tax.value, // Use 'rate' property for compatibility
-          value: tax.value
-        }))
-        localStorage.setItem('hotelTaxes', JSON.stringify(taxesArray))
-        // Also save to hotelTaxesObject in object format for parent component
-        const taxesObj: any = {}
-        list.forEach(tax => {
-          taxesObj[tax.key] = tax.value
-        })
-        localStorage.setItem('hotelTaxesObject', JSON.stringify(taxesObj))
       }
     }
+    
+    loadTaxes()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   
-  const saveTaxList = (newList: typeof taxList) => {
+  const saveTaxList = async (newList: typeof taxList) => {
     setTaxList(newList)
     // Save to taxList for this component
     localStorage.setItem('taxList', JSON.stringify(newList))
@@ -5159,6 +6095,24 @@ function TaxesEditor({ taxes, setTaxes, onSave }: {
     // Also save object format to hotelTaxesObject for backward compatibility
     localStorage.setItem('hotelTaxesObject', JSON.stringify(taxesObj))
     
+    // Save to API
+    try {
+      for (const tax of newList) {
+        await fetch('/api/hotel/taxes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: tax.key,
+            name: tax.label,
+            rate: tax.value,
+            taxData: { description: tax.description }
+          })
+        })
+      }
+    } catch (e) {
+      console.error('Error saving taxes to API:', e)
+    }
+    
     // Auto-save to parent's localStorage
     if (onSave) {
       setTimeout(() => {
@@ -5181,8 +6135,16 @@ function TaxesEditor({ taxes, setTaxes, onSave }: {
     setEditingTax(null)
   }
   
-  const handleDeleteTax = (id: string) => {
+  const handleDeleteTax = async (id: string) => {
     if (!confirm('ნამდვილად გსურთ ამ გადასახადის წაშლა?')) return
+    
+    // Delete from API
+    try {
+      await fetch(`/api/hotel/taxes?id=${id}`, { method: 'DELETE' })
+    } catch (e) {
+      console.error('Error deleting tax:', e)
+    }
+    
     saveTaxList(taxList.filter(t => t.id !== id))
   }
   
@@ -5733,29 +6695,57 @@ function HousekeepingSection({ checklist, setChecklist, onSave, isSaving }: {
   
   const categories = ['საძინებელი', 'აბაზანა', 'ზოგადი', 'მომსახურება']
   
-  const handleSave = () => {
+  // Save entire checklist to API
+  const saveToAPI = async (items: ChecklistItem[]) => {
+    try {
+      const apiData = items.map((item, index) => ({
+        name: item.task,
+        category: item.category,
+        sortOrder: index,
+        isRequired: item.required,
+        isActive: true
+      }))
+      
+      await fetch('/api/hotel/housekeeping-checklist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiData)
+      })
+      
+      localStorage.setItem('housekeepingChecklist', JSON.stringify(items))
+    } catch (e) {
+      console.error('Error saving checklist to API:', e)
+      localStorage.setItem('housekeepingChecklist', JSON.stringify(items))
+    }
+  }
+  
+  const handleSave = async () => {
     if (!newTask.task) {
       alert('შეიყვანეთ დავალება')
       return
     }
-    setChecklist([...checklist, {
+    const newItem = {
       id: `task-${Date.now()}`,
       ...newTask
-    }])
+    }
+    const updatedList = [...checklist, newItem]
+    setChecklist(updatedList)
+    await saveToAPI(updatedList)
     setShowAdd(false)
     setNewTask({ task: '', category: 'ზოგადი', required: false })
-    onSave()
   }
   
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('წაშალოთ?')) return
-    setChecklist(checklist.filter(c => c.id !== id))
-    onSave()
+    const updatedList = checklist.filter(c => c.id !== id)
+    setChecklist(updatedList)
+    await saveToAPI(updatedList)
   }
   
-  const toggleRequired = (id: string) => {
-    setChecklist(checklist.map(c => c.id === id ? { ...c, required: !c.required } : c))
-    onSave()
+  const toggleRequired = async (id: string) => {
+    const updatedList = checklist.map(c => c.id === id ? { ...c, required: !c.required } : c)
+    setChecklist(updatedList)
+    await saveToAPI(updatedList)
   }
   
   return (

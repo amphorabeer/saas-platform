@@ -70,6 +70,3 @@ export interface FolioWindow {
   
   status: 'open' | 'closed'
 }
-
-
-

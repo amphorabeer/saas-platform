@@ -292,13 +292,13 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
               </tr>
             </thead>
             <tbody>
-              ${folio.transactions.map((t: any) => `
+              ${(folio.transactions || []).map((t: any) => `
                 <tr>
-                  <td>${moment(t.date).format('DD/MM')} ${t.time}</td>
-                  <td>${t.description}</td>
-                  <td class="debit">${t.debit > 0 ? `₾${t.debit.toFixed(2)}` : ''}</td>
-                  <td class="credit">${t.credit > 0 ? `₾${t.credit.toFixed(2)}` : ''}</td>
-                  <td>₾${t.balance.toFixed(2)}</td>
+                  <td>${t.date ? moment(t.date).format('DD/MM') : ''} ${t.time || ''}</td>
+                  <td>${t.description || ''}</td>
+                  <td class="debit">${Number(t.debit || 0) > 0 ? `₾${Number(t.debit).toFixed(2)}` : ''}</td>
+                  <td class="credit">${Number(t.credit || 0) > 0 ? `₾${Number(t.credit).toFixed(2)}` : ''}</td>
+                  <td>₾${Number(t.balance || 0).toFixed(2)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -430,7 +430,7 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
                 </tr>
               </thead>
               <tbody>
-                {folio.transactions.length === 0 ? (
+                {(!folio.transactions || folio.transactions.length === 0) ? (
                   <tr>
                     <td colSpan={5} className="text-center py-8 text-gray-500">
                       No transactions yet
@@ -438,16 +438,16 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
                   </tr>
                 ) : (
                   folio.transactions.map((t: any, index: number) => (
-                    <tr key={t.id} className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <tr key={t.id || index} className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                       <td className="px-4 py-2 text-sm">
-                        {moment(t.date).format('DD/MM')} {t.time.substring(0, 5)}
+                        {t.date ? moment(t.date).format('DD/MM') : ''} {t.time ? t.time.substring(0, 5) : ''}
                       </td>
                       <td className="px-4 py-2">{t.description}</td>
                       <td className="px-4 py-2 text-right">
-                        {t.debit > 0 && <span className="text-red-600 font-medium">₾{t.debit.toFixed(2)}</span>}
+                        {Number(t.debit || 0) > 0 && <span className="text-red-600 font-medium">₾{Number(t.debit).toFixed(2)}</span>}
                       </td>
                       <td className="px-4 py-2 text-right">
-                        {t.credit > 0 && <span className="text-green-600 font-medium">₾{t.credit.toFixed(2)}</span>}
+                        {Number(t.credit || 0) > 0 && <span className="text-green-600 font-medium">₾{Number(t.credit).toFixed(2)}</span>}
                       </td>
                       <td className="px-4 py-2 text-right font-medium">
                         <span className={t.balance > 0 ? 'text-red-600' : t.balance < 0 ? 'text-green-600' : 'text-gray-600'}>
@@ -463,7 +463,8 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
           
           {/* Tax Summary */}
           {(() => {
-            const totalCharges = folio.transactions.reduce((sum: number, t: any) => sum + t.debit, 0)
+            const transactions = folio.transactions || []
+            const totalCharges = transactions.reduce((sum: number, t: any) => sum + Number(t.debit || 0), 0)
             if (totalCharges > 0) {
               const taxData = calculateTaxBreakdown(totalCharges)
               if (taxData.totalTax > 0) {
@@ -503,19 +504,19 @@ export default function FolioViewModal({ reservation, onClose }: FolioViewModalP
               <div>
                 <div className="text-sm text-gray-600">Total Charges</div>
                 <div className="text-xl font-bold">
-                  ₾{folio.transactions.reduce((sum: number, t: any) => sum + t.debit, 0).toFixed(2)}
+                  ₾{(folio.transactions || []).reduce((sum: number, t: any) => sum + Number(t.debit || 0), 0).toFixed(2)}
                 </div>
               </div>
               <div>
                 <div className="text-sm text-gray-600">Total Payments</div>
                 <div className="text-xl font-bold text-green-600">
-                  ₾{folio.transactions.reduce((sum: number, t: any) => sum + t.credit, 0).toFixed(2)}
+                  ₾{(folio.transactions || []).reduce((sum: number, t: any) => sum + Number(t.credit || 0), 0).toFixed(2)}
                 </div>
               </div>
               <div>
                 <div className="text-sm text-gray-600">Balance Due</div>
-                <div className={`text-xl font-bold ${folio.balance > 0 ? 'text-red-600' : folio.balance < 0 ? 'text-green-600' : 'text-gray-600'}`}>
-                  ₾{folio.balance.toFixed(2)}
+                <div className={`text-xl font-bold ${Number(folio.balance || 0) > 0 ? 'text-red-600' : Number(folio.balance || 0) < 0 ? 'text-green-600' : 'text-gray-600'}`}>
+                  ₾{Number(folio.balance || 0).toFixed(2)}
                 </div>
               </div>
             </div>
@@ -698,6 +699,3 @@ const SimplePaymentModal = ({ amount, onPost, onCancel }: {
     </div>
   )
 }
-
-
-

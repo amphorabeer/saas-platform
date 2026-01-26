@@ -138,9 +138,40 @@ export default function HotelDashboard() {
     }
   }, [])
   
-  // Load hotel info from localStorage
+  // Load hotel info from API first, then localStorage
   useEffect(() => {
-    const loadHotelInfo = () => {
+    const loadHotelInfo = async () => {
+      // Try API first
+      try {
+        const res = await fetch('/api/hotel/organization')
+        if (res.ok) {
+          const orgData = await res.json()
+          if (orgData && orgData.name) {
+            const info = {
+              name: orgData.name || '',
+              company: orgData.company || '',
+              taxId: orgData.taxId || '',
+              address: orgData.address || '',
+              city: orgData.city || '',
+              country: orgData.country || 'Georgia',
+              phone: orgData.phone || '',
+              email: orgData.email || '',
+              website: orgData.website || '',
+              bankName: orgData.bankName || '',
+              bankAccount: orgData.bankAccount || '',
+              logo: sanitizeLogo(orgData.logo)
+            }
+            setHotelInfo(info)
+            // Also save to localStorage for consistency
+            localStorage.setItem('hotelInfo', JSON.stringify(info))
+            return
+          }
+        }
+      } catch (e) {
+        console.error('Error loading hotel info from API:', e)
+      }
+      
+      // Fallback to localStorage
       const savedHotelInfo = localStorage.getItem('hotelInfo')
       if (savedHotelInfo) {
         try {
@@ -869,6 +900,25 @@ export default function HotelDashboard() {
       })
       
       if (res.ok) {
+        // Also delete associated folio
+        try {
+          // Find folio by reservationId
+          const foliosRes = await fetch(`/api/hotel/folios?reservationId=${id}`)
+          if (foliosRes.ok) {
+            const folio = await foliosRes.json()
+            if (folio && folio.id) {
+              await fetch(`/api/hotel/folios?id=${folio.id}`, { method: 'DELETE' })
+              console.log('✅ Folio deleted for reservation:', id)
+            }
+          }
+          // Also remove from localStorage
+          const localFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+          const updatedFolios = localFolios.filter((f: any) => f.reservationId !== id)
+          localStorage.setItem('hotelFolios', JSON.stringify(updatedFolios))
+        } catch (folioErr) {
+          console.error('Error deleting folio:', folioErr)
+        }
+        
         ActivityLogger.log('RESERVATION_DELETE', { reservationId: id })
         await loadReservations()
         await loadRooms()

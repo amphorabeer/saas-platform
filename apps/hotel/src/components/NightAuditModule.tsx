@@ -135,13 +135,14 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
   // Helper function to load folios from API or localStorage
   const loadFolios = async (): Promise<any[]> => {
     try {
-      const response = await fetch('/api/folios')
+      const response = await fetch('/api/hotel/folios')
       if (response.ok) {
         const data = await response.json()
-        if (data.folios && data.folios.length > 0) {
-          return data.folios.map((f: any) => ({
+        const folios = Array.isArray(data) ? data : (data.folios || [])
+        if (folios.length > 0) {
+          return folios.map((f: any) => ({
             ...f,
-            transactions: f.folioData?.transactions || f.charges || []
+            transactions: f.transactions || f.folioData?.transactions || f.charges || []
           }))
         }
       }
@@ -151,6 +152,45 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
     // Fallback to localStorage
     if (typeof window === 'undefined') return []
     return JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+  }
+
+  // Helper function to load night audits from API or localStorage
+  const loadAuditsFromApi = async (): Promise<any[]> => {
+    try {
+      const response = await fetch('/api/hotel/night-audits')
+      if (response.ok) {
+        const data = await response.json()
+        const audits = Array.isArray(data) ? data : []
+        if (audits.length > 0) {
+          // Update localStorage as backup
+          localStorage.setItem(getNightAuditsKey(), JSON.stringify(audits))
+          return audits
+        }
+      }
+    } catch (error) {
+      console.error('[NightAuditModule] Audits API error:', error)
+    }
+    // Fallback to localStorage
+    if (typeof window === 'undefined') return []
+    return JSON.parse(localStorage.getItem(getNightAuditsKey()) || '[]')
+  }
+
+  // Helper function to save night audit to API
+  const saveAuditToApi = async (audit: any): Promise<any> => {
+    try {
+      const response = await fetch('/api/hotel/night-audits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(audit)
+      })
+      if (response.ok) {
+        console.log('[NightAuditModule] Audit saved to API:', audit.date)
+        return await response.json()
+      }
+    } catch (error) {
+      console.error('[NightAuditModule] Error saving audit to API:', error)
+    }
+    return null
   }
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -894,23 +934,12 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
     // Try to load from API first, fallback to localStorage
     let history: any[] = []
     
-    if (organizationId) {
-      try {
-        const response = await fetch('/api/night-audit')
-        if (response.ok) {
-          const data = await response.json()
-          history = data.audits || []
-          console.log("[NightAudit] Loaded from API:", history.length, "audits")
-        }
-      } catch (error) {
-        console.error("[NightAudit] API error, using localStorage:", error)
-      }
-    }
-    
-    // Fallback to localStorage if API failed or no organizationId
-    if (history.length === 0) {
+    try {
+      history = await loadAuditsFromApi()
+      console.log("[NightAudit] Loaded audits:", history.length)
+    } catch (error) {
+      console.error("[NightAudit] API error, using localStorage:", error)
       history = JSON.parse(localStorage.getItem(getNightAuditsKey()) || '[]')
-      console.log("[NightAudit] Loaded from localStorage:", history.length, "audits")
     }
     
     // Recalculate statistics for each audit date from actual reservations
@@ -2305,22 +2334,25 @@ This is an automated report from Night Audit System.
       localStorage.setItem(getNightAuditsKey(), JSON.stringify(history))
       
       // Also save to API/database
-      if (organizationId) {
-        try {
-          await fetch('/api/night-audit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              date: auditResult.date,
-              organizationId,
-              ...auditResult
-            }),
-          })
+      try {
+        const userName = typeof window !== 'undefined' 
+          ? JSON.parse(localStorage.getItem('currentUser') || '{}').name || 'System'
+          : 'System'
+        const savedAudit = await saveAuditToApi({
+          date: auditResult.date,
+          status: 'completed',
+          completedAt: new Date().toISOString(),
+          user: userName,
+          ...auditResult
+        })
+        if (savedAudit) {
           addToLog('✅ Night Audit შენახულია database-ში')
-        } catch (error) {
-          console.error('[NightAudit] Failed to save to API:', error)
-          addToLog('⚠️ Database-ში შენახვა ვერ მოხერხდა')
+        } else {
+          addToLog('⚠️ Database-ში შენახვა ვერ მოხერხდა (localStorage backup active)')
         }
+      } catch (error) {
+        console.error('[NightAudit] Failed to save to API:', error)
+        addToLog('⚠️ Database-ში შენახვა ვერ მოხერხდა')
       }
       
       addToLog('✅ Night Audit შენახულია history-ში')

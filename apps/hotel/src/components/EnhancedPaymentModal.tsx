@@ -58,10 +58,10 @@ export default function EnhancedPaymentModal({
       // Try API first
       let folios: any[] = []
       try {
-        const response = await fetch('/api/folios')
+        const response = await fetch('/api/hotel/folios')
         if (response.ok) {
           const data = await response.json()
-          folios = data.folios || []
+          folios = Array.isArray(data) ? data : (data.folios || [])
         }
       } catch (error) {
         console.error('[EnhancedPaymentModal] API error:', error)
@@ -81,26 +81,64 @@ export default function EnhancedPaymentModal({
         const res = reservations.find((r: any) => r.id === reservation.id)
         
         if (res) {
+          // Calculate room charges
+          const nights = Math.max(1, moment(res.checkOut).diff(moment(res.checkIn), 'days'))
+          const totalAmount = res.totalAmount || 0
+          const ratePerNight = nights > 0 ? totalAmount / nights : totalAmount
+          
+          // Create room charge transactions
+          const transactions: any[] = []
+          let runningBalance = 0
+          
+          if (totalAmount > 0) {
+            for (let i = 0; i < nights; i++) {
+              const chargeDate = moment(res.checkIn).add(i, 'days').format('YYYY-MM-DD')
+              runningBalance += ratePerNight
+              
+              transactions.push({
+                id: `CHG-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 9)}`,
+                folioId: '',
+                date: chargeDate,
+                time: '23:59:59',
+                type: 'charge',
+                category: 'room',
+                description: `ოთახის ღირებულება - ღამე ${i + 1}`,
+                debit: ratePerNight,
+                credit: 0,
+                balance: runningBalance,
+                postedBy: 'System',
+                postedAt: moment().format()
+              })
+            }
+          }
+          
           const newFolio = {
             id: `FOLIO-${Date.now()}`,
             folioNumber: `F${moment().format('YYMMDD')}-${res.roomNumber || res.roomId || Math.floor(Math.random() * 1000)}-${reservation.id}`,
             reservationId: reservation.id,
             guestName: res.guestName,
             roomNumber: res.roomNumber || res.roomId,
-            balance: 0,
+            balance: totalAmount,
             creditLimit: 5000,
             paymentMethod: 'cash',
             status: 'open',
             openDate: res.checkIn || moment().format('YYYY-MM-DD'),
-            transactions: [],
+            transactions: transactions,
             totalDeposit: 0
           }
+          
+          // Update transaction folioIds
+          newFolio.transactions = newFolio.transactions.map((t: any) => ({
+            ...t,
+            folioId: newFolio.id
+          }))
+          
           folios.push(newFolio)
           localStorage.setItem('hotelFolios', JSON.stringify(folios))
           
           // Also save to API
           try {
-            await fetch('/api/folios', {
+            await fetch('/api/hotel/folios', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(newFolio),
@@ -528,7 +566,7 @@ export default function EnhancedPaymentModal({
               disabled={processing || (amount <= 0 && !splitPayment) || (splitPayment && splits.length === 0)}
               className="flex-1 px-4 py-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 transition"
             >
-              {processing ? 'Processing...' : `Process ${paymentType === 'refund' ? 'Refund' : 'Payment'} ${!splitPayment ? `₾${amount.toFixed(2)}` : ''}`}
+              {processing ? 'Processing...' : `Process ${paymentType === 'refund' ? 'Refund' : 'Payment'} ${!splitPayment ? `₾${Number(amount || 0).toFixed(2)}` : ''}`}
             </button>
             <button
               onClick={onClose}
@@ -542,6 +580,3 @@ export default function EnhancedPaymentModal({
     </div>
   )
 }
-
-
-

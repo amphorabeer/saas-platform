@@ -1492,6 +1492,9 @@ export default function RoomCalendar({
             folio.roomId = targetRoom.id
             folio.roomNumber = targetRoom.roomNumber
             
+            // Ensure transactions array exists
+            if (!folio.transactions) folio.transactions = []
+            
             // Update room charges in folio transactions
             // Calculate price per night for each night (considering seasons/special dates)
             const roomChargeTransactions = folio.transactions.filter((t: any) => 
@@ -2799,7 +2802,8 @@ export default function RoomCalendar({
       // Check if room charge posted for today
       if (folio) {
         const today = moment().format('YYYY-MM-DD')
-        roomChargePosted = folio.transactions.some((t: any) => 
+        const transactions = folio.transactions || []
+        roomChargePosted = transactions.some((t: any) => 
           t.nightAuditDate === today && 
           t.category === 'room' &&
           t.type === 'charge'

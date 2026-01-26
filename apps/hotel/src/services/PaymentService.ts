@@ -29,9 +29,32 @@ export class PaymentService {
         return { success: false, error: 'Not in browser environment' }
       }
       
-      // Get or create folio
-      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-      let folio = folios.find((f: any) => f.reservationId === params.reservationId)
+      // Try to get folio from API first
+      let folio = null
+      let folios: any[] = []
+      
+      try {
+        const apiResponse = await fetch('/api/hotel/folios')
+        if (apiResponse.ok) {
+          const apiData = await apiResponse.json()
+          folios = Array.isArray(apiData) ? apiData : (apiData.folios || [])
+          folio = folios.find((f: any) => f.reservationId === params.reservationId)
+          console.log('[PaymentService] Loaded folio from API')
+        }
+      } catch (e) {
+        console.log('[PaymentService] API error, falling back to localStorage')
+      }
+      
+      // Fallback to localStorage
+      if (!folio) {
+        folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+        folio = folios.find((f: any) => f.reservationId === params.reservationId)
+      }
+      
+      // Ensure transactions array exists
+      if (folio && !folio.transactions) {
+        folio.transactions = []
+      }
       
       if (!folio) {
         // Get reservation details
@@ -62,8 +85,9 @@ export class PaymentService {
       }
       
       // Recalculate balance from existing transactions first
-      const currentBalance = folio.transactions.reduce((balance, trx) => {
-        return balance + (trx.debit || 0) - (trx.credit || 0)
+      const transactions = folio.transactions || []
+      const currentBalance = transactions.reduce((balance: number, trx: any) => {
+        return balance + Number(trx.debit || 0) - Number(trx.credit || 0)
       }, 0)
       
       // Calculate new balance
@@ -115,6 +139,18 @@ export class PaymentService {
         folios.push(folio)
       }
       localStorage.setItem('hotelFolios', JSON.stringify(folios))
+      
+      // Also save folio to API
+      try {
+        await fetch('/api/hotel/folios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(folio)
+        })
+        console.log('[PaymentService] Folio saved to API')
+      } catch (apiError) {
+        console.error('[PaymentService] Failed to save folio to API:', apiError)
+      }
       
       // Save to payment history
       const paymentHistory = JSON.parse(localStorage.getItem('paymentHistory') || '[]')
@@ -198,4 +234,3 @@ export class PaymentService {
     return stats
   }
 }
-
