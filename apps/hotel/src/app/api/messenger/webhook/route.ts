@@ -64,10 +64,15 @@ export async function POST(request: NextRequest) {
           continue
         }
         
-        await prisma.facebookIntegration.update({
-          where: { pageId },
-          data: { messagesReceived: { increment: 1 } }
-        })
+        // Update stats (non-critical)
+        try {
+          await prisma.facebookIntegration.update({
+            where: { pageId },
+            data: { messagesReceived: { increment: 1 } }
+          })
+        } catch (e) {
+          console.warn('[Messenger] Failed to update messagesReceived:', e)
+        }
         
         const messaging = entry.messaging || []
         
@@ -169,11 +174,15 @@ async function handleMessage(senderId: string, message: any, integration: any) {
   console.log('[Messenger] Using pageId:', integration.pageId)
   await sendMessage(senderId, responseText, integration.pageAccessToken, integration.pageId)
   
-  // Update stats
-  await prisma.facebookIntegration.update({
-    where: { pageId: integration.pageId },
-    data: { messagesSent: { increment: 1 } }
-  })
+  // Update stats (non-critical, don't fail if it errors)
+  try {
+    await prisma.facebookIntegration.update({
+      where: { pageId: integration.pageId },
+      data: { messagesSent: { increment: 1 } }
+    })
+  } catch (e) {
+    console.warn('[Messenger] Failed to update stats:', e)
+  }
 }
 
 // Get main menu
@@ -271,11 +280,15 @@ async function handleConversationFlow(
         conversationState.delete(senderId)
         
         if (result.success) {
-          // Update booking stats
-          await prisma.facebookIntegration.update({
-            where: { organizationId: orgId },
-            data: { bookingsCreated: { increment: 1 } }
-          })
+          // Update booking stats (non-critical)
+          try {
+            await prisma.facebookIntegration.update({
+              where: { pageId: integration.pageId },
+              data: { bookingsCreated: { increment: 1 } }
+            })
+          } catch (e) {
+            console.warn('[Messenger] Failed to update bookingsCreated:', e)
+          }
           
           return `🎉 ჯავშანი წარმატებით შეიქმნა!\n\n` +
             `📋 ჯავშნის ნომერი: ${result.reservationId}\n` +
