@@ -147,7 +147,7 @@ export default function NightAuditView({ rooms, reservations, onAuditComplete }:
   // Load folios cache from API
   const loadFoliosCache = async () => {
     try {
-      const response = await fetch('/api/folios')
+      const response = await fetch('/api/hotel/folios')
       if (response.ok) {
         const data = await response.json()
         if (data.folios && data.folios.length > 0) {
@@ -359,7 +359,7 @@ export default function NightAuditView({ rooms, reservations, onAuditComplete }:
     // Also save new folios to API
     for (const folio of results.foliosGenerated) {
       try {
-        await fetch('/api/folios', {
+        await fetch('/api/hotel/folios', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(folio),
@@ -1613,7 +1613,7 @@ function PendingOperationsSection({ auditDate, reservations, rooms, onRefresh }:
     
     // Also save to API
     try {
-      await fetch('/api/folios', {
+      await fetch('/api/hotel/folios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newFolio),

@@ -197,7 +197,7 @@ export default function FolioSystem({ onSelectFolio, onClose }: FolioSystemProps
     // Also save to API
     const closedFolio = updated.find(f => f.id === folioId)
     if (closedFolio) {
-      fetch('/api/folios', {
+      fetch('/api/hotel/folios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(closedFolio),
@@ -218,7 +218,7 @@ export default function FolioSystem({ onSelectFolio, onClose }: FolioSystemProps
     // Also save to API
     const reopenedFolio = updated.find(f => f.id === folioId)
     if (reopenedFolio) {
-      fetch('/api/folios', {
+      fetch('/api/hotel/folios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reopenedFolio),

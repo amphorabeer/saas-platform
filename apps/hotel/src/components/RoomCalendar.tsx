@@ -190,7 +190,7 @@ export default function RoomCalendar({
   // Load folios from API
   const loadFoliosCache = async () => {
     try {
-      const response = await fetch('/api/folios')
+      const response = await fetch('/api/hotel/folios')
       if (response.ok) {
         const data = await response.json()
         if (data.folios && data.folios.length > 0) {
@@ -1551,7 +1551,7 @@ export default function RoomCalendar({
             
             // Also save to API
             try {
-              await fetch('/api/folios', {
+              await fetch('/api/hotel/folios', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(folio),
@@ -1843,7 +1843,7 @@ export default function RoomCalendar({
           
           // Also save to API
           try {
-            await fetch('/api/folios', {
+            await fetch('/api/hotel/folios', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(folio),
@@ -2133,7 +2133,7 @@ export default function RoomCalendar({
       
       // Also save to API
       try {
-        await fetch('/api/folios', {
+        await fetch('/api/hotel/folios', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newFolio),

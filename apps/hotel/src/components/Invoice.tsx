@@ -72,7 +72,7 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
     // Try API first
     let folios: any[] = []
     try {
-      const response = await fetch('/api/folios')
+      const response = await fetch('/api/hotel/folios')
       if (response.ok) {
         const data = await response.json()
         folios = data.folios || []
