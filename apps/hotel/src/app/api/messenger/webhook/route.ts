@@ -100,7 +100,22 @@ async function handleMessage(senderId: string, message: any, integration: any) {
   const text = message.text?.toLowerCase().trim() || ''
   const originalText = message.text?.trim() || ''
   const orgName = integration.pageName || 'სასტუმრო'
-  const orgId = integration.organizationId
+  
+  // Get tenantId from organization (not organizationId)
+  // organizationId is Organization.id, but rooms use Organization.tenantId
+  let orgId = integration.organizationId
+  try {
+    const org = await prisma.organization.findUnique({
+      where: { id: integration.organizationId },
+      select: { tenantId: true }
+    })
+    if (org?.tenantId) {
+      orgId = org.tenantId
+      console.log('[Messenger] Using tenantId:', orgId)
+    }
+  } catch (e) {
+    console.error('[Messenger] Error getting tenantId:', e)
+  }
   
   let responseText = ''
   
