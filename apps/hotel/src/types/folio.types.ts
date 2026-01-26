@@ -15,6 +15,10 @@ export interface Folio {
   openDate: string
   closeDate?: string
   
+  // Dates from reservation
+  checkIn?: string
+  checkOut?: string
+  
   // Transactions
   transactions: FolioTransaction[]
   
@@ -70,6 +74,3 @@ export interface RoutingRule {
   
   active: boolean
 }
-
-
-

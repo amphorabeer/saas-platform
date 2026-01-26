@@ -5,9 +5,136 @@ import { ActivityLogger } from '../lib/activityLogger'
 /**
  * Centralized Folio Service
  * Handles all folio creation and management operations
+ * Now with API support and localStorage fallback
  */
 export class FolioService {
+  private static cache: Folio[] | null = null
+  private static lastFetch: number = 0
+  private static CACHE_TTL = 30000 // 30 seconds
   
+  /**
+   * Get all folios from API (with cache)
+   */
+  static async getAllAsync(forceRefresh = false): Promise<Folio[]> {
+    // Check cache
+    if (!forceRefresh && this.cache && Date.now() - this.lastFetch < this.CACHE_TTL) {
+      return this.cache
+    }
+    
+    try {
+      const res = await fetch('/api/hotel/folios')
+      if (res.ok) {
+        const data = await res.json()
+        this.cache = data
+        this.lastFetch = Date.now()
+        // Also update localStorage as backup
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('hotelFolios', JSON.stringify(data))
+        }
+        return data
+      }
+    } catch (e) {
+      console.error('Error fetching folios from API:', e)
+    }
+    
+    // Fallback to localStorage
+    return this.getAllFromLocalStorage()
+  }
+  
+  /**
+   * Get all folios from localStorage (sync method for backward compatibility)
+   */
+  static getAllFromLocalStorage(): Folio[] {
+    if (typeof window === 'undefined') return []
+    try {
+      return JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    } catch {
+      return []
+    }
+  }
+  
+  /**
+   * Save folio to API and localStorage
+   */
+  static async saveAsync(folio: Folio): Promise<Folio> {
+    try {
+      const method = folio.id && !folio.id.startsWith('FOLIO-') ? 'PUT' : 'POST'
+      const res = await fetch('/api/hotel/folios', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(folio)
+      })
+      
+      if (res.ok) {
+        const saved = await res.json()
+        this.invalidateCache()
+        this.updateLocalStorage(saved)
+        return saved
+      }
+    } catch (e) {
+      console.error('Error saving folio to API:', e)
+    }
+    
+    // Fallback: save to localStorage only
+    this.saveFolio(folio)
+    return folio
+  }
+  
+  /**
+   * Sync all localStorage folios to API
+   */
+  static async syncToApi(): Promise<{ created: number; updated: number; errors: string[] }> {
+    if (typeof window === 'undefined') {
+      return { created: 0, updated: 0, errors: [] }
+    }
+    
+    try {
+      const localFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      
+      if (localFolios.length === 0) {
+        return { created: 0, updated: 0, errors: [] }
+      }
+      
+      const res = await fetch('/api/hotel/folios/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folios: localFolios })
+      })
+      
+      if (res.ok) {
+        const result = await res.json()
+        this.invalidateCache()
+        return result
+      }
+    } catch (e) {
+      console.error('Error syncing folios:', e)
+    }
+    
+    return { created: 0, updated: 0, errors: ['Sync failed'] }
+  }
+  
+  private static invalidateCache() {
+    this.cache = null
+    this.lastFetch = 0
+  }
+  
+  private static updateLocalStorage(folio: Folio) {
+    if (typeof window === 'undefined') return
+    
+    try {
+      const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      const index = folios.findIndex((f: any) => f.id === folio.id || f.folioNumber === folio.folioNumber)
+      if (index >= 0) {
+        folios[index] = folio
+      } else {
+        folios.push(folio)
+      }
+      localStorage.setItem('hotelFolios', JSON.stringify(folios))
+    } catch (e) {
+      console.error('Error updating localStorage:', e)
+    }
+  }
+
   /**
    * Get or create folio for a reservation
    * Checks if folio exists, creates if not
@@ -80,7 +207,7 @@ export class FolioService {
           referenceId: `ROOM-${reservation.id}-${chargeDate}`,
           nightAuditDate: chargeDate,
           prePosted: true
-        })
+        } as any)
       }
     }
     
@@ -93,7 +220,7 @@ export class FolioService {
       roomNumber: reservation.roomNumber || reservation.roomId,
       balance: prePostCharges ? totalAmount : 0,
       creditLimit: creditLimit,
-      paymentMethod: paymentMethod,
+      paymentMethod: paymentMethod as any,
       status: 'open',
       openDate: moment().format('YYYY-MM-DD'),
       transactions: transactions.map(t => ({
@@ -106,7 +233,7 @@ export class FolioService {
         nights: nights,
         allNightsPosted: true
       } : undefined
-    }
+    } as any
     
     // Update transaction folioIds
     newFolio.transactions = newFolio.transactions.map(t => ({
@@ -114,9 +241,12 @@ export class FolioService {
       folioId: newFolio.id
     }))
     
-    // Save folio
+    // Save folio to localStorage
     folios.push(newFolio)
     localStorage.setItem('hotelFolios', JSON.stringify(folios))
+    
+    // Also save to API (async, don't wait)
+    this.saveAsync(newFolio).catch(e => console.error('Error saving folio to API:', e))
     
     // Log activity
     ActivityLogger.log('FOLIO_CREATED', {
@@ -161,15 +291,20 @@ export class FolioService {
       roomNumber: reservation.roomNumber || reservation.roomId,
       balance: 0,
       creditLimit: creditLimit,
-      paymentMethod: paymentMethod,
+      paymentMethod: paymentMethod as any,
       status: 'open',
       openDate: moment(reservation.checkIn || moment()).format('YYYY-MM-DD'),
+      checkIn: reservation.checkIn ? moment(reservation.checkIn).format('YYYY-MM-DD') : undefined,
+      checkOut: reservation.checkOut ? moment(reservation.checkOut).format('YYYY-MM-DD') : undefined,
       transactions: []
     }
     
-    // Save folio
+    // Save folio to localStorage
     folios.push(newFolio)
     localStorage.setItem('hotelFolios', JSON.stringify(folios))
+    
+    // Also save to API (async, don't wait)
+    this.saveAsync(newFolio).catch(e => console.error('Error saving folio to API:', e))
     
     // Log activity
     ActivityLogger.log('FOLIO_CREATED', {
@@ -211,6 +346,9 @@ export class FolioService {
     if (folioIndex >= 0) {
       folios[folioIndex] = folio
       localStorage.setItem('hotelFolios', JSON.stringify(folios))
+      
+      // Also save to API (async)
+      this.saveAsync(folio).catch(e => console.error('Error saving folio to API:', e))
       return true
     }
     
@@ -238,7 +376,7 @@ export class FolioService {
   }
   
   /**
-   * Save folio to localStorage
+   * Save folio to localStorage (sync method for backward compatibility)
    */
   static saveFolio(folio: Folio): boolean {
     if (typeof window === 'undefined') return false
@@ -253,6 +391,10 @@ export class FolioService {
     }
     
     localStorage.setItem('hotelFolios', JSON.stringify(folios))
+    
+    // Also save to API (async, don't wait)
+    this.saveAsync(folio).catch(e => console.error('Error saving folio to API:', e))
+    
     return true
   }
   
@@ -268,17 +410,12 @@ export class FolioService {
     if (!folio) return false
     
     folio.status = 'closed'
-    folio.closedDate = moment().format('YYYY-MM-DD')
-    folio.closedTime = moment().format('HH:mm:ss')
-    folio.closedBy = closedBy || (typeof window !== 'undefined' 
+    folio.closeDate = moment().format('YYYY-MM-DD')
+    ;(folio as any).closedTime = moment().format('HH:mm:ss')
+    ;(folio as any).closedBy = closedBy || (typeof window !== 'undefined' 
       ? JSON.parse(localStorage.getItem('currentUser') || '{}').name || 'User'
       : 'User')
     
     return this.saveFolio(folio)
   }
 }
-
-
-
-
-
