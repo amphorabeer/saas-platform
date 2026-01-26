@@ -80,13 +80,16 @@ export default function HotelDashboard() {
     if (status === 'unauthenticated') {
       router.push('/login')
     } else if (status === 'authenticated' && session?.user) {
-      setCurrentUser({
+      const user = {
         id: session.user.id,
         name: session.user.name,
         email: session.user.email,
         role: session.user.role || 'admin',
         tenantId: session.user.tenantId
-      })
+      }
+      setCurrentUser(user)
+      // Sync to localStorage for services/utilities that can't use hooks
+      localStorage.setItem('currentUser', JSON.stringify(user))
     }
   }, [status, session, router])
   
@@ -123,6 +126,7 @@ export default function HotelDashboard() {
   
   const handleLogout = async () => {
     ActivityLogger.log('LOGOUT', { username: currentUser?.name })
+    localStorage.removeItem('currentUser')
     await signOut({ callbackUrl: '/login' })
   }
 
