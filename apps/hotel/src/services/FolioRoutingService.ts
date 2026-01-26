@@ -397,6 +397,3 @@ export class FolioRoutingService {
     return windows.filter((w: FolioWindow) => w.reservationId === reservationId)
   }
 }
-
-
-

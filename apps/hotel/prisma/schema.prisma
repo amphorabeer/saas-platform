@@ -91,8 +91,8 @@ model Organization {
   chargeItems       ChargeItem[]
   folioRoutingRules FolioRoutingRule[]
   hotelSettings     HotelSettings?
-  roomTypes         RoomType[]
-  floors            Floor[]
+  // roomTypes removed - no FK constraint
+  // floors removed - no FK constraint
   housekeepingTasks HousekeepingTask[]
   maintenanceRooms  MaintenanceRoom[]
   quickButtons      QuickButton[]
@@ -684,7 +684,6 @@ model HotelSettings {
 model RoomType {
   id                String       @id @default(cuid())
   organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   
   code              String
   name              String
@@ -709,7 +708,6 @@ model RoomType {
 model Floor {
   id                String       @id @default(cuid())
   organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   
   floorNumber       Int
   name              String?
@@ -1066,4 +1064,253 @@ model FacebookIntegration {
   updatedAt         DateTime     @updatedAt
   
   @@index([pageId])
+}
+
+// Hotel Staff
+model HotelStaff {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  firstName       String
+  lastName        String
+  position        String
+  department      String   // housekeeping, reception, management, etc.
+  phone           String?
+  email           String?
+  
+  isActive        Boolean  @default(true)
+  hireDate        DateTime?
+  notes           String?  @db.Text
+  staffData       Json?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@index([department])
+}
+
+// Hotel Seasons (for pricing)
+model HotelSeason {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  name            String
+  startDate       DateTime
+  endDate         DateTime
+  priceMultiplier Float    @default(1.0) // 1.0 = normal, 1.2 = 20% more, 0.8 = 20% less
+  isActive        Boolean  @default(true)
+  seasonData      Json?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@index([startDate, endDate])
+}
+
+// Hotel Taxes
+model HotelTax {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  name            String   // VAT, City Tax, Tourism Tax, etc.
+  code            String   // VAT, CITY_TAX, etc.
+  rate            Float    // percentage, e.g., 18 for 18%
+  isActive        Boolean  @default(true)
+  isIncluded      Boolean  @default(false) // included in price or added
+  taxData         Json?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+// Hotel Extra Services
+model HotelService {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  name            String
+  code            String
+  price           Float    @default(0)
+  category        String?  // spa, restaurant, transport, etc.
+  description     String?
+  isActive        Boolean  @default(true)
+  serviceData     Json?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+// Hotel Packages
+model HotelPackage {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  name            String
+  code            String
+  price           Float    @default(0)
+  description     String?
+  includedItems   String[] // list of included services/items
+  isActive        Boolean  @default(true)
+  packageData     Json?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+// Special Dates (holidays, events with special pricing)
+model HotelSpecialDate {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  date            DateTime
+  name            String
+  priceModifier   Float    @default(0) // percentage modifier
+  priceType       String   @default("modifier") // "modifier" or "fixed"
+  fixedPrice      Float?
+  color           String?
+  roomTypes       String[] // which room types this applies to
+  isActive        Boolean  @default(true)
+  dateData        Json?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([organizationId, date])
+  @@index([organizationId])
+  @@index([date])
+}
+
+// Room Rates (base prices per room type)
+model HotelRoomRate {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  roomTypeCode    String
+  dayOfWeek       Int?     // 0=Sunday, 1=Monday, etc. null=all days
+  basePrice       Float
+  isActive        Boolean  @default(true)
+  rateData        Json?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([organizationId, roomTypeCode, dayOfWeek])
+  @@index([organizationId])
+}
+
+// Charge Items (POS items for folios)
+model HotelChargeItem {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  name            String
+  code            String
+  price           Float    @default(0)
+  category        String   // F&B, Minibar, Spa, etc.
+  department      String?
+  unit            String   @default("piece") // piece, hour, person, etc.
+  stock           Int?
+  isActive        Boolean  @default(true)
+  itemData        Json?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([category])
+}
+
+// Charge Categories
+model HotelChargeCategory {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  name            String
+  code            String
+  icon            String?
+  sortOrder       Int      @default(0)
+  isActive        Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+// Housekeeping Checklist
+model HotelHousekeepingItem {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  name            String
+  category        String   @default("general")
+  sortOrder       Int      @default(0)
+  isRequired      Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([organizationId])
+}
+
+// System Settings
+model HotelSystemSettings {
+  id              String   @id @default(cuid())
+  organizationId  String   @unique
+  
+  settingsData    Json     // all system settings as JSON
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Cashier Settings
+model HotelCashierSettings {
+  id              String   @id @default(cuid())
+  organizationId  String   @unique
+  
+  settingsData    Json     // cashier settings as JSON
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Calendar Settings
+model HotelCalendarSettings {
+  id              String   @id @default(cuid())
+  organizationId  String   @unique
+  
+  settingsData    Json     // calendar settings as JSON
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Quick Charge Buttons
+model HotelQuickChargeButton {
+  id              String   @id @default(cuid())
+  organizationId  String
+  
+  itemId          String   // reference to charge item
+  position        Int      @default(0)
+  isActive        Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([organizationId])
 }

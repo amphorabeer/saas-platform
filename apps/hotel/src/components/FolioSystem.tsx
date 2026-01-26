@@ -58,12 +58,14 @@ export default function FolioSystem({ onSelectFolio, onClose }: FolioSystemProps
     setLoading(true)
     try {
       // Try API first
-      const response = await fetch('/api/folios')
+      const response = await fetch('/api/hotel/folios')
       if (response.ok) {
         const data = await response.json()
-        if (data.folios && data.folios.length > 0) {
+        // API returns array directly, not { folios: [] }
+        const apiFolios = Array.isArray(data) ? data : (data.folios || [])
+        if (apiFolios.length > 0) {
           // Transform API data to component format
-          const apiFolios = data.folios.map((f: any) => ({
+          const mappedFolios = apiFolios.map((f: any) => ({
             id: f.id,
             folioNumber: f.folioNumber,
             reservationId: f.reservationId || '',
@@ -71,15 +73,17 @@ export default function FolioSystem({ onSelectFolio, onClose }: FolioSystemProps
             roomNumber: f.roomNumber || '',
             checkIn: f.checkIn || '',
             checkOut: f.checkOut || '',
-            transactions: f.charges || f.folioData?.transactions || [],
+            transactions: f.transactions || f.charges || [],
             balance: f.balance || 0,
+            totalCharges: f.totalCharges || 0,
+            totalPayments: f.totalPayments || 0,
             status: f.status || 'open',
             createdAt: f.createdAt,
             closedAt: f.closedAt,
           }))
-          setFolios(apiFolios)
-          setFilteredFolios(apiFolios)
-          console.log('[FolioSystem] Loaded from API:', apiFolios.length)
+          setFolios(mappedFolios)
+          setFilteredFolios(mappedFolios)
+          console.log('[FolioSystem] Loaded from API:', mappedFolios.length)
           return
         }
       }
@@ -143,19 +147,28 @@ export default function FolioSystem({ onSelectFolio, onClose }: FolioSystemProps
     setFilteredFolios(result)
   }, [folios, searchTerm, statusFilter, sortBy, sortOrder])
 
-  // Calculate folio totals from transactions
+  // Calculate folio totals from transactions or use stored values
   const calculateFolioTotals = (folio: Folio) => {
     const transactions = folio.transactions || []
     
-    const totalCharges = transactions
-      .filter(t => t.type === 'charge')
-      .reduce((sum, t) => sum + (Number(t.debit) || Number(t.amount) || 0), 0)
+    // If transactions exist, calculate from them
+    if (transactions.length > 0) {
+      const totalCharges = transactions
+        .filter(t => t.type === 'charge')
+        .reduce((sum, t) => sum + (Number(t.debit) || Number(t.amount) || 0), 0)
+      
+      const totalPayments = transactions
+        .filter(t => t.type === 'payment')
+        .reduce((sum, t) => sum + (Number(t.credit) || Number(t.amount) || 0), 0)
+      
+      const balance = totalCharges - totalPayments
+      return { totalCharges, totalPayments, balance }
+    }
     
-    const totalPayments = transactions
-      .filter(t => t.type === 'payment')
-      .reduce((sum, t) => sum + (Number(t.credit) || Number(t.amount) || 0), 0)
-    
-    const balance = totalCharges - totalPayments
+    // Otherwise use stored values from API
+    const totalCharges = (folio as any).totalCharges || 0
+    const totalPayments = (folio as any).totalPayments || 0
+    const balance = folio.balance || (totalCharges - totalPayments)
 
     return { totalCharges, totalPayments, balance }
   }

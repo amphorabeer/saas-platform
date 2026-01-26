@@ -67,13 +67,14 @@ export default function CashierModule() {
     
     // Try API first
     try {
-      const response = await fetch('/api/folios')
+      const response = await fetch('/api/hotel/folios')
       if (response.ok) {
         const data = await response.json()
-        if (data.folios && data.folios.length > 0) {
-          folios = data.folios.map((f: any) => ({
+        const foliosList = Array.isArray(data) ? data : (data.folios || [])
+        if (foliosList.length > 0) {
+          folios = foliosList.map((f: any) => ({
             ...f,
-            transactions: f.folioData?.transactions || f.charges || []
+            transactions: f.transactions || f.folioData?.transactions || f.charges || []
           }))
           console.log('[CashierModule] Loaded folios from API:', folios.length)
         }
@@ -148,11 +149,11 @@ export default function CashierModule() {
     const loadData = async () => {
       // Load shift from API first, then localStorage
       try {
-        const shiftResponse = await fetch('/api/cashier?current=true')
+        const shiftResponse = await fetch('/api/hotel/cashier-shifts?current=true')
         if (shiftResponse.ok) {
           const shiftData = await shiftResponse.json()
-          if (shiftData.shift) {
-            setCurrentShift(shiftData.shift)
+          if (shiftData) {
+            setCurrentShift(shiftData)
             console.log('[CashierModule] Loaded shift from API')
           } else {
             // Fallback to localStorage
@@ -172,12 +173,13 @@ export default function CashierModule() {
       
       // Load shifts history from API
       try {
-        const historyResponse = await fetch('/api/cashier')
+        const historyResponse = await fetch('/api/hotel/cashier-shifts')
         if (historyResponse.ok) {
           const historyData = await historyResponse.json()
-          if (historyData.shifts && historyData.shifts.length > 0) {
-            setShifts(historyData.shifts)
-            console.log('[CashierModule] Loaded shifts history from API:', historyData.shifts.length)
+          const shiftsList = Array.isArray(historyData) ? historyData : (historyData.shifts || [])
+          if (shiftsList.length > 0) {
+            setShifts(shiftsList)
+            console.log('[CashierModule] Loaded shifts history from API:', shiftsList.length)
           } else {
             const allShifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
             setShifts(allShifts)
