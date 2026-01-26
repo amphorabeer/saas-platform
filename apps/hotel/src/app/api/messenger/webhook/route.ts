@@ -48,6 +48,13 @@ export async function POST(request: NextRequest) {
       for (const entry of body.entry || []) {
         const pageId = entry.id
         
+        // Debug: log all integrations
+        const allIntegrations = await prisma.facebookIntegration.findMany({
+          select: { pageId: true, isActive: true, organizationId: true }
+        })
+        console.log('[Messenger Webhook] All integrations:', JSON.stringify(allIntegrations))
+        console.log('[Messenger Webhook] Looking for pageId:', pageId)
+        
         const integration = await prisma.facebookIntegration.findUnique({
           where: { pageId }
         })
@@ -143,7 +150,9 @@ async function handleMessage(senderId: string, message: any, integration: any) {
   }
   
   // Send response
-  await sendMessage(senderId, responseText, integration.pageAccessToken)
+  console.log('[Messenger] Using token (first 20 chars):', integration.pageAccessToken?.substring(0, 20))
+  console.log('[Messenger] Using pageId:', integration.pageId)
+  await sendMessage(senderId, responseText, integration.pageAccessToken, integration.pageId)
   
   // Update stats
   await prisma.facebookIntegration.update({
@@ -579,10 +588,15 @@ async function createReservation(
 }
 
 // Send message via Facebook API
-async function sendMessage(recipientId: string, text: string, accessToken: string) {
+async function sendMessage(recipientId: string, text: string, accessToken: string, pageId?: string) {
   try {
+    // Use pageId if provided, otherwise fall back to 'me'
+    const endpoint = pageId 
+      ? `https://graph.facebook.com/v18.0/${pageId}/messages`
+      : `https://graph.facebook.com/v18.0/me/messages`
+    
     const response = await fetch(
-      `https://graph.facebook.com/v18.0/me/messages?access_token=${accessToken}`,
+      `${endpoint}?access_token=${accessToken}`,
       {
         method: 'POST',
         headers: {
