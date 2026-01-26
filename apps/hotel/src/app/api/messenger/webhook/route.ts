@@ -592,15 +592,16 @@ async function createReservation(
         tenantId: orgId,
         roomId: availableRoom.id,
         guestName: state.guestName,
-        guestPhone: state.guestPhone,
+        guestEmail: '',
+        guestPhone: state.guestPhone || '',
         checkIn: checkInDate,
         checkOut: checkOutDate,
         adults: state.guests,
         children: 0,
         totalAmount: pricing.total,
         paidAmount: 0,
-        status: 'pending',
-        source: 'Facebook Messenger',
+        status: 'CONFIRMED',
+        source: 'messenger',
         notes: `Messenger Bot-ით შექმნილი ჯავშანი`
       }
     })
