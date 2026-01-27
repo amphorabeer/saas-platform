@@ -222,6 +222,8 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
               ${hotelInfo?.address ? `<p>📍 ${hotelInfo.address}</p>` : ''}
               ${hotelInfo?.phone ? `<p>📞 ${hotelInfo.phone}</p>` : ''}
               ${hotelInfo?.email ? `<p>📧 ${hotelInfo.email}</p>` : ''}
+              ${hotelInfo?.bankName ? `<p>🏦 ${hotelInfo.bankName}</p>` : ''}
+              ${hotelInfo?.bankAccount ? `<p>💳 ${hotelInfo.bankAccount}</p>` : ''}
             </div>
           </div>
           
@@ -233,7 +235,17 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
           <div class="two-columns">
             <div class="column">
               <h3>👤 მიმღები</h3>
-              <p><span class="value">${reservation.guestName}</span></p>
+              ${hasCompany ? `
+                <p><strong>🏢 ${reservation.companyName}</strong></p>
+                ${reservation.companyTaxId ? `<p><span class="label">ს/კ:</span> <span class="value">${reservation.companyTaxId}</span></p>` : ''}
+                ${reservation.companyAddress ? `<p><span class="label">მისამართი:</span> <span class="value">${reservation.companyAddress}</span></p>` : ''}
+                ${reservation.companyBank ? `<p><span class="label">ბანკი:</span> <span class="value">${reservation.companyBank}</span></p>` : ''}
+                ${reservation.companyBankAccount ? `<p><span class="label">ანგარიში:</span> <span class="value">${reservation.companyBankAccount}</span></p>` : ''}
+                <hr style="margin: 8px 0; border: none; border-top: 1px dashed #ccc;">
+                <p><span class="label">საკონტაქტო:</span> <span class="value">${reservation.guestName}</span></p>
+              ` : `
+                <p><span class="value">${reservation.guestName}</span></p>
+              `}
               ${reservation.guestPhone ? `<p><span class="label">ტელეფონი:</span> <span class="value">${reservation.guestPhone}</span></p>` : ''}
               ${reservation.guestEmail ? `<p><span class="label">ელ-ფოსტა:</span> <span class="value">${reservation.guestEmail}</span></p>` : ''}
               ${reservation.guestCountry ? `<p><span class="label">ქვეყანა:</span> <span class="value">${reservation.guestCountry}</span></p>` : ''}
@@ -247,17 +259,6 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
               <p><span class="label">ღამეები:</span> <span class="value">${nights}</span></p>
             </div>
           </div>
-          
-          ${hasCompany ? `
-          <div class="company-section">
-            <h4>🏢 გადამხდელი კომპანია</h4>
-            <p><strong>${reservation.companyName}</strong></p>
-            ${reservation.companyTaxId ? `<p><span class="label">საიდენტიფიკაციო:</span> ${reservation.companyTaxId}</p>` : ''}
-            ${reservation.companyAddress ? `<p><span class="label">მისამართი:</span> ${reservation.companyAddress}</p>` : ''}
-            ${reservation.companyBank ? `<p><span class="label">ბანკი:</span> ${reservation.companyBank}</p>` : ''}
-            ${reservation.companyBankAccount ? `<p><span class="label">ანგარიში:</span> ${reservation.companyBankAccount}</p>` : ''}
-          </div>
-          ` : ''}
           
           <table>
             <thead>
