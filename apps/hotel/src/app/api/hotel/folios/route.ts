@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     })
     
     const mapped = folios.map(mapFolioToFrontend)
-    return NextResponse.json(mapped)
+    return NextResponse.json({ folios: mapped })
   } catch (error: any) {
     console.error('Error loading folios:', error)
     return NextResponse.json({ error: 'Failed to load folios', details: error.message }, { status: 500 })
@@ -196,6 +196,33 @@ function mapFolioToFrontend(folio: any) {
   const charges = folio.charges || []
   const payments = folio.payments || []
   
+  // Check if transactions are stored in folioData (legacy format)
+  if (folioData.transactions && Array.isArray(folioData.transactions) && folioData.transactions.length > 0) {
+    // Use transactions directly from folioData
+    return {
+      id: folio.id,
+      folioNumber: folio.folioNumber,
+      reservationId: folio.reservationId,
+      guestName: folio.guestName,
+      roomNumber: folio.roomNumber,
+      balance: folio.balance,
+      creditLimit: folioData.creditLimit || 5000,
+      paymentMethod: folioData.paymentMethod || 'cash',
+      status: folio.status,
+      openDate: folio.createdAt?.toISOString().split('T')[0] || folioData.openDate,
+      closeDate: folio.closedAt?.toISOString().split('T')[0] || folioData.closeDate,
+      checkIn: folio.checkIn?.toISOString().split('T')[0] || folioData.checkIn,
+      checkOut: folio.checkOut?.toISOString().split('T')[0] || folioData.checkOut,
+      transactions: folioData.transactions,
+      routingInstructions: folioData.routingInstructions || [],
+      masterFolioId: folioData.masterFolioId,
+      companyId: folioData.companyId,
+      initialRoomCharge: folioData.initialRoomCharge || null,
+      totalCharges: folio.totalCharges,
+      totalPayments: folio.totalPayments
+    }
+  }
+  
   // Reconstruct transactions from charges and payments
   const transactions = [
     ...charges.map((c: any) => ({ ...c, type: c.type || 'charge' })),
@@ -218,11 +245,13 @@ function mapFolioToFrontend(folio: any) {
     status: folio.status,
     openDate: folio.createdAt?.toISOString().split('T')[0] || folioData.openDate,
     closeDate: folio.closedAt?.toISOString().split('T')[0] || folioData.closeDate,
+    checkIn: folio.checkIn?.toISOString().split('T')[0] || folioData.checkIn,
+    checkOut: folio.checkOut?.toISOString().split('T')[0] || folioData.checkOut,
     transactions,
     routingInstructions: folioData.routingInstructions || [],
     masterFolioId: folioData.masterFolioId,
     companyId: folioData.companyId,
-    // Extra data
+    initialRoomCharge: folioData.initialRoomCharge || null,
     totalCharges: folio.totalCharges,
     totalPayments: folio.totalPayments
   }
@@ -274,7 +303,10 @@ function mapFolioToDatabase(data: any, organizationId: string) {
       closeDate: data.closeDate,
       routingInstructions: data.routingInstructions,
       masterFolioId: data.masterFolioId,
-      companyId: data.companyId
+      companyId: data.companyId,
+      // Store initial room charge info
+      initialRoomCharge: data.initialRoomCharge || null,
+      transactions: data.transactions || []
     }
   }
 }
