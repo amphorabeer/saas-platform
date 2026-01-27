@@ -93,8 +93,9 @@ export async function POST(request: NextRequest) {
         tenantId,
         roomId: data.roomId,
         guestName: data.guestName,
-        guestEmail: data.guestEmail || '',  // ✅ empty string, not null
+        guestEmail: data.guestEmail || '',
         guestPhone: data.guestPhone || '',
+        guestCountry: data.guestCountry || '',
         checkIn: newCheckIn,
         checkOut: newCheckOut,
         adults: data.adults || 1,
@@ -103,7 +104,13 @@ export async function POST(request: NextRequest) {
         paidAmount: data.paidAmount || 0,
         status: data.status || 'CONFIRMED',
         source: data.source || 'direct',
-        notes: data.notes || '',  // ✅ empty string, not null
+        notes: data.notes || '',
+        // Company fields
+        companyName: data.companyName || '',
+        companyTaxId: data.companyTaxId || '',
+        companyAddress: data.companyAddress || '',
+        companyBank: data.companyBank || '',
+        companyBankAccount: data.companyBankAccount || '',
       },
       include: { room: true },
     })
@@ -164,9 +171,11 @@ export async function PUT(request: NextRequest) {
     
     // Only allow valid fields - filter out unknown fields
     const validFields = [
-      'guestName', 'guestEmail', 'guestPhone',
+      'guestName', 'guestEmail', 'guestPhone', 'guestCountry',
       'checkIn', 'checkOut', 'adults', 'children',
-      'totalAmount', 'paidAmount', 'status', 'source', 'notes'
+      'totalAmount', 'paidAmount', 'status', 'source', 'notes',
+      // Company fields
+      'companyName', 'companyTaxId', 'companyAddress', 'companyBank', 'companyBankAccount'
     ]
     
     updateData = {}
@@ -193,11 +202,14 @@ export async function PUT(request: NextRequest) {
           if (!isNaN(numVal) && numVal >= 0) {
             updateData[field] = numVal
           }
-        } else if (field === 'guestEmail' || field === 'guestPhone' || field === 'notes') {
+        } else if (field === 'guestEmail' || field === 'guestPhone' || field === 'notes' || field === 'guestCountry') {
           // ✅ FIX: Use empty string, NOT null (guestEmail is required)
           updateData[field] = body[field] || ''
         } else if (field === 'source') {
           updateData[field] = body[field] || 'direct'
+        } else if (field.startsWith('company')) {
+          // Company fields - use empty string if not provided
+          updateData[field] = body[field] || ''
         } else {
           updateData[field] = body[field]
         }
