@@ -1009,16 +1009,144 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
   )
 }
 
-// Task Details Modal Component
+// Task Details Modal Component - Optimized with local state
 function TaskDetailsModal({ task, onClose, onUpdate, onChecklist, onPhotoUpload, onAddLostItem, onAddMinibar }: any) {
+  // Local state for fast editing - no API calls until save
+  const [localTask, setLocalTask] = useState({ ...task })
   const [notes, setNotes] = useState(task.notes || '')
   const [showLostForm, setShowLostForm] = useState(false)
   const [showMinibarForm, setShowMinibarForm] = useState(false)
   const [lostItem, setLostItem] = useState({ description: '', location: '' })
   const [minibarItem, setMinibarItem] = useState({ item: '', consumed: 1, price: 0 })
+  const [isSaving, setIsSaving] = useState(false)
+  const [hasChanges, setHasChanges] = useState(false)
   
   const photoBeforeRef = useRef<HTMLInputElement>(null)
   const photoAfterRef = useRef<HTMLInputElement>(null)
+
+  // Toggle checklist item locally (no API call)
+  const toggleChecklist = (idx: number) => {
+    const newChecklist = [...(localTask.checklist || [])]
+    newChecklist[idx] = { ...newChecklist[idx], completed: !newChecklist[idx].completed }
+    setLocalTask({ ...localTask, checklist: newChecklist })
+    setHasChanges(true)
+  }
+
+  // Add photo locally
+  const handlePhotoUpload = async (type: 'before' | 'after', file: File) => {
+    // Compress image before storing
+    const reader = new FileReader()
+    reader.onload = () => {
+      const base64 = reader.result as string
+      
+      // Compress by resizing (optional - limit to 800px width)
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const maxWidth = 800
+        const scale = Math.min(1, maxWidth / img.width)
+        canvas.width = img.width * scale
+        canvas.height = img.height * scale
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
+        const compressed = canvas.toDataURL('image/jpeg', 0.7)
+        
+        if (type === 'before') {
+          setLocalTask(prev => ({
+            ...prev,
+            photosBefore: [...(prev.photosBefore || []), compressed]
+          }))
+        } else {
+          setLocalTask(prev => ({
+            ...prev,
+            photosAfter: [...(prev.photosAfter || []), compressed]
+          }))
+        }
+        setHasChanges(true)
+      }
+      img.src = base64
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Remove photo locally
+  const removePhoto = (type: 'before' | 'after', idx: number) => {
+    if (type === 'before') {
+      const newPhotos = [...(localTask.photosBefore || [])]
+      newPhotos.splice(idx, 1)
+      setLocalTask({ ...localTask, photosBefore: newPhotos })
+    } else {
+      const newPhotos = [...(localTask.photosAfter || [])]
+      newPhotos.splice(idx, 1)
+      setLocalTask({ ...localTask, photosAfter: newPhotos })
+    }
+    setHasChanges(true)
+  }
+
+  // Add lost item locally
+  const addLostItemLocal = () => {
+    if (!lostItem.description) return
+    const newItem = {
+      id: `lost-${Date.now()}`,
+      description: lostItem.description,
+      location: lostItem.location,
+      foundAt: new Date().toISOString()
+    }
+    setLocalTask(prev => ({
+      ...prev,
+      lostAndFound: [...(prev.lostAndFound || []), newItem]
+    }))
+    setLostItem({ description: '', location: '' })
+    setShowLostForm(false)
+    setHasChanges(true)
+  }
+
+  // Remove lost item locally
+  const removeLostItem = (idx: number) => {
+    const newItems = [...(localTask.lostAndFound || [])]
+    newItems.splice(idx, 1)
+    setLocalTask({ ...localTask, lostAndFound: newItems })
+    setHasChanges(true)
+  }
+
+  // Add minibar item locally
+  const addMinibarLocal = () => {
+    if (!minibarItem.item) return
+    setLocalTask(prev => ({
+      ...prev,
+      minibarItems: [...(prev.minibarItems || []), { ...minibarItem }]
+    }))
+    setMinibarItem({ item: '', consumed: 1, price: 0 })
+    setShowMinibarForm(false)
+    setHasChanges(true)
+  }
+
+  // Remove minibar item locally
+  const removeMinibarItem = (idx: number) => {
+    const newItems = [...(localTask.minibarItems || [])]
+    newItems.splice(idx, 1)
+    setLocalTask({ ...localTask, minibarItems: newItems })
+    setHasChanges(true)
+  }
+
+  // Save all changes to server
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      await onUpdate({ 
+        ...localTask, 
+        notes,
+        checklist: localTask.checklist,
+        photosBefore: localTask.photosBefore,
+        photosAfter: localTask.photosAfter,
+        lostAndFound: localTask.lostAndFound,
+        minibarItems: localTask.minibarItems
+      })
+      setHasChanges(false)
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1026,276 +1154,339 @@ function TaskDetailsModal({ task, onClose, onUpdate, onChecklist, onPhotoUpload,
         {/* Header */}
         <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-bold">🚪 ოთახი {task.roomNumber}</h3>
+            <h3 className="text-lg font-bold">🚪 ოთახი {localTask.roomNumber}</h3>
             <p className="text-sm text-blue-100">
-              {task.type === 'checkout' ? 'Check-out დასუფთავება' :
-               task.type === 'checkin' ? 'Check-in მომზადება' :
-               task.type === 'daily' ? 'ყოველდღიური დასუფთავება' :
-               task.type === 'deep' ? 'ღრმა დასუფთავება' : 'შემოწმება'}
+              {localTask.type === 'checkout' ? 'Check-out დასუფთავება' :
+               localTask.type === 'checkin' ? 'Check-in მომზადება' :
+               localTask.type === 'daily' ? 'ყოველდღიური დასუფთავება' :
+               localTask.type === 'deep' ? 'ღრმა დასუფთავება' : 'შემოწმება'}
             </p>
           </div>
-          <button onClick={onClose} className="text-2xl hover:text-blue-200">×</button>
+          <div className="flex items-center gap-2">
+            {hasChanges && <span className="text-yellow-300 text-sm">● შეუნახავია</span>}
+            <button onClick={onClose} className="text-2xl hover:text-blue-200">×</button>
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {/* Checklist */}
-          {task.checklist && task.checklist.length > 0 && (
+          {/* Checklist - Fast local toggle */}
+          {localTask.checklist && localTask.checklist.length > 0 && (
             <div>
-              <h4 className="font-bold mb-2">📋 Checklist</h4>
-              <div className="bg-gray-50 rounded-lg p-3 max-h-48 overflow-y-auto">
-                {task.checklist.map((item: ChecklistItem, idx: number) => (
-                  <label key={idx} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-100 px-2 rounded">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-bold">📋 Checklist</h4>
+                <button
+                  onClick={() => {
+                    const allChecked = localTask.checklist.every((c: any) => c.completed)
+                    const newChecklist = localTask.checklist.map((c: any) => ({ ...c, completed: !allChecked }))
+                    setLocalTask({ ...localTask, checklist: newChecklist })
+                    setHasChanges(true)
+                  }}
+                  className="text-xs text-blue-600 hover:text-blue-800"
+                >
+                  {localTask.checklist.every((c: any) => c.completed) ? 'მოხსნა ყველა' : 'მონიშვნა ყველა'}
+                </button>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2 max-h-40 overflow-y-auto">
+                {localTask.checklist.map((item: ChecklistItem, idx: number) => (
+                  <label key={idx} className="flex items-center gap-2 py-1.5 cursor-pointer hover:bg-gray-100 px-2 rounded">
                     <input
                       type="checkbox"
                       checked={item.completed}
-                      onChange={() => onChecklist(task.id, idx)}
-                      disabled={task.status === 'verified'}
-                      className="w-4 h-4"
+                      onChange={() => toggleChecklist(idx)}
+                      disabled={localTask.status === 'verified'}
+                      className="w-5 h-5 cursor-pointer"
                     />
-                    <span className={`flex-1 ${item.completed ? 'line-through text-gray-400' : ''}`}>
+                    <span className={`flex-1 text-sm ${item.completed ? 'line-through text-gray-400' : ''}`}>
                       {item.item}
                       {item.required && <span className="text-red-500 ml-1">*</span>}
                     </span>
-                    {item.category && (
-                      <span className="text-xs text-gray-400">{item.category}</span>
-                    )}
                   </label>
                 ))}
               </div>
               <div className="text-sm text-gray-500 mt-1">
-                {task.checklist.filter((c: ChecklistItem) => c.completed).length}/{task.checklist.length} შესრულებული
+                ✓ {localTask.checklist.filter((c: ChecklistItem) => c.completed).length}/{localTask.checklist.length}
               </div>
             </div>
           )}
 
-          {/* Photos */}
+          {/* Photos - With delete option */}
           <div className="grid grid-cols-2 gap-4">
             {/* Before Photos */}
             <div>
-              <h4 className="font-bold mb-2">📷 ფოტო (მანამდე)</h4>
-              <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                {task.photosBefore && task.photosBefore.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    {task.photosBefore.map((photo: string, idx: number) => (
-                      <img key={idx} src={photo} alt={`Before ${idx}`} className="w-full h-20 object-cover rounded" />
+              <h4 className="font-bold mb-2 text-sm">📷 ფოტო (მანამდე)</h4>
+              <div className="border-2 border-dashed rounded-lg p-2 min-h-[100px]">
+                {localTask.photosBefore && localTask.photosBefore.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-1">
+                    {localTask.photosBefore.map((photo: string, idx: number) => (
+                      <div key={idx} className="relative group">
+                        <img src={photo} alt={`Before ${idx}`} className="w-full h-16 object-cover rounded" />
+                        <button
+                          onClick={() => removePhoto('before', idx)}
+                          className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition"
+                        >
+                          ×
+                        </button>
+                      </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-400 text-sm">ფოტო არ არის</p>
+                  <p className="text-gray-400 text-xs text-center py-4">ფოტო არ არის</p>
                 )}
                 <input
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   className="hidden"
                   ref={photoBeforeRef}
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
-                      onPhotoUpload(task.id, 'before', e.target.files[0])
+                      handlePhotoUpload('before', e.target.files[0])
+                      e.target.value = '' // Reset for same file
                     }
                   }}
                 />
                 <button
                   onClick={() => photoBeforeRef.current?.click()}
-                  className="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
-                  disabled={task.status === 'verified'}
+                  className="w-full mt-2 px-2 py-1.5 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                  disabled={localTask.status === 'verified'}
                 >
-                  + ფოტოს დამატება
+                  + დამატება
                 </button>
               </div>
             </div>
 
             {/* After Photos */}
             <div>
-              <h4 className="font-bold mb-2">📷✓ ფოტო (შემდეგ)</h4>
-              <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                {task.photosAfter && task.photosAfter.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    {task.photosAfter.map((photo: string, idx: number) => (
-                      <img key={idx} src={photo} alt={`After ${idx}`} className="w-full h-20 object-cover rounded" />
+              <h4 className="font-bold mb-2 text-sm">📷✓ ფოტო (შემდეგ)</h4>
+              <div className="border-2 border-dashed rounded-lg p-2 min-h-[100px]">
+                {localTask.photosAfter && localTask.photosAfter.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-1">
+                    {localTask.photosAfter.map((photo: string, idx: number) => (
+                      <div key={idx} className="relative group">
+                        <img src={photo} alt={`After ${idx}`} className="w-full h-16 object-cover rounded" />
+                        <button
+                          onClick={() => removePhoto('after', idx)}
+                          className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition"
+                        >
+                          ×
+                        </button>
+                      </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-400 text-sm">ფოტო არ არის</p>
+                  <p className="text-gray-400 text-xs text-center py-4">ფოტო არ არის</p>
                 )}
                 <input
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   className="hidden"
                   ref={photoAfterRef}
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
-                      onPhotoUpload(task.id, 'after', e.target.files[0])
+                      handlePhotoUpload('after', e.target.files[0])
+                      e.target.value = ''
                     }
                   }}
                 />
                 <button
                   onClick={() => photoAfterRef.current?.click()}
-                  className="mt-2 px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200"
-                  disabled={task.status === 'verified'}
+                  className="w-full mt-2 px-2 py-1.5 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
+                  disabled={localTask.status === 'verified'}
                 >
-                  + ფოტოს დამატება
+                  + დამატება
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Lost & Found */}
-          <div>
+          {/* Lost & Found - Simplified */}
+          <div className="border rounded-lg p-3">
             <div className="flex justify-between items-center mb-2">
-              <h4 className="font-bold">🔍 ნაპოვნი ნივთები</h4>
-              <button
-                onClick={() => setShowLostForm(!showLostForm)}
-                className="text-sm text-blue-600 hover:text-blue-800"
-                disabled={task.status === 'verified'}
-              >
-                + დამატება
-              </button>
+              <h4 className="font-bold text-sm">🔍 ნაპოვნი ნივთები ({localTask.lostAndFound?.length || 0})</h4>
+              {!showLostForm && localTask.status !== 'verified' && (
+                <button
+                  onClick={() => setShowLostForm(true)}
+                  className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded hover:bg-yellow-200"
+                >
+                  + დამატება
+                </button>
+              )}
             </div>
             
             {showLostForm && (
-              <div className="bg-yellow-50 p-3 rounded-lg mb-2">
+              <div className="bg-yellow-50 p-2 rounded mb-2 space-y-2">
                 <input
                   type="text"
-                  placeholder="აღწერა"
-                  className="w-full border rounded px-3 py-2 mb-2 text-sm"
+                  placeholder="აღწერა *"
+                  className="w-full border rounded px-2 py-1.5 text-sm"
                   value={lostItem.description}
                   onChange={(e) => setLostItem({ ...lostItem, description: e.target.value })}
+                  autoFocus
                 />
                 <input
                   type="text"
                   placeholder="მდებარეობა"
-                  className="w-full border rounded px-3 py-2 mb-2 text-sm"
+                  className="w-full border rounded px-2 py-1.5 text-sm"
                   value={lostItem.location}
                   onChange={(e) => setLostItem({ ...lostItem, location: e.target.value })}
                 />
-                <button
-                  onClick={() => {
-                    if (lostItem.description) {
-                      onAddLostItem(task.id, lostItem)
-                      setLostItem({ description: '', location: '' })
-                      setShowLostForm(false)
-                    }
-                  }}
-                  className="w-full py-2 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-                >
-                  შენახვა
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={addLostItemLocal}
+                    disabled={!lostItem.description}
+                    className="flex-1 py-1.5 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600 disabled:bg-gray-300"
+                  >
+                    ✓ დამატება
+                  </button>
+                  <button
+                    onClick={() => { setShowLostForm(false); setLostItem({ description: '', location: '' }) }}
+                    className="px-3 py-1.5 bg-gray-200 rounded text-sm hover:bg-gray-300"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
             )}
             
-            {task.lostAndFound && task.lostAndFound.length > 0 ? (
-              <div className="space-y-2">
-                {task.lostAndFound.map((item: LostItem) => (
-                  <div key={item.id} className="bg-yellow-50 p-2 rounded text-sm">
-                    <div className="font-medium">{item.description}</div>
-                    <div className="text-gray-500">{item.location} • {moment(item.foundAt).format('HH:mm')}</div>
+            {localTask.lostAndFound && localTask.lostAndFound.length > 0 ? (
+              <div className="space-y-1 max-h-24 overflow-y-auto">
+                {localTask.lostAndFound.map((item: LostItem, idx: number) => (
+                  <div key={item.id || idx} className="flex items-center justify-between bg-yellow-50 p-2 rounded text-sm">
+                    <div>
+                      <span className="font-medium">{item.description}</span>
+                      {item.location && <span className="text-gray-500 ml-2">📍 {item.location}</span>}
+                    </div>
+                    <button
+                      onClick={() => removeLostItem(idx)}
+                      className="text-red-500 hover:text-red-700 px-2"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-gray-400 text-sm">ნაპოვნი ნივთები არ არის</p>
+            ) : !showLostForm && (
+              <p className="text-gray-400 text-xs">ნაპოვნი ნივთები არ არის</p>
             )}
           </div>
 
-          {/* Minibar */}
-          <div>
+          {/* Minibar - Simplified */}
+          <div className="border rounded-lg p-3">
             <div className="flex justify-between items-center mb-2">
-              <h4 className="font-bold">🍫 მინიბარი</h4>
-              <button
-                onClick={() => setShowMinibarForm(!showMinibarForm)}
-                className="text-sm text-blue-600 hover:text-blue-800"
-                disabled={task.status === 'verified'}
-              >
-                + დამატება
-              </button>
+              <h4 className="font-bold text-sm">🍫 მინიბარი ({localTask.minibarItems?.length || 0})</h4>
+              {!showMinibarForm && localTask.status !== 'verified' && (
+                <button
+                  onClick={() => setShowMinibarForm(true)}
+                  className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded hover:bg-purple-200"
+                >
+                  + დამატება
+                </button>
+              )}
             </div>
             
             {showMinibarForm && (
-              <div className="bg-purple-50 p-3 rounded-lg mb-2">
+              <div className="bg-purple-50 p-2 rounded mb-2 space-y-2">
                 <input
                   type="text"
-                  placeholder="პროდუქტი"
-                  className="w-full border rounded px-3 py-2 mb-2 text-sm"
+                  placeholder="პროდუქტი *"
+                  className="w-full border rounded px-2 py-1.5 text-sm"
                   value={minibarItem.item}
                   onChange={(e) => setMinibarItem({ ...minibarItem, item: e.target.value })}
+                  autoFocus
                 />
-                <div className="grid grid-cols-2 gap-2 mb-2">
+                <div className="grid grid-cols-2 gap-2">
                   <input
                     type="number"
                     placeholder="რაოდენობა"
-                    className="border rounded px-3 py-2 text-sm"
+                    className="border rounded px-2 py-1.5 text-sm"
                     value={minibarItem.consumed}
-                    onChange={(e) => setMinibarItem({ ...minibarItem, consumed: parseInt(e.target.value) || 0 })}
+                    min="1"
+                    onChange={(e) => setMinibarItem({ ...minibarItem, consumed: parseInt(e.target.value) || 1 })}
                   />
                   <input
                     type="number"
                     placeholder="ფასი"
-                    className="border rounded px-3 py-2 text-sm"
-                    value={minibarItem.price}
+                    className="border rounded px-2 py-1.5 text-sm"
+                    value={minibarItem.price || ''}
+                    step="0.01"
                     onChange={(e) => setMinibarItem({ ...minibarItem, price: parseFloat(e.target.value) || 0 })}
                   />
                 </div>
-                <button
-                  onClick={() => {
-                    if (minibarItem.item) {
-                      onAddMinibar(task.id, minibarItem)
-                      setMinibarItem({ item: '', consumed: 1, price: 0 })
-                      setShowMinibarForm(false)
-                    }
-                  }}
-                  className="w-full py-2 bg-purple-500 text-white rounded text-sm hover:bg-purple-600"
-                >
-                  დამატება
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={addMinibarLocal}
+                    disabled={!minibarItem.item}
+                    className="flex-1 py-1.5 bg-purple-500 text-white rounded text-sm hover:bg-purple-600 disabled:bg-gray-300"
+                  >
+                    ✓ დამატება
+                  </button>
+                  <button
+                    onClick={() => { setShowMinibarForm(false); setMinibarItem({ item: '', consumed: 1, price: 0 }) }}
+                    className="px-3 py-1.5 bg-gray-200 rounded text-sm hover:bg-gray-300"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
             )}
             
-            {task.minibarItems && task.minibarItems.length > 0 ? (
-              <div className="space-y-2">
-                {task.minibarItems.map((item: MinibarItem, idx: number) => (
-                  <div key={idx} className="bg-purple-50 p-2 rounded text-sm flex justify-between">
+            {localTask.minibarItems && localTask.minibarItems.length > 0 ? (
+              <div className="space-y-1 max-h-24 overflow-y-auto">
+                {localTask.minibarItems.map((item: MinibarItem, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between bg-purple-50 p-2 rounded text-sm">
                     <span>{item.item} × {item.consumed}</span>
-                    <span className="font-medium">₾{(item.consumed * item.price).toFixed(2)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">₾{(item.consumed * item.price).toFixed(2)}</span>
+                      <button
+                        onClick={() => removeMinibarItem(idx)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 ))}
-                <div className="text-right font-bold">
-                  სულ: ₾{task.minibarItems.reduce((sum: number, i: MinibarItem) => sum + i.consumed * i.price, 0).toFixed(2)}
+                <div className="text-right font-bold text-sm pt-1 border-t">
+                  სულ: ₾{localTask.minibarItems.reduce((sum: number, i: MinibarItem) => sum + i.consumed * i.price, 0).toFixed(2)}
                 </div>
               </div>
-            ) : (
-              <p className="text-gray-400 text-sm">მინიბარის მოხმარება არ არის</p>
+            ) : !showMinibarForm && (
+              <p className="text-gray-400 text-xs">მინიბარის მოხმარება არ არის</p>
             )}
           </div>
 
           {/* Notes */}
           <div>
-            <h4 className="font-bold mb-2">📝 შენიშვნები</h4>
+            <h4 className="font-bold mb-2 text-sm">📝 შენიშვნები</h4>
             <textarea
-              className="w-full border rounded-lg p-3 text-sm"
-              rows={3}
+              className="w-full border rounded-lg p-2 text-sm"
+              rows={2}
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(e) => { setNotes(e.target.value); setHasChanges(true) }}
               placeholder="დამატებითი ინფორმაცია..."
-              disabled={task.status === 'verified'}
+              disabled={localTask.status === 'verified'}
             />
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="border-t p-4 flex gap-3">
+        {/* Footer - Single save button */}
+        <div className="border-t p-3 bg-gray-50 flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 py-2 bg-gray-200 rounded hover:bg-gray-300"
+            className="flex-1 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm"
           >
             დახურვა
           </button>
           <button
-            onClick={() => onUpdate({ ...task, notes })}
-            className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            disabled={task.status === 'verified'}
+            onClick={handleSave}
+            disabled={localTask.status === 'verified' || isSaving}
+            className={`flex-1 py-2 rounded text-white text-sm font-medium ${
+              isSaving ? 'bg-gray-400' : hasChanges ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
-            შენახვა
+            {isSaving ? '⏳ ინახება...' : hasChanges ? '💾 შენახვა' : '✓ შენახვა'}
           </button>
         </div>
       </div>
