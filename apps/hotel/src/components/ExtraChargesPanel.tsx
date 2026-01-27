@@ -233,7 +233,10 @@ export default function ExtraChargesPanel({
   
   const getItemDetails = () => {
     if (!selectedItem) return null
-    return items.find(i => i.id === selectedItem)
+    // Match by id or code
+    const found = items.find(i => i.id === selectedItem || i.code === selectedItem)
+    console.log('[ExtraChargesPanel] getItemDetails:', selectedItem, found)
+    return found
   }
   
   // Calculate tax inclusive breakdown
@@ -249,23 +252,23 @@ export default function ExtraChargesPanel({
       total: 0
     }
     
-    const category = categories.find(c => c.id === item.categoryId)
-    if (!category) return {
-      gross: 0,
-      net: 0,
-      serviceCharge: 0,
-      serviceRate: 0,
-      vat: 0,
-      vatRate: 0,
-      total: 0
-    }
+    // Find category by id or code
+    const category = categories.find(c => 
+      c.id === item.categoryId || 
+      c.code === item.categoryId ||
+      c.id === item.category ||
+      c.code === item.category
+    )
+    
+    // Get price (handle both unitPrice and price)
+    const itemPrice = item.unitPrice || item.price || 0
     
     // Gross price (taxes included) - this is what customer pays
-    const grossPrice = item.unitPrice * quantity
+    const grossPrice = itemPrice * quantity
     
     // Get tax rates (from loaded settings, not hardcoded)
-    const vatRate = taxRates.vat
-    const serviceRate = category.serviceChargeRate ? taxRates.serviceCharge : 0
+    const vatRate = taxRates.vat || 18
+    const serviceRate = category?.serviceChargeRate ? taxRates.serviceCharge : 0
     
     // Calculate tax inclusive breakdown
     // Total tax multiplier: 1 + vatRate/100 + serviceRate/100
@@ -342,6 +345,15 @@ export default function ExtraChargesPanel({
   const taxBreakdown = calculateTaxInclusive()
   const totalAmount = taxBreakdown.gross
   
+  // Debug current state
+  console.log('[ExtraChargesPanel] Current state:', {
+    selectedItem,
+    item,
+    itemsCount: items.length,
+    firstItem: items[0],
+    taxBreakdown
+  })
+  
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
@@ -383,13 +395,16 @@ export default function ExtraChargesPanel({
           <label className="block text-sm font-medium mb-2">Select Item</label>
           <select
             value={selectedItem}
-            onChange={(e) => setSelectedItem(e.target.value)}
+            onChange={(e) => {
+              console.log('[ExtraChargesPanel] Selected item:', e.target.value)
+              setSelectedItem(e.target.value)
+            }}
             className="w-full border rounded px-3 py-2"
           >
             <option value="">-- Select Item --</option>
             {getCategoryItems().map(item => (
-              <option key={item.id} value={item.id}>
-                {item.name} - ₾{item.unitPrice}/{item.unit}
+              <option key={item.id || item.code} value={item.id || item.code}>
+                {item.name} - ₾{item.unitPrice || item.price}/{item.unit}
                 {item.trackStock && item.currentStock !== undefined && ` (Stock: ${item.currentStock})`}
               </option>
             ))}
