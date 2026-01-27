@@ -125,7 +125,39 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
   }
 
   // Load staff
-  const loadStaff = () => {
+  const loadStaff = async () => {
+    // Try API first
+    try {
+      const response = await fetch('/api/hotel/staff')
+      if (response.ok) {
+        const data = await response.json()
+        const allStaff = data.staff || data || []
+        
+        const housekeepingStaff = allStaff.filter((s: any) => {
+          const dept = String(s.department || '').toLowerCase()
+          const pos = String(s.position || '').toLowerCase()
+          return dept === 'housekeeping' || dept === 'დასუფთავება' || 
+                 pos.includes('housekeeper') || pos.includes('დამლაგებელი')
+        })
+        
+        const staffToUse = housekeepingStaff.length > 0 ? housekeepingStaff : allStaff.filter((s: any) => s.active !== false)
+        
+        const formatted = staffToUse.map((s: any) => ({
+          id: s.id,
+          name: s.firstName && s.lastName ? `${s.firstName} ${s.lastName}` : s.name || 'Unknown',
+          position: s.position || 'Housekeeper',
+          department: s.department || 'housekeeping'
+        }))
+        
+        setStaff(formatted)
+        console.log('[Housekeeping] Staff loaded from API:', formatted.length)
+        return
+      }
+    } catch (error) {
+      console.error('[Housekeeping] API error, falling back to localStorage:', error)
+    }
+    
+    // Fallback to localStorage
     const savedStaff = JSON.parse(localStorage.getItem('hotelStaff') || '[]')
     const housekeepingStaff = savedStaff.filter((s: any) => {
       const dept = String(s.department || '').toLowerCase()
@@ -144,6 +176,7 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     }))
     
     setStaff(formatted)
+    console.log('[Housekeeping] Staff loaded from localStorage:', formatted.length)
   }
 
   // Load tasks from API

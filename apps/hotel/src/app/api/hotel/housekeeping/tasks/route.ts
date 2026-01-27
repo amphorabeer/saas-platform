@@ -6,10 +6,10 @@ import { NextRequest, NextResponse } from 'next/server'
 // GET - Fetch housekeeping tasks
 export async function GET(request: NextRequest) {
   try {
-    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
-    const tenantId = await getTenantId()
+    const { getOrganizationId, unauthorizedResponse } = await import('@/lib/tenant')
+    const organizationId = await getOrganizationId()
     
-    if (!tenantId) {
+    if (!organizationId) {
       return unauthorizedResponse()
     }
     
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const floor = searchParams.get('floor')
     
     // Build where clause
-    const where: any = { organizationId: tenantId }
+    const where: any = { organizationId }
     
     if (date) {
       const startOfDay = new Date(date)
@@ -103,10 +103,10 @@ export async function GET(request: NextRequest) {
 // POST - Create new task
 export async function POST(request: NextRequest) {
   try {
-    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
-    const tenantId = await getTenantId()
+    const { getOrganizationId, unauthorizedResponse } = await import('@/lib/tenant')
+    const organizationId = await getOrganizationId()
     
-    if (!tenantId) {
+    if (!organizationId) {
       return unauthorizedResponse()
     }
     
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     if (Array.isArray(data)) {
       const created = await prisma.housekeepingTask.createMany({
         data: data.map((task: any) => ({
-          organizationId: tenantId,
+          organizationId,
           roomNumber: task.roomNumber,
           taskType: task.type || task.taskType || 'cleaning',
           status: task.status || 'pending',
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     // Single task
     const task = await prisma.housekeepingTask.create({
       data: {
-        organizationId: tenantId,
+        organizationId,
         roomNumber: data.roomNumber,
         taskType: data.type || data.taskType || 'cleaning',
         status: data.status || 'pending',
@@ -175,10 +175,10 @@ export async function POST(request: NextRequest) {
 // PUT - Update task
 export async function PUT(request: NextRequest) {
   try {
-    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
-    const tenantId = await getTenantId()
+    const { getOrganizationId, unauthorizedResponse } = await import('@/lib/tenant')
+    const organizationId = await getOrganizationId()
     
-    if (!tenantId) {
+    if (!organizationId) {
       return unauthorizedResponse()
     }
     
@@ -195,7 +195,7 @@ export async function PUT(request: NextRequest) {
       where: { id: data.id }
     })
     
-    if (!existing || existing.organizationId !== tenantId) {
+    if (!existing || existing.organizationId !== organizationId) {
       return NextResponse.json({ error: 'Task not found' }, { status: 404 })
     }
     
@@ -239,10 +239,10 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete task
 export async function DELETE(request: NextRequest) {
   try {
-    const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
-    const tenantId = await getTenantId()
+    const { getOrganizationId, unauthorizedResponse } = await import('@/lib/tenant')
+    const organizationId = await getOrganizationId()
     
-    if (!tenantId) {
+    if (!organizationId) {
       return unauthorizedResponse()
     }
     
@@ -260,7 +260,7 @@ export async function DELETE(request: NextRequest) {
       
       const deleted = await prisma.housekeepingTask.deleteMany({
         where: {
-          organizationId: tenantId,
+          organizationId,
           status: 'verified',
           completedAt: { lt: sevenDaysAgo }
         }
@@ -278,7 +278,7 @@ export async function DELETE(request: NextRequest) {
       where: { id }
     })
     
-    if (!existing || existing.organizationId !== tenantId) {
+    if (!existing || existing.organizationId !== organizationId) {
       return NextResponse.json({ error: 'Task not found' }, { status: 404 })
     }
     
