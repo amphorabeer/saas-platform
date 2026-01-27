@@ -259,28 +259,65 @@ export class ExtraChargesService {
     notes?: string
     reference?: string
     postedBy?: string
+    // New: accept item and category details directly
+    itemDetails?: {
+      id: string
+      code: string
+      name: string
+      unitPrice: number
+      unit: string
+      categoryId: string
+      department: string
+    }
+    categoryDetails?: {
+      id: string
+      code: string
+      name: string
+      taxRate: number
+      serviceChargeRate?: number
+    }
+    taxRates?: {
+      vat: number
+      serviceCharge: number
+    }
   }) {
     try {
-      // Get item details
-      const item = this.ITEMS.find(i => i.id === params.itemId)
-      if (!item) throw new Error('Item not found')
-      
-      // Get category
-      const category = this.CATEGORIES.find(c => c.id === item.categoryId)
-      if (!category) throw new Error('Category not found')
-      
-      // Check stock if applicable
-      if (item.trackStock && item.currentStock !== undefined) {
-        if (item.currentStock < params.quantity) {
-          throw new Error(`Insufficient stock. Available: ${item.currentStock}`)
+      // Use passed item details or try to find from hardcoded list
+      let item = params.itemDetails
+      if (!item) {
+        const foundItem = this.ITEMS.find(i => i.id === params.itemId || i.code === params.itemId)
+        if (!foundItem) throw new Error('Item not found')
+        item = {
+          id: foundItem.id,
+          code: foundItem.code,
+          name: foundItem.name,
+          unitPrice: foundItem.unitPrice,
+          unit: foundItem.unit,
+          categoryId: foundItem.categoryId,
+          department: foundItem.department
         }
       }
       
-      // Load tax rates from localStorage (override hardcoded values)
-      let vatRate = category.taxRate // Default to category's hardcoded rate
-      let serviceChargeRate = category.serviceChargeRate // Default to category's hardcoded rate
+      // Use passed category details or try to find from hardcoded list
+      let category = params.categoryDetails
+      if (!category) {
+        const foundCategory = this.CATEGORIES.find(c => c.id === item!.categoryId || c.code === item!.categoryId)
+        if (!foundCategory) throw new Error('Category not found')
+        category = {
+          id: foundCategory.id,
+          code: foundCategory.code,
+          name: foundCategory.name,
+          taxRate: foundCategory.taxRate,
+          serviceChargeRate: foundCategory.serviceChargeRate
+        }
+      }
       
-      if (typeof window !== 'undefined') {
+      // Load tax rates from params or localStorage
+      let vatRate = params.taxRates?.vat ?? category.taxRate ?? 18
+      let serviceChargeRate = params.taxRates?.serviceCharge ?? category.serviceChargeRate ?? 0
+      
+      // Only load from localStorage if not passed in params
+      if (!params.taxRates && typeof window !== 'undefined') {
         const saved = localStorage.getItem('hotelTaxes')
         if (saved) {
           try {
