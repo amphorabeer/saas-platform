@@ -266,8 +266,9 @@ export default function EditReservationModal({
     
     onSave({
       guestName: formData.guestName,
-      guestEmail: formData.guestEmail || '',  // ✅ empty string
+      guestEmail: formData.guestEmail || '',
       guestPhone: formData.guestPhone || '',
+      guestCountry: formData.guestCountry || '',
       roomId: formData.roomId,
       checkIn: formData.checkIn,
       checkOut: formData.checkOut,
@@ -276,7 +277,13 @@ export default function EditReservationModal({
       totalAmount: formData.totalAmount,
       status: formData.status,
       source: formData.source || 'direct',
-      notes: formData.notes || ''  // ✅ empty string
+      notes: formData.notes || '',
+      // Company fields
+      companyName: showCompany ? formData.companyName : '',
+      companyTaxId: showCompany ? formData.companyTaxId : '',
+      companyAddress: showCompany ? formData.companyAddress : '',
+      companyBank: showCompany ? formData.companyBank : '',
+      companyBankAccount: showCompany ? formData.companyBankAccount : ''
     })
   }
   
