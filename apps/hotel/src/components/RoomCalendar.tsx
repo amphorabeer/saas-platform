@@ -196,7 +196,8 @@ export default function RoomCalendar({
         if (data.folios && data.folios.length > 0) {
           const mappedFolios = data.folios.map((f: any) => ({
             ...f,
-            transactions: f.folioData?.transactions || f.charges || f.transactions || []
+            // API returns transactions directly, fallback to folioData.transactions or charges
+            transactions: f.transactions || f.folioData?.transactions || f.charges || []
           }))
           setFoliosCache(mappedFolios)
           console.log('[RoomCalendar] Loaded folios from API:', mappedFolios.length)
@@ -2089,7 +2090,9 @@ export default function RoomCalendar({
       try {
         const response = await fetch('/api/hotel/folios')
         if (response.ok) {
-          const apiFolios = await response.json()
+          const apiResponse = await response.json()
+          // Handle both array and { folios: [...] } response formats
+          const apiFolios = Array.isArray(apiResponse) ? apiResponse : (apiResponse.folios || [])
           existingFolio = apiFolios.find((f: any) => f.reservationId === reservation.id)
           if (existingFolio) {
             console.log('[RoomCalendar] Found existing folio in API:', existingFolio.folioNumber)
@@ -5001,7 +5004,9 @@ function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, on
     
     if (foundFolio) {
       // Extract charges and payments from transactions
-      const transactions = foundFolio.transactions || []
+      // API returns transactions directly, but also check folioData.transactions for legacy
+      const transactions = foundFolio.transactions || foundFolio.folioData?.transactions || []
+      console.log('[ReservationDetails] Folio transactions:', transactions.length)
       
       // Get charges from transactions (type === 'charge' or debit > 0)
       const charges = transactions.filter((t: any) => 
