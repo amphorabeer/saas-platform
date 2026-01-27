@@ -29,6 +29,8 @@ export default function CheckOutModal({
   const [canCheckOut, setCanCheckOut] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showFullFolio, setShowFullFolio] = useState(false)
+  const [isCheckingOut, setIsCheckingOut] = useState(false) // Loading for checkout button
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false) // Loading for payment button
   
   useEffect(() => {
     loadFolio()
@@ -175,13 +177,15 @@ export default function CheckOutModal({
   }
   
   const processCheckOut = async () => {
-    if (!folio) return
+    if (!folio || isCheckingOut) return
     
     // Validate balance - allow small rounding errors (0.01)
     if (Math.abs(folio.balance) > 0.01) {
       alert(`❌ Cannot check out with outstanding balance: ₾${folio.balance.toFixed(2)}\n\nPlease process payment first.`)
       return
     }
+    
+    setIsCheckingOut(true) // Start loading
     
     try {
       // Update reservation status via API
@@ -307,6 +311,8 @@ export default function CheckOutModal({
     } catch (error) {
       console.error('Check-out error:', error)
       alert('❌ Error completing check-out')
+    } finally {
+      setIsCheckingOut(false) // End loading
     }
   }
   
@@ -628,14 +634,14 @@ export default function CheckOutModal({
             </button>
             <button
               onClick={processCheckOut}
-              disabled={folio.balance > 0}
+              disabled={folio.balance > 0 || isCheckingOut}
               className={`px-6 py-3 rounded font-bold transition ${
-                folio.balance > 0 
+                folio.balance > 0 || isCheckingOut
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                   : 'bg-green-600 text-white hover:bg-green-700'
               }`}
             >
-              {folio.balance > 0 ? '⏳ Settle Balance First' : '✅ Complete Check-Out'}
+              {isCheckingOut ? '⏳ იტვირთება...' : (folio.balance > 0 ? '⏳ Settle Balance First' : '✅ Complete Check-Out')}
             </button>
           </div>
         </div>

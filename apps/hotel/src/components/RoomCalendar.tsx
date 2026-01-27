@@ -49,6 +49,7 @@ export default function RoomCalendar({
   const [showNoShowModal, setShowNoShowModal] = useState<any>(null)
   const [showCheckOutModal, setShowCheckOutModal] = useState(false)
   const [showCheckInModal, setShowCheckInModal] = useState(false)
+  const [isCheckingIn, setIsCheckingIn] = useState(false) // Loading for check-in button
   const [showFolioModal, setShowFolioModal] = useState(false)
   const [showExtraChargesModal, setShowExtraChargesModal] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
@@ -2244,7 +2245,7 @@ export default function RoomCalendar({
   
   // New function for actual check-in process
   const processCheckIn = async () => {
-    if (!selectedReservation || !onReservationUpdate) return
+    if (!selectedReservation || !onReservationUpdate || isCheckingIn) return
     
     // ========================================
     // STEP 1: BLOCK IF ROOM IS OCCUPIED
@@ -2312,6 +2313,7 @@ export default function RoomCalendar({
     // ========================================
     // STEP 4: Process check-in
     // ========================================
+    setIsCheckingIn(true) // Start loading
     const now = new Date()
     
     try {
@@ -2353,6 +2355,8 @@ export default function RoomCalendar({
     } catch (error) {
       console.error('Failed to check in:', error)
       alert('შეცდომა Check-in-ისას')
+    } finally {
+      setIsCheckingIn(false) // End loading
     }
   }
   
@@ -4511,9 +4515,14 @@ export default function RoomCalendar({
                 
                 <button
                   onClick={processCheckIn}
-                  className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium"
+                  disabled={isCheckingIn}
+                  className={`flex-1 px-4 py-2 rounded-lg font-medium ${
+                    isCheckingIn 
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-green-500 text-white hover:bg-green-600'
+                  }`}
                 >
-                  ✅ Check-in
+                  {isCheckingIn ? '⏳ იტვირთება...' : '✅ Check-in'}
                 </button>
               </div>
             </div>
