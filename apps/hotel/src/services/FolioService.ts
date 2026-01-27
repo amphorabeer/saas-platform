@@ -283,6 +283,11 @@ export class FolioService {
     const creditLimit = options?.creditLimit || 5000
     const paymentMethod = options?.paymentMethod || reservation.paymentMethod || 'cash'
     
+    // Calculate nights
+    const checkInDate = moment(reservation.checkIn)
+    const checkOutDate = moment(reservation.checkOut)
+    const nights = checkOutDate.diff(checkInDate, 'days') || 1
+    
     const newFolio: Folio = {
       id: `FOLIO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       folioNumber: `F${moment().format('YYMMDD')}-${reservation.roomNumber || reservation.roomId || Math.floor(Math.random() * 1000)}-${Math.random().toString(36).substring(2, 6)}`,
@@ -296,7 +301,13 @@ export class FolioService {
       openDate: moment(reservation.checkIn || moment()).format('YYYY-MM-DD'),
       checkIn: reservation.checkIn ? moment(reservation.checkIn).format('YYYY-MM-DD') : undefined,
       checkOut: reservation.checkOut ? moment(reservation.checkOut).format('YYYY-MM-DD') : undefined,
-      transactions: []
+      transactions: [],
+      // Store reservation data for reference
+      initialRoomCharge: {
+        nights: nights,
+        ratePerNight: reservation.totalAmount ? Number(reservation.totalAmount) / nights : 0,
+        totalAmount: Number(reservation.totalAmount) || 0
+      }
     }
     
     // Save folio to localStorage
