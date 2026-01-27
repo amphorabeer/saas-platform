@@ -19,7 +19,7 @@ interface ReportsProps {
   rooms: any[]
 }
 
-type ReportType = 'reservations' | 'revenue' | 'occupancy' | 'guests' | 'rooms' | 'payments' | 'cancellations' | 'sources' | 'tax'
+type ReportType = 'reservations' | 'revenue' | 'occupancy' | 'guests' | 'rooms' | 'payments' | 'cancellations' | 'sources' | 'tax' | 'housekeeping'
 type DateRange = 'today' | 'week' | 'month' | 'quarter' | 'year' | 'custom'
 
 export default function Reports({ reservations, rooms }: ReportsProps) {
@@ -37,6 +37,10 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
   const [isExporting, setIsExporting] = useState(false)
   const [selectedSource, setSelectedSource] = useState<string | null>(null)
   const [revenueChartType, setRevenueChartType] = useState<'area' | 'bar' | 'line'>('area')
+  
+  // Housekeeping report state
+  const [housekeepingData, setHousekeepingData] = useState<any>(null)
+  const [housekeepingLoading, setHousekeepingLoading] = useState(false)
   
   // Helper function to get room number from roomId
   const getRoomNumber = (roomIdOrNumber: string | undefined): string => {
@@ -532,6 +536,31 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
     }
   }, [filteredReservations, folios, startDate, endDate])
   
+  // =============== HOUSEKEEPING REPORT ===============
+  const loadHousekeepingReport = async () => {
+    setHousekeepingLoading(true)
+    try {
+      const response = await fetch(
+        `/api/hotel/housekeeping/reports?type=custom&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+      )
+      if (response.ok) {
+        const data = await response.json()
+        setHousekeepingData(data)
+      }
+    } catch (error) {
+      console.error('Error loading housekeeping report:', error)
+    } finally {
+      setHousekeepingLoading(false)
+    }
+  }
+  
+  // Load housekeeping data when tab is active
+  useEffect(() => {
+    if (activeReport === 'housekeeping') {
+      loadHousekeepingReport()
+    }
+  }, [activeReport, startDate, endDate])
+  
   // =============== EXPORT FUNCTIONS ===============
   const exportToCSV = () => {
     setIsExporting(true)
@@ -885,6 +914,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
     { id: 'guests', label: 'სტუმრები', icon: '👥' },
     { id: 'rooms', label: 'ოთახები', icon: '🚪' },
     { id: 'payments', label: 'გადახდები', icon: '💳' },
+    { id: 'housekeeping', label: 'დასუფთავება', icon: '🧹' },
     { id: 'cancellations', label: 'გაუქმებები', icon: '❌' },
     { id: 'sources', label: 'წყაროები', icon: '📊' },
     { id: 'tax', label: 'გადასახადები', icon: '🧾' }
@@ -1515,6 +1545,193 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
               <div className="text-center text-gray-400 text-sm">
                 გენერირებულია: {taxData.generatedAt} | პერიოდი: {taxData.dateRange.from} - {taxData.dateRange.to}
               </div>
+            </div>
+          )}
+
+          {/* =============== HOUSEKEEPING REPORT =============== */}
+          {activeReport === 'housekeeping' && (
+            <div>
+              {housekeepingLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-gray-500">⏳ იტვირთება...</div>
+                </div>
+              ) : housekeepingData ? (
+                <>
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
+                      <p className="text-blue-600 text-sm font-medium">სულ დავალებები</p>
+                      <p className="text-3xl font-bold text-blue-700 mt-1">{housekeepingData.stats?.total || 0}</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
+                      <p className="text-green-600 text-sm font-medium">შესრულების %</p>
+                      <p className="text-3xl font-bold text-green-700 mt-1">{housekeepingData.stats?.completionRate || 0}%</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
+                      <p className="text-purple-600 text-sm font-medium">შემოწმების %</p>
+                      <p className="text-3xl font-bold text-purple-700 mt-1">{housekeepingData.stats?.verificationRate || 0}%</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-4">
+                      <p className="text-yellow-600 text-sm font-medium">ნაპოვნი ნივთები</p>
+                      <p className="text-3xl font-bold text-yellow-700 mt-1">{housekeepingData.lostAndFound?.total || 0}</p>
+                    </div>
+                  </div>
+
+                  {/* Status Breakdown */}
+                  <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                    <h3 className="font-bold text-lg mb-4">📊 სტატუსის მიხედვით</h3>
+                    <div className="grid grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">{housekeepingData.stats?.byStatus?.pending || 0}</div>
+                        <div className="text-xs text-gray-500">მოლოდინში</div>
+                      </div>
+                      <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                        <div className="text-2xl font-bold text-yellow-600">{housekeepingData.stats?.byStatus?.in_progress || 0}</div>
+                        <div className="text-xs text-gray-500">მიმდინარე</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">{housekeepingData.stats?.byStatus?.completed || 0}</div>
+                        <div className="text-xs text-gray-500">დასრულებული</div>
+                      </div>
+                      <div className="text-center p-3 bg-gray-100 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-600">{housekeepingData.stats?.byStatus?.verified || 0}</div>
+                        <div className="text-xs text-gray-500">შემოწმებული</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Type Breakdown */}
+                  <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                    <h3 className="font-bold text-lg mb-4">🧹 ტიპის მიხედვით</h3>
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                      {[
+                        { key: 'checkout', label: 'Check-out', icon: '🚪' },
+                        { key: 'checkin', label: 'Check-in', icon: '🔑' },
+                        { key: 'daily', label: 'ყოველდღ.', icon: '🧹' },
+                        { key: 'deep', label: 'ღრმა', icon: '🧼' },
+                        { key: 'turndown', label: 'Turndown', icon: '🌙' },
+                        { key: 'inspection', label: 'შემოწმება', icon: '🔍' }
+                      ].map(type => (
+                        <div key={type.key} className="text-center p-3 bg-gray-50 rounded-lg">
+                          <div className="text-xl mb-1">{type.icon}</div>
+                          <div className="text-lg font-bold">{housekeepingData.stats?.byType?.[type.key] || 0}</div>
+                          <div className="text-xs text-gray-500">{type.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Staff Performance */}
+                  {housekeepingData.staffPerformance && Object.keys(housekeepingData.staffPerformance).length > 0 && (
+                    <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                      <h3 className="font-bold text-lg mb-4">👥 თანამშრომლების შედეგები</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="text-left p-3 text-sm font-medium text-gray-600">თანამშრომელი</th>
+                              <th className="text-center p-3 text-sm font-medium text-gray-600">დანიშნული</th>
+                              <th className="text-center p-3 text-sm font-medium text-gray-600">დასრულებული</th>
+                              <th className="text-center p-3 text-sm font-medium text-gray-600">შემოწმებული</th>
+                              <th className="text-center p-3 text-sm font-medium text-gray-600">საშ. დრო</th>
+                              <th className="text-center p-3 text-sm font-medium text-gray-600">ეფექტურობა</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {Object.entries(housekeepingData.staffPerformance).map(([name, data]: [string, any]) => {
+                              const efficiency = data.assigned > 0 ? Math.round((data.completed / data.assigned) * 100) : 0
+                              return (
+                                <tr key={name} className="border-t hover:bg-gray-50">
+                                  <td className="p-3 font-medium">{name}</td>
+                                  <td className="text-center p-3">{data.assigned}</td>
+                                  <td className="text-center p-3 text-green-600 font-medium">{data.completed}</td>
+                                  <td className="text-center p-3 text-purple-600">{data.verified}</td>
+                                  <td className="text-center p-3 text-gray-500">
+                                    {data.avgCompletionTime > 0 ? `${data.avgCompletionTime} წთ` : '-'}
+                                  </td>
+                                  <td className="text-center p-3">
+                                    <span className={`px-2 py-1 rounded text-sm font-medium ${
+                                      efficiency >= 90 ? 'bg-green-100 text-green-700' :
+                                      efficiency >= 70 ? 'bg-yellow-100 text-yellow-700' :
+                                      'bg-red-100 text-red-700'
+                                    }`}>
+                                      {efficiency}%
+                                    </span>
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Minibar Summary */}
+                  {housekeepingData.minibar?.total > 0 && (
+                    <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                      <h3 className="font-bold text-lg mb-4">🍫 მინიბარის მოხმარება</h3>
+                      <div className="text-2xl font-bold text-purple-600 mb-4">
+                        სულ: ₾{housekeepingData.minibar.total.toFixed(2)}
+                      </div>
+                      {housekeepingData.minibar.byItem && Object.keys(housekeepingData.minibar.byItem).length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {Object.entries(housekeepingData.minibar.byItem).map(([item, data]: [string, any]) => (
+                            <div key={item} className="bg-purple-50 p-3 rounded-lg">
+                              <div className="font-medium">{item}</div>
+                              <div className="text-sm text-gray-500">{data.count} ერთეული</div>
+                              <div className="font-bold text-purple-600">₾{data.total.toFixed(2)}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Lost & Found */}
+                  {housekeepingData.lostAndFound?.items && housekeepingData.lostAndFound.items.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                      <h3 className="font-bold text-lg mb-4">🔍 ნაპოვნი ნივთები ({housekeepingData.lostAndFound.total})</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-yellow-50">
+                            <tr>
+                              <th className="text-left p-3 text-sm font-medium text-gray-600">აღწერა</th>
+                              <th className="text-left p-3 text-sm font-medium text-gray-600">მდებარეობა</th>
+                              <th className="text-center p-3 text-sm font-medium text-gray-600">ოთახი</th>
+                              <th className="text-center p-3 text-sm font-medium text-gray-600">იპოვა</th>
+                              <th className="text-center p-3 text-sm font-medium text-gray-600">თარიღი</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {housekeepingData.lostAndFound.items.map((item: any, idx: number) => (
+                              <tr key={idx} className="border-t hover:bg-yellow-50">
+                                <td className="p-3 font-medium">{item.description}</td>
+                                <td className="p-3 text-gray-500">{item.location || '-'}</td>
+                                <td className="text-center p-3">{item.roomNumber}</td>
+                                <td className="text-center p-3">{item.foundBy || '-'}</td>
+                                <td className="text-center p-3 text-gray-500">
+                                  {item.foundAt ? moment(item.foundAt).format('DD/MM HH:mm') : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Info Footer */}
+                  <div className="text-center text-gray-400 text-sm">
+                    გენერირებულია: {moment(housekeepingData.generatedAt).format('DD/MM/YYYY HH:mm')} | 
+                    პერიოდი: {moment(housekeepingData.period?.start).format('DD/MM/YYYY')} - {moment(housekeepingData.period?.end).format('DD/MM/YYYY')}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  მონაცემები არ მოიძებნა
+                </div>
+              )}
             </div>
           )}
         </div>
