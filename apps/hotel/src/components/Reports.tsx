@@ -24,6 +24,13 @@ type DateRange = 'today' | 'week' | 'month' | 'quarter' | 'year' | 'custom'
 
 export default function Reports({ reservations, rooms }: ReportsProps) {
   const [activeReport, setActiveReport] = useState<ReportType>('reservations')
+  
+  // Debug: log incoming reservations
+  useEffect(() => {
+    console.log('[Reports] Incoming reservations:', reservations.length)
+    console.log('[Reports] All statuses:', [...new Set(reservations.map(r => r.status))])
+    console.log('[Reports] CANCELLED count:', reservations.filter(r => r.status === 'CANCELLED').length)
+  }, [reservations])
   const [dateRange, setDateRange] = useState<DateRange>('month')
   const [customStartDate, setCustomStartDate] = useState(moment().subtract(30, 'days').format('YYYY-MM-DD'))
   const [customEndDate, setCustomEndDate] = useState(moment().format('YYYY-MM-DD'))
@@ -103,27 +110,40 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
   const [folios, setFolios] = useState<any[]>([])
   useEffect(() => {
     const loadFolios = async () => {
+      let loadedFolios: any[] = []
+      
+      // Try API first
       try {
         const response = await fetch('/api/hotel/folios')
         if (response.ok) {
           const data = await response.json()
-          if (data.folios && data.folios.length > 0) {
-            setFolios(data.folios.map((f: any) => ({
+          const apiFolios = data.folios || data || []
+          if (Array.isArray(apiFolios) && apiFolios.length > 0) {
+            loadedFolios = apiFolios.map((f: any) => ({
               ...f,
               transactions: f.folioData?.transactions || f.charges || f.transactions || []
-            })))
-            console.log('[Reports] Loaded folios from API:', data.folios.length)
-            return
+            }))
+            console.log('[Reports] Loaded folios from API:', loadedFolios.length)
           }
         }
       } catch (error) {
         console.error('[Reports] API error:', error)
       }
+      
       // Fallback to localStorage
-      const savedFolios = localStorage.getItem('hotelFolios')
-      if (savedFolios) {
-        setFolios(JSON.parse(savedFolios))
+      if (loadedFolios.length === 0) {
+        try {
+          const savedFolios = localStorage.getItem('hotelFolios')
+          if (savedFolios) {
+            loadedFolios = JSON.parse(savedFolios)
+            console.log('[Reports] Loaded folios from localStorage:', loadedFolios.length)
+          }
+        } catch (e) {
+          console.error('[Reports] localStorage error:', e)
+        }
       }
+      
+      setFolios(loadedFolios)
     }
     loadFolios()
   }, [])
@@ -423,9 +443,36 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
   
   // =============== CANCELLATION REPORT ===============
   const cancellationData = useMemo(() => {
-    const cancelled = filteredReservations.filter(r => r.status === 'CANCELLED')
-    const noShows = filteredReservations.filter(r => r.status === 'NO_SHOW')
-    const total = filteredReservations.length
+    const normalizeStatus = (status: string | undefined) => (status || '').toUpperCase().replace(/-/g, '_').replace(/ /g, '_')
+    
+    // Get all cancelled/noshow reservations
+    const allCancelled = reservations.filter(r => {
+      const status = normalizeStatus(r.status)
+      return status === 'CANCELLED' || status === 'CANCELED'
+    })
+    
+    const allNoShows = reservations.filter(r => {
+      const status = normalizeStatus(r.status)
+      return status === 'NO_SHOW' || status === 'NOSHOW'
+    })
+    
+    // Filter by date range
+    // For CANCELLED: use cancelledAt date (when it was cancelled), default to today
+    // For NO_SHOW: use checkIn date (when they were supposed to arrive)
+    const cancelled = allCancelled.filter(r => {
+      // Use cancelledAt if available, otherwise use today (recently cancelled)
+      const cancelDate = r.cancelledAt ? moment(r.cancelledAt) : moment()
+      const inRange = cancelDate.isSameOrAfter(startDate, 'day') && cancelDate.isSameOrBefore(endDate, 'day')
+      return inRange
+    })
+    
+    const noShows = allNoShows.filter(r => {
+      const dateToCheck = moment(r.checkIn)
+      return dateToCheck.isSameOrAfter(startDate, 'day') && dateToCheck.isSameOrBefore(endDate, 'day')
+    })
+    
+    // Total is from filteredReservations (active reservations in date range) + cancelled/noshow in range
+    const total = filteredReservations.length + cancelled.length + noShows.length
     
     const lostRevenue = [...cancelled, ...noShows].reduce((sum, r) => sum + Number(r.totalAmount || 0), 0)
     
@@ -840,7 +887,7 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
     { id: 'payments', label: 'გადახდები', icon: '💳' },
     { id: 'cancellations', label: 'გაუქმებები', icon: '❌' },
     { id: 'sources', label: 'წყაროები', icon: '📊' },
-    { id: 'tax', label: 'Tax Summary', icon: '🧾' }
+    { id: 'tax', label: 'გადასახადები', icon: '🧾' }
   ]
   
   return (

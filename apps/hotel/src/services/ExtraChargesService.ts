@@ -349,11 +349,30 @@ export class ExtraChargesService {
       // Total amount is the gross price (taxes included)
       const totalAmount = grossPrice
       
-      // Get or create folio
-      const folios = typeof window !== 'undefined' 
-        ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
-        : []
-      let folio = folios.find((f: any) => f.reservationId === params.reservationId)
+      // Get or create folio - try API first
+      let folios: any[] = []
+      let folio = null
+      
+      // Try API first
+      try {
+        const apiResponse = await fetch('/api/hotel/folios')
+        if (apiResponse.ok) {
+          const apiData = await apiResponse.json()
+          folios = Array.isArray(apiData) ? apiData : (apiData.folios || [])
+          folio = folios.find((f: any) => f.reservationId === params.reservationId)
+          console.log('[ExtraChargesService] Loaded folio from API')
+        }
+      } catch (e) {
+        console.log('[ExtraChargesService] API error, falling back to localStorage')
+      }
+      
+      // Fallback to localStorage
+      if (!folio) {
+        folios = typeof window !== 'undefined' 
+          ? JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+          : []
+        folio = folios.find((f: any) => f.reservationId === params.reservationId)
+      }
       
       if (!folio) {
         // Get reservation
@@ -430,7 +449,7 @@ export class ExtraChargesService {
         // In real app, update item in database
       }
       
-      // Save folio
+      // Save folio to localStorage first (for backup)
       const folioIndex = folios.findIndex((f: any) => f.id === folio.id)
       if (folioIndex >= 0) {
         folios[folioIndex] = folio
@@ -440,6 +459,18 @@ export class ExtraChargesService {
       
       if (typeof window !== 'undefined') {
         localStorage.setItem('hotelFolios', JSON.stringify(folios))
+      }
+      
+      // Save folio to API
+      try {
+        await fetch('/api/hotel/folios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(folio)
+        })
+        console.log('[ExtraChargesService] Folio saved to API')
+      } catch (apiError) {
+        console.error('[ExtraChargesService] Failed to save folio to API:', apiError)
       }
       
       // Save extra charge record
@@ -557,6 +588,3 @@ export class ExtraChargesService {
     return this.ITEMS.find(i => i.id === itemId)
   }
 }
-
-
-
