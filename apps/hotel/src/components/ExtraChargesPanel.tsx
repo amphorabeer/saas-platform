@@ -300,22 +300,53 @@ export default function ExtraChargesPanel({
       return
     }
     
+    const itemDetails = getItemDetails()
+    if (!itemDetails) {
+      alert('პროდუქტი ვერ მოიძებნა')
+      return
+    }
+    
+    const categoryDetails = categories.find(c => 
+      c.id === itemDetails.categoryId || 
+      c.code === itemDetails.categoryId ||
+      c.id === itemDetails.category ||
+      c.code === itemDetails.category
+    )
+    
     setPosting(true)
     
     const result = await ExtraChargesService.postExtraCharge({
       reservationId,
       itemId: selectedItem,
       quantity,
-      notes
+      notes,
+      // Pass item details so service doesn't need to look them up
+      itemDetails: {
+        id: itemDetails.id,
+        code: itemDetails.code,
+        name: itemDetails.name,
+        unitPrice: itemDetails.unitPrice || itemDetails.price || 0,
+        unit: itemDetails.unit || 'piece',
+        categoryId: itemDetails.categoryId || itemDetails.category,
+        department: itemDetails.department || categoryDetails?.department || 'ROOMS'
+      },
+      categoryDetails: categoryDetails ? {
+        id: categoryDetails.id,
+        code: categoryDetails.code,
+        name: categoryDetails.name,
+        taxRate: categoryDetails.taxRate || taxRates.vat,
+        serviceChargeRate: categoryDetails.serviceChargeRate || 0
+      } : undefined,
+      taxRates
     })
     
     if (result.success) {
-      alert(`✅ Charge posted successfully! Amount: ₾${result.totalAmount.toFixed(2)}`)
+      alert(`✅ ჩარჯი დაემატა! თანხა: ₾${result.totalAmount.toFixed(2)}`)
       
       // Log activity
       ActivityLogger.log('EXTRA_CHARGE_POSTED', {
         reservationId,
-        item: getItemDetails()?.name,
+        item: itemDetails.name,
         quantity,
         amount: result.totalAmount
       })
@@ -334,7 +365,7 @@ export default function ExtraChargesPanel({
         onChargePosted()
       }
     } else {
-      alert(`❌ Error: ${result.error}`)
+      alert(`❌ შეცდომა: ${result.error}`)
     }
     
     setPosting(false)
