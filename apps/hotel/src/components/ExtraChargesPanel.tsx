@@ -40,10 +40,41 @@ export default function ExtraChargesPanel({
     loadTaxRates()
   }, [reservationId])
   
-  const loadTaxRates = () => {
+  const loadTaxRates = async () => {
     if (typeof window === 'undefined') return
     
-    // Try to load from hotelTaxes (unified key)
+    // Try API first
+    try {
+      const response = await fetch('/api/hotel/taxes')
+      if (response.ok) {
+        const apiTaxes = await response.json()
+        if (apiTaxes && apiTaxes.length > 0) {
+          const vatTax = apiTaxes.find((t: any) => 
+            t.code === 'VAT' || 
+            t.name?.toLowerCase().includes('vat') || 
+            t.name?.includes('დღგ')
+          )
+          
+          const serviceTax = apiTaxes.find((t: any) => 
+            t.code === 'SERVICE' ||
+            t.name?.toLowerCase().includes('service') || 
+            t.name?.includes('სერვის')
+          )
+          
+          setTaxRates({
+            vat: vatTax?.rate ?? 18,
+            serviceCharge: serviceTax?.rate ?? 10
+          })
+          
+          console.log('[ExtraChargesPanel] Loaded tax rates from API')
+          return
+        }
+      }
+    } catch (e) {
+      console.log('[ExtraChargesPanel] API error, falling back to localStorage')
+    }
+    
+    // Fallback to localStorage - Try to load from hotelTaxes (unified key)
     const saved = localStorage.getItem('hotelTaxes')
     if (saved) {
       try {
@@ -86,7 +117,7 @@ export default function ExtraChargesPanel({
           serviceCharge: serviceTax?.rate ?? serviceTax?.value ?? 10
         })
         
-        console.log('Loaded tax rates from hotelTaxes:', {
+        console.log('Loaded tax rates from localStorage:', {
           vat: vatTax?.rate ?? vatTax?.value ?? 18,
           service: serviceTax?.rate ?? serviceTax?.value ?? 10
         })
@@ -368,6 +399,3 @@ export default function ExtraChargesPanel({
     </div>
   )
 }
-
-
-

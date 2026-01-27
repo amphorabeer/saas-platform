@@ -90,49 +90,116 @@ export default function CheckInModal({
 
   // Load room rates and seasons on mount
   useEffect(() => {
-    const loadRates = () => {
-      const saved = localStorage.getItem('roomRates')
-      if (saved) {
-        try {
-          const rates = JSON.parse(saved)
-          setRoomRates(rates)
-        } catch (e) {
-          console.error('Error loading room rates:', e)
+    const loadRates = async () => {
+      // Try API first for room rates
+      try {
+        const ratesResponse = await fetch('/api/hotel/room-rates')
+        if (ratesResponse.ok) {
+          const apiRates = await ratesResponse.json()
+          if (apiRates && apiRates.length > 0) {
+            // Transform API data to expected format
+            const transformedRates = apiRates.reduce((acc: any[], rate: any) => {
+              const existing = acc.find(r => r.type === rate.roomTypeCode)
+              if (existing) {
+                if (rate.dayOfWeek === 0 || rate.dayOfWeek === 6) {
+                  existing.weekend = rate.price
+                } else {
+                  existing.weekday = rate.price
+                }
+              } else {
+                acc.push({
+                  id: rate.id,
+                  type: rate.roomTypeCode,
+                  weekday: rate.dayOfWeek >= 1 && rate.dayOfWeek <= 5 ? rate.price : 0,
+                  weekend: rate.dayOfWeek === 0 || rate.dayOfWeek === 6 ? rate.price : 0
+                })
+              }
+              return acc
+            }, [])
+            setRoomRates(transformedRates)
+            console.log('[CheckInModal] Loaded room rates from API')
+          }
+        }
+      } catch (e) {
+        console.log('[CheckInModal] API error for rates, falling back to localStorage')
+      }
+      
+      // Fallback to localStorage for rates
+      if (roomRates.length === 0) {
+        const saved = localStorage.getItem('roomRates')
+        if (saved) {
+          try {
+            const rates = JSON.parse(saved)
+            setRoomRates(rates)
+          } catch (e) {
+            console.error('Error loading room rates:', e)
+          }
         }
       }
       
-      // Load seasons
-      const savedSeasons = localStorage.getItem('hotelSeasons')
-      if (savedSeasons) {
-        try {
-          const loadedSeasons = JSON.parse(savedSeasons)
-          setSeasons(loadedSeasons)
-        } catch (e) {
-          console.error('Error loading seasons:', e)
+      // Try API first for seasons
+      try {
+        const seasonsResponse = await fetch('/api/hotel/seasons')
+        if (seasonsResponse.ok) {
+          const apiSeasons = await seasonsResponse.json()
+          if (apiSeasons && apiSeasons.length > 0) {
+            setSeasons(apiSeasons)
+            console.log('[CheckInModal] Loaded seasons from API')
+          }
+        }
+      } catch (e) {
+        console.log('[CheckInModal] API error for seasons, falling back to localStorage')
+      }
+      
+      // Fallback to localStorage for seasons
+      if (seasons.length === 0) {
+        const savedSeasons = localStorage.getItem('hotelSeasons')
+        if (savedSeasons) {
+          try {
+            const loadedSeasons = JSON.parse(savedSeasons)
+            setSeasons(loadedSeasons)
+          } catch (e) {
+            console.error('Error loading seasons:', e)
+          }
         }
       }
       
-      // Load Weekday Prices
+      // Try API first for special dates
+      try {
+        const specialResponse = await fetch('/api/hotel/special-dates')
+        if (specialResponse.ok) {
+          const apiSpecial = await specialResponse.json()
+          if (apiSpecial && apiSpecial.length > 0) {
+            setSpecialDates(apiSpecial)
+            console.log('[CheckInModal] Loaded special dates from API')
+          }
+        }
+      } catch (e) {
+        console.log('[CheckInModal] API error for special dates, falling back to localStorage')
+      }
+      
+      // Fallback to localStorage for special dates
+      if (specialDates.length === 0) {
+        const savedSpecialDates = localStorage.getItem('hotelSpecialDates')
+        if (savedSpecialDates) {
+          try {
+            const parsed = JSON.parse(savedSpecialDates)
+            setSpecialDates(parsed || [])
+          } catch (e) {
+            console.error('Error loading special dates:', e)
+          }
+        }
+      }
+      
+      // Load Weekday Prices (localStorage only for now)
       const savedWeekdays = localStorage.getItem('hotelWeekdayPrices')
       if (savedWeekdays) {
         try {
           const parsed = JSON.parse(savedWeekdays)
-          // Handle both formats: array or {all: array}
           const weekdays = Array.isArray(parsed) ? parsed : (parsed.all || [])
           setWeekdayPrices(weekdays)
         } catch (e) {
           console.error('Error loading weekday prices:', e)
-        }
-      }
-      
-      // Load Special Dates
-      const savedSpecialDates = localStorage.getItem('hotelSpecialDates')
-      if (savedSpecialDates) {
-        try {
-          const parsed = JSON.parse(savedSpecialDates)
-          setSpecialDates(parsed || [])
-        } catch (e) {
-          console.error('Error loading special dates:', e)
         }
       }
     }

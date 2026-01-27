@@ -2590,8 +2590,52 @@ export default function RoomCalendar({
   const processCancelReservation = async (reason: string, refundAmount: number) => {
     if (!selectedReservation) return
     
-    // Delete reservation completely
-    if (onReservationDelete) {
+    // Update status to CANCELLED (don't delete - keep for reports)
+    if (onReservationUpdate) {
+      try {
+        await onReservationUpdate(selectedReservation.id, {
+          status: 'CANCELLED',
+          cancelledAt: new Date().toISOString(),
+          cancellationReason: reason,
+          refundAmount: refundAmount
+        })
+        
+        // Update room status to VACANT if was OCCUPIED
+        if (selectedReservation.status === 'CHECKED_IN') {
+          await fetch('/api/hotel/rooms/status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              roomId: selectedReservation.roomId,
+              status: 'VACANT'
+            })
+          })
+        }
+        
+        ActivityLogger.log('RESERVATION_CANCELLED', {
+          guest: selectedReservation.guestName,
+          room: selectedReservation.roomNumber,
+          reservationId: selectedReservation.id,
+          reason: reason,
+          refundAmount: refundAmount
+        })
+        
+        setShowCancelModal(false)
+        setSelectedReservation(null)
+        setCancelReason('')
+        setRefundAmount(0)
+        
+        alert(`❌ ჯავშანი გაუქმებულია\n\n${refundAmount > 0 ? `💰 რეფუნდი: ₾${refundAmount}` : ''}`)
+        
+        if (loadReservations) {
+          loadReservations()
+        }
+      } catch (error) {
+        console.error('Failed to cancel reservation:', error)
+        alert('შეცდომა ჯავშნის გაუქმებისას')
+      }
+    } else if (onReservationDelete) {
+      // Fallback: delete if update not available
       try {
         await onReservationDelete(selectedReservation.id)
         
@@ -2616,52 +2660,6 @@ export default function RoomCalendar({
       } catch (error) {
         console.error('Failed to delete reservation:', error)
         alert('შეცდომა ჯავშნის წაშლისას')
-      }
-    } else {
-      // Fallback to update status if delete not available
-      if (onReservationUpdate) {
-        try {
-          await onReservationUpdate(selectedReservation.id, {
-            status: 'CANCELLED',
-            cancelledAt: new Date().toISOString(),
-            cancellationReason: reason,
-            refundAmount: refundAmount
-          })
-          
-          // Update room status to VACANT if was OCCUPIED
-          if (selectedReservation.status === 'CHECKED_IN') {
-            await fetch('/api/hotel/rooms/status', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                roomId: selectedReservation.roomId,
-                status: 'VACANT'
-              })
-            })
-          }
-          
-          ActivityLogger.log('RESERVATION_CANCELLED', {
-            guest: selectedReservation.guestName,
-            room: selectedReservation.roomNumber,
-            reservationId: selectedReservation.id,
-            reason: reason,
-            refundAmount: refundAmount
-          })
-          
-          setShowCancelModal(false)
-          setSelectedReservation(null)
-          setCancelReason('')
-          setRefundAmount(0)
-          
-          alert(`❌ ჯავშანი გაუქმებულია\n\n${refundAmount > 0 ? `💰 რეფუნდი: ₾${refundAmount}` : ''}`)
-          
-          if (loadReservations) {
-            loadReservations()
-          }
-        } catch (error) {
-          console.error('Failed to cancel reservation:', error)
-          alert('შეცდომა ჯავშნის გაუქმებისას')
-        }
       }
     }
   }
@@ -4215,9 +4213,9 @@ export default function RoomCalendar({
             
             // Show success message
             if (isClosedDate) {
-              alert(`✅ Payment recorded successfully!\n\n` +
-                    `⚠️ Note: This payment was processed after Night Audit for ${checkOutDate}\n` +
-                    `Processing date: ${moment().format('YYYY-MM-DD')}`)
+              alert(`✅ გადახდა წარმატებით დაფიქსირდა!\n\n` +
+                    `⚠️ შენიშვნა: გადახდა დამუშავდა Night Audit-ის შემდეგ (${checkOutDate})\n` +
+                    `დამუშავების თარიღი: ${moment().format('DD/MM/YYYY')}`)
             } else {
               alert(payment.isPaid ? 
                 '✅ გადახდა სრულად დასრულდა!' : 
@@ -4974,10 +4972,27 @@ function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, on
   const nights = moment(reservation.checkOut).diff(moment(reservation.checkIn), 'days')
   
   // Load folio data
-  const loadFolioData = () => {
+  const loadFolioData = async () => {
     if (typeof window === 'undefined') return
     
-    const folios = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('hotelFolios') || '[]') : []
+    let folios: any[] = []
+    
+    // Try API first
+    try {
+      const response = await fetch('/api/hotel/folios')
+      if (response.ok) {
+        const data = await response.json()
+        folios = Array.isArray(data) ? data : (data.folios || [])
+        console.log('[ReservationDetails] Loaded folios from API:', folios.length)
+      }
+    } catch (e) {
+      console.log('[ReservationDetails] API error, falling back to localStorage')
+    }
+    
+    // Fallback to localStorage
+    if (folios.length === 0) {
+      folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+    }
     
     // Find folio by reservationId ONLY (each reservation has its own folio)
     const foundFolio = folios.find((f: any) => f.reservationId === reservation.id)

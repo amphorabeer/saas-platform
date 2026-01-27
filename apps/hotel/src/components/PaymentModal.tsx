@@ -151,12 +151,6 @@ export default function PaymentModal({ reservation, onClose, onPayment }: Paymen
     
     onPayment(paymentInfo)
     
-    const newBalance = updatedFolio?.balance || 0
-    alert(newBalance <= 0 ? 
-      '✅ გადახდა სრულად დასრულდა!' : 
-      `✅ გადახდა მიღებულია. ახალი ბალანსი: ₾${newBalance.toFixed(2)}`
-    )
-    
     // Trigger folio refresh in UI
     window.dispatchEvent(new CustomEvent('folioUpdated', { 
       detail: { reservationId: reservation.id, folio: updatedFolio } 
@@ -201,9 +195,9 @@ export default function PaymentModal({ reservation, onClose, onPayment }: Paymen
                 <div className="flex items-center gap-2 text-orange-700 text-sm">
                   <span>⚠️</span>
                   <div>
-                    <div className="font-medium">Post-Audit Payment</div>
+                    <div className="font-medium">Night Audit-ის შემდგომი გადახდა</div>
                     <div className="text-xs text-orange-600">
-                      Check-out date ({checkOutDate}) is closed. This payment will be recorded as processed after Night Audit.
+                      Check-out თარიღი ({checkOutDate}) დახურულია. გადახდა დაფიქსირდება როგორც Night Audit-ის შემდეგ დამუშავებული.
                     </div>
                   </div>
                 </div>

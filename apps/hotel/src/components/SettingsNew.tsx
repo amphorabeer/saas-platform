@@ -3522,8 +3522,12 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
             id: c.id,
             name: c.name,
             code: c.code,
-            icon: c.icon
+            icon: c.icon || '📦',
+            department: c.department,
+            taxRate: c.taxRate,
+            serviceChargeRate: c.serviceChargeRate
           })))
+          console.log('[ServicesSection] Loaded categories from API')
         } else {
           const savedCategories = localStorage.getItem('chargeCategories')
           if (savedCategories) {
@@ -3555,13 +3559,17 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
             id: i.id,
             name: i.name,
             code: i.code,
-            price: i.price,
+            unitPrice: i.price || i.unitPrice || 0,
+            price: i.price || i.unitPrice || 0,
+            categoryId: i.category,
             category: i.category,
             department: i.department,
             unit: i.unit || 'piece',
-            stock: i.stock,
-            available: i.isActive
+            currentStock: i.stock,
+            trackStock: i.stock !== null && i.stock !== undefined,
+            available: i.isActive !== false
           })))
+          console.log('[ServicesSection] Loaded items from API')
         } else {
           const savedItems = localStorage.getItem('chargeItems')
           if (savedItems) {
@@ -3591,11 +3599,13 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
     }
     
     // Convert categoryId to category code if needed
-    let categoryCode = item.category
-    if (item.categoryId && !categoryCode) {
+    let categoryCode = item.category || item.categoryId
+    if (item.categoryId && !item.category) {
       const cat = categories.find(c => c.id === item.categoryId)
       categoryCode = cat?.code || item.categoryId
     }
+    
+    const itemPrice = item.unitPrice || item.price || 0
     
     let updatedItems = [...items]
     
@@ -3609,20 +3619,27 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
             id: item.id,
             name: item.name,
             code: item.code,
-            price: item.price || item.unitPrice || 0,
+            price: itemPrice,
             category: categoryCode,
             department: item.department,
             unit: item.unit,
-            stock: item.stock || item.currentStock,
+            stock: item.currentStock || item.stock,
             isActive: item.available
           })
         })
+        console.log('[ServicesSection] Item updated in API')
       } catch (e) {
         console.error('Error updating item:', e)
       }
       const index = updatedItems.findIndex(i => i.id === item.id)
       if (index >= 0) {
-        updatedItems[index] = { ...item, category: categoryCode, price: item.price || item.unitPrice || 0 }
+        updatedItems[index] = { 
+          ...item, 
+          category: categoryCode, 
+          categoryId: categoryCode,
+          unitPrice: itemPrice,
+          price: itemPrice
+        }
       }
     } else {
       // Create new in API
@@ -3633,23 +3650,30 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
           body: JSON.stringify({
             name: item.name,
             code: item.code,
-            price: item.price || item.unitPrice || 0,
+            price: itemPrice,
             category: categoryCode,
             department: item.department,
             unit: item.unit,
-            stock: item.stock || item.currentStock,
+            stock: item.currentStock || item.stock,
             isActive: item.available ?? true
           })
         })
         if (res.ok) {
           const saved = await res.json()
           item.id = saved.id
+          console.log('[ServicesSection] Item created in API:', saved.id)
         }
       } catch (e) {
         console.error('Error creating item:', e)
         item.id = `ITEM-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       }
-      updatedItems.push({ ...item, category: categoryCode, price: item.price || item.unitPrice || 0 })
+      updatedItems.push({ 
+        ...item, 
+        category: categoryCode, 
+        categoryId: categoryCode,
+        unitPrice: itemPrice,
+        price: itemPrice
+      })
     }
     
     setItems(updatedItems)
@@ -3706,46 +3730,44 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
     
     let updatedCategories = [...categories]
     
-    if (category.id && !category.id.startsWith('CAT-')) {
-      // Update existing in API
-      try {
-        await fetch('/api/hotel/charge-categories', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            code: category.code,
-            name: category.name,
-            icon: category.icon
-          })
-        })
-      } catch (e) {
-        console.error('Error updating category:', e)
+    const categoryData = {
+      code: category.code,
+      name: category.name,
+      icon: category.icon || '📦',
+      department: category.department || 'ROOMS',
+      taxRate: category.taxRate || 18,
+      serviceChargeRate: category.serviceChargeRate || 0,
+      accountCode: category.accountCode || `REV-${category.code}`
+    }
+    
+    // API uses POST for upsert (by code)
+    try {
+      const res = await fetch('/api/hotel/charge-categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryData)
+      })
+      if (res.ok) {
+        const saved = await res.json()
+        categoryData.id = saved.id
+        console.log('[ServicesSection] Category saved to API:', saved.id)
       }
-      const index = updatedCategories.findIndex(c => c.id === category.id)
+    } catch (e) {
+      console.error('Error saving category:', e)
+    }
+    
+    if (category.id) {
+      // Update existing
+      const index = updatedCategories.findIndex(c => c.id === category.id || c.code === category.code)
       if (index >= 0) {
-        updatedCategories[index] = category
+        updatedCategories[index] = { ...category, ...categoryData, id: categoryData.id || category.id }
       }
     } else {
-      // Create new in API
-      try {
-        const res = await fetch('/api/hotel/charge-categories', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            code: category.code,
-            name: category.name,
-            icon: category.icon
-          })
-        })
-        if (res.ok) {
-          const saved = await res.json()
-          category.id = saved.id
-        }
-      } catch (e) {
-        console.error('Error creating category:', e)
-        category.id = `CAT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      // Add new
+      if (!categoryData.id) {
+        categoryData.id = `CAT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       }
-      updatedCategories.push(category)
+      updatedCategories.push({ ...category, ...categoryData })
     }
     
     setCategories(updatedCategories)
@@ -3772,7 +3794,10 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.code?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = !categoryFilter || item.category === categoryFilter || item.categoryId === categoryFilter
+    const matchesCategory = !categoryFilter || 
+                           item.category === categoryFilter || 
+                           item.categoryId === categoryFilter ||
+                           item.category?.code === categoryFilter
     const matchesStatus = statusFilter === 'all' || 
                          (statusFilter === 'active' && item.available) ||
                          (statusFilter === 'inactive' && !item.available)
@@ -3849,7 +3874,7 @@ function ServicesSection({ extraServices, setExtraServices, taxes, setTaxes, qui
                 >
                   <option value="">ყველა კატეგორია</option>
                   {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    <option key={cat.id || cat.code} value={cat.code}>{cat.icon} {cat.name}</option>
                   ))}
                 </select>
                 <select 
@@ -4021,7 +4046,7 @@ const ItemCard = ({ item, category, onEdit, onDelete, onToggleActive }: {
       <div className="space-y-1 text-sm">
         <div className="flex justify-between">
           <span className="text-gray-600">ფასი:</span>
-          <span className="font-bold">₾{item.unitPrice?.toFixed(2) || '0.00'}</span>
+          <span className="font-bold">₾{(item.unitPrice || item.price || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-600">ერთეული:</span>
@@ -4066,7 +4091,12 @@ const CategoryCard = ({ category, items, onEdit, onDelete }: {
   onEdit?: () => void
   onDelete?: () => void
 }) => {
-  const itemCount = items.filter((i: any) => i.categoryId === category.id).length
+  const itemCount = items.filter((i: any) => 
+    i.categoryId === category.id || 
+    i.categoryId === category.code || 
+    i.category === category.id || 
+    i.category === category.code
+  ).length
   
   return (
     <div className="border rounded-lg p-4 bg-white hover:shadow-lg transition-shadow">
@@ -4260,16 +4290,18 @@ const ItemEditModal = ({ item, categories, onSave, onClose }: {
   onSave: (item: any) => void
   onClose: () => void
 }) => {
-  const [formData, setFormData] = useState(item || {
-    name: '',
-    code: '',
-    categoryId: categories[0]?.id || '',
-    unitPrice: 0,
-    unit: 'piece',
-    department: 'ROOMS',
-    available: true,
-    trackStock: false,
-    currentStock: 0
+  const [formData, setFormData] = useState({
+    id: item?.id || '',
+    name: item?.name || '',
+    code: item?.code || '',
+    categoryId: item?.categoryId || item?.category || categories[0]?.code || '',
+    category: item?.category || item?.categoryId || categories[0]?.code || '',
+    unitPrice: item?.unitPrice || item?.price || 0,
+    unit: item?.unit || 'piece',
+    department: item?.department || 'ROOMS',
+    available: item?.available !== false,
+    trackStock: item?.trackStock || false,
+    currentStock: item?.currentStock || item?.stock || 0
   })
   
   return (
@@ -8050,13 +8082,22 @@ function FacebookBotSection() {
     loadIntegration()
   }, [])
   
-  // Get organizationId from localStorage
+  // Get organizationId from session/localStorage
   const getOrgId = () => {
     if (typeof window !== 'undefined') {
+      // First try currentUser (session-synced)
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+      if (currentUser.organizationId) {
+        return currentUser.organizationId
+      }
+      // Fallback to hotelInfo
       const hotelInfo = JSON.parse(localStorage.getItem('hotelInfo') || '{}')
-      return hotelInfo.organizationId || 'default-org'
+      if (hotelInfo.organizationId) {
+        return hotelInfo.organizationId
+      }
     }
-    return 'default-org'
+    // Return empty - let API handle auth
+    return ''
   }
   
   const loadIntegration = async () => {
