@@ -183,17 +183,18 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
   const loadTasks = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams()
-      if (selectedDate) params.append('date', selectedDate)
-      if (selectedStatus !== 'all') params.append('status', selectedStatus)
-      if (selectedStaff !== 'all') params.append('assignedTo', selectedStaff)
+      // First load ALL tasks for the date (for stats)
+      const statsParams = new URLSearchParams()
+      if (selectedDate) statsParams.append('date', selectedDate)
       
-      const response = await fetch(`/api/hotel/housekeeping/tasks?${params}`)
-      if (response.ok) {
-        const data = await response.json()
+      const statsResponse = await fetch(`/api/hotel/housekeeping/tasks?${statsParams}`)
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json()
+        setStats(statsData.stats || { total: 0, pending: 0, inProgress: 0, completed: 0, verified: 0 })
+        setStaffStats(statsData.staffStats || {})
         
-        // Transform API data to component format
-        const transformedTasks = (data.tasks || []).map((t: any) => ({
+        // Transform ALL tasks
+        const allTasks = (statsData.tasks || []).map((t: any) => ({
           id: t.id,
           roomId: t.taskData?.roomId,
           roomNumber: t.roomNumber,
@@ -214,9 +215,7 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
           taskData: t.taskData
         }))
         
-        setTasks(transformedTasks)
-        setStats(data.stats || { total: 0, pending: 0, inProgress: 0, completed: 0, verified: 0 })
-        setStaffStats(data.staffStats || {})
+        setTasks(allTasks)
       } else {
         // Fallback to localStorage
         loadTasksFromLocalStorage()
@@ -226,7 +225,7 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
       loadTasksFromLocalStorage()
     }
     setLoading(false)
-  }, [selectedDate, selectedStatus, selectedStaff])
+  }, [selectedDate])
 
   // Fallback: Load from localStorage
   const loadTasksFromLocalStorage = () => {
