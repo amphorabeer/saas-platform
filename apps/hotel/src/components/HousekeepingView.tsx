@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import moment from 'moment'
+import { NotificationService } from '../services/NotificationService'
 
 interface Task {
   id: string
@@ -68,6 +69,10 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [showTaskDetails, setShowTaskDetails] = useState(false)
   const [showStaffStats, setShowStaffStats] = useState(false)
+  const [showReports, setShowReports] = useState(false)
+  const [reportData, setReportData] = useState<any>(null)
+  const [reportLoading, setReportLoading] = useState(false)
+  const [reportPeriod, setReportPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily')
   
   const [staff, setStaff] = useState<any[]>([])
   const [staffStats, setStaffStats] = useState<StaffStats>({})
@@ -405,6 +410,15 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     }
     
     await saveTask(updated)
+    
+    // Send notification
+    NotificationService.notifyTaskCompleted({
+      roomNumber: task.roomNumber,
+      taskType: task.type === 'checkout' ? 'Check-out დასუფთავება' :
+                task.type === 'checkin' ? 'Check-in მომზადება' :
+                task.type === 'deep' ? 'ღრმა დასუფთავება' : 'დასუფთავება',
+      completedBy: task.assignedTo
+    })
   }
 
   const verifyTask = async (taskId: string) => {
@@ -422,6 +436,11 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     if (onRoomStatusUpdate && task.roomId) {
       onRoomStatusUpdate(task.roomId, 'VACANT')
     }
+    
+    // Send notification - room ready
+    NotificationService.notifyRoomReady({
+      roomNumber: task.roomNumber
+    })
     
     alert('✅ დასუფთავება შემოწმებულია!\n🟢 ოთახი მზადაა.')
   }
@@ -486,6 +505,14 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     }
     
     await saveTask(updated)
+    
+    // Send notification to reception
+    NotificationService.notifyLostFound({
+      roomNumber: task.roomNumber,
+      description: item.description,
+      location: item.location,
+      foundBy: task.assignedTo
+    })
   }
 
   // Minibar
@@ -499,6 +526,49 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
     }
     
     await saveTask(updated)
+    
+    // Send notification about minibar consumption
+    const allItems = updated.minibarItems || []
+    const total = allItems.reduce((sum, i) => sum + (i.consumed * i.price), 0)
+    NotificationService.notifyMinibar({
+      roomNumber: task.roomNumber,
+      items: allItems,
+      total
+    })
+  }
+
+  // Load housekeeping report
+  const loadReport = async (period: 'daily' | 'weekly' | 'monthly') => {
+    setReportLoading(true)
+    setReportPeriod(period)
+    
+    try {
+      let startDate: string, endDate: string
+      
+      if (period === 'daily') {
+        startDate = moment(selectedDate).startOf('day').toISOString()
+        endDate = moment(selectedDate).endOf('day').toISOString()
+      } else if (period === 'weekly') {
+        startDate = moment(selectedDate).startOf('week').toISOString()
+        endDate = moment(selectedDate).endOf('week').toISOString()
+      } else {
+        startDate = moment(selectedDate).startOf('month').toISOString()
+        endDate = moment(selectedDate).endOf('month').toISOString()
+      }
+      
+      const response = await fetch(`/api/hotel/housekeeping/reports?type=${period}&startDate=${startDate}&endDate=${endDate}`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        setReportData(data)
+      } else {
+        console.error('Failed to load report')
+      }
+    } catch (error) {
+      console.error('Error loading report:', error)
+    } finally {
+      setReportLoading(false)
+    }
   }
 
   // Filter tasks
@@ -540,10 +610,16 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
         <h2 className="text-2xl font-bold">🧹 დასუფთავების მართვა</h2>
         <div className="flex flex-wrap gap-2">
           <button
+            onClick={() => { setShowReports(true); loadReport('daily') }}
+            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm"
+          >
+            📈 რეპორტები
+          </button>
+          <button
             onClick={() => setShowStaffStats(true)}
             className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-sm"
           >
-            📊 თანამშრომლების სტატისტიკა
+            📊 თანამშრომლები
           </button>
           <button
             onClick={loadTasks}
@@ -980,6 +1056,193 @@ export default function HousekeepingView({ rooms, onRoomStatusUpdate }: any) {
             >
               დახურვა
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reports Modal */}
+      {showReports && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
+              <h3 className="text-lg font-bold">📈 დასუფთავების რეპორტები</h3>
+              <button onClick={() => setShowReports(false)} className="text-2xl hover:text-indigo-200">×</button>
+            </div>
+            
+            {/* Period Tabs */}
+            <div className="flex border-b">
+              {['daily', 'weekly', 'monthly'].map((period) => (
+                <button
+                  key={period}
+                  onClick={() => loadReport(period as any)}
+                  className={`flex-1 py-3 text-sm font-medium ${
+                    reportPeriod === period 
+                      ? 'border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50' 
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {period === 'daily' ? '📅 დღიური' : period === 'weekly' ? '📆 კვირის' : '🗓️ თვის'}
+                </button>
+              ))}
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {reportLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-gray-500">⏳ იტვირთება...</div>
+                </div>
+              ) : reportData ? (
+                <div className="space-y-6">
+                  {/* Period Info */}
+                  <div className="text-center text-gray-500 text-sm">
+                    {moment(reportData.period?.start).format('DD/MM/YYYY')} - {moment(reportData.period?.end).format('DD/MM/YYYY')}
+                  </div>
+                  
+                  {/* Stats Summary */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-blue-50 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-blue-600">{reportData.stats?.total || 0}</div>
+                      <div className="text-xs text-gray-500">სულ დავალებები</div>
+                    </div>
+                    <div className="bg-green-50 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-green-600">{reportData.stats?.completionRate || 0}%</div>
+                      <div className="text-xs text-gray-500">შესრულების მაჩვენებელი</div>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-purple-600">{reportData.stats?.verificationRate || 0}%</div>
+                      <div className="text-xs text-gray-500">შემოწმების მაჩვენებელი</div>
+                    </div>
+                    <div className="bg-yellow-50 rounded-lg p-4 text-center">
+                      <div className="text-2xl font-bold text-yellow-600">{reportData.lostAndFound?.total || 0}</div>
+                      <div className="text-xs text-gray-500">ნაპოვნი ნივთები</div>
+                    </div>
+                  </div>
+                  
+                  {/* By Status */}
+                  <div className="bg-white border rounded-lg p-4">
+                    <h4 className="font-bold mb-3">სტატუსის მიხედვით</h4>
+                    <div className="grid grid-cols-4 gap-2 text-center text-sm">
+                      <div className="bg-blue-100 rounded p-2">
+                        <div className="font-bold">{reportData.stats?.byStatus?.pending || 0}</div>
+                        <div className="text-xs text-gray-500">მოლოდინში</div>
+                      </div>
+                      <div className="bg-yellow-100 rounded p-2">
+                        <div className="font-bold">{reportData.stats?.byStatus?.in_progress || 0}</div>
+                        <div className="text-xs text-gray-500">მიმდინარე</div>
+                      </div>
+                      <div className="bg-green-100 rounded p-2">
+                        <div className="font-bold">{reportData.stats?.byStatus?.completed || 0}</div>
+                        <div className="text-xs text-gray-500">დასრულებული</div>
+                      </div>
+                      <div className="bg-gray-100 rounded p-2">
+                        <div className="font-bold">{reportData.stats?.byStatus?.verified || 0}</div>
+                        <div className="text-xs text-gray-500">შემოწმებული</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* By Type */}
+                  <div className="bg-white border rounded-lg p-4">
+                    <h4 className="font-bold mb-3">ტიპის მიხედვით</h4>
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-2 text-center text-sm">
+                      {[
+                        { key: 'checkout', label: 'Check-out', icon: '🚪' },
+                        { key: 'checkin', label: 'Check-in', icon: '🔑' },
+                        { key: 'daily', label: 'ყოველდღიური', icon: '🧹' },
+                        { key: 'deep', label: 'ღრმა', icon: '🧼' },
+                        { key: 'turndown', label: 'Turndown', icon: '🌙' },
+                        { key: 'inspection', label: 'შემოწმება', icon: '🔍' }
+                      ].map(type => (
+                        <div key={type.key} className="bg-gray-50 rounded p-2">
+                          <div className="text-lg">{type.icon}</div>
+                          <div className="font-bold">{reportData.stats?.byType?.[type.key] || 0}</div>
+                          <div className="text-xs text-gray-500">{type.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Staff Performance */}
+                  {reportData.staffPerformance && Object.keys(reportData.staffPerformance).length > 0 && (
+                    <div className="bg-white border rounded-lg p-4">
+                      <h4 className="font-bold mb-3">👥 თანამშრომლების შედეგები</h4>
+                      <div className="space-y-2">
+                        {Object.entries(reportData.staffPerformance).map(([name, data]: [string, any]) => (
+                          <div key={name} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                            <span className="font-medium">{name}</span>
+                            <div className="flex gap-4 text-sm">
+                              <span>დანიშნული: <b>{data.assigned}</b></span>
+                              <span className="text-green-600">დასრულებული: <b>{data.completed}</b></span>
+                              <span className="text-purple-600">შემოწმებული: <b>{data.verified}</b></span>
+                              {data.avgCompletionTime > 0 && (
+                                <span className="text-gray-500">საშ. დრო: <b>{data.avgCompletionTime} წთ</b></span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Minibar Summary */}
+                  {reportData.minibar?.total > 0 && (
+                    <div className="bg-white border rounded-lg p-4">
+                      <h4 className="font-bold mb-3">🍫 მინიბარის მოხმარება</h4>
+                      <div className="text-2xl font-bold text-purple-600 mb-3">
+                        სულ: ₾{reportData.minibar.total.toFixed(2)}
+                      </div>
+                      {reportData.minibar.byItem && Object.keys(reportData.minibar.byItem).length > 0 && (
+                        <div className="space-y-1 text-sm">
+                          {Object.entries(reportData.minibar.byItem).map(([item, data]: [string, any]) => (
+                            <div key={item} className="flex justify-between bg-purple-50 p-2 rounded">
+                              <span>{item} × {data.count}</span>
+                              <span className="font-medium">₾{data.total.toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Lost & Found List */}
+                  {reportData.lostAndFound?.items && reportData.lostAndFound.items.length > 0 && (
+                    <div className="bg-white border rounded-lg p-4">
+                      <h4 className="font-bold mb-3">🔍 ნაპოვნი ნივთები</h4>
+                      <div className="space-y-2 max-h-40 overflow-y-auto">
+                        {reportData.lostAndFound.items.map((item: any, idx: number) => (
+                          <div key={idx} className="flex justify-between bg-yellow-50 p-2 rounded text-sm">
+                            <div>
+                              <span className="font-medium">{item.description}</span>
+                              {item.location && <span className="text-gray-500 ml-2">📍 {item.location}</span>}
+                            </div>
+                            <span className="text-gray-500">ოთახი {item.roomNumber}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  მონაცემები არ მოიძებნა
+                </div>
+              )}
+            </div>
+            
+            {/* Footer */}
+            <div className="border-t p-3 bg-gray-50 flex justify-between items-center">
+              <span className="text-xs text-gray-500">
+                {reportData?.generatedAt && `გენერირებულია: ${moment(reportData.generatedAt).format('DD/MM/YYYY HH:mm')}`}
+              </span>
+              <button
+                onClick={() => setShowReports(false)}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                დახურვა
+              </button>
+            </div>
           </div>
         </div>
       )}
