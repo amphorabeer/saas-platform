@@ -2080,8 +2080,33 @@ export default function RoomCalendar({
   const createFolioOnCheckIn = async (reservation: any) => {
     if (typeof window === 'undefined') return
     
-    const folios = getFolios()
-    const existingFolio = folios.find((f: any) => f.reservationId === reservation.id)
+    // First check localStorage cache
+    let folios = getFolios()
+    let existingFolio = folios.find((f: any) => f.reservationId === reservation.id)
+    
+    // If not found in localStorage, check API
+    if (!existingFolio) {
+      try {
+        const response = await fetch('/api/hotel/folios')
+        if (response.ok) {
+          const apiFolios = await response.json()
+          existingFolio = apiFolios.find((f: any) => f.reservationId === reservation.id)
+          if (existingFolio) {
+            console.log('[RoomCalendar] Found existing folio in API:', existingFolio.folioNumber)
+            // Sync to localStorage
+            const localFolios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+            if (!localFolios.find((f: any) => f.id === existingFolio.id)) {
+              localFolios.push(existingFolio)
+              localStorage.setItem('hotelFolios', JSON.stringify(localFolios))
+            }
+            loadFoliosCache()
+            return // Folio already exists, don't create new one
+          }
+        }
+      } catch (e) {
+        console.error('[RoomCalendar] Error checking API for folio:', e)
+      }
+    }
     
     if (!existingFolio) {
       // Get room number (convert roomId to roomNumber if needed)
@@ -2125,6 +2150,8 @@ export default function RoomCalendar({
         paymentMethod: 'cash',
         status: 'open',
         openDate: moment().format('YYYY-MM-DD'),
+        checkIn: reservation.checkIn ? moment(reservation.checkIn).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD'),
+        checkOut: reservation.checkOut ? moment(reservation.checkOut).format('YYYY-MM-DD') : undefined,
         transactions: []
       }
       
