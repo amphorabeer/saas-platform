@@ -209,13 +209,22 @@ export async function PUT(request: NextRequest) {
     if (data.completedAt) updateData.completedAt = new Date(data.completedAt)
     if (data.completedBy) updateData.completedBy = data.completedBy
     
-    // Update taskData (merge with existing)
-    if (data.taskData || data.checklist || data.photosBefore || data.photosAfter || data.startedAt) {
-      const existingData = (existing.taskData as any) || {}
+    // Always update taskData if any relevant field is present
+    const existingData = (existing.taskData as any) || {}
+    const hasTaskDataUpdate = data.taskData || data.checklist !== undefined || 
+                              data.photosBefore !== undefined || data.photosAfter !== undefined || 
+                              data.startedAt !== undefined || data.lostAndFound !== undefined || 
+                              data.minibarItems !== undefined || data.floor !== undefined ||
+                              data.scheduledTime !== undefined
+    
+    if (hasTaskDataUpdate) {
       updateData.taskData = {
         ...existingData,
         ...(data.taskData || {}),
-        checklist: data.checklist ?? data.taskData?.checklist ?? existingData.checklist,
+        floor: data.floor ?? existingData.floor,
+        roomId: data.roomId ?? existingData.roomId,
+        scheduledTime: data.scheduledTime ?? existingData.scheduledTime,
+        checklist: data.checklist ?? data.taskData?.checklist ?? existingData.checklist ?? [],
         photosBefore: data.photosBefore ?? existingData.photosBefore ?? [],
         photosAfter: data.photosAfter ?? existingData.photosAfter ?? [],
         lostAndFound: data.lostAndFound ?? existingData.lostAndFound ?? [],
