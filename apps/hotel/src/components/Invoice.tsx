@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import moment from 'moment'
 import { ActivityLogger } from '../lib/activityLogger'
 import { calculateTaxBreakdown } from '../utils/taxCalculator'
@@ -8,6 +8,8 @@ import { hasDisplayableLogo } from '@/lib/logo'
 
 export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: any) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+  const [invoiceData, setInvoiceData] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
   
   const nights = moment(reservation.checkOut).diff(moment(reservation.checkIn), 'days')
   const pricePerNight = nights > 0 ? reservation.totalAmount / nights : reservation.totalAmount
@@ -65,9 +67,16 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
     return generateInvoiceNumber(reservation)
   }, [reservation.id, reservation.invoiceNumber, reservation.roomNumber])
   
+  // Load invoice data on mount
+  useEffect(() => {
+    loadInvoiceData()
+  }, [reservation.id])
+  
   // Load ALL charges from folio
-  const getInvoiceData = async () => {
-    if (typeof window === 'undefined') return null
+  const loadInvoiceData = async () => {
+    if (typeof window === 'undefined') return
+    
+    setIsLoading(true)
     
     // Try API first
     let folios: any[] = []
@@ -76,6 +85,7 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
       if (response.ok) {
         const data = await response.json()
         folios = data.folios || []
+        console.log('[Invoice] Loaded folios from API:', folios.length)
       }
     } catch (error) {
       console.error('[Invoice] API error:', error)
@@ -84,13 +94,15 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
     // Fallback to localStorage
     if (folios.length === 0) {
       folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
+      console.log('[Invoice] Loaded folios from localStorage:', folios.length)
     }
     
     const folio = folios.find((f: any) => f.reservationId === reservation.id)
+    console.log('[Invoice] Found folio:', folio?.folioNumber)
     
     if (!folio) {
       // No folio found, use reservation data as fallback
-      return {
+      setInvoiceData({
         folioNumber: null,
         charges: [{
           description: `ოთახი ${reservation.roomNumber || 'N/A'}`,
@@ -102,10 +114,13 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
         totalCharges: reservation.totalAmount || 0,
         totalPayments: 0,
         balance: reservation.totalAmount || 0
-      }
+      })
+      setIsLoading(false)
+      return
     }
     
-    const transactions = folio.transactions || []
+    const transactions = folio.folioData?.transactions || folio.transactions || folio.charges || []
+    console.log('[Invoice] Transactions:', transactions.length)
     
     // Get charges from transactions (type === 'charge' or debit > 0)
     const charges = transactions.filter((t: any) => 
@@ -141,17 +156,18 @@ export default function Invoice({ reservation, hotelInfo, onPrint, onEmail }: an
     const totalPayments = payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
     const balance = totalCharges - totalPayments
     
-    return {
+    console.log('[Invoice] Data:', { charges: charges.length, payments: payments.length, totalCharges, totalPayments, balance })
+    
+    setInvoiceData({
       folioNumber: folio.folioNumber,
       charges,
       payments,
       totalCharges,
       totalPayments,
       balance
-    }
+    })
+    setIsLoading(false)
   }
-  
-  const invoiceData = getInvoiceData()
   
   const generateInvoiceHTML = () => {
     return `
@@ -530,18 +546,26 @@ ${hotelInfo?.name || 'Hotel'}-დან გიგზავნით ინვო
   
   return (
     <div className="space-y-3">
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
+          ⏳ ინვოისის მონაცემები იტვირთება...
+        </div>
+      )}
+      
       {/* Main Actions */}
       <div className="flex flex-wrap gap-2">
         <button
           onClick={handlePrint}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
+          disabled={isLoading}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm disabled:opacity-50"
         >
           🖨️ დაბეჭდვა
         </button>
         
         <button
           onClick={handleDownloadPDF}
-          disabled={isGeneratingPDF}
+          disabled={isGeneratingPDF || isLoading}
           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 text-sm disabled:opacity-50"
         >
           {isGeneratingPDF ? '⏳ იტვირთება...' : '📄 PDF ჩამოტვირთვა'}
@@ -552,7 +576,7 @@ ${hotelInfo?.name || 'Hotel'}-დან გიგზავნით ინვო
       <div className="flex flex-wrap gap-2">
         <button
           onClick={handleEmail}
-          disabled={!reservation.guestEmail}
+          disabled={!reservation.guestEmail || isLoading}
           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           📧 Email-ით
@@ -560,7 +584,7 @@ ${hotelInfo?.name || 'Hotel'}-დან გიგზავნით ინვო
         
         <button
           onClick={handleWhatsApp}
-          disabled={!reservation.guestPhone}
+          disabled={!reservation.guestPhone || isLoading}
           className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           💬 WhatsApp
