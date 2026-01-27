@@ -25,20 +25,102 @@ export default function ExtraChargesPanel({
     serviceCharge: 10
   })
   
-  const baseCategories = ExtraChargesService.CATEGORIES
-  const items = ExtraChargesService.ITEMS
-  
-  // Override categories with dynamic tax rates from localStorage
-  const categories = baseCategories.map(cat => ({
-    ...cat,
-    taxRate: taxRates.vat, // Use loaded VAT rate
-    serviceChargeRate: cat.serviceChargeRate ? taxRates.serviceCharge : undefined // Use loaded service charge rate if category has it
-  }))
+  // Load categories and items from API
+  const [categories, setCategories] = useState<any[]>(ExtraChargesService.CATEGORIES)
+  const [items, setItems] = useState<any[]>(ExtraChargesService.ITEMS)
+  const [loading, setLoading] = useState(true)
   
   useEffect(() => {
-    loadRecentCharges()
-    loadTaxRates()
+    loadData()
   }, [reservationId])
+  
+  const loadData = async () => {
+    setLoading(true)
+    await Promise.all([
+      loadCategories(),
+      loadItems(),
+      loadTaxRates(),
+      loadRecentCharges()
+    ])
+    setLoading(false)
+  }
+  
+  const loadCategories = async () => {
+    try {
+      const response = await fetch('/api/hotel/charge-categories')
+      if (response.ok) {
+        const apiCategories = await response.json()
+        if (Array.isArray(apiCategories) && apiCategories.length > 0) {
+          const mapped = apiCategories.map((c: any) => ({
+            id: c.id,
+            code: c.code,
+            name: c.name,
+            icon: c.icon || '📦',
+            department: c.department || 'ROOMS',
+            taxRate: c.taxRate || taxRates.vat,
+            serviceChargeRate: c.serviceChargeRate || 0
+          }))
+          setCategories(mapped)
+          console.log('[ExtraChargesPanel] Loaded categories from API:', mapped.length)
+          return
+        }
+      }
+    } catch (e) {
+      console.log('[ExtraChargesPanel] Categories API error, using defaults')
+    }
+    
+    // Fallback to localStorage
+    const saved = localStorage.getItem('chargeCategories')
+    if (saved) {
+      try {
+        setCategories(JSON.parse(saved))
+        return
+      } catch (e) {}
+    }
+    
+    // Use hardcoded defaults
+    setCategories(ExtraChargesService.CATEGORIES)
+  }
+  
+  const loadItems = async () => {
+    try {
+      const response = await fetch('/api/hotel/charge-items')
+      if (response.ok) {
+        const apiItems = await response.json()
+        if (Array.isArray(apiItems) && apiItems.length > 0) {
+          const mapped = apiItems.map((i: any) => ({
+            id: i.id,
+            code: i.code,
+            name: i.name,
+            categoryId: i.category || i.categoryId,
+            unitPrice: i.price || i.unitPrice || 0,
+            unit: i.unit || 'piece',
+            department: i.department || 'ROOMS',
+            available: i.isActive !== false,
+            trackStock: i.stock !== null && i.stock !== undefined,
+            currentStock: i.stock
+          }))
+          setItems(mapped)
+          console.log('[ExtraChargesPanel] Loaded items from API:', mapped.length)
+          return
+        }
+      }
+    } catch (e) {
+      console.log('[ExtraChargesPanel] Items API error, using defaults')
+    }
+    
+    // Fallback to localStorage
+    const saved = localStorage.getItem('chargeItems')
+    if (saved) {
+      try {
+        setItems(JSON.parse(saved))
+        return
+      } catch (e) {}
+    }
+    
+    // Use hardcoded defaults
+    setItems(ExtraChargesService.ITEMS)
+  }
   
   const loadTaxRates = async () => {
     if (typeof window === 'undefined') return
@@ -140,7 +222,13 @@ export default function ExtraChargesPanel({
   
   const getCategoryItems = () => {
     if (!selectedCategory) return []
-    return items.filter(i => i.categoryId === selectedCategory && i.available)
+    // Match by category id, code, or categoryId
+    return items.filter(i => {
+      const catMatch = i.categoryId === selectedCategory || 
+                       i.category === selectedCategory ||
+                       i.categoryId === categories.find(c => c.id === selectedCategory)?.code
+      return catMatch && i.available !== false
+    })
   }
   
   const getItemDetails = () => {
@@ -250,9 +338,21 @@ export default function ExtraChargesPanel({
   }
   
   const item = getItemDetails()
-  const category = item ? categories.find(c => c.id === item.categoryId) : null
+  const category = item ? categories.find(c => c.id === item.categoryId || c.code === item.categoryId) : null
   const taxBreakdown = calculateTaxInclusive()
   const totalAmount = taxBreakdown.gross
+  
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <h2 className="text-xl font-bold mb-4">➕ Extra Charges</h2>
+        <div className="text-center py-8 text-gray-500">
+          <div className="animate-spin inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
+          <p>იტვირთება...</p>
+        </div>
+      </div>
+    )
+  }
   
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -262,13 +362,13 @@ export default function ExtraChargesPanel({
       <div className="grid grid-cols-4 gap-2 mb-4">
         {categories.map(cat => (
           <button
-            key={cat.id}
+            key={cat.id || cat.code}
             onClick={() => {
-              setSelectedCategory(cat.id)
+              setSelectedCategory(cat.id || cat.code)
               setSelectedItem('')
             }}
             className={`p-3 rounded border text-center hover:bg-gray-50 transition ${
-              selectedCategory === cat.id ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200'
+              selectedCategory === cat.id || selectedCategory === cat.code ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200'
             }`}
           >
             <div className="text-2xl mb-1">{cat.icon}</div>
