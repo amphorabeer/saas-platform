@@ -2410,14 +2410,42 @@ This is an automated report from Night Audit System.
   // ============================================
   // NEW FEATURE 1: Undo/Reverse Day
   // ============================================
-  const reverseAudit = async (date: string) => {
-    const password = prompt('შეიყვანეთ Admin პაროლი:')
-    if (password !== 'admin123') {
-      alert('არასწორი პაროლი!')
+  const reverseAuditWithPassword = async (date: string, password: string) => {
+    // Get admin password from settings (fallback to 'admin123')
+    let adminPassword = 'admin123'
+    try {
+      const settings = JSON.parse(localStorage.getItem('systemSettings') || '{}')
+      if (settings.adminPassword) {
+        adminPassword = settings.adminPassword
+      }
+      // Also try hotelSettings
+      const hotelSettings = JSON.parse(localStorage.getItem('hotelSettings') || '{}')
+      if (hotelSettings.adminPassword) {
+        adminPassword = hotelSettings.adminPassword
+      }
+    } catch (e) {
+      console.error('[NightAudit] Error reading admin password:', e)
+    }
+    
+    if (password !== adminPassword) {
+      alert('❌ არასწორი პაროლი!')
       return
     }
     
+    // Check if this is the last completed audit (only last can be reversed)
     const history = JSON.parse(localStorage.getItem(getNightAuditsKey()) || '[]')
+    const completedAudits = history
+      .filter((a: any) => a.status === 'completed' && !a.reversed)
+      .sort((a: any, b: any) => a.date.localeCompare(b.date))
+    
+    if (completedAudits.length > 0) {
+      const lastCompletedDate = completedAudits[completedAudits.length - 1].date
+      if (date !== lastCompletedDate) {
+        alert(`❌ მხოლოდ ბოლო დახურული დღე შეიძლება გაიხსნას!\n\nბოლო დახურული: ${moment(lastCompletedDate).format('DD/MM/YYYY')}\nთქვენ აირჩიეთ: ${moment(date).format('DD/MM/YYYY')}`)
+        return
+      }
+    }
+    
     const updatedHistory = history.map((audit: any) => {
       if (audit.date === date && audit.status === 'completed') {
         return {
@@ -2449,11 +2477,18 @@ This is an automated report from Night Audit System.
     localStorage.setItem('currentBusinessDate', date)
     localStorage.setItem(getLastAuditDateKey(), moment(date).subtract(1, 'day').format('YYYY-MM-DD'))
     
-    alert(`✅ თარიღი ${date} გახსნილია!\nახლა შეგიძლიათ თავიდან გაუშვათ Night Audit.`)
+    alert(`✅ თარიღი ${moment(date).format('DD/MM/YYYY')} გახსნილია!\nახლა შეგიძლიათ თავიდან გაუშვათ Night Audit.`)
     setShowReverseModal(false)
     setReverseDate(null)
     await loadAuditHistory()
     setSelectedDate(date)
+  }
+  
+  // Legacy function for backward compatibility
+  const reverseAudit = async (date: string) => {
+    const password = prompt('შეიყვანეთ Admin პაროლი:')
+    if (!password) return
+    await reverseAuditWithPassword(date, password)
   }
   
   // ============================================
@@ -3411,9 +3446,17 @@ This is an automated report from Night Audit System.
               <p className="mb-4">
                 თარიღი: <strong>{moment(reverseDate).format('DD/MM/YYYY')}</strong>
               </p>
-              <p className="text-sm text-gray-600 mb-4">
-                ეს მოქმედება მოითხოვს Admin პაროლს.
-              </p>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Admin პაროლი
+                </label>
+                <input
+                  type="password"
+                  id="reversePassword"
+                  placeholder="შეიყვანეთ პაროლი..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                />
+              </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => { setShowReverseModal(false); setReverseDate(null) }}
@@ -3422,7 +3465,11 @@ This is an automated report from Night Audit System.
                   გაუქმება
                 </button>
                 <button
-                  onClick={() => reverseAudit(reverseDate)}
+                  onClick={() => {
+                    const passwordInput = document.getElementById('reversePassword') as HTMLInputElement
+                    const password = passwordInput?.value || ''
+                    reverseAuditWithPassword(reverseDate, password)
+                  }}
                   className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                 >
                   ↩️ გახსნა
@@ -3640,21 +3687,30 @@ This is an automated report from Night Audit System.
                       // Total rooms - fallback to 6 if localStorage has fewer
                       const totalRooms = Math.max(rooms.length, 6)
                       
-                      // Count OPEN folios for the business date = occupied rooms
-                      const occupiedRooms = folios.filter((f: any) => {
+                      // Count UNIQUE ROOMS with open folios for the business date
+                      const occupiedRoomNumbers = new Set<string>()
+                      folios.forEach((f: any) => {
+                        let isOccupied = false
+                        
                         // Open folio = room is occupied
-                        if (f.status === 'open') return true
+                        if (f.status === 'open') isOccupied = true
                         
                         // Or closed folio where closedDate is after businessDate
-                        if (f.status === 'closed' && f.closedDate) {
-                          return f.closedDate > businessDate
+                        else if (f.status === 'closed' && f.closedDate) {
+                          isOccupied = f.closedDate > businessDate
+                        } else {
+                          // Check if folio was active on businessDate
+                          const openDate = f.openDate || ''
+                          const closeDate = f.closedDate || '9999-12-31'
+                          isOccupied = openDate <= businessDate && closeDate > businessDate
                         }
                         
-                        // Check if folio was active on businessDate
-                        const openDate = f.openDate || ''
-                        const closeDate = f.closedDate || '9999-12-31'
-                        return openDate <= businessDate && closeDate > businessDate
-                      }).length
+                        if (isOccupied && f.roomNumber) {
+                          occupiedRoomNumbers.add(f.roomNumber.toString())
+                        }
+                      })
+                      
+                      const occupiedRooms = occupiedRoomNumbers.size
                       
                       // Calculate room revenue from zReport or folios
                       let roomRevenue = zReport?.roomRevenue || 0
@@ -3995,18 +4051,30 @@ This is an automated report from Night Audit System.
                       )}
                     </td>
                     <td className="p-2 text-center">
-                      {!audit.reversed && i === 0 && (
-                        <button
-                          onClick={() => {
-                            setReverseDate(audit.date)
-                            setShowReverseModal(true)
-                          }}
-                          className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
-                          title="გახსნა (Admin Only)"
-                        >
-                          ↩️ Reverse
-                        </button>
-                      )}
+                      {(() => {
+                        // Find the last completed (non-reversed) audit
+                        const completedAudits = auditHistory.filter(a => a.status === 'completed' && !a.reversed)
+                        const lastCompletedDate = completedAudits.length > 0 
+                          ? completedAudits.reduce((latest, a) => a.date > latest ? a.date : latest, completedAudits[0].date)
+                          : null
+                        
+                        // Only show Reverse button on the last completed audit
+                        if (!audit.reversed && audit.status === 'completed' && audit.date === lastCompletedDate) {
+                          return (
+                            <button
+                              onClick={() => {
+                                setReverseDate(audit.date)
+                                setShowReverseModal(true)
+                              }}
+                              className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+                              title="გახსნა (Admin Only)"
+                            >
+                              ↩️ Reverse
+                            </button>
+                          )
+                        }
+                        return null
+                      })()}
                     </td>
                   </tr>
                   )
