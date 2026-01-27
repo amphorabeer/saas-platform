@@ -75,6 +75,7 @@ export default function CheckInModal({
   })
   
   const [overlapError, setOverlapError] = useState<string | null>(null) // ✅ დაემატა
+  const [isSubmitting, setIsSubmitting] = useState(false) // Loading state
 
   // Room rates from Settings
   const [roomRates, setRoomRates] = useState<{ id: string; type: string; weekday: number; weekend: number }[]>([])
@@ -628,7 +629,9 @@ export default function CheckInModal({
     return { allowed: true }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (isSubmitting) return // Prevent double-click
+    
     if (!formData.guestName || !formData.checkOut) {
       alert('გთხოვთ შეავსოთ სტუმრის სახელი და Check-out თარიღი')
       return
@@ -669,35 +672,43 @@ export default function CheckInModal({
       }
     }
     
-    // Note: Room status update should be handled by parent component via API
-    // Don't update localStorage here since rooms are managed by API/state
+    setIsSubmitting(true) // Start loading
     
-    // ✅ Use different variable name to avoid conflict with `reservation` prop!
-    const newReservation = {
-      guestName: formData.guestName,
-      guestEmail: formData.guestEmail || '',  // ✅ empty string
-      guestPhone: formData.guestPhone || '',
-      roomId: formData.roomId,
-      checkIn: formData.checkIn,
-      checkOut: formData.checkOut,
-      adults: formData.adults,
-      children: formData.children,
-      totalAmount: calculateTotal(),
-      status: 'CONFIRMED',
-      source: formData.source || 'direct',
-      notes: formData.notes || ''  // ✅ empty string
+    try {
+      // Note: Room status update should be handled by parent component via API
+      // Don't update localStorage here since rooms are managed by API/state
+      
+      // ✅ Use different variable name to avoid conflict with `reservation` prop!
+      const newReservation = {
+        guestName: formData.guestName,
+        guestEmail: formData.guestEmail || '',  // ✅ empty string
+        guestPhone: formData.guestPhone || '',
+        roomId: formData.roomId,
+        checkIn: formData.checkIn,
+        checkOut: formData.checkOut,
+        adults: formData.adults,
+        children: formData.children,
+        totalAmount: calculateTotal(),
+        status: 'CONFIRMED',
+        source: formData.source || 'direct',
+        notes: formData.notes || ''  // ✅ empty string
+      }
+      
+      ActivityLogger.log('RESERVATION_CREATE', {
+        guest: formData.guestName,
+        room: formData.roomNumber,
+        checkIn: formData.checkIn,
+        checkOut: formData.checkOut,
+        amount: formData.totalAmount,
+        reservationNumber: newReservation.reservationNumber
+      })
+      
+      await onSubmit(newReservation)
+    } catch (error) {
+      console.error('Error submitting reservation:', error)
+    } finally {
+      setIsSubmitting(false) // End loading
     }
-    
-    ActivityLogger.log('RESERVATION_CREATE', {
-      guest: formData.guestName,
-      room: formData.roomNumber,
-      checkIn: formData.checkIn,
-      checkOut: formData.checkOut,
-      amount: formData.totalAmount,
-      reservationNumber: newReservation.reservationNumber
-    })
-    
-    onSubmit(newReservation)
   }
 
   return (
@@ -944,14 +955,14 @@ export default function CheckInModal({
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!formData.guestName || !formData.checkOut || !!overlapError}
+            disabled={!formData.guestName || !formData.checkOut || !!overlapError || isSubmitting}
             className={`flex-1 px-4 py-2 rounded-lg text-white ${
-              !formData.guestName || !formData.checkOut || overlapError
+              !formData.guestName || !formData.checkOut || overlapError || isSubmitting
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-green-600 hover:bg-green-700'
             }`}
           >
-            ✅ შექმნა
+            {isSubmitting ? '⏳ იტვირთება...' : '✅ შექმნა'}
           </button>
         </div>
       </div>

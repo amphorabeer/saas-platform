@@ -566,11 +566,12 @@ export default function EnhancedPaymentModal({
               disabled={processing || (amount <= 0 && !splitPayment) || (splitPayment && splits.length === 0)}
               className="flex-1 px-4 py-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 transition"
             >
-              {processing ? 'Processing...' : `Process ${paymentType === 'refund' ? 'Refund' : 'Payment'} ${!splitPayment ? `₾${Number(amount || 0).toFixed(2)}` : ''}`}
+              {processing ? '⏳ იტვირთება...' : `Process ${paymentType === 'refund' ? 'Refund' : 'Payment'} ${!splitPayment ? `₾${Number(amount || 0).toFixed(2)}` : ''}`}
             </button>
             <button
               onClick={onClose}
-              className="px-6 py-3 bg-gray-300 rounded hover:bg-gray-400 transition"
+              disabled={processing}
+              className="px-6 py-3 bg-gray-300 rounded hover:bg-gray-400 transition disabled:opacity-50"
             >
               Cancel
             </button>
