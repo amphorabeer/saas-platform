@@ -84,17 +84,47 @@ export async function POST(request: NextRequest) {
     const prisma = getPrismaClient()
     const data = await request.json()
     
-    console.log('📥 POST /api/hotel/folios - Creating folio:', data.folioNumber)
+    console.log('📥 POST /api/hotel/folios - Creating folio:', data.folioNumber, 'reservationId:', data.reservationId)
     
-    // Check if folio with same folioNumber exists
-    const existing = await prisma.folio.findFirst({
+    // FIRST: Check if folio with same reservationId exists (prevent duplicates!)
+    if (data.reservationId) {
+      const existingByReservation = await prisma.folio.findFirst({
+        where: { organizationId, reservationId: data.reservationId }
+      })
+      
+      if (existingByReservation) {
+        console.log('📋 Folio already exists for reservation:', existingByReservation.folioNumber)
+        
+        // Merge data - keep the one with more transactions
+        const existingTransactions = (existingByReservation.folioData as any)?.transactions || 
+                                     existingByReservation.charges || []
+        const newTransactions = data.transactions || []
+        
+        // If new data has more transactions or higher balance, update
+        if (newTransactions.length > existingTransactions.length || 
+            (data.totalCharges || 0) > (existingByReservation.totalCharges || 0)) {
+          console.log('📝 Updating existing folio with new data')
+          const updated = await prisma.folio.update({
+            where: { id: existingByReservation.id },
+            data: mapFolioToDatabase(data, organizationId)
+          })
+          return NextResponse.json(mapFolioToFrontend(updated))
+        }
+        
+        // Otherwise return existing without changes
+        return NextResponse.json(mapFolioToFrontend(existingByReservation))
+      }
+    }
+    
+    // SECOND: Check if folio with same folioNumber exists
+    const existingByNumber = await prisma.folio.findFirst({
       where: { organizationId, folioNumber: data.folioNumber }
     })
     
-    if (existing) {
+    if (existingByNumber) {
       // Update existing
       const updated = await prisma.folio.update({
-        where: { id: existing.id },
+        where: { id: existingByNumber.id },
         data: mapFolioToDatabase(data, organizationId)
       })
       return NextResponse.json(mapFolioToFrontend(updated))
