@@ -53,6 +53,37 @@ export default function CashierModule() {
     nextDayBalance: 0
   })
   
+  // Cashier settings
+  const [cashierSettings, setCashierSettings] = useState({
+    requireCashCount: true,  // ჩამთვლელი - ნაღდი ფულის დათვლა სავალდებულოა
+    defaultFloatBalance: 200, // სტანდარტული float თანხა
+    allowCashWithdrawal: true // ნაღდი ფულის გატანა დაშვებულია
+  })
+  
+  // Helper function to round currency values (fixes floating point errors like 1771.1999999998)
+  const roundCurrency = (value: number): number => {
+    return Math.round(value * 100) / 100
+  }
+  
+  // Format currency for display
+  const formatCurrency = (value: number): string => {
+    return roundCurrency(value).toFixed(2)
+  }
+  
+  // Load cashier settings
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('cashierSettings')
+      if (saved) {
+        try {
+          setCashierSettings(prev => ({ ...prev, ...JSON.parse(saved) }))
+        } catch (e) {
+          console.error('Error loading cashier settings:', e)
+        }
+      }
+    }
+  }, [])
+  
   // Get business date from localStorage (falls back to real date)
   const getBusinessDate = () => {
     const stored = localStorage.getItem('currentBusinessDate')
@@ -147,19 +178,26 @@ export default function CashierModule() {
   // SINGLE useEffect - Load data on mount ONLY
   useEffect(() => {
     const loadData = async () => {
-      // Load shift from API first, then localStorage
+      // Load shift from API first
       try {
-        const shiftResponse = await fetch('/api/hotel/cashier-shifts?current=true')
+        const shiftResponse = await fetch('/api/cashier?current=true')
         if (shiftResponse.ok) {
           const shiftData = await shiftResponse.json()
-          if (shiftData) {
+          // API now returns the shift directly (not wrapped in { shift })
+          if (shiftData && shiftData.id) {
             setCurrentShift(shiftData)
-            console.log('[CashierModule] Loaded shift from API')
+            // Sync to localStorage
+            localStorage.setItem('currentCashierShift', JSON.stringify(shiftData))
+            console.log('[CashierModule] Loaded shift from API, ID:', shiftData.id)
           } else {
-            // Fallback to localStorage
+            // No open shift in API, check localStorage
             const savedShift = localStorage.getItem('currentCashierShift')
             if (savedShift) {
-              setCurrentShift(JSON.parse(savedShift))
+              const parsed = JSON.parse(savedShift)
+              // Only use if it's a valid open shift
+              if (parsed.status === 'open') {
+                setCurrentShift(parsed)
+              }
             }
           }
         }
@@ -173,9 +211,10 @@ export default function CashierModule() {
       
       // Load shifts history from API
       try {
-        const historyResponse = await fetch('/api/hotel/cashier-shifts')
+        const historyResponse = await fetch('/api/cashier')
         if (historyResponse.ok) {
           const historyData = await historyResponse.json()
+          // API now returns array directly
           const shiftsList = Array.isArray(historyData) ? historyData : (historyData.shifts || [])
           if (shiftsList.length > 0) {
             setShifts(shiftsList)
@@ -193,10 +232,26 @@ export default function CashierModule() {
       // Load folio transactions
       const todayTx = await loadCashierTransactions()
       
-      // Load manual transactions
+      // Load manual transactions from API
       const today = getBusinessDate()
-      const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
-      const todayManual = savedManual.filter((t: any) => t.date === today)
+      let todayManual: any[] = []
+      
+      try {
+        const txResponse = await fetch(`/api/cashier/transactions?date=${today}`)
+        if (txResponse.ok) {
+          const txData = await txResponse.json()
+          todayManual = txData.transactions || []
+          console.log('[CashierModule] Loaded manual transactions from API:', todayManual.length)
+        }
+      } catch (error) {
+        console.error('[CashierModule] Error loading manual transactions from API:', error)
+      }
+      
+      // Fallback to localStorage if API returned nothing
+      if (todayManual.length === 0) {
+        const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+        todayManual = savedManual.filter((t: any) => t.date === today)
+      }
       
       // Add manual INCOME transactions to main list
       const manualIncomes = todayManual.filter((t: any) => t.type === 'income')
@@ -287,39 +342,34 @@ export default function CashierModule() {
   }, [transactions, manualTransactions])
 
   // Manual refresh function
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     console.log('=== MANUAL REFRESH ===')
     
-    // Load folio transactions
-    const folios = JSON.parse(localStorage.getItem('hotelFolios') || '[]')
     const today = getBusinessDate()
-    
     console.log('Refreshing for date:', today)
     
-    const todayTx: any[] = []
+    // Load folio transactions from API
+    const todayTx = await loadCashierTransactions()
     
-    // Load folio payments
-    folios.forEach((folio: any) => {
-      if (!folio.transactions) return
-      
-      folio.transactions.forEach((t: any) => {
-        if (t.credit > 0 && t.date === today) {
-          todayTx.push({
-            id: t.id || `tx-${Math.random()}`,
-            time: t.time || '00:00',
-            description: `${folio.guestName} - Room ${folio.roomNumber || ''}`,
-            amount: t.credit,
-            method: t.paymentMethod || 'cash',
-            type: 'income',
-            manual: false
-          })
-        }
-      })
-    })
+    // Load manual transactions from API
+    let todayManual: any[] = []
+    try {
+      const txResponse = await fetch(`/api/cashier/transactions?date=${today}`)
+      if (txResponse.ok) {
+        const txData = await txResponse.json()
+        todayManual = txData.transactions || []
+        console.log('Manual transactions from API:', todayManual.length)
+      }
+    } catch (error) {
+      console.error('Error loading manual transactions:', error)
+    }
     
-    // Load manual income transactions
-    const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
-    const todayManual = savedManual.filter((t: any) => t.date === today)
+    // Fallback to localStorage
+    if (todayManual.length === 0) {
+      const savedManual = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
+      todayManual = savedManual.filter((t: any) => t.date === today)
+    }
+    
     const manualIncomes = todayManual.filter((t: any) => t.type === 'income')
     const manualExpenses = todayManual.filter((t: any) => t.type === 'expense')
     
@@ -369,8 +419,9 @@ export default function CashierModule() {
   const openShift = async (openingBalance: number) => {
     const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('currentUser') || '{}') : {}
     
+    const tempId = Date.now().toString()
     const newShift: CashierShift = {
-      id: Date.now().toString(),
+      id: tempId, // Temporary ID, will be replaced by API
       userId: user.id || 'unknown',
       userName: user.name || 'Unknown User',
       openingBalance,
@@ -386,30 +437,38 @@ export default function CashierModule() {
       status: 'open'
     }
     
-    setCurrentShift(newShift)
-    localStorage.setItem('currentCashierShift', JSON.stringify(newShift))
-    
-    // Also save to API
+    // Save to API first and get the real ID
     try {
-      await fetch('/api/cashier', {
+      const response = await fetch('/api/cashier', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          shiftNumber: `SH-${newShift.id}`,
+          shiftNumber: `SH-${tempId}`,
           cashierName: newShift.userName,
           cashierId: newShift.userId,
           openingBalance: newShift.openingBalance,
           shiftData: newShift,
         }),
       })
-      console.log('[CashierModule] Shift saved to API')
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.shift?.id) {
+          // Use the database ID!
+          newShift.id = data.shift.id
+          console.log('[CashierModule] Shift created with DB ID:', newShift.id)
+        }
+      }
     } catch (error) {
       console.error('[CashierModule] API error saving shift:', error)
     }
+    
+    setCurrentShift(newShift)
+    localStorage.setItem('currentCashierShift', JSON.stringify(newShift))
   }
   
   // Add manual transaction
-  const addManualTransaction = () => {
+  const addManualTransaction = async () => {
     if (!currentShift || !newTransaction.amount || !newTransaction.description) {
       alert('შეავსეთ ყველა ველი')
       return
@@ -429,12 +488,30 @@ export default function CashierModule() {
       shiftId: currentShift.id
     }
     
-    // Save to localStorage
+    // Save to API
+    try {
+      const response = await fetch('/api/cashier/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shiftId: currentShift.id,
+          transaction
+        })
+      })
+      
+      if (response.ok) {
+        console.log('[CashierModule] Manual transaction saved to API')
+      }
+    } catch (error) {
+      console.error('[CashierModule] Error saving manual transaction to API:', error)
+    }
+    
+    // Also save to localStorage for backup
     const saved = JSON.parse(localStorage.getItem('cashierManualTransactions') || '[]')
     saved.push(transaction)
     localStorage.setItem('cashierManualTransactions', JSON.stringify(saved))
     
-    // Update state based on type - THIS IS THE KEY FIX!
+    // Update state based on type
     if (newTransaction.type === 'income') {
       // Add income to transactions array (so it's counted in cash/card/bank totals)
       setTransactions(prev => [...prev, transaction])
@@ -524,13 +601,14 @@ export default function CashierModule() {
     history.push(closedShift)
     localStorage.setItem('cashierShifts', JSON.stringify(history))
     
-    // Also update in API
+    // Update in API - use the correct database ID
     try {
-      await fetch('/api/cashier', {
+      const response = await fetch('/api/cashier', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: currentShift.id,
+          id: currentShift.id, // This should now be the database ID
+          dbId: currentShift.id,
           status: 'closed',
           closedAt: closedShift.closedAt,
           closingBalance: closeFormData.nextDayBalance,
@@ -542,7 +620,13 @@ export default function CashierModule() {
           shiftData: closedShift,
         }),
       })
-      console.log('[CashierModule] Shift closed in API')
+      
+      if (response.ok) {
+        console.log('[CashierModule] Shift closed in API successfully')
+      } else {
+        const errorData = await response.json()
+        console.error('[CashierModule] API error closing shift:', errorData)
+      }
     } catch (error) {
       console.error('[CashierModule] API error closing shift:', error)
     }
@@ -658,33 +742,58 @@ export default function CashierModule() {
     const [loading, setLoading] = useState(true)
     const [modalSelectedShift, setModalSelectedShift] = useState<CashierShift | null>(null)
     
-    // ✅ Load data in useEffect, not during render
+    // Load data from API first, then localStorage as fallback
     useEffect(() => {
       if (isOpen) {
         setLoading(true)
         
-        // Load from both sources
-        const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
-        const shiftsData = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
+        const loadHistory = async () => {
+          let allShifts: CashierShift[] = []
+          
+          // Try API first
+          try {
+            const response = await fetch('/api/cashier')
+            if (response.ok) {
+              const data = await response.json()
+              // API returns array directly now
+              const apiShifts = Array.isArray(data) ? data : (data.shifts || [])
+              if (apiShifts.length > 0) {
+                allShifts = apiShifts.filter((s: any) => s.status === 'closed')
+                console.log('[ShiftHistory] Loaded from API:', allShifts.length)
+              }
+            }
+          } catch (error) {
+            console.error('[ShiftHistory] API error:', error)
+          }
+          
+          // If API returned nothing, fallback to localStorage
+          if (allShifts.length === 0) {
+            const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
+            const shiftsData = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
+            
+            // Combine and deduplicate
+            const combined = [...history, ...shiftsData]
+            allShifts = combined.filter((shift, index, self) =>
+              index === self.findIndex(s => 
+                (s.id && shift.id && s.id === shift.id) || 
+                (s.closedAt && shift.closedAt && s.closedAt === shift.closedAt)
+              )
+            )
+            console.log('[ShiftHistory] Loaded from localStorage:', allShifts.length)
+          }
+          
+          // Sort by date descending (most recent first)
+          allShifts.sort((a, b) => {
+            const dateA = new Date(a.closedAt || a.openedAt || 0).getTime()
+            const dateB = new Date(b.closedAt || b.openedAt || 0).getTime()
+            return dateB - dateA
+          })
+          
+          setModalShifts(allShifts)
+          setLoading(false)
+        }
         
-        // Combine and deduplicate by id or date
-        const allShifts = [...history, ...shiftsData]
-        const uniqueShifts = allShifts.filter((shift, index, self) =>
-          index === self.findIndex(s => 
-            (s.id && shift.id && s.id === shift.id) || 
-            (s.date && shift.date && s.date === shift.date && s.closedAt && shift.closedAt)
-          )
-        )
-        
-        // Sort by date descending (most recent first)
-        uniqueShifts.sort((a, b) => {
-          const dateA = new Date(a.closedAt || a.closedDate || a.date || a.openedAt || 0).getTime()
-          const dateB = new Date(b.closedAt || b.closedDate || b.date || b.openedAt || 0).getTime()
-          return dateB - dateA
-        })
-        
-        setModalShifts(uniqueShifts)
-        setLoading(false)
+        loadHistory()
       } else {
         // Reset when modal closes
         setModalSelectedShift(null)
@@ -713,6 +822,7 @@ export default function CashierModule() {
                   <th className="p-2 text-left">მოლარე</th>
                   <th className="p-2 text-right">საწყისი</th>
                   <th className="p-2 text-right">შემოსავალი</th>
+                  <th className="p-2 text-right">ხარჯი</th>
                   <th className="p-2 text-right">სხვაობა</th>
                   <th className="p-2"></th>
                 </tr>
@@ -722,10 +832,11 @@ export default function CashierModule() {
                   <tr key={shift.id || shift.date} className="border-t hover:bg-gray-50">
                     <td className="p-2">{moment(shift.openedAt || shift.date).format('DD/MM/YY')}</td>
                     <td className="p-2">{shift.userName || shift.closedBy || '-'}</td>
-                    <td className="p-2 text-right">₾{(shift.openingBalance || 0).toFixed(2)}</td>
-                    <td className="p-2 text-right">₾{(shift.totalCollected || 0).toFixed(2)}</td>
+                    <td className="p-2 text-right">₾{formatCurrency(shift.openingBalance || 0)}</td>
+                    <td className="p-2 text-right text-green-600">₾{formatCurrency(shift.totalCollected || 0)}</td>
+                    <td className="p-2 text-right text-red-600">{(shift.expenses || 0) > 0 ? `-₾${formatCurrency(shift.expenses || 0)}` : '-'}</td>
                     <td className={`p-2 text-right ${shift.discrepancy !== 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {shift.discrepancy !== 0 ? `₾${(shift.discrepancy || 0).toFixed(2)}` : '✓'}
+                      {shift.discrepancy !== 0 ? `₾${formatCurrency(shift.discrepancy || 0)}` : '✓'}
                     </td>
                     <td className="p-2">
                       <button
@@ -751,13 +862,13 @@ export default function CashierModule() {
               <div>დახურვა:</div>
               <div>{modalSelectedShift.closedAt ? moment(modalSelectedShift.closedAt).format('DD/MM/YYYY HH:mm') : '-'}</div>
               <div>ნაღდი:</div>
-              <div>₾{(modalSelectedShift.cashCollected || 0).toFixed(2)}</div>
+              <div>₾{formatCurrency(modalSelectedShift.cashCollected || 0)}</div>
               <div>ბარათი:</div>
-              <div>₾{(modalSelectedShift.cardPayments || 0).toFixed(2)}</div>
+              <div>₾{formatCurrency(modalSelectedShift.cardPayments || 0)}</div>
               <div>ხარჯები:</div>
-              <div>-₾{(modalSelectedShift.expenses || 0).toFixed(2)}</div>
+              <div className="text-red-600">-₾{formatCurrency(modalSelectedShift.expenses || 0)}</div>
               <div>გასატანი:</div>
-              <div>₾{(modalSelectedShift.withdrawal || 0).toFixed(2)}</div>
+              <div>₾{formatCurrency(modalSelectedShift.withdrawal || 0)}</div>
             </div>
             
             {/* Z-Report Tax Breakdown */}
@@ -1086,77 +1197,213 @@ export default function CashierModule() {
       
       {/* Modals */}
       {/* Close Shift Modal - INLINE */}
-      {showCloseModal && (
+      {showCloseModal && (() => {
+        const expectedCash = roundCurrency((currentShift?.openingBalance || 0) + calculatedTotals.cash - calculatedTotals.expenses)
+        
+        return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">სალაროს დახურვა</h3>
+            <h3 className="text-xl font-bold mb-4">🔒 სალაროს დახურვა</h3>
             
             {/* Summary */}
             <div className="space-y-2 mb-4 p-3 bg-gray-50 rounded">
               <div className="flex justify-between">
-                <span>გახსნის ბალანსი:</span>
-                <span>₾{(currentShift?.openingBalance || 0).toFixed(2)}</span>
+                <span>საწყისი ბალანსი:</span>
+                <span>₾{formatCurrency(currentShift?.openingBalance || 0)}</span>
               </div>
               <div className="flex justify-between">
-                <span>ნაღდი შემოსავალი:</span>
-                <span className="text-green-600">₾{calculatedTotals.cash.toFixed(2)}</span>
+                <span>➕ ნაღდი შემოსავალი:</span>
+                <span className="text-green-600">₾{formatCurrency(calculatedTotals.cash)}</span>
               </div>
               <div className="flex justify-between">
-                <span>ბარათით:</span>
-                <span className="text-blue-600">₾{calculatedTotals.card.toFixed(2)}</span>
+                <span>➖ ნაღდი ხარჯი:</span>
+                <span className="text-red-600">₾{formatCurrency(calculatedTotals.expenses)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>ხარჯები:</span>
-                <span className="text-red-600">-₾{calculatedTotals.expenses.toFixed(2)}</span>
+              <div className="flex justify-between font-bold border-t pt-2 text-lg">
+                <span>📊 მოსალოდნელი ნაღდი:</span>
+                <span className="text-blue-600">₾{formatCurrency(expectedCash)}</span>
               </div>
-              <div className="flex justify-between font-bold border-t pt-2">
-                <span>მოსალოდნელი ნაღდი:</span>
-                <span>₾{((currentShift?.openingBalance || 0) + calculatedTotals.cash - calculatedTotals.expenses).toFixed(2)}</span>
+              <div className="text-xs text-gray-500 mt-1">
+                (ბარათი: ₾{formatCurrency(calculatedTotals.card)} | ბანკი: ₾{formatCurrency(calculatedTotals.bank)})
               </div>
             </div>
             
-            {/* Actual Cash Input */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">ფაქტიური ნაღდი ფული</label>
-              <input
-                type="number"
-                value={closeFormData.actualCash}
-                onChange={(e) => setCloseFormData({...closeFormData, actualCash: Number(e.target.value)})}
-                className="w-full border rounded px-3 py-2 text-lg"
-                placeholder="0.00"
-              />
+            {/* Cash Count Toggle */}
+            <div className="mb-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="font-medium text-yellow-800">
+                  🔢 ნაღდი ფულის დათვლა
+                </span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={cashierSettings.requireCashCount}
+                    onChange={(e) => {
+                      const newSettings = { ...cashierSettings, requireCashCount: e.target.checked }
+                      setCashierSettings(newSettings)
+                      localStorage.setItem('cashierSettings', JSON.stringify(newSettings))
+                      // If turning off, auto-fill with expected
+                      if (!e.target.checked) {
+                        setCloseFormData({
+                          actualCash: expectedCash,
+                          nextDayBalance: Math.min(cashierSettings.defaultFloatBalance, expectedCash)
+                        })
+                      }
+                    }}
+                    className="sr-only"
+                  />
+                  <div className={`w-12 h-6 rounded-full transition-colors ${cashierSettings.requireCashCount ? 'bg-green-500' : 'bg-gray-300'}`}>
+                    <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${cashierSettings.requireCashCount ? 'translate-x-6' : 'translate-x-0.5'} mt-0.5`}></div>
+                  </div>
+                </div>
+              </label>
+              <p className="text-xs text-yellow-700 mt-1">
+                {cashierSettings.requireCashCount 
+                  ? '✓ ჩართულია - მოლარე ითვლის ფაქტიურ თანხას' 
+                  : '✗ გამორთულია - სისტემა იყენებს მოსალოდნელ თანხას'}
+              </p>
             </div>
             
-            {/* Discrepancy Display */}
-            {closeFormData.actualCash > 0 && (
-              <div className={`mb-4 p-3 rounded ${
-                closeFormData.actualCash === ((currentShift?.openingBalance || 0) + calculatedTotals.cash - calculatedTotals.expenses)
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-red-100 text-red-700'
-              }`}>
-                <div className="font-bold">
-                  სხვაობა: ₾{(closeFormData.actualCash - ((currentShift?.openingBalance || 0) + calculatedTotals.cash - calculatedTotals.expenses)).toFixed(2)}
+            {/* Step 1: Count actual cash (only if required) */}
+            {cashierSettings.requireCashCount ? (
+              <div className="mb-4 p-3 border-2 border-blue-200 rounded-lg">
+                <label className="block text-sm font-bold mb-2 text-blue-700">
+                  📝 ნაბიჯი 1: დათვალეთ ნაღდი ფული
+                </label>
+                <input
+                  type="number"
+                  value={closeFormData.actualCash || ''}
+                  onChange={(e) => {
+                    const actual = Number(e.target.value)
+                    setCloseFormData({
+                      ...closeFormData, 
+                      actualCash: actual,
+                      nextDayBalance: closeFormData.nextDayBalance || Math.min(cashierSettings.defaultFloatBalance, actual)
+                    })
+                  }}
+                  className="w-full border-2 rounded px-3 py-3 text-xl font-bold text-center"
+                  placeholder="შეიყვანეთ დათვლილი თანხა"
+                />
+                
+                {/* Quick fill button */}
+                <button
+                  onClick={() => setCloseFormData({
+                    ...closeFormData,
+                    actualCash: expectedCash,
+                    nextDayBalance: Math.min(cashierSettings.defaultFloatBalance, expectedCash)
+                  })}
+                  className="w-full mt-2 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"
+                >
+                  შევსება მოსალოდნელით (₾{formatCurrency(expectedCash)})
+                </button>
+              </div>
+            ) : (
+              <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">ავტომატური თანხა</div>
+                  <div className="text-2xl font-bold text-blue-700">₾{formatCurrency(expectedCash)}</div>
                 </div>
               </div>
             )}
             
-            {/* Next Day Balance */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">დატოვეთ შემდეგი დღისთვის</label>
-              <input
-                type="number"
-                value={closeFormData.nextDayBalance}
-                onChange={(e) => setCloseFormData({...closeFormData, nextDayBalance: Number(e.target.value)})}
-                className="w-full border rounded px-3 py-2"
-                placeholder="0.00"
-              />
-            </div>
+            {/* Discrepancy Display (only when counting) */}
+            {cashierSettings.requireCashCount && closeFormData.actualCash > 0 && (() => {
+              const diff = roundCurrency(closeFormData.actualCash - expectedCash)
+              return (
+                <div className={`mb-4 p-3 rounded-lg ${
+                  Math.abs(diff) < 0.01 ? 'bg-green-100 border-2 border-green-400' :
+                  diff > 0 ? 'bg-blue-100 border-2 border-blue-400' :
+                  'bg-red-100 border-2 border-red-400'
+                }`}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">
+                      {Math.abs(diff) < 0.01 ? '✅ ზუსტია!' :
+                       diff > 0 ? '📈 ზედმეტი:' : '📉 დანაკლისი:'}
+                    </span>
+                    <span className={`font-bold text-lg ${
+                      Math.abs(diff) < 0.01 ? 'text-green-700' :
+                      diff > 0 ? 'text-blue-700' : 'text-red-700'
+                    }`}>
+                      {diff > 0 ? '+' : ''}₾{formatCurrency(diff)}
+                    </span>
+                  </div>
+                </div>
+              )
+            })()}
             
-            {/* Withdrawal Amount */}
-            {closeFormData.actualCash > 0 && (
-              <div className="mb-4 p-3 bg-blue-50 rounded">
-                <div className="font-bold text-blue-700">
-                  💰 გასატანი თანხა: ₾{(closeFormData.actualCash - closeFormData.nextDayBalance).toFixed(2)}
+            {/* Cash Withdrawal Toggle */}
+            {(closeFormData.actualCash > 0 || !cashierSettings.requireCashCount) && (
+              <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                <label className="flex items-center justify-between cursor-pointer mb-2">
+                  <span className="font-medium text-purple-800">
+                    💸 ნაღდის გატანა სალაროდან
+                  </span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={cashierSettings.allowCashWithdrawal}
+                      onChange={(e) => {
+                        const newSettings = { ...cashierSettings, allowCashWithdrawal: e.target.checked }
+                        setCashierSettings(newSettings)
+                        localStorage.setItem('cashierSettings', JSON.stringify(newSettings))
+                        // If turning off, leave all cash for next day
+                        if (!e.target.checked) {
+                          const cash = cashierSettings.requireCashCount ? closeFormData.actualCash : expectedCash
+                          setCloseFormData({ ...closeFormData, nextDayBalance: cash })
+                        }
+                      }}
+                      className="sr-only"
+                    />
+                    <div className={`w-12 h-6 rounded-full transition-colors ${cashierSettings.allowCashWithdrawal ? 'bg-purple-500' : 'bg-gray-300'}`}>
+                      <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${cashierSettings.allowCashWithdrawal ? 'translate-x-6' : 'translate-x-0.5'} mt-0.5`}></div>
+                    </div>
+                  </div>
+                </label>
+                
+                {cashierSettings.allowCashWithdrawal && (
+                  <>
+                    <label className="block text-sm font-bold mb-2 text-purple-700">
+                      💼 შემდეგი დღისთვის დასატოვებელი
+                    </label>
+                    <div className="flex gap-2 mb-2">
+                      {[0, 100, 200, 500].map(amount => {
+                        const maxAmount = cashierSettings.requireCashCount ? closeFormData.actualCash : expectedCash
+                        return (
+                          <button
+                            key={amount}
+                            onClick={() => setCloseFormData({...closeFormData, nextDayBalance: Math.min(amount, maxAmount)})}
+                            className={`flex-1 py-2 rounded text-sm ${
+                              closeFormData.nextDayBalance === amount ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
+                            }`}
+                          >
+                            ₾{amount}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <input
+                      type="number"
+                      value={closeFormData.nextDayBalance || ''}
+                      onChange={(e) => {
+                        const maxAmount = cashierSettings.requireCashCount ? closeFormData.actualCash : expectedCash
+                        setCloseFormData({...closeFormData, nextDayBalance: Math.min(Number(e.target.value), maxAmount)})
+                      }}
+                      className="w-full border rounded px-3 py-2 text-center"
+                      placeholder="ან შეიყვანეთ სხვა თანხა"
+                    />
+                  </>
+                )}
+              </div>
+            )}
+            
+            {/* Withdrawal Summary */}
+            {(closeFormData.actualCash > 0 || !cashierSettings.requireCashCount) && cashierSettings.allowCashWithdrawal && (
+              <div className="mb-4 p-4 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg border-2 border-purple-300">
+                <div className="text-center">
+                  <div className="text-sm text-gray-600 mb-1">სეიფში ჩასაბარებელი</div>
+                  <div className="text-3xl font-bold text-purple-700">
+                    💰 ₾{formatCurrency((cashierSettings.requireCashCount ? closeFormData.actualCash : expectedCash) - closeFormData.nextDayBalance)}
+                  </div>
                 </div>
               </div>
             )}
@@ -1164,21 +1411,40 @@ export default function CashierModule() {
             {/* Buttons */}
             <div className="flex gap-2">
               <button
-                onClick={handleCloseShift}
-                className="flex-1 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={() => {
+                  // Set actual cash to expected if not counting
+                  if (!cashierSettings.requireCashCount) {
+                    setCloseFormData(prev => ({
+                      ...prev,
+                      actualCash: expectedCash
+                    }))
+                  }
+                  // Small delay to ensure state is updated
+                  setTimeout(() => handleCloseShift(), 50)
+                }}
+                disabled={cashierSettings.requireCashCount && !closeFormData.actualCash}
+                className={`flex-1 py-3 rounded-lg font-bold ${
+                  (!cashierSettings.requireCashCount || closeFormData.actualCash)
+                    ? 'bg-red-600 text-white hover:bg-red-700' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
-                დახურვა და განაღდება
+                🔒 დახურვა და Z-Report
               </button>
               <button
-                onClick={() => setShowCloseModal(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded"
+                onClick={() => {
+                  setShowCloseModal(false)
+                  setCloseFormData({ actualCash: 0, nextDayBalance: 0 })
+                }}
+                className="px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
               >
                 გაუქმება
               </button>
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
       {showXReport && <XReportModal />}
       {showHistory && <ShiftHistoryModal isOpen={showHistory} onClose={() => setShowHistory(false)} />}
       {showAddTransaction && (
@@ -1253,7 +1519,7 @@ export default function CashierModule() {
               />
             </div>
             
-            {/* Payment Method (for income) */}
+            {/* Payment Method (only for income) */}
             {newTransaction.type === 'income' && (
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">გადახდის მეთოდი</label>
@@ -1268,6 +1534,13 @@ export default function CashierModule() {
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+            
+            {/* Expense note */}
+            {newTransaction.type === 'expense' && (
+              <div className="mb-4 p-2 bg-yellow-50 rounded text-sm text-yellow-700">
+                💵 ხარჯი გამოაკლდება ნაღდ ფულს
               </div>
             )}
             
@@ -1295,72 +1568,136 @@ export default function CashierModule() {
 
 // Helper component
 const OpenShiftForm = ({ onOpen }: { onOpen: (balance: number) => void }) => {
+  const [showModal, setShowModal] = useState(false)
   const [openingBalance, setOpeningBalance] = useState(0)
   const [previousBalance, setPreviousBalance] = useState<number | null>(null)
+  const [loading, setLoading] = useState(true)
   
   useEffect(() => {
-    // Get last closed shift's closing balance (priority: cashierHistory > cashierShifts)
-    const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
-    const shifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
-    
-    // Priority 1: cashierHistory (preferred)
-    let lastBalance = null
-    if (history.length > 0) {
-      const lastSession = history[history.length - 1]
-      lastBalance = lastSession?.closingBalance || null
+    const loadPreviousBalance = async () => {
+      setLoading(true)
+      let lastBalance: number | null = null
+      
+      // Try API first
+      try {
+        const response = await fetch('/api/cashier')
+        if (response.ok) {
+          const data = await response.json()
+          const shifts = Array.isArray(data) ? data : (data.shifts || [])
+          const closedShifts = shifts.filter((s: any) => s.status === 'closed')
+          if (closedShifts.length > 0) {
+            closedShifts.sort((a: any, b: any) => 
+              new Date(b.closedAt || 0).getTime() - new Date(a.closedAt || 0).getTime()
+            )
+            lastBalance = closedShifts[0]?.closingBalance || closedShifts[0]?.nextDayOpening || null
+          }
+        }
+      } catch (error) {
+        console.error('[OpenShiftForm] API error:', error)
+      }
+      
+      // Fallback to localStorage
+      if (lastBalance === null) {
+        const history = JSON.parse(localStorage.getItem('cashierHistory') || '[]')
+        const shifts = JSON.parse(localStorage.getItem('cashierShifts') || '[]')
+        
+        if (history.length > 0) {
+          lastBalance = history[history.length - 1]?.closingBalance || null
+        }
+        
+        if (lastBalance === null && shifts.length > 0) {
+          const sortedShifts = shifts.sort((a: any, b: any) => 
+            new Date(b.closedAt || 0).getTime() - new Date(a.closedAt || 0).getTime()
+          )
+          lastBalance = sortedShifts[0]?.closingBalance || sortedShifts[0]?.nextDayOpening || null
+        }
+      }
+      
+      if (lastBalance !== null && lastBalance > 0) {
+        setPreviousBalance(lastBalance)
+        setOpeningBalance(lastBalance)
+      }
+      setLoading(false)
     }
     
-    // Priority 2: cashierShifts (fallback - legacy)
-    if (lastBalance === null && shifts.length > 0) {
-      const sortedShifts = shifts.sort((a: any, b: any) => 
-        new Date(b.closedAt || 0).getTime() - new Date(a.closedAt || 0).getTime()
-      )
-      const lastShift = sortedShifts[0]
-      lastBalance = lastShift?.closingBalance || lastShift?.nextDayOpening || null
-    }
-    
-    if (lastBalance !== null) {
-      setPreviousBalance(lastBalance)
-      setOpeningBalance(lastBalance) // Auto-fill
-    }
+    loadPreviousBalance()
   }, [])
   
+  const handleOpen = (balance: number) => {
+    setShowModal(false)
+    onOpen(balance)
+  }
+  
   return (
-    <div className="space-y-4">
-      {previousBalance !== null && previousBalance > 0 && (
-        <div className="p-3 bg-blue-50 rounded-lg text-sm">
-          <div className="text-blue-700">
-            💰 წინა დღის ნაშთი: <strong>₾{previousBalance.toFixed(2)}</strong>
+    <>
+      {/* Main Button */}
+      <button
+        onClick={() => setShowModal(true)}
+        disabled={loading}
+        className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold text-lg disabled:bg-gray-400"
+      >
+        {loading ? '⏳ იტვირთება...' : '🔓 სალაროს გახსნა'}
+      </button>
+      
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">🔓 სალაროს გახსნა</h3>
+              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            
+            {/* Previous Balance Display */}
+            {previousBalance !== null && previousBalance > 0 && (
+              <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                <div className="text-center">
+                  <div className="text-sm text-gray-600 mb-1">წინა დღის ნაშთი</div>
+                  <div className="text-3xl font-bold text-green-700">₾{previousBalance.toFixed(2)}</div>
+                </div>
+              </div>
+            )}
+            
+            {/* Opening Balance Input */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">საწყისი ბალანსი (₾)</label>
+              <input
+                type="number"
+                value={openingBalance || ''}
+                onChange={(e) => setOpeningBalance(Number(e.target.value))}
+                className="w-full border-2 rounded-lg px-3 py-3 text-xl text-center font-bold"
+                placeholder="0.00"
+              />
+              
+              {/* Quick fill buttons */}
+              {previousBalance !== null && previousBalance > 0 && openingBalance !== previousBalance && (
+                <button
+                  onClick={() => setOpeningBalance(previousBalance)}
+                  className="w-full mt-2 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded"
+                >
+                  ↩️ წინა ნაშთის გამოყენება (₾{previousBalance.toFixed(2)})
+                </button>
+              )}
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleOpen(openingBalance)}
+                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold"
+              >
+                ✓ გახსნა
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                გაუქმება
+              </button>
+            </div>
           </div>
         </div>
       )}
-      
-      <div>
-        <label className="block text-sm font-medium mb-1">საწყისი ბალანსი (₾)</label>
-        <input
-          type="number"
-          value={openingBalance}
-          onChange={(e) => setOpeningBalance(Number(e.target.value))}
-          className="w-full border rounded px-3 py-2"
-          placeholder="0.00"
-        />
-      </div>
-      
-      {previousBalance !== null && previousBalance > 0 && openingBalance !== previousBalance && (
-        <button
-          onClick={() => setOpeningBalance(previousBalance)}
-          className="w-full py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"
-        >
-          ↩️ წინა დღის ნაშთის გამოყენება (₾{previousBalance.toFixed(2)})
-        </button>
-      )}
-      
-      <button
-        onClick={() => onOpen(openingBalance)}
-        className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
-        სალაროს გახსნა
-      </button>
-    </div>
+    </>
   )
 }
