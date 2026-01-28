@@ -33,26 +33,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Hotel not found' }, { status: 404, headers: corsHeaders })
     }
     
-    // Use correct model: HotelRoom
+    // HotelRoom uses tenantId
     const rooms = await prisma.hotelRoom.findMany({
       where: { tenantId: hotelId }
     })
     
-    // Use correct model: HotelRoomRate
+    // HotelRoomRate uses organizationId
     const roomRates = await prisma.hotelRoomRate.findMany({
-      where: { tenantId: hotelId }
+      where: { organizationId: hotelId }
     })
     
     const ratesByType: Record<string, { weekday: number; weekend: number }> = {}
     roomRates.forEach(rate => {
-      const type = rate.roomType || 'STANDARD'
-      if (!ratesByType[type]) {
-        ratesByType[type] = { weekday: 0, weekend: 0 }
-      }
+      const type = rate.roomTypeCode || 'STANDARD'
+      if (!ratesByType[type]) ratesByType[type] = { weekday: 0, weekend: 0 }
       if (rate.dayOfWeek === 0 || rate.dayOfWeek === 6) {
-        ratesByType[type].weekend = rate.price
+        ratesByType[type].weekend = rate.basePrice
       } else if (rate.dayOfWeek === 1) {
-        ratesByType[type].weekday = rate.price
+        ratesByType[type].weekday = rate.basePrice
       }
     })
     
@@ -60,13 +58,13 @@ export async function GET(request: NextRequest) {
     rooms.forEach(room => {
       const type = room.roomType || 'STANDARD'
       if (!roomTypes[type]) {
-        const rates = ratesByType[type] || { weekday: room.basePrice || 100, weekend: room.basePrice || 100 }
+        const rates = ratesByType[type] || { weekday: Number(room.basePrice) || 100, weekend: Number(room.basePrice) || 100 }
         roomTypes[type] = {
           roomType: type,
           name: type,
           maxOccupancy: room.maxOccupancy || 2,
-          weekdayRate: rates.weekday || room.basePrice || 100,
-          weekendRate: rates.weekend || rates.weekday || room.basePrice || 100,
+          weekdayRate: rates.weekday || Number(room.basePrice) || 100,
+          weekendRate: rates.weekend || rates.weekday || Number(room.basePrice) || 100,
           totalRooms: 0
         }
       }

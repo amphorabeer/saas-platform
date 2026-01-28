@@ -60,12 +60,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Hotel not found' }, { status: 404, headers: corsHeaders })
     }
     
-    // Use correct model: HotelRoom
+    // HotelRoom uses tenantId
     const rooms = await prisma.hotelRoom.findMany({
       where: { tenantId: hotelId }
     })
     
-    // Use correct model: HotelReservation
+    // HotelReservation uses tenantId
     const existingReservations = await prisma.hotelReservation.findMany({
       where: {
         tenantId: hotelId,
@@ -84,31 +84,32 @@ export async function GET(request: NextRequest) {
       return true
     })
     
-    // Use correct model: HotelRoomRate
+    // HotelRoomRate uses organizationId
     const roomRates = await prisma.hotelRoomRate.findMany({
-      where: { tenantId: hotelId }
+      where: { organizationId: hotelId }
     })
     
     const ratesByType: Record<string, { weekday: number; weekend: number }> = {}
     roomRates.forEach(rate => {
-      const type = rate.roomType || 'STANDARD'
+      const type = rate.roomTypeCode || 'STANDARD'
       if (!ratesByType[type]) ratesByType[type] = { weekday: 0, weekend: 0 }
       if (rate.dayOfWeek === 0 || rate.dayOfWeek === 6) {
-        ratesByType[type].weekend = rate.price
+        ratesByType[type].weekend = rate.basePrice
       } else {
-        ratesByType[type].weekday = rate.price
+        ratesByType[type].weekday = rate.basePrice
       }
     })
     
     const calculatePrice = (room: any): number => {
       const type = room.roomType || 'STANDARD'
-      const rates = ratesByType[type] || { weekday: room.basePrice || 100, weekend: room.basePrice || 100 }
+      const basePrice = Number(room.basePrice) || 100
+      const rates = ratesByType[type] || { weekday: basePrice, weekend: basePrice }
       let total = 0
       for (let i = 0; i < nights; i++) {
         const d = moment(checkIn).add(i, 'days').day()
         total += (d === 0 || d === 6) ? (rates.weekend || rates.weekday) : rates.weekday
       }
-      return total
+      return total || (basePrice * nights)
     }
     
     const roomsByType: Record<string, any[]> = {}
