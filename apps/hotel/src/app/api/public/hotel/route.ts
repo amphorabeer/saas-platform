@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
     
-    // Use correct model name: Organization
     const organization = await prisma.organization.findUnique({
       where: { id: hotelId }
     })
@@ -34,30 +33,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Hotel not found' }, { status: 404, headers: corsHeaders })
     }
     
-    // Use correct model name: HotelRoom (not Room)
+    // HotelRoom uses tenantId
     const rooms = await prisma.hotelRoom.findMany({
       where: { tenantId: hotelId }
     })
     
-    // Use correct model name: HotelRoomRate (not RoomRate)
+    // HotelRoomRate uses organizationId
     const roomRates = await prisma.hotelRoomRate.findMany({
-      where: { tenantId: hotelId }
+      where: { organizationId: hotelId }
     })
     
     const minRate = roomRates.length > 0 
-      ? Math.min(...roomRates.map(r => r.price))
-      : rooms.length > 0 ? Math.min(...rooms.map(r => r.basePrice || 100)) : 100
+      ? Math.min(...roomRates.map(r => r.basePrice))
+      : rooms.length > 0 ? Math.min(...rooms.map(r => Number(r.basePrice) || 100)) : 100
     
     const roomTypes: Record<string, any> = {}
     rooms.forEach(room => {
       const type = room.roomType || 'STANDARD'
       if (!roomTypes[type]) {
-        roomTypes[type] = {
-          type,
-          name: type,
-          count: 0,
-          maxOccupancy: room.maxOccupancy || 2
-        }
+        roomTypes[type] = { type, name: type, count: 0, maxOccupancy: room.maxOccupancy || 2 }
       }
       roomTypes[type].count++
     })

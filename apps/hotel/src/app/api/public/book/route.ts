@@ -19,7 +19,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { hotelId, roomId, checkIn, checkOut, guest, adults = 2, children = 0, specialRequests } = body
     
-    // Validate
     const errors: string[] = []
     if (!hotelId) errors.push('hotelId required')
     if (!roomId) errors.push('roomId required')
@@ -55,7 +54,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Hotel not found' }, { status: 404, headers: corsHeaders })
     }
     
-    // Use correct model: HotelRoom
+    // HotelRoom uses tenantId
     const room = await prisma.hotelRoom.findFirst({
       where: { id: roomId, tenantId: hotelId }
     })
@@ -63,7 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Room not found' }, { status: 404, headers: corsHeaders })
     }
     
-    // Use correct model: HotelReservation
+    // HotelReservation uses tenantId
     const overlapping = await prisma.hotelReservation.findFirst({
       where: {
         tenantId: hotelId,
@@ -78,23 +77,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Room not available for selected dates' }, { status: 409, headers: corsHeaders })
     }
     
-    // Calculate price
+    // HotelRoomRate uses organizationId
     const roomRates = await prisma.hotelRoomRate.findMany({
-      where: { tenantId: hotelId, roomType: room.roomType || 'STANDARD' }
+      where: { organizationId: hotelId, roomTypeCode: room.roomType || 'STANDARD' }
     })
     
     const ratesByDay: Record<number, number> = {}
-    roomRates.forEach(rate => { ratesByDay[rate.dayOfWeek] = rate.price })
+    roomRates.forEach(rate => { 
+      if (rate.dayOfWeek !== null) ratesByDay[rate.dayOfWeek] = rate.basePrice 
+    })
     
+    const basePrice = Number(room.basePrice) || 100
     let totalAmount = 0
     for (let i = 0; i < nights; i++) {
       const d = moment(checkIn).add(i, 'days').day()
-      totalAmount += ratesByDay[d] || room.basePrice || 100
+      totalAmount += ratesByDay[d] || basePrice
     }
     
     const confirmationNumber = `WEB${moment().format('YYMMDD')}${Math.random().toString(36).substring(2, 8).toUpperCase()}`
     
-    // Use correct model: HotelReservation
+    // HotelReservation uses tenantId
     const reservation = await prisma.hotelReservation.create({
       data: {
         tenantId: hotelId,
