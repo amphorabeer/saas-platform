@@ -121,6 +121,88 @@ export async function POST(request: NextRequest) {
     
     console.log(`[Public Book] New booking: ${confirmationNumber}`)
     
+    // Send confirmation email
+    try {
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0;">🏨 ${orgName}</h1>
+            <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">ჯავშნის დადასტურება</p>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 30px; border: 1px solid #e9ecef;">
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #333; margin-top: 0;">✅ ჯავშანი დადასტურებულია!</h2>
+              <p style="font-size: 24px; color: #667eea; font-weight: bold; margin: 10px 0;">
+                კოდი: ${confirmationNumber}
+              </p>
+            </div>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h3 style="color: #333; margin-top: 0;">📋 ჯავშნის დეტალები</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">სტუმარი:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">${guest.firstName} ${guest.lastName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">ოთახი:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">#${room.roomNumber} (${room.roomType})</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">შესვლა:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">${checkIn} (14:00-დან)</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">გასვლა:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">${checkOut} (12:00-მდე)</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">ღამეები:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">${nights}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">სტუმრები:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">${adults} მოზრდილი${children > 0 ? `, ${children} ბავშვი` : ''}</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div style="background: #667eea; color: white; padding: 20px; border-radius: 8px; text-align: center;">
+              <p style="margin: 0; font-size: 14px;">სულ გადასახდელი</p>
+              <p style="margin: 5px 0 0 0; font-size: 32px; font-weight: bold;">₾${totalAmount}</p>
+            </div>
+            
+            ${specialRequests ? `
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px;">
+              <h3 style="color: #333; margin-top: 0;">📝 სპეციალური მოთხოვნები</h3>
+              <p style="color: #666;">${specialRequests}</p>
+            </div>
+            ` : ''}
+          </div>
+          
+          <div style="padding: 20px; text-align: center; color: #666; font-size: 12px;">
+            <p>გმადლობთ რომ აირჩიეთ ${orgName}!</p>
+            <p>კითხვების შემთხვევაში დაგვიკავშირდით.</p>
+          </div>
+        </div>
+      `
+      
+      await fetch(new URL('/api/email/send', request.url).toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: [guest.email],
+          subject: `✅ ჯავშანი დადასტურებულია - ${confirmationNumber} | ${orgName}`,
+          body: emailHtml
+        })
+      })
+      console.log(`[Public Book] Confirmation email sent to ${guest.email}`)
+    } catch (emailError) {
+      console.error('[Public Book] Failed to send confirmation email:', emailError)
+      // Don't fail the booking if email fails
+    }
+    
     return NextResponse.json({
       success: true,
       booking: {
