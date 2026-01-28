@@ -24,11 +24,11 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Check if email is configured
-    const smtpHost = process.env.SMTP_HOST
-    const smtpPort = process.env.SMTP_PORT
-    const smtpUser = process.env.SMTP_USER
-    const smtpPass = process.env.SMTP_PASS
+    // Check if email is configured - support both SMTP_* and GMAIL_* variables
+    const smtpHost = process.env.SMTP_HOST || (process.env.GMAIL_USER ? 'smtp.gmail.com' : '')
+    const smtpPort = process.env.SMTP_PORT || '587'
+    const smtpUser = process.env.SMTP_USER || process.env.GMAIL_USER
+    const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
     const smtpFrom = process.env.SMTP_FROM || smtpUser || 'noreply@hotel.com'
     
     // If SMTP not configured, use demo mode (save to localStorage via client)
@@ -116,20 +116,18 @@ export async function POST(request: NextRequest) {
 
 // GET endpoint for testing email configuration
 export async function GET() {
-  const smtpHost = process.env.SMTP_HOST
-  const smtpUser = process.env.SMTP_USER
-  const smtpPass = process.env.SMTP_PASS
+  const smtpHost = process.env.SMTP_HOST || (process.env.GMAIL_USER ? 'smtp.gmail.com' : '')
+  const smtpUser = process.env.SMTP_USER || process.env.GMAIL_USER
+  const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
   
   return NextResponse.json({
     configured: !!(smtpHost && smtpUser && smtpPass),
     hasHost: !!smtpHost,
     hasUser: !!smtpUser,
     hasPass: !!smtpPass,
+    provider: process.env.GMAIL_USER ? 'Gmail' : (process.env.SMTP_HOST ? 'SMTP' : 'None'),
     message: smtpHost && smtpUser && smtpPass
       ? 'Email service is configured'
-      : 'Email service is not configured. Set SMTP_HOST, SMTP_USER, and SMTP_PASS environment variables.'
+      : 'Email service is not configured. Set GMAIL_USER and GMAIL_APP_PASSWORD, or SMTP_HOST, SMTP_USER, and SMTP_PASS environment variables.'
   })
 }
-
-
-
