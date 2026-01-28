@@ -418,6 +418,9 @@ model HotelReservation {
   paidAmount        Decimal            @db.Decimal(10, 2) @default(0)
 
   status            String
+  
+  // Confirmation number for booking reference
+  confirmationNumber String?
 
   // Booking source
   source            String?            @default("Direct")
@@ -437,6 +440,7 @@ model HotelReservation {
   @@index([tenantId])
   @@index([roomId])
   @@index([status])
+  @@index([confirmationNumber])
 }
 
 model Configuration {
