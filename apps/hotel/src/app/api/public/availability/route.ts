@@ -52,15 +52,15 @@ export async function GET(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
     
-    const organization = await prisma.organization.findUnique({
-      where: { id: hotelId }
-    })
-    
+    // Try to find organization
+    let organization = await prisma.organization.findUnique({ where: { id: hotelId } })
     if (!organization) {
-      return NextResponse.json({ error: 'Hotel not found' }, { status: 404, headers: corsHeaders })
+      organization = await prisma.organization.findFirst({ where: { tenantId: hotelId } })
     }
     
-    // HotelRoom uses tenantId
+    const orgName = organization?.name || 'Hotel'
+    
+    // HotelRoom uses tenantId - use hotelId directly
     const rooms = await prisma.hotelRoom.findMany({
       where: { tenantId: hotelId }
     })
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
     
     // HotelRoomRate uses organizationId
     const roomRates = await prisma.hotelRoomRate.findMany({
-      where: { organizationId: hotelId }
+      where: { organizationId: organization?.id || hotelId }
     })
     
     const ratesByType: Record<string, { weekday: number; weekend: number }> = {}
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
       let total = 0
       for (let i = 0; i < nights; i++) {
         const d = moment(checkIn).add(i, 'days').day()
-        total += (d === 0 || d === 6) ? (rates.weekend || rates.weekday) : rates.weekday
+        total += (d === 0 || d === 6) ? (rates.weekend || rates.weekday || basePrice) : (rates.weekday || basePrice)
       }
       return total || (basePrice * nights)
     }
@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       hotelId,
-      hotelName: organization.name,
+      hotelName: orgName,
       checkIn,
       checkOut,
       nights,

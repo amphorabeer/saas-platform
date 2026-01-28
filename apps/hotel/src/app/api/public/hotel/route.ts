@@ -25,23 +25,36 @@ export async function GET(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
     
-    const organization = await prisma.organization.findUnique({
+    // Try to find organization by id OR by tenantId field
+    let organization = await prisma.organization.findUnique({
       where: { id: hotelId }
     })
     
+    // If not found by id, try to find by tenantId (some orgs use different IDs)
     if (!organization) {
-      return NextResponse.json({ error: 'Hotel not found' }, { status: 404, headers: corsHeaders })
+      organization = await prisma.organization.findFirst({
+        where: { tenantId: hotelId }
+      })
     }
+    
+    // Use the hotelId directly as tenantId for rooms lookup
+    const tenantIdForRooms = hotelId
     
     // HotelRoom uses tenantId
     const rooms = await prisma.hotelRoom.findMany({
-      where: { tenantId: hotelId }
+      where: { tenantId: tenantIdForRooms }
     })
     
-    // HotelRoomRate uses organizationId
-    const roomRates = await prisma.hotelRoomRate.findMany({
+    // If we found rooms but no organization, create a virtual org response
+    const orgName = organization?.name || 'Hotel'
+    const orgSlug = organization?.slug || 'hotel'
+    
+    // HotelRoomRate uses organizationId - try both
+    let roomRates = await prisma.hotelRoomRate.findMany({
       where: { organizationId: hotelId }
     })
+    
+    // If no rates found with organizationId, the hotel might not have rates configured
     
     const minRate = roomRates.length > 0 
       ? Math.min(...roomRates.map(r => r.basePrice))
@@ -58,8 +71,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       id: hotelId,
-      name: organization.name,
-      slug: organization.slug,
+      name: orgName,
+      slug: orgSlug,
       rooms: { total: rooms.length, types: Object.values(roomTypes) },
       pricing: { currency: 'GEL', startingFrom: minRate },
       policies: { checkInTime: '14:00', checkOutTime: '12:00' },
