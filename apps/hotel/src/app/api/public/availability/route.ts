@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import moment from 'moment'
 
 // CORS headers for public API
@@ -16,24 +15,10 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders })
 }
 
-/**
- * GET /api/public/availability
- * 
- * Query params:
- * - hotelId: string (required) - Organization ID
- * - checkIn: string (required) - YYYY-MM-DD
- * - checkOut: string (required) - YYYY-MM-DD
- * - adults?: number (default: 2)
- * - children?: number (default: 0)
- * - roomType?: string (optional filter)
- * 
- * Returns available rooms with rates for the given period
- */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     
-    // Get parameters
     const hotelId = searchParams.get('hotelId') || request.headers.get('X-Hotel-ID')
     const checkIn = searchParams.get('checkIn')
     const checkOut = searchParams.get('checkOut')
@@ -41,7 +26,6 @@ export async function GET(request: NextRequest) {
     const children = parseInt(searchParams.get('children') || '0')
     const roomTypeFilter = searchParams.get('roomType')
     
-    // Validate required params
     if (!hotelId) {
       return NextResponse.json(
         { error: 'hotelId is required' },
@@ -56,7 +40,6 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    // Validate dates
     const checkInDate = moment(checkIn)
     const checkOutDate = moment(checkOut)
     
@@ -83,6 +66,10 @@ export async function GET(request: NextRequest) {
     
     const nights = checkOutDate.diff(checkInDate, 'days')
     
+    // Lazy import like other working APIs
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
+    
     // Verify hotel exists
     const organization = await prisma.organization.findUnique({
       where: { id: hotelId }
@@ -95,7 +82,7 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    // Get all rooms for this hotel
+    // Get all rooms
     const rooms = await prisma.room.findMany({
       where: {
         organizationId: hotelId,
@@ -104,34 +91,24 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    // Get existing reservations that overlap with requested dates
+    // Get existing reservations that overlap
     const existingReservations = await prisma.reservation.findMany({
       where: {
         organizationId: hotelId,
-        status: {
-          in: ['CONFIRMED', 'CHECKED_IN', 'PENDING']
-        },
-        // Overlap check: existing checkIn < requested checkOut AND existing checkOut > requested checkIn
+        status: { in: ['CONFIRMED', 'CHECKED_IN', 'PENDING'] },
         checkIn: { lt: checkOutDate.toDate() },
         checkOut: { gt: checkInDate.toDate() }
       },
-      select: {
-        roomId: true,
-        roomNumber: true
-      }
+      select: { roomId: true, roomNumber: true }
     })
     
-    // Get set of occupied room IDs
     const occupiedRoomIds = new Set(existingReservations.map(r => r.roomId))
     const occupiedRoomNumbers = new Set(existingReservations.map(r => r.roomNumber).filter(Boolean))
     
     // Filter available rooms
     const availableRooms = rooms.filter(room => {
-      // Check by ID
       if (room.id && occupiedRoomIds.has(room.id)) return false
-      // Check by room number
       if (room.roomNumber && occupiedRoomNumbers.has(room.roomNumber)) return false
-      // Check capacity
       const roomData = room.roomData as any
       const maxOccupancy = roomData?.maxOccupancy || room.maxOccupancy || 4
       if (adults + children > maxOccupancy) return false
@@ -143,7 +120,6 @@ export async function GET(request: NextRequest) {
       where: { organizationId: hotelId }
     })
     
-    // Build rate lookup by room type
     const ratesByType: Record<string, { weekday: number; weekend: number }> = {}
     roomRates.forEach(rate => {
       if (!ratesByType[rate.roomTypeCode]) {
@@ -156,7 +132,7 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    // Calculate total price for each room
+    // Calculate total price
     const calculateTotalPrice = (room: any): number => {
       const roomType = room.roomType || 'standard'
       const rates = ratesByType[roomType] || { weekday: room.basePrice || 100, weekend: room.basePrice || 100 }
@@ -168,21 +144,17 @@ export async function GET(request: NextRequest) {
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
         total += isWeekend ? (rates.weekend || rates.weekday) : rates.weekday
       }
-      
       return total
     }
     
-    // Group available rooms by type
+    // Group by type
     const roomsByType: Record<string, any[]> = {}
     availableRooms.forEach(room => {
       const type = room.roomType || 'standard'
-      if (!roomsByType[type]) {
-        roomsByType[type] = []
-      }
+      if (!roomsByType[type]) roomsByType[type] = []
       
       const roomData = room.roomData as any
       const totalPrice = calculateTotalPrice(room)
-      const pricePerNight = Math.round(totalPrice / nights)
       
       roomsByType[type].push({
         id: room.id,
@@ -190,17 +162,12 @@ export async function GET(request: NextRequest) {
         roomType: type,
         floor: room.floor,
         maxOccupancy: roomData?.maxOccupancy || room.maxOccupancy || 2,
-        amenities: roomData?.amenities || [],
-        description: roomData?.description || '',
-        images: roomData?.images || [],
-        basePrice: room.basePrice,
-        pricePerNight,
+        pricePerNight: Math.round(totalPrice / nights),
         totalPrice,
         nights
       })
     })
     
-    // Build response
     const response = {
       hotelId,
       hotelName: organization.name,

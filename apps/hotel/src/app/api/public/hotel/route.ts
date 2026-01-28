@@ -2,10 +2,6 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-// Create prisma instance for public API
-const prisma = new PrismaClient()
 
 // CORS headers for public API
 const corsHeaders = {
@@ -30,6 +26,11 @@ export async function GET(request: NextRequest) {
       )
     }
     
+    // Lazy import like other working APIs
+    const { getPrismaClient } = await import('@/lib/prisma')
+    const prisma = getPrismaClient()
+    
+    // Get organization
     const organization = await prisma.organization.findUnique({
       where: { id: hotelId }
     })
@@ -41,10 +42,15 @@ export async function GET(request: NextRequest) {
       )
     }
     
+    // Get rooms summary
     const rooms = await prisma.room.findMany({
-      where: { organizationId: hotelId, isActive: true }
+      where: {
+        organizationId: hotelId,
+        isActive: true
+      }
     })
     
+    // Get room rates for starting price
     const roomRates = await prisma.roomRate.findMany({
       where: { organizationId: hotelId }
     })
@@ -53,6 +59,7 @@ export async function GET(request: NextRequest) {
       ? Math.min(...roomRates.map(r => r.price))
       : rooms.length > 0 ? Math.min(...rooms.map(r => r.basePrice || 100)) : 100
     
+    // Group rooms by type
     const roomTypes: Record<string, any> = {}
     rooms.forEach(room => {
       const type = room.roomType || 'standard'
@@ -62,21 +69,57 @@ export async function GET(request: NextRequest) {
           type,
           name: type.charAt(0).toUpperCase() + type.slice(1),
           count: 0,
-          maxOccupancy: roomData?.maxOccupancy || room.maxOccupancy || 2
+          maxOccupancy: roomData?.maxOccupancy || room.maxOccupancy || 2,
+          amenities: roomData?.amenities || [],
+          description: roomData?.description || '',
+          images: roomData?.images || []
         }
       }
       roomTypes[type].count++
     })
     
-    return NextResponse.json({
+    // Build response
+    const response = {
       id: hotelId,
       name: organization.name,
       slug: organization.slug,
-      rooms: { total: rooms.length, types: Object.values(roomTypes) },
-      pricing: { currency: 'GEL', startingFrom: minRate },
-      policies: { checkInTime: '14:00', checkOutTime: '12:00' },
+      description: `Welcome to ${organization.name}`,
+      
+      contact: {
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        country: 'Georgia'
+      },
+      
+      rooms: {
+        total: rooms.length,
+        types: Object.values(roomTypes)
+      },
+      
+      pricing: {
+        currency: 'GEL',
+        startingFrom: minRate
+      },
+      
+      amenities: [
+        'Free WiFi',
+        'Parking',
+        'Room Service',
+        'Reception 24/7'
+      ],
+      
+      policies: {
+        checkInTime: '14:00',
+        checkOutTime: '12:00',
+        cancellationPolicy: 'Free cancellation up to 24 hours before check-in'
+      },
+      
       generatedAt: new Date().toISOString()
-    }, { headers: corsHeaders })
+    }
+    
+    return NextResponse.json(response, { headers: corsHeaders })
     
   } catch (error: any) {
     console.error('[Public Hotel API] Error:', error)
