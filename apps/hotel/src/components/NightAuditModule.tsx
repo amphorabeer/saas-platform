@@ -982,8 +982,10 @@ export default function NightAuditModule({ rooms, hotelCode, organizationId }: {
       
       if (lastCompleted) {
         const nextDate = moment(lastCompleted.date).add(1, 'day')
-        if (nextDate.isBefore(moment(), 'day')) {
+        // Always set to next unclosed date (even if it's today)
+        if (nextDate.isSameOrBefore(moment(), 'day')) {
           setSelectedDate(nextDate.format('YYYY-MM-DD'))
+          console.log('[NightAudit] Set selectedDate from API:', nextDate.format('YYYY-MM-DD'))
         }
       }
     }
@@ -3383,9 +3385,10 @@ This is an automated report from Night Audit System.
   )
   }
   
-  const currentBusinessDate = typeof window !== 'undefined' 
-    ? localStorage.getItem('currentBusinessDate') || moment().format('YYYY-MM-DD')
-    : moment().format('YYYY-MM-DD')
+  // Business Date = day AFTER the last closed audit
+  // selectedDate = the date we need to close next
+  // So if selectedDate is 28, last closed was 27, and Business Date should be 28
+  const currentBusinessDate = selectedDate || moment().format('YYYY-MM-DD')
   
   return (
     <div className="min-h-screen bg-gray-100 p-6">
