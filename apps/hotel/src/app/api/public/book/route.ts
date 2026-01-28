@@ -2,8 +2,11 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 import moment from 'moment'
+
+// Create prisma instance for public API
+const prisma = new PrismaClient()
 
 // CORS headers for public API
 const corsHeaders = {
