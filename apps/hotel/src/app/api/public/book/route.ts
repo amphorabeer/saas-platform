@@ -49,10 +49,13 @@ export async function POST(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
     
-    const organization = await prisma.organization.findUnique({ where: { id: hotelId } })
+    // Try to find organization
+    let organization = await prisma.organization.findUnique({ where: { id: hotelId } })
     if (!organization) {
-      return NextResponse.json({ error: 'Hotel not found' }, { status: 404, headers: corsHeaders })
+      organization = await prisma.organization.findFirst({ where: { tenantId: hotelId } })
     }
+    
+    const orgName = organization?.name || 'Hotel'
     
     // HotelRoom uses tenantId
     const room = await prisma.hotelRoom.findFirst({
@@ -79,7 +82,7 @@ export async function POST(request: NextRequest) {
     
     // HotelRoomRate uses organizationId
     const roomRates = await prisma.hotelRoomRate.findMany({
-      where: { organizationId: hotelId, roomTypeCode: room.roomType || 'STANDARD' }
+      where: { organizationId: organization?.id || hotelId, roomTypeCode: room.roomType || 'STANDARD' }
     })
     
     const ratesByDay: Record<number, number> = {}
@@ -124,7 +127,7 @@ export async function POST(request: NextRequest) {
         confirmationNumber,
         reservationId: reservation.id,
         status: 'CONFIRMED',
-        hotel: { id: hotelId, name: organization.name },
+        hotel: { id: hotelId, name: orgName },
         room: { id: room.id, number: room.roomNumber, type: room.roomType },
         dates: { checkIn, checkOut, nights },
         guests: { adults, children },

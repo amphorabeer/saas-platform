@@ -25,22 +25,22 @@ export async function GET(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
     
-    const organization = await prisma.organization.findUnique({
-      where: { id: hotelId }
-    })
-    
+    // Try to find organization
+    let organization = await prisma.organization.findUnique({ where: { id: hotelId } })
     if (!organization) {
-      return NextResponse.json({ error: 'Hotel not found' }, { status: 404, headers: corsHeaders })
+      organization = await prisma.organization.findFirst({ where: { tenantId: hotelId } })
     }
     
-    // HotelRoom uses tenantId
+    const orgName = organization?.name || 'Hotel'
+    
+    // HotelRoom uses tenantId - use hotelId directly
     const rooms = await prisma.hotelRoom.findMany({
       where: { tenantId: hotelId }
     })
     
     // HotelRoomRate uses organizationId
     const roomRates = await prisma.hotelRoomRate.findMany({
-      where: { organizationId: hotelId }
+      where: { organizationId: organization?.id || hotelId }
     })
     
     const ratesByType: Record<string, { weekday: number; weekend: number }> = {}
@@ -58,13 +58,14 @@ export async function GET(request: NextRequest) {
     rooms.forEach(room => {
       const type = room.roomType || 'STANDARD'
       if (!roomTypes[type]) {
-        const rates = ratesByType[type] || { weekday: Number(room.basePrice) || 100, weekend: Number(room.basePrice) || 100 }
+        const basePrice = Number(room.basePrice) || 100
+        const rates = ratesByType[type] || { weekday: basePrice, weekend: basePrice }
         roomTypes[type] = {
           roomType: type,
           name: type,
           maxOccupancy: room.maxOccupancy || 2,
-          weekdayRate: rates.weekday || Number(room.basePrice) || 100,
-          weekendRate: rates.weekend || rates.weekday || Number(room.basePrice) || 100,
+          weekdayRate: rates.weekday || basePrice,
+          weekendRate: rates.weekend || rates.weekday || basePrice,
           totalRooms: 0
         }
       }
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       hotelId,
-      hotelName: organization.name,
+      hotelName: orgName,
       currency: 'GEL',
       roomTypes: Object.values(roomTypes),
       policies: { checkInTime: '14:00', checkOutTime: '12:00' },
