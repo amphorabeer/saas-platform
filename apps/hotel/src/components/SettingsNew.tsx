@@ -4839,40 +4839,76 @@ function RoomRatesEditor({ roomTypes, onSave, onSaveRef }: { roomTypes: RoomType
     weekend: number 
   }[]>([])
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   
-  // Sync with roomTypes
+  // Load rates from API first, then fallback to localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('roomRates')
-    let savedRates: any[] = []
-    
-    if (saved) {
+    const loadRates = async () => {
+      setIsLoading(true)
+      let apiRates: any[] = []
+      
+      // Try to load from API first
       try {
-        savedRates = JSON.parse(saved)
-      } catch (e) {
-        console.error('Error loading rates:', e)
+        const response = await fetch('/api/hotel/room-rates')
+        if (response.ok) {
+          apiRates = await response.json()
+          console.log('[RoomRates] Loaded from API:', apiRates.length, 'rates')
+        }
+      } catch (error) {
+        console.error('[RoomRates] Failed to load from API:', error)
       }
+      
+      // Fallback to localStorage
+      let savedRates: any[] = []
+      const saved = localStorage.getItem('roomRates')
+      if (saved) {
+        try {
+          savedRates = JSON.parse(saved)
+        } catch (e) {
+          console.error('Error loading rates from localStorage:', e)
+        }
+      }
+      
+      // Build rates from roomTypes
+      const syncedRates = roomTypes.map(rt => {
+        // First check API rates
+        const apiWeekday = apiRates.find(r => r.roomTypeCode === rt.name && r.dayOfWeek === 1)
+        const apiWeekend = apiRates.find(r => r.roomTypeCode === rt.name && (r.dayOfWeek === 0 || r.dayOfWeek === 6))
+        
+        // Then check localStorage
+        const localRate = savedRates.find(r => r.id === rt.id || r.type === rt.name)
+        
+        // Priority: API > localStorage > roomType.basePrice
+        const weekday = apiWeekday?.basePrice ?? localRate?.weekday ?? rt.basePrice
+        const weekend = apiWeekend?.basePrice ?? localRate?.weekend ?? Math.round(rt.basePrice * 1.2)
+        
+        return {
+          id: rt.id,
+          type: rt.name,
+          icon: rt.icon || '🛏️',
+          weekday,
+          weekend
+        }
+      })
+      
+      setRates(syncedRates)
+      
+      // Update localStorage with synced rates
+      localStorage.setItem('roomRates', JSON.stringify(syncedRates))
+      
+      setIsLoading(false)
     }
     
-    // Build rates from roomTypes, preserving saved prices
-    const syncedRates = roomTypes.map(rt => {
-      const existing = savedRates.find(r => r.id === rt.id || r.type === rt.name)
-      return {
-        id: rt.id,
-        type: rt.name,
-        icon: rt.icon || '🛏️',
-        weekday: existing?.weekday ?? rt.basePrice,
-        weekend: existing?.weekend ?? Math.round(rt.basePrice * 1.2)
-      }
-    })
-    
-    setRates(syncedRates)
+    if (roomTypes.length > 0) {
+      loadRates()
+    }
   }, [roomTypes])
   
   const updateRate = (id: string, field: 'weekday' | 'weekend', value: number) => {
     setRates(rates.map(r => r.id === id ? { ...r, [field]: value } : r))
   }
   
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true)
     localStorage.setItem('roomRates', JSON.stringify(rates))
     
@@ -4883,10 +4919,67 @@ function RoomRatesEditor({ roomTypes, onSave, onSaveRef }: { roomTypes: RoomType
     })
     localStorage.setItem('roomTypes', JSON.stringify(updatedTypes))
     
+    try {
+      // 1. Save rates to HotelRoomRate API
+      const apiRates: any[] = []
+      rates.forEach(rate => {
+        const roomType = roomTypes.find(rt => rt.id === rate.id)
+        const typeCode = roomType?.name || rate.type
+        // Weekday rate (Mon-Fri: 1-5)
+        for (let day = 1; day <= 5; day++) {
+          apiRates.push({ roomTypeCode: typeCode, dayOfWeek: day, basePrice: rate.weekday })
+        }
+        // Weekend rate (Sat-Sun: 6, 0)
+        apiRates.push({ roomTypeCode: typeCode, dayOfWeek: 6, basePrice: rate.weekend })
+        apiRates.push({ roomTypeCode: typeCode, dayOfWeek: 0, basePrice: rate.weekend })
+      })
+      
+      await fetch('/api/hotel/room-rates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiRates)
+      })
+      console.log('[RoomRates] Saved rates to API:', apiRates.length)
+      
+      // 2. Update all rooms' basePrice based on their roomType
+      const roomsResponse = await fetch('/api/hotel/rooms')
+      if (roomsResponse.ok) {
+        const rooms = await roomsResponse.json()
+        
+        for (const room of rooms) {
+          const rate = rates.find(r => r.type === room.roomType)
+          if (rate && Number(room.basePrice) !== rate.weekday) {
+            await fetch('/api/hotel/rooms', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: room.id, basePrice: rate.weekday })
+            })
+            console.log(`[RoomRates] Updated room ${room.roomNumber} basePrice to ${rate.weekday}`)
+          }
+        }
+      }
+      
+      // 3. Update room-types API
+      for (const rt of updatedTypes) {
+        const rate = rates.find(r => r.id === rt.id)
+        if (rate) {
+          await fetch('/api/hotel/room-types', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: rt.id, basePrice: rate.weekday })
+          })
+        }
+      }
+      console.log('[RoomRates] Updated room types')
+      
+    } catch (error) {
+      console.error('[RoomRates] Failed to save:', error)
+    }
+    
     setTimeout(() => {
       setIsSaving(false)
       alert('✅ ფასები შენახულია!')
-    }, 500)
+    }, 300)
   }
   
   // Expose handleSave to parent via ref callback
@@ -4918,11 +5011,12 @@ function RoomRatesEditor({ roomTypes, onSave, onSaveRef }: { roomTypes: RoomType
           <h3 className="font-bold text-gray-800 text-lg">💵 Room Rates</h3>
           <p className="text-sm text-gray-500">
             ოთახის ტიპების ფასები • {roomTypes.length} ტიპი
+            {isLoading && <span className="ml-2 text-blue-500">⏳ იტვირთება...</span>}
           </p>
         </div>
         <button 
           onClick={handleSave}
-          disabled={isSaving}
+          disabled={isSaving || isLoading}
           className="px-5 py-2.5 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 disabled:opacity-50 flex items-center gap-2 shadow-sm transition"
         >
           {isSaving ? (
