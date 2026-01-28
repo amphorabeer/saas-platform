@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 import moment from 'moment'
 
 // CORS headers for public API
@@ -39,9 +40,6 @@ export async function GET(request: NextRequest) {
         { status: 400, headers: corsHeaders }
       )
     }
-    
-    const { getPrismaClient } = await import('@/lib/prisma')
-    const prisma = getPrismaClient()
     
     // Verify hotel exists
     const organization = await prisma.organization.findUnique({
