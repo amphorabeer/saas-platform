@@ -54,6 +54,54 @@ interface Reservation {
   roomNumber?: string
 }
 
+// Business Day Card - fetches from API
+function BusinessDayCard() {
+  const [businessDay, setBusinessDay] = useState(moment().format('YYYY-MM-DD'))
+  
+  useEffect(() => {
+    const fetchBusinessDay = async () => {
+      try {
+        const response = await fetch('/api/hotel/night-audits')
+        if (response.ok) {
+          const audits = await response.json()
+          const completedAudits = audits
+            .filter((a: any) => a.status === 'completed' && !a.reversed)
+            .sort((a: any, b: any) => moment(b.date).valueOf() - moment(a.date).valueOf())
+          
+          if (completedAudits.length > 0) {
+            // Business day is NEXT day after last completed audit
+            const nextDay = moment(completedAudits[0].date).add(1, 'day').format('YYYY-MM-DD')
+            setBusinessDay(nextDay)
+            return
+          }
+        }
+      } catch (error) {
+        console.error('[BusinessDayCard] API error:', error)
+      }
+      
+      // Fallback to localStorage
+      const lastAuditDate = localStorage.getItem('lastNightAuditDate')
+      if (lastAuditDate) {
+        setBusinessDay(moment(lastAuditDate).add(1, 'day').format('YYYY-MM-DD'))
+      }
+    }
+    
+    fetchBusinessDay()
+  }, [])
+  
+  return (
+    <div className="bg-purple-50 rounded-lg p-2 border border-purple-200 shadow-sm col-span-2 md:col-span-1">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-gray-500">Business Day</p>
+          <p className="text-lg font-bold text-purple-600">{moment(businessDay).format('DD/MM/YYYY')}</p>
+        </div>
+        <span className="text-lg">📅</span>
+      </div>
+    </div>
+  )
+}
+
 export default function HotelDashboard() {
   const router = useRouter()
   const [currentUser, setCurrentUser] = useState<any>(null)
@@ -1176,38 +1224,7 @@ export default function HotelDashboard() {
           </div>
           
           {/* Business Day Card - NEW */}
-          {(() => {
-            const getBusinessDay = () => {
-              const lastAuditDate = typeof window !== 'undefined' ? localStorage.getItem('lastAuditDate') : null
-              
-              if (lastAuditDate) {
-                try {
-                  const lastClosed = JSON.parse(lastAuditDate)
-                  // Business day is NEXT day after audit
-                  return moment(lastClosed).add(1, 'day').format('YYYY-MM-DD')
-                } catch {
-                  return moment().format('YYYY-MM-DD')
-                }
-              }
-              
-              // If no audit, use today
-              return moment().format('YYYY-MM-DD')
-            }
-            
-            const businessDay = getBusinessDay()
-            
-            return (
-              <div className="bg-purple-50 rounded-lg p-2 border border-purple-200 shadow-sm col-span-2 md:col-span-1">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Business Day</p>
-                    <p className="text-lg font-bold text-purple-600">{moment(businessDay).format('DD/MM/YYYY')}</p>
-                  </div>
-                  <span className="text-lg">📅</span>
-                </div>
-              </div>
-            )
-          })()}
+          <BusinessDayCard />
           
           <div className="bg-white rounded-lg p-2 border shadow-sm">
             <div className="flex items-center justify-between">
