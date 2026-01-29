@@ -1002,18 +1002,18 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
       
       {/* Report Type Tabs */}
       <div className="bg-white rounded-xl shadow-sm border mb-6">
-        <div className="flex overflow-x-auto border-b">
+        <div className="flex overflow-x-auto border-b scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pb-px" style={{ scrollbarWidth: 'thin' }}>
           {reportTabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveReport(tab.id)}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
+              className={`px-3 py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition flex-shrink-0 ${
                 activeReport === tab.id
                   ? 'border-blue-500 text-blue-600 bg-blue-50'
                   : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
-              {tab.icon} {tab.label}
+              <span className="hidden sm:inline">{tab.icon} </span>{tab.label}
             </button>
           ))}
         </div>
