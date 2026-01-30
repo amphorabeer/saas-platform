@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "postinstall": "cd packages/database && npx prisma@5.22.0 generate",
+    "dev": "turbo run dev",
     "build": "turbo run build",
-    "dev": "turbo run dev --concurrency=20",
+    "start": "turbo run start",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "type-check": "turbo run type-check",

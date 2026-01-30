@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { Moon, Sun, LogOut } from "lucide-react";
 import { Button, Badge } from "@saas-platform/ui";
 import { logout, getAuth } from "../lib/auth";
@@ -69,6 +70,18 @@ export function SidebarWithState({
             </button>
           );
         })}
+
+        {/* GeoGuide Link */}
+        <div className="pt-4 mt-4 border-t">
+          <Link
+            href="/geoguide"
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-100 hover:bg-amber-200 dark:hover:bg-amber-900/50"
+          >
+            <span>🗺️</span>
+            <span className="text-sm font-medium">აუდიო გიდი</span>
+            <span className="ml-auto">→</span>
+          </Link>
+        </div>
       </nav>
       <div className="pt-4 border-t space-y-2">
         <div className="mb-2 px-4 py-2 text-sm text-muted-foreground">
