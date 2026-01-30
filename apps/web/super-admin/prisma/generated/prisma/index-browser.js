@@ -366,6 +366,177 @@ exports.Prisma.ContactRequestScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.MuseumScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  city: 'city',
+  address: 'address',
+  nameEn: 'nameEn',
+  descriptionEn: 'descriptionEn',
+  cityEn: 'cityEn',
+  addressEn: 'addressEn',
+  nameRu: 'nameRu',
+  descriptionRu: 'descriptionRu',
+  cityRu: 'cityRu',
+  addressRu: 'addressRu',
+  nameDe: 'nameDe',
+  descriptionDe: 'descriptionDe',
+  cityDe: 'cityDe',
+  addressDe: 'addressDe',
+  nameFr: 'nameFr',
+  descriptionFr: 'descriptionFr',
+  cityFr: 'cityFr',
+  addressFr: 'addressFr',
+  slug: 'slug',
+  coverImage: 'coverImage',
+  gallery: 'gallery',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  contactEmail: 'contactEmail',
+  contactPhone: 'contactPhone',
+  website: 'website',
+  workingHours: 'workingHours',
+  showMap: 'showMap',
+  showQrScanner: 'showQrScanner',
+  isPublished: 'isPublished',
+  displayOrder: 'displayOrder',
+  category: 'category',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TourScalarFieldEnum = {
+  id: 'id',
+  museumId: 'museumId',
+  name: 'name',
+  nameEn: 'nameEn',
+  nameRu: 'nameRu',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  descriptionRu: 'descriptionRu',
+  duration: 'duration',
+  stopsCount: 'stopsCount',
+  isFree: 'isFree',
+  price: 'price',
+  currency: 'currency',
+  isPublished: 'isPublished',
+  displayOrder: 'displayOrder',
+  coverImage: 'coverImage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TourStopScalarFieldEnum = {
+  id: 'id',
+  tourId: 'tourId',
+  title: 'title',
+  titleEn: 'titleEn',
+  titleRu: 'titleRu',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  descriptionRu: 'descriptionRu',
+  transcript: 'transcript',
+  transcriptEn: 'transcriptEn',
+  transcriptRu: 'transcriptRu',
+  audioUrl: 'audioUrl',
+  audioUrlEn: 'audioUrlEn',
+  audioUrlRu: 'audioUrlRu',
+  audioDuration: 'audioDuration',
+  imageUrl: 'imageUrl',
+  images: 'images',
+  qrCode: 'qrCode',
+  orderIndex: 'orderIndex',
+  isPublished: 'isPublished',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TourPackScalarFieldEnum = {
+  id: 'id',
+  tourId: 'tourId',
+  locale: 'locale',
+  version: 'version',
+  manifestUrl: 'manifestUrl',
+  totalSize: 'totalSize',
+  status: 'status',
+  builtAt: 'builtAt',
+  buildLog: 'buildLog',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ActivationCodeScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  codeHash: 'codeHash',
+  durationDays: 'durationDays',
+  status: 'status',
+  tourIds: 'tourIds',
+  museumIds: 'museumIds',
+  redeemedAt: 'redeemedAt',
+  redeemedBy: 'redeemedBy',
+  batchId: 'batchId',
+  batchName: 'batchName',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DeviceScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  platform: 'platform',
+  deviceName: 'deviceName',
+  appVersion: 'appVersion',
+  pushToken: 'pushToken',
+  lastActiveAt: 'lastActiveAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EntitlementScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  tourId: 'tourId',
+  activationCodeId: 'activationCodeId',
+  activatedAt: 'activatedAt',
+  expiresAt: 'expiresAt',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  tbcPaymentId: 'tbcPaymentId',
+  tbcStatus: 'tbcStatus',
+  tourId: 'tourId',
+  museumId: 'museumId',
+  deviceId: 'deviceId',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  activationCodeId: 'activationCodeId',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GeoGuideEventScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  tourId: 'tourId',
+  stopId: 'stopId',
+  museumId: 'museumId',
+  eventType: 'eventType',
+  metadata: 'metadata',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -441,6 +612,26 @@ exports.TicketStatus = exports.$Enums.TicketStatus = {
   CLOSED: 'CLOSED'
 };
 
+exports.TourPackStatus = exports.$Enums.TourPackStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED'
+};
+
+exports.ActivationCodeStatus = exports.$Enums.ActivationCodeStatus = {
+  AVAILABLE: 'AVAILABLE',
+  REDEEMED: 'REDEEMED',
+  EXPIRED: 'EXPIRED',
+  REVOKED: 'REVOKED'
+};
+
+exports.PaymentStatus = exports.$Enums.PaymentStatus = {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+};
+
 exports.Prisma.ModelName = {
   Organization: 'Organization',
   User: 'User',
@@ -458,7 +649,16 @@ exports.Prisma.ModelName = {
   HotelRoom: 'HotelRoom',
   HotelReservation: 'HotelReservation',
   Configuration: 'Configuration',
-  ContactRequest: 'ContactRequest'
+  ContactRequest: 'ContactRequest',
+  Museum: 'Museum',
+  Tour: 'Tour',
+  TourStop: 'TourStop',
+  TourPack: 'TourPack',
+  ActivationCode: 'ActivationCode',
+  Device: 'Device',
+  Entitlement: 'Entitlement',
+  Payment: 'Payment',
+  GeoGuideEvent: 'GeoGuideEvent'
 };
 
 /**

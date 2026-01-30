@@ -453,3 +453,373 @@ model ContactRequest {
   @@index([module])
   @@index([createdAt])
 }
+
+// ===================================
+// GEOGUIDE - Audio Guide Platform
+// დაამატე ეს super-admin/prisma/schema.prisma ფაილის ბოლოს
+// ===================================
+
+// ENUMS
+enum ActivationCodeStatus {
+  AVAILABLE // კოდი ხელმისაწვდომია
+  REDEEMED // კოდი გამოყენებულია
+  EXPIRED // კოდი ვადაგასულია
+  REVOKED // კოდი გაუქმებულია
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum TourPackStatus {
+  DRAFT // შექმნის პროცესში
+  PUBLISHED // გამოქვეყნებული
+  ARCHIVED // არქივირებული
+}
+
+// MODELS
+
+// მუზეუმი / ლოკაცია
+model Museum {
+  id String @id @default(cuid())
+
+  // ქართული (ძირითადი)
+  name        String
+  description String? @db.Text
+  city        String?
+  address     String?
+
+  // ინგლისური
+  nameEn        String?
+  descriptionEn String? @db.Text
+  cityEn        String?
+  addressEn     String?
+
+  // რუსული
+  nameRu        String?
+  descriptionRu String? @db.Text
+  cityRu        String?
+  addressRu     String?
+
+  // გერმანული
+  nameDe        String?
+  descriptionDe String? @db.Text
+  cityDe        String?
+  addressDe     String?
+
+  // ფრანგული
+  nameFr        String?
+  descriptionFr String? @db.Text
+  cityFr        String?
+  addressFr     String?
+
+  // URL და მედია
+  slug       String   @unique
+  coverImage String?
+  gallery    String[]
+
+  // მდებარეობა (კოორდინატები)
+  latitude  Float?
+  longitude Float?
+
+  // საკონტაქტო
+  contactEmail String?
+  contactPhone String?
+  website      String?
+
+  // სამუშაო საათები
+  workingHours Json?
+
+  // პარამეტრები
+  showMap       Boolean @default(false)
+  showQrScanner Boolean @default(false)
+  isPublished   Boolean @default(false)
+  displayOrder  Int     @default(0)
+  category      String?
+
+  // რელაციები
+  tours    Tour[]
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isPublished])
+  @@index([category])
+}
+
+// ტური
+model Tour {
+  id String @id @default(cuid())
+
+  museumId String
+  museum   Museum @relation(fields: [museumId], references: [id], onDelete: Cascade)
+
+  // ძირითადი ინფორმაცია
+  name   String
+  nameEn String?
+  nameRu String?
+
+  description   String? @db.Text
+  descriptionEn String? @db.Text
+  descriptionRu String? @db.Text
+
+  // პარამეტრები
+  duration   Int? // წუთებში
+  stopsCount Int  @default(0)
+
+  // ფასი
+  isFree   Boolean  @default(false)
+  price    Decimal? @db.Decimal(10, 2)
+  currency String   @default("GEL")
+
+  // სტატუსი
+  isPublished  Boolean @default(false)
+  displayOrder Int     @default(0)
+
+  // მედია
+  coverImage String?
+
+  // რელაციები
+  stops        TourStop[]
+  packs        TourPack[]
+  entitlements Entitlement[]
+  payments     Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([museumId])
+  @@index([isPublished])
+}
+
+// ტურის გაჩერება (Stop/Exhibit)
+model TourStop {
+  id String @id @default(cuid())
+
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  // ძირითადი ინფორმაცია
+  title   String
+  titleEn String?
+  titleRu String?
+
+  description   String? @db.Text
+  descriptionEn String? @db.Text
+  descriptionRu String? @db.Text
+
+  // აუდიო ტრანსკრიპტი
+  transcript   String? @db.Text
+  transcriptEn String? @db.Text
+  transcriptRu String? @db.Text
+
+  // მედია
+  audioUrl   String? // აუდიო ფაილის URL
+  audioUrlEn String?
+  audioUrlRu String?
+
+  audioDuration Int? // წამებში
+
+  imageUrl String? // სურათი
+  images   String[] // დამატებითი სურათები
+
+  // QR კოდი
+  qrCode String? @unique // უნიკალური QR კოდი
+
+  // თანმიმდევრობა
+  orderIndex Int @default(0)
+
+  // სტატუსი
+  isPublished Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tourId])
+  @@index([qrCode])
+  @@index([orderIndex])
+}
+
+// ოფლაინ პაკეტი
+model TourPack {
+  id String @id @default(cuid())
+
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  // ენა
+  locale String // "ka", "en", "ru"
+
+  // ვერსია
+  version Int @default(1)
+
+  // ფაილები
+  manifestUrl String? // manifest.json URL
+  totalSize   BigInt? // ბაიტებში
+
+  // სტატუსი
+  status TourPackStatus @default(DRAFT)
+
+  // Build info
+  builtAt  DateTime?
+  buildLog String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tourId, locale])
+  @@index([tourId])
+  @@index([status])
+}
+
+// აქტივაციის კოდი
+model ActivationCode {
+  id String @id @default(cuid())
+
+  // კოდი (hashed)
+  code     String @unique // დისპლეისთვის: "GEOG-XXXX-XXXX"
+  codeHash String @unique // SHA256 hash ვერიფიკაციისთვის
+
+  // ვადა
+  durationDays Int // რამდენი დღე მოქმედებს
+
+  // სტატუსი
+  status ActivationCodeStatus @default(AVAILABLE)
+
+  // ტურები რომლებზეც წვდომა აქვს
+  tourIds   String[] // ცარიელი = ყველა ტური
+  museumIds String[] // ცარიელი = ყველა მუზეუმი
+
+  // Redeem ინფორმაცია
+  redeemedAt DateTime?
+  redeemedBy String? // deviceId
+
+  // Batch ინფორმაცია (ჯგუფური გენერაციისთვის)
+  batchId   String?
+  batchName String?
+
+  // მეტადატა
+  notes String?
+
+  // რელაცია
+  entitlement Entitlement?
+  payments    Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+  @@index([codeHash])
+  @@index([status])
+  @@index([batchId])
+}
+
+// მოწყობილობა
+model Device {
+  id String @id @default(cuid())
+
+  deviceId String @unique // უნიკალური მოწყობილობის ID
+
+  // მოწყობილობის ინფო
+  platform   String? // "ios", "android", "web"
+  deviceName String?
+  appVersion String?
+
+  // Push notifications
+  pushToken String?
+
+  // რელაციები
+  entitlements Entitlement[]
+
+  // აქტივობა
+  lastActiveAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([deviceId])
+}
+
+// უფლებამოსილება (Device + Tour წვდომა)
+model Entitlement {
+  id String @id @default(cuid())
+
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id])
+
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id])
+
+  // აქტივაციის კოდი
+  activationCodeId String?         @unique
+  activationCode   ActivationCode? @relation(fields: [activationCodeId], references: [id])
+
+  // ვადა
+  activatedAt DateTime @default(now())
+  expiresAt   DateTime
+
+  // სტატუსი
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([deviceId, tourId])
+  @@index([deviceId])
+  @@index([tourId])
+  @@index([expiresAt])
+  @@index([isActive])
+}
+
+// გადახდა (TBC Pay / ტურის შეძენა)
+model Payment {
+  id               String          @id @default(cuid())
+  orderId          String          @unique
+  tbcPaymentId     String?
+  tbcStatus        String?
+  tourId           String
+  tour             Tour            @relation(fields: [tourId], references: [id])
+  museumId         String?
+  museum           Museum?         @relation(fields: [museumId], references: [id])
+  deviceId         String
+  amount           Decimal         @db.Decimal(10, 2)
+  currency         String          @default("GEL")
+  status           PaymentStatus   @default(PENDING)
+  activationCodeId String?
+  activationCode   ActivationCode? @relation(fields: [activationCodeId], references: [id])
+  completedAt      DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+// ანალიტიკა (Optional)
+model GeoGuideEvent {
+  id String @id @default(cuid())
+
+  deviceId String?
+  tourId   String?
+  stopId   String?
+  museumId String?
+
+  // Event type
+  eventType String // "tour_start", "stop_play", "download", "qr_scan"
+
+  // მეტადატა
+  metadata Json?
+
+  // Location (optional)
+  latitude  Decimal? @db.Decimal(10, 8)
+  longitude Decimal? @db.Decimal(11, 8)
+
+  createdAt DateTime @default(now())
+
+  @@index([deviceId])
+  @@index([tourId])
+  @@index([eventType])
+  @@index([createdAt])
+}
