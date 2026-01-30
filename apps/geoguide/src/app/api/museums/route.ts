@@ -14,7 +14,6 @@ export async function GET() {
 
     const museums = await res.json();
 
-    // Filter only published museums with published tours
     const publishedMuseums = museums.filter((m: { isPublished?: boolean }) => m.isPublished);
 
     return NextResponse.json(publishedMuseums);
