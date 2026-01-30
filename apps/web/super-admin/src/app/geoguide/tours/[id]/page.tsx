@@ -22,6 +22,7 @@ const AVAILABLE_LANGUAGES = [
   { code: "fr", name: "ფრანგული", nameEn: "French" },
   { code: "es", name: "ესპანური", nameEn: "Spanish" },
   { code: "it", name: "იტალიური", nameEn: "Italian" },
+  { code: "uk", name: "უკრაინული", nameEn: "Ukrainian" },
   { code: "tr", name: "თურქული", nameEn: "Turkish" },
   { code: "zh", name: "ჩინური", nameEn: "Chinese" },
   { code: "ja", name: "იაპონური", nameEn: "Japanese" },

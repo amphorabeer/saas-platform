@@ -20,6 +20,7 @@ const AVAILABLE_LANGUAGES = [
   { code: "ru", name: "რუსული", nameEn: "Russian" },
   { code: "de", name: "გერმანული", nameEn: "German" },
   { code: "fr", name: "ფრანგული", nameEn: "French" },
+  { code: "uk", name: "უკრაინული", nameEn: "Ukrainian" },
 ];
 
 interface Translation {
