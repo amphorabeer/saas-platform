@@ -118,6 +118,7 @@ export default function NewMuseumPage() {
       const ruTrans = translations.find((t) => t.langCode === "ru");
       const deTrans = translations.find((t) => t.langCode === "de");
       const frTrans = translations.find((t) => t.langCode === "fr");
+      const ukTrans = translations.find((t) => t.langCode === "uk");
 
       const res = await fetch("/api/geoguide/museums", {
         method: "POST",
@@ -148,6 +149,11 @@ export default function NewMuseumPage() {
           descriptionFr: frTrans?.description || null,
           cityFr: frTrans?.city || null,
           addressFr: frTrans?.address || null,
+          // Ukrainian
+          nameUk: ukTrans?.name || null,
+          descriptionUk: ukTrans?.description || null,
+          cityUk: ukTrans?.city || null,
+          addressUk: ukTrans?.address || null,
         }),
       });
 

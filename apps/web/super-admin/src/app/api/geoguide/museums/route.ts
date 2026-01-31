@@ -76,6 +76,12 @@ export async function POST(request: NextRequest) {
         cityFr: body.cityFr || null,
         addressFr: body.addressFr || null,
 
+        // Ukrainian
+        nameUk: body.nameUk || null,
+        descriptionUk: body.descriptionUk || null,
+        cityUk: body.cityUk || null,
+        addressUk: body.addressUk || null,
+
         // Common
         slug: body.slug,
         coverImage: body.coverImage || null,
