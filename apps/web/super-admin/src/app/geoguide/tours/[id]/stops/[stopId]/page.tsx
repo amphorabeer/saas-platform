@@ -179,9 +179,16 @@ export default function EditStopPage({
             ...formData,
             titleEn: translations.find((t) => t.langCode === "en")?.title || null,
             titleRu: translations.find((t) => t.langCode === "ru")?.title || null,
+            titleUk: translations.find((t) => t.langCode === "uk")?.title || null,
             descriptionEn: translations.find((t) => t.langCode === "en")?.description || null,
             transcriptEn: translations.find((t) => t.langCode === "en")?.transcript || null,
             audioUrlEn: translations.find((t) => t.langCode === "en")?.audioUrl || null,
+            descriptionRu: translations.find((t) => t.langCode === "ru")?.description || null,
+            transcriptRu: translations.find((t) => t.langCode === "ru")?.transcript || null,
+            audioUrlRu: translations.find((t) => t.langCode === "ru")?.audioUrl || null,
+            descriptionUk: translations.find((t) => t.langCode === "uk")?.description || null,
+            transcriptUk: translations.find((t) => t.langCode === "uk")?.transcript || null,
+            audioUrlUk: translations.find((t) => t.langCode === "uk")?.audioUrl || null,
           }),
         }
       );
