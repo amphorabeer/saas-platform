@@ -125,11 +125,18 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
             description: data.descriptionEn || "",
           });
         }
-        if (data.nameRu) {
+        if (data.nameRu || data.descriptionRu) {
           existingTranslations.push({
             langCode: "ru",
             name: data.nameRu || "",
-            description: "",
+            description: data.descriptionRu || "",
+          });
+        }
+        if (data.nameUk || data.descriptionUk) {
+          existingTranslations.push({
+            langCode: "uk",
+            name: data.nameUk || "",
+            description: data.descriptionUk || "",
           });
         }
         setTranslations(existingTranslations);
