@@ -5,6 +5,7 @@ export interface Museum {
   nameRu?: string | null;
   nameDe?: string | null;
   nameFr?: string | null;
+  nameUk?: string | null;
   description: string | null;
   descriptionEn: string | null;
   slug: string;
@@ -13,11 +14,13 @@ export interface Museum {
   cityRu?: string | null;
   cityDe?: string | null;
   cityFr?: string | null;
+  cityUk?: string | null;
   address?: string | null;
   addressEn?: string | null;
   addressRu?: string | null;
   addressDe?: string | null;
   addressFr?: string | null;
+  addressUk?: string | null;
   coverImage: string | null;
   showMap: boolean;
   tours: Tour[];
@@ -27,6 +30,8 @@ export interface Tour {
   id: string;
   name: string;
   nameEn: string | null;
+  nameRu?: string | null;
+  nameUk?: string | null;
   description: string | null;
   descriptionEn: string | null;
   duration: number | null;
@@ -42,12 +47,16 @@ export interface TourStop {
   id: string;
   title: string;
   titleEn: string | null;
+  titleRu?: string | null;
+  titleUk?: string | null;
   description: string | null;
   descriptionEn: string | null;
   transcript: string | null;
   transcriptEn: string | null;
   audioUrl: string | null;
   audioUrlEn: string | null;
+  audioUrlRu?: string | null;
+  audioUrlUk?: string | null;
   imageUrl: string | null;
   qrCode: string | null;
   orderIndex: number;

@@ -50,6 +50,7 @@ export default function MuseumPage() {
         if (data.nameRu) langs.add("ru");
         if (data.nameDe) langs.add("de");
         if (data.nameFr) langs.add("fr");
+        if (data.nameUk) langs.add("uk");
         setAvailableLanguages(Array.from(langs));
       }
     } catch (error) {
