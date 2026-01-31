@@ -12,7 +12,7 @@ import {
   Input,
   Label,
 } from "@saas-platform/ui";
-import { ArrowLeft, Save, Loader2, Trash2, Plus, GripVertical, X, Building2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Trash2, Plus, GripVertical, X, Building2, ChevronDown, ChevronRight, Image as ImageIcon } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
 
 const AVAILABLE_LANGUAGES = [
@@ -35,6 +35,11 @@ interface Translation {
   description: string;
 }
 
+interface HallTranslation {
+  langCode: string;
+  name: string;
+}
+
 interface Hall {
   id: string;
   name: string;
@@ -42,6 +47,7 @@ interface Hall {
   nameRu: string | null;
   nameUk: string | null;
   floorNumber: number | null;
+  imageUrl: string | null;
   orderIndex: number;
   isPublished: boolean;
   _count?: { stops: number };
@@ -101,8 +107,12 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     isPublished: false,
   });
 
+  // Expanded halls state
+  const [expandedHalls, setExpandedHalls] = useState<Set<string>>(new Set());
+
   // New Stop Form State
   const [showNewStop, setShowNewStop] = useState(false);
+  const [activeHallIdForNewStop, setActiveHallIdForNewStop] = useState<string | null>(null);
   const [newStopData, setNewStopData] = useState({
     title: "",
     audioUrl: "",
@@ -117,11 +127,10 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
   const [showNewHall, setShowNewHall] = useState(false);
   const [newHallData, setNewHallData] = useState({
     name: "",
-    nameEn: "",
-    nameRu: "",
-    nameUk: "",
-    floorNumber: "",
+    imageUrl: "",
   });
+  const [newHallTranslations, setNewHallTranslations] = useState<HallTranslation[]>([]);
+  const [showNewHallLangPicker, setShowNewHallLangPicker] = useState(false);
   const [addingHall, setAddingHall] = useState(false);
 
   useEffect(() => {
@@ -216,6 +225,18 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     (l) => !translations.find((t) => t.langCode === l.code)
   );
 
+  const toggleHallExpanded = (hallId: string) => {
+    setExpandedHalls((prev) => {
+      const next = new Set(prev);
+      if (next.has(hallId)) {
+        next.delete(hallId);
+      } else {
+        next.add(hallId);
+      }
+      return next;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -273,22 +294,27 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     setAddingHall(true);
 
     try {
+      const enTrans = newHallTranslations.find((t) => t.langCode === "en");
+      const ruTrans = newHallTranslations.find((t) => t.langCode === "ru");
+      const ukTrans = newHallTranslations.find((t) => t.langCode === "uk");
+
       const res = await fetch(`/api/geoguide/tours/${params.id}/halls`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newHallData.name,
-          nameEn: newHallData.nameEn || null,
-          nameRu: newHallData.nameRu || null,
-          nameUk: newHallData.nameUk || null,
-          floorNumber: newHallData.floorNumber ? parseInt(newHallData.floorNumber) : null,
+          nameEn: enTrans?.name || null,
+          nameRu: ruTrans?.name || null,
+          nameUk: ukTrans?.name || null,
+          imageUrl: newHallData.imageUrl || null,
         }),
       });
 
       if (res.ok) {
         const newHall = await res.json();
         setTour((prev) => prev ? { ...prev, halls: [...prev.halls, newHall] } : null);
-        setNewHallData({ name: "", nameEn: "", nameRu: "", nameUk: "", floorNumber: "" });
+        setNewHallData({ name: "", imageUrl: "" });
+        setNewHallTranslations([]);
         setShowNewHall(false);
       } else {
         const error = await res.json();
@@ -317,6 +343,13 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     }
   };
 
+  const openNewStopForm = (hallId?: string) => {
+    setActiveHallIdForNewStop(hallId || null);
+    setNewStopData({ title: "", audioUrl: "", imageUrl: "", hallId: hallId || "" });
+    setNewStopTranslations([]);
+    setShowNewStop(true);
+  };
+
   const handleAddStop = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddingStop(true);
@@ -325,6 +358,8 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
       const enTrans = newStopTranslations.find((t) => t.langCode === "en");
       const ruTrans = newStopTranslations.find((t) => t.langCode === "ru");
       const ukTrans = newStopTranslations.find((t) => t.langCode === "uk");
+
+      const hallId = activeHallIdForNewStop || newStopData.hallId || null;
 
       const res = await fetch(`/api/geoguide/tours/${params.id}/stops`, {
         method: "POST",
@@ -339,7 +374,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
           audioUrlRu: ruTrans?.audioUrl || null,
           audioUrlUk: ukTrans?.audioUrl || null,
           imageUrl: newStopData.imageUrl || null,
-          hallId: newStopData.hallId || null,
+          hallId: hallId,
           orderIndex: tour?.stops.length || 0,
         }),
       });
@@ -350,6 +385,9 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
         setNewStopData({ title: "", audioUrl: "", imageUrl: "", hallId: "" });
         setNewStopTranslations([]);
         setShowNewStop(false);
+        setActiveHallIdForNewStop(null);
+        // Refresh to update hall stop counts
+        fetchTour();
       } else {
         const error = await res.json();
         alert(error.message || "შეცდომა მოხდა");
@@ -371,6 +409,8 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
 
       if (res.ok) {
         setTour((prev) => prev ? { ...prev, stops: prev.stops.filter((s) => s.id !== stopId) } : null);
+        // Refresh to update hall stop counts
+        fetchTour();
       }
     } catch (error) {
       console.error("Error deleting stop:", error);
@@ -381,6 +421,14 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     if (!hallId) return null;
     const hall = tour?.halls.find((h) => h.id === hallId);
     return hall?.name || null;
+  };
+
+  const getStopsForHall = (hallId: string) => {
+    return tour?.stops.filter((s) => s.hallId === hallId) || [];
+  };
+
+  const getStopsWithoutHall = () => {
+    return tour?.stops.filter((s) => !s.hallId) || [];
   };
 
   if (loading) {
@@ -629,62 +677,108 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
               {showNewHall && (
                 <form onSubmit={handleAddHall} className="mb-4 p-4 border rounded-lg bg-muted/50">
                   <h4 className="font-medium mb-3">ახალი დარბაზი</h4>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>სახელი (ქართ) *</Label>
-                      <Input
-                        value={newHallData.name}
-                        onChange={(e) => setNewHallData({ ...newHallData, name: e.target.value })}
-                        placeholder="მაგ: პირველი სართული"
-                        required
-                      />
+                  <div className="space-y-4">
+                    {/* Georgian - Main */}
+                    <div className="p-3 border rounded-lg bg-background">
+                      <div className="text-sm font-medium text-amber-600 mb-2">🇬🇪 ქართული (მთავარი)</div>
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <Label>სახელი *</Label>
+                          <Input
+                            value={newHallData.name}
+                            onChange={(e) => setNewHallData({ ...newHallData, name: e.target.value })}
+                            placeholder="მაგ: პირველი სართული"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>სურათი</Label>
+                          <FileUpload
+                            accept="image/*"
+                            folder="halls"
+                            currentUrl={newHallData.imageUrl}
+                            onUpload={(url) => setNewHallData({ ...newHallData, imageUrl: url })}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>სართული (არასავალდებულო)</Label>
-                      <Input
-                        type="number"
-                        value={newHallData.floorNumber}
-                        onChange={(e) => setNewHallData({ ...newHallData, floorNumber: e.target.value })}
-                        placeholder="მაგ: 1"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>სახელი (ინგლ)</Label>
-                      <Input
-                        value={newHallData.nameEn}
-                        onChange={(e) => setNewHallData({ ...newHallData, nameEn: e.target.value })}
-                        placeholder="First Floor"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>სახელი (რუს)</Label>
-                      <Input
-                        value={newHallData.nameRu}
-                        onChange={(e) => setNewHallData({ ...newHallData, nameRu: e.target.value })}
-                        placeholder="Первый этаж"
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>სახელი (უკრ)</Label>
-                      <Input
-                        value={newHallData.nameUk}
-                        onChange={(e) => setNewHallData({ ...newHallData, nameUk: e.target.value })}
-                        placeholder="Перший поверх"
-                      />
+
+                    {/* Translations */}
+                    {newHallTranslations.map((trans) => (
+                      <div key={trans.langCode} className="p-3 border rounded-lg bg-background">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">{getLanguageName(trans.langCode)}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setNewHallTranslations(newHallTranslations.filter((t) => t.langCode !== trans.langCode))}
+                            className="text-red-500 h-6 w-6 p-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <Input
+                          value={trans.name}
+                          onChange={(e) =>
+                            setNewHallTranslations(
+                              newHallTranslations.map((t) =>
+                                t.langCode === trans.langCode ? { ...t, name: e.target.value } : t
+                              )
+                            )
+                          }
+                          placeholder={`სახელი (${getLanguageName(trans.langCode)})`}
+                        />
+                      </div>
+                    ))}
+
+                    {/* Add Language Button */}
+                    <div className="relative">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowNewHallLangPicker(!showNewHallLangPicker)}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        ენის დამატება
+                      </Button>
+                      {showNewHallLangPicker && (
+                        <div className="absolute left-0 top-full mt-1 bg-white border rounded-md shadow-lg z-10 min-w-[150px]">
+                          {AVAILABLE_LANGUAGES.filter(
+                            (l) => !newHallTranslations.find((t) => t.langCode === l.code)
+                          ).map((lang) => (
+                            <button
+                              key={lang.code}
+                              type="button"
+                              className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
+                              onClick={() => {
+                                setNewHallTranslations([...newHallTranslations, { langCode: lang.code, name: "" }]);
+                                setShowNewHallLangPicker(false);
+                              }}
+                            >
+                              {lang.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2 mt-4">
                     <Button type="submit" disabled={addingHall} size="sm" className="bg-amber-500 hover:bg-amber-600">
                       {addingHall ? <Loader2 className="h-4 w-4 animate-spin" /> : "დამატება"}
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setShowNewHall(false)}>
+                    <Button type="button" variant="outline" size="sm" onClick={() => {
+                      setShowNewHall(false);
+                      setNewHallTranslations([]);
+                    }}>
                       გაუქმება
                     </Button>
                   </div>
                 </form>
               )}
 
-              {/* Halls List */}
+              {/* Halls List with Accordion */}
               {(!tour.halls || tour.halls.length === 0) ? (
                 <div className="text-center py-6 text-muted-foreground">
                   <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -692,55 +786,139 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                   <p className="text-xs">დარბაზები არასავალდებულოა - გამოიყენეთ დიდი მუზეუმებისთვის</p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {tour.halls
                     .sort((a, b) => a.orderIndex - b.orderIndex)
-                    .map((hall, index) => (
-                      <div
-                        key={hall.id}
-                        className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50"
-                      >
-                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                        <span className="w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center">
-                          {index + 1}
-                        </span>
-                        <div className="flex-1">
-                          <div className="font-medium">{hall.name}</div>
-                          {hall.nameEn && (
-                            <div className="text-sm text-muted-foreground">{hall.nameEn}</div>
+                    .map((hall, index) => {
+                      const isExpanded = expandedHalls.has(hall.id);
+                      const hallStops = getStopsForHall(hall.id);
+                      
+                      return (
+                        <div key={hall.id} className="border rounded-lg overflow-hidden">
+                          {/* Hall Header - Card Style */}
+                          <div
+                            className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-white cursor-pointer hover:bg-blue-100/50 transition-colors"
+                            onClick={() => toggleHallExpanded(hall.id)}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-5 w-5 text-blue-500" />
+                            ) : (
+                              <ChevronRight className="h-5 w-5 text-blue-500" />
+                            )}
+                            
+                            {hall.imageUrl ? (
+                              <img
+                                src={hall.imageUrl}
+                                alt={hall.name}
+                                className="w-16 h-16 object-cover rounded-lg"
+                              />
+                            ) : (
+                              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <ImageIcon className="h-6 w-6 text-blue-400" />
+                              </div>
+                            )}
+                            
+                            <div className="flex-1">
+                              <div className="font-semibold text-gray-900">{hall.name}</div>
+                              {hall.nameEn && (
+                                <div className="text-sm text-muted-foreground">{hall.nameEn}</div>
+                              )}
+                              <div className="text-xs text-blue-600 mt-1">
+                                {hallStops.length} გაჩერება
+                              </div>
+                            </div>
+                            
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteHall(hall.id);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          {/* Expanded Content - Stops */}
+                          {isExpanded && (
+                            <div className="border-t bg-gray-50 p-3">
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="text-sm font-medium text-gray-600">გაჩერებები დარბაზში</span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openNewStopForm(hall.id);
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4 mr-1" />
+                                  დამატება
+                                </Button>
+                              </div>
+                              
+                              {hallStops.length === 0 ? (
+                                <div className="text-center py-4 text-muted-foreground text-sm">
+                                  გაჩერებები არ არის
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {hallStops
+                                    .sort((a, b) => a.orderIndex - b.orderIndex)
+                                    .map((stop, stopIndex) => (
+                                      <div
+                                        key={stop.id}
+                                        className="flex items-center gap-2 p-2 bg-white rounded border"
+                                      >
+                                        <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center">
+                                          {stopIndex + 1}
+                                        </span>
+                                        <div className="flex-1 text-sm">
+                                          <div className="font-medium">{stop.title}</div>
+                                          {stop.titleEn && (
+                                            <div className="text-xs text-muted-foreground">{stop.titleEn}</div>
+                                          )}
+                                        </div>
+                                        {stop.audioUrl && (
+                                          <span className="text-xs text-green-600">🎧</span>
+                                        )}
+                                        <Link href={`/geoguide/tours/${params.id}/stops/${stop.id}`}>
+                                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+                                            რედაქტირება
+                                          </Button>
+                                        </Link>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-red-500 h-7 w-7 p-0"
+                                          onClick={() => handleDeleteStop(stop.id)}
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
-                        <span className="text-xs px-2 py-1 rounded-full bg-gray-100">
-                          {hall._count?.stops || 0} გაჩერება
-                        </span>
-                        {hall.floorNumber && (
-                          <span className="text-xs text-muted-foreground">
-                            სართ. {hall.floorNumber}
-                          </span>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500 hover:text-red-600"
-                          onClick={() => handleDeleteHall(hall.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Stops Section */}
+          {/* Stops Without Hall Section */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>გაჩერებები ({tour.stops.length})</CardTitle>
+              <CardTitle>გაჩერებები (დარბაზის გარეშე: {getStopsWithoutHall().length})</CardTitle>
               <Button
                 size="sm"
                 className="bg-amber-500 hover:bg-amber-600"
-                onClick={() => setShowNewStop(true)}
+                onClick={() => openNewStopForm()}
               >
                 <Plus className="h-4 w-4 mr-1" />
                 დამატება
@@ -750,10 +928,17 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
               {/* New Stop Form */}
               {showNewStop && (
                 <form onSubmit={handleAddStop} className="mb-6 p-4 border rounded-lg bg-muted/50">
-                  <h4 className="font-medium mb-4">ახალი გაჩერება</h4>
+                  <h4 className="font-medium mb-4">
+                    ახალი გაჩერება
+                    {activeHallIdForNewStop && (
+                      <span className="text-blue-600 ml-2">
+                        ({getHallName(activeHallIdForNewStop)})
+                      </span>
+                    )}
+                  </h4>
                   <div className="space-y-4">
-                    {/* Hall Selection */}
-                    {tour.halls && tour.halls.length > 0 && (
+                    {/* Hall Selection - only if no active hall */}
+                    {!activeHallIdForNewStop && tour.halls && tour.halls.length > 0 && (
                       <div className="space-y-2">
                         <Label>დარბაზი (არასავალდებულო)</Label>
                         <select
@@ -761,10 +946,10 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                           onChange={(e) => setNewStopData({ ...newStopData, hallId: e.target.value })}
                           className="w-full px-3 py-2 border rounded-md text-sm"
                         >
-                          <option value="">-- აირჩიეთ დარბაზი --</option>
+                          <option value="">-- დარბაზის გარეშე --</option>
                           {tour.halls.map((hall) => (
                             <option key={hall.id} value={hall.id}>
-                              {hall.name} {hall.floorNumber ? `(სართ. ${hall.floorNumber})` : ""}
+                              {hall.name}
                             </option>
                           ))}
                         </select>
@@ -898,6 +1083,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                       onClick={() => {
                         setShowNewStop(false);
                         setNewStopTranslations([]);
+                        setActiveHallIdForNewStop(null);
                       }}
                     >
                       გაუქმება
@@ -906,16 +1092,15 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                 </form>
               )}
 
-              {/* Stops List */}
-              {tour.stops.length === 0 ? (
+              {/* Stops Without Hall List */}
+              {getStopsWithoutHall().length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <div className="text-4xl mb-2">📍</div>
-                  <p>გაჩერებები ჯერ არ არის</p>
-                  <p className="text-sm">დაამატეთ პირველი გაჩერება</p>
+                  <p>დარბაზის გარეშე გაჩერებები არ არის</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {tour.stops
+                  {getStopsWithoutHall()
                     .sort((a, b) => a.orderIndex - b.orderIndex)
                     .map((stop, index) => (
                       <div
@@ -932,13 +1117,6 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                             <div className="text-sm text-muted-foreground">{stop.titleEn}</div>
                           )}
                         </div>
-
-                        {/* Hall badge */}
-                        {stop.hallId && getHallName(stop.hallId) && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
-                            {getHallName(stop.hallId)}
-                          </span>
-                        )}
 
                         {/* Status badges */}
                         <div className="flex items-center gap-2">
