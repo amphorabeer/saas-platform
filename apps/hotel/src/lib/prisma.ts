@@ -1,29 +1,32 @@
 import { PrismaClient } from '@prisma/client'
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
+declare global {
+  // eslint-disable-next-line no-var
+  var prismaClient: PrismaClient | undefined
 }
 
-const prismaInstance = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-})
+// Create a single instance
+let prismaInstance: PrismaClient
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prismaInstance
+if (process.env.NODE_ENV === 'production') {
+  prismaInstance = new PrismaClient({
+    log: ['error'],
+  })
+} else {
+  // In development, use global to preserve across hot reloads
+  if (!global.prismaClient) {
+    global.prismaClient = new PrismaClient({
+      log: ['error', 'warn'],
+    })
+  }
+  prismaInstance = global.prismaClient
 }
-
-// Always set in production too
-globalForPrisma.prisma = prismaInstance
 
 export const prisma = prismaInstance
 
 export function getPrismaClient(): PrismaClient {
-  if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient({
-      log: ['error'],
-    })
-  }
-  return globalForPrisma.prisma
+  // Always return the instance - never undefined
+  return prismaInstance
 }
 
 export default prisma
