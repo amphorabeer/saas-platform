@@ -1,29 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
 
-// GET /api/geoguide/tours/[id]/stops
+// GET /api/geoguide/tours/[id]/halls - დარბაზების სია
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const stops = await prisma.tourStop.findMany({
+    const halls = await prisma.hall.findMany({
       where: { tourId: params.id },
       orderBy: { orderIndex: "asc" },
+      include: {
+        _count: {
+          select: { stops: true },
+        },
+      },
     });
 
-    return NextResponse.json(stops);
+    return NextResponse.json(halls);
   } catch (error) {
-    console.error("Error fetching stops:", error);
+    console.error("Error fetching halls:", error);
     return NextResponse.json(
-      { error: "Failed to fetch stops" },
+      { error: "Failed to fetch halls" },
       { status: 500 }
     );
   }
 }
 
-// POST /api/geoguide/tours/[id]/stops
+// POST /api/geoguide/tours/[id]/halls - ახალი დარბაზის შექმნა
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -44,52 +48,41 @@ export async function POST(
     }
 
     // Get max orderIndex
-    const maxOrder = await prisma.tourStop.aggregate({
+    const maxOrder = await prisma.hall.aggregate({
       where: { tourId: params.id },
       _max: { orderIndex: true },
     });
 
     const newOrderIndex = (maxOrder._max.orderIndex ?? -1) + 1;
 
-    // Generate unique QR code
-    const qrCode = `STOP-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
-
-    const stop = await prisma.tourStop.create({
+    const hall = await prisma.hall.create({
       data: {
         tourId: params.id,
-        hallId: body.hallId || null,
-        title: body.title,
-        titleEn: body.titleEn || null,
-        titleRu: body.titleRu || null,
-        titleUk: body.titleUk || null,
+        name: body.name,
+        nameEn: body.nameEn || null,
+        nameRu: body.nameRu || null,
+        nameUk: body.nameUk || null,
         description: body.description || null,
         descriptionEn: body.descriptionEn || null,
         descriptionRu: body.descriptionRu || null,
         descriptionUk: body.descriptionUk || null,
-        audioUrl: body.audioUrl || null,
-        audioUrlEn: body.audioUrlEn || null,
-        audioUrlRu: body.audioUrlRu || null,
-        audioUrlUk: body.audioUrlUk || null,
+        floorNumber: body.floorNumber || null,
         imageUrl: body.imageUrl || null,
-        qrCode,
         orderIndex: body.orderIndex ?? newOrderIndex,
-        isPublished: body.isPublished ?? false,
+        isPublished: body.isPublished ?? true,
+      },
+      include: {
+        _count: {
+          select: { stops: true },
+        },
       },
     });
 
-    // Update tour stopsCount
-    await prisma.tour.update({
-      where: { id: params.id },
-      data: {
-        stopsCount: { increment: 1 },
-      },
-    });
-
-    return NextResponse.json(stop, { status: 201 });
+    return NextResponse.json(hall, { status: 201 });
   } catch (error) {
-    console.error("Error creating stop:", error);
+    console.error("Error creating hall:", error);
     return NextResponse.json(
-      { error: "Failed to create stop" },
+      { error: "Failed to create hall" },
       { status: 500 }
     );
   }

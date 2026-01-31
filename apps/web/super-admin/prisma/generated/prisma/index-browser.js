@@ -433,9 +433,29 @@ exports.Prisma.TourScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.HallScalarFieldEnum = {
+  id: 'id',
+  tourId: 'tourId',
+  name: 'name',
+  nameEn: 'nameEn',
+  nameRu: 'nameRu',
+  nameUk: 'nameUk',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  descriptionRu: 'descriptionRu',
+  descriptionUk: 'descriptionUk',
+  floorNumber: 'floorNumber',
+  imageUrl: 'imageUrl',
+  orderIndex: 'orderIndex',
+  isPublished: 'isPublished',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.TourStopScalarFieldEnum = {
   id: 'id',
   tourId: 'tourId',
+  hallId: 'hallId',
   title: 'title',
   titleEn: 'titleEn',
   titleRu: 'titleRu',
@@ -662,6 +682,7 @@ exports.Prisma.ModelName = {
   ContactRequest: 'ContactRequest',
   Museum: 'Museum',
   Tour: 'Tour',
+  Hall: 'Hall',
   TourStop: 'TourStop',
   TourPack: 'TourPack',
   ActivationCode: 'ActivationCode',

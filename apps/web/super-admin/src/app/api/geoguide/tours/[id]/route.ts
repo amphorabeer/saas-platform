@@ -11,6 +11,12 @@ export async function GET(
       include: {
         museum: { select: { id: true, name: true, coverImage: true } },
         stops: { orderBy: { orderIndex: "asc" } },
+        halls: {
+          orderBy: { orderIndex: "asc" },
+          include: {
+            _count: { select: { stops: true } },
+          },
+        },
       },
     });
 
@@ -53,6 +59,12 @@ export async function PATCH(
       include: {
         museum: { select: { id: true, name: true, coverImage: true } },
         stops: { orderBy: { orderIndex: "asc" } },
+        halls: {
+          orderBy: { orderIndex: "asc" },
+          include: {
+            _count: { select: { stops: true } },
+          },
+        },
       },
     });
 

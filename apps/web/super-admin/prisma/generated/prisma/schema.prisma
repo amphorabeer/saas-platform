@@ -593,6 +593,7 @@ model Tour {
   coverImage String?
 
   // რელაციები
+  halls        Hall[]
   stops        TourStop[]
   packs        TourPack[]
   entitlements Entitlement[]
@@ -605,12 +606,41 @@ model Tour {
   @@index([isPublished])
 }
 
+model Hall {
+  id     String @id @default(cuid())
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  name   String
+  nameEn String?
+  nameRu String?
+  nameUk String?
+
+  description   String?
+  descriptionEn String?
+  descriptionRu String?
+  descriptionUk String?
+
+  floorNumber Int?
+  imageUrl    String?
+  orderIndex  Int     @default(0)
+  isPublished Boolean @default(true)
+
+  stops TourStop[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ტურის გაჩერება (Stop/Exhibit)
 model TourStop {
   id String @id @default(cuid())
 
   tourId String
   tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  hallId String?
+  hall   Hall?   @relation(fields: [hallId], references: [id])
 
   // ძირითადი ინფორმაცია
   title   String
