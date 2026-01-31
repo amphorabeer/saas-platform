@@ -98,6 +98,10 @@ export async function PATCH(
         }),
         ...(body.cityFr !== undefined && { cityFr: body.cityFr }),
         ...(body.addressFr !== undefined && { addressFr: body.addressFr }),
+        ...(body.nameUk !== undefined && { nameUk: body.nameUk }),
+        ...(body.descriptionUk !== undefined && { descriptionUk: body.descriptionUk }),
+        ...(body.cityUk !== undefined && { cityUk: body.cityUk }),
+        ...(body.addressUk !== undefined && { addressUk: body.addressUk }),
 
         // Common
         ...(body.slug !== undefined && { slug: body.slug }),
