@@ -37,7 +37,12 @@ export async function PATCH(
       data: {
         ...(body.name !== undefined && { name: body.name }),
         ...(body.nameEn !== undefined && { nameEn: body.nameEn }),
+        ...(body.nameRu !== undefined && { nameRu: body.nameRu }),
+        ...(body.nameUk !== undefined && { nameUk: body.nameUk }),
         ...(body.description !== undefined && { description: body.description }),
+        ...(body.descriptionEn !== undefined && { descriptionEn: body.descriptionEn }),
+        ...(body.descriptionRu !== undefined && { descriptionRu: body.descriptionRu }),
+        ...(body.descriptionUk !== undefined && { descriptionUk: body.descriptionUk }),
         ...(body.duration !== undefined && { duration: body.duration }),
         ...(body.isFree !== undefined && { isFree: body.isFree }),
         ...(body.price !== undefined && { price: body.price }),

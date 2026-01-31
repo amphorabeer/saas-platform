@@ -63,6 +63,8 @@ export async function POST(request: NextRequest) {
         description: body.description || null,
         descriptionEn: body.descriptionEn || null,
         descriptionRu: body.descriptionRu || null,
+        nameUk: body.nameUk || null,
+        descriptionUk: body.descriptionUk || null,
         duration: body.duration || null,
         isFree: body.isFree || false,
         price: body.price || null,

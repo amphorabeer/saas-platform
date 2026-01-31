@@ -516,6 +516,12 @@ model Museum {
   cityFr          String?
   addressFr       String?
 
+  // უკრაინული
+  nameUk          String?
+  descriptionUk   String?         @db.Text
+  cityUk          String?
+  addressUk       String?
+
   // URL და მედია
   slug            String          @unique
   coverImage      String?
@@ -563,10 +569,12 @@ model Tour {
   name            String
   nameEn          String?
   nameRu          String?
+  nameUk          String?
   
   description     String?         @db.Text
   descriptionEn   String?         @db.Text
   descriptionRu   String?         @db.Text
+  descriptionUk   String?         @db.Text
   
   // პარამეტრები
   duration        Int?            // წუთებში
@@ -608,20 +616,24 @@ model TourStop {
   title           String
   titleEn         String?
   titleRu         String?
+  titleUk         String?
   
   description     String?         @db.Text
   descriptionEn   String?         @db.Text
   descriptionRu   String?         @db.Text
+  descriptionUk   String?         @db.Text
   
   // აუდიო ტრანსკრიპტი
   transcript      String?         @db.Text
   transcriptEn    String?         @db.Text
   transcriptRu    String?         @db.Text
+  transcriptUk    String?         @db.Text
   
   // მედია
   audioUrl        String?         // აუდიო ფაილის URL
   audioUrlEn      String?
   audioUrlRu      String?
+  audioUrlUk      String?
   
   audioDuration   Int?            // წამებში
   
