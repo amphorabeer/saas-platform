@@ -45,6 +45,7 @@ export default function HomePage() {
           if (museum.nameRu) langs.add("ru");
           if (museum.nameDe) langs.add("de");
           if (museum.nameFr) langs.add("fr");
+          if (museum.nameUk) langs.add("uk");
         });
         setAvailableLanguages(Array.from(langs));
       }
@@ -76,6 +77,7 @@ export default function HomePage() {
       ru: { name: "nameRu", city: "cityRu" },
       de: { name: "nameDe", city: "cityDe" },
       fr: { name: "nameFr", city: "cityFr" },
+      uk: { name: "nameUk", city: "cityUk" },
     };
 
     const langField = langFieldMap[language]?.[field];
@@ -95,6 +97,7 @@ export default function HomePage() {
       ru: "nameRu",
       de: "nameDe",
       fr: "nameFr",
+      uk: "nameUk",
     };
 
     const nameField = nameFieldMap[language];
@@ -127,6 +130,10 @@ export default function HomePage() {
     fr: {
       selectMuseum: "Choisir un musée",
       noMuseums: "Aucun musée trouvé",
+    },
+    uk: {
+      selectMuseum: "Оберіть музей",
+      noMuseums: "Музеї не знайдено",
     },
   };
 
