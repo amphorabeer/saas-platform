@@ -109,6 +109,11 @@ export type Museum = $Result.DefaultSelection<Prisma.$MuseumPayload>
  */
 export type Tour = $Result.DefaultSelection<Prisma.$TourPayload>
 /**
+ * Model Hall
+ * 
+ */
+export type Hall = $Result.DefaultSelection<Prisma.$HallPayload>
+/**
  * Model TourStop
  * 
  */
@@ -590,6 +595,16 @@ export class PrismaClient<
     * ```
     */
   get tour(): Prisma.TourDelegate<ExtArgs>;
+
+  /**
+   * `prisma.hall`: Exposes CRUD operations for the **Hall** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Halls
+    * const halls = await prisma.hall.findMany()
+    * ```
+    */
+  get hall(): Prisma.HallDelegate<ExtArgs>;
 
   /**
    * `prisma.tourStop`: Exposes CRUD operations for the **TourStop** model.
@@ -1120,6 +1135,7 @@ export namespace Prisma {
     ContactRequest: 'ContactRequest',
     Museum: 'Museum',
     Tour: 'Tour',
+    Hall: 'Hall',
     TourStop: 'TourStop',
     TourPack: 'TourPack',
     ActivationCode: 'ActivationCode',
@@ -1142,7 +1158,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "organization" | "user" | "account" | "session" | "verificationToken" | "subscription" | "moduleAccess" | "moduleFeature" | "invoice" | "moduleConfig" | "landingPageContent" | "supportTicket" | "activityLog" | "hotelRoom" | "hotelReservation" | "configuration" | "contactRequest" | "museum" | "tour" | "tourStop" | "tourPack" | "activationCode" | "device" | "entitlement" | "payment" | "geoGuideEvent"
+      modelProps: "organization" | "user" | "account" | "session" | "verificationToken" | "subscription" | "moduleAccess" | "moduleFeature" | "invoice" | "moduleConfig" | "landingPageContent" | "supportTicket" | "activityLog" | "hotelRoom" | "hotelReservation" | "configuration" | "contactRequest" | "museum" | "tour" | "hall" | "tourStop" | "tourPack" | "activationCode" | "device" | "entitlement" | "payment" | "geoGuideEvent"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2476,6 +2492,76 @@ export namespace Prisma {
           }
         }
       }
+      Hall: {
+        payload: Prisma.$HallPayload<ExtArgs>
+        fields: Prisma.HallFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.HallFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.HallFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload>
+          }
+          findFirst: {
+            args: Prisma.HallFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.HallFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload>
+          }
+          findMany: {
+            args: Prisma.HallFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload>[]
+          }
+          create: {
+            args: Prisma.HallCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload>
+          }
+          createMany: {
+            args: Prisma.HallCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.HallCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload>[]
+          }
+          delete: {
+            args: Prisma.HallDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload>
+          }
+          update: {
+            args: Prisma.HallUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload>
+          }
+          deleteMany: {
+            args: Prisma.HallDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.HallUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.HallUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$HallPayload>
+          }
+          aggregate: {
+            args: Prisma.HallAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateHall>
+          }
+          groupBy: {
+            args: Prisma.HallGroupByArgs<ExtArgs>
+            result: $Utils.Optional<HallGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.HallCountArgs<ExtArgs>
+            result: $Utils.Optional<HallCountAggregateOutputType> | number
+          }
+        }
+      }
       TourStop: {
         payload: Prisma.$TourStopPayload<ExtArgs>
         fields: Prisma.TourStopFieldRefs
@@ -3358,6 +3444,7 @@ export namespace Prisma {
    */
 
   export type TourCountOutputType = {
+    halls: number
     stops: number
     packs: number
     entitlements: number
@@ -3365,6 +3452,7 @@ export namespace Prisma {
   }
 
   export type TourCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    halls?: boolean | TourCountOutputTypeCountHallsArgs
     stops?: boolean | TourCountOutputTypeCountStopsArgs
     packs?: boolean | TourCountOutputTypeCountPacksArgs
     entitlements?: boolean | TourCountOutputTypeCountEntitlementsArgs
@@ -3380,6 +3468,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the TourCountOutputType
      */
     select?: TourCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TourCountOutputType without action
+   */
+  export type TourCountOutputTypeCountHallsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: HallWhereInput
   }
 
   /**
@@ -3408,6 +3503,37 @@ export namespace Prisma {
    */
   export type TourCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaymentWhereInput
+  }
+
+
+  /**
+   * Count Type HallCountOutputType
+   */
+
+  export type HallCountOutputType = {
+    stops: number
+  }
+
+  export type HallCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stops?: boolean | HallCountOutputTypeCountStopsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * HallCountOutputType without action
+   */
+  export type HallCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the HallCountOutputType
+     */
+    select?: HallCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * HallCountOutputType without action
+   */
+  export type HallCountOutputTypeCountStopsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TourStopWhereInput
   }
 
 
@@ -22662,6 +22788,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     museum?: boolean | MuseumDefaultArgs<ExtArgs>
+    halls?: boolean | Tour$hallsArgs<ExtArgs>
     stops?: boolean | Tour$stopsArgs<ExtArgs>
     packs?: boolean | Tour$packsArgs<ExtArgs>
     entitlements?: boolean | Tour$entitlementsArgs<ExtArgs>
@@ -22718,6 +22845,7 @@ export namespace Prisma {
 
   export type TourInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     museum?: boolean | MuseumDefaultArgs<ExtArgs>
+    halls?: boolean | Tour$hallsArgs<ExtArgs>
     stops?: boolean | Tour$stopsArgs<ExtArgs>
     packs?: boolean | Tour$packsArgs<ExtArgs>
     entitlements?: boolean | Tour$entitlementsArgs<ExtArgs>
@@ -22732,6 +22860,7 @@ export namespace Prisma {
     name: "Tour"
     objects: {
       museum: Prisma.$MuseumPayload<ExtArgs>
+      halls: Prisma.$HallPayload<ExtArgs>[]
       stops: Prisma.$TourStopPayload<ExtArgs>[]
       packs: Prisma.$TourPackPayload<ExtArgs>[]
       entitlements: Prisma.$EntitlementPayload<ExtArgs>[]
@@ -23123,6 +23252,7 @@ export namespace Prisma {
   export interface Prisma__TourClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     museum<T extends MuseumDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MuseumDefaultArgs<ExtArgs>>): Prisma__MuseumClient<$Result.GetResult<Prisma.$MuseumPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    halls<T extends Tour$hallsArgs<ExtArgs> = {}>(args?: Subset<T, Tour$hallsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "findMany"> | Null>
     stops<T extends Tour$stopsArgs<ExtArgs> = {}>(args?: Subset<T, Tour$stopsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TourStopPayload<ExtArgs>, T, "findMany"> | Null>
     packs<T extends Tour$packsArgs<ExtArgs> = {}>(args?: Subset<T, Tour$packsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TourPackPayload<ExtArgs>, T, "findMany"> | Null>
     entitlements<T extends Tour$entitlementsArgs<ExtArgs> = {}>(args?: Subset<T, Tour$entitlementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EntitlementPayload<ExtArgs>, T, "findMany"> | Null>
@@ -23494,6 +23624,26 @@ export namespace Prisma {
   }
 
   /**
+   * Tour.halls
+   */
+  export type Tour$hallsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    where?: HallWhereInput
+    orderBy?: HallOrderByWithRelationInput | HallOrderByWithRelationInput[]
+    cursor?: HallWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: HallScalarFieldEnum | HallScalarFieldEnum[]
+  }
+
+  /**
    * Tour.stops
    */
   export type Tour$stopsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -23589,6 +23739,1135 @@ export namespace Prisma {
 
 
   /**
+   * Model Hall
+   */
+
+  export type AggregateHall = {
+    _count: HallCountAggregateOutputType | null
+    _avg: HallAvgAggregateOutputType | null
+    _sum: HallSumAggregateOutputType | null
+    _min: HallMinAggregateOutputType | null
+    _max: HallMaxAggregateOutputType | null
+  }
+
+  export type HallAvgAggregateOutputType = {
+    floorNumber: number | null
+    orderIndex: number | null
+  }
+
+  export type HallSumAggregateOutputType = {
+    floorNumber: number | null
+    orderIndex: number | null
+  }
+
+  export type HallMinAggregateOutputType = {
+    id: string | null
+    tourId: string | null
+    name: string | null
+    nameEn: string | null
+    nameRu: string | null
+    nameUk: string | null
+    description: string | null
+    descriptionEn: string | null
+    descriptionRu: string | null
+    descriptionUk: string | null
+    floorNumber: number | null
+    imageUrl: string | null
+    orderIndex: number | null
+    isPublished: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type HallMaxAggregateOutputType = {
+    id: string | null
+    tourId: string | null
+    name: string | null
+    nameEn: string | null
+    nameRu: string | null
+    nameUk: string | null
+    description: string | null
+    descriptionEn: string | null
+    descriptionRu: string | null
+    descriptionUk: string | null
+    floorNumber: number | null
+    imageUrl: string | null
+    orderIndex: number | null
+    isPublished: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type HallCountAggregateOutputType = {
+    id: number
+    tourId: number
+    name: number
+    nameEn: number
+    nameRu: number
+    nameUk: number
+    description: number
+    descriptionEn: number
+    descriptionRu: number
+    descriptionUk: number
+    floorNumber: number
+    imageUrl: number
+    orderIndex: number
+    isPublished: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type HallAvgAggregateInputType = {
+    floorNumber?: true
+    orderIndex?: true
+  }
+
+  export type HallSumAggregateInputType = {
+    floorNumber?: true
+    orderIndex?: true
+  }
+
+  export type HallMinAggregateInputType = {
+    id?: true
+    tourId?: true
+    name?: true
+    nameEn?: true
+    nameRu?: true
+    nameUk?: true
+    description?: true
+    descriptionEn?: true
+    descriptionRu?: true
+    descriptionUk?: true
+    floorNumber?: true
+    imageUrl?: true
+    orderIndex?: true
+    isPublished?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type HallMaxAggregateInputType = {
+    id?: true
+    tourId?: true
+    name?: true
+    nameEn?: true
+    nameRu?: true
+    nameUk?: true
+    description?: true
+    descriptionEn?: true
+    descriptionRu?: true
+    descriptionUk?: true
+    floorNumber?: true
+    imageUrl?: true
+    orderIndex?: true
+    isPublished?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type HallCountAggregateInputType = {
+    id?: true
+    tourId?: true
+    name?: true
+    nameEn?: true
+    nameRu?: true
+    nameUk?: true
+    description?: true
+    descriptionEn?: true
+    descriptionRu?: true
+    descriptionUk?: true
+    floorNumber?: true
+    imageUrl?: true
+    orderIndex?: true
+    isPublished?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type HallAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Hall to aggregate.
+     */
+    where?: HallWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Halls to fetch.
+     */
+    orderBy?: HallOrderByWithRelationInput | HallOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: HallWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Halls from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Halls.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Halls
+    **/
+    _count?: true | HallCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: HallAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: HallSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: HallMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: HallMaxAggregateInputType
+  }
+
+  export type GetHallAggregateType<T extends HallAggregateArgs> = {
+        [P in keyof T & keyof AggregateHall]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateHall[P]>
+      : GetScalarType<T[P], AggregateHall[P]>
+  }
+
+
+
+
+  export type HallGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: HallWhereInput
+    orderBy?: HallOrderByWithAggregationInput | HallOrderByWithAggregationInput[]
+    by: HallScalarFieldEnum[] | HallScalarFieldEnum
+    having?: HallScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: HallCountAggregateInputType | true
+    _avg?: HallAvgAggregateInputType
+    _sum?: HallSumAggregateInputType
+    _min?: HallMinAggregateInputType
+    _max?: HallMaxAggregateInputType
+  }
+
+  export type HallGroupByOutputType = {
+    id: string
+    tourId: string
+    name: string
+    nameEn: string | null
+    nameRu: string | null
+    nameUk: string | null
+    description: string | null
+    descriptionEn: string | null
+    descriptionRu: string | null
+    descriptionUk: string | null
+    floorNumber: number | null
+    imageUrl: string | null
+    orderIndex: number
+    isPublished: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: HallCountAggregateOutputType | null
+    _avg: HallAvgAggregateOutputType | null
+    _sum: HallSumAggregateOutputType | null
+    _min: HallMinAggregateOutputType | null
+    _max: HallMaxAggregateOutputType | null
+  }
+
+  type GetHallGroupByPayload<T extends HallGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<HallGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof HallGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], HallGroupByOutputType[P]>
+            : GetScalarType<T[P], HallGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type HallSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tourId?: boolean
+    name?: boolean
+    nameEn?: boolean
+    nameRu?: boolean
+    nameUk?: boolean
+    description?: boolean
+    descriptionEn?: boolean
+    descriptionRu?: boolean
+    descriptionUk?: boolean
+    floorNumber?: boolean
+    imageUrl?: boolean
+    orderIndex?: boolean
+    isPublished?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    tour?: boolean | TourDefaultArgs<ExtArgs>
+    stops?: boolean | Hall$stopsArgs<ExtArgs>
+    _count?: boolean | HallCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["hall"]>
+
+  export type HallSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tourId?: boolean
+    name?: boolean
+    nameEn?: boolean
+    nameRu?: boolean
+    nameUk?: boolean
+    description?: boolean
+    descriptionEn?: boolean
+    descriptionRu?: boolean
+    descriptionUk?: boolean
+    floorNumber?: boolean
+    imageUrl?: boolean
+    orderIndex?: boolean
+    isPublished?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    tour?: boolean | TourDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["hall"]>
+
+  export type HallSelectScalar = {
+    id?: boolean
+    tourId?: boolean
+    name?: boolean
+    nameEn?: boolean
+    nameRu?: boolean
+    nameUk?: boolean
+    description?: boolean
+    descriptionEn?: boolean
+    descriptionRu?: boolean
+    descriptionUk?: boolean
+    floorNumber?: boolean
+    imageUrl?: boolean
+    orderIndex?: boolean
+    isPublished?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type HallInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tour?: boolean | TourDefaultArgs<ExtArgs>
+    stops?: boolean | Hall$stopsArgs<ExtArgs>
+    _count?: boolean | HallCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type HallIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tour?: boolean | TourDefaultArgs<ExtArgs>
+  }
+
+  export type $HallPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Hall"
+    objects: {
+      tour: Prisma.$TourPayload<ExtArgs>
+      stops: Prisma.$TourStopPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tourId: string
+      name: string
+      nameEn: string | null
+      nameRu: string | null
+      nameUk: string | null
+      description: string | null
+      descriptionEn: string | null
+      descriptionRu: string | null
+      descriptionUk: string | null
+      floorNumber: number | null
+      imageUrl: string | null
+      orderIndex: number
+      isPublished: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["hall"]>
+    composites: {}
+  }
+
+  type HallGetPayload<S extends boolean | null | undefined | HallDefaultArgs> = $Result.GetResult<Prisma.$HallPayload, S>
+
+  type HallCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<HallFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: HallCountAggregateInputType | true
+    }
+
+  export interface HallDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Hall'], meta: { name: 'Hall' } }
+    /**
+     * Find zero or one Hall that matches the filter.
+     * @param {HallFindUniqueArgs} args - Arguments to find a Hall
+     * @example
+     * // Get one Hall
+     * const hall = await prisma.hall.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends HallFindUniqueArgs>(args: SelectSubset<T, HallFindUniqueArgs<ExtArgs>>): Prisma__HallClient<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Hall that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {HallFindUniqueOrThrowArgs} args - Arguments to find a Hall
+     * @example
+     * // Get one Hall
+     * const hall = await prisma.hall.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends HallFindUniqueOrThrowArgs>(args: SelectSubset<T, HallFindUniqueOrThrowArgs<ExtArgs>>): Prisma__HallClient<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Hall that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HallFindFirstArgs} args - Arguments to find a Hall
+     * @example
+     * // Get one Hall
+     * const hall = await prisma.hall.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends HallFindFirstArgs>(args?: SelectSubset<T, HallFindFirstArgs<ExtArgs>>): Prisma__HallClient<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Hall that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HallFindFirstOrThrowArgs} args - Arguments to find a Hall
+     * @example
+     * // Get one Hall
+     * const hall = await prisma.hall.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends HallFindFirstOrThrowArgs>(args?: SelectSubset<T, HallFindFirstOrThrowArgs<ExtArgs>>): Prisma__HallClient<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Halls that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HallFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Halls
+     * const halls = await prisma.hall.findMany()
+     * 
+     * // Get first 10 Halls
+     * const halls = await prisma.hall.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const hallWithIdOnly = await prisma.hall.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends HallFindManyArgs>(args?: SelectSubset<T, HallFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Hall.
+     * @param {HallCreateArgs} args - Arguments to create a Hall.
+     * @example
+     * // Create one Hall
+     * const Hall = await prisma.hall.create({
+     *   data: {
+     *     // ... data to create a Hall
+     *   }
+     * })
+     * 
+     */
+    create<T extends HallCreateArgs>(args: SelectSubset<T, HallCreateArgs<ExtArgs>>): Prisma__HallClient<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Halls.
+     * @param {HallCreateManyArgs} args - Arguments to create many Halls.
+     * @example
+     * // Create many Halls
+     * const hall = await prisma.hall.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends HallCreateManyArgs>(args?: SelectSubset<T, HallCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Halls and returns the data saved in the database.
+     * @param {HallCreateManyAndReturnArgs} args - Arguments to create many Halls.
+     * @example
+     * // Create many Halls
+     * const hall = await prisma.hall.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Halls and only return the `id`
+     * const hallWithIdOnly = await prisma.hall.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends HallCreateManyAndReturnArgs>(args?: SelectSubset<T, HallCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Hall.
+     * @param {HallDeleteArgs} args - Arguments to delete one Hall.
+     * @example
+     * // Delete one Hall
+     * const Hall = await prisma.hall.delete({
+     *   where: {
+     *     // ... filter to delete one Hall
+     *   }
+     * })
+     * 
+     */
+    delete<T extends HallDeleteArgs>(args: SelectSubset<T, HallDeleteArgs<ExtArgs>>): Prisma__HallClient<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Hall.
+     * @param {HallUpdateArgs} args - Arguments to update one Hall.
+     * @example
+     * // Update one Hall
+     * const hall = await prisma.hall.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends HallUpdateArgs>(args: SelectSubset<T, HallUpdateArgs<ExtArgs>>): Prisma__HallClient<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Halls.
+     * @param {HallDeleteManyArgs} args - Arguments to filter Halls to delete.
+     * @example
+     * // Delete a few Halls
+     * const { count } = await prisma.hall.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends HallDeleteManyArgs>(args?: SelectSubset<T, HallDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Halls.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HallUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Halls
+     * const hall = await prisma.hall.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends HallUpdateManyArgs>(args: SelectSubset<T, HallUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Hall.
+     * @param {HallUpsertArgs} args - Arguments to update or create a Hall.
+     * @example
+     * // Update or create a Hall
+     * const hall = await prisma.hall.upsert({
+     *   create: {
+     *     // ... data to create a Hall
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Hall we want to update
+     *   }
+     * })
+     */
+    upsert<T extends HallUpsertArgs>(args: SelectSubset<T, HallUpsertArgs<ExtArgs>>): Prisma__HallClient<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Halls.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HallCountArgs} args - Arguments to filter Halls to count.
+     * @example
+     * // Count the number of Halls
+     * const count = await prisma.hall.count({
+     *   where: {
+     *     // ... the filter for the Halls we want to count
+     *   }
+     * })
+    **/
+    count<T extends HallCountArgs>(
+      args?: Subset<T, HallCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], HallCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Hall.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HallAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends HallAggregateArgs>(args: Subset<T, HallAggregateArgs>): Prisma.PrismaPromise<GetHallAggregateType<T>>
+
+    /**
+     * Group by Hall.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {HallGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends HallGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: HallGroupByArgs['orderBy'] }
+        : { orderBy?: HallGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, HallGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetHallGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Hall model
+   */
+  readonly fields: HallFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Hall.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__HallClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    tour<T extends TourDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TourDefaultArgs<ExtArgs>>): Prisma__TourClient<$Result.GetResult<Prisma.$TourPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    stops<T extends Hall$stopsArgs<ExtArgs> = {}>(args?: Subset<T, Hall$stopsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TourStopPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Hall model
+   */ 
+  interface HallFieldRefs {
+    readonly id: FieldRef<"Hall", 'String'>
+    readonly tourId: FieldRef<"Hall", 'String'>
+    readonly name: FieldRef<"Hall", 'String'>
+    readonly nameEn: FieldRef<"Hall", 'String'>
+    readonly nameRu: FieldRef<"Hall", 'String'>
+    readonly nameUk: FieldRef<"Hall", 'String'>
+    readonly description: FieldRef<"Hall", 'String'>
+    readonly descriptionEn: FieldRef<"Hall", 'String'>
+    readonly descriptionRu: FieldRef<"Hall", 'String'>
+    readonly descriptionUk: FieldRef<"Hall", 'String'>
+    readonly floorNumber: FieldRef<"Hall", 'Int'>
+    readonly imageUrl: FieldRef<"Hall", 'String'>
+    readonly orderIndex: FieldRef<"Hall", 'Int'>
+    readonly isPublished: FieldRef<"Hall", 'Boolean'>
+    readonly createdAt: FieldRef<"Hall", 'DateTime'>
+    readonly updatedAt: FieldRef<"Hall", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Hall findUnique
+   */
+  export type HallFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    /**
+     * Filter, which Hall to fetch.
+     */
+    where: HallWhereUniqueInput
+  }
+
+  /**
+   * Hall findUniqueOrThrow
+   */
+  export type HallFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    /**
+     * Filter, which Hall to fetch.
+     */
+    where: HallWhereUniqueInput
+  }
+
+  /**
+   * Hall findFirst
+   */
+  export type HallFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    /**
+     * Filter, which Hall to fetch.
+     */
+    where?: HallWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Halls to fetch.
+     */
+    orderBy?: HallOrderByWithRelationInput | HallOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Halls.
+     */
+    cursor?: HallWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Halls from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Halls.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Halls.
+     */
+    distinct?: HallScalarFieldEnum | HallScalarFieldEnum[]
+  }
+
+  /**
+   * Hall findFirstOrThrow
+   */
+  export type HallFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    /**
+     * Filter, which Hall to fetch.
+     */
+    where?: HallWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Halls to fetch.
+     */
+    orderBy?: HallOrderByWithRelationInput | HallOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Halls.
+     */
+    cursor?: HallWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Halls from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Halls.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Halls.
+     */
+    distinct?: HallScalarFieldEnum | HallScalarFieldEnum[]
+  }
+
+  /**
+   * Hall findMany
+   */
+  export type HallFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    /**
+     * Filter, which Halls to fetch.
+     */
+    where?: HallWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Halls to fetch.
+     */
+    orderBy?: HallOrderByWithRelationInput | HallOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Halls.
+     */
+    cursor?: HallWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Halls from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Halls.
+     */
+    skip?: number
+    distinct?: HallScalarFieldEnum | HallScalarFieldEnum[]
+  }
+
+  /**
+   * Hall create
+   */
+  export type HallCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Hall.
+     */
+    data: XOR<HallCreateInput, HallUncheckedCreateInput>
+  }
+
+  /**
+   * Hall createMany
+   */
+  export type HallCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Halls.
+     */
+    data: HallCreateManyInput | HallCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Hall createManyAndReturn
+   */
+  export type HallCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Halls.
+     */
+    data: HallCreateManyInput | HallCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Hall update
+   */
+  export type HallUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Hall.
+     */
+    data: XOR<HallUpdateInput, HallUncheckedUpdateInput>
+    /**
+     * Choose, which Hall to update.
+     */
+    where: HallWhereUniqueInput
+  }
+
+  /**
+   * Hall updateMany
+   */
+  export type HallUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Halls.
+     */
+    data: XOR<HallUpdateManyMutationInput, HallUncheckedUpdateManyInput>
+    /**
+     * Filter which Halls to update
+     */
+    where?: HallWhereInput
+  }
+
+  /**
+   * Hall upsert
+   */
+  export type HallUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Hall to update in case it exists.
+     */
+    where: HallWhereUniqueInput
+    /**
+     * In case the Hall found by the `where` argument doesn't exist, create a new Hall with this data.
+     */
+    create: XOR<HallCreateInput, HallUncheckedCreateInput>
+    /**
+     * In case the Hall was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<HallUpdateInput, HallUncheckedUpdateInput>
+  }
+
+  /**
+   * Hall delete
+   */
+  export type HallDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    /**
+     * Filter which Hall to delete.
+     */
+    where: HallWhereUniqueInput
+  }
+
+  /**
+   * Hall deleteMany
+   */
+  export type HallDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Halls to delete
+     */
+    where?: HallWhereInput
+  }
+
+  /**
+   * Hall.stops
+   */
+  export type Hall$stopsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TourStop
+     */
+    select?: TourStopSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TourStopInclude<ExtArgs> | null
+    where?: TourStopWhereInput
+    orderBy?: TourStopOrderByWithRelationInput | TourStopOrderByWithRelationInput[]
+    cursor?: TourStopWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TourStopScalarFieldEnum | TourStopScalarFieldEnum[]
+  }
+
+  /**
+   * Hall without action
+   */
+  export type HallDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model TourStop
    */
 
@@ -23613,6 +24892,7 @@ export namespace Prisma {
   export type TourStopMinAggregateOutputType = {
     id: string | null
     tourId: string | null
+    hallId: string | null
     title: string | null
     titleEn: string | null
     titleRu: string | null
@@ -23641,6 +24921,7 @@ export namespace Prisma {
   export type TourStopMaxAggregateOutputType = {
     id: string | null
     tourId: string | null
+    hallId: string | null
     title: string | null
     titleEn: string | null
     titleRu: string | null
@@ -23669,6 +24950,7 @@ export namespace Prisma {
   export type TourStopCountAggregateOutputType = {
     id: number
     tourId: number
+    hallId: number
     title: number
     titleEn: number
     titleRu: number
@@ -23710,6 +24992,7 @@ export namespace Prisma {
   export type TourStopMinAggregateInputType = {
     id?: true
     tourId?: true
+    hallId?: true
     title?: true
     titleEn?: true
     titleRu?: true
@@ -23738,6 +25021,7 @@ export namespace Prisma {
   export type TourStopMaxAggregateInputType = {
     id?: true
     tourId?: true
+    hallId?: true
     title?: true
     titleEn?: true
     titleRu?: true
@@ -23766,6 +25050,7 @@ export namespace Prisma {
   export type TourStopCountAggregateInputType = {
     id?: true
     tourId?: true
+    hallId?: true
     title?: true
     titleEn?: true
     titleRu?: true
@@ -23882,6 +25167,7 @@ export namespace Prisma {
   export type TourStopGroupByOutputType = {
     id: string
     tourId: string
+    hallId: string | null
     title: string
     titleEn: string | null
     titleRu: string | null
@@ -23930,6 +25216,7 @@ export namespace Prisma {
   export type TourStopSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     tourId?: boolean
+    hallId?: boolean
     title?: boolean
     titleEn?: boolean
     titleRu?: boolean
@@ -23955,11 +25242,13 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     tour?: boolean | TourDefaultArgs<ExtArgs>
+    hall?: boolean | TourStop$hallArgs<ExtArgs>
   }, ExtArgs["result"]["tourStop"]>
 
   export type TourStopSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     tourId?: boolean
+    hallId?: boolean
     title?: boolean
     titleEn?: boolean
     titleRu?: boolean
@@ -23985,11 +25274,13 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     tour?: boolean | TourDefaultArgs<ExtArgs>
+    hall?: boolean | TourStop$hallArgs<ExtArgs>
   }, ExtArgs["result"]["tourStop"]>
 
   export type TourStopSelectScalar = {
     id?: boolean
     tourId?: boolean
+    hallId?: boolean
     title?: boolean
     titleEn?: boolean
     titleRu?: boolean
@@ -24018,19 +25309,23 @@ export namespace Prisma {
 
   export type TourStopInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tour?: boolean | TourDefaultArgs<ExtArgs>
+    hall?: boolean | TourStop$hallArgs<ExtArgs>
   }
   export type TourStopIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tour?: boolean | TourDefaultArgs<ExtArgs>
+    hall?: boolean | TourStop$hallArgs<ExtArgs>
   }
 
   export type $TourStopPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "TourStop"
     objects: {
       tour: Prisma.$TourPayload<ExtArgs>
+      hall: Prisma.$HallPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       tourId: string
+      hallId: string | null
       title: string
       titleEn: string | null
       titleRu: string | null
@@ -24420,6 +25715,7 @@ export namespace Prisma {
   export interface Prisma__TourStopClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     tour<T extends TourDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TourDefaultArgs<ExtArgs>>): Prisma__TourClient<$Result.GetResult<Prisma.$TourPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    hall<T extends TourStop$hallArgs<ExtArgs> = {}>(args?: Subset<T, TourStop$hallArgs<ExtArgs>>): Prisma__HallClient<$Result.GetResult<Prisma.$HallPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -24451,6 +25747,7 @@ export namespace Prisma {
   interface TourStopFieldRefs {
     readonly id: FieldRef<"TourStop", 'String'>
     readonly tourId: FieldRef<"TourStop", 'String'>
+    readonly hallId: FieldRef<"TourStop", 'String'>
     readonly title: FieldRef<"TourStop", 'String'>
     readonly titleEn: FieldRef<"TourStop", 'String'>
     readonly titleRu: FieldRef<"TourStop", 'String'>
@@ -24790,6 +26087,21 @@ export namespace Prisma {
      * Filter which TourStops to delete
      */
     where?: TourStopWhereInput
+  }
+
+  /**
+   * TourStop.hall
+   */
+  export type TourStop$hallArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Hall
+     */
+    select?: HallSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: HallInclude<ExtArgs> | null
+    where?: HallWhereInput
   }
 
   /**
@@ -31426,9 +32738,32 @@ export namespace Prisma {
   export type TourScalarFieldEnum = (typeof TourScalarFieldEnum)[keyof typeof TourScalarFieldEnum]
 
 
+  export const HallScalarFieldEnum: {
+    id: 'id',
+    tourId: 'tourId',
+    name: 'name',
+    nameEn: 'nameEn',
+    nameRu: 'nameRu',
+    nameUk: 'nameUk',
+    description: 'description',
+    descriptionEn: 'descriptionEn',
+    descriptionRu: 'descriptionRu',
+    descriptionUk: 'descriptionUk',
+    floorNumber: 'floorNumber',
+    imageUrl: 'imageUrl',
+    orderIndex: 'orderIndex',
+    isPublished: 'isPublished',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type HallScalarFieldEnum = (typeof HallScalarFieldEnum)[keyof typeof HallScalarFieldEnum]
+
+
   export const TourStopScalarFieldEnum: {
     id: 'id',
     tourId: 'tourId',
+    hallId: 'hallId',
     title: 'title',
     titleEn: 'titleEn',
     titleRu: 'titleRu',
@@ -33610,6 +34945,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Tour"> | Date | string
     updatedAt?: DateTimeFilter<"Tour"> | Date | string
     museum?: XOR<MuseumRelationFilter, MuseumWhereInput>
+    halls?: HallListRelationFilter
     stops?: TourStopListRelationFilter
     packs?: TourPackListRelationFilter
     entitlements?: EntitlementListRelationFilter
@@ -33638,6 +34974,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     museum?: MuseumOrderByWithRelationInput
+    halls?: HallOrderByRelationAggregateInput
     stops?: TourStopOrderByRelationAggregateInput
     packs?: TourPackOrderByRelationAggregateInput
     entitlements?: EntitlementOrderByRelationAggregateInput
@@ -33669,6 +35006,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Tour"> | Date | string
     updatedAt?: DateTimeFilter<"Tour"> | Date | string
     museum?: XOR<MuseumRelationFilter, MuseumWhereInput>
+    halls?: HallListRelationFilter
     stops?: TourStopListRelationFilter
     packs?: TourPackListRelationFilter
     entitlements?: EntitlementListRelationFilter
@@ -33729,12 +35067,128 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Tour"> | Date | string
   }
 
+  export type HallWhereInput = {
+    AND?: HallWhereInput | HallWhereInput[]
+    OR?: HallWhereInput[]
+    NOT?: HallWhereInput | HallWhereInput[]
+    id?: StringFilter<"Hall"> | string
+    tourId?: StringFilter<"Hall"> | string
+    name?: StringFilter<"Hall"> | string
+    nameEn?: StringNullableFilter<"Hall"> | string | null
+    nameRu?: StringNullableFilter<"Hall"> | string | null
+    nameUk?: StringNullableFilter<"Hall"> | string | null
+    description?: StringNullableFilter<"Hall"> | string | null
+    descriptionEn?: StringNullableFilter<"Hall"> | string | null
+    descriptionRu?: StringNullableFilter<"Hall"> | string | null
+    descriptionUk?: StringNullableFilter<"Hall"> | string | null
+    floorNumber?: IntNullableFilter<"Hall"> | number | null
+    imageUrl?: StringNullableFilter<"Hall"> | string | null
+    orderIndex?: IntFilter<"Hall"> | number
+    isPublished?: BoolFilter<"Hall"> | boolean
+    createdAt?: DateTimeFilter<"Hall"> | Date | string
+    updatedAt?: DateTimeFilter<"Hall"> | Date | string
+    tour?: XOR<TourRelationFilter, TourWhereInput>
+    stops?: TourStopListRelationFilter
+  }
+
+  export type HallOrderByWithRelationInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrderInput | SortOrder
+    nameRu?: SortOrderInput | SortOrder
+    nameUk?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
+    descriptionEn?: SortOrderInput | SortOrder
+    descriptionRu?: SortOrderInput | SortOrder
+    descriptionUk?: SortOrderInput | SortOrder
+    floorNumber?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    orderIndex?: SortOrder
+    isPublished?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    tour?: TourOrderByWithRelationInput
+    stops?: TourStopOrderByRelationAggregateInput
+  }
+
+  export type HallWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: HallWhereInput | HallWhereInput[]
+    OR?: HallWhereInput[]
+    NOT?: HallWhereInput | HallWhereInput[]
+    tourId?: StringFilter<"Hall"> | string
+    name?: StringFilter<"Hall"> | string
+    nameEn?: StringNullableFilter<"Hall"> | string | null
+    nameRu?: StringNullableFilter<"Hall"> | string | null
+    nameUk?: StringNullableFilter<"Hall"> | string | null
+    description?: StringNullableFilter<"Hall"> | string | null
+    descriptionEn?: StringNullableFilter<"Hall"> | string | null
+    descriptionRu?: StringNullableFilter<"Hall"> | string | null
+    descriptionUk?: StringNullableFilter<"Hall"> | string | null
+    floorNumber?: IntNullableFilter<"Hall"> | number | null
+    imageUrl?: StringNullableFilter<"Hall"> | string | null
+    orderIndex?: IntFilter<"Hall"> | number
+    isPublished?: BoolFilter<"Hall"> | boolean
+    createdAt?: DateTimeFilter<"Hall"> | Date | string
+    updatedAt?: DateTimeFilter<"Hall"> | Date | string
+    tour?: XOR<TourRelationFilter, TourWhereInput>
+    stops?: TourStopListRelationFilter
+  }, "id">
+
+  export type HallOrderByWithAggregationInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrderInput | SortOrder
+    nameRu?: SortOrderInput | SortOrder
+    nameUk?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
+    descriptionEn?: SortOrderInput | SortOrder
+    descriptionRu?: SortOrderInput | SortOrder
+    descriptionUk?: SortOrderInput | SortOrder
+    floorNumber?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    orderIndex?: SortOrder
+    isPublished?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: HallCountOrderByAggregateInput
+    _avg?: HallAvgOrderByAggregateInput
+    _max?: HallMaxOrderByAggregateInput
+    _min?: HallMinOrderByAggregateInput
+    _sum?: HallSumOrderByAggregateInput
+  }
+
+  export type HallScalarWhereWithAggregatesInput = {
+    AND?: HallScalarWhereWithAggregatesInput | HallScalarWhereWithAggregatesInput[]
+    OR?: HallScalarWhereWithAggregatesInput[]
+    NOT?: HallScalarWhereWithAggregatesInput | HallScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Hall"> | string
+    tourId?: StringWithAggregatesFilter<"Hall"> | string
+    name?: StringWithAggregatesFilter<"Hall"> | string
+    nameEn?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameRu?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameUk?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    description?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionEn?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionRu?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionUk?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    floorNumber?: IntNullableWithAggregatesFilter<"Hall"> | number | null
+    imageUrl?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    orderIndex?: IntWithAggregatesFilter<"Hall"> | number
+    isPublished?: BoolWithAggregatesFilter<"Hall"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"Hall"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Hall"> | Date | string
+  }
+
   export type TourStopWhereInput = {
     AND?: TourStopWhereInput | TourStopWhereInput[]
     OR?: TourStopWhereInput[]
     NOT?: TourStopWhereInput | TourStopWhereInput[]
     id?: StringFilter<"TourStop"> | string
     tourId?: StringFilter<"TourStop"> | string
+    hallId?: StringNullableFilter<"TourStop"> | string | null
     title?: StringFilter<"TourStop"> | string
     titleEn?: StringNullableFilter<"TourStop"> | string | null
     titleRu?: StringNullableFilter<"TourStop"> | string | null
@@ -33760,11 +35214,13 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"TourStop"> | Date | string
     updatedAt?: DateTimeFilter<"TourStop"> | Date | string
     tour?: XOR<TourRelationFilter, TourWhereInput>
+    hall?: XOR<HallNullableRelationFilter, HallWhereInput> | null
   }
 
   export type TourStopOrderByWithRelationInput = {
     id?: SortOrder
     tourId?: SortOrder
+    hallId?: SortOrderInput | SortOrder
     title?: SortOrder
     titleEn?: SortOrderInput | SortOrder
     titleRu?: SortOrderInput | SortOrder
@@ -33790,6 +35246,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tour?: TourOrderByWithRelationInput
+    hall?: HallOrderByWithRelationInput
   }
 
   export type TourStopWhereUniqueInput = Prisma.AtLeast<{
@@ -33799,6 +35256,7 @@ export namespace Prisma {
     OR?: TourStopWhereInput[]
     NOT?: TourStopWhereInput | TourStopWhereInput[]
     tourId?: StringFilter<"TourStop"> | string
+    hallId?: StringNullableFilter<"TourStop"> | string | null
     title?: StringFilter<"TourStop"> | string
     titleEn?: StringNullableFilter<"TourStop"> | string | null
     titleRu?: StringNullableFilter<"TourStop"> | string | null
@@ -33823,11 +35281,13 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"TourStop"> | Date | string
     updatedAt?: DateTimeFilter<"TourStop"> | Date | string
     tour?: XOR<TourRelationFilter, TourWhereInput>
+    hall?: XOR<HallNullableRelationFilter, HallWhereInput> | null
   }, "id" | "qrCode">
 
   export type TourStopOrderByWithAggregationInput = {
     id?: SortOrder
     tourId?: SortOrder
+    hallId?: SortOrderInput | SortOrder
     title?: SortOrder
     titleEn?: SortOrderInput | SortOrder
     titleRu?: SortOrderInput | SortOrder
@@ -33865,6 +35325,7 @@ export namespace Prisma {
     NOT?: TourStopScalarWhereWithAggregatesInput | TourStopScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"TourStop"> | string
     tourId?: StringWithAggregatesFilter<"TourStop"> | string
+    hallId?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
     title?: StringWithAggregatesFilter<"TourStop"> | string
     titleEn?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
     titleRu?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
@@ -36503,6 +37964,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
+    halls?: HallCreateNestedManyWithoutTourInput
     stops?: TourStopCreateNestedManyWithoutTourInput
     packs?: TourPackCreateNestedManyWithoutTourInput
     entitlements?: EntitlementCreateNestedManyWithoutTourInput
@@ -36530,6 +37992,7 @@ export namespace Prisma {
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    halls?: HallUncheckedCreateNestedManyWithoutTourInput
     stops?: TourStopUncheckedCreateNestedManyWithoutTourInput
     packs?: TourPackUncheckedCreateNestedManyWithoutTourInput
     entitlements?: EntitlementUncheckedCreateNestedManyWithoutTourInput
@@ -36557,6 +38020,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
+    halls?: HallUpdateManyWithoutTourNestedInput
     stops?: TourStopUpdateManyWithoutTourNestedInput
     packs?: TourPackUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUpdateManyWithoutTourNestedInput
@@ -36584,6 +38048,7 @@ export namespace Prisma {
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    halls?: HallUncheckedUpdateManyWithoutTourNestedInput
     stops?: TourStopUncheckedUpdateManyWithoutTourNestedInput
     packs?: TourPackUncheckedUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUncheckedUpdateManyWithoutTourNestedInput
@@ -36658,6 +38123,142 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type HallCreateInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    floorNumber?: number | null
+    imageUrl?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tour: TourCreateNestedOneWithoutHallsInput
+    stops?: TourStopCreateNestedManyWithoutHallInput
+  }
+
+  export type HallUncheckedCreateInput = {
+    id?: string
+    tourId: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    floorNumber?: number | null
+    imageUrl?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stops?: TourStopUncheckedCreateNestedManyWithoutHallInput
+  }
+
+  export type HallUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tour?: TourUpdateOneRequiredWithoutHallsNestedInput
+    stops?: TourStopUpdateManyWithoutHallNestedInput
+  }
+
+  export type HallUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stops?: TourStopUncheckedUpdateManyWithoutHallNestedInput
+  }
+
+  export type HallCreateManyInput = {
+    id?: string
+    tourId: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    floorNumber?: number | null
+    imageUrl?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type HallUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HallUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type TourStopCreateInput = {
     id?: string
     title: string
@@ -36685,11 +38286,13 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     tour: TourCreateNestedOneWithoutStopsInput
+    hall?: HallCreateNestedOneWithoutStopsInput
   }
 
   export type TourStopUncheckedCreateInput = {
     id?: string
     tourId: string
+    hallId?: string | null
     title: string
     titleEn?: string | null
     titleRu?: string | null
@@ -36743,11 +38346,13 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tour?: TourUpdateOneRequiredWithoutStopsNestedInput
+    hall?: HallUpdateOneWithoutStopsNestedInput
   }
 
   export type TourStopUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     tourId?: StringFieldUpdateOperationsInput | string
+    hallId?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     titleEn?: NullableStringFieldUpdateOperationsInput | string | null
     titleRu?: NullableStringFieldUpdateOperationsInput | string | null
@@ -36777,6 +38382,7 @@ export namespace Prisma {
   export type TourStopCreateManyInput = {
     id?: string
     tourId: string
+    hallId?: string | null
     title: string
     titleEn?: string | null
     titleRu?: string | null
@@ -36834,6 +38440,7 @@ export namespace Prisma {
   export type TourStopUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     tourId?: StringFieldUpdateOperationsInput | string
+    hallId?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     titleEn?: NullableStringFieldUpdateOperationsInput | string | null
     titleRu?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39051,6 +40658,12 @@ export namespace Prisma {
     isNot?: MuseumWhereInput
   }
 
+  export type HallListRelationFilter = {
+    every?: HallWhereInput
+    some?: HallWhereInput
+    none?: HallWhereInput
+  }
+
   export type TourStopListRelationFilter = {
     every?: TourStopWhereInput
     some?: TourStopWhereInput
@@ -39067,6 +40680,10 @@ export namespace Prisma {
     every?: EntitlementWhereInput
     some?: EntitlementWhereInput
     none?: EntitlementWhereInput
+  }
+
+  export type HallOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type TourStopOrderByRelationAggregateInput = {
@@ -39169,9 +40786,82 @@ export namespace Prisma {
     isNot?: TourWhereInput
   }
 
+  export type HallCountOrderByAggregateInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrder
+    nameRu?: SortOrder
+    nameUk?: SortOrder
+    description?: SortOrder
+    descriptionEn?: SortOrder
+    descriptionRu?: SortOrder
+    descriptionUk?: SortOrder
+    floorNumber?: SortOrder
+    imageUrl?: SortOrder
+    orderIndex?: SortOrder
+    isPublished?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type HallAvgOrderByAggregateInput = {
+    floorNumber?: SortOrder
+    orderIndex?: SortOrder
+  }
+
+  export type HallMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrder
+    nameRu?: SortOrder
+    nameUk?: SortOrder
+    description?: SortOrder
+    descriptionEn?: SortOrder
+    descriptionRu?: SortOrder
+    descriptionUk?: SortOrder
+    floorNumber?: SortOrder
+    imageUrl?: SortOrder
+    orderIndex?: SortOrder
+    isPublished?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type HallMinOrderByAggregateInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrder
+    nameRu?: SortOrder
+    nameUk?: SortOrder
+    description?: SortOrder
+    descriptionEn?: SortOrder
+    descriptionRu?: SortOrder
+    descriptionUk?: SortOrder
+    floorNumber?: SortOrder
+    imageUrl?: SortOrder
+    orderIndex?: SortOrder
+    isPublished?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type HallSumOrderByAggregateInput = {
+    floorNumber?: SortOrder
+    orderIndex?: SortOrder
+  }
+
+  export type HallNullableRelationFilter = {
+    is?: HallWhereInput | null
+    isNot?: HallWhereInput | null
+  }
+
   export type TourStopCountOrderByAggregateInput = {
     id?: SortOrder
     tourId?: SortOrder
+    hallId?: SortOrder
     title?: SortOrder
     titleEn?: SortOrder
     titleRu?: SortOrder
@@ -39206,6 +40896,7 @@ export namespace Prisma {
   export type TourStopMaxOrderByAggregateInput = {
     id?: SortOrder
     tourId?: SortOrder
+    hallId?: SortOrder
     title?: SortOrder
     titleEn?: SortOrder
     titleRu?: SortOrder
@@ -39234,6 +40925,7 @@ export namespace Prisma {
   export type TourStopMinOrderByAggregateInput = {
     id?: SortOrder
     tourId?: SortOrder
+    hallId?: SortOrder
     title?: SortOrder
     titleEn?: SortOrder
     titleRu?: SortOrder
@@ -40428,6 +42120,13 @@ export namespace Prisma {
     connect?: MuseumWhereUniqueInput
   }
 
+  export type HallCreateNestedManyWithoutTourInput = {
+    create?: XOR<HallCreateWithoutTourInput, HallUncheckedCreateWithoutTourInput> | HallCreateWithoutTourInput[] | HallUncheckedCreateWithoutTourInput[]
+    connectOrCreate?: HallCreateOrConnectWithoutTourInput | HallCreateOrConnectWithoutTourInput[]
+    createMany?: HallCreateManyTourInputEnvelope
+    connect?: HallWhereUniqueInput | HallWhereUniqueInput[]
+  }
+
   export type TourStopCreateNestedManyWithoutTourInput = {
     create?: XOR<TourStopCreateWithoutTourInput, TourStopUncheckedCreateWithoutTourInput> | TourStopCreateWithoutTourInput[] | TourStopUncheckedCreateWithoutTourInput[]
     connectOrCreate?: TourStopCreateOrConnectWithoutTourInput | TourStopCreateOrConnectWithoutTourInput[]
@@ -40454,6 +42153,13 @@ export namespace Prisma {
     connectOrCreate?: PaymentCreateOrConnectWithoutTourInput | PaymentCreateOrConnectWithoutTourInput[]
     createMany?: PaymentCreateManyTourInputEnvelope
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
+  export type HallUncheckedCreateNestedManyWithoutTourInput = {
+    create?: XOR<HallCreateWithoutTourInput, HallUncheckedCreateWithoutTourInput> | HallCreateWithoutTourInput[] | HallUncheckedCreateWithoutTourInput[]
+    connectOrCreate?: HallCreateOrConnectWithoutTourInput | HallCreateOrConnectWithoutTourInput[]
+    createMany?: HallCreateManyTourInputEnvelope
+    connect?: HallWhereUniqueInput | HallWhereUniqueInput[]
   }
 
   export type TourStopUncheckedCreateNestedManyWithoutTourInput = {
@@ -40490,6 +42196,20 @@ export namespace Prisma {
     upsert?: MuseumUpsertWithoutToursInput
     connect?: MuseumWhereUniqueInput
     update?: XOR<XOR<MuseumUpdateToOneWithWhereWithoutToursInput, MuseumUpdateWithoutToursInput>, MuseumUncheckedUpdateWithoutToursInput>
+  }
+
+  export type HallUpdateManyWithoutTourNestedInput = {
+    create?: XOR<HallCreateWithoutTourInput, HallUncheckedCreateWithoutTourInput> | HallCreateWithoutTourInput[] | HallUncheckedCreateWithoutTourInput[]
+    connectOrCreate?: HallCreateOrConnectWithoutTourInput | HallCreateOrConnectWithoutTourInput[]
+    upsert?: HallUpsertWithWhereUniqueWithoutTourInput | HallUpsertWithWhereUniqueWithoutTourInput[]
+    createMany?: HallCreateManyTourInputEnvelope
+    set?: HallWhereUniqueInput | HallWhereUniqueInput[]
+    disconnect?: HallWhereUniqueInput | HallWhereUniqueInput[]
+    delete?: HallWhereUniqueInput | HallWhereUniqueInput[]
+    connect?: HallWhereUniqueInput | HallWhereUniqueInput[]
+    update?: HallUpdateWithWhereUniqueWithoutTourInput | HallUpdateWithWhereUniqueWithoutTourInput[]
+    updateMany?: HallUpdateManyWithWhereWithoutTourInput | HallUpdateManyWithWhereWithoutTourInput[]
+    deleteMany?: HallScalarWhereInput | HallScalarWhereInput[]
   }
 
   export type TourStopUpdateManyWithoutTourNestedInput = {
@@ -40548,6 +42268,20 @@ export namespace Prisma {
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
   }
 
+  export type HallUncheckedUpdateManyWithoutTourNestedInput = {
+    create?: XOR<HallCreateWithoutTourInput, HallUncheckedCreateWithoutTourInput> | HallCreateWithoutTourInput[] | HallUncheckedCreateWithoutTourInput[]
+    connectOrCreate?: HallCreateOrConnectWithoutTourInput | HallCreateOrConnectWithoutTourInput[]
+    upsert?: HallUpsertWithWhereUniqueWithoutTourInput | HallUpsertWithWhereUniqueWithoutTourInput[]
+    createMany?: HallCreateManyTourInputEnvelope
+    set?: HallWhereUniqueInput | HallWhereUniqueInput[]
+    disconnect?: HallWhereUniqueInput | HallWhereUniqueInput[]
+    delete?: HallWhereUniqueInput | HallWhereUniqueInput[]
+    connect?: HallWhereUniqueInput | HallWhereUniqueInput[]
+    update?: HallUpdateWithWhereUniqueWithoutTourInput | HallUpdateWithWhereUniqueWithoutTourInput[]
+    updateMany?: HallUpdateManyWithWhereWithoutTourInput | HallUpdateManyWithWhereWithoutTourInput[]
+    deleteMany?: HallScalarWhereInput | HallScalarWhereInput[]
+  }
+
   export type TourStopUncheckedUpdateManyWithoutTourNestedInput = {
     create?: XOR<TourStopCreateWithoutTourInput, TourStopUncheckedCreateWithoutTourInput> | TourStopCreateWithoutTourInput[] | TourStopUncheckedCreateWithoutTourInput[]
     connectOrCreate?: TourStopCreateOrConnectWithoutTourInput | TourStopCreateOrConnectWithoutTourInput[]
@@ -40604,6 +42338,62 @@ export namespace Prisma {
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
   }
 
+  export type TourCreateNestedOneWithoutHallsInput = {
+    create?: XOR<TourCreateWithoutHallsInput, TourUncheckedCreateWithoutHallsInput>
+    connectOrCreate?: TourCreateOrConnectWithoutHallsInput
+    connect?: TourWhereUniqueInput
+  }
+
+  export type TourStopCreateNestedManyWithoutHallInput = {
+    create?: XOR<TourStopCreateWithoutHallInput, TourStopUncheckedCreateWithoutHallInput> | TourStopCreateWithoutHallInput[] | TourStopUncheckedCreateWithoutHallInput[]
+    connectOrCreate?: TourStopCreateOrConnectWithoutHallInput | TourStopCreateOrConnectWithoutHallInput[]
+    createMany?: TourStopCreateManyHallInputEnvelope
+    connect?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+  }
+
+  export type TourStopUncheckedCreateNestedManyWithoutHallInput = {
+    create?: XOR<TourStopCreateWithoutHallInput, TourStopUncheckedCreateWithoutHallInput> | TourStopCreateWithoutHallInput[] | TourStopUncheckedCreateWithoutHallInput[]
+    connectOrCreate?: TourStopCreateOrConnectWithoutHallInput | TourStopCreateOrConnectWithoutHallInput[]
+    createMany?: TourStopCreateManyHallInputEnvelope
+    connect?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+  }
+
+  export type TourUpdateOneRequiredWithoutHallsNestedInput = {
+    create?: XOR<TourCreateWithoutHallsInput, TourUncheckedCreateWithoutHallsInput>
+    connectOrCreate?: TourCreateOrConnectWithoutHallsInput
+    upsert?: TourUpsertWithoutHallsInput
+    connect?: TourWhereUniqueInput
+    update?: XOR<XOR<TourUpdateToOneWithWhereWithoutHallsInput, TourUpdateWithoutHallsInput>, TourUncheckedUpdateWithoutHallsInput>
+  }
+
+  export type TourStopUpdateManyWithoutHallNestedInput = {
+    create?: XOR<TourStopCreateWithoutHallInput, TourStopUncheckedCreateWithoutHallInput> | TourStopCreateWithoutHallInput[] | TourStopUncheckedCreateWithoutHallInput[]
+    connectOrCreate?: TourStopCreateOrConnectWithoutHallInput | TourStopCreateOrConnectWithoutHallInput[]
+    upsert?: TourStopUpsertWithWhereUniqueWithoutHallInput | TourStopUpsertWithWhereUniqueWithoutHallInput[]
+    createMany?: TourStopCreateManyHallInputEnvelope
+    set?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+    disconnect?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+    delete?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+    connect?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+    update?: TourStopUpdateWithWhereUniqueWithoutHallInput | TourStopUpdateWithWhereUniqueWithoutHallInput[]
+    updateMany?: TourStopUpdateManyWithWhereWithoutHallInput | TourStopUpdateManyWithWhereWithoutHallInput[]
+    deleteMany?: TourStopScalarWhereInput | TourStopScalarWhereInput[]
+  }
+
+  export type TourStopUncheckedUpdateManyWithoutHallNestedInput = {
+    create?: XOR<TourStopCreateWithoutHallInput, TourStopUncheckedCreateWithoutHallInput> | TourStopCreateWithoutHallInput[] | TourStopUncheckedCreateWithoutHallInput[]
+    connectOrCreate?: TourStopCreateOrConnectWithoutHallInput | TourStopCreateOrConnectWithoutHallInput[]
+    upsert?: TourStopUpsertWithWhereUniqueWithoutHallInput | TourStopUpsertWithWhereUniqueWithoutHallInput[]
+    createMany?: TourStopCreateManyHallInputEnvelope
+    set?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+    disconnect?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+    delete?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+    connect?: TourStopWhereUniqueInput | TourStopWhereUniqueInput[]
+    update?: TourStopUpdateWithWhereUniqueWithoutHallInput | TourStopUpdateWithWhereUniqueWithoutHallInput[]
+    updateMany?: TourStopUpdateManyWithWhereWithoutHallInput | TourStopUpdateManyWithWhereWithoutHallInput[]
+    deleteMany?: TourStopScalarWhereInput | TourStopScalarWhereInput[]
+  }
+
   export type TourStopCreateimagesInput = {
     set: string[]
   }
@@ -40612,6 +42402,12 @@ export namespace Prisma {
     create?: XOR<TourCreateWithoutStopsInput, TourUncheckedCreateWithoutStopsInput>
     connectOrCreate?: TourCreateOrConnectWithoutStopsInput
     connect?: TourWhereUniqueInput
+  }
+
+  export type HallCreateNestedOneWithoutStopsInput = {
+    create?: XOR<HallCreateWithoutStopsInput, HallUncheckedCreateWithoutStopsInput>
+    connectOrCreate?: HallCreateOrConnectWithoutStopsInput
+    connect?: HallWhereUniqueInput
   }
 
   export type TourStopUpdateimagesInput = {
@@ -40625,6 +42421,16 @@ export namespace Prisma {
     upsert?: TourUpsertWithoutStopsInput
     connect?: TourWhereUniqueInput
     update?: XOR<XOR<TourUpdateToOneWithWhereWithoutStopsInput, TourUpdateWithoutStopsInput>, TourUncheckedUpdateWithoutStopsInput>
+  }
+
+  export type HallUpdateOneWithoutStopsNestedInput = {
+    create?: XOR<HallCreateWithoutStopsInput, HallUncheckedCreateWithoutStopsInput>
+    connectOrCreate?: HallCreateOrConnectWithoutStopsInput
+    upsert?: HallUpsertWithoutStopsInput
+    disconnect?: HallWhereInput | boolean
+    delete?: HallWhereInput | boolean
+    connect?: HallWhereUniqueInput
+    update?: XOR<XOR<HallUpdateToOneWithWhereWithoutStopsInput, HallUpdateWithoutStopsInput>, HallUncheckedUpdateWithoutStopsInput>
   }
 
   export type TourCreateNestedOneWithoutPacksInput = {
@@ -43045,6 +44851,7 @@ export namespace Prisma {
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    halls?: HallCreateNestedManyWithoutTourInput
     stops?: TourStopCreateNestedManyWithoutTourInput
     packs?: TourPackCreateNestedManyWithoutTourInput
     entitlements?: EntitlementCreateNestedManyWithoutTourInput
@@ -43071,6 +44878,7 @@ export namespace Prisma {
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    halls?: HallUncheckedCreateNestedManyWithoutTourInput
     stops?: TourStopUncheckedCreateNestedManyWithoutTourInput
     packs?: TourPackUncheckedCreateNestedManyWithoutTourInput
     entitlements?: EntitlementUncheckedCreateNestedManyWithoutTourInput
@@ -43302,6 +45110,54 @@ export namespace Prisma {
     create: XOR<MuseumCreateWithoutToursInput, MuseumUncheckedCreateWithoutToursInput>
   }
 
+  export type HallCreateWithoutTourInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    floorNumber?: number | null
+    imageUrl?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stops?: TourStopCreateNestedManyWithoutHallInput
+  }
+
+  export type HallUncheckedCreateWithoutTourInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    floorNumber?: number | null
+    imageUrl?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stops?: TourStopUncheckedCreateNestedManyWithoutHallInput
+  }
+
+  export type HallCreateOrConnectWithoutTourInput = {
+    where: HallWhereUniqueInput
+    create: XOR<HallCreateWithoutTourInput, HallUncheckedCreateWithoutTourInput>
+  }
+
+  export type HallCreateManyTourInputEnvelope = {
+    data: HallCreateManyTourInput | HallCreateManyTourInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TourStopCreateWithoutTourInput = {
     id?: string
     title: string
@@ -43328,10 +45184,12 @@ export namespace Prisma {
     isPublished?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    hall?: HallCreateNestedOneWithoutStopsInput
   }
 
   export type TourStopUncheckedCreateWithoutTourInput = {
     id?: string
+    hallId?: string | null
     title: string
     titleEn?: string | null
     titleRu?: string | null
@@ -43579,6 +45437,44 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutMuseumNestedInput
   }
 
+  export type HallUpsertWithWhereUniqueWithoutTourInput = {
+    where: HallWhereUniqueInput
+    update: XOR<HallUpdateWithoutTourInput, HallUncheckedUpdateWithoutTourInput>
+    create: XOR<HallCreateWithoutTourInput, HallUncheckedCreateWithoutTourInput>
+  }
+
+  export type HallUpdateWithWhereUniqueWithoutTourInput = {
+    where: HallWhereUniqueInput
+    data: XOR<HallUpdateWithoutTourInput, HallUncheckedUpdateWithoutTourInput>
+  }
+
+  export type HallUpdateManyWithWhereWithoutTourInput = {
+    where: HallScalarWhereInput
+    data: XOR<HallUpdateManyMutationInput, HallUncheckedUpdateManyWithoutTourInput>
+  }
+
+  export type HallScalarWhereInput = {
+    AND?: HallScalarWhereInput | HallScalarWhereInput[]
+    OR?: HallScalarWhereInput[]
+    NOT?: HallScalarWhereInput | HallScalarWhereInput[]
+    id?: StringFilter<"Hall"> | string
+    tourId?: StringFilter<"Hall"> | string
+    name?: StringFilter<"Hall"> | string
+    nameEn?: StringNullableFilter<"Hall"> | string | null
+    nameRu?: StringNullableFilter<"Hall"> | string | null
+    nameUk?: StringNullableFilter<"Hall"> | string | null
+    description?: StringNullableFilter<"Hall"> | string | null
+    descriptionEn?: StringNullableFilter<"Hall"> | string | null
+    descriptionRu?: StringNullableFilter<"Hall"> | string | null
+    descriptionUk?: StringNullableFilter<"Hall"> | string | null
+    floorNumber?: IntNullableFilter<"Hall"> | number | null
+    imageUrl?: StringNullableFilter<"Hall"> | string | null
+    orderIndex?: IntFilter<"Hall"> | number
+    isPublished?: BoolFilter<"Hall"> | boolean
+    createdAt?: DateTimeFilter<"Hall"> | Date | string
+    updatedAt?: DateTimeFilter<"Hall"> | Date | string
+  }
+
   export type TourStopUpsertWithWhereUniqueWithoutTourInput = {
     where: TourStopWhereUniqueInput
     update: XOR<TourStopUpdateWithoutTourInput, TourStopUncheckedUpdateWithoutTourInput>
@@ -43601,6 +45497,7 @@ export namespace Prisma {
     NOT?: TourStopScalarWhereInput | TourStopScalarWhereInput[]
     id?: StringFilter<"TourStop"> | string
     tourId?: StringFilter<"TourStop"> | string
+    hallId?: StringNullableFilter<"TourStop"> | string | null
     title?: StringFilter<"TourStop"> | string
     titleEn?: StringNullableFilter<"TourStop"> | string | null
     titleRu?: StringNullableFilter<"TourStop"> | string | null
@@ -43707,6 +45604,214 @@ export namespace Prisma {
     data: XOR<PaymentUpdateManyMutationInput, PaymentUncheckedUpdateManyWithoutTourInput>
   }
 
+  export type TourCreateWithoutHallsInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    duration?: number | null
+    stopsCount?: number
+    isFree?: boolean
+    price?: Decimal | DecimalJsLike | number | string | null
+    currency?: string
+    isPublished?: boolean
+    displayOrder?: number
+    coverImage?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    museum: MuseumCreateNestedOneWithoutToursInput
+    stops?: TourStopCreateNestedManyWithoutTourInput
+    packs?: TourPackCreateNestedManyWithoutTourInput
+    entitlements?: EntitlementCreateNestedManyWithoutTourInput
+    payments?: PaymentCreateNestedManyWithoutTourInput
+  }
+
+  export type TourUncheckedCreateWithoutHallsInput = {
+    id?: string
+    museumId: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    duration?: number | null
+    stopsCount?: number
+    isFree?: boolean
+    price?: Decimal | DecimalJsLike | number | string | null
+    currency?: string
+    isPublished?: boolean
+    displayOrder?: number
+    coverImage?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stops?: TourStopUncheckedCreateNestedManyWithoutTourInput
+    packs?: TourPackUncheckedCreateNestedManyWithoutTourInput
+    entitlements?: EntitlementUncheckedCreateNestedManyWithoutTourInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutTourInput
+  }
+
+  export type TourCreateOrConnectWithoutHallsInput = {
+    where: TourWhereUniqueInput
+    create: XOR<TourCreateWithoutHallsInput, TourUncheckedCreateWithoutHallsInput>
+  }
+
+  export type TourStopCreateWithoutHallInput = {
+    id?: string
+    title: string
+    titleEn?: string | null
+    titleRu?: string | null
+    titleUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    transcript?: string | null
+    transcriptEn?: string | null
+    transcriptRu?: string | null
+    transcriptUk?: string | null
+    audioUrl?: string | null
+    audioUrlEn?: string | null
+    audioUrlRu?: string | null
+    audioUrlUk?: string | null
+    audioDuration?: number | null
+    imageUrl?: string | null
+    images?: TourStopCreateimagesInput | string[]
+    qrCode?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tour: TourCreateNestedOneWithoutStopsInput
+  }
+
+  export type TourStopUncheckedCreateWithoutHallInput = {
+    id?: string
+    tourId: string
+    title: string
+    titleEn?: string | null
+    titleRu?: string | null
+    titleUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    transcript?: string | null
+    transcriptEn?: string | null
+    transcriptRu?: string | null
+    transcriptUk?: string | null
+    audioUrl?: string | null
+    audioUrlEn?: string | null
+    audioUrlRu?: string | null
+    audioUrlUk?: string | null
+    audioDuration?: number | null
+    imageUrl?: string | null
+    images?: TourStopCreateimagesInput | string[]
+    qrCode?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TourStopCreateOrConnectWithoutHallInput = {
+    where: TourStopWhereUniqueInput
+    create: XOR<TourStopCreateWithoutHallInput, TourStopUncheckedCreateWithoutHallInput>
+  }
+
+  export type TourStopCreateManyHallInputEnvelope = {
+    data: TourStopCreateManyHallInput | TourStopCreateManyHallInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TourUpsertWithoutHallsInput = {
+    update: XOR<TourUpdateWithoutHallsInput, TourUncheckedUpdateWithoutHallsInput>
+    create: XOR<TourCreateWithoutHallsInput, TourUncheckedCreateWithoutHallsInput>
+    where?: TourWhereInput
+  }
+
+  export type TourUpdateToOneWithWhereWithoutHallsInput = {
+    where?: TourWhereInput
+    data: XOR<TourUpdateWithoutHallsInput, TourUncheckedUpdateWithoutHallsInput>
+  }
+
+  export type TourUpdateWithoutHallsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
+    stopsCount?: IntFieldUpdateOperationsInput | number
+    isFree?: BoolFieldUpdateOperationsInput | boolean
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    displayOrder?: IntFieldUpdateOperationsInput | number
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
+    stops?: TourStopUpdateManyWithoutTourNestedInput
+    packs?: TourPackUpdateManyWithoutTourNestedInput
+    entitlements?: EntitlementUpdateManyWithoutTourNestedInput
+    payments?: PaymentUpdateManyWithoutTourNestedInput
+  }
+
+  export type TourUncheckedUpdateWithoutHallsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    museumId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
+    stopsCount?: IntFieldUpdateOperationsInput | number
+    isFree?: BoolFieldUpdateOperationsInput | boolean
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    displayOrder?: IntFieldUpdateOperationsInput | number
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stops?: TourStopUncheckedUpdateManyWithoutTourNestedInput
+    packs?: TourPackUncheckedUpdateManyWithoutTourNestedInput
+    entitlements?: EntitlementUncheckedUpdateManyWithoutTourNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutTourNestedInput
+  }
+
+  export type TourStopUpsertWithWhereUniqueWithoutHallInput = {
+    where: TourStopWhereUniqueInput
+    update: XOR<TourStopUpdateWithoutHallInput, TourStopUncheckedUpdateWithoutHallInput>
+    create: XOR<TourStopCreateWithoutHallInput, TourStopUncheckedCreateWithoutHallInput>
+  }
+
+  export type TourStopUpdateWithWhereUniqueWithoutHallInput = {
+    where: TourStopWhereUniqueInput
+    data: XOR<TourStopUpdateWithoutHallInput, TourStopUncheckedUpdateWithoutHallInput>
+  }
+
+  export type TourStopUpdateManyWithWhereWithoutHallInput = {
+    where: TourStopScalarWhereInput
+    data: XOR<TourStopUpdateManyMutationInput, TourStopUncheckedUpdateManyWithoutHallInput>
+  }
+
   export type TourCreateWithoutStopsInput = {
     id?: string
     name: string
@@ -43728,6 +45833,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
+    halls?: HallCreateNestedManyWithoutTourInput
     packs?: TourPackCreateNestedManyWithoutTourInput
     entitlements?: EntitlementCreateNestedManyWithoutTourInput
     payments?: PaymentCreateNestedManyWithoutTourInput
@@ -43754,6 +45860,7 @@ export namespace Prisma {
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    halls?: HallUncheckedCreateNestedManyWithoutTourInput
     packs?: TourPackUncheckedCreateNestedManyWithoutTourInput
     entitlements?: EntitlementUncheckedCreateNestedManyWithoutTourInput
     payments?: PaymentUncheckedCreateNestedManyWithoutTourInput
@@ -43762,6 +45869,49 @@ export namespace Prisma {
   export type TourCreateOrConnectWithoutStopsInput = {
     where: TourWhereUniqueInput
     create: XOR<TourCreateWithoutStopsInput, TourUncheckedCreateWithoutStopsInput>
+  }
+
+  export type HallCreateWithoutStopsInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    floorNumber?: number | null
+    imageUrl?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tour: TourCreateNestedOneWithoutHallsInput
+  }
+
+  export type HallUncheckedCreateWithoutStopsInput = {
+    id?: string
+    tourId: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    floorNumber?: number | null
+    imageUrl?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type HallCreateOrConnectWithoutStopsInput = {
+    where: HallWhereUniqueInput
+    create: XOR<HallCreateWithoutStopsInput, HallUncheckedCreateWithoutStopsInput>
   }
 
   export type TourUpsertWithoutStopsInput = {
@@ -43796,6 +45946,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
+    halls?: HallUpdateManyWithoutTourNestedInput
     packs?: TourPackUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUpdateManyWithoutTourNestedInput
     payments?: PaymentUpdateManyWithoutTourNestedInput
@@ -43822,9 +45973,59 @@ export namespace Prisma {
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    halls?: HallUncheckedUpdateManyWithoutTourNestedInput
     packs?: TourPackUncheckedUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUncheckedUpdateManyWithoutTourNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutTourNestedInput
+  }
+
+  export type HallUpsertWithoutStopsInput = {
+    update: XOR<HallUpdateWithoutStopsInput, HallUncheckedUpdateWithoutStopsInput>
+    create: XOR<HallCreateWithoutStopsInput, HallUncheckedCreateWithoutStopsInput>
+    where?: HallWhereInput
+  }
+
+  export type HallUpdateToOneWithWhereWithoutStopsInput = {
+    where?: HallWhereInput
+    data: XOR<HallUpdateWithoutStopsInput, HallUncheckedUpdateWithoutStopsInput>
+  }
+
+  export type HallUpdateWithoutStopsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tour?: TourUpdateOneRequiredWithoutHallsNestedInput
+  }
+
+  export type HallUncheckedUpdateWithoutStopsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TourCreateWithoutPacksInput = {
@@ -43848,6 +46049,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
+    halls?: HallCreateNestedManyWithoutTourInput
     stops?: TourStopCreateNestedManyWithoutTourInput
     entitlements?: EntitlementCreateNestedManyWithoutTourInput
     payments?: PaymentCreateNestedManyWithoutTourInput
@@ -43874,6 +46076,7 @@ export namespace Prisma {
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    halls?: HallUncheckedCreateNestedManyWithoutTourInput
     stops?: TourStopUncheckedCreateNestedManyWithoutTourInput
     entitlements?: EntitlementUncheckedCreateNestedManyWithoutTourInput
     payments?: PaymentUncheckedCreateNestedManyWithoutTourInput
@@ -43916,6 +46119,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
+    halls?: HallUpdateManyWithoutTourNestedInput
     stops?: TourStopUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUpdateManyWithoutTourNestedInput
     payments?: PaymentUpdateManyWithoutTourNestedInput
@@ -43942,6 +46146,7 @@ export namespace Prisma {
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    halls?: HallUncheckedUpdateManyWithoutTourNestedInput
     stops?: TourStopUncheckedUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUncheckedUpdateManyWithoutTourNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutTourNestedInput
@@ -44163,6 +46368,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
+    halls?: HallCreateNestedManyWithoutTourInput
     stops?: TourStopCreateNestedManyWithoutTourInput
     packs?: TourPackCreateNestedManyWithoutTourInput
     payments?: PaymentCreateNestedManyWithoutTourInput
@@ -44189,6 +46395,7 @@ export namespace Prisma {
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    halls?: HallUncheckedCreateNestedManyWithoutTourInput
     stops?: TourStopUncheckedCreateNestedManyWithoutTourInput
     packs?: TourPackUncheckedCreateNestedManyWithoutTourInput
     payments?: PaymentUncheckedCreateNestedManyWithoutTourInput
@@ -44307,6 +46514,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
+    halls?: HallUpdateManyWithoutTourNestedInput
     stops?: TourStopUpdateManyWithoutTourNestedInput
     packs?: TourPackUpdateManyWithoutTourNestedInput
     payments?: PaymentUpdateManyWithoutTourNestedInput
@@ -44333,6 +46541,7 @@ export namespace Prisma {
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    halls?: HallUncheckedUpdateManyWithoutTourNestedInput
     stops?: TourStopUncheckedUpdateManyWithoutTourNestedInput
     packs?: TourPackUncheckedUpdateManyWithoutTourNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutTourNestedInput
@@ -44406,6 +46615,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
+    halls?: HallCreateNestedManyWithoutTourInput
     stops?: TourStopCreateNestedManyWithoutTourInput
     packs?: TourPackCreateNestedManyWithoutTourInput
     entitlements?: EntitlementCreateNestedManyWithoutTourInput
@@ -44432,6 +46642,7 @@ export namespace Prisma {
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    halls?: HallUncheckedCreateNestedManyWithoutTourInput
     stops?: TourStopUncheckedCreateNestedManyWithoutTourInput
     packs?: TourPackUncheckedCreateNestedManyWithoutTourInput
     entitlements?: EntitlementUncheckedCreateNestedManyWithoutTourInput
@@ -44610,6 +46821,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
+    halls?: HallUpdateManyWithoutTourNestedInput
     stops?: TourStopUpdateManyWithoutTourNestedInput
     packs?: TourPackUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUpdateManyWithoutTourNestedInput
@@ -44636,6 +46848,7 @@ export namespace Prisma {
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    halls?: HallUncheckedUpdateManyWithoutTourNestedInput
     stops?: TourStopUncheckedUpdateManyWithoutTourNestedInput
     packs?: TourPackUncheckedUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUncheckedUpdateManyWithoutTourNestedInput
@@ -45291,6 +47504,7 @@ export namespace Prisma {
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    halls?: HallUpdateManyWithoutTourNestedInput
     stops?: TourStopUpdateManyWithoutTourNestedInput
     packs?: TourPackUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUpdateManyWithoutTourNestedInput
@@ -45317,6 +47531,7 @@ export namespace Prisma {
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    halls?: HallUncheckedUpdateManyWithoutTourNestedInput
     stops?: TourStopUncheckedUpdateManyWithoutTourNestedInput
     packs?: TourPackUncheckedUpdateManyWithoutTourNestedInput
     entitlements?: EntitlementUncheckedUpdateManyWithoutTourNestedInput
@@ -45393,8 +47608,27 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type HallCreateManyTourInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    nameRu?: string | null
+    nameUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    floorNumber?: number | null
+    imageUrl?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type TourStopCreateManyTourInput = {
     id?: string
+    hallId?: string | null
     title: string
     titleEn?: string | null
     titleRu?: string | null
@@ -45461,6 +47695,62 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type HallUpdateWithoutTourInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stops?: TourStopUpdateManyWithoutHallNestedInput
+  }
+
+  export type HallUncheckedUpdateWithoutTourInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stops?: TourStopUncheckedUpdateManyWithoutHallNestedInput
+  }
+
+  export type HallUncheckedUpdateManyWithoutTourInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    nameRu?: NullableStringFieldUpdateOperationsInput | string | null
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type TourStopUpdateWithoutTourInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -45487,10 +47777,12 @@ export namespace Prisma {
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hall?: HallUpdateOneWithoutStopsNestedInput
   }
 
   export type TourStopUncheckedUpdateWithoutTourInput = {
     id?: StringFieldUpdateOperationsInput | string
+    hallId?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     titleEn?: NullableStringFieldUpdateOperationsInput | string | null
     titleRu?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45519,6 +47811,7 @@ export namespace Prisma {
 
   export type TourStopUncheckedUpdateManyWithoutTourInput = {
     id?: StringFieldUpdateOperationsInput | string
+    hallId?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     titleEn?: NullableStringFieldUpdateOperationsInput | string | null
     titleRu?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45665,6 +47958,122 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TourStopCreateManyHallInput = {
+    id?: string
+    tourId: string
+    title: string
+    titleEn?: string | null
+    titleRu?: string | null
+    titleUk?: string | null
+    description?: string | null
+    descriptionEn?: string | null
+    descriptionRu?: string | null
+    descriptionUk?: string | null
+    transcript?: string | null
+    transcriptEn?: string | null
+    transcriptRu?: string | null
+    transcriptUk?: string | null
+    audioUrl?: string | null
+    audioUrlEn?: string | null
+    audioUrlRu?: string | null
+    audioUrlUk?: string | null
+    audioDuration?: number | null
+    imageUrl?: string | null
+    images?: TourStopCreateimagesInput | string[]
+    qrCode?: string | null
+    orderIndex?: number
+    isPublished?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TourStopUpdateWithoutHallInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    titleEn?: NullableStringFieldUpdateOperationsInput | string | null
+    titleRu?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    transcript?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEn?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptRu?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptUk?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    images?: TourStopUpdateimagesInput | string[]
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tour?: TourUpdateOneRequiredWithoutStopsNestedInput
+  }
+
+  export type TourStopUncheckedUpdateWithoutHallInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    titleEn?: NullableStringFieldUpdateOperationsInput | string | null
+    titleRu?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    transcript?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEn?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptRu?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptUk?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    images?: TourStopUpdateimagesInput | string[]
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TourStopUncheckedUpdateManyWithoutHallInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    titleEn?: NullableStringFieldUpdateOperationsInput | string | null
+    titleRu?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    transcript?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEn?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptRu?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptUk?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    images?: TourStopUpdateimagesInput | string[]
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    isPublished?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type PaymentCreateManyActivationCodeInput = {
     id?: string
     orderId: string
@@ -45807,6 +48216,10 @@ export namespace Prisma {
      */
     export type TourCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TourCountOutputTypeDefaultArgs<ExtArgs>
     /**
+     * @deprecated Use HallCountOutputTypeDefaultArgs instead
+     */
+    export type HallCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = HallCountOutputTypeDefaultArgs<ExtArgs>
+    /**
      * @deprecated Use ActivationCodeCountOutputTypeDefaultArgs instead
      */
     export type ActivationCodeCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ActivationCodeCountOutputTypeDefaultArgs<ExtArgs>
@@ -45890,6 +48303,10 @@ export namespace Prisma {
      * @deprecated Use TourDefaultArgs instead
      */
     export type TourArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TourDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use HallDefaultArgs instead
+     */
+    export type HallArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = HallDefaultArgs<ExtArgs>
     /**
      * @deprecated Use TourStopDefaultArgs instead
      */
