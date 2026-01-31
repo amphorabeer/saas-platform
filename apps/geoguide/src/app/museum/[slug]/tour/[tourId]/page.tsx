@@ -34,6 +34,7 @@ const uiTexts: Record<string, {
   ru: { audioGuide: "Аудиогид", stop: "Остановка", search: "Поиск по номеру или названию...", tourNotFound: "Тур не найден", list: "Список" },
   de: { audioGuide: "Audioguide", stop: "Haltestelle", search: "Nach Nummer oder Name suchen...", tourNotFound: "Tour nicht gefunden", list: "Liste" },
   fr: { audioGuide: "Audioguide", stop: "Arrêt", search: "Rechercher par numéro ou nom...", tourNotFound: "Visite non trouvée", list: "Liste" },
+  uk: { audioGuide: "Аудіогід", stop: "Зупинка", search: "Пошук за номером або назвою...", tourNotFound: "Тур не знайдено", list: "Список" },
 };
 
 export default function TourPage() {

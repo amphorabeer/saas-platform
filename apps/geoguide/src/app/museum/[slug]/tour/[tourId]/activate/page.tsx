@@ -92,6 +92,26 @@ const uiTexts: Record<string, {
     cameraError: "Не удалось получить доступ к камере",
     stopScanning: "Остановить сканирование",
   },
+  uk: {
+    title: "Активація коду",
+    subtitle: "Введіть код активації або скануйте QR",
+    placeholder: "GEOG-XXXX-XXXX",
+    activate: "Активувати",
+    activating: "Перевірка...",
+    success: "Успішно!",
+    successMessage: "Код активовано. Можете почати тур.",
+    startTour: "Почати тур",
+    errorInvalid: "Невірний код",
+    errorUsed: "Код вже використано на іншому пристрої",
+    errorExpired: "Код закінчився",
+    errorWrongMuseum: "Код не дійсний для цього музею",
+    errorGeneric: "Сталася помилка",
+    scanQr: "Сканувати QR",
+    orEnterCode: "або введіть код",
+    scanning: "Сканування...",
+    cameraError: "Не вдалося отримати доступ до камери",
+    stopScanning: "Зупинити сканування",
+  },
 };
 
 export default function ActivatePage() {

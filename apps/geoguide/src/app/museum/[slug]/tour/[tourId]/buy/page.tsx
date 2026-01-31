@@ -98,6 +98,29 @@ const uiTexts: Record<string, {
       "Неограниченное прослушивание",
     ],
   },
+  uk: {
+    title: "Придбати тур",
+    subtitle: "Доступ до аудіогіда",
+    tourAccess: "Доступ до туру",
+    validFor: "Термін дії",
+    days: "днів",
+    price: "Ціна",
+    securePayment: "Безпечна оплата",
+    payWith: "Сплатити через TBC",
+    processing: "Обробка...",
+    successTitle: "Оплата успішна!",
+    successMessage: "Ви придбали доступ до туру.",
+    startTour: "Почати тур",
+    errorPayment: "Оплата не вдалася",
+    errorGeneric: "Сталася помилка",
+    includesTitle: "Включає:",
+    includes: [
+      "Повний аудіогід",
+      "Всі зупинки",
+      "Офлайн режим",
+      "Необмежене прослуховування",
+    ],
+  },
 };
 
 interface TourInfo {
