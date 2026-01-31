@@ -80,9 +80,11 @@ export default function TourPage() {
         const langs = new Set<Language>(["ka"]);
         if (data.nameEn) langs.add("en");
         if (data.nameRu) langs.add("ru");
+        if (data.nameUk) langs.add("uk");
         data.stops?.forEach((stop: TourStop) => {
           if (stop.titleEn || stop.audioUrlEn) langs.add("en");
           if (stop.titleRu || stop.audioUrlRu) langs.add("ru");
+          if (stop.titleUk || stop.audioUrlUk) langs.add("uk");
         });
         setAvailableLanguages(Array.from(langs));
       }
