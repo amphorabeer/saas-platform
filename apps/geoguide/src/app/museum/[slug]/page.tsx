@@ -31,6 +31,7 @@ export default function MuseumPage() {
     ru: { start: "Начать", enterCode: "Введите код", buy: "Купить", minutes: "мин", stops: "остановок", noTours: "Туры пока недоступны" },
     de: { start: "Starten", enterCode: "Code eingeben", buy: "Kaufen", minutes: "Min", stops: "Haltestellen", noTours: "Noch keine Touren" },
     fr: { start: "Commencer", enterCode: "Entrer le code", buy: "Acheter", minutes: "min", stops: "arrêts", noTours: "Pas encore de visites" },
+    uk: { start: "Почати", enterCode: "Введіть код", buy: "Купити", minutes: "хв", stops: "зупинок", noTours: "Турів поки немає" },
   };
 
   useEffect(() => {
@@ -70,6 +71,7 @@ export default function MuseumPage() {
       ru: { name: "nameRu", description: "descriptionRu", city: "cityRu", address: "addressRu" },
       de: { name: "nameDe", description: "descriptionDe", city: "cityDe", address: "addressDe" },
       fr: { name: "nameFr", description: "descriptionFr", city: "cityFr", address: "addressFr" },
+      uk: { name: "nameUk", description: "descriptionUk", city: "cityUk", address: "addressUk" },
     };
 
     const langField = fieldMap[language]?.[field];
@@ -241,8 +243,8 @@ function TourCard({
   // Get localized field based on language
   const getField = (field: "name" | "description"): string => {
     const fieldMap: Record<string, Record<string, string>> = {
-      name: { ka: "name", en: "nameEn", ru: "nameRu", de: "nameDe", fr: "nameFr" },
-      description: { ka: "description", en: "descriptionEn", ru: "descriptionRu", de: "descriptionDe", fr: "descriptionFr" },
+      name: { ka: "name", en: "nameEn", ru: "nameRu", de: "nameDe", fr: "nameFr", uk: "nameUk" },
+      description: { ka: "description", en: "descriptionEn", ru: "descriptionRu", de: "descriptionDe", fr: "descriptionFr", uk: "descriptionUk" },
     };
 
     const langField = fieldMap[field]?.[language];

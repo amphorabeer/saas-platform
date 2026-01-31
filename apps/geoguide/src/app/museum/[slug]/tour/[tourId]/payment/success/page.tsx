@@ -29,6 +29,12 @@ const uiTexts: Record<string, {
     startTour: "Начать тур",
     processing: "Обработка...",
   },
+  uk: {
+    title: "Оплата успішна!",
+    message: "Ви придбали доступ до туру. Можете почати тур.",
+    startTour: "Почати тур",
+    processing: "Обробка...",
+  },
 };
 
 export default function PaymentSuccessPage() {
