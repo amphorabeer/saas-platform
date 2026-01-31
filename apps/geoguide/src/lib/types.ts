@@ -55,7 +55,7 @@ export interface TourStop {
   longitude: number | null;
 }
 
-export type Language = "ka" | "en" | "ru" | "de" | "fr";
+export type Language = "ka" | "en" | "ru" | "de" | "fr" | "uk";
 
 export interface LanguageOption {
   code: Language;
@@ -69,4 +69,5 @@ export const LANGUAGES: LanguageOption[] = [
   { code: "ru", name: "Русский", flag: "🇷🇺" },
   { code: "de", name: "Deutsch", flag: "🇩🇪" },
   { code: "fr", name: "Français", flag: "🇫🇷" },
+  { code: "uk", name: "Українська", flag: "🇺🇦" },
 ];
