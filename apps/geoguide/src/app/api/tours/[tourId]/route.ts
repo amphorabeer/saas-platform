@@ -8,7 +8,9 @@ export async function GET(
   { params }: { params: { tourId: string } }
 ) {
   try {
-    const res = await fetch(`${API_BASE}/api/geoguide/tours/${params.tourId}`);
+    const res = await fetch(`${API_BASE}/api/geoguide/tours/${params.tourId}`, {
+      cache: 'no-store',
+    });
     
     if (!res.ok) {
       return NextResponse.json(
@@ -24,16 +26,18 @@ export async function GET(
       name: tour.name,
       nameEn: tour.nameEn,
       nameRu: tour.nameRu,
+      nameUk: tour.nameUk,
       price: parseFloat(tour.price) || 0,
       currency: tour.currency || "GEL",
       duration: tour.duration,
-      stopsCount: tour.stopsCount,
+      stopsCount: tour.stops?.length || tour.stopsCount || 0,
       isFree: tour.isFree,
       coverImage: tour.coverImage,
       museum: {
         name: tour.museum?.name,
         nameEn: tour.museum?.nameEn,
         nameRu: tour.museum?.nameRu,
+        nameUk: tour.museum?.nameUk,
         coverImage: tour.museum?.coverImage,
       },
       stops: tour.stops || [],
