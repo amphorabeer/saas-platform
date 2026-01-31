@@ -160,21 +160,21 @@ export default function TourPage() {
 
   const getTourName = (): string => {
     if (!tour) return "";
-    const fieldMap: Record<Language, keyof Tour> = { ka: "name", en: "nameEn", ru: "nameRu", de: "nameDe", fr: "nameFr" };
+    const fieldMap: Record<Language, keyof Tour> = { ka: "name", en: "nameEn", ru: "nameRu", de: "nameDe", fr: "nameFr", uk: "nameUk" };
     const field = fieldMap[language];
     if (field && tour[field]) return tour[field] as string;
     return tour.name;
   };
 
   const getLocalizedAudio = (stop: TourStop): string | null => {
-    const audioFieldMap: Record<Language, keyof TourStop | null> = { ka: "audioUrl", en: "audioUrlEn", ru: "audioUrlRu", de: null, fr: null };
+    const audioFieldMap: Record<Language, keyof TourStop | null> = { ka: "audioUrl", en: "audioUrlEn", ru: "audioUrlRu", de: null, fr: null, uk: "audioUrlUk" };
     const field = audioFieldMap[language];
     if (field && stop[field]) return stop[field] as string;
     return stop.audioUrl;
   };
 
   const getLocalizedTitle = (stop: TourStop): string => {
-    const titleFieldMap: Record<Language, keyof TourStop> = { ka: "title", en: "titleEn", ru: "titleRu", de: "title", fr: "title" };
+    const titleFieldMap: Record<Language, keyof TourStop> = { ka: "title", en: "titleEn", ru: "titleRu", de: "title", fr: "title", uk: "titleUk" };
     const field = titleFieldMap[language];
     if (field && stop[field]) return stop[field] as string;
     return stop.title;
