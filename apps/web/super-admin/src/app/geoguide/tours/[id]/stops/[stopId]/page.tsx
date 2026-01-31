@@ -108,13 +108,22 @@ export default function EditStopPage({
             audioUrl: data.audioUrlEn || "",
           });
         }
-        if (data.titleRu) {
+        if (data.titleRu || data.descriptionRu || data.audioUrlRu || data.transcriptRu) {
           existingTranslations.push({
             langCode: "ru",
             title: data.titleRu || "",
-            description: "",
-            transcript: "",
-            audioUrl: "",
+            description: data.descriptionRu || "",
+            transcript: data.transcriptRu || "",
+            audioUrl: data.audioUrlRu || "",
+          });
+        }
+        if (data.titleUk || data.descriptionUk || data.audioUrlUk || data.transcriptUk) {
+          existingTranslations.push({
+            langCode: "uk",
+            title: data.titleUk || "",
+            description: data.descriptionUk || "",
+            transcript: data.transcriptUk || "",
+            audioUrl: data.audioUrlUk || "",
           });
         }
         setTranslations(existingTranslations);

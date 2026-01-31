@@ -194,7 +194,10 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
           price: formData.price ? parseFloat(formData.price) : null,
           nameEn: translations.find((t) => t.langCode === "en")?.name || null,
           nameRu: translations.find((t) => t.langCode === "ru")?.name || null,
+          nameUk: translations.find((t) => t.langCode === "uk")?.name || null,
           descriptionEn: translations.find((t) => t.langCode === "en")?.description || null,
+          descriptionRu: translations.find((t) => t.langCode === "ru")?.description || null,
+          descriptionUk: translations.find((t) => t.langCode === "uk")?.description || null,
         }),
       });
 
@@ -235,6 +238,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     try {
       const enTrans = newStopTranslations.find((t) => t.langCode === "en");
       const ruTrans = newStopTranslations.find((t) => t.langCode === "ru");
+      const ukTrans = newStopTranslations.find((t) => t.langCode === "uk");
 
       const res = await fetch(`/api/geoguide/tours/${params.id}/stops`, {
         method: "POST",
@@ -243,8 +247,11 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
           title: newStopData.title,
           titleEn: enTrans?.title || null,
           titleRu: ruTrans?.title || null,
+          titleUk: ukTrans?.title || null,
           audioUrl: newStopData.audioUrl || null,
           audioUrlEn: enTrans?.audioUrl || null,
+          audioUrlRu: ruTrans?.audioUrl || null,
+          audioUrlUk: ukTrans?.audioUrl || null,
           imageUrl: newStopData.imageUrl || null,
           orderIndex: tour?.stops.length || 0,
         }),

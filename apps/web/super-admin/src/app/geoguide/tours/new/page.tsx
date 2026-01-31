@@ -130,8 +130,10 @@ export default function NewTourPage() {
           price: formData.price ? parseFloat(formData.price) : null,
           nameEn: translations.find((t) => t.langCode === "en")?.name || null,
           nameRu: translations.find((t) => t.langCode === "ru")?.name || null,
+          nameUk: translations.find((t) => t.langCode === "uk")?.name || null,
           descriptionEn: translations.find((t) => t.langCode === "en")?.description || null,
           descriptionRu: translations.find((t) => t.langCode === "ru")?.description || null,
+          descriptionUk: translations.find((t) => t.langCode === "uk")?.description || null,
         }),
       });
 
