@@ -53,6 +53,10 @@ interface Museum {
   descriptionFr: string | null;
   cityFr: string | null;
   addressFr: string | null;
+  nameUk: string | null;
+  descriptionUk: string | null;
+  cityUk: string | null;
+  addressUk: string | null;
   slug: string;
   coverImage: string | null;
   latitude: number | null;
@@ -177,6 +181,20 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
             address: data.addressFr || "",
           });
         }
+        if (
+          data.nameUk ||
+          data.descriptionUk ||
+          data.cityUk ||
+          data.addressUk
+        ) {
+          trans.push({
+            langCode: "uk",
+            name: data.nameUk || "",
+            description: data.descriptionUk || "",
+            city: data.cityUk || "",
+            address: data.addressUk || "",
+          });
+        }
         setTranslations(trans);
       } else {
         alert("მუზეუმი ვერ მოიძებნა");
@@ -244,6 +262,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
       const ruTrans = translations.find((t) => t.langCode === "ru");
       const deTrans = translations.find((t) => t.langCode === "de");
       const frTrans = translations.find((t) => t.langCode === "fr");
+      const ukTrans = translations.find((t) => t.langCode === "uk");
 
       const res = await fetch(`/api/geoguide/museums/${params.id}`, {
         method: "PATCH",
@@ -274,6 +293,11 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
           descriptionFr: frTrans?.description || null,
           cityFr: frTrans?.city || null,
           addressFr: frTrans?.address || null,
+          // Ukrainian
+          nameUk: ukTrans?.name || null,
+          descriptionUk: ukTrans?.description || null,
+          cityUk: ukTrans?.city || null,
+          addressUk: ukTrans?.address || null,
         }),
       });
 
