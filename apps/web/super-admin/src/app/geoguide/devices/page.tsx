@@ -21,6 +21,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  CreditCard,
 } from "lucide-react";
 
 interface Entitlement {
@@ -44,6 +45,24 @@ interface Entitlement {
   isActive: boolean;
 }
 
+interface Payment {
+  id: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  completedAt: string | null;
+  createdAt: string;
+  tour: {
+    id: string;
+    name: string;
+    museum: {
+      id: string;
+      name: string;
+    };
+  };
+}
+
 interface Device {
   id: string;
   deviceId: string;
@@ -53,6 +72,7 @@ interface Device {
   lastActiveAt: string | null;
   createdAt: string;
   entitlements: Entitlement[];
+  payments: Payment[];
 }
 
 export default function DevicesPage() {
@@ -146,6 +166,11 @@ export default function DevicesPage() {
           e.activationCode?.code.toLowerCase().includes(searchLower) ||
           e.tour.name.toLowerCase().includes(searchLower) ||
           e.tour.museum.name.toLowerCase().includes(searchLower)
+      ) ||
+      device.payments.some(
+        (p) =>
+          p.tour.name.toLowerCase().includes(searchLower) ||
+          p.tour.museum.name.toLowerCase().includes(searchLower)
       )
     );
   });
@@ -156,7 +181,9 @@ export default function DevicesPage() {
       (d) => d.lastActiveAt && new Date(d.lastActiveAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     ).length,
     withEntitlements: devices.filter((d) => d.entitlements.length > 0).length,
+    withPayments: devices.filter((d) => d.payments.length > 0).length,
     totalEntitlements: devices.reduce((sum, d) => sum + d.entitlements.length, 0),
+    totalPayments: devices.reduce((sum, d) => sum + d.payments.length, 0),
   };
 
   if (loading) {
@@ -186,7 +213,7 @@ export default function DevicesPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -207,8 +234,20 @@ export default function DevicesPage() {
         </Card>
         <Card>
           <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-purple-600">{stats.withPayments}</div>
+            <p className="text-sm text-muted-foreground">ბანკით გადამხდელი</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
             <div className="text-2xl font-bold text-amber-600">{stats.totalEntitlements}</div>
-            <p className="text-sm text-muted-foreground">სულ აქტივაციები</p>
+            <p className="text-sm text-muted-foreground">სულ კოდები</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-emerald-600">{stats.totalPayments}</div>
+            <p className="text-sm text-muted-foreground">სულ გადახდები</p>
           </CardContent>
         </Card>
       </div>
@@ -253,8 +292,13 @@ export default function DevicesPage() {
                     <div className="font-medium flex items-center gap-2">
                       {getPlatformLabel(device.platform)}
                       {device.entitlements.length > 0 && (
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                          🔑 {device.entitlements.length}
+                        </span>
+                      )}
+                      {device.payments.length > 0 && (
                         <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                          {device.entitlements.length} აქტივაცია
+                          💳 {device.payments.length}
                         </span>
                       )}
                     </div>
@@ -281,65 +325,112 @@ export default function DevicesPage() {
                 </div>
               </div>
 
-              {/* Expanded Content - Entitlements */}
+              {/* Expanded Content */}
               {expandedDevice === device.id && (
                 <div className="border-t bg-muted/30 p-4">
-                  {device.entitlements.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-4">
-                      ამ მოწყობილობას კოდი არ გაუაქტიურებია
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-sm mb-3">აქტივაციების ისტორია</h4>
-                      {device.entitlements.map((entitlement) => (
-                        <div
-                          key={entitlement.id}
-                          className={`flex items-center justify-between p-3 rounded-lg ${
-                            isExpired(entitlement.expiresAt)
-                              ? "bg-gray-100 dark:bg-gray-800"
-                              : "bg-white dark:bg-gray-900"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`p-2 rounded-full ${
-                                isExpired(entitlement.expiresAt)
-                                  ? "bg-gray-200 text-gray-500"
-                                  : "bg-green-100 text-green-600"
-                              }`}
-                            >
-                              <Key className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <div className="font-mono text-sm">
-                                {entitlement.activationCode?.code || "—"}
+                  {/* Entitlements (Code activations) */}
+                  {device.entitlements.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                        <Key className="h-4 w-4" />
+                        კოდით აქტივაციები ({device.entitlements.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {device.entitlements.map((entitlement) => (
+                          <div
+                            key={entitlement.id}
+                            className={`flex items-center justify-between p-3 rounded-lg ${
+                              isExpired(entitlement.expiresAt)
+                                ? "bg-gray-100 dark:bg-gray-800"
+                                : "bg-white dark:bg-gray-900"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-full ${
+                                  isExpired(entitlement.expiresAt)
+                                    ? "bg-gray-200 text-gray-500"
+                                    : "bg-blue-100 text-blue-600"
+                                }`}
+                              >
+                                <Key className="h-4 w-4" />
                               </div>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <MapPin className="h-3 w-3" />
-                                {entitlement.tour.museum.name} • {entitlement.tour.name}
+                              <div>
+                                <div className="font-mono text-sm">
+                                  {entitlement.activationCode?.code || "—"}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <MapPin className="h-3 w-3" />
+                                  {entitlement.tour.museum.name} • {entitlement.tour.name}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div
+                                className={`text-xs px-2 py-1 rounded-full ${
+                                  isExpired(entitlement.expiresAt)
+                                    ? "bg-gray-200 text-gray-600"
+                                    : "bg-blue-100 text-blue-700"
+                                }`}
+                              >
+                                {isExpired(entitlement.expiresAt) ? "ვადაგასული" : "აქტიური"}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {formatDate(entitlement.activatedAt)}
                               </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div
-                              className={`text-xs px-2 py-1 rounded-full ${
-                                isExpired(entitlement.expiresAt)
-                                  ? "bg-gray-200 text-gray-600"
-                                  : "bg-green-100 text-green-700"
-                              }`}
-                            >
-                              {isExpired(entitlement.expiresAt) ? "ვადაგასული" : "აქტიური"}
-                            </div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {formatDate(entitlement.activatedAt)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              ვადა: {formatDate(entitlement.expiresAt)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
+                  )}
+
+                  {/* Payments */}
+                  {device.payments.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        ბანკით გადახდები ({device.payments.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {device.payments.map((payment) => (
+                          <div
+                            key={payment.id}
+                            className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-gray-900"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-full bg-green-100 text-green-600">
+                                <CreditCard className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <div className="font-medium text-sm">
+                                  ₾{payment.amount}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <MapPin className="h-3 w-3" />
+                                  {payment.tour.museum.name} • {payment.tour.name}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                                გადახდილი
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {formatDate(payment.completedAt || payment.createdAt)}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty state */}
+                  {device.entitlements.length === 0 && device.payments.length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">
+                      ამ მოწყობილობას აქტივაცია არ აქვს
+                    </p>
                   )}
 
                   {/* Device Details */}

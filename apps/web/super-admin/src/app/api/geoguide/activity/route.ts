@@ -3,13 +3,23 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // Get recent redeemed codes
-    const recentCodes = await prisma.activationCode.findMany({
-      where: { status: "REDEEMED" },
-      orderBy: { updatedAt: "desc" },
+    // Get recent redeemed codes with their entitlements
+    const recentEntitlements = await prisma.entitlement.findMany({
+      where: {
+        activationCodeId: { not: null },
+      },
+      orderBy: { activatedAt: "desc" },
       take: 5,
       include: {
-        tour: { select: { name: true } },
+        activationCode: {
+          select: { code: true },
+        },
+        tour: {
+          select: { 
+            name: true,
+            museum: { select: { name: true } },
+          },
+        },
       },
     });
 
@@ -19,7 +29,12 @@ export async function GET() {
       orderBy: { completedAt: "desc" },
       take: 5,
       include: {
-        tour: { select: { name: true } },
+        tour: { 
+          select: { 
+            name: true,
+            museum: { select: { name: true } },
+          } 
+        },
       },
     });
 
@@ -45,13 +60,13 @@ export async function GET() {
       createdAt: Date;
     }[] = [];
 
-    // Add redeemed codes
-    recentCodes.forEach((code) => {
+    // Add redeemed codes from entitlements
+    recentEntitlements.forEach((ent) => {
       activities.push({
-        id: `code-${code.id}`,
+        id: `code-${ent.id}`,
         type: "code_redeemed",
-        description: `კოდი გააქტიურდა: ${code.code} (${code.tour?.name || "Unknown tour"})`,
-        createdAt: code.updatedAt,
+        description: `კოდი გააქტიურდა: ${ent.activationCode?.code || "—"} (${ent.tour.museum.name} - ${ent.tour.name})`,
+        createdAt: ent.activatedAt,
       });
     });
 
@@ -60,7 +75,7 @@ export async function GET() {
       activities.push({
         id: `payment-${payment.id}`,
         type: "payment_completed",
-        description: `გადახდა: ₾${payment.amount} (${payment.tour?.name || "Unknown tour"})`,
+        description: `გადახდა: ₾${payment.amount} (${payment.tour.museum.name} - ${payment.tour.name})`,
         createdAt: payment.completedAt || payment.createdAt,
       });
     });
