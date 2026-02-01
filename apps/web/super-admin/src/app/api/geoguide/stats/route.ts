@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
+    // Basic counts
     const [
       totalMuseums,
       totalTours,
@@ -16,7 +17,6 @@ export async function GET() {
       totalPayments,
       completedPayments,
       totalRevenue,
-      freeTourStarts,
     ] = await Promise.all([
       prisma.museum.count(),
       prisma.tour.count(),
@@ -38,10 +38,18 @@ export async function GET() {
         where: { status: "COMPLETED" },
         _sum: { amount: true },
       }),
-      prisma.geoGuideEvent.count({
-        where: { eventType: "tour_start" },
-      }),
     ]);
+
+    // Try to get free tour starts from events (may not exist or be empty)
+    let freeTourStarts = 0;
+    try {
+      freeTourStarts = await prisma.geoGuideEvent.count({
+        where: { eventType: "tour_start" },
+      });
+    } catch {
+      // Table might not exist or be empty
+      freeTourStarts = 0;
+    }
 
     return NextResponse.json({
       totalMuseums,

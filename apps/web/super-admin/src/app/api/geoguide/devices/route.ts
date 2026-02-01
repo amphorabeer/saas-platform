@@ -38,7 +38,43 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(devices);
+    // Get all payments and group by deviceId
+    const payments = await prisma.payment.findMany({
+      where: { status: "COMPLETED" },
+      include: {
+        tour: {
+          select: {
+            id: true,
+            name: true,
+            museum: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        completedAt: "desc",
+      },
+    });
+
+    // Create a map of deviceId to payments
+    const paymentsByDevice = new Map<string, typeof payments>();
+    payments.forEach((payment) => {
+      const existing = paymentsByDevice.get(payment.deviceId) || [];
+      existing.push(payment);
+      paymentsByDevice.set(payment.deviceId, existing);
+    });
+
+    // Combine devices with their payments
+    const devicesWithPayments = devices.map((device) => ({
+      ...device,
+      payments: paymentsByDevice.get(device.deviceId) || [],
+    }));
+
+    return NextResponse.json(devicesWithPayments);
   } catch (error) {
     console.error("Error fetching devices:", error);
     return NextResponse.json(
