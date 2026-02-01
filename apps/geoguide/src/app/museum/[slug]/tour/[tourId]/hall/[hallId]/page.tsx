@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useLanguage } from "@/lib/language-context";
 import { LANGUAGES, Language, TourStop } from "@/lib/types";
 import { OfflineImage } from "@/components/OfflineImage";
@@ -11,9 +10,14 @@ import {
   PlayIcon,
   PauseIcon,
   MagnifyingGlassIcon,
-  ArrowDownTrayIcon,
+  XMarkIcon,
+  BackwardIcon,
+  ForwardIcon,
+  MinusIcon,
+  PlusIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
-import { PlayIcon as PlayIconSolid } from "@heroicons/react/24/solid";
+import { PlayIcon as PlayIconSolid, PauseIcon as PauseIconSolid } from "@heroicons/react/24/solid";
 
 interface Hall {
   id: string;
@@ -30,6 +34,7 @@ interface Tour {
   nameEn: string | null;
   nameRu: string | null;
   nameUk: string | null;
+  coverImage: string | null;
   halls: Hall[];
   stops: TourStop[];
 }
@@ -42,12 +47,12 @@ const uiTexts: Record<string, {
   noStops: string;
   list: string;
 }> = {
-  ka: { audioGuide: "აუდიო გიდი", stop: "გაჩერება", search: "ძებნა...", noStops: "გაჩერებები არ არის", list: "ჩამონათვალი" },
-  en: { audioGuide: "Audio Guide", stop: "Stop", search: "Search...", noStops: "No stops available", list: "List" },
-  ru: { audioGuide: "Аудиогид", stop: "Остановка", search: "Поиск...", noStops: "Остановки недоступны", list: "Список" },
-  de: { audioGuide: "Audioguide", stop: "Haltestelle", search: "Suchen...", noStops: "Keine Haltestellen", list: "Liste" },
-  fr: { audioGuide: "Audioguide", stop: "Arrêt", search: "Rechercher...", noStops: "Aucun arrêt", list: "Liste" },
-  uk: { audioGuide: "Аудіогід", stop: "Зупинка", search: "Пошук...", noStops: "Зупинки недоступні", list: "Список" },
+  ka: { audioGuide: "აუდიო გიდი", stop: "გაჩერება", search: "ძებნა ნომრით ან სახელით...", noStops: "გაჩერებები არ არის", list: "ჩამონათვალი" },
+  en: { audioGuide: "Audio Guide", stop: "Stop", search: "Search by number or name...", noStops: "No stops available", list: "List" },
+  ru: { audioGuide: "Аудиогид", stop: "Остановка", search: "Поиск по номеру или названию...", noStops: "Остановки недоступны", list: "Список" },
+  de: { audioGuide: "Audioguide", stop: "Haltestelle", search: "Nach Nummer oder Name suchen...", noStops: "Keine Haltestellen", list: "Liste" },
+  fr: { audioGuide: "Audioguide", stop: "Arrêt", search: "Rechercher par numéro ou nom...", noStops: "Aucun arrêt", list: "Liste" },
+  uk: { audioGuide: "Аудіогід", stop: "Зупинка", search: "Пошук за номером або назвою...", noStops: "Зупинки недоступні", list: "Список" },
 };
 
 export default function HallPage() {
@@ -62,11 +67,14 @@ export default function HallPage() {
   const [availableLanguages, setAvailableLanguages] = useState<Language[]>(["ka"]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [playedStops, setPlayedStops] = useState<Set<string>>(new Set());
 
   // Audio player state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1.0);
+  const [actualAudioUrl, setActualAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const ui = uiTexts[language] || uiTexts.ka;
@@ -108,6 +116,34 @@ export default function HallPage() {
       setLoading(false);
     }
   };
+
+  // Load offline audio when stop selected
+  useEffect(() => {
+    if (!selectedStop) return;
+    const audioUrl = getAudioUrl(selectedStop);
+    if (!audioUrl) return;
+
+    const loadAudio = async () => {
+      try {
+        const { getAudioOffline } = await import("@/lib/offline-manager");
+        const offlineUrl = await getAudioOffline(audioUrl);
+        setActualAudioUrl(offlineUrl || audioUrl);
+      } catch {
+        setActualAudioUrl(audioUrl);
+      }
+    };
+    loadAudio();
+  }, [selectedStop, language]);
+
+  // Auto-play when audio URL changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio && actualAudioUrl) {
+      audio.src = actualAudioUrl;
+      audio.playbackRate = playbackRate;
+      audio.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  }, [actualAudioUrl, playbackRate]);
 
   const getHallName = (): string => {
     if (!hall) return "";
@@ -153,30 +189,59 @@ export default function HallPage() {
   
   const filteredStops = hallStops.filter((stop) => {
     if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
     const title = getStopTitle(stop).toLowerCase();
-    return title.includes(searchQuery.toLowerCase());
+    const index = (stop.orderIndex + 1).toString();
+    return title.includes(query) || index.includes(query);
   });
 
-  const handleStopSelect = (stop: TourStop) => {
-    setSelectedStop(stop);
-    setIsPlaying(false);
-    setCurrentTime(0);
+  const handleStopClick = (stop: TourStop) => {
+    const audioUrl = getAudioUrl(stop);
+    if (!audioUrl) return;
+
+    if (selectedStop?.id === stop.id) {
+      togglePlay();
+    } else {
+      setSelectedStop(stop);
+      setPlayedStops((prev) => new Set(prev).add(stop.id));
+      setCurrentTime(0);
+    }
   };
 
   const togglePlay = () => {
-    if (!audioRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) return;
     if (isPlaying) {
-      audioRef.current.pause();
+      audio.pause();
     } else {
-      audioRef.current.play();
+      audio.play();
     }
     setIsPlaying(!isPlaying);
   };
 
-  const formatTime = (time: number) => {
+  const seek = (seconds: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = Math.max(0, Math.min(audio.currentTime + seconds, duration));
+  };
+
+  const changeSpeed = (delta: number) => {
+    const newRate = Math.max(0.5, Math.min(2.0, playbackRate + delta));
+    setPlaybackRate(newRate);
+    if (audioRef.current) audioRef.current.playbackRate = newRate;
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = parseFloat(e.target.value);
+    setCurrentTime(time);
+    if (audioRef.current) audioRef.current.currentTime = time;
+  };
+
+  const formatTime = (time: number): string => {
+    if (!time || isNaN(time)) return "00:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const currentLang = LANGUAGES.find((l) => l.code === language);
@@ -199,7 +264,15 @@ export default function HallPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <audio
+        ref={audioRef}
+        preload="metadata"
+        onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        onEnded={() => setIsPlaying(false)}
+      />
+
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b safe-top">
         <div className="flex items-center justify-between px-4 h-14">
@@ -257,75 +330,168 @@ export default function HallPage() {
         </div>
       </header>
 
-      {/* Audio Guide Label & Search */}
-      <div className="bg-white px-4 py-3 border-b flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-amber-500">🎧</span>
-          <span className="font-medium">{ui.audioGuide}</span>
+      {/* Toolbar */}
+      <div className="sticky top-14 z-40 bg-white border-b px-4 py-2">
+        <div className="flex items-center justify-between">
+          <h2 className="font-medium flex items-center gap-2">🎧 {ui.audioGuide}</h2>
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={() => setShowSearch(!showSearch)} 
+              className={`p-2 rounded-lg hover:bg-gray-100 ${showSearch ? "bg-amber-100 text-amber-600" : ""}`}
+            >
+              <MagnifyingGlassIcon className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setShowSearch(!showSearch)}
-          className="p-2 rounded-full hover:bg-gray-100"
-        >
-          <MagnifyingGlassIcon className="w-5 h-5" />
-        </button>
+        {showSearch && (
+          <div className="mt-2 relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={ui.search}
+              className="w-full px-4 py-2 pr-10 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              autoFocus
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <XMarkIcon className="w-5 h-5 text-gray-400" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Search Bar */}
-      {showSearch && (
-        <div className="bg-white px-4 py-2 border-b">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={ui.search}
-            className="w-full px-4 py-2 border rounded-full text-sm"
-            autoFocus
-          />
-        </div>
-      )}
-
       {/* Stops List */}
-      <div className="flex-1">
+      <div className="flex-1 p-4 pb-20">
         {filteredStops.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>{ui.noStops}</p>
           </div>
         ) : (
-          <div className="divide-y">
+          <div className="space-y-3">
             {filteredStops
               .sort((a, b) => a.orderIndex - b.orderIndex)
               .map((stop) => {
                 const audioUrl = getAudioUrl(stop);
                 const isSelected = selectedStop?.id === stop.id;
+                const isPlayed = playedStops.has(stop.id);
 
                 return (
-                  <div
-                    key={stop.id}
-                    onClick={() => handleStopSelect(stop)}
-                    className={`flex items-center gap-4 px-4 py-4 bg-white cursor-pointer hover:bg-gray-50 ${
-                      isSelected ? "bg-amber-50" : ""
-                    }`}
-                  >
-                    <div className="flex-1">
-                      <div className="font-medium">{getStopTitle(stop)}</div>
-                    </div>
-                    {audioUrl && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStopSelect(stop);
-                          setTimeout(() => {
-                            if (audioRef.current) {
-                              audioRef.current.play();
-                              setIsPlaying(true);
-                            }
-                          }, 100);
-                        }}
-                        className="p-2 rounded-full bg-amber-500 text-white hover:bg-amber-600"
-                      >
-                        <PlayIcon className="w-5 h-5" />
-                      </button>
+                  <div key={stop.id} className="space-y-0">
+                    {/* Stop Card */}
+                    <button
+                      onClick={() => handleStopClick(stop)}
+                      disabled={!audioUrl}
+                      className={`w-full rounded-xl overflow-hidden text-left transition-all ${
+                        isSelected ? "ring-2 ring-amber-500" : ""
+                      } ${!audioUrl ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      {/* Image - if stop has image */}
+                      {stop.imageUrl && (
+                        <div className="relative h-48 bg-gray-200">
+                          <OfflineImage
+                            src={stop.imageUrl || tour.coverImage || ""}
+                            alt={getStopTitle(stop)}
+                            className="w-full h-full object-cover"
+                          />
+                          {/* Number badge on image */}
+                          <div className="absolute top-3 left-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                            <span className="font-semibold">{stop.orderIndex + 1}</span>
+                          </div>
+                          {/* Played check on image */}
+                          {isPlayed && (
+                            <div className="absolute top-3 right-3 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                              <CheckIcon className="w-5 h-5 text-white" />
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Title bar */}
+                      <div className={`flex items-center gap-3 p-4 ${isSelected ? "bg-amber-50" : "bg-white"}`}>
+                        {/* Number circle - only if no image */}
+                        {!stop.imageUrl && (
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 ${
+                            isPlayed ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-600"
+                          }`}>
+                            {stop.orderIndex + 1}
+                          </div>
+                        )}
+                        {/* Played check - only if no image */}
+                        {!stop.imageUrl && isPlayed && (
+                          <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{getStopTitle(stop)}</p>
+                        </div>
+                        {audioUrl && (
+                          <div className="flex-shrink-0">
+                            {isSelected && isPlaying ? (
+                              <PauseIconSolid className="w-6 h-6 text-amber-500" />
+                            ) : (
+                              <PlayIcon className="w-6 h-6 text-gray-400" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+
+                    {/* Inline Player - appears under selected stop */}
+                    {isSelected && audioUrl && (
+                      <div className="bg-gray-800 rounded-b-xl p-4 -mt-1 text-white">
+                        {/* Controls Row */}
+                        <div className="flex items-center justify-center gap-6 mb-4">
+                          <button onClick={() => seek(-5)} className="flex flex-col items-center text-gray-400 hover:text-white">
+                            <BackwardIcon className="w-6 h-6" />
+                            <span className="text-xs">5</span>
+                          </button>
+                          <button onClick={() => changeSpeed(-0.25)} className="p-2 rounded-full border border-gray-600 hover:border-gray-400">
+                            <MinusIcon className="w-4 h-4" />
+                          </button>
+                          <span className="text-sm font-medium min-w-[40px] text-center">{playbackRate.toFixed(1)}x</span>
+                          <button onClick={() => changeSpeed(0.25)} className="p-2 rounded-full border border-gray-600 hover:border-gray-400">
+                            <PlusIcon className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => seek(10)} className="flex flex-col items-center text-gray-400 hover:text-white">
+                            <ForwardIcon className="w-6 h-6" />
+                            <span className="text-xs">10</span>
+                          </button>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="text-sm text-gray-400 min-w-[45px]">{formatTime(currentTime)}</span>
+                          <input
+                            type="range"
+                            min={0}
+                            max={duration || 100}
+                            value={currentTime}
+                            onChange={handleSeek}
+                            className="flex-1 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
+                              [&::-webkit-slider-thumb]:appearance-none
+                              [&::-webkit-slider-thumb]:w-3
+                              [&::-webkit-slider-thumb]:h-3
+                              [&::-webkit-slider-thumb]:bg-amber-500
+                              [&::-webkit-slider-thumb]:rounded-full"
+                          />
+                          <span className="text-sm text-gray-400 min-w-[45px] text-right">{formatTime(duration)}</span>
+                        </div>
+
+                        {/* Play Button */}
+                        <div className="flex justify-center">
+                          <button
+                            onClick={togglePlay}
+                            className="w-14 h-14 flex items-center justify-center bg-amber-500 rounded-full hover:bg-amber-600 transition-colors"
+                          >
+                            {isPlaying ? (
+                              <PauseIconSolid className="w-7 h-7 text-white" />
+                            ) : (
+                              <PlayIconSolid className="w-7 h-7 text-white ml-1" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     )}
                   </div>
                 );
@@ -334,51 +500,13 @@ export default function HallPage() {
         )}
       </div>
 
-      {/* Audio Player */}
-      {selectedStop && getAudioUrl(selectedStop) && (
-        <div className="sticky bottom-0 bg-white border-t shadow-lg safe-bottom">
-          <audio
-            ref={audioRef}
-            src={getAudioUrl(selectedStop) || ""}
-            onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
-            onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
-            onEnded={() => setIsPlaying(false)}
-          />
-          <div className="px-4 py-3">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={togglePlay}
-                className="w-12 h-12 rounded-full bg-amber-500 text-white flex items-center justify-center hover:bg-amber-600"
-              >
-                {isPlaying ? (
-                  <PauseIcon className="w-6 h-6" />
-                ) : (
-                  <PlayIconSolid className="w-6 h-6" />
-                )}
-              </button>
-              <div className="flex-1">
-                <div className="font-medium text-sm truncate">
-                  {getStopTitle(selectedStop)}
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-gray-500">{formatTime(currentTime)}</span>
-                  <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-500"
-                      style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-500">{formatTime(duration)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Bottom nav */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t safe-bottom z-30">
+        <div className="flex justify-center py-3">
+          <span className="text-sm text-gray-500 flex items-center gap-2">
+            ☰ {ui.list}
+          </span>
         </div>
-      )}
-
-      {/* Bottom Tab - List */}
-      <div className="bg-white border-t py-2 text-center safe-bottom">
-        <span className="text-sm text-gray-600">☰ {ui.list}</span>
       </div>
     </div>
   );
