@@ -14,6 +14,13 @@ interface Stats {
   activeEntitlements: number;
 }
 
+interface RecentActivity {
+  id: string;
+  type: "code_redeemed" | "tour_created" | "museum_created" | "stop_created";
+  description: string;
+  createdAt: string;
+}
+
 export default function GeoGuideDashboard() {
   const [stats, setStats] = useState<Stats>({
     totalMuseums: 0,
@@ -25,10 +32,12 @@ export default function GeoGuideDashboard() {
     totalDevices: 0,
     activeEntitlements: 0,
   });
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
+    fetchRecentActivity();
   }, []);
 
   const fetchStats = async () => {
@@ -42,6 +51,18 @@ export default function GeoGuideDashboard() {
       console.error("Error fetching stats:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRecentActivity = async () => {
+    try {
+      const res = await fetch("/api/geoguide/activity");
+      if (res.ok) {
+        const data = await res.json();
+        setRecentActivity(data);
+      }
+    } catch (error) {
+      console.error("Error fetching activity:", error);
     }
   };
 
@@ -63,7 +84,7 @@ export default function GeoGuideDashboard() {
     {
       title: "გაჩერებები",
       value: stats.totalStops,
-      description: "სულ stops",
+      description: "სულ გაჩერებები",
       icon: "📍",
       color: "bg-green-500",
     },
@@ -89,6 +110,31 @@ export default function GeoGuideDashboard() {
       color: "bg-emerald-500",
     },
   ];
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ka-GE", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "code_redeemed":
+        return "🔓";
+      case "tour_created":
+        return "🎧";
+      case "museum_created":
+        return "🏛️";
+      case "stop_created":
+        return "📍";
+      default:
+        return "📝";
+    }
+  };
 
   if (loading) {
     return (
@@ -182,16 +228,35 @@ export default function GeoGuideDashboard() {
         </CardContent>
       </Card>
 
-      {/* Recent Activity (placeholder) */}
+      {/* Recent Activity */}
       <Card>
         <CardHeader>
           <CardTitle>ბოლო აქტივობა</CardTitle>
           <CardDescription>უახლესი მოვლენები</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground text-center py-8">
-            აქტივობა ჯერ არ არის
-          </div>
+          {recentActivity.length === 0 ? (
+            <div className="text-sm text-muted-foreground text-center py-8">
+              აქტივობა ჯერ არ არის
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentActivity.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
+                >
+                  <span className="text-xl">{getActivityIcon(activity.type)}</span>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{activity.description}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {formatDate(activity.createdAt)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
