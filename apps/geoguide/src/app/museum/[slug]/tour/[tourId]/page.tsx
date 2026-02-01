@@ -515,16 +515,16 @@ export default function TourPage() {
 
                     {/* Title bar */}
                     <div className={`flex items-center gap-3 p-4 ${isSelected ? "bg-amber-50" : "bg-white"}`}>
-                      {/* Number circle - only if no image */}
-                      {!stop.imageUrl && !tour.coverImage && (
+                      {/* Number circle - always show if no image on stop */}
+                      {!stop.imageUrl && (
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 ${
                           isPlayed ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-600"
                         }`}>
                           {stop.orderIndex + 1}
                         </div>
                       )}
-                      {/* Played check - only if no image */}
-                      {!stop.imageUrl && !tour.coverImage && isPlayed && (
+                      {/* Played check - show if no image and played */}
+                      {!stop.imageUrl && isPlayed && (
                         <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0" />
                       )}
                       <div className="flex-1 min-w-0">
