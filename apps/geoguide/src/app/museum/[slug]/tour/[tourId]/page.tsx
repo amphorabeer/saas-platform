@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useLanguage } from "@/lib/language-context";
-import { Tour, TourStop, LANGUAGES, Language } from "@/lib/types";
+import { Tour, TourStop, Hall, LANGUAGES, Language } from "@/lib/types";
 import { OfflineImage } from "@/components/OfflineImage";
 import {
   ArrowDownTrayIcon,
@@ -18,6 +19,7 @@ import {
   ForwardIcon,
   MinusIcon,
   PlusIcon,
+  BuildingLibraryIcon,
 } from "@heroicons/react/24/outline";
 import { PlayIcon as PlayIconSolid, PauseIcon as PauseIconSolid } from "@heroicons/react/24/solid";
 
@@ -28,13 +30,16 @@ const uiTexts: Record<string, {
   search: string;
   tourNotFound: string;
   list: string;
+  halls: string;
+  stops: string;
+  allStops: string;
 }> = {
-  ka: { audioGuide: "აუდიო გიდი", stop: "გაჩერება", search: "ძებნა ნომრით ან სახელით...", tourNotFound: "ტური ვერ მოიძებნა", list: "ჩამონათვალი" },
-  en: { audioGuide: "Audio Guide", stop: "Stop", search: "Search by number or name...", tourNotFound: "Tour not found", list: "List" },
-  ru: { audioGuide: "Аудиогид", stop: "Остановка", search: "Поиск по номеру или названию...", tourNotFound: "Тур не найден", list: "Список" },
-  de: { audioGuide: "Audioguide", stop: "Haltestelle", search: "Nach Nummer oder Name suchen...", tourNotFound: "Tour nicht gefunden", list: "Liste" },
-  fr: { audioGuide: "Audioguide", stop: "Arrêt", search: "Rechercher par numéro ou nom...", tourNotFound: "Visite non trouvée", list: "Liste" },
-  uk: { audioGuide: "Аудіогід", stop: "Зупинка", search: "Пошук за номером або назвою...", tourNotFound: "Тур не знайдено", list: "Список" },
+  ka: { audioGuide: "აუდიო გიდი", stop: "გაჩერება", search: "ძებნა ნომრით ან სახელით...", tourNotFound: "ტური ვერ მოიძებნა", list: "ჩამონათვალი", halls: "დარბაზები", stops: "გაჩერება", allStops: "ყველა გაჩერება" },
+  en: { audioGuide: "Audio Guide", stop: "Stop", search: "Search by number or name...", tourNotFound: "Tour not found", list: "List", halls: "Halls", stops: "stops", allStops: "All Stops" },
+  ru: { audioGuide: "Аудиогид", stop: "Остановка", search: "Поиск по номеру или названию...", tourNotFound: "Тур не найден", list: "Список", halls: "Залы", stops: "остановок", allStops: "Все остановки" },
+  de: { audioGuide: "Audioguide", stop: "Haltestelle", search: "Nach Nummer oder Name suchen...", tourNotFound: "Tour nicht gefunden", list: "Liste", halls: "Säle", stops: "Haltestellen", allStops: "Alle Haltestellen" },
+  fr: { audioGuide: "Audioguide", stop: "Arrêt", search: "Rechercher par numéro ou nom...", tourNotFound: "Visite non trouvée", list: "Liste", halls: "Salles", stops: "arrêts", allStops: "Tous les arrêts" },
+  uk: { audioGuide: "Аудіогід", stop: "Зупинка", search: "Пошук за номером або назвою...", tourNotFound: "Тур не знайдено", list: "Список", halls: "Зали", stops: "зупинок", allStops: "Всі зупинки" },
 };
 
 export default function TourPage() {
@@ -42,7 +47,7 @@ export default function TourPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { language, setLanguage } = useLanguage();
-  const [tour, setTour] = useState<Tour | null>(null);
+  const [tour, setTour] = useState<(Tour & { halls?: Hall[] }) | null>(null);
   const [museum, setMuseum] = useState<{ showQrScanner?: boolean; showMap?: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedStop, setSelectedStop] = useState<TourStop | null>(null);
@@ -56,6 +61,9 @@ export default function TourPage() {
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
 
+  // View mode: 'halls' or 'stops'
+  const [viewMode, setViewMode] = useState<'halls' | 'stops'>('halls');
+
   // Audio player state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -65,6 +73,9 @@ export default function TourPage() {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const ui = uiTexts[language] || uiTexts.ka;
+
+  // Check if tour has halls
+  const hasHalls = tour?.halls && tour.halls.length > 0;
 
   useEffect(() => {
     fetchTour();
@@ -78,6 +89,13 @@ export default function TourPage() {
         const data = await res.json();
         setTour(data);
 
+        // Set initial view mode based on halls
+        if (data.halls && data.halls.length > 0) {
+          setViewMode('halls');
+        } else {
+          setViewMode('stops');
+        }
+
         const langs = new Set<Language>(["ka"]);
         if (data.nameEn) langs.add("en");
         if (data.nameRu) langs.add("ru");
@@ -86,6 +104,11 @@ export default function TourPage() {
           if (stop.titleEn || stop.audioUrlEn) langs.add("en");
           if (stop.titleRu || stop.audioUrlRu) langs.add("ru");
           if (stop.titleUk || stop.audioUrlUk) langs.add("uk");
+        });
+        data.halls?.forEach((hall: Hall) => {
+          if (hall.nameEn) langs.add("en");
+          if (hall.nameRu) langs.add("ru");
+          if (hall.nameUk) langs.add("uk");
         });
         setAvailableLanguages(Array.from(langs));
       }
@@ -121,13 +144,19 @@ export default function TourPage() {
     const stopId = searchParams.get("stop");
     if (stopId) {
       const stop = tour.stops.find((s) => s.id === stopId);
-      if (stop) handleStopClick(stop);
+      if (stop) {
+        setViewMode('stops');
+        handleStopClick(stop);
+      }
     }
     const stopIndex = searchParams.get("stopIndex");
     if (stopIndex !== null) {
       const index = parseInt(stopIndex, 10);
       const stop = tour.stops.find((s) => s.orderIndex === index);
-      if (stop) handleStopClick(stop);
+      if (stop) {
+        setViewMode('stops');
+        handleStopClick(stop);
+      }
     }
   }, [tour, searchParams]);
 
@@ -161,10 +190,17 @@ export default function TourPage() {
 
   const getTourName = (): string => {
     if (!tour) return "";
-    const fieldMap: Record<Language, keyof Tour> = { ka: "name", en: "nameEn", ru: "nameRu", de: "nameDe", fr: "nameFr", uk: "nameUk" };
+    const fieldMap: Record<Language, keyof Tour> = { ka: "name", en: "nameEn", ru: "nameRu", de: "name", fr: "name", uk: "nameUk" };
     const field = fieldMap[language];
     if (field && tour[field]) return tour[field] as string;
     return tour.name;
+  };
+
+  const getHallName = (hall: Hall): string => {
+    const fieldMap: Record<Language, keyof Hall> = { ka: "name", en: "nameEn", ru: "nameRu", de: "name", fr: "name", uk: "nameUk" };
+    const field = fieldMap[language];
+    if (field && hall[field]) return hall[field] as string;
+    return hall.name;
   };
 
   const getLocalizedAudio = (stop: TourStop): string | null => {
@@ -259,6 +295,10 @@ export default function TourPage() {
     }
   };
 
+  const getStopsForHall = (hallId: string) => {
+    return tour?.stops?.filter((s) => s.hallId === hallId) || [];
+  };
+
   const filteredStops = (tour?.stops || []).filter((stop) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -340,9 +380,11 @@ export default function TourPage() {
             <button onClick={() => setShowDownloadModal(true)} className={`p-2 rounded-lg hover:bg-gray-100 ${isDownloaded ? "text-green-600" : ""}`}>
               {isDownloaded ? <CheckIcon className="w-5 h-5" /> : <ArrowDownTrayIcon className="w-5 h-5" />}
             </button>
-            <button onClick={() => setShowSearch(!showSearch)} className={`p-2 rounded-lg hover:bg-gray-100 ${showSearch ? "bg-amber-100 text-amber-600" : ""}`}>
-              <MagnifyingGlassIcon className="w-5 h-5" />
-            </button>
+            {viewMode === 'stops' && (
+              <button onClick={() => setShowSearch(!showSearch)} className={`p-2 rounded-lg hover:bg-gray-100 ${showSearch ? "bg-amber-100 text-amber-600" : ""}`}>
+                <MagnifyingGlassIcon className="w-5 h-5" />
+              </button>
+            )}
             {museum?.showQrScanner && (
               <button onClick={() => router.push(`/museum/${params.slug}/tour/${params.tourId}/scan`)} className="p-2 rounded-lg hover:bg-gray-100">
                 <QrCodeIcon className="w-5 h-5" />
@@ -350,7 +392,35 @@ export default function TourPage() {
             )}
           </div>
         </div>
-        {showSearch && (
+        
+        {/* View Mode Toggle - only if has halls */}
+        {hasHalls && (
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={() => setViewMode('halls')}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                viewMode === 'halls'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              <BuildingLibraryIcon className="w-4 h-4 inline mr-1" />
+              {ui.halls}
+            </button>
+            <button
+              onClick={() => setViewMode('stops')}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                viewMode === 'stops'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {ui.allStops}
+            </button>
+          </div>
+        )}
+
+        {showSearch && viewMode === 'stops' && (
           <div className="mt-2 relative">
             <input
               type="text"
@@ -369,134 +439,170 @@ export default function TourPage() {
         )}
       </div>
 
-      {/* Stops List */}
+      {/* Content */}
       <div className="flex-1 p-4 pb-20">
-        <div className="space-y-3">
-          {filteredStops?.map((stop) => {
-            const audioUrl = getLocalizedAudio(stop);
-            const isSelected = selectedStop?.id === stop.id;
-            const isPlayed = playedStops.has(stop.id);
-
-            return (
-              <div key={stop.id} className="space-y-0">
-                {/* Stop Card */}
-                <button
-                  onClick={() => handleStopClick(stop)}
-                  disabled={!audioUrl}
-                  className={`w-full rounded-xl overflow-hidden text-left transition-all ${
-                    isSelected ? "ring-2 ring-amber-500" : ""
-                  } ${!audioUrl ? "opacity-50 cursor-not-allowed" : ""}`}
+        {/* Halls View */}
+        {viewMode === 'halls' && hasHalls && (
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            {tour.halls!
+              .sort((a, b) => a.orderIndex - b.orderIndex)
+              .map((hall) => (
+                <Link
+                  key={hall.id}
+                  href={`/museum/${params.slug}/tour/${params.tourId}/hall/${hall.id}`}
+                  className="block bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  {/* Image - if stop has image or use tour cover */}
-                  {stop.imageUrl && (
-                    <div className="relative h-48 bg-gray-200">
-                      <OfflineImage
-                        src={stop.imageUrl || tour.coverImage || ""}
-                        alt={getLocalizedTitle(stop)}
-                        className="w-full h-full object-cover"
-                      />
-                      {/* Number badge on image */}
-                      <div className="absolute top-3 left-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
-                        <span className="font-semibold">{stop.orderIndex + 1}</span>
+                  {hall.imageUrl ? (
+                    <img
+                      src={hall.imageUrl}
+                      alt={getHallName(hall)}
+                      className="w-full h-40 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-40 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                      <BuildingLibraryIcon className="w-16 h-16 text-blue-400" />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg">{getHallName(hall)}</h3>
+                    <p className="text-gray-500 text-sm mt-1">
+                      {getStopsForHall(hall.id).length} {ui.stops}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+          </div>
+        )}
+
+        {/* Stops View */}
+        {viewMode === 'stops' && (
+          <div className="space-y-3">
+            {filteredStops?.map((stop) => {
+              const audioUrl = getLocalizedAudio(stop);
+              const isSelected = selectedStop?.id === stop.id;
+              const isPlayed = playedStops.has(stop.id);
+
+              return (
+                <div key={stop.id} className="space-y-0">
+                  {/* Stop Card */}
+                  <button
+                    onClick={() => handleStopClick(stop)}
+                    disabled={!audioUrl}
+                    className={`w-full rounded-xl overflow-hidden text-left transition-all ${
+                      isSelected ? "ring-2 ring-amber-500" : ""
+                    } ${!audioUrl ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {/* Image - if stop has image or use tour cover */}
+                    {stop.imageUrl && (
+                      <div className="relative h-48 bg-gray-200">
+                        <OfflineImage
+                          src={stop.imageUrl || tour.coverImage || ""}
+                          alt={getLocalizedTitle(stop)}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Number badge on image */}
+                        <div className="absolute top-3 left-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                          <span className="font-semibold">{stop.orderIndex + 1}</span>
+                        </div>
+                        {/* Played check on image */}
+                        {isPlayed && (
+                          <div className="absolute top-3 right-3 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                            <CheckIcon className="w-5 h-5 text-white" />
+                          </div>
+                        )}
                       </div>
-                      {/* Played check on image */}
-                      {isPlayed && (
-                        <div className="absolute top-3 right-3 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                          <CheckIcon className="w-5 h-5 text-white" />
+                    )}
+
+                    {/* Title bar */}
+                    <div className={`flex items-center gap-3 p-4 ${isSelected ? "bg-amber-50" : "bg-white"}`}>
+                      {/* Number circle - only if no image */}
+                      {!stop.imageUrl && !tour.coverImage && (
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 ${
+                          isPlayed ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-600"
+                        }`}>
+                          {stop.orderIndex + 1}
+                        </div>
+                      )}
+                      {/* Played check - only if no image */}
+                      {!stop.imageUrl && !tour.coverImage && isPlayed && (
+                        <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{getLocalizedTitle(stop)}</p>
+                      </div>
+                      {audioUrl && (
+                        <div className="flex-shrink-0">
+                          {isSelected && isPlaying ? (
+                            <PauseIconSolid className="w-6 h-6 text-amber-500" />
+                          ) : (
+                            <PlayIcon className="w-6 h-6 text-gray-400" />
+                          )}
                         </div>
                       )}
                     </div>
+                  </button>
+
+                  {/* Inline Player - appears under selected stop */}
+                  {isSelected && audioUrl && (
+                    <div className="bg-gray-800 rounded-b-xl p-4 -mt-1 text-white">
+                      {/* Controls Row */}
+                      <div className="flex items-center justify-center gap-6 mb-4">
+                        <button onClick={() => seek(-5)} className="flex flex-col items-center text-gray-400 hover:text-white">
+                          <BackwardIcon className="w-6 h-6" />
+                          <span className="text-xs">5</span>
+                        </button>
+                        <button onClick={() => changeSpeed(-0.25)} className="p-2 rounded-full border border-gray-600 hover:border-gray-400">
+                          <MinusIcon className="w-4 h-4" />
+                        </button>
+                        <span className="text-sm font-medium min-w-[40px] text-center">{playbackRate.toFixed(1)}x</span>
+                        <button onClick={() => changeSpeed(0.25)} className="p-2 rounded-full border border-gray-600 hover:border-gray-400">
+                          <PlusIcon className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => seek(10)} className="flex flex-col items-center text-gray-400 hover:text-white">
+                          <ForwardIcon className="w-6 h-6" />
+                          <span className="text-xs">10</span>
+                        </button>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-sm text-gray-400 min-w-[45px]">{formatTime(currentTime)}</span>
+                        <input
+                          type="range"
+                          min={0}
+                          max={duration || 100}
+                          value={currentTime}
+                          onChange={handleSeek}
+                          className="flex-1 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
+                            [&::-webkit-slider-thumb]:appearance-none
+                            [&::-webkit-slider-thumb]:w-3
+                            [&::-webkit-slider-thumb]:h-3
+                            [&::-webkit-slider-thumb]:bg-amber-500
+                            [&::-webkit-slider-thumb]:rounded-full"
+                        />
+                        <span className="text-sm text-gray-400 min-w-[45px] text-right">{formatTime(duration)}</span>
+                      </div>
+
+                      {/* Play Button */}
+                      <div className="flex justify-center">
+                        <button
+                          onClick={togglePlay}
+                          className="w-14 h-14 flex items-center justify-center bg-amber-500 rounded-full hover:bg-amber-600 transition-colors"
+                        >
+                          {isPlaying ? (
+                            <PauseIconSolid className="w-7 h-7 text-white" />
+                          ) : (
+                            <PlayIconSolid className="w-7 h-7 text-white ml-1" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   )}
-
-                  {/* Title bar */}
-                  <div className={`flex items-center gap-3 p-4 ${isSelected ? "bg-amber-50" : "bg-white"}`}>
-                    {/* Number circle - only if no image */}
-                    {!stop.imageUrl && !tour.coverImage && (
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 ${
-                        isPlayed ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-600"
-                      }`}>
-                        {stop.orderIndex + 1}
-                      </div>
-                    )}
-                    {/* Played check - only if no image */}
-                    {!stop.imageUrl && !tour.coverImage && isPlayed && (
-                      <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{getLocalizedTitle(stop)}</p>
-                    </div>
-                    {audioUrl && (
-                      <div className="flex-shrink-0">
-                        {isSelected && isPlaying ? (
-                          <PauseIconSolid className="w-6 h-6 text-amber-500" />
-                        ) : (
-                          <PlayIcon className="w-6 h-6 text-gray-400" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </button>
-
-                {/* Inline Player - appears under selected stop */}
-                {isSelected && audioUrl && (
-                  <div className="bg-gray-800 rounded-b-xl p-4 -mt-1 text-white">
-                    {/* Controls Row */}
-                    <div className="flex items-center justify-center gap-6 mb-4">
-                      <button onClick={() => seek(-5)} className="flex flex-col items-center text-gray-400 hover:text-white">
-                        <BackwardIcon className="w-6 h-6" />
-                        <span className="text-xs">5</span>
-                      </button>
-                      <button onClick={() => changeSpeed(-0.25)} className="p-2 rounded-full border border-gray-600 hover:border-gray-400">
-                        <MinusIcon className="w-4 h-4" />
-                      </button>
-                      <span className="text-sm font-medium min-w-[40px] text-center">{playbackRate.toFixed(1)}x</span>
-                      <button onClick={() => changeSpeed(0.25)} className="p-2 rounded-full border border-gray-600 hover:border-gray-400">
-                        <PlusIcon className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => seek(10)} className="flex flex-col items-center text-gray-400 hover:text-white">
-                        <ForwardIcon className="w-6 h-6" />
-                        <span className="text-xs">10</span>
-                      </button>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-sm text-gray-400 min-w-[45px]">{formatTime(currentTime)}</span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={duration || 100}
-                        value={currentTime}
-                        onChange={handleSeek}
-                        className="flex-1 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
-                          [&::-webkit-slider-thumb]:appearance-none
-                          [&::-webkit-slider-thumb]:w-3
-                          [&::-webkit-slider-thumb]:h-3
-                          [&::-webkit-slider-thumb]:bg-amber-500
-                          [&::-webkit-slider-thumb]:rounded-full"
-                      />
-                      <span className="text-sm text-gray-400 min-w-[45px] text-right">{formatTime(duration)}</span>
-                    </div>
-
-                    {/* Play Button */}
-                    <div className="flex justify-center">
-                      <button
-                        onClick={togglePlay}
-                        className="w-14 h-14 flex items-center justify-center bg-amber-500 rounded-full hover:bg-amber-600 transition-colors"
-                      >
-                        {isPlaying ? (
-                          <PauseIconSolid className="w-7 h-7 text-white" />
-                        ) : (
-                          <PlayIconSolid className="w-7 h-7 text-white ml-1" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Bottom nav - simplified */}
