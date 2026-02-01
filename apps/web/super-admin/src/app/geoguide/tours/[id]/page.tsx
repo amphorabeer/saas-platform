@@ -902,13 +902,14 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                                     .map((stop, stopIndex) => (
                                       <div
                                         key={stop.id}
-                                        className="flex items-center gap-2 p-2 bg-white rounded border"
+                                        className="flex items-center gap-3 p-3 bg-white rounded-lg border hover:bg-muted/50"
                                       >
+                                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
                                         {/* Editable Order Index */}
                                         {editingOrderIndex === stop.id ? (
                                           <input
                                             type="number"
-                                            className="w-10 h-6 text-center text-xs border rounded focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                            className="w-12 h-7 text-center text-sm border rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
                                             value={tempOrderIndex}
                                             onChange={(e) => setTempOrderIndex(e.target.value)}
                                             onBlur={() => {
@@ -935,7 +936,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                                           />
                                         ) : (
                                           <button
-                                            className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center hover:bg-amber-600 cursor-pointer"
+                                            className="w-7 h-7 rounded-full bg-amber-500 text-white text-sm flex items-center justify-center hover:bg-amber-600 cursor-pointer"
                                             title="დააწკაპუნეთ ნომრის შესაცვლელად"
                                             onClick={() => {
                                               setEditingOrderIndex(stop.id);
@@ -945,27 +946,41 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                                             {stop.orderIndex + 1}
                                           </button>
                                         )}
-                                        <div className="flex-1 text-sm">
+                                        <div className="flex-1">
                                           <div className="font-medium">{stop.title}</div>
                                           {stop.titleEn && (
-                                            <div className="text-xs text-muted-foreground">{stop.titleEn}</div>
+                                            <div className="text-sm text-muted-foreground">{stop.titleEn}</div>
                                           )}
                                         </div>
-                                        {stop.audioUrl && (
-                                          <span className="text-xs text-green-600">🎧</span>
-                                        )}
+
+                                        {/* Status badges */}
+                                        <div className="flex items-center gap-2">
+                                          {stop.isPublished ? (
+                                            <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                                              აქტიური
+                                            </span>
+                                          ) : (
+                                            <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-500">
+                                              არააქტიური
+                                            </span>
+                                          )}
+                                          {stop.audioUrl && (
+                                            <span className="text-xs text-green-600">🎧 აუდიო</span>
+                                          )}
+                                        </div>
+
                                         <Link href={`/geoguide/tours/${params.id}/stops/${stop.id}`}>
-                                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+                                          <Button variant="outline" size="sm">
                                             რედაქტირება
                                           </Button>
                                         </Link>
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          className="text-red-500 h-7 w-7 p-0"
+                                          className="text-red-500 hover:text-red-600"
                                           onClick={() => handleDeleteStop(stop.id)}
                                         >
-                                          <Trash2 className="h-3 w-3" />
+                                          <Trash2 className="h-4 w-4" />
                                         </Button>
                                       </div>
                                     ))}
