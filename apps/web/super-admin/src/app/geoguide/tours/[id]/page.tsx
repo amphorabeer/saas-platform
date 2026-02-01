@@ -133,6 +133,10 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
   const [showNewHallLangPicker, setShowNewHallLangPicker] = useState(false);
   const [addingHall, setAddingHall] = useState(false);
 
+  // Editing order index state
+  const [editingOrderIndex, setEditingOrderIndex] = useState<string | null>(null);
+  const [tempOrderIndex, setTempOrderIndex] = useState<string>("");
+
   useEffect(() => {
     fetchTour();
   }, [params.id]);
@@ -186,6 +190,34 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
       console.error("Error fetching tour:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateStopOrderIndex = async (stopId: string, newIndex: number) => {
+    try {
+      const res = await fetch(`/api/geoguide/tours/${params.id}/stops/${stopId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderIndex: newIndex }),
+      });
+      if (res.ok) {
+        // Update local state
+        setTour((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            stops: prev.stops.map((s) =>
+              s.id === stopId ? { ...s, orderIndex: newIndex } : s
+            ),
+          };
+        });
+        setEditingOrderIndex(null);
+      } else {
+        alert("ნომრის განახლება ვერ მოხერხდა");
+      }
+    } catch (error) {
+      console.error("Error updating order index:", error);
+      alert("შეცდომა");
     }
   };
 
@@ -872,9 +904,47 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                                         key={stop.id}
                                         className="flex items-center gap-2 p-2 bg-white rounded border"
                                       >
-                                        <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center">
-                                          {stopIndex + 1}
-                                        </span>
+                                        {/* Editable Order Index */}
+                                        {editingOrderIndex === stop.id ? (
+                                          <input
+                                            type="number"
+                                            className="w-10 h-6 text-center text-xs border rounded focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                            value={tempOrderIndex}
+                                            onChange={(e) => setTempOrderIndex(e.target.value)}
+                                            onBlur={() => {
+                                              const newIndex = parseInt(tempOrderIndex);
+                                              if (!isNaN(newIndex) && newIndex >= 0) {
+                                                updateStopOrderIndex(stop.id, newIndex);
+                                              } else {
+                                                setEditingOrderIndex(null);
+                                              }
+                                            }}
+                                            onKeyDown={(e) => {
+                                              if (e.key === "Enter") {
+                                                const newIndex = parseInt(tempOrderIndex);
+                                                if (!isNaN(newIndex) && newIndex >= 0) {
+                                                  updateStopOrderIndex(stop.id, newIndex);
+                                                } else {
+                                                  setEditingOrderIndex(null);
+                                                }
+                                              } else if (e.key === "Escape") {
+                                                setEditingOrderIndex(null);
+                                              }
+                                            }}
+                                            autoFocus
+                                          />
+                                        ) : (
+                                          <button
+                                            className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center hover:bg-amber-600 cursor-pointer"
+                                            title="დააწკაპუნეთ ნომრის შესაცვლელად"
+                                            onClick={() => {
+                                              setEditingOrderIndex(stop.id);
+                                              setTempOrderIndex(stop.orderIndex.toString());
+                                            }}
+                                          >
+                                            {stop.orderIndex + 1}
+                                          </button>
+                                        )}
                                         <div className="flex-1 text-sm">
                                           <div className="font-medium">{stop.title}</div>
                                           {stop.titleEn && (
@@ -1108,9 +1178,47 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                         className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50"
                       >
                         <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                        <span className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center">
-                          {index + 1}
-                        </span>
+                        {/* Editable Order Index */}
+                        {editingOrderIndex === stop.id ? (
+                          <input
+                            type="number"
+                            className="w-12 h-7 text-center text-sm border rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            value={tempOrderIndex}
+                            onChange={(e) => setTempOrderIndex(e.target.value)}
+                            onBlur={() => {
+                              const newIndex = parseInt(tempOrderIndex);
+                              if (!isNaN(newIndex) && newIndex >= 0) {
+                                updateStopOrderIndex(stop.id, newIndex);
+                              } else {
+                                setEditingOrderIndex(null);
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                const newIndex = parseInt(tempOrderIndex);
+                                if (!isNaN(newIndex) && newIndex >= 0) {
+                                  updateStopOrderIndex(stop.id, newIndex);
+                                } else {
+                                  setEditingOrderIndex(null);
+                                }
+                              } else if (e.key === "Escape") {
+                                setEditingOrderIndex(null);
+                              }
+                            }}
+                            autoFocus
+                          />
+                        ) : (
+                          <button
+                            className="w-7 h-7 rounded-full bg-amber-500 text-white text-sm flex items-center justify-center hover:bg-amber-600 cursor-pointer"
+                            title="დააწკაპუნეთ ნომრის შესაცვლელად"
+                            onClick={() => {
+                              setEditingOrderIndex(stop.id);
+                              setTempOrderIndex(stop.orderIndex.toString());
+                            }}
+                          >
+                            {stop.orderIndex + 1}
+                          </button>
+                        )}
                         <div className="flex-1">
                           <div className="font-medium">{stop.title}</div>
                           {stop.titleEn && (
