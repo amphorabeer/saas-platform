@@ -27,6 +27,14 @@ export async function GET(request: NextRequest) {
         startDate = null;
     }
 
+    // Free tour starts (from GeoGuideEvent)
+    const freeTourStarts = await prisma.geoGuideEvent.count({
+      where: {
+        eventType: "tour_start",
+        ...(startDate ? { createdAt: { gte: startDate } } : {}),
+      },
+    });
+
     // Codes statistics
     const codesStats = await prisma.activationCode.groupBy({
       by: ["status"],
@@ -40,6 +48,7 @@ export async function GET(request: NextRequest) {
       expired: 0,
       revoked: 0,
       redemptionRate: 0,
+      freeTourStarts,
     };
 
     codesStats.forEach((stat) => {
