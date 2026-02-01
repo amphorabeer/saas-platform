@@ -13,6 +13,16 @@ export async function GET() {
       },
     });
 
+    // Get recent completed payments
+    const recentPayments = await prisma.payment.findMany({
+      where: { status: "COMPLETED" },
+      orderBy: { completedAt: "desc" },
+      take: 5,
+      include: {
+        tour: { select: { name: true } },
+      },
+    });
+
     // Get recent tours
     const recentTours = await prisma.tour.findMany({
       orderBy: { createdAt: "desc" },
@@ -30,7 +40,7 @@ export async function GET() {
     // Combine and sort activities
     const activities: {
       id: string;
-      type: "code_redeemed" | "tour_created" | "museum_created";
+      type: "code_redeemed" | "tour_created" | "museum_created" | "payment_completed";
       description: string;
       createdAt: Date;
     }[] = [];
@@ -42,6 +52,16 @@ export async function GET() {
         type: "code_redeemed",
         description: `კოდი გააქტიურდა: ${code.code} (${code.tour?.name || "Unknown tour"})`,
         createdAt: code.updatedAt,
+      });
+    });
+
+    // Add completed payments
+    recentPayments.forEach((payment) => {
+      activities.push({
+        id: `payment-${payment.id}`,
+        type: "payment_completed",
+        description: `გადახდა: ₾${payment.amount} (${payment.tour?.name || "Unknown tour"})`,
+        createdAt: payment.completedAt || payment.createdAt,
       });
     });
 

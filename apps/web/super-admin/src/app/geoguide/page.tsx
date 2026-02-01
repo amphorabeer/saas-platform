@@ -12,11 +12,14 @@ interface Stats {
   redeemedCodes: number;
   totalDevices: number;
   activeEntitlements: number;
+  totalPayments: number;
+  completedPayments: number;
+  totalRevenue: number;
 }
 
 interface RecentActivity {
   id: string;
-  type: "code_redeemed" | "tour_created" | "museum_created" | "stop_created";
+  type: "code_redeemed" | "tour_created" | "museum_created" | "payment_completed";
   description: string;
   createdAt: string;
 }
@@ -31,6 +34,9 @@ export default function GeoGuideDashboard() {
     redeemedCodes: 0,
     totalDevices: 0,
     activeEntitlements: 0,
+    totalPayments: 0,
+    completedPayments: 0,
+    totalRevenue: 0,
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,42 +78,42 @@ export default function GeoGuideDashboard() {
       value: stats.totalMuseums,
       description: "სულ ლოკაციები",
       icon: "🏛️",
-      color: "bg-blue-500",
     },
     {
       title: "ტურები",
       value: stats.totalTours,
       description: "აუდიო ტურები",
       icon: "🎧",
-      color: "bg-purple-500",
     },
     {
       title: "გაჩერებები",
       value: stats.totalStops,
       description: "სულ გაჩერებები",
       icon: "📍",
-      color: "bg-green-500",
     },
     {
       title: "აქტივაციის კოდები",
       value: stats.totalCodes,
       description: `${stats.activeCodes} ხელმისაწვდომი / ${stats.redeemedCodes} გამოყენებული`,
       icon: "🔑",
-      color: "bg-amber-500",
+    },
+    {
+      title: "გადახდები (TBC)",
+      value: stats.completedPayments,
+      description: `სულ შემოსავალი: ₾${stats.totalRevenue.toFixed(2)}`,
+      icon: "💳",
     },
     {
       title: "მოწყობილობები",
       value: stats.totalDevices,
       description: "რეგისტრირებული",
       icon: "📱",
-      color: "bg-cyan-500",
     },
     {
       title: "აქტიური წვდომები",
       value: stats.activeEntitlements,
       description: "მოქმედი entitlements",
       icon: "✅",
-      color: "bg-emerald-500",
     },
   ];
 
@@ -129,8 +135,8 @@ export default function GeoGuideDashboard() {
         return "🎧";
       case "museum_created":
         return "🏛️";
-      case "stop_created":
-        return "📍";
+      case "payment_completed":
+        return "💳";
       default:
         return "📝";
     }
@@ -157,7 +163,7 @@ export default function GeoGuideDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
