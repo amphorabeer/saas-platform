@@ -6,6 +6,7 @@ export async function GET() {
     const [
       totalMuseums,
       totalTours,
+      freeTours,
       totalStops,
       totalCodes,
       activeCodes,
@@ -15,9 +16,11 @@ export async function GET() {
       totalPayments,
       completedPayments,
       totalRevenue,
+      freeTourStarts,
     ] = await Promise.all([
       prisma.museum.count(),
       prisma.tour.count(),
+      prisma.tour.count({ where: { isFree: true } }),
       prisma.tourStop.count(),
       prisma.activationCode.count(),
       prisma.activationCode.count({ where: { status: "AVAILABLE" } }),
@@ -35,11 +38,15 @@ export async function GET() {
         where: { status: "COMPLETED" },
         _sum: { amount: true },
       }),
+      prisma.geoGuideEvent.count({
+        where: { eventType: "tour_start" },
+      }),
     ]);
 
     return NextResponse.json({
       totalMuseums,
       totalTours,
+      freeTours,
       totalStops,
       totalCodes,
       activeCodes,
@@ -49,6 +56,7 @@ export async function GET() {
       totalPayments,
       completedPayments,
       totalRevenue: Number(totalRevenue._sum.amount || 0),
+      freeTourStarts,
     });
   } catch (error) {
     console.error("Error fetching GeoGuide stats:", error);

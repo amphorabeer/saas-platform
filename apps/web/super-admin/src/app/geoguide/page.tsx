@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@saas
 interface Stats {
   totalMuseums: number;
   totalTours: number;
+  freeTours: number;
   totalStops: number;
   totalCodes: number;
   activeCodes: number;
@@ -15,6 +16,7 @@ interface Stats {
   totalPayments: number;
   completedPayments: number;
   totalRevenue: number;
+  freeTourStarts: number;
 }
 
 interface RecentActivity {
@@ -28,6 +30,7 @@ export default function GeoGuideDashboard() {
   const [stats, setStats] = useState<Stats>({
     totalMuseums: 0,
     totalTours: 0,
+    freeTours: 0,
     totalStops: 0,
     totalCodes: 0,
     activeCodes: 0,
@@ -37,6 +40,7 @@ export default function GeoGuideDashboard() {
     totalPayments: 0,
     completedPayments: 0,
     totalRevenue: 0,
+    freeTourStarts: 0,
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +86,7 @@ export default function GeoGuideDashboard() {
     {
       title: "ტურები",
       value: stats.totalTours,
-      description: "აუდიო ტურები",
+      description: `${stats.freeTours} უფასო / ${stats.totalTours - stats.freeTours} ფასიანი`,
       icon: "🎧",
     },
     {
@@ -102,6 +106,12 @@ export default function GeoGuideDashboard() {
       value: stats.completedPayments,
       description: `სულ შემოსავალი: ₾${stats.totalRevenue.toFixed(2)}`,
       icon: "💳",
+    },
+    {
+      title: "უფასო ტურები",
+      value: stats.freeTourStarts,
+      description: "გახსნილი უფასო ტურები",
+      icon: "🆓",
     },
     {
       title: "მოწყობილობები",
