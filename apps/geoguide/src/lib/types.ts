@@ -26,6 +26,17 @@ export interface Museum {
   tours: Tour[];
 }
 
+export interface Hall {
+  id: string;
+  name: string;
+  nameEn: string | null;
+  nameRu?: string | null;
+  nameUk?: string | null;
+  imageUrl: string | null;
+  orderIndex: number;
+  stopsCount?: number;
+}
+
 export interface Tour {
   id: string;
   name: string;
@@ -40,6 +51,7 @@ export interface Tour {
   price: number | null;
   currency: string;
   coverImage: string | null;
+  halls?: Hall[];
   stops: TourStop[];
 }
 
@@ -62,6 +74,7 @@ export interface TourStop {
   orderIndex: number;
   latitude: number | null;
   longitude: number | null;
+  hallId?: string | null;
 }
 
 export type Language = "ka" | "en" | "ru" | "de" | "fr" | "uk";
