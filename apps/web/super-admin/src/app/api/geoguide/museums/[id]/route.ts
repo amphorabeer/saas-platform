@@ -98,6 +98,8 @@ export async function PATCH(
         }),
         ...(body.cityFr !== undefined && { cityFr: body.cityFr }),
         ...(body.addressFr !== undefined && { addressFr: body.addressFr }),
+
+        // Ukrainian
         ...(body.nameUk !== undefined && { nameUk: body.nameUk }),
         ...(body.descriptionUk !== undefined && { descriptionUk: body.descriptionUk }),
         ...(body.cityUk !== undefined && { cityUk: body.cityUk }),
@@ -122,6 +124,7 @@ export async function PATCH(
           showQrScanner: body.showQrScanner,
         }),
         ...(body.isPublished !== undefined && { isPublished: body.isPublished }),
+        ...(body.displayOrder !== undefined && { displayOrder: body.displayOrder }),
       },
     });
 
