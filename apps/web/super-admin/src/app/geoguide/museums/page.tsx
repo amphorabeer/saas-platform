@@ -11,7 +11,7 @@ import {
   Button,
   Input,
 } from "@saas-platform/ui";
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, MapPin } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, MapPin, GripVertical } from "lucide-react";
 
 interface Museum {
   id: string;
@@ -22,7 +22,7 @@ interface Museum {
   category: string | null;
   coverImage: string | null;
   isPublished: boolean;
-  displayOrder?: number;
+  displayOrder: number;
   tours?: { id: string; name: string; isPublished: boolean }[];
   _count?: { tours: number };
   createdAt: string;
@@ -32,6 +32,10 @@ export default function MuseumsPage() {
   const [museums, setMuseums] = useState<Museum[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Order editing state
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [tempOrder, setTempOrder] = useState<string>("");
 
   useEffect(() => {
     fetchMuseums();
@@ -48,6 +52,29 @@ export default function MuseumsPage() {
       console.error("Error fetching museums:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateDisplayOrder = async (id: string, newOrder: number) => {
+    try {
+      const res = await fetch(`/api/geoguide/museums/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayOrder: newOrder }),
+      });
+      if (res.ok) {
+        setMuseums((prev) =>
+          prev.map((m) =>
+            m.id === id ? { ...m, displayOrder: newOrder } : m
+          )
+        );
+        setEditingOrderId(null);
+      } else {
+        alert("რიგითობის განახლება ვერ მოხერხდა");
+      }
+    } catch (error) {
+      console.error("Error updating display order:", error);
+      alert("შეცდომა");
     }
   };
 
@@ -85,7 +112,15 @@ export default function MuseumsPage() {
     }
   };
 
-  const filteredMuseums = museums.filter(
+  // Sort by displayOrder, then by createdAt
+  const sortedMuseums = [...museums].sort((a, b) => {
+    if (a.displayOrder !== b.displayOrder) {
+      return a.displayOrder - b.displayOrder;
+    }
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  });
+
+  const filteredMuseums = sortedMuseums.filter(
     (m) =>
       m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.nameEn?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -166,7 +201,7 @@ export default function MuseumsPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredMuseums.map((museum) => (
+          {filteredMuseums.map((museum, index) => (
             <Card key={museum.id} className="overflow-hidden">
               {/* Cover Image */}
               <div className="h-40 bg-muted relative">
@@ -181,6 +216,49 @@ export default function MuseumsPage() {
                     🏛️
                   </div>
                 )}
+                {/* Order Badge - Editable */}
+                <div className="absolute top-2 left-2">
+                  {editingOrderId === museum.id ? (
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center text-sm border-2 border-amber-500 rounded-lg bg-white focus:outline-none"
+                      value={tempOrder}
+                      onChange={(e) => setTempOrder(e.target.value)}
+                      onBlur={() => {
+                        const newOrder = parseInt(tempOrder);
+                        if (!isNaN(newOrder) && newOrder >= 0) {
+                          updateDisplayOrder(museum.id, newOrder);
+                        } else {
+                          setEditingOrderId(null);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const newOrder = parseInt(tempOrder);
+                          if (!isNaN(newOrder) && newOrder >= 0) {
+                            updateDisplayOrder(museum.id, newOrder);
+                          } else {
+                            setEditingOrderId(null);
+                          }
+                        } else if (e.key === "Escape") {
+                          setEditingOrderId(null);
+                        }
+                      }}
+                      autoFocus
+                    />
+                  ) : (
+                    <button
+                      className="w-8 h-8 rounded-lg bg-amber-500 text-white text-sm font-bold flex items-center justify-center hover:bg-amber-600 cursor-pointer shadow-lg"
+                      title="დააწკაპუნეთ რიგითობის შესაცვლელად"
+                      onClick={() => {
+                        setEditingOrderId(museum.id);
+                        setTempOrder(museum.displayOrder.toString());
+                      }}
+                    >
+                      {museum.displayOrder || index + 1}
+                    </button>
+                  )}
+                </div>
                 {/* Status Badge */}
                 <div
                   className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
