@@ -14,7 +14,10 @@ export async function GET() {
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { displayOrder: "asc" },
+        { createdAt: "desc" },
+      ],
     });
 
     return NextResponse.json(museums);
@@ -43,6 +46,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Get max displayOrder to put new museum at the end
+    const maxOrder = await prisma.museum.aggregate({
+      _max: { displayOrder: true },
+    });
+    const nextOrder = (maxOrder._max.displayOrder || 0) + 1;
 
     const museum = await prisma.museum.create({
       data: {
@@ -95,6 +104,7 @@ export async function POST(request: NextRequest) {
         showMap: body.showMap ?? false,
         showQrScanner: body.showQrScanner ?? false,
         isPublished: body.isPublished ?? false,
+        displayOrder: nextOrder,
       },
     });
 
