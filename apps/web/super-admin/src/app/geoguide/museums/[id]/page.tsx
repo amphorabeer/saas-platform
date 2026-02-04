@@ -67,6 +67,7 @@ interface Museum {
   showMap: boolean;
   showQrScanner: boolean;
   isPublished: boolean;
+  introAudioUrl: string | null;
 }
 
 export default function EditMuseumPage({ params }: { params: { id: string } }) {
@@ -84,6 +85,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
     address: "",
     slug: "",
     coverImage: "",
+    introAudioUrl: "",
     latitude: "",
     longitude: "",
     contactEmail: "",
@@ -113,6 +115,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
           address: data.address || "",
           slug: data.slug || "",
           coverImage: data.coverImage || "",
+          introAudioUrl: data.introAudioUrl || "",
           latitude: data.latitude?.toString() || "",
           longitude: data.longitude?.toString() || "",
           contactEmail: data.contactEmail || "",
@@ -397,6 +400,21 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
                     placeholder="მაგ: საქართველოს ეროვნული მუზეუმი"
                     required
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>შესავალი აუდიო</Label>
+                  <FileUpload
+                    accept="audio/*"
+                    folder="museums/audio"
+                    type="audio"
+                    label="აუდიო ფაილის ატვირთვა"
+                    currentUrl={formData.introAudioUrl}
+                    onUpload={(url) => setFormData((prev) => ({ ...prev, introAudioUrl: url }))}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    მუზეუმის შესავალი აუდიო აღწერილობა
+                  </p>
                 </div>
 
                 <div className="space-y-2">

@@ -523,9 +523,10 @@ model Museum {
   addressUk     String?
 
   // URL და მედია
-  slug       String   @unique
-  coverImage String?
-  gallery    String[]
+  slug          String   @unique
+  coverImage    String?
+  introAudioUrl String?
+  gallery       String[]
 
   // მდებარეობა (კოორდინატები)
   latitude  Float?
@@ -704,7 +705,7 @@ model TourPack {
   manifestUrl String? // manifest.json URL
   totalSize   BigInt? // ბაიტებში
 
-  // სტატუსი
+  // სტატ���სი
   status TourPackStatus @default(DRAFT)
 
   // Build info
