@@ -125,6 +125,7 @@ export async function PATCH(
         }),
         ...(body.isPublished !== undefined && { isPublished: body.isPublished }),
         ...(body.displayOrder !== undefined && { displayOrder: body.displayOrder }),
+        ...(body.introAudioUrl !== undefined && { introAudioUrl: body.introAudioUrl }),
       },
     });
 

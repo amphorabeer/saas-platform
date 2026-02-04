@@ -525,6 +525,7 @@ model Museum {
   // URL და მედია
   slug            String          @unique
   coverImage      String?
+  introAudioUrl   String?
   gallery         String[]
 
   // მდებარეობა (კოორდინატები)

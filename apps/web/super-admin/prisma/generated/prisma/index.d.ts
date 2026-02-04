@@ -21071,6 +21071,7 @@ export namespace Prisma {
     addressUk: string | null
     slug: string | null
     coverImage: string | null
+    introAudioUrl: string | null
     latitude: number | null
     longitude: number | null
     contactEmail: string | null
@@ -21113,6 +21114,7 @@ export namespace Prisma {
     addressUk: string | null
     slug: string | null
     coverImage: string | null
+    introAudioUrl: string | null
     latitude: number | null
     longitude: number | null
     contactEmail: string | null
@@ -21155,6 +21157,7 @@ export namespace Prisma {
     addressUk: number
     slug: number
     coverImage: number
+    introAudioUrl: number
     gallery: number
     latitude: number
     longitude: number
@@ -21213,6 +21216,7 @@ export namespace Prisma {
     addressUk?: true
     slug?: true
     coverImage?: true
+    introAudioUrl?: true
     latitude?: true
     longitude?: true
     contactEmail?: true
@@ -21255,6 +21259,7 @@ export namespace Prisma {
     addressUk?: true
     slug?: true
     coverImage?: true
+    introAudioUrl?: true
     latitude?: true
     longitude?: true
     contactEmail?: true
@@ -21297,6 +21302,7 @@ export namespace Prisma {
     addressUk?: true
     slug?: true
     coverImage?: true
+    introAudioUrl?: true
     gallery?: true
     latitude?: true
     longitude?: true
@@ -21428,6 +21434,7 @@ export namespace Prisma {
     addressUk: string | null
     slug: string
     coverImage: string | null
+    introAudioUrl: string | null
     gallery: string[]
     latitude: number | null
     longitude: number | null
@@ -21491,6 +21498,7 @@ export namespace Prisma {
     addressUk?: boolean
     slug?: boolean
     coverImage?: boolean
+    introAudioUrl?: boolean
     gallery?: boolean
     latitude?: boolean
     longitude?: boolean
@@ -21538,6 +21546,7 @@ export namespace Prisma {
     addressUk?: boolean
     slug?: boolean
     coverImage?: boolean
+    introAudioUrl?: boolean
     gallery?: boolean
     latitude?: boolean
     longitude?: boolean
@@ -21582,6 +21591,7 @@ export namespace Prisma {
     addressUk?: boolean
     slug?: boolean
     coverImage?: boolean
+    introAudioUrl?: boolean
     gallery?: boolean
     latitude?: boolean
     longitude?: boolean
@@ -21639,6 +21649,7 @@ export namespace Prisma {
       addressUk: string | null
       slug: string
       coverImage: string | null
+      introAudioUrl: string | null
       gallery: string[]
       latitude: number | null
       longitude: number | null
@@ -22075,6 +22086,7 @@ export namespace Prisma {
     readonly addressUk: FieldRef<"Museum", 'String'>
     readonly slug: FieldRef<"Museum", 'String'>
     readonly coverImage: FieldRef<"Museum", 'String'>
+    readonly introAudioUrl: FieldRef<"Museum", 'String'>
     readonly gallery: FieldRef<"Museum", 'String[]'>
     readonly latitude: FieldRef<"Museum", 'Float'>
     readonly longitude: FieldRef<"Museum", 'Float'>
@@ -32693,6 +32705,7 @@ export namespace Prisma {
     addressUk: 'addressUk',
     slug: 'slug',
     coverImage: 'coverImage',
+    introAudioUrl: 'introAudioUrl',
     gallery: 'gallery',
     latitude: 'latitude',
     longitude: 'longitude',
@@ -34711,6 +34724,7 @@ export namespace Prisma {
     addressUk?: StringNullableFilter<"Museum"> | string | null
     slug?: StringFilter<"Museum"> | string
     coverImage?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrl?: StringNullableFilter<"Museum"> | string | null
     gallery?: StringNullableListFilter<"Museum">
     latitude?: FloatNullableFilter<"Museum"> | number | null
     longitude?: FloatNullableFilter<"Museum"> | number | null
@@ -34757,6 +34771,7 @@ export namespace Prisma {
     addressUk?: SortOrderInput | SortOrder
     slug?: SortOrder
     coverImage?: SortOrderInput | SortOrder
+    introAudioUrl?: SortOrderInput | SortOrder
     gallery?: SortOrder
     latitude?: SortOrderInput | SortOrder
     longitude?: SortOrderInput | SortOrder
@@ -34806,6 +34821,7 @@ export namespace Prisma {
     cityUk?: StringNullableFilter<"Museum"> | string | null
     addressUk?: StringNullableFilter<"Museum"> | string | null
     coverImage?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrl?: StringNullableFilter<"Museum"> | string | null
     gallery?: StringNullableListFilter<"Museum">
     latitude?: FloatNullableFilter<"Museum"> | number | null
     longitude?: FloatNullableFilter<"Museum"> | number | null
@@ -34852,6 +34868,7 @@ export namespace Prisma {
     addressUk?: SortOrderInput | SortOrder
     slug?: SortOrder
     coverImage?: SortOrderInput | SortOrder
+    introAudioUrl?: SortOrderInput | SortOrder
     gallery?: SortOrder
     latitude?: SortOrderInput | SortOrder
     longitude?: SortOrderInput | SortOrder
@@ -34904,6 +34921,7 @@ export namespace Prisma {
     addressUk?: StringNullableWithAggregatesFilter<"Museum"> | string | null
     slug?: StringWithAggregatesFilter<"Museum"> | string
     coverImage?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrl?: StringNullableWithAggregatesFilter<"Museum"> | string | null
     gallery?: StringNullableListFilter<"Museum">
     latitude?: FloatNullableWithAggregatesFilter<"Museum"> | number | null
     longitude?: FloatNullableWithAggregatesFilter<"Museum"> | number | null
@@ -37655,6 +37673,7 @@ export namespace Prisma {
     addressUk?: string | null
     slug: string
     coverImage?: string | null
+    introAudioUrl?: string | null
     gallery?: MuseumCreategalleryInput | string[]
     latitude?: number | null
     longitude?: number | null
@@ -37701,6 +37720,7 @@ export namespace Prisma {
     addressUk?: string | null
     slug: string
     coverImage?: string | null
+    introAudioUrl?: string | null
     gallery?: MuseumCreategalleryInput | string[]
     latitude?: number | null
     longitude?: number | null
@@ -37747,6 +37767,7 @@ export namespace Prisma {
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gallery?: MuseumUpdategalleryInput | string[]
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -37793,6 +37814,7 @@ export namespace Prisma {
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gallery?: MuseumUpdategalleryInput | string[]
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -37839,6 +37861,7 @@ export namespace Prisma {
     addressUk?: string | null
     slug: string
     coverImage?: string | null
+    introAudioUrl?: string | null
     gallery?: MuseumCreategalleryInput | string[]
     latitude?: number | null
     longitude?: number | null
@@ -37883,6 +37906,7 @@ export namespace Prisma {
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gallery?: MuseumUpdategalleryInput | string[]
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -37927,6 +37951,7 @@ export namespace Prisma {
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gallery?: MuseumUpdategalleryInput | string[]
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -40525,6 +40550,7 @@ export namespace Prisma {
     addressUk?: SortOrder
     slug?: SortOrder
     coverImage?: SortOrder
+    introAudioUrl?: SortOrder
     gallery?: SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
@@ -40575,6 +40601,7 @@ export namespace Prisma {
     addressUk?: SortOrder
     slug?: SortOrder
     coverImage?: SortOrder
+    introAudioUrl?: SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
     contactEmail?: SortOrder
@@ -40617,6 +40644,7 @@ export namespace Prisma {
     addressUk?: SortOrder
     slug?: SortOrder
     coverImage?: SortOrder
+    introAudioUrl?: SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
     contactEmail?: SortOrder
@@ -45043,6 +45071,7 @@ export namespace Prisma {
     addressUk?: string | null
     slug: string
     coverImage?: string | null
+    introAudioUrl?: string | null
     gallery?: MuseumCreategalleryInput | string[]
     latitude?: number | null
     longitude?: number | null
@@ -45088,6 +45117,7 @@ export namespace Prisma {
     addressUk?: string | null
     slug: string
     coverImage?: string | null
+    introAudioUrl?: string | null
     gallery?: MuseumCreategalleryInput | string[]
     latitude?: number | null
     longitude?: number | null
@@ -45375,6 +45405,7 @@ export namespace Prisma {
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gallery?: MuseumUpdategalleryInput | string[]
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -45420,6 +45451,7 @@ export namespace Prisma {
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gallery?: MuseumUpdategalleryInput | string[]
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -46681,6 +46713,7 @@ export namespace Prisma {
     addressUk?: string | null
     slug: string
     coverImage?: string | null
+    introAudioUrl?: string | null
     gallery?: MuseumCreategalleryInput | string[]
     latitude?: number | null
     longitude?: number | null
@@ -46726,6 +46759,7 @@ export namespace Prisma {
     addressUk?: string | null
     slug: string
     coverImage?: string | null
+    introAudioUrl?: string | null
     gallery?: MuseumCreategalleryInput | string[]
     latitude?: number | null
     longitude?: number | null
@@ -46893,6 +46927,7 @@ export namespace Prisma {
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gallery?: MuseumUpdategalleryInput | string[]
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -46938,6 +46973,7 @@ export namespace Prisma {
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gallery?: MuseumUpdategalleryInput | string[]
     latitude?: NullableFloatFieldUpdateOperationsInput | number | null
     longitude?: NullableFloatFieldUpdateOperationsInput | number | null

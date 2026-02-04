@@ -394,6 +394,7 @@ exports.Prisma.MuseumScalarFieldEnum = {
   addressUk: 'addressUk',
   slug: 'slug',
   coverImage: 'coverImage',
+  introAudioUrl: 'introAudioUrl',
   gallery: 'gallery',
   latitude: 'latitude',
   longitude: 'longitude',
