@@ -125,7 +125,14 @@ export async function PATCH(
         }),
         ...(body.isPublished !== undefined && { isPublished: body.isPublished }),
         ...(body.displayOrder !== undefined && { displayOrder: body.displayOrder }),
+
+        // Audio URLs
         ...(body.introAudioUrl !== undefined && { introAudioUrl: body.introAudioUrl }),
+        ...(body.introAudioUrlEn !== undefined && { introAudioUrlEn: body.introAudioUrlEn }),
+        ...(body.introAudioUrlRu !== undefined && { introAudioUrlRu: body.introAudioUrlRu }),
+        ...(body.introAudioUrlDe !== undefined && { introAudioUrlDe: body.introAudioUrlDe }),
+        ...(body.introAudioUrlFr !== undefined && { introAudioUrlFr: body.introAudioUrlFr }),
+        ...(body.introAudioUrlUk !== undefined && { introAudioUrlUk: body.introAudioUrlUk }),
       },
     });
 

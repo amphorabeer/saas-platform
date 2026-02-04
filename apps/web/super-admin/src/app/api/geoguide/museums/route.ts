@@ -105,6 +105,14 @@ export async function POST(request: NextRequest) {
         showQrScanner: body.showQrScanner ?? false,
         isPublished: body.isPublished ?? false,
         displayOrder: nextOrder,
+
+        // Audio URLs
+        introAudioUrl: body.introAudioUrl || null,
+        introAudioUrlEn: body.introAudioUrlEn || null,
+        introAudioUrlRu: body.introAudioUrlRu || null,
+        introAudioUrlDe: body.introAudioUrlDe || null,
+        introAudioUrlFr: body.introAudioUrlFr || null,
+        introAudioUrlUk: body.introAudioUrlUk || null,
       },
     });
 

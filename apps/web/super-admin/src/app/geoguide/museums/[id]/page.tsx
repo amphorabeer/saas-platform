@@ -29,6 +29,7 @@ interface Translation {
   description: string;
   city: string;
   address: string;
+  audioUrl: string;
 }
 
 interface Museum {
@@ -68,6 +69,11 @@ interface Museum {
   showQrScanner: boolean;
   isPublished: boolean;
   introAudioUrl: string | null;
+  introAudioUrlEn: string | null;
+  introAudioUrlRu: string | null;
+  introAudioUrlDe: string | null;
+  introAudioUrlFr: string | null;
+  introAudioUrlUk: string | null;
 }
 
 export default function EditMuseumPage({ params }: { params: { id: string } }) {
@@ -132,7 +138,8 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
           data.nameEn ||
           data.descriptionEn ||
           data.cityEn ||
-          data.addressEn
+          data.addressEn ||
+          data.introAudioUrlEn
         ) {
           trans.push({
             langCode: "en",
@@ -140,13 +147,15 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
             description: data.descriptionEn || "",
             city: data.cityEn || "",
             address: data.addressEn || "",
+            audioUrl: data.introAudioUrlEn || "",
           });
         }
         if (
           data.nameRu ||
           data.descriptionRu ||
           data.cityRu ||
-          data.addressRu
+          data.addressRu ||
+          data.introAudioUrlRu
         ) {
           trans.push({
             langCode: "ru",
@@ -154,13 +163,15 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
             description: data.descriptionRu || "",
             city: data.cityRu || "",
             address: data.addressRu || "",
+            audioUrl: data.introAudioUrlRu || "",
           });
         }
         if (
           data.nameDe ||
           data.descriptionDe ||
           data.cityDe ||
-          data.addressDe
+          data.addressDe ||
+          data.introAudioUrlDe
         ) {
           trans.push({
             langCode: "de",
@@ -168,13 +179,15 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
             description: data.descriptionDe || "",
             city: data.cityDe || "",
             address: data.addressDe || "",
+            audioUrl: data.introAudioUrlDe || "",
           });
         }
         if (
           data.nameFr ||
           data.descriptionFr ||
           data.cityFr ||
-          data.addressFr
+          data.addressFr ||
+          data.introAudioUrlFr
         ) {
           trans.push({
             langCode: "fr",
@@ -182,13 +195,15 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
             description: data.descriptionFr || "",
             city: data.cityFr || "",
             address: data.addressFr || "",
+            audioUrl: data.introAudioUrlFr || "",
           });
         }
         if (
           data.nameUk ||
           data.descriptionUk ||
           data.cityUk ||
-          data.addressUk
+          data.addressUk ||
+          data.introAudioUrlUk
         ) {
           trans.push({
             langCode: "uk",
@@ -196,6 +211,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
             description: data.descriptionUk || "",
             city: data.cityUk || "",
             address: data.addressUk || "",
+            audioUrl: data.introAudioUrlUk || "",
           });
         }
         setTranslations(trans);
@@ -227,7 +243,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
     if (translations.find((t) => t.langCode === langCode)) return;
     setTranslations([
       ...translations,
-      { langCode, name: "", description: "", city: "", address: "" },
+      { langCode, name: "", description: "", city: "", address: "", audioUrl: "" },
     ]);
     setShowLangPicker(false);
   };
@@ -281,26 +297,31 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
           descriptionEn: enTrans?.description || null,
           cityEn: enTrans?.city || null,
           addressEn: enTrans?.address || null,
+          introAudioUrlEn: enTrans?.audioUrl || null,
           // Russian
           nameRu: ruTrans?.name || null,
           descriptionRu: ruTrans?.description || null,
           cityRu: ruTrans?.city || null,
           addressRu: ruTrans?.address || null,
+          introAudioUrlRu: ruTrans?.audioUrl || null,
           // German
           nameDe: deTrans?.name || null,
           descriptionDe: deTrans?.description || null,
           cityDe: deTrans?.city || null,
           addressDe: deTrans?.address || null,
+          introAudioUrlDe: deTrans?.audioUrl || null,
           // French
           nameFr: frTrans?.name || null,
           descriptionFr: frTrans?.description || null,
           cityFr: frTrans?.city || null,
           addressFr: frTrans?.address || null,
+          introAudioUrlFr: frTrans?.audioUrl || null,
           // Ukrainian
           nameUk: ukTrans?.name || null,
           descriptionUk: ukTrans?.description || null,
           cityUk: ukTrans?.city || null,
           addressUk: ukTrans?.address || null,
+          introAudioUrlUk: ukTrans?.audioUrl || null,
         }),
       });
 
@@ -339,6 +360,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
       }
     } catch (error) {
       console.error("Error deleting museum:", error);
+      alert("შეცდომა მოხდა");
     }
   };
 
@@ -351,7 +373,14 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
   }
 
   if (!museum) {
-    return null;
+    return (
+      <div className="text-center py-12">
+        <p>მუზეუმი ვერ მოიძებნა</p>
+        <Link href="/geoguide/museums">
+          <Button className="mt-4">უკან დაბრუნება</Button>
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -366,8 +395,8 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
             </Button>
           </Link>
           <div>
+            <p className="text-sm text-muted-foreground">{museum.slug}</p>
             <h1 className="text-3xl font-bold">{museum.name}</h1>
-            <p className="text-muted-foreground mt-1">მუზეუმის რედაქტირება</p>
           </div>
         </div>
         <Button
@@ -403,18 +432,15 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>შესავალი აუდიო</Label>
+                  <Label>შესავალი აუდიო (ქართულად)</Label>
                   <FileUpload
                     accept="audio/*"
-                    folder="museums/audio"
+                    folder="museums/audio/ka"
                     type="audio"
                     label="აუდიო ფაილის ატვირთვა"
                     currentUrl={formData.introAudioUrl}
                     onUpload={(url) => setFormData((prev) => ({ ...prev, introAudioUrl: url }))}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    მუზეუმის შესავალი აუდიო აღწერილობა
-                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -470,17 +496,16 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
                     <Plus className="h-4 w-4 mr-1" />
                     ენის დამატება
                   </Button>
-
-                  {showLangPicker && availableToAdd.length > 0 && (
-                    <div className="absolute right-0 top-full mt-1 bg-background border rounded-lg shadow-lg z-10 py-1 min-w-[200px]">
+                  {showLangPicker && (
+                    <div className="absolute right-0 top-full mt-1 bg-white border rounded-md shadow-lg z-10 min-w-[150px]">
                       {availableToAdd.map((lang) => (
                         <button
                           key={lang.code}
                           type="button"
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
                           onClick={() => addTranslation(lang.code)}
-                          className="w-full px-4 py-2 text-left hover:bg-muted text-sm"
                         >
-                          {lang.name} ({lang.nameEn})
+                          {lang.name}
                         </button>
                       ))}
                     </div>
@@ -490,7 +515,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
               <CardContent>
                 {translations.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    დააჭირეთ "ენის დამატება" თარგმანის დასამატებლად
+                    დაამატეთ თარგმანები სხვა ენებზე
                   </p>
                 ) : (
                   <div className="space-y-4">
@@ -526,6 +551,21 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
                               )}
                             placeholder="სახელი"
                           />
+                          
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">შესავალი აუდიო</Label>
+                            <FileUpload
+                              accept="audio/*"
+                              folder={`museums/audio/${trans.langCode}`}
+                              type="audio"
+                              label={`აუდიო (${getLanguageName(trans.langCode)})`}
+                              currentUrl={trans.audioUrl}
+                              onUpload={(url) =>
+                                updateTranslation(trans.langCode, "audioUrl", url)
+                              }
+                            />
+                          </div>
+
                           <textarea
                             value={trans.description}
                             onChange={(e) =>
