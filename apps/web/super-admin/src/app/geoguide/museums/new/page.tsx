@@ -29,6 +29,7 @@ interface Translation {
   description: string;
   city: string;
   address: string;
+  audioUrl: string;
 }
 
 export default function NewMuseumPage() {
@@ -44,6 +45,7 @@ export default function NewMuseumPage() {
     address: "",
     slug: "",
     coverImage: "",
+    introAudioUrl: "",
     latitude: "",
     longitude: "",
     contactEmail: "",
@@ -80,7 +82,7 @@ export default function NewMuseumPage() {
     if (translations.find((t) => t.langCode === langCode)) return;
     setTranslations([
       ...translations,
-      { langCode, name: "", description: "", city: "", address: "" },
+      { langCode, name: "", description: "", city: "", address: "", audioUrl: "" },
     ]);
     setShowLangPicker(false);
   };
@@ -134,26 +136,31 @@ export default function NewMuseumPage() {
           descriptionEn: enTrans?.description || null,
           cityEn: enTrans?.city || null,
           addressEn: enTrans?.address || null,
+          introAudioUrlEn: enTrans?.audioUrl || null,
           // Russian
           nameRu: ruTrans?.name || null,
           descriptionRu: ruTrans?.description || null,
           cityRu: ruTrans?.city || null,
           addressRu: ruTrans?.address || null,
+          introAudioUrlRu: ruTrans?.audioUrl || null,
           // German
           nameDe: deTrans?.name || null,
           descriptionDe: deTrans?.description || null,
           cityDe: deTrans?.city || null,
           addressDe: deTrans?.address || null,
+          introAudioUrlDe: deTrans?.audioUrl || null,
           // French
           nameFr: frTrans?.name || null,
           descriptionFr: frTrans?.description || null,
           cityFr: frTrans?.city || null,
           addressFr: frTrans?.address || null,
+          introAudioUrlFr: frTrans?.audioUrl || null,
           // Ukrainian
           nameUk: ukTrans?.name || null,
           descriptionUk: ukTrans?.description || null,
           cityUk: ukTrans?.city || null,
           addressUk: ukTrans?.address || null,
+          introAudioUrlUk: ukTrans?.audioUrl || null,
         }),
       });
 
@@ -205,6 +212,18 @@ export default function NewMuseumPage() {
                     onChange={handleChange}
                     placeholder="მაგ: საქართველოს ეროვნული მუზეუმი"
                     required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>შესავალი აუდიო (ქართულად)</Label>
+                  <FileUpload
+                    accept="audio/*"
+                    folder="museums/audio/ka"
+                    type="audio"
+                    label="აუდიო ფაილის ატვირთვა"
+                    currentUrl={formData.introAudioUrl}
+                    onUpload={(url) => setFormData((prev) => ({ ...prev, introAudioUrl: url }))}
                   />
                 </div>
 
@@ -261,17 +280,16 @@ export default function NewMuseumPage() {
                     <Plus className="h-4 w-4 mr-1" />
                     ენის დამატება
                   </Button>
-
-                  {showLangPicker && availableToAdd.length > 0 && (
-                    <div className="absolute right-0 top-full mt-1 bg-background border rounded-lg shadow-lg z-10 py-1 min-w-[200px]">
+                  {showLangPicker && (
+                    <div className="absolute right-0 top-full mt-1 bg-white border rounded-md shadow-lg z-10 min-w-[150px]">
                       {availableToAdd.map((lang) => (
                         <button
                           key={lang.code}
                           type="button"
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
                           onClick={() => addTranslation(lang.code)}
-                          className="w-full px-4 py-2 text-left hover:bg-muted text-sm"
                         >
-                          {lang.name} ({lang.nameEn})
+                          {lang.name}
                         </button>
                       ))}
                     </div>
@@ -281,7 +299,7 @@ export default function NewMuseumPage() {
               <CardContent>
                 {translations.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    დააჭირეთ "ენის დამატება" თარგმანის დასამატებლად
+                    დაამატეთ თარგმანები სხვა ენებზე
                   </p>
                 ) : (
                   <div className="space-y-4">
@@ -298,7 +316,9 @@ export default function NewMuseumPage() {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeTranslation(trans.langCode)}
+                            onClick={() =>
+                              removeTranslation(trans.langCode)
+                            }
                             className="text-red-500 hover:text-red-600 h-6 w-6 p-0"
                           >
                             <X className="h-4 w-4" />
@@ -315,6 +335,21 @@ export default function NewMuseumPage() {
                               )}
                             placeholder="სახელი"
                           />
+                          
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">შესავალი აუდიო</Label>
+                            <FileUpload
+                              accept="audio/*"
+                              folder={`museums/audio/${trans.langCode}`}
+                              type="audio"
+                              label={`აუდიო (${getLanguageName(trans.langCode)})`}
+                              currentUrl={trans.audioUrl}
+                              onUpload={(url) =>
+                                updateTranslation(trans.langCode, "audioUrl", url)
+                              }
+                            />
+                          </div>
+
                           <textarea
                             value={trans.description}
                             onChange={(e) =>

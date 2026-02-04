@@ -526,6 +526,11 @@ model Museum {
   slug            String          @unique
   coverImage      String?
   introAudioUrl   String?
+  introAudioUrlEn String?
+  introAudioUrlRu String?
+  introAudioUrlDe String?
+  introAudioUrlFr String?
+  introAudioUrlUk String?
   gallery         String[]
 
   // მდებარეობა (კოორდინატები)
