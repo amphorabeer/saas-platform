@@ -12,7 +12,7 @@ import {
   Input,
   Label,
 } from "@saas-platform/ui";
-import { ArrowLeft, Save, Loader2, Trash2, Plus, GripVertical, X, Building2, ChevronDown, ChevronRight, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Trash2, Plus, GripVertical, X, Building2, ChevronDown, ChevronRight, Image as ImageIcon, Pencil } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
 
 const AVAILABLE_LANGUAGES = [
@@ -136,6 +136,19 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
   // Editing order index state
   const [editingOrderIndex, setEditingOrderIndex] = useState<string | null>(null);
   const [tempOrderIndex, setTempOrderIndex] = useState<string>("");
+
+  // Editing hall state
+  const [editingHallId, setEditingHallId] = useState<string | null>(null);
+  const [editHallData, setEditHallData] = useState<{
+    name: string;
+    nameEn: string;
+    nameRu: string;
+    nameUk: string;
+    imageUrl: string;
+    orderIndex: number;
+    isPublished: boolean;
+  }>({ name: "", nameEn: "", nameRu: "", nameUk: "", imageUrl: "", orderIndex: 0, isPublished: true });
+  const [savingHall, setSavingHall] = useState(false);
 
   useEffect(() => {
     fetchTour();
@@ -369,9 +382,64 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
 
       if (res.ok) {
         setTour((prev) => prev ? { ...prev, halls: prev.halls.filter((h) => h.id !== hallId) } : null);
+        setEditingHallId(null);
       }
     } catch (error) {
       console.error("Error deleting hall:", error);
+    }
+  };
+
+  const openEditHall = (hall: Hall) => {
+    setExpandedHalls((prev) => new Set(prev).add(hall.id));
+    setEditingHallId(hall.id);
+    setEditHallData({
+      name: hall.name,
+      nameEn: hall.nameEn || "",
+      nameRu: hall.nameRu || "",
+      nameUk: hall.nameUk || "",
+      imageUrl: hall.imageUrl || "",
+      orderIndex: hall.orderIndex,
+      isPublished: hall.isPublished,
+    });
+  };
+
+  const handleUpdateHall = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingHallId) return;
+    setSavingHall(true);
+    try {
+      const res = await fetch(`/api/geoguide/tours/${params.id}/halls/${editingHallId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editHallData.name,
+          nameEn: editHallData.nameEn || null,
+          nameRu: editHallData.nameRu || null,
+          nameUk: editHallData.nameUk || null,
+          imageUrl: editHallData.imageUrl || null,
+          orderIndex: editHallData.orderIndex,
+          isPublished: editHallData.isPublished,
+        }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setTour((prev) =>
+          prev
+            ? {
+                ...prev,
+                halls: prev.halls.map((h) => (h.id === editingHallId ? updated : h)),
+              }
+            : null
+        );
+        setEditingHallId(null);
+      } else {
+        const err = await res.json();
+        alert(err.error || "შეცდომა");
+      }
+    } catch (error) {
+      console.error("Error updating hall:", error);
+    } finally {
+      setSavingHall(false);
     }
   };
 
@@ -860,22 +928,112 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                               </div>
                             </div>
                             
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-500 hover:text-red-600"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteHall(hall.id);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-amber-600 hover:text-amber-700"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEditHall(hall);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-500 hover:text-red-600"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteHall(hall.id);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                           
-                          {/* Expanded Content - Stops */}
+                          {/* Expanded Content - Edit form or Stops */}
                           {isExpanded && (
                             <div className="border-t bg-gray-50 p-3">
+                              {/* Inline Edit Hall Form */}
+                              {editingHallId === hall.id && (
+                                <form onSubmit={handleUpdateHall} className="mb-4 p-4 border rounded-lg bg-white">
+                                  <h4 className="font-medium mb-3">დარბაზის რედაქტირება</h4>
+                                  <div className="grid gap-3 sm:grid-cols-2">
+                                    <div className="space-y-2">
+                                      <Label>სახელი (ქართულად) *</Label>
+                                      <Input
+                                        value={editHallData.name}
+                                        onChange={(e) => setEditHallData({ ...editHallData, name: e.target.value })}
+                                        required
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>სახელი (EN)</Label>
+                                      <Input
+                                        value={editHallData.nameEn}
+                                        onChange={(e) => setEditHallData({ ...editHallData, nameEn: e.target.value })}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>სახელი (RU)</Label>
+                                      <Input
+                                        value={editHallData.nameRu}
+                                        onChange={(e) => setEditHallData({ ...editHallData, nameRu: e.target.value })}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>სახელი (UK)</Label>
+                                      <Input
+                                        value={editHallData.nameUk}
+                                        onChange={(e) => setEditHallData({ ...editHallData, nameUk: e.target.value })}
+                                      />
+                                    </div>
+                                    <div className="space-y-2 sm:col-span-2">
+                                      <Label>სურათი</Label>
+                                      <FileUpload
+                                        accept="image/*"
+                                        folder="halls"
+                                        currentUrl={editHallData.imageUrl}
+                                        onUpload={(url) => setEditHallData({ ...editHallData, imageUrl: url })}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>თანმიმდევრობა (orderIndex)</Label>
+                                      <Input
+                                        type="number"
+                                        value={editHallData.orderIndex}
+                                        onChange={(e) => setEditHallData({ ...editHallData, orderIndex: parseInt(e.target.value) || 0 })}
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-2 pt-2">
+                                      <input
+                                        type="checkbox"
+                                        id={`hall-published-${hall.id}`}
+                                        checked={editHallData.isPublished}
+                                        onChange={(e) => setEditHallData({ ...editHallData, isPublished: e.target.checked })}
+                                        className="h-4 w-4"
+                                      />
+                                      <Label htmlFor={`hall-published-${hall.id}`}>გამოქვეყნებული</Label>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2 mt-4">
+                                    <Button type="submit" disabled={savingHall} size="sm" className="bg-amber-500 hover:bg-amber-600">
+                                      {savingHall ? <Loader2 className="h-4 w-4 animate-spin" /> : "შენახვა"}
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setEditingHallId(null)}
+                                    >
+                                      გაუქმება
+                                    </Button>
+                                  </div>
+                                </form>
+                              )}
                               <div className="flex items-center justify-between mb-3">
                                 <span className="text-sm font-medium text-gray-600">გაჩერებები დარბაზში</span>
                                 <Button
