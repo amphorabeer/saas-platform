@@ -13,7 +13,6 @@ import {
   ChevronLeftIcon,
   MapPinIcon,
 } from "@heroicons/react/24/outline";
-import { OfflineImage } from "@/components/OfflineImage";
 
 export default function MuseumPage() {
   const params = useParams();
@@ -165,16 +164,7 @@ export default function MuseumPage() {
         </div>
       </header>
 
-      {/* Cover Image */}
-      {museum.coverImage && (
-        <OfflineImage
-          src={museum.coverImage}
-          alt={getMuseumField("name")}
-          className="w-full h-48 object-cover"
-        />
-      )}
-
-      {/* Museum Info - under image */}
+      {/* Museum Info */}
       <div className="bg-white px-4 py-3 border-b">
         <div className="flex items-center gap-4 text-sm text-gray-500">
           {getMuseumField("city") && (
@@ -202,7 +192,7 @@ export default function MuseumPage() {
       <div className="bg-white px-4 py-4 border-b">
         {museum.tours && museum.tours.length > 0 ? (
           <div className="space-y-4">
-            {museum.tours.map((tour) => (
+            {[...museum.tours].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)).map((tour) => (
               <TourCard
                 key={tour.id}
                 tour={tour}
@@ -238,7 +228,7 @@ function TourCard({
   tour: Tour;
   museumSlug: string;
   language: string;
-  ui: { start: string; enterCode: string; buy: string };
+  ui: { start: string; enterCode: string; buy: string; minutes: string; stops: string };
 }) {
   // Get localized field based on language
   const getField = (field: "name" | "description"): string => {
@@ -269,12 +259,28 @@ function TourCard({
       <div className="p-4">
         <h3 className="font-semibold text-lg">{getField("name")}</h3>
 
-        {/* Tour Description - ტურის საკუთარი აღწერა */}
+        {/* Tour Description */}
         {getField("description") && (
           <p className="text-sm text-gray-500 mt-1 line-clamp-2">
             {getField("description")}
           </p>
         )}
+
+        {/* Duration and Stops */}
+        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+          {tour.duration && (
+            <span className="flex items-center gap-1">
+              <ClockIcon className="w-4 h-4" />
+              {tour.duration} {ui.minutes}
+            </span>
+          )}
+          {tour.stopsCount > 0 && (
+            <span className="flex items-center gap-1">
+              <MusicalNoteIcon className="w-4 h-4" />
+              {tour.stopsCount} {ui.stops}
+            </span>
+          )}
+        </div>
 
         {/* Action Buttons */}
         {tour.isFree ? (

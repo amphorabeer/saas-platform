@@ -47,6 +47,7 @@ export interface Tour {
   descriptionEn: string | null;
   duration: number | null;
   stopsCount: number;
+  displayOrder?: number;
   isFree: boolean;
   price: number | null;
   currency: string;
