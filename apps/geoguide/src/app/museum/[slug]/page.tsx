@@ -164,30 +164,6 @@ export default function MuseumPage() {
         </div>
       </header>
 
-      {/* Museum Info */}
-      <div className="bg-white px-4 py-3 border-b">
-        <div className="flex items-center gap-4 text-sm text-gray-500">
-          {getMuseumField("city") && (
-            <span className="flex items-center gap-1">
-              <MapPinIcon className="w-4 h-4" />
-              {getMuseumField("city")}
-            </span>
-          )}
-          {museum.tours && museum.tours.length > 0 && (
-            <>
-              <span className="flex items-center gap-1">
-                <ClockIcon className="w-4 h-4" />
-                {museum.tours.reduce((sum, t) => sum + (t.duration || 0), 0)} {ui.minutes}
-              </span>
-              <span className="flex items-center gap-1">
-                <MusicalNoteIcon className="w-4 h-4" />
-                {museum.tours.reduce((sum, t) => sum + (t.stopsCount || 0), 0)} {ui.stops}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-
       {/* Tours */}
       <div className="bg-white px-4 py-4 border-b">
         {museum.tours && museum.tours.length > 0 ? (
