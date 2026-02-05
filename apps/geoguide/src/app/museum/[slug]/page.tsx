@@ -256,37 +256,55 @@ function TourCard({
   };
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm">
-      <h3 className="font-semibold text-lg mb-4">{getField("name")}</h3>
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+      {/* Tour Cover Image - ტურის საკუთარი სურათი */}
+      {tour.coverImage && (
+        <img
+          src={tour.coverImage}
+          alt={getField("name")}
+          className="w-full h-40 object-cover"
+        />
+      )}
 
-      {/* Action Buttons */}
-      {tour.isFree ? (
-        <Link
-          href={`/museum/${museumSlug}/tour/${tour.id}`}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-amber-500 text-white rounded-full font-medium hover:bg-amber-600 transition-colors"
-        >
-          <PlayIcon className="w-5 h-5" />
-          <span>{ui.start}</span>
-        </Link>
-      ) : (
-        <div className="flex gap-3">
+      <div className="p-4">
+        <h3 className="font-semibold text-lg">{getField("name")}</h3>
+
+        {/* Tour Description - ტურის საკუთარი აღწერა */}
+        {getField("description") && (
+          <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+            {getField("description")}
+          </p>
+        )}
+
+        {/* Action Buttons */}
+        {tour.isFree ? (
           <Link
-            href={`/museum/${museumSlug}/tour/${tour.id}/activate`}
-            className="flex-1 flex items-center justify-center gap-2 py-3 border-2 border-gray-200 rounded-full text-gray-700 font-medium hover:border-amber-500 hover:text-amber-600 transition-colors"
+            href={`/museum/${museumSlug}/tour/${tour.id}`}
+            className="w-full flex items-center justify-center gap-2 py-3 bg-amber-500 text-white rounded-full font-medium hover:bg-amber-600 transition-colors"
           >
             <PlayIcon className="w-5 h-5" />
-            <span>{ui.enterCode}</span>
+            <span>{ui.start}</span>
           </Link>
+        ) : (
+          <div className="flex gap-3">
+            <Link
+              href={`/museum/${museumSlug}/tour/${tour.id}/activate`}
+              className="flex-1 flex items-center justify-center gap-2 py-3 border-2 border-gray-200 rounded-full text-gray-700 font-medium hover:border-amber-500 hover:text-amber-600 transition-colors"
+            >
+              <PlayIcon className="w-5 h-5" />
+              <span>{ui.enterCode}</span>
+            </Link>
 
-          <Link
-            href={`/museum/${museumSlug}/tour/${tour.id}/buy`}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-500 text-white rounded-full font-medium hover:bg-amber-600 transition-colors"
-          >
-            <ShoppingCartIcon className="w-5 h-5" />
-            <span>{ui.buy} {tour.price} {tour.currency === "GEL" ? "₾" : tour.currency}</span>
-          </Link>
-        </div>
-      )}
+            <Link
+              href={`/museum/${museumSlug}/tour/${tour.id}/buy`}
+              className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-500 text-white rounded-full font-medium hover:bg-amber-600 transition-colors"
+            >
+              <ShoppingCartIcon className="w-5 h-5" />
+              <span>{ui.buy} {tour.price} {tour.currency === "GEL" ? "₾" : tour.currency}</span>
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
