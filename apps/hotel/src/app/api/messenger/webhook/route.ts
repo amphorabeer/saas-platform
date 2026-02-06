@@ -265,6 +265,10 @@ async function handleConversationFlow(
     
     case 'confirm_booking': {
       if (text.toLowerCase().includes('დიახ') || text.toLowerCase() === 'yes' || text === '✅' || text.toLowerCase() === 'კი') {
+        // Save dates before deleting state
+        const savedCheckIn = state.checkIn
+        const savedCheckOut = state.checkOut
+        
         // Create reservation
         const result = await createReservation(orgId, state)
         conversationState.delete(senderId)
@@ -282,7 +286,7 @@ async function handleConversationFlow(
           
           return `🎉 ჯავშანი წარმატებით შეიქმნა!\n\n` +
             `📋 ჯავშნის ნომერი: ${result.reservationId}\n` +
-            `📅 ${state.checkIn} - ${state.checkOut}\n\n` +
+            `📅 ${savedCheckIn} - ${savedCheckOut}\n\n` +
             `მალე დაგიკავშირდებით დასადასტურებლად.\n\n` +
             `მადლობა! 🙏`
         } else {
