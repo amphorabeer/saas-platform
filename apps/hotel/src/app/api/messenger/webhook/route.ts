@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 // ============================================
 
 const HOTEL_CONFIG = {
-  phone: '+995 555 123 456',  // სასტუმროს ტელეფონი
+  phone: '+995 599 946 500',  // სასტუმროს ტელეფონი
   email: 'info@gizavi.ge',
   address: 'სოფ. გიზავი, გურჯაანის რაიონი',
   checkInTime: '14:00',
@@ -72,8 +72,7 @@ const MESSAGES = {
       `💰 ფასი: ${HOTEL_CONFIG.services.beerSpa.price}₾\n\n` +
       `სპა მოიცავს:\n` +
       `• ლუდის აბაზანა\n` +
-      `• საუნა\n` +
-      `• 1 ჭიქა ხელნაკეთი ლუდი\n\n` +
+      `• ულიმიტო ქვევრის ლუდი\n\n` +
       `დაჯავშნისთვის დაგვიკავშირდით:\n` +
       `📱 ${HOTEL_CONFIG.phone}`,
     
@@ -180,8 +179,7 @@ const MESSAGES = {
       `💰 Price: ${HOTEL_CONFIG.services.beerSpa.price}₾\n\n` +
       `Includes:\n` +
       `• Beer bath\n` +
-      `• Sauna\n` +
-      `• 1 glass of craft beer\n\n` +
+      `• Unlimited Qvevri beer\n\n` +
       `To book, contact us:\n` +
       `📱 ${HOTEL_CONFIG.phone}`,
     
@@ -269,8 +267,60 @@ interface ConversationState {
   guestPhone?: string
 }
 
-// In-memory conversation state (production: use Redis)
-const conversationState: Map<string, ConversationState> = new Map()
+// ============================================
+// STATE MANAGEMENT (Database-backed for Serverless)
+// ============================================
+
+async function getConversationState(senderId: string): Promise<ConversationState | null> {
+  try {
+    // Use MessengerSession table or cache in a simple way
+    const session = await prisma.messengerSession.findUnique({
+      where: { senderId }
+    })
+    
+    if (session && session.state) {
+      // Check if session is not expired (30 min)
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
+      if (session.updatedAt > thirtyMinutesAgo) {
+        return JSON.parse(session.state) as ConversationState
+      }
+    }
+    return null
+  } catch (error) {
+    // Table might not exist yet, return null
+    console.log('[Messenger] No session table or error:', error)
+    return null
+  }
+}
+
+async function setConversationState(senderId: string, state: ConversationState): Promise<void> {
+  try {
+    await prisma.messengerSession.upsert({
+      where: { senderId },
+      update: { 
+        state: JSON.stringify(state),
+        updatedAt: new Date()
+      },
+      create: {
+        senderId,
+        state: JSON.stringify(state),
+        updatedAt: new Date()
+      }
+    })
+  } catch (error) {
+    console.log('[Messenger] Could not save session:', error)
+  }
+}
+
+async function deleteConversationState(senderId: string): Promise<void> {
+  try {
+    await prisma.messengerSession.delete({
+      where: { senderId }
+    })
+  } catch (error) {
+    // Ignore if doesn't exist
+  }
+}
 
 // ============================================
 // WEBHOOK HANDLERS
@@ -342,8 +392,8 @@ export async function POST(request: NextRequest) {
           
           console.log('[Messenger] Message from', senderId, ':', text)
           
-          // Get or create conversation state
-          let state = conversationState.get(senderId) || {
+          // Get or create conversation state from database
+          let state = await getConversationState(senderId) || {
             step: 'menu',
             language: 'ka'
           }
@@ -389,20 +439,20 @@ async function processMessage(
   if (lowerText === 'en' || lowerText === 'english') {
     state.language = 'en'
     state.step = 'menu'
-    conversationState.set(senderId, state)
+    await setConversationState(senderId, state)
     return MESSAGES.en.welcome(pageName)
   }
   
   if (lowerText === 'ka' || lowerText === 'geo' || lowerText === 'ქართული') {
     state.language = 'ka'
     state.step = 'menu'
-    conversationState.set(senderId, state)
+    await setConversationState(senderId, state)
     return MESSAGES.ka.welcome(pageName)
   }
   
   // Cancel booking
   if (lowerText === 'გაუქმება' || lowerText === 'cancel' || lowerText === 'menu') {
-    conversationState.delete(senderId)
+    await deleteConversationState(senderId)
     return msg.welcome(pageName)
   }
   
@@ -419,7 +469,7 @@ async function processMessage(
     
     if (matchesIntent(lowerText, ['ჯავშანი', 'ჯავშნა', 'დაჯავშნა', 'book', 'booking', 'reserve', '1'])) {
       state.step = 'ask_checkin'
-      conversationState.set(senderId, state)
+      await setConversationState(senderId, state)
       return msg.bookingStart
     }
     
@@ -449,7 +499,7 @@ async function processMessage(
     
     if (matchesIntent(lowerText, ['book', 'booking', 'reserve', 'reservation', '1'])) {
       state.step = 'ask_checkin'
-      conversationState.set(senderId, state)
+      await setConversationState(senderId, state)
       return msg.bookingStart
     }
     
@@ -490,7 +540,7 @@ async function handleBookingFlow(
       }
       state.checkIn = checkIn
       state.step = 'ask_checkout'
-      conversationState.set(senderId, state)
+      await setConversationState(senderId, state)
       return msg.askCheckout(checkIn)
     }
     
@@ -501,7 +551,7 @@ async function handleBookingFlow(
       }
       state.checkOut = checkOut
       state.step = 'ask_guests'
-      conversationState.set(senderId, state)
+      await setConversationState(senderId, state)
       return msg.askGuests(checkOut)
     }
     
@@ -512,7 +562,7 @@ async function handleBookingFlow(
       }
       state.guests = guests
       state.step = 'ask_name'
-      conversationState.set(senderId, state)
+      await setConversationState(senderId, state)
       return msg.askName(guests)
     }
     
@@ -522,7 +572,7 @@ async function handleBookingFlow(
       }
       state.guestName = text
       state.step = 'ask_phone'
-      conversationState.set(senderId, state)
+      await setConversationState(senderId, state)
       return msg.askPhone(text)
     }
     
@@ -533,7 +583,7 @@ async function handleBookingFlow(
       }
       state.guestPhone = phone
       state.step = 'confirm_booking'
-      conversationState.set(senderId, state)
+      await setConversationState(senderId, state)
       
       const pricing = await calculatePrice(orgId, state.checkIn!, state.checkOut!, state.guests!)
       return msg.confirmBooking(state, pricing.total)
@@ -541,16 +591,16 @@ async function handleBookingFlow(
     
     case 'confirm_booking': {
       const isYes = state.language === 'ka'
-        ? (text.toLowerCase().includes('დიახ') || text === '✅')
-        : (text.toLowerCase().includes('yes') || text === '✅')
+        ? (text.toLowerCase().includes('დიახ') || text === '✅' || text === 'კი')
+        : (text.toLowerCase().includes('yes') || text === '✅' || text.toLowerCase() === 'y')
       
       const isNo = state.language === 'ka'
         ? (text.toLowerCase().includes('არა') || text === '❌')
-        : (text.toLowerCase().includes('no') || text === '❌')
+        : (text.toLowerCase().includes('no') || text === '❌' || text.toLowerCase() === 'n')
       
       if (isYes) {
         const result = await createReservation(orgId, state)
-        conversationState.delete(senderId)
+        await deleteConversationState(senderId)
         
         if (result.success) {
           // Update stats (non-critical)
@@ -570,7 +620,7 @@ async function handleBookingFlow(
       }
       
       if (isNo) {
-        conversationState.delete(senderId)
+        await deleteConversationState(senderId)
         return msg.bookingCancelled
       }
       
