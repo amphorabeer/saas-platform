@@ -1318,3 +1318,13 @@ model HotelQuickChargeButton {
   
   @@index([organizationId])
 }
+
+// Messenger Conversation Sessions (for chatbot state)
+model MessengerSession {
+  id        String   @id @default(cuid())
+  senderId  String   @unique  // Facebook sender ID
+  state     String   @db.Text // JSON string of conversation state
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([updatedAt])
+}
