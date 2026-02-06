@@ -57,6 +57,8 @@ export default function NewTourPage() {
     price: "",
     currency: "GEL",
     coverImage: "",
+    allowActivationCodes: true,
+    allowBankPayment: true,
   });
 
   useEffect(() => {
@@ -390,35 +392,76 @@ export default function NewTourPage() {
                 </div>
 
                 {!formData.isFree && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="price">ფასი</Label>
-                      <Input
-                        id="price"
-                        name="price"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={formData.price}
-                        onChange={handleChange}
-                        placeholder="0.00"
-                      />
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="price">ფასი</Label>
+                        <Input
+                          id="price"
+                          name="price"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={formData.price}
+                          onChange={handleChange}
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="currency">ვალუტა</Label>
+                        <select
+                          id="currency"
+                          name="currency"
+                          value={formData.currency}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border rounded-md bg-background"
+                        >
+                          <option value="GEL">GEL</option>
+                          <option value="USD">USD</option>
+                          <option value="EUR">EUR</option>
+                        </select>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="currency">ვალუტა</Label>
-                      <select
-                        id="currency"
-                        name="currency"
-                        value={formData.currency}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border rounded-md bg-background"
-                      >
-                        <option value="GEL">GEL</option>
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                      </select>
+
+                    {/* Payment Options */}
+                    <div className="pt-4 border-t space-y-3">
+                      <Label className="text-sm font-medium">გადახდის მეთოდები</Label>
+                      
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="allowBankPayment"
+                          name="allowBankPayment"
+                          checked={formData.allowBankPayment}
+                          onChange={handleChange}
+                          className="h-4 w-4"
+                        />
+                        <Label htmlFor="allowBankPayment" className="font-normal">
+                          💳 ბანკით გადახდა (ონლაინ)
+                        </Label>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="allowActivationCodes"
+                          name="allowActivationCodes"
+                          checked={formData.allowActivationCodes}
+                          onChange={handleChange}
+                          className="h-4 w-4"
+                        />
+                        <Label htmlFor="allowActivationCodes" className="font-normal">
+                          🔑 აქტივაციის კოდები (მუზეუმში ყიდვა)
+                        </Label>
+                      </div>
+
+                      {!formData.allowBankPayment && !formData.allowActivationCodes && (
+                        <p className="text-sm text-red-500">
+                          ⚠️ აირჩიეთ მინიმუმ ერთი გადახდის მეთოდი
+                        </p>
+                      )}
                     </div>
-                  </div>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -434,7 +477,7 @@ export default function NewTourPage() {
           </Link>
           <Button
             type="submit"
-            disabled={loading}
+            disabled={loading || (!formData.isFree && !formData.allowBankPayment && !formData.allowActivationCodes)}
             className="bg-amber-500 hover:bg-amber-600"
           >
             {loading ? (

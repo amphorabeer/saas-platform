@@ -105,6 +105,8 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     currency: "GEL",
     coverImage: "",
     isPublished: false,
+    allowActivationCodes: true,
+    allowBankPayment: true,
   });
 
   // Expanded halls state
@@ -169,6 +171,8 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
           currency: data.currency || "GEL",
           coverImage: data.coverImage || "",
           isPublished: data.isPublished,
+          allowActivationCodes: data.allowActivationCodes ?? true,
+          allowBankPayment: data.allowBankPayment ?? true,
         });
 
         // Load existing translations
@@ -713,6 +717,47 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                   </div>
                 )}
 
+                {/* Payment Options */}
+                {!formData.isFree && (
+                  <div className="pt-4 border-t space-y-3">
+                    <Label className="text-sm font-medium">გადახდის მეთოდები</Label>
+                    
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="allowBankPayment"
+                        name="allowBankPayment"
+                        checked={formData.allowBankPayment}
+                        onChange={handleChange}
+                        className="h-4 w-4"
+                      />
+                      <Label htmlFor="allowBankPayment" className="font-normal">
+                        💳 ბანკით გადახდა (ონლაინ)
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="allowActivationCodes"
+                        name="allowActivationCodes"
+                        checked={formData.allowActivationCodes}
+                        onChange={handleChange}
+                        className="h-4 w-4"
+                      />
+                      <Label htmlFor="allowActivationCodes" className="font-normal">
+                        🔑 აქტივაციის კოდები (მუზეუმში ყიდვა)
+                      </Label>
+                    </div>
+
+                    {!formData.allowBankPayment && !formData.allowActivationCodes && (
+                      <p className="text-sm text-red-500">
+                        ⚠️ აირჩიეთ მინიმუმ ერთი გადახდის მეთოდი
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label>გარეკანის სურათი</Label>
                   <FileUpload
@@ -737,7 +782,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
 
                 <Button
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || (!formData.isFree && !formData.allowBankPayment && !formData.allowActivationCodes)}
                   className="w-full bg-amber-500 hover:bg-amber-600"
                 >
                   {saving ? (

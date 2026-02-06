@@ -595,6 +595,10 @@ model Tour {
   isPublished  Boolean @default(false)
   displayOrder Int     @default(0)
 
+  // ფასი/წვდომა
+  allowActivationCodes Boolean @default(true)
+  allowBankPayment     Boolean @default(true)
+
   // მედია
   coverImage String?
 

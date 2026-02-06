@@ -66,12 +66,14 @@ export async function POST(request: NextRequest) {
         nameUk: body.nameUk || null,
         descriptionUk: body.descriptionUk || null,
         duration: body.duration || null,
-        isFree: body.isFree || false,
+        isFree: body.isFree ?? false,
         price: body.price || null,
         currency: body.currency || "GEL",
         coverImage: body.coverImage || null,
-        isPublished: body.isPublished || false,
+        isPublished: body.isPublished ?? false,
         displayOrder: body.displayOrder || 0,
+        allowActivationCodes: body.allowActivationCodes ?? true,
+        allowBankPayment: body.allowBankPayment ?? true,
       },
       include: {
         museum: {
