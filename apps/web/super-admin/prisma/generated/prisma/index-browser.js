@@ -434,6 +434,8 @@ exports.Prisma.TourScalarFieldEnum = {
   currency: 'currency',
   isPublished: 'isPublished',
   displayOrder: 'displayOrder',
+  allowActivationCodes: 'allowActivationCodes',
+  allowBankPayment: 'allowBankPayment',
   coverImage: 'coverImage',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

@@ -22573,6 +22573,8 @@ export namespace Prisma {
     currency: string | null
     isPublished: boolean | null
     displayOrder: number | null
+    allowActivationCodes: boolean | null
+    allowBankPayment: boolean | null
     coverImage: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -22596,6 +22598,8 @@ export namespace Prisma {
     currency: string | null
     isPublished: boolean | null
     displayOrder: number | null
+    allowActivationCodes: boolean | null
+    allowBankPayment: boolean | null
     coverImage: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -22619,6 +22623,8 @@ export namespace Prisma {
     currency: number
     isPublished: number
     displayOrder: number
+    allowActivationCodes: number
+    allowBankPayment: number
     coverImage: number
     createdAt: number
     updatedAt: number
@@ -22658,6 +22664,8 @@ export namespace Prisma {
     currency?: true
     isPublished?: true
     displayOrder?: true
+    allowActivationCodes?: true
+    allowBankPayment?: true
     coverImage?: true
     createdAt?: true
     updatedAt?: true
@@ -22681,6 +22689,8 @@ export namespace Prisma {
     currency?: true
     isPublished?: true
     displayOrder?: true
+    allowActivationCodes?: true
+    allowBankPayment?: true
     coverImage?: true
     createdAt?: true
     updatedAt?: true
@@ -22704,6 +22714,8 @@ export namespace Prisma {
     currency?: true
     isPublished?: true
     displayOrder?: true
+    allowActivationCodes?: true
+    allowBankPayment?: true
     coverImage?: true
     createdAt?: true
     updatedAt?: true
@@ -22814,6 +22826,8 @@ export namespace Prisma {
     currency: string
     isPublished: boolean
     displayOrder: number
+    allowActivationCodes: boolean
+    allowBankPayment: boolean
     coverImage: string | null
     createdAt: Date
     updatedAt: Date
@@ -22856,6 +22870,8 @@ export namespace Prisma {
     currency?: boolean
     isPublished?: boolean
     displayOrder?: boolean
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -22886,6 +22902,8 @@ export namespace Prisma {
     currency?: boolean
     isPublished?: boolean
     displayOrder?: boolean
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -22910,6 +22928,8 @@ export namespace Prisma {
     currency?: boolean
     isPublished?: boolean
     displayOrder?: boolean
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -22956,6 +22976,8 @@ export namespace Prisma {
       currency: string
       isPublished: boolean
       displayOrder: number
+      allowActivationCodes: boolean
+      allowBankPayment: boolean
       coverImage: string | null
       createdAt: Date
       updatedAt: Date
@@ -23375,6 +23397,8 @@ export namespace Prisma {
     readonly currency: FieldRef<"Tour", 'String'>
     readonly isPublished: FieldRef<"Tour", 'Boolean'>
     readonly displayOrder: FieldRef<"Tour", 'Int'>
+    readonly allowActivationCodes: FieldRef<"Tour", 'Boolean'>
+    readonly allowBankPayment: FieldRef<"Tour", 'Boolean'>
     readonly coverImage: FieldRef<"Tour", 'String'>
     readonly createdAt: FieldRef<"Tour", 'DateTime'>
     readonly updatedAt: FieldRef<"Tour", 'DateTime'>
@@ -32808,6 +32832,8 @@ export namespace Prisma {
     currency: 'currency',
     isPublished: 'isPublished',
     displayOrder: 'displayOrder',
+    allowActivationCodes: 'allowActivationCodes',
+    allowBankPayment: 'allowBankPayment',
     coverImage: 'coverImage',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -35049,6 +35075,8 @@ export namespace Prisma {
     currency?: StringFilter<"Tour"> | string
     isPublished?: BoolFilter<"Tour"> | boolean
     displayOrder?: IntFilter<"Tour"> | number
+    allowActivationCodes?: BoolFilter<"Tour"> | boolean
+    allowBankPayment?: BoolFilter<"Tour"> | boolean
     coverImage?: StringNullableFilter<"Tour"> | string | null
     createdAt?: DateTimeFilter<"Tour"> | Date | string
     updatedAt?: DateTimeFilter<"Tour"> | Date | string
@@ -35078,6 +35106,8 @@ export namespace Prisma {
     currency?: SortOrder
     isPublished?: SortOrder
     displayOrder?: SortOrder
+    allowActivationCodes?: SortOrder
+    allowBankPayment?: SortOrder
     coverImage?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -35110,6 +35140,8 @@ export namespace Prisma {
     currency?: StringFilter<"Tour"> | string
     isPublished?: BoolFilter<"Tour"> | boolean
     displayOrder?: IntFilter<"Tour"> | number
+    allowActivationCodes?: BoolFilter<"Tour"> | boolean
+    allowBankPayment?: BoolFilter<"Tour"> | boolean
     coverImage?: StringNullableFilter<"Tour"> | string | null
     createdAt?: DateTimeFilter<"Tour"> | Date | string
     updatedAt?: DateTimeFilter<"Tour"> | Date | string
@@ -35139,6 +35171,8 @@ export namespace Prisma {
     currency?: SortOrder
     isPublished?: SortOrder
     displayOrder?: SortOrder
+    allowActivationCodes?: SortOrder
+    allowBankPayment?: SortOrder
     coverImage?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -35170,6 +35204,8 @@ export namespace Prisma {
     currency?: StringWithAggregatesFilter<"Tour"> | string
     isPublished?: BoolWithAggregatesFilter<"Tour"> | boolean
     displayOrder?: IntWithAggregatesFilter<"Tour"> | number
+    allowActivationCodes?: BoolWithAggregatesFilter<"Tour"> | boolean
+    allowBankPayment?: BoolWithAggregatesFilter<"Tour"> | boolean
     coverImage?: StringNullableWithAggregatesFilter<"Tour"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Tour"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Tour"> | Date | string
@@ -38110,6 +38146,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38139,6 +38177,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38166,6 +38206,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38195,6 +38237,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38223,6 +38267,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38245,6 +38291,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38268,6 +38316,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40884,6 +40934,8 @@ export namespace Prisma {
     currency?: SortOrder
     isPublished?: SortOrder
     displayOrder?: SortOrder
+    allowActivationCodes?: SortOrder
+    allowBankPayment?: SortOrder
     coverImage?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -40914,6 +40966,8 @@ export namespace Prisma {
     currency?: SortOrder
     isPublished?: SortOrder
     displayOrder?: SortOrder
+    allowActivationCodes?: SortOrder
+    allowBankPayment?: SortOrder
     coverImage?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -40937,6 +40991,8 @@ export namespace Prisma {
     currency?: SortOrder
     isPublished?: SortOrder
     displayOrder?: SortOrder
+    allowActivationCodes?: SortOrder
+    allowBankPayment?: SortOrder
     coverImage?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -45016,6 +45072,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -45043,6 +45101,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -45142,6 +45202,8 @@ export namespace Prisma {
     currency?: StringFilter<"Tour"> | string
     isPublished?: BoolFilter<"Tour"> | boolean
     displayOrder?: IntFilter<"Tour"> | number
+    allowActivationCodes?: BoolFilter<"Tour"> | boolean
+    allowBankPayment?: BoolFilter<"Tour"> | boolean
     coverImage?: StringNullableFilter<"Tour"> | string | null
     createdAt?: DateTimeFilter<"Tour"> | Date | string
     updatedAt?: DateTimeFilter<"Tour"> | Date | string
@@ -45813,6 +45875,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -45841,6 +45905,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -45951,6 +46017,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -45979,6 +46047,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -46021,6 +46091,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -46049,6 +46121,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -46134,6 +46208,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -46162,6 +46238,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -46237,6 +46315,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -46265,6 +46345,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -46307,6 +46389,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -46335,6 +46419,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -46556,6 +46642,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -46584,6 +46672,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -46702,6 +46792,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -46730,6 +46822,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -46803,6 +46897,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -46831,6 +46927,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -47021,6 +47119,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47049,6 +47149,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47679,6 +47781,8 @@ export namespace Prisma {
     currency?: string
     isPublished?: boolean
     displayOrder?: number
+    allowActivationCodes?: boolean
+    allowBankPayment?: boolean
     coverImage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -47717,6 +47821,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47744,6 +47850,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47771,6 +47879,8 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
+    allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
+    allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

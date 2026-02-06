@@ -55,6 +55,8 @@ export async function PATCH(
         ...(body.currency !== undefined && { currency: body.currency }),
         ...(body.coverImage !== undefined && { coverImage: body.coverImage }),
         ...(body.isPublished !== undefined && { isPublished: body.isPublished }),
+        ...(body.allowActivationCodes !== undefined && { allowActivationCodes: body.allowActivationCodes }),
+        ...(body.allowBankPayment !== undefined && { allowBankPayment: body.allowBankPayment }),
       },
       include: {
         museum: { select: { id: true, name: true, coverImage: true } },
