@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma'
 const HOTEL_CONFIG = {
   phone: '+995 599 946 500',
   email: 'info@breweryhouse.ge',
-  address: 'სოფ. გიზავი, გურჯაანის რაიონი',
+  address: 'ასპინძა, შორეთის ქ. 21',
   
   services: {
     beerSpa: {
