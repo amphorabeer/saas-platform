@@ -54,6 +54,8 @@ export interface Tour {
   coverImage: string | null;
   halls?: Hall[];
   stops: TourStop[];
+  allowActivationCodes?: boolean;
+  allowBankPayment?: boolean;
 }
 
 export interface TourStop {

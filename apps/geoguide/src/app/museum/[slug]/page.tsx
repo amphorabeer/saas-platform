@@ -221,9 +221,13 @@ function TourCard({
     return (tour as any)[field] || "";
   };
 
+  // Check payment methods - default to true if not set (backwards compatibility)
+  const allowActivationCodes = tour.allowActivationCodes ?? true;
+  const allowBankPayment = tour.allowBankPayment ?? true;
+
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-      {/* Tour Cover Image - ტურის საკუთარი სურათი */}
+      {/* Tour Cover Image */}
       {tour.coverImage && (
         <img
           src={tour.coverImage}
@@ -259,33 +263,47 @@ function TourCard({
         </div>
 
         {/* Action Buttons */}
-        {tour.isFree ? (
-          <Link
-            href={`/museum/${museumSlug}/tour/${tour.id}`}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-amber-500 text-white rounded-full font-medium hover:bg-amber-600 transition-colors"
-          >
-            <PlayIcon className="w-5 h-5" />
-            <span>{ui.start}</span>
-          </Link>
-        ) : (
-          <div className="flex gap-3">
+        <div className="mt-4">
+          {tour.isFree ? (
+            /* Free Tour - just Start button */
             <Link
-              href={`/museum/${museumSlug}/tour/${tour.id}/activate`}
-              className="flex-1 flex items-center justify-center gap-2 py-3 border-2 border-gray-200 rounded-full text-gray-700 font-medium hover:border-amber-500 hover:text-amber-600 transition-colors"
+              href={`/museum/${museumSlug}/tour/${tour.id}`}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-amber-500 text-white rounded-full font-medium hover:bg-amber-600 transition-colors"
             >
               <PlayIcon className="w-5 h-5" />
-              <span>{ui.enterCode}</span>
+              <span>{ui.start}</span>
             </Link>
+          ) : (
+            /* Paid Tour - show buttons based on allowed payment methods */
+            <div className="flex gap-3">
+              {/* Activation Code Button - only if allowed */}
+              {allowActivationCodes && (
+                <Link
+                  href={`/museum/${museumSlug}/tour/${tour.id}/activate`}
+                  className={`flex items-center justify-center gap-2 py-3 border-2 border-gray-200 rounded-full text-gray-700 font-medium hover:border-amber-500 hover:text-amber-600 transition-colors ${
+                    allowBankPayment ? "flex-1" : "w-full"
+                  }`}
+                >
+                  <PlayIcon className="w-5 h-5" />
+                  <span>{ui.enterCode}</span>
+                </Link>
+              )}
 
-            <Link
-              href={`/museum/${museumSlug}/tour/${tour.id}/buy`}
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-500 text-white rounded-full font-medium hover:bg-amber-600 transition-colors"
-            >
-              <ShoppingCartIcon className="w-5 h-5" />
-              <span>{ui.buy} {tour.price} {tour.currency === "GEL" ? "₾" : tour.currency}</span>
-            </Link>
-          </div>
-        )}
+              {/* Buy Button - only if allowed */}
+              {allowBankPayment && (
+                <Link
+                  href={`/museum/${museumSlug}/tour/${tour.id}/buy`}
+                  className={`flex items-center justify-center gap-2 py-3 bg-amber-500 text-white rounded-full font-medium hover:bg-amber-600 transition-colors ${
+                    allowActivationCodes ? "flex-1" : "w-full"
+                  }`}
+                >
+                  <ShoppingCartIcon className="w-5 h-5" />
+                  <span>{ui.buy} {tour.price} {tour.currency === "GEL" ? "₾" : tour.currency}</span>
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
