@@ -18,17 +18,17 @@ const HOTEL_CONFIG = {
       ka: {
         name: 'ლუდის სპა',
         description: '1 საათიანი პროცედურა ლუდის აბაზანაში + ულიმიტო ქვევრის ლუდი',
-        includes: ['ლუდის აბაზანა (მაქს. 2 ადამიანი)', '1 საათი პროცედურა', 'ულიმიტო ქვევრის ლუდი']
+        includes: ['1 ლუდის აბაზანა (მაქს. 2 ადამიანი)', '1 საათი პროცედურა', 'ულიმიტო ქვევრის ლუდი']
       },
       en: {
         name: 'Beer Spa',
         description: '1-hour beer bath procedure + unlimited Qvevri beer',
-        includes: ['Beer bath (max 2 persons)', '1 hour procedure', 'Unlimited Qvevri beer']
+        includes: ['1 Beer bath (max 2 persons)', '1 hour procedure', 'Unlimited Qvevri beer']
       },
       ru: {
         name: 'Пивное СПА',
         description: '1-часовая процедура в пивной ванне + безлимитное квеври пиво',
-        includes: ['Пивная ванна (макс. 2 человека)', '1 час процедуры', 'Безлимитное квеври пиво']
+        includes: ['1 Пивная ванна (макс. 2 человека)', '1 час процедуры', 'Безлимитное квеври пиво']
       }
     },
     beerTasting: {

@@ -18,10 +18,10 @@ export default function LoginPage() {
     try {
       // Simple authentication check
       // In production, use proper API with bcrypt verification
-      if (email === 'admin@platform.ge' && password === 'admin123') {
+      if (email === 'zzedginidze@gmail.com' && password === 'Zatealuka2026!') {
         // Store auth token in localStorage
         localStorage.setItem('super-admin-auth', JSON.stringify({
-          email: 'admin@platform.ge',
+          email: 'zzedginidze@gmail.com',
           role: 'SUPER_ADMIN',
           authenticated: true,
           timestamp: Date.now()
@@ -57,7 +57,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@platform.ge"
+                placeholder="zzedginidze@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -86,10 +86,6 @@ export default function LoginPage() {
               {loading ? 'იტვირთება...' : 'შესვლა'}
             </Button>
           </form>
-          <div className="mt-4 text-sm text-center text-gray-500 dark:text-gray-400">
-            <p>ტესტ ანგარიში:</p>
-            <p className="font-mono">admin@platform.ge / admin123</p>
-          </div>
         </CardContent>
       </Card>
     </div>
