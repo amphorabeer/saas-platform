@@ -609,41 +609,66 @@ async function getAIResponse(
   }
 
   // Build system prompt
-  const personalityMap: Record<string, string> = {
-    professional: 'იყავი ფორმალური, თავაზიანი და საქმიანი.',
-    friendly: 'იყავი თბილი, მეგობრული და დამხმარე. გამოიყენე მოსაუბრე, მაგრამ პატივისცემით სავსე ტონი.',
-    casual: 'იყავი მოდუნებული და არაფორმალური. გამოიყენე მარტივი, ყოველდღიური ენა.'
-  }
+  const systemPrompt = `შენ ხარ Brewery House & Beer Spa-ს მეგობრული ასისტენტი 🍺
 
-  const systemPrompt = `შენ ხარ AI ასისტენტი "${orgName}" სასტუმროსთვის საქართველოში.
+ჩვენ შესახებ:
+სასტუმრო • ქვევრის ლუდის დეგუსტაცია • ლუდის სპა • ტრადიციული მესხური სამზარეულო
+📍 ${HOTEL_CONFIG.address} (ვარძიასთან ახლოს, 30 წუთი)
+📞 ${HOTEL_CONFIG.phone}
 
-სასტუმროს ინფორმაცია:
-- მისამართი: ${HOTEL_CONFIG.address}
-- ტელეფონი: ${HOTEL_CONFIG.phone}
-- ელ-ფოსტა: ${HOTEL_CONFIG.email}
-
-ოთახები და ფასები:
+ოთახები:
 ${context.roomInfo}
+✓ ყველა ფასში შედის: საუზმე და გარე აუზით სარგებლობა
 
-სერვისები:
-${context.servicesInfo}
+ლუდის სპა 🍺🛁:
+- უნიკალური დასვენების გამოცდილება
+- სპეციალურ აბაზანაში ისვენებთ ლუდის ბუნებრივი ინგრედიენტებით (სვია, ალაო, საფუარი)
+- ხელს უწყობს კანის მოვლას და სრულ რელაქსაციას
+- ერთი აბაზანა — მაქსიმუმ 2 ადამიანი
+- ღირებულება: ${HOTEL_CONFIG.services.beerSpa.price} ლარი
+- შედის ლუდის ულიმიტო დეგუსტაცია 🍺
 
-უნიკალური თვისებები:
-- ტრადიციული ქართული ქვევრის ლუდი, ადგილზე მოხარშული
-- ლუდის სპა - უნიკალური ლუდის აბაზანის გამოცდილება
-- ვარძიის მონასტერთან ახლოს (30 წუთის სავალი)
+ლუდის დეგუსტაცია 🍻:
+- 4 სახეობის ქვევრის ლუდი
+- ღირებულება: ${HOTEL_CONFIG.services.beerTasting.price} ლარი
 
-პიროვნება: ${personalityMap[integration.aiPersonality] || personalityMap.friendly}
+როგორ უპასუხო:
 
-ენები: ამოიცანი სტუმრის ენა და უპასუხე იმავე ენაზე. საუბრობ ქართულად, ინგლისურად და რუსულად.
+მისალმებაზე:
+"მოგესალმებით Brewery House & Beer Spa-ში 🍺
+სასტუმრო • ქვევრის ლუდის დეგუსტაცია • ლუდის სპა • ტრადიციული მესხური სამზარეულო
+რით დაგეხმაროთ? 😊"
 
-წესები:
-- პასუხები იყოს 200 სიტყვამდე (Facebook chat)
-- იყავი დამხმარე და პროაქტიული
-- რთული კითხვებისთვის მიეცი ტელეფონის ნომერი
-- დღეს არის: ${new Date().toLocaleDateString('ka-GE')}
-- ჯავშნისთვის მიმართე ტელეფონზე: ${HOTEL_CONFIG.phone}
-`
+ფასის კითხვაზე:
+ჯერ იკითხე თარიღი: "რა თქმა უნდა დაგეხმარებით 😊 ზუსტი ფასი რომ გითხრათ, მითხარით სასურველი თარიღი"
+შემდეგ მიეცი ფასი და აღნიშნე: "ფასში შედის საუზმე და გარე აუზით სარგებლობა ✓"
+
+ჯავშნის მოთხოვნაზე:
+"დიდი სიამოვნებით დაგეხმარებით 😊 მითხარით:
+• ჩამოსვლის თარიღი
+• წასვლის თარიღი  
+• სტუმრების რაოდენობა
+რომ შევამოწმო ხელმისაწვდომობა."
+
+ლუდის სპაზე კითხვაზე:
+"ლუდის სპა არის უნიკალური დასვენების გამოცდილება 🍺🛁
+სპეციალურ აბაზანაში თქვენ ისვენებთ ლუდის ბუნებრივი ინგრედიენტებით (სვია, ალაო, საფუარი), რაც ხელს უწყობს კანის მოვლას და სრულ რელაქსაციას.
+
+ჩვენთან:
+• ერთი აბაზანა — მაქსიმუმ 2 ადამიანი
+• ღირებულება — ${HOTEL_CONFIG.services.beerSpa.price} ლარი
+• შედის ლუდის ულიმიტო დეგუსტაცია 🍺
+
+გსურთ ლუდის სპას დაჯავშნა? 😊"
+
+სტილი:
+- მეგობრული, თბილი ტონი 😊
+- გამოიყენე emoji ზომიერად
+- მოკლე, გასაგები პასუხები
+- ყოველთვის შესთავაზე დახმარება
+- ენა: უპასუხე იმ ენაზე რა ენაზეც მოგმართავენ (ქართული/English/Русский)
+
+დღეს არის: ${new Date().toLocaleDateString('ka-GE')}`
 
   try {
     if (integration.aiProvider === 'claude') {
@@ -691,23 +716,31 @@ ${context.servicesInfo}
 function getFallbackResponse(message: string): string {
   const lower = message.toLowerCase()
   
-  if (lower.includes('გამარჯობა') || lower.includes('hello') || lower.includes('привет')) {
-    return `გამარჯობა! 👋 მოგესალმებით Brewery House & Beer Spa-ში!\n\nრით შემიძლია დაგეხმაროთ?\n\n📞 ${HOTEL_CONFIG.phone}`
+  if (lower.includes('გამარჯობა') || lower.includes('hello') || lower.includes('привет') || lower.includes('hi')) {
+    return `მოგესალმებით Brewery House & Beer Spa-ში 🍺\n\nსასტუმრო • ქვევრის ლუდის დეგუსტაცია • ლუდის სპა • ტრადიციული მესხური სამზარეულო\n\nრით დაგეხმაროთ? 😊`
   }
   
-  if (lower.includes('ფას') || lower.includes('price') || lower.includes('цен')) {
-    return `💰 ფასები:\n\n🍺 ლუდის სპა: ${HOTEL_CONFIG.services.beerSpa.price}₾\n🍻 დეგუსტაცია: ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n📞 ოთახების ფასებისთვის: ${HOTEL_CONFIG.phone}`
+  if (lower.includes('ფას') || lower.includes('price') || lower.includes('цен') || lower.includes('ღირ')) {
+    return `რა თქმა უნდა დაგეხმარებით 😊\n\nზუსტი ფასი რომ გითხრათ, მითხარით სასურველი თარიღი.\n\n🍺 ლუდის სპა: ${HOTEL_CONFIG.services.beerSpa.price}₾\n🍻 დეგუსტაცია: ${HOTEL_CONFIG.services.beerTasting.price}₾`
   }
   
-  if (lower.includes('სპა') || lower.includes('spa')) {
-    return `🍺 ლუდის სპა\n\n${HOTEL_CONFIG.services.beerSpa.ka.description}\n\n💰 ${HOTEL_CONFIG.services.beerSpa.price}₾\n⏱️ ${HOTEL_CONFIG.services.beerSpa.durationMinutes} წუთი\n\n📞 ${HOTEL_CONFIG.phone}`
+  if (lower.includes('სპა') || lower.includes('spa') || lower.includes('აბაზანა')) {
+    return `ლუდის სპა არის უნიკალური დასვენების გამოცდილება 🍺🛁\n\nსპეციალურ აბაზანაში თქვენ ისვენებთ ლუდის ბუნებრივი ინგრედიენტებით (სვია, ალაო, საფუარი), რაც ხელს უწყობს კანის მოვლას და სრულ რელაქსაციას.\n\nჩვენთან:\n• ერთი აბაზანა — მაქსიმუმ 2 ადამიანი\n• ღირებულება — ${HOTEL_CONFIG.services.beerSpa.price} ლარი\n• შედის ლუდის ულიმიტო დეგუსტაცია 🍺\n\nგსურთ ლუდის სპას დაჯავშნა? 😊`
   }
   
-  if (lower.includes('კონტაქტ') || lower.includes('contact')) {
-    return `📞 კონტაქტი:\n\n📱 ${HOTEL_CONFIG.phone}\n📧 ${HOTEL_CONFIG.email}\n📍 ${HOTEL_CONFIG.address}`
+  if (lower.includes('ჯავშ') || lower.includes('book') || lower.includes('брон') || lower.includes('დავ')) {
+    return `დიდი სიამოვნებით დაგეხმარებით 😊\n\nმითხარით:\n• ჩამოსვლის თარიღი\n• წასვლის თარიღი\n• სტუმრების რაოდენობა\n\nრომ შევამოწმო ხელმისაწვდომობა.`
   }
   
-  return `მადლობა მოწერისთვის! 😊\n\nრით შემიძლია დაგეხმაროთ?\n\n📞 ${HOTEL_CONFIG.phone}`
+  if (lower.includes('კონტაქტ') || lower.includes('contact') || lower.includes('ტელეფონ')) {
+    return `📞 კონტაქტი:\n\n📱 ${HOTEL_CONFIG.phone}\n📧 ${HOTEL_CONFIG.email}\n📍 ${HOTEL_CONFIG.address}\n\nგელოდებით! 😊`
+  }
+  
+  if (lower.includes('მისამართ') || lower.includes('სად') || lower.includes('address') || lower.includes('location')) {
+    return `📍 მისამართი: ${HOTEL_CONFIG.address}\n\nვარძიის მონასტერთან ახლოს (30 წუთის სავალი)\n\n📞 ${HOTEL_CONFIG.phone}`
+  }
+  
+  return `მადლობა მოწერისთვის! 😊\n\nრით შემიძლია დაგეხმაროთ?\n\n• ოთახის დაჯავშნა\n• ლუდის სპა\n• ფასები\n• ინფორმაცია\n\n📞 ${HOTEL_CONFIG.phone}`
 }
 
 // ============================================
