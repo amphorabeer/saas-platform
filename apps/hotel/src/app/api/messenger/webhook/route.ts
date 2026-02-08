@@ -9,26 +9,29 @@ const HOTEL_CONFIG = {
   phone: '+995 599 946 500',
   email: 'info@breweryhouse.ge',
   address: 'ასპინძა, შორეთის ქ. 21',
+  googleMaps: 'https://maps.app.goo.gl/kLxZiRbNPPMF2gwdA?g_st=ic',
+  coordinates: '41.5755° N, 43.3269° E',
   
   services: {
     beerSpa: {
       price: 150,
       maxPersons: 2,
+      totalBaths: 2,
       durationMinutes: 60,
       ka: {
         name: 'ლუდის სპა',
         description: '1 საათიანი პროცედურა ლუდის აბაზანაში + ულიმიტო ქვევრის ლუდი',
-        includes: ['1 ლუდის აბაზანა (მაქს. 2 ადამიანი)', '1 საათი პროცედურა', 'ულიმიტო ქვევრის ლუდი']
+        includes: ['2 ლუდის აბაზანა (თითოში მაქს. 2 ადამიანი)', '1 საათი პროცედურა', 'ულიმიტო ქვევრის ლუდი']
       },
       en: {
         name: 'Beer Spa',
         description: '1-hour beer bath procedure + unlimited Qvevri beer',
-        includes: ['1 Beer bath (max 2 persons)', '1 hour procedure', 'Unlimited Qvevri beer']
+        includes: ['2 Beer baths (max 2 persons each)', '1 hour procedure', 'Unlimited Qvevri beer']
       },
       ru: {
         name: 'Пивное СПА',
         description: '1-часовая процедура в пивной ванне + безлимитное квеври пиво',
-        includes: ['1 Пивная ванна (макс. 2 человека)', '1 час процедуры', 'Безлимитное квеври пиво']
+        includes: ['2 Пивные ванны (макс. 2 человека в каждой)', '1 час процедуры', 'Безлимитное квеври пиво']
       }
     },
     beerTasting: {
@@ -515,6 +518,17 @@ async function handleMessage(senderId: string, text: string, integration: any) {
 // AI conversation history storage
 const aiConversationHistory: Map<string, Array<{ role: 'user' | 'assistant'; content: string }>> = new Map()
 
+// AI booking state storage
+interface AIBookingState {
+  checkIn?: string
+  checkOut?: string
+  guests?: number
+  roomType?: string
+  guestName?: string
+  guestPhone?: string
+}
+const aiBookingState: Map<string, AIBookingState> = new Map()
+
 async function handleAIMessage(
   senderId: string, 
   text: string, 
@@ -525,6 +539,55 @@ async function handleAIMessage(
   try {
     // Get conversation history
     let history = aiConversationHistory.get(senderId) || []
+    
+    // Get booking state
+    let bookingState = aiBookingState.get(senderId) || {}
+    
+    // Try to extract booking data from user message
+    const extractedData = extractBookingData(text, bookingState)
+    bookingState = { ...bookingState, ...extractedData }
+    aiBookingState.set(senderId, bookingState)
+    
+    // Check if we have all data needed for booking
+    if (canCreateBooking(bookingState)) {
+      // Create real reservation!
+      const result = await createAIReservation(orgId, bookingState)
+      
+      if (result.success) {
+        // Clear booking state
+        aiBookingState.delete(senderId)
+        aiConversationHistory.delete(senderId)
+        
+        const response = `🎉 ჯავშანი წარმატებით შეიქმნა!\n\n` +
+          `📋 ჯავშნის ნომერი: ${result.reservationId}\n` +
+          `📅 ${bookingState.checkIn} - ${bookingState.checkOut}\n` +
+          `👤 ${bookingState.guestName}\n` +
+          `📱 ${bookingState.guestPhone}\n` +
+          `💰 ჯამი: ${result.total}₾\n\n` +
+          `✓ ფასში შედის საუზმე და აუზი\n\n` +
+          `მალე დაგიკავშირდებით! 😊\n` +
+          `📞 ${HOTEL_CONFIG.phone}`
+        
+        await sendMessage(senderId, response, integration.pageAccessToken, integration.pageId)
+        
+        try {
+          await prisma.facebookIntegration.update({
+            where: { pageId: integration.pageId },
+            data: { messagesSent: { increment: 1 }, bookingsCreated: { increment: 1 } }
+          })
+        } catch (e) {}
+        
+        return
+      } else {
+        // Booking failed - inform user
+        const response = `❌ სამწუხაროდ, ამ თარიღებში ოთახი არ არის ხელმისაწვდომი.\n\n` +
+          `გთხოვთ სცადოთ სხვა თარიღები ან დარეკოთ: ${HOTEL_CONFIG.phone}`
+        
+        await sendMessage(senderId, response, integration.pageAccessToken, integration.pageId)
+        aiBookingState.delete(senderId)
+        return
+      }
+    }
     
     // Add user message to history
     history.push({ role: 'user', content: text })
@@ -537,8 +600,14 @@ async function handleAIMessage(
     // Build context with real data from database
     const hotelContext = await buildHotelContext(orgId)
     
+    // Add booking state context to help AI
+    let bookingContext = ''
+    if (Object.keys(bookingState).length > 0) {
+      bookingContext = `\n\n[შენახული ჯავშნის მონაცემები: ${JSON.stringify(bookingState)}]`
+    }
+    
     // Get AI response with history
-    const response = await getAIResponse(history, integration, hotelContext, orgName)
+    const response = await getAIResponse(history, integration, hotelContext, orgName, bookingContext)
     
     // Add assistant response to history
     history.push({ role: 'assistant', content: response })
@@ -562,6 +631,138 @@ async function handleAIMessage(
     // Fallback to simple response
     const fallback = getFallbackResponse(text)
     await sendMessage(senderId, fallback, integration.pageAccessToken, integration.pageId)
+  }
+}
+
+// Extract booking data from user message
+function extractBookingData(text: string, currentState: AIBookingState): Partial<AIBookingState> {
+  const extracted: Partial<AIBookingState> = {}
+  const lower = text.toLowerCase()
+  
+  // Extract dates (DD.MM.YYYY format)
+  const dateMatches = text.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/g)
+  if (dateMatches) {
+    if (dateMatches.length >= 1 && !currentState.checkIn) {
+      extracted.checkIn = dateMatches[0].replace(/[\/\-]/g, '.')
+    }
+    if (dateMatches.length >= 2 && !currentState.checkOut) {
+      extracted.checkOut = dateMatches[1].replace(/[\/\-]/g, '.')
+    }
+  }
+  
+  // Extract nights and calculate checkout
+  const nightsMatch = text.match(/(\d+)\s*(ღამ|night|ночь)/i)
+  if (nightsMatch && extracted.checkIn && !extracted.checkOut) {
+    const nights = parseInt(nightsMatch[1])
+    const [d, m, y] = extracted.checkIn.split('.').map(Number)
+    const checkInDate = new Date(y, m - 1, d)
+    checkInDate.setDate(checkInDate.getDate() + nights)
+    extracted.checkOut = `${checkInDate.getDate().toString().padStart(2, '0')}.${(checkInDate.getMonth() + 1).toString().padStart(2, '0')}.${checkInDate.getFullYear()}`
+  }
+  
+  // Extract guests count
+  const guestsMatch = text.match(/(\d+)\s*(ადამიან|სტუმარ|კაც|person|guest|человек|чел)/i)
+  if (guestsMatch) {
+    extracted.guests = parseInt(guestsMatch[1])
+  }
+  
+  // Extract phone number (Georgian format)
+  const phoneMatch = text.match(/(\+?995\s?\d{3}\s?\d{2}\s?\d{2}\s?\d{2}|\d{3}\s?\d{2}\s?\d{2}\s?\d{2})/g)
+  if (phoneMatch) {
+    extracted.guestPhone = phoneMatch[0].replace(/\s/g, '')
+  }
+  
+  // Extract name (if text looks like a name - 2+ words, no numbers, not a command)
+  if (!currentState.guestName && currentState.checkIn && currentState.guestPhone) {
+    // If we already have dates and phone, the remaining text might be name
+    const nameCandidate = text.replace(/[\d\+\-\.\(\)]/g, '').trim()
+    if (nameCandidate.length >= 3 && !isCommand(nameCandidate.toLowerCase())) {
+      extracted.guestName = nameCandidate
+    }
+  }
+  
+  // Check if message contains name and phone together
+  const namePhoneMatch = text.match(/([ა-ჰa-zA-Zა-ჰ\s]{3,})\s+(\+?995\s?\d{3}\s?\d{2}\s?\d{2}\s?\d{2}|\d{3}\s?\d{2}\s?\d{2}\s?\d{2})/i)
+  if (namePhoneMatch) {
+    extracted.guestName = namePhoneMatch[1].trim()
+    extracted.guestPhone = namePhoneMatch[2].replace(/\s/g, '')
+  }
+  
+  // Reverse order: phone then name
+  const phoneNameMatch = text.match(/(\+?995\s?\d{3}\s?\d{2}\s?\d{2}\s?\d{2}|\d{3}\s?\d{2}\s?\d{2}\s?\d{2})\s+([ა-ჰa-zA-Zა-ჰ\s]{3,})/i)
+  if (phoneNameMatch) {
+    extracted.guestPhone = phoneNameMatch[1].replace(/\s/g, '')
+    extracted.guestName = phoneNameMatch[2].trim()
+  }
+  
+  return extracted
+}
+
+function isCommand(text: string): boolean {
+  const commands = ['გამარჯობა', 'hello', 'hi', 'ჯავშანი', 'book', 'ფასი', 'price', 'სპა', 'spa', 'კონტაქტ', 'დიახ', 'არა', 'yes', 'no']
+  return commands.some(cmd => text.includes(cmd))
+}
+
+function canCreateBooking(state: AIBookingState): boolean {
+  return !!(state.checkIn && state.checkOut && state.guestName && state.guestPhone)
+}
+
+async function createAIReservation(orgId: string, state: AIBookingState): Promise<{ success: boolean; reservationId?: string; total?: number; error?: string }> {
+  try {
+    const [d1, m1, y1] = state.checkIn!.split('.').map(Number)
+    const [d2, m2, y2] = state.checkOut!.split('.').map(Number)
+    const checkInDate = new Date(y1, m1 - 1, d1)
+    const checkOutDate = new Date(y2, m2 - 1, d2)
+    
+    // Check availability
+    const rooms = await prisma.hotelRoom.findMany({ where: { tenantId: orgId } })
+    if (rooms.length === 0) return { success: false, error: 'No rooms' }
+    
+    const reservations = await prisma.hotelReservation.findMany({
+      where: {
+        tenantId: orgId,
+        checkIn: { lt: checkOutDate },
+        checkOut: { gt: checkInDate },
+        status: { in: ['confirmed', 'checked_in', 'pending', 'CONFIRMED', 'CHECKED_IN', 'PENDING'] }
+      }
+    })
+    
+    const occupied = new Set(reservations.map(r => r.roomId))
+    const availableRoom = rooms.find(r => !occupied.has(r.id))
+    
+    if (!availableRoom) {
+      return { success: false, error: 'No rooms available' }
+    }
+    
+    // Calculate price
+    const nights = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)))
+    const pricePerNight = Number(availableRoom.basePrice) || 150
+    const total = pricePerNight * nights
+    
+    // Create reservation
+    const reservation = await prisma.hotelReservation.create({
+      data: {
+        tenantId: orgId,
+        roomId: availableRoom.id,
+        guestName: state.guestName!,
+        guestEmail: '',
+        guestPhone: state.guestPhone || '',
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        adults: state.guests || 2,
+        children: 0,
+        totalAmount: total,
+        paidAmount: 0,
+        status: 'confirmed',
+        source: 'Facebook Messenger AI',
+        notes: `AI Chatbot`
+      }
+    })
+    
+    return { success: true, reservationId: reservation.id.slice(-8).toUpperCase(), total }
+  } catch (error) {
+    console.error('[AI Reservation] Error:', error)
+    return { success: false, error: 'System error' }
   }
 }
 
@@ -617,7 +818,8 @@ async function getAIResponse(
   history: Array<{ role: 'user' | 'assistant'; content: string }>,
   integration: any,
   context: { roomInfo: string; servicesInfo: string },
-  orgName: string
+  orgName: string,
+  bookingContext: string = ''
 ): Promise<string> {
   
   // Decrypt API key
@@ -636,6 +838,7 @@ async function getAIResponse(
 📍 ${HOTEL_CONFIG.address} (ვარძიასთან ახლოს, 30 წუთი)
 📞 ${HOTEL_CONFIG.phone}
 🌐 https://breweryhouse.ge
+🗺️ Google Maps: ${HOTEL_CONFIG.googleMaps}
 
 ოთახები:
 ${context.roomInfo}
@@ -645,13 +848,19 @@ ${context.roomInfo}
 - უნიკალური დასვენების გამოცდილება
 - სპეციალურ აბაზანაში ისვენებთ ლუდის ბუნებრივი ინგრედიენტებით (სვია, ალაო, საფუარი)
 - ხელს უწყობს კანის მოვლას და სრულ რელაქსაციას
-- ერთი აბაზანა — მაქსიმუმ 2 ადამიანი
-- ღირებულება: ${HOTEL_CONFIG.services.beerSpa.price} ლარი
+- გვაქვს 2 აბაზანა, თითოეულში მაქსიმუმ 2 ადამიანი (სულ 4 ადამიანი ერთდროულად)
+- ღირებულება: ${HOTEL_CONFIG.services.beerSpa.price} ლარი (თითო აბაზანა)
 - შედის ლუდის ულიმიტო დეგუსტაცია 🍺
 
 ლუდის დეგუსტაცია 🍻:
 - 4 სახეობის ქვევრის ლუდი
 - ღირებულება: ${HOTEL_CONFIG.services.beerTasting.price} ლარი
+
+მდებარეობა:
+როცა ვინმე კითხულობს ლოკაციას/მისამართს/როგორ მოვიდეს - მიეცი Google Maps ლინკი:
+"📍 მისამართი: ${HOTEL_CONFIG.address}
+🗺️ Google Maps: ${HOTEL_CONFIG.googleMaps}
+ვარძიასთან ახლოს, 30 წუთის სავალზე 🚗"
 
 === ჯავშნის პროცესი ===
 
@@ -710,7 +919,9 @@ ${context.roomInfo}
 - ენა: უპასუხე იმ ენაზე რა ენაზეც მოგმართავენ (ქართული/English/Русский)
 - დაიმახსოვრე საუბრის კონტექსტი
 
-დღეს არის: ${new Date().toLocaleDateString('ka-GE')}`
+დღეს არის: ${new Date().toLocaleDateString('ka-GE')}${bookingContext}
+
+მნიშვნელოვანი: როცა სტუმარი აძლევს სახელს და ტელეფონს ჯავშნისთვის, უთხარი რომ მონაცემები მიიღე და მალე დაუკავშირდები. სისტემა ავტომატურად შექმნის ჯავშანს.`
 
   try {
     if (integration.aiProvider === 'claude') {
@@ -767,7 +978,7 @@ function getFallbackResponse(message: string): string {
   }
   
   if (lower.includes('სპა') || lower.includes('spa') || lower.includes('აბაზანა')) {
-    return `ლუდის სპა არის უნიკალური დასვენების გამოცდილება 🍺🛁\n\nსპეციალურ აბაზანაში თქვენ ისვენებთ ლუდის ბუნებრივი ინგრედიენტებით (სვია, ალაო, საფუარი), რაც ხელს უწყობს კანის მოვლას და სრულ რელაქსაციას.\n\nჩვენთან:\n• ერთი აბაზანა — მაქსიმუმ 2 ადამიანი\n• ღირებულება — ${HOTEL_CONFIG.services.beerSpa.price} ლარი\n• შედის ლუდის ულიმიტო დეგუსტაცია 🍺\n\nგსურთ ლუდის სპას დაჯავშნა? 😊`
+    return `ლუდის სპა არის უნიკალური დასვენების გამოცდილება 🍺🛁\n\nსპეციალურ აბაზანაში თქვენ ისვენებთ ლუდის ბუნებრივი ინგრედიენტებით (სვია, ალაო, საფუარი), რაც ხელს უწყობს კანის მოვლას და სრულ რელაქსაციას.\n\nჩვენთან:\n• 2 აბაზანა, თითოეულში მაქს. 2 ადამიანი\n• ღირებულება — ${HOTEL_CONFIG.services.beerSpa.price} ლარი (თითო აბაზანა)\n• შედის ლუდის ულიმიტო დეგუსტაცია 🍺\n\nგსურთ ლუდის სპას დაჯავშნა? 😊`
   }
   
   if (lower.includes('ჯავშ') || lower.includes('book') || lower.includes('брон') || lower.includes('დავ')) {
@@ -778,8 +989,8 @@ function getFallbackResponse(message: string): string {
     return `📞 კონტაქტი:\n\n📱 ${HOTEL_CONFIG.phone}\n📧 ${HOTEL_CONFIG.email}\n📍 ${HOTEL_CONFIG.address}\n\nგელოდებით! 😊`
   }
   
-  if (lower.includes('მისამართ') || lower.includes('სად') || lower.includes('address') || lower.includes('location')) {
-    return `📍 მისამართი: ${HOTEL_CONFIG.address}\n\nვარძიის მონასტერთან ახლოს (30 წუთის სავალი)\n\n📞 ${HOTEL_CONFIG.phone}`
+  if (lower.includes('მისამართ') || lower.includes('სად') || lower.includes('address') || lower.includes('location') || lower.includes('ლოკაცია') || lower.includes('როგორ მოვიდ') || lower.includes('გზა')) {
+    return `📍 მისამართი: ${HOTEL_CONFIG.address}\n\n🗺️ Google Maps:\n${HOTEL_CONFIG.googleMaps}\n\nვარძიასთან ახლოს, 30 წუთის სავალზე 🚗\n\n📞 ${HOTEL_CONFIG.phone}`
   }
   
   return `მადლობა მოწერისთვის! 😊\n\nრით შემიძლია დაგეხმაროთ?\n\n• ოთახის დაჯავშნა\n• ლუდის სპა\n• ფასები\n• ინფორმაცია\n\n📞 ${HOTEL_CONFIG.phone}`
