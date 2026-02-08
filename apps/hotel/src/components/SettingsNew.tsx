@@ -8155,7 +8155,37 @@ function RoomSyncRow({ room, connectionId, roomMappings, onUpdate, copiedUrl, on
   )
 }
 
-// ==================== FACEBOOK BOT SECTION ====================
+const AI_PROVIDERS = [
+  { 
+    value: 'claude', 
+    label: 'Claude (Anthropic)', 
+    models: [
+      { value: 'claude-3-5-haiku-20241022', label: 'Haiku 3.5 (სწრაფი, იაფი)' },
+      { value: 'claude-3-5-sonnet-20241022', label: 'Sonnet 3.5 (ბალანსირებული)' },
+    ]
+  },
+  { 
+    value: 'openai', 
+    label: 'OpenAI (GPT)', 
+    models: [
+      { value: 'gpt-4o-mini', label: 'GPT-4o Mini (სწრაფი, იაფი)' },
+      { value: 'gpt-4o', label: 'GPT-4o (საუკეთესო)' },
+    ]
+  },
+]
+
+const AI_PERSONALITIES = [
+  { value: 'professional', label: '👔 პროფესიონალური', desc: 'ფორმალური და საქმიანი' },
+  { value: 'friendly', label: '😊 მეგობრული', desc: 'თბილი და დახმარებისთვის მზად' },
+  { value: 'casual', label: '😎 არაფორმალური', desc: 'მარტივი და მოდუნებული' },
+]
+
+const AI_LANGUAGES = [
+  { value: 'ka', label: '🇬🇪 ქართული' },
+  { value: 'en', label: '🇬🇧 English' },
+  { value: 'ru', label: '🇷🇺 Русский' },
+]
+
 function FacebookBotSection() {
   const [integration, setIntegration] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -8172,25 +8202,26 @@ function FacebookBotSection() {
   const [showToken, setShowToken] = useState(false)
   const [showInstructions, setShowInstructions] = useState(false)
   
+  // AI Settings state
+  const [aiEnabled, setAiEnabled] = useState(false)
+  const [aiProvider, setAiProvider] = useState('claude')
+  const [aiApiKey, setAiApiKey] = useState('')
+  const [aiModel, setAiModel] = useState('claude-3-5-haiku-20241022')
+  const [aiPersonality, setAiPersonality] = useState('friendly')
+  const [aiLanguages, setAiLanguages] = useState<string[]>(['ka', 'en', 'ru'])
+  const [showAiKey, setShowAiKey] = useState(false)
+  
   useEffect(() => {
     loadIntegration()
   }, [])
   
-  // Get organizationId from session/localStorage
   const getOrgId = () => {
     if (typeof window !== 'undefined') {
-      // First try currentUser (session-synced)
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
-      if (currentUser.organizationId) {
-        return currentUser.organizationId
-      }
-      // Fallback to hotelInfo
+      if (currentUser.organizationId) return currentUser.organizationId
       const hotelInfo = JSON.parse(localStorage.getItem('hotelInfo') || '{}')
-      if (hotelInfo.organizationId) {
-        return hotelInfo.organizationId
-      }
+      if (hotelInfo.organizationId) return hotelInfo.organizationId
     }
-    // Return empty - let API handle auth
     return ''
   }
   
@@ -8207,6 +8238,13 @@ function FacebookBotSection() {
         setWelcomeMessage(data.integration.welcomeMessage || '')
         setBotEnabled(data.integration.botEnabled)
         setBookingEnabled(data.integration.bookingEnabled)
+        // AI Settings
+        setAiEnabled(data.integration.aiEnabled || false)
+        setAiProvider(data.integration.aiProvider || 'claude')
+        setAiApiKey(data.integration.aiApiKey || '')
+        setAiModel(data.integration.aiModel || 'claude-3-5-haiku-20241022')
+        setAiPersonality(data.integration.aiPersonality || 'friendly')
+        setAiLanguages(data.integration.aiLanguages || ['ka', 'en', 'ru'])
       }
     } catch (err) {
       console.error('Error loading integration:', err)
@@ -8233,6 +8271,13 @@ function FacebookBotSection() {
           welcomeMessage,
           botEnabled,
           bookingEnabled,
+          // AI Settings
+          aiEnabled,
+          aiProvider,
+          aiApiKey: aiApiKey && !aiApiKey.includes('...') ? aiApiKey : undefined,
+          aiModel,
+          aiPersonality,
+          aiLanguages,
         })
       })
       
@@ -8241,7 +8286,7 @@ function FacebookBotSection() {
       if (data.error) {
         setError(data.error + (data.details ? `: ${data.details}` : ''))
       } else {
-        setSuccess('Facebook ინტეგრაცია წარმატებით შეინახა!')
+        setSuccess('✅ პარამეტრები წარმატებით შეინახა!')
         setIntegration(data.integration)
         setPageAccessToken('')
         loadIntegration()
@@ -8265,11 +8310,25 @@ function FacebookBotSection() {
       setPageId('')
       setPageAccessToken('')
       setWelcomeMessage('')
+      setAiEnabled(false)
+      setAiApiKey('')
       setSuccess('Facebook ინტეგრაცია წაიშალა')
     } catch (err) {
       setError('შეცდომა წაშლისას')
     }
   }
+
+  const toggleLanguage = (lang: string) => {
+    if (aiLanguages.includes(lang)) {
+      if (aiLanguages.length > 1) {
+        setAiLanguages(aiLanguages.filter(l => l !== lang))
+      }
+    } else {
+      setAiLanguages([...aiLanguages, lang])
+    }
+  }
+
+  const selectedProvider = AI_PROVIDERS.find(p => p.value === aiProvider)
   
   if (loading) {
     return (
@@ -8425,73 +8484,230 @@ function FacebookBotSection() {
             </label>
           </div>
         </div>
-        
-        {/* Webhook Info */}
-        {integration && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-            <h4 className="font-medium mb-3 flex items-center gap-2">
-              <span>📋</span> Webhook კონფიგურაცია
-            </h4>
-            <p className="text-sm text-gray-500 mb-3">ეს მონაცემები ჩაწერეთ Facebook Developer Console-ში</p>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-500 text-sm w-28">Callback URL:</span>
-                <code className="flex-1 bg-white px-3 py-2 rounded-lg border text-sm font-mono">
-                  https://saas-hotel.vercel.app/api/messenger/webhook
-                </code>
-                <button
-                  onClick={() => navigator.clipboard.writeText('https://saas-hotel.vercel.app/api/messenger/webhook')}
-                  className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
+      </div>
+
+      {/* AI Chatbot Section */}
+      <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <span className="text-2xl">🤖</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold">AI Chatbot</h3>
+              <p className="text-sm text-gray-500">ხელოვნური ინტელექტით მართული ავტომატური პასუხები</p>
+            </div>
+          </div>
+          
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={aiEnabled}
+              onChange={(e) => setAiEnabled(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+            <span className="ml-3 text-sm font-medium text-gray-700">
+              {aiEnabled ? 'ჩართული' : 'გამორთული'}
+            </span>
+          </label>
+        </div>
+
+        {aiEnabled && (
+          <div className="space-y-5">
+            {/* AI Provider & Model */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  🧠 AI პროვაიდერი
+                </label>
+                <select
+                  value={aiProvider}
+                  onChange={(e) => {
+                    setAiProvider(e.target.value)
+                    const provider = AI_PROVIDERS.find(p => p.value === e.target.value)
+                    if (provider) setAiModel(provider.models[0].value)
+                  }}
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500"
                 >
-                  📋
+                  {AI_PROVIDERS.map(p => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  📊 მოდელი
+                </label>
+                <select
+                  value={aiModel}
+                  onChange={(e) => setAiModel(e.target.value)}
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500"
+                >
+                  {selectedProvider?.models.map(m => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* API Key */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                🔑 API Key
+              </label>
+              <div className="relative">
+                <input
+                  type={showAiKey ? 'text' : 'password'}
+                  value={aiApiKey}
+                  onChange={(e) => setAiApiKey(e.target.value)}
+                  placeholder={aiProvider === 'claude' ? 'sk-ant-api03-...' : 'sk-...'}
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAiKey(!showAiKey)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showAiKey ? '🙈' : '👁️'}
                 </button>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-500 text-sm w-28">Verify Token:</span>
-                <code className="flex-1 bg-white px-3 py-2 rounded-lg border text-sm font-mono">
-                  {integration.verifyToken}
-                </code>
-                <button
-                  onClick={() => navigator.clipboard.writeText(integration.verifyToken)}
-                  className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
-                >
-                  📋
-                </button>
+              <p className="text-xs text-gray-500 mt-1">
+                {aiProvider === 'claude' 
+                  ? '→ მიიღე: console.anthropic.com' 
+                  : '→ მიიღე: platform.openai.com'}
+              </p>
+            </div>
+
+            {/* Personality */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🎭 პიროვნება / სტილი
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {AI_PERSONALITIES.map(p => (
+                  <button
+                    key={p.value}
+                    type="button"
+                    onClick={() => setAiPersonality(p.value)}
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
+                      aiPersonality === p.value
+                        ? 'border-purple-500 bg-purple-50'
+                        : 'border-gray-200 hover:border-purple-300'
+                    }`}
+                  >
+                    <div className="font-medium">{p.label}</div>
+                    <div className="text-xs text-gray-500">{p.desc}</div>
+                  </button>
+                ))}
               </div>
+            </div>
+
+            {/* Languages */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🌍 ენები
+              </label>
+              <div className="flex gap-2">
+                {AI_LANGUAGES.map(lang => (
+                  <button
+                    key={lang.value}
+                    type="button"
+                    onClick={() => toggleLanguage(lang.value)}
+                    className={`px-4 py-2 rounded-xl border-2 font-medium transition-all ${
+                      aiLanguages.includes(lang.value)
+                        ? 'border-purple-500 bg-purple-100 text-purple-700'
+                        : 'border-gray-200 text-gray-600 hover:border-purple-300'
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* AI Info Box */}
+            <div className="p-4 bg-purple-50 rounded-xl">
+              <h4 className="font-medium text-purple-700 mb-2 flex items-center gap-2">
+                <span>💡</span> AI Chatbot-ის შესახებ
+              </h4>
+              <ul className="text-sm text-purple-600 space-y-1">
+                <li>• AI ავტომატურად პასუხობს კლიენტების კითხვებს</li>
+                <li>• იყენებს ოთახების რეალურ ფასებს და ხელმისაწვდომობას</li>
+                <li>• საუბრობს არჩეულ ენებზე</li>
+                <li>• სავარაუდო ხარჯი: ~$1-5/თვე (გამოყენების მიხედვით)</li>
+              </ul>
             </div>
           </div>
         )}
+      </div>
         
-        {/* Action Buttons */}
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={saveIntegration}
-            disabled={saving || !pageId}
-            className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {saving ? (
-              <>
-                <span className="animate-spin">⏳</span>
-                <span>ინახება...</span>
-              </>
-            ) : (
-              <>
-                <span>💾</span>
-                <span>შენახვა</span>
-              </>
-            )}
-          </button>
-          
-          {integration && (
-            <button
-              onClick={deleteIntegration}
-              className="px-6 py-3 bg-red-100 text-red-600 rounded-xl font-medium hover:bg-red-200 flex items-center gap-2"
-            >
-              <span>🗑️</span>
-              <span>წაშლა</span>
-            </button>
-          )}
+      {/* Webhook Info */}
+      {integration && (
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <h4 className="font-medium mb-3 flex items-center gap-2">
+            <span>📋</span> Webhook კონფიგურაცია
+          </h4>
+          <p className="text-sm text-gray-500 mb-3">ეს მონაცემები ჩაწერეთ Facebook Developer Console-ში</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-sm w-28">Callback URL:</span>
+              <code className="flex-1 bg-gray-100 px-3 py-2 rounded-lg border text-sm font-mono">
+                https://hotel.geobiz.app/api/messenger/webhook
+              </code>
+              <button
+                onClick={() => navigator.clipboard.writeText('https://hotel.geobiz.app/api/messenger/webhook')}
+                className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
+              >
+                📋
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-sm w-28">Verify Token:</span>
+              <code className="flex-1 bg-gray-100 px-3 py-2 rounded-lg border text-sm font-mono">
+                {integration.verifyToken}
+              </code>
+              <button
+                onClick={() => navigator.clipboard.writeText(integration.verifyToken)}
+                className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
+              >
+                📋
+              </button>
+            </div>
+          </div>
         </div>
+      )}
+      
+      {/* Action Buttons */}
+      <div className="flex gap-3">
+        <button
+          onClick={saveIntegration}
+          disabled={saving || !pageId}
+          className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {saving ? (
+            <>
+              <span className="animate-spin">⏳</span>
+              <span>ინახება...</span>
+            </>
+          ) : (
+            <>
+              <span>💾</span>
+              <span>შენახვა</span>
+            </>
+          )}
+        </button>
+        
+        {integration && (
+          <button
+            onClick={deleteIntegration}
+            className="px-6 py-3 bg-red-100 text-red-600 rounded-xl font-medium hover:bg-red-200 flex items-center gap-2"
+          >
+            <span>🗑️</span>
+            <span>წაშლა</span>
+          </button>
+        )}
       </div>
       
       {/* Instructions */}
@@ -8557,7 +8773,7 @@ function FacebookBotSection() {
                 <div>
                   <h4 className="font-medium">ჩაწერეთ Page ID და Token</h4>
                   <p className="text-sm text-gray-500 mt-1">
-                    ზემოთ ფორმაში შეიყვანეთ Page ID (რიცხვი Page-ის ქვეშ) და Access Token, შემდეგ დააჭირეთ "შენახვა"
+                    ზემოთ ფორმაში შეიყვანეთ Page ID და Access Token, შემდეგ დააჭირეთ "შენახვა"
                   </p>
                 </div>
               </div>
