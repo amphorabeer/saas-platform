@@ -1059,6 +1059,14 @@ model FacebookIntegration {
   botEnabled        Boolean      @default(true)
   bookingEnabled    Boolean      @default(true)
   
+  // AI Chatbot Settings
+  aiEnabled         Boolean      @default(false)
+  aiProvider        String?      @default("claude")
+  aiApiKey          String?      @db.Text
+  aiModel           String?      @default("claude-3-5-haiku-20241022")
+  aiPersonality     String?      @default("friendly")
+  aiLanguages       String[]     @default(["ka", "en", "ru"])
+  
   // Stats
   messagesReceived  Int          @default(0)
   messagesSent      Int          @default(0)
