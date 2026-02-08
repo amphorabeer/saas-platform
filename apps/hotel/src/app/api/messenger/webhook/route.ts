@@ -548,6 +548,9 @@ async function handleAIMessage(
     bookingState = { ...bookingState, ...extractedData }
     aiBookingState.set(senderId, bookingState)
     
+    console.log('[AI Booking] State:', JSON.stringify(bookingState))
+    console.log('[AI Booking] Can create:', canCreateBooking(bookingState))
+    
     // Check if we have all data needed for booking
     if (canCreateBooking(bookingState)) {
       // Create real reservation!
@@ -648,13 +651,18 @@ function extractBookingData(text: string, currentState: AIBookingState): Partial
     if (dateMatches.length >= 2 && !currentState.checkOut) {
       extracted.checkOut = dateMatches[1].replace(/[\/\-]/g, '.')
     }
+    // If only one date and we already have checkIn, use as checkOut
+    if (dateMatches.length === 1 && currentState.checkIn && !currentState.checkOut) {
+      extracted.checkOut = dateMatches[0].replace(/[\/\-]/g, '.')
+    }
   }
   
   // Extract nights and calculate checkout
   const nightsMatch = text.match(/(\d+)\s*(ღამ|night|ночь)/i)
-  if (nightsMatch && extracted.checkIn && !extracted.checkOut) {
+  if (nightsMatch && (extracted.checkIn || currentState.checkIn) && !extracted.checkOut && !currentState.checkOut) {
     const nights = parseInt(nightsMatch[1])
-    const [d, m, y] = extracted.checkIn.split('.').map(Number)
+    const checkInStr = extracted.checkIn || currentState.checkIn!
+    const [d, m, y] = checkInStr.split('.').map(Number)
     const checkInDate = new Date(y, m - 1, d)
     checkInDate.setDate(checkInDate.getDate() + nights)
     extracted.checkOut = `${checkInDate.getDate().toString().padStart(2, '0')}.${(checkInDate.getMonth() + 1).toString().padStart(2, '0')}.${checkInDate.getFullYear()}`
@@ -666,33 +674,69 @@ function extractBookingData(text: string, currentState: AIBookingState): Partial
     extracted.guests = parseInt(guestsMatch[1])
   }
   
-  // Extract phone number (Georgian format)
-  const phoneMatch = text.match(/(\+?995\s?\d{3}\s?\d{2}\s?\d{2}\s?\d{2}|\d{3}\s?\d{2}\s?\d{2}\s?\d{2})/g)
-  if (phoneMatch) {
-    extracted.guestPhone = phoneMatch[0].replace(/\s/g, '')
-  }
+  // Extract phone number (Georgian format) - more flexible
+  const phonePatterns = [
+    /(\+?995\s?\d{3}\s?\d{2}\s?\d{2}\s?\d{2})/,  // +995 XXX XX XX XX
+    /(\d{3}\s?\d{2}\s?\d{2}\s?\d{2})/,            // XXX XX XX XX (9 digits)
+    /(\d{9})/                                       // XXXXXXXXX (9 digits together)
+  ]
   
-  // Extract name (if text looks like a name - 2+ words, no numbers, not a command)
-  if (!currentState.guestName && currentState.checkIn && currentState.guestPhone) {
-    // If we already have dates and phone, the remaining text might be name
-    const nameCandidate = text.replace(/[\d\+\-\.\(\)]/g, '').trim()
-    if (nameCandidate.length >= 3 && !isCommand(nameCandidate.toLowerCase())) {
-      extracted.guestName = nameCandidate
+  for (const pattern of phonePatterns) {
+    const phoneMatch = text.match(pattern)
+    if (phoneMatch && !currentState.guestPhone) {
+      const phone = phoneMatch[1].replace(/\s/g, '')
+      if (phone.length >= 9) {
+        extracted.guestPhone = phone
+        break
+      }
     }
   }
   
-  // Check if message contains name and phone together
-  const namePhoneMatch = text.match(/([ა-ჰa-zA-Zა-ჰ\s]{3,})\s+(\+?995\s?\d{3}\s?\d{2}\s?\d{2}\s?\d{2}|\d{3}\s?\d{2}\s?\d{2}\s?\d{2})/i)
-  if (namePhoneMatch) {
-    extracted.guestName = namePhoneMatch[1].trim()
-    extracted.guestPhone = namePhoneMatch[2].replace(/\s/g, '')
+  // Extract name - if we have dates and this looks like a name (Georgian or Latin letters, 2+ chars)
+  // and it's not a command/keyword
+  if (!currentState.guestName) {
+    const cleanText = text.replace(/[\d\+\-\.\(\)\:]/g, '').trim()
+    
+    // Check if it's a name (contains Georgian or Latin letters, reasonable length)
+    const isGeorgianName = /^[ა-ჰ\s]{3,}$/.test(cleanText)
+    const isLatinName = /^[a-zA-Z\s]{3,}$/.test(cleanText)
+    const isMixedName = /^[ა-ჰa-zA-Z\s]{3,}$/.test(cleanText)
+    
+    if ((isGeorgianName || isLatinName || isMixedName) && !isCommand(lower) && cleanText.length >= 3 && cleanText.length <= 50) {
+      // Make sure it's not just a single common word
+      const commonWords = ['გამარჯობა', 'დიახ', 'არა', 'კარგი', 'მადლობა', 'hello', 'yes', 'no', 'ok', 'thanks']
+      if (!commonWords.includes(cleanText.toLowerCase())) {
+        extracted.guestName = cleanText
+      }
+    }
   }
   
-  // Reverse order: phone then name
-  const phoneNameMatch = text.match(/(\+?995\s?\d{3}\s?\d{2}\s?\d{2}\s?\d{2}|\d{3}\s?\d{2}\s?\d{2}\s?\d{2})\s+([ა-ჰa-zA-Zა-ჰ\s]{3,})/i)
-  if (phoneNameMatch) {
-    extracted.guestPhone = phoneNameMatch[1].replace(/\s/g, '')
-    extracted.guestName = phoneNameMatch[2].trim()
+  // Check if message contains name and phone together (either order)
+  const namePhonePatterns = [
+    // Name then phone
+    /([ა-ჰa-zA-Z\s]{3,})\s+(\+?995\s?\d{3}\s?\d{2}\s?\d{2}\s?\d{2}|\d{9}|\d{3}\s?\d{2}\s?\d{2}\s?\d{2})/i,
+    // Phone then name
+    /(\+?995\s?\d{3}\s?\d{2}\s?\d{2}\s?\d{2}|\d{9}|\d{3}\s?\d{2}\s?\d{2}\s?\d{2})\s+([ა-ჰa-zA-Z\s]{3,})/i
+  ]
+  
+  for (const pattern of namePhonePatterns) {
+    const match = text.match(pattern)
+    if (match) {
+      // Determine which group is name and which is phone
+      const first = match[1].trim()
+      const second = match[2].trim()
+      
+      if (/\d{9}/.test(first.replace(/\s/g, ''))) {
+        // First is phone
+        if (!currentState.guestPhone) extracted.guestPhone = first.replace(/\s/g, '')
+        if (!currentState.guestName) extracted.guestName = second
+      } else {
+        // First is name
+        if (!currentState.guestName) extracted.guestName = first
+        if (!currentState.guestPhone) extracted.guestPhone = second.replace(/\s/g, '')
+      }
+      break
+    }
   }
   
   return extracted
