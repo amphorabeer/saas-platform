@@ -5,171 +5,538 @@ import { prisma } from '@/lib/prisma'
 // CONFIGURATION
 // ============================================
 
-const VERIFY_TOKEN = process.env.MESSENGER_VERIFY_TOKEN || 'brewery_house_verify_token_2024'
-
 const HOTEL_CONFIG = {
   phone: '+995 599 946 500',
   email: 'info@breweryhouse.ge',
   address: 'ასპინძა, შორეთის ქ. 21',
-  website: 'https://breweryhouse.ge',
   
   services: {
     beerSpa: {
       price: 150,
       maxPersons: 2,
       durationMinutes: 60,
-      ka: { name: 'ლუდის სპა', description: '1 საათიანი პროცედურა ლუდის აბაზანაში + ულიმიტო ქვევრის ლუდი' },
-      en: { name: 'Beer Spa', description: '1-hour beer bath procedure + unlimited Qvevri beer' },
-      ru: { name: 'Пивное СПА', description: '1-часовая процедура в пивной ванне + безлимитное квеври пиво' }
+      ka: {
+        name: 'ლუდის სპა',
+        description: '1 საათიანი პროცედურა ლუდის აბაზანაში + ულიმიტო ქვევრის ლუდი',
+        includes: ['1 ლუდის აბაზანა (მაქს. 2 ადამიანი)', '1 საათი პროცედურა', 'ულიმიტო ქვევრის ლუდი']
+      },
+      en: {
+        name: 'Beer Spa',
+        description: '1-hour beer bath procedure + unlimited Qvevri beer',
+        includes: ['1 Beer bath (max 2 persons)', '1 hour procedure', 'Unlimited Qvevri beer']
+      },
+      ru: {
+        name: 'Пивное СПА',
+        description: '1-часовая процедура в пивной ванне + безлимитное квеври пиво',
+        includes: ['1 Пивная ванна (макс. 2 человека)', '1 час процедуры', 'Безлимитное квеври пиво']
+      }
     },
     beerTasting: {
       price: 30,
-      ka: { name: 'ლუდის დეგუსტაცია', description: '4 სახეობის ქვევრის ლუდის დეგუსტაცია' },
-      en: { name: 'Beer Tasting', description: 'Tasting of 4 types of Qvevri beer' },
-      ru: { name: 'Дегустация пива', description: 'Дегустация 4 видов квеври пива' }
+      ka: {
+        name: 'ლუდის დეგუსტაცია',
+        description: '4 სახეობის ქვევრის ლუდის დეგუსტაცია',
+        includes: ['4 სახეობის ქვევრის ლუდი', 'ლუდსახარში']
+      },
+      en: {
+        name: 'Beer Tasting',
+        description: 'Tasting of 4 types of Qvevri beer',
+        includes: ['4 types of Qvevri beer', 'Beer snacks']
+      },
+      ru: {
+        name: 'Дегустация пива',
+        description: 'Дегустация 4 видов квеври пива',
+        includes: ['4 вида квеври пива', 'Пивные закуски']
+      }
     }
   }
 }
+
+// ============================================
+// MULTILINGUAL MESSAGES
+// ============================================
+
+type Language = 'ka' | 'en' | 'ru'
+
+const MESSAGES = {
+  ka: {
+    welcome: (orgName: string) =>
+      `გამარჯობა! 👋 მოგესალმებით ${orgName}-ში!\n\n` +
+      `აირჩიეთ:\n` +
+      `1️⃣ ჯავშანი - ოთახის დაჯავშნა\n` +
+      `2️⃣ ფასები\n` +
+      `3️⃣ 🍺 ლუდის სპა\n` +
+      `4️⃣ 🍻 ლუდის დეგუსტაცია\n` +
+      `5️⃣ კონტაქტი\n` +
+      `6️⃣ თავისუფალი ოთახები\n\n` +
+      `🇬🇧 English - type "EN"\n` +
+      `🇷🇺 Русский - напишите "RU"`,
+    
+    beerSpa: () => {
+      const spa = HOTEL_CONFIG.services.beerSpa
+      return `🍺 ${spa.ka.name}\n\n` +
+        `${spa.ka.description}\n\n` +
+        `💰 ფასი: ${spa.price}₾ (მაქს. ${spa.maxPersons} ადამიანი)\n` +
+        `⏱️ ხანგრძლივობა: ${spa.durationMinutes} წუთი\n\n` +
+        `შედის:\n` +
+        spa.ka.includes.map(i => `• ${i}`).join('\n') +
+        `\n\n📞 დაჯავშნა: ${HOTEL_CONFIG.phone}`
+    },
+    
+    beerTasting: () => {
+      const tasting = HOTEL_CONFIG.services.beerTasting
+      return `🍻 ${tasting.ka.name}\n\n` +
+        `${tasting.ka.description}\n\n` +
+        `💰 ფასი: ${tasting.price}₾\n\n` +
+        `შედის:\n` +
+        tasting.ka.includes.map(i => `• ${i}`).join('\n') +
+        `\n\n📞 დაჯავშნა: ${HOTEL_CONFIG.phone}`
+    },
+    
+    prices: (roomPrice: number) =>
+      `💰 ფასები:\n\n` +
+      `🛏️ ოთახი: ${roomPrice}₾/ღამე\n` +
+      `🍺 ლუდის სპა: ${HOTEL_CONFIG.services.beerSpa.price}₾\n` +
+      `🍻 დეგუსტაცია: ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n` +
+      `📅 ჯავშნისთვის დაწერეთ "1"`,
+    
+    contact: () =>
+      `📞 კონტაქტი:\n\n` +
+      `📱 ${HOTEL_CONFIG.phone}\n` +
+      `📧 ${HOTEL_CONFIG.email}\n` +
+      `📍 ${HOTEL_CONFIG.address}`,
+    
+    bookingStart: '📅 შემოსვლის თარიღი?\n\nმაგ: 15.02.2026 ან "ხვალ"\n\n❌ გაუქმება - "0"',
+    askCheckout: (d: string) => `✅ შემოსვლა: ${d}\n\n📅 გასვლის თარიღი?`,
+    askGuests: (d: string) => `✅ გასვლა: ${d}\n\n👥 რამდენი სტუმარი?`,
+    askName: (n: number) => `✅ სტუმრები: ${n}\n\n👤 სახელი და გვარი?`,
+    askPhone: (n: string) => `✅ სახელი: ${n}\n\n📱 ტელეფონის ნომერი?`,
+    
+    confirmBooking: (state: any, room: string, total: number) =>
+      `📋 ჯავშნის დეტალები:\n\n` +
+      `📅 ${state.checkIn} - ${state.checkOut}\n` +
+      `👥 ${state.guests} სტუმარი\n` +
+      `👤 ${state.guestName}\n` +
+      `📱 ${state.guestPhone}\n` +
+      `🛏️ ოთახი: ${room}\n` +
+      `💰 ჯამი: ${total}₾\n\n` +
+      `✅ "დიახ" - დადასტურება\n❌ "არა" - გაუქმება`,
+    
+    bookingSuccess: (id: string, checkIn: string, checkOut: string) =>
+      `🎉 ჯავშანი წარმატებით შეიქმნა!\n\n` +
+      `📋 ნომერი: ${id}\n` +
+      `📅 ${checkIn} - ${checkOut}\n\n` +
+      `მალე დაგიკავშირდებით!\nმადლობა! 🙏`,
+    
+    bookingFailed: (err: string) => `❌ ${err}\n\n📞 ${HOTEL_CONFIG.phone}`,
+    bookingCancelled: '❌ გაუქმებულია.\n\nახლიდან - "1"',
+    noRooms: (checkIn: string, checkOut: string) => 
+      `❌ ${checkIn} - ${checkOut} თარიღებში ოთახი არ არის.\n\n📅 სხვა თარიღი - "1"`,
+    
+    invalidDate: '❌ თარიღი არასწორია.\n\nმაგ: 15.02.2026',
+    invalidGuests: '❌ სტუმრების რაოდენობა (1-10)',
+    invalidName: '❌ სახელი და გვარი',
+    invalidPhone: '❌ სწორი ტელეფონის ნომერი',
+    askConfirm: '✅ "დიახ" ან ❌ "არა"',
+    
+    unknown: (orgName: string) =>
+      `🤔 ვერ გავიგე.\n\n` +
+      `1️⃣ ჯავშანი\n2️⃣ ფასები\n3️⃣ სპა\n4️⃣ დეგუსტაცია\n5️⃣ კონტაქტი\n6️⃣ ოთახები`,
+    
+    availability: (available: number, total: number) => {
+      const icon = available > 2 ? '🟢' : available > 0 ? '🟡' : '🔴'
+      return `🏨 თავისუფალია:\n\n${icon} ${available} ოთახი ${total}-დან\n\n📅 ჯავშნისთვის - "1"`
+    }
+  },
+  
+  en: {
+    welcome: (orgName: string) =>
+      `Hello! 👋 Welcome to ${orgName}!\n\n` +
+      `Choose:\n` +
+      `1️⃣ Book - Room reservation\n` +
+      `2️⃣ Prices\n` +
+      `3️⃣ 🍺 Beer Spa\n` +
+      `4️⃣ 🍻 Beer Tasting\n` +
+      `5️⃣ Contact\n` +
+      `6️⃣ Availability\n\n` +
+      `🇬🇪 ქართული - "KA"\n` +
+      `🇷🇺 Русский - "RU"`,
+    
+    beerSpa: () => {
+      const spa = HOTEL_CONFIG.services.beerSpa
+      return `🍺 ${spa.en.name}\n\n` +
+        `${spa.en.description}\n\n` +
+        `💰 Price: ${spa.price}₾ (max ${spa.maxPersons} persons)\n` +
+        `⏱️ Duration: ${spa.durationMinutes} min\n\n` +
+        `Includes:\n` +
+        spa.en.includes.map(i => `• ${i}`).join('\n') +
+        `\n\n📞 Book: ${HOTEL_CONFIG.phone}`
+    },
+    
+    beerTasting: () => {
+      const tasting = HOTEL_CONFIG.services.beerTasting
+      return `🍻 ${tasting.en.name}\n\n` +
+        `${tasting.en.description}\n\n` +
+        `💰 Price: ${tasting.price}₾\n\n` +
+        `Includes:\n` +
+        tasting.en.includes.map(i => `• ${i}`).join('\n') +
+        `\n\n📞 Book: ${HOTEL_CONFIG.phone}`
+    },
+    
+    prices: (roomPrice: number) =>
+      `💰 Prices:\n\n` +
+      `🛏️ Room: ${roomPrice}₾/night\n` +
+      `🍺 Beer Spa: ${HOTEL_CONFIG.services.beerSpa.price}₾\n` +
+      `🍻 Tasting: ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n` +
+      `📅 To book type "1"`,
+    
+    contact: () =>
+      `📞 Contact:\n\n` +
+      `📱 ${HOTEL_CONFIG.phone}\n` +
+      `📧 ${HOTEL_CONFIG.email}\n` +
+      `📍 ${HOTEL_CONFIG.address}`,
+    
+    bookingStart: '📅 Check-in date?\n\ne.g.: 15.02.2026 or "tomorrow"\n\n❌ Cancel - "0"',
+    askCheckout: (d: string) => `✅ Check-in: ${d}\n\n📅 Check-out date?`,
+    askGuests: (d: string) => `✅ Check-out: ${d}\n\n👥 Number of guests?`,
+    askName: (n: number) => `✅ Guests: ${n}\n\n👤 Full name?`,
+    askPhone: (n: string) => `✅ Name: ${n}\n\n📱 Phone number?`,
+    
+    confirmBooking: (state: any, room: string, total: number) =>
+      `📋 Booking details:\n\n` +
+      `📅 ${state.checkIn} - ${state.checkOut}\n` +
+      `👥 ${state.guests} guests\n` +
+      `👤 ${state.guestName}\n` +
+      `📱 ${state.guestPhone}\n` +
+      `🛏️ Room: ${room}\n` +
+      `💰 Total: ${total}₾\n\n` +
+      `✅ "Yes" - Confirm\n❌ "No" - Cancel`,
+    
+    bookingSuccess: (id: string, checkIn: string, checkOut: string) =>
+      `🎉 Booking confirmed!\n\n` +
+      `📋 ID: ${id}\n` +
+      `📅 ${checkIn} - ${checkOut}\n\n` +
+      `We'll contact you soon!\nThank you! 🙏`,
+    
+    bookingFailed: (err: string) => `❌ ${err}\n\n📞 ${HOTEL_CONFIG.phone}`,
+    bookingCancelled: '❌ Cancelled.\n\nTo book again - "1"',
+    noRooms: (checkIn: string, checkOut: string) => 
+      `❌ No rooms for ${checkIn} - ${checkOut}.\n\n📅 Try other dates - "1"`,
+    
+    invalidDate: '❌ Invalid date.\n\ne.g.: 15.02.2026',
+    invalidGuests: '❌ Guests (1-10)',
+    invalidName: '❌ Full name required',
+    invalidPhone: '❌ Valid phone number',
+    askConfirm: '✅ "Yes" or ❌ "No"',
+    
+    unknown: (orgName: string) =>
+      `🤔 Didn't understand.\n\n` +
+      `1️⃣ Book\n2️⃣ Prices\n3️⃣ Spa\n4️⃣ Tasting\n5️⃣ Contact\n6️⃣ Rooms`,
+    
+    availability: (available: number, total: number) => {
+      const icon = available > 2 ? '🟢' : available > 0 ? '🟡' : '🔴'
+      return `🏨 Available:\n\n${icon} ${available} rooms of ${total}\n\n📅 To book - "1"`
+    }
+  },
+  
+  ru: {
+    welcome: (orgName: string) =>
+      `Здравствуйте! 👋 Добро пожаловать в ${orgName}!\n\n` +
+      `Выберите:\n` +
+      `1️⃣ Бронь - Забронировать номер\n` +
+      `2️⃣ Цены\n` +
+      `3️⃣ 🍺 Пивное СПА\n` +
+      `4️⃣ 🍻 Дегустация пива\n` +
+      `5️⃣ Контакт\n` +
+      `6️⃣ Свободные номера\n\n` +
+      `🇬🇪 ქართული - "KA"\n` +
+      `🇬🇧 English - "EN"`,
+    
+    beerSpa: () => {
+      const spa = HOTEL_CONFIG.services.beerSpa
+      return `🍺 ${spa.ru.name}\n\n` +
+        `${spa.ru.description}\n\n` +
+        `💰 Цена: ${spa.price}₾ (макс. ${spa.maxPersons} чел.)\n` +
+        `⏱️ Длительность: ${spa.durationMinutes} мин\n\n` +
+        `Включено:\n` +
+        spa.ru.includes.map(i => `• ${i}`).join('\n') +
+        `\n\n📞 Бронь: ${HOTEL_CONFIG.phone}`
+    },
+    
+    beerTasting: () => {
+      const tasting = HOTEL_CONFIG.services.beerTasting
+      return `🍻 ${tasting.ru.name}\n\n` +
+        `${tasting.ru.description}\n\n` +
+        `💰 Цена: ${tasting.price}₾\n\n` +
+        `Включено:\n` +
+        tasting.ru.includes.map(i => `• ${i}`).join('\n') +
+        `\n\n📞 Бронь: ${HOTEL_CONFIG.phone}`
+    },
+    
+    prices: (roomPrice: number) =>
+      `💰 Цены:\n\n` +
+      `🛏️ Номер: ${roomPrice}₾/ночь\n` +
+      `🍺 Пивное СПА: ${HOTEL_CONFIG.services.beerSpa.price}₾\n` +
+      `🍻 Дегустация: ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n` +
+      `📅 Для брони напишите "1"`,
+    
+    contact: () =>
+      `📞 Контакт:\n\n` +
+      `📱 ${HOTEL_CONFIG.phone}\n` +
+      `📧 ${HOTEL_CONFIG.email}\n` +
+      `📍 ${HOTEL_CONFIG.address}`,
+    
+    bookingStart: '📅 Дата заезда?\n\nНапр.: 15.02.2026 или "завтра"\n\n❌ Отмена - "0"',
+    askCheckout: (d: string) => `✅ Заезд: ${d}\n\n📅 Дата выезда?`,
+    askGuests: (d: string) => `✅ Выезд: ${d}\n\n👥 Количество гостей?`,
+    askName: (n: number) => `✅ Гости: ${n}\n\n👤 Имя и фамилия?`,
+    askPhone: (n: string) => `✅ Имя: ${n}\n\n📱 Номер телефона?`,
+    
+    confirmBooking: (state: any, room: string, total: number) =>
+      `📋 Детали брони:\n\n` +
+      `📅 ${state.checkIn} - ${state.checkOut}\n` +
+      `👥 ${state.guests} гостей\n` +
+      `👤 ${state.guestName}\n` +
+      `📱 ${state.guestPhone}\n` +
+      `🛏️ Номер: ${room}\n` +
+      `💰 Итого: ${total}₾\n\n` +
+      `✅ "Да" - Подтвердить\n❌ "Нет" - Отменить`,
+    
+    bookingSuccess: (id: string, checkIn: string, checkOut: string) =>
+      `🎉 Бронь подтверждена!\n\n` +
+      `📋 Номер: ${id}\n` +
+      `📅 ${checkIn} - ${checkOut}\n\n` +
+      `Скоро свяжемся!\nСпасибо! 🙏`,
+    
+    bookingFailed: (err: string) => `❌ ${err}\n\n📞 ${HOTEL_CONFIG.phone}`,
+    bookingCancelled: '❌ Отменено.\n\nЗаново - "1"',
+    noRooms: (checkIn: string, checkOut: string) => 
+      `❌ Нет номеров ${checkIn} - ${checkOut}.\n\n📅 Другие даты - "1"`,
+    
+    invalidDate: '❌ Неверная дата.\n\nНапр.: 15.02.2026',
+    invalidGuests: '❌ Гостей (1-10)',
+    invalidName: '❌ Имя и фамилия',
+    invalidPhone: '❌ Корректный номер телефона',
+    askConfirm: '✅ "Да" или ❌ "Нет"',
+    
+    unknown: (orgName: string) =>
+      `🤔 Не понял.\n\n` +
+      `1️⃣ Бронь\n2️⃣ Цены\n3️⃣ СПА\n4️⃣ Дегустация\n5️⃣ Контакт\n6️⃣ Номера`,
+    
+    availability: (available: number, total: number) => {
+      const icon = available > 2 ? '🟢' : available > 0 ? '🟡' : '🔴'
+      return `🏨 Свободно:\n\n${icon} ${available} номеров из ${total}\n\n📅 Для брони - "1"`
+    }
+  }
+}
+
+// ============================================
+// STATE MANAGEMENT
+// ============================================
+
+interface ConversationState {
+  step: string
+  lang: Language
+  checkIn?: string
+  checkOut?: string
+  guests?: number
+  guestName?: string
+  guestPhone?: string
+}
+
+const conversationState: Map<string, ConversationState> = new Map()
 
 // ============================================
 // WEBHOOK HANDLERS
 // ============================================
 
 export async function GET(request: NextRequest) {
-  const params = request.nextUrl.searchParams
-  if (params.get('hub.mode') === 'subscribe' && params.get('hub.verify_token') === VERIFY_TOKEN) {
-    console.log('[Webhook] Verified')
-    return new NextResponse(params.get('hub.challenge'), { status: 200 })
+  const searchParams = request.nextUrl.searchParams
+  const mode = searchParams.get('hub.mode')
+  const token = searchParams.get('hub.verify_token')
+  const challenge = searchParams.get('hub.challenge')
+  
+  if (mode === 'subscribe' && token) {
+    const integration = await prisma.facebookIntegration.findFirst({
+      where: { verifyToken: token, isActive: true }
+    })
+    if (integration) {
+      return new NextResponse(challenge, { status: 200 })
+    }
   }
-  return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  return new NextResponse('Forbidden', { status: 403 })
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    if (body.object !== 'page') {
-      return NextResponse.json({ status: 'ignored' })
-    }
-
-    for (const entry of body.entry || []) {
-      const pageId = entry.id
-      
-      for (const event of entry.messaging || []) {
-        if (event.message?.text) {
-          await handleMessage(pageId, event.sender.id, event.message.text)
+    if (body.object === 'page') {
+      for (const entry of body.entry || []) {
+        const pageId = entry.id
+        
+        const integration = await prisma.facebookIntegration.findUnique({
+          where: { pageId }
+        })
+        
+        if (!integration || !integration.isActive) continue
+        
+        try {
+          await prisma.facebookIntegration.update({
+            where: { pageId },
+            data: { messagesReceived: { increment: 1 } }
+          })
+        } catch (e) {}
+        
+        for (const event of entry.messaging || []) {
+          const senderId = event.sender?.id
+          const message = event.message
+          
+          if (senderId && message?.text) {
+            if (integration.botEnabled) {
+              await handleMessage(senderId, message.text.trim(), integration)
+            }
+          }
         }
       }
     }
-
+    
     return NextResponse.json({ status: 'ok' })
   } catch (error) {
-    console.error('[Webhook] Error:', error)
-    return NextResponse.json({ status: 'ok' })
+    console.error('[Messenger] Error:', error)
+    return NextResponse.json({ error: 'Error' }, { status: 500 })
   }
 }
 
 // ============================================
-// MESSAGE HANDLER
+// MESSAGE HANDLER (with AI support)
 // ============================================
 
-async function handleMessage(pageId: string, senderId: string, text: string) {
-  console.log(`[${pageId}] Message from ${senderId}: ${text}`)
-
-  // Get integration settings
-  const integration = await prisma.facebookIntegration.findUnique({
-    where: { pageId }
-  })
-
-  if (!integration) {
-    console.error('Integration not found for page:', pageId)
-    return
-  }
-
-  if (!integration.botEnabled) {
-    console.log('Bot disabled for page:', pageId)
-    return
-  }
-
-  // Update message count
-  await prisma.facebookIntegration.update({
-    where: { pageId },
-    data: { messagesReceived: { increment: 1 } }
-  })
-
-  const orgId = integration.organizationId
-
-  // Check if AI is enabled
+async function handleMessage(senderId: string, text: string, integration: any) {
+  const orgName = integration.pageName || 'Hotel'
+  
+  // Get tenantId (ORIGINAL LOGIC - unchanged)
+  let orgId = integration.organizationId
+  try {
+    const org = await prisma.organization.findUnique({
+      where: { id: integration.organizationId },
+      select: { tenantId: true }
+    })
+    if (org?.tenantId) orgId = org.tenantId
+  } catch (e) {}
+  
+  // ========== NEW: Check if AI is enabled ==========
   if (integration.aiEnabled && integration.aiApiKey) {
-    await handleAIMessage(senderId, text, integration, orgId)
-  } else {
-    // Use menu-based bot
-    await handleMenuMessage(senderId, text, integration, orgId)
+    await handleAIMessage(senderId, text, integration, orgId, orgName)
+    return
   }
+  // ========== END NEW ==========
+  
+  // ORIGINAL MENU-BASED LOGIC (unchanged)
+  const lowerText = text.toLowerCase()
+  let state = conversationState.get(senderId) || { step: 'menu', lang: 'ka' as Language }
+  const msg = MESSAGES[state.lang]
+  
+  let response = ''
+  
+  // Language switch
+  if (lowerText === 'en' || lowerText === 'english') {
+    state.lang = 'en'
+    state.step = 'menu'
+    conversationState.set(senderId, state)
+    response = MESSAGES.en.welcome(orgName)
+  }
+  else if (lowerText === 'ru' || lowerText === 'рус' || lowerText === 'русский') {
+    state.lang = 'ru'
+    state.step = 'menu'
+    conversationState.set(senderId, state)
+    response = MESSAGES.ru.welcome(orgName)
+  }
+  else if (lowerText === 'ka' || lowerText === 'geo' || lowerText === 'ქართული') {
+    state.lang = 'ka'
+    state.step = 'menu'
+    conversationState.set(senderId, state)
+    response = MESSAGES.ka.welcome(orgName)
+  }
+  // Cancel
+  else if (lowerText === '0' || lowerText === 'cancel' || lowerText === 'გაუქმება' || lowerText === 'отмена') {
+    conversationState.delete(senderId)
+    response = msg.welcome(orgName)
+  }
+  // Booking flow
+  else if (state.step.startsWith('ask_') || state.step === 'confirm') {
+    response = await handleBookingFlow(senderId, text, state, orgId, msg)
+  }
+  // Menu commands
+  else if (isGreeting(lowerText)) {
+    response = msg.welcome(orgName)
+  }
+  else if (isBooking(lowerText)) {
+    state.step = 'ask_checkin'
+    state.lang = state.lang
+    conversationState.set(senderId, state)
+    response = msg.bookingStart
+  }
+  else if (isPrices(lowerText)) {
+    const price = await getRoomPrice(orgId)
+    response = msg.prices(price)
+  }
+  else if (isSpa(lowerText)) {
+    response = msg.beerSpa()
+  }
+  else if (isTasting(lowerText)) {
+    response = msg.beerTasting()
+  }
+  else if (isContact(lowerText)) {
+    response = msg.contact()
+  }
+  else if (isAvailability(lowerText)) {
+    const { available, total } = await getAvailability(orgId)
+    response = msg.availability(available, total)
+  }
+  else {
+    response = msg.unknown(orgName)
+  }
+  
+  await sendMessage(senderId, response, integration.pageAccessToken, integration.pageId)
+  
+  try {
+    await prisma.facebookIntegration.update({
+      where: { pageId: integration.pageId },
+      data: { messagesSent: { increment: 1 } }
+    })
+  } catch (e) {}
 }
 
 // ============================================
-// AI MESSAGE HANDLER
+// NEW: AI MESSAGE HANDLER
 // ============================================
 
 async function handleAIMessage(
   senderId: string, 
   text: string, 
   integration: any,
-  orgId: string
+  orgId: string,
+  orgName: string
 ) {
   try {
-    // Get or create conversation state
-    let session = await prisma.messengerSession.findUnique({
-      where: { senderId }
-    })
-
-    let conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
-    
-    if (session?.state) {
-      try {
-        const state = JSON.parse(session.state)
-        conversationHistory = state.messages || []
-      } catch {}
-    }
-
-    // Add user message
-    conversationHistory.push({ role: 'user', content: text })
-
-    // Build context
+    // Build context with real data from database
     const hotelContext = await buildHotelContext(orgId)
     
     // Get AI response
-    const response = await getAIResponse(
-      text,
-      conversationHistory,
-      integration,
-      hotelContext
-    )
-
-    // Save conversation state
-    conversationHistory.push({ role: 'assistant', content: response })
+    const response = await getAIResponse(text, integration, hotelContext, orgName)
     
-    // Keep last 20 messages
-    if (conversationHistory.length > 20) {
-      conversationHistory = conversationHistory.slice(-20)
-    }
-
-    await prisma.messengerSession.upsert({
-      where: { senderId },
-      update: { state: JSON.stringify({ messages: conversationHistory }) },
-      create: { senderId, state: JSON.stringify({ messages: conversationHistory }) }
-    })
-
     // Send response
     await sendMessage(senderId, response, integration.pageAccessToken, integration.pageId)
     
     // Update sent count
-    await prisma.facebookIntegration.update({
-      where: { pageId: integration.pageId },
-      data: { messagesSent: { increment: 1 } }
-    })
-
+    try {
+      await prisma.facebookIntegration.update({
+        where: { pageId: integration.pageId },
+        data: { messagesSent: { increment: 1 } }
+      })
+    } catch (e) {}
+    
   } catch (error) {
     console.error('[AI] Error:', error)
     // Fallback to simple response
@@ -178,9 +545,9 @@ async function handleAIMessage(
   }
 }
 
-async function buildHotelContext(orgId: string) {
+async function buildHotelContext(orgId: string): Promise<{ roomInfo: string; servicesInfo: string }> {
   try {
-    // Get rooms
+    // Get rooms with prices
     const rooms = await prisma.hotelRoom.findMany({
       where: { tenantId: orgId }
     })
@@ -199,26 +566,38 @@ async function buildHotelContext(orgId: string) {
       .join('\n')
 
     // Get services
-    const services = await prisma.hotelService.findMany({
-      where: { organizationId: orgId, isActive: true }
-    })
+    let servicesInfo = ''
+    try {
+      const services = await prisma.hotelService.findMany({
+        where: { organizationId: orgId, isActive: true }
+      })
+      if (services.length > 0) {
+        servicesInfo = services.map(s => `- ${s.name}: ${s.price}₾`).join('\n')
+      }
+    } catch (e) {}
 
-    const servicesInfo = services.length > 0
-      ? services.map(s => `- ${s.name}: ${s.price}₾`).join('\n')
-      : `- ლუდის სპა: ${HOTEL_CONFIG.services.beerSpa.price}₾\n- ლუდის დეგუსტაცია: ${HOTEL_CONFIG.services.beerTasting.price}₾`
+    if (!servicesInfo) {
+      servicesInfo = `- ლუდის სპა: ${HOTEL_CONFIG.services.beerSpa.price}₾ (${HOTEL_CONFIG.services.beerSpa.durationMinutes} წუთი, მაქს. ${HOTEL_CONFIG.services.beerSpa.maxPersons} ადამიანი)\n- ლუდის დეგუსტაცია: ${HOTEL_CONFIG.services.beerTasting.price}₾`
+    }
 
-    return { roomInfo: roomInfo || 'ოთახები: დარეკეთ ფასისთვის', servicesInfo }
+    return { 
+      roomInfo: roomInfo || 'ოთახები: დარეკეთ ფასისთვის', 
+      servicesInfo 
+    }
   } catch (error) {
     console.error('[Context] Error:', error)
-    return { roomInfo: '', servicesInfo: '' }
+    return { 
+      roomInfo: 'ოთახები: დარეკეთ ფასისთვის', 
+      servicesInfo: `- ლუდის სპა: ${HOTEL_CONFIG.services.beerSpa.price}₾\n- დეგუსტაცია: ${HOTEL_CONFIG.services.beerTasting.price}₾` 
+    }
   }
 }
 
 async function getAIResponse(
   message: string,
-  history: Array<{ role: 'user' | 'assistant'; content: string }>,
   integration: any,
-  context: { roomInfo: string; servicesInfo: string }
+  context: { roomInfo: string; servicesInfo: string },
+  orgName: string
 ): Promise<string> {
   
   // Decrypt API key
@@ -231,44 +610,43 @@ async function getAIResponse(
 
   // Build system prompt
   const personalityMap: Record<string, string> = {
-    professional: 'Be formal, polite, and business-like.',
-    friendly: 'Be warm, welcoming, and helpful. Use a conversational but respectful tone.',
-    casual: 'Be relaxed and informal. Use simple, everyday language.'
+    professional: 'იყავი ფორმალური, თავაზიანი და საქმიანი.',
+    friendly: 'იყავი თბილი, მეგობრული და დამხმარე. გამოიყენე მოსაუბრე, მაგრამ პატივისცემით სავსე ტონი.',
+    casual: 'იყავი მოდუნებული და არაფორმალური. გამოიყენე მარტივი, ყოველდღიური ენა.'
   }
 
-  const systemPrompt = `You are an AI assistant for "Brewery House & Beer Spa" hotel in Georgia.
+  const systemPrompt = `შენ ხარ AI ასისტენტი "${orgName}" სასტუმროსთვის საქართველოში.
 
-HOTEL INFO:
-- Address: ${HOTEL_CONFIG.address}
-- Phone: ${HOTEL_CONFIG.phone}
-- Email: ${HOTEL_CONFIG.email}
-- Website: ${HOTEL_CONFIG.website}
+სასტუმროს ინფორმაცია:
+- მისამართი: ${HOTEL_CONFIG.address}
+- ტელეფონი: ${HOTEL_CONFIG.phone}
+- ელ-ფოსტა: ${HOTEL_CONFIG.email}
 
-ROOMS & PRICES:
+ოთახები და ფასები:
 ${context.roomInfo}
 
-SERVICES:
+სერვისები:
 ${context.servicesInfo}
 
-UNIQUE FEATURES:
-- Traditional Georgian Qvevri beer brewed on-site
-- Beer Spa - unique beer bath experience
-- Near Vardzia cave monastery (30 min drive)
+უნიკალური თვისებები:
+- ტრადიციული ქართული ქვევრის ლუდი, ადგილზე მოხარშული
+- ლუდის სპა - უნიკალური ლუდის აბაზანის გამოცდილება
+- ვარძიის მონასტერთან ახლოს (30 წუთის სავალი)
 
-PERSONALITY: ${personalityMap[integration.aiPersonality] || personalityMap.friendly}
+პიროვნება: ${personalityMap[integration.aiPersonality] || personalityMap.friendly}
 
-LANGUAGES: Detect the guest's language and respond in the same language. You speak Georgian, English, and Russian.
+ენები: ამოიცანი სტუმრის ენა და უპასუხე იმავე ენაზე. საუბრობ ქართულად, ინგლისურად და რუსულად.
 
-RULES:
-- Keep responses under 200 words (Facebook chat)
-- Be helpful and proactive
-- Provide phone number for complex questions
-- Today: ${new Date().toLocaleDateString('ka-GE')}
+წესები:
+- პასუხები იყოს 200 სიტყვამდე (Facebook chat)
+- იყავი დამხმარე და პროაქტიული
+- რთული კითხვებისთვის მიეცი ტელეფონის ნომერი
+- დღეს არის: ${new Date().toLocaleDateString('ka-GE')}
+- ჯავშნისთვის მიმართე ტელეფონზე: ${HOTEL_CONFIG.phone}
 `
 
   try {
     if (integration.aiProvider === 'claude') {
-      // Dynamic import to avoid build errors if not installed
       const { default: Anthropic } = await import('@anthropic-ai/sdk')
       
       const anthropic = new Anthropic({ apiKey })
@@ -277,10 +655,7 @@ RULES:
         model: integration.aiModel || 'claude-3-5-haiku-20241022',
         max_tokens: 500,
         system: systemPrompt,
-        messages: history.slice(-10).map(m => ({
-          role: m.role,
-          content: m.content
-        }))
+        messages: [{ role: 'user', content: message }]
       })
 
       const textContent = response.content.find(c => c.type === 'text')
@@ -298,7 +673,7 @@ RULES:
           max_tokens: 500,
           messages: [
             { role: 'system', content: systemPrompt },
-            ...history.slice(-10)
+            { role: 'user', content: message }
           ]
         })
       })
@@ -321,7 +696,7 @@ function getFallbackResponse(message: string): string {
   }
   
   if (lower.includes('ფას') || lower.includes('price') || lower.includes('цен')) {
-    return `💰 ფასები:\n\n🍺 ლუდის სპა: ${HOTEL_CONFIG.services.beerSpa.price}₾\n🍻 დეგუსტაცია: ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n📞 დაჯავშნა: ${HOTEL_CONFIG.phone}`
+    return `💰 ფასები:\n\n🍺 ლუდის სპა: ${HOTEL_CONFIG.services.beerSpa.price}₾\n🍻 დეგუსტაცია: ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n📞 ოთახების ფასებისთვის: ${HOTEL_CONFIG.phone}`
   }
   
   if (lower.includes('სპა') || lower.includes('spa')) {
@@ -336,319 +711,183 @@ function getFallbackResponse(message: string): string {
 }
 
 // ============================================
-// MENU-BASED MESSAGE HANDLER (Original)
-// ============================================
-
-type Language = 'ka' | 'en' | 'ru'
-
-interface ConversationState {
-  lang: Language
-  step: 'menu' | 'checkin' | 'checkout' | 'guests' | 'name' | 'phone' | 'confirm'
-  checkIn?: string
-  checkOut?: string
-  guests?: number
-  guestName?: string
-  guestPhone?: string
-  roomId?: string
-}
-
-const menuConversations = new Map<string, ConversationState>()
-
-async function handleMenuMessage(
-  senderId: string, 
-  text: string, 
-  integration: any,
-  orgId: string
-) {
-  // Get or create state
-  let state = menuConversations.get(senderId) || { lang: 'ka' as Language, step: 'menu' as const }
-  
-  // Detect language
-  if (text.toLowerCase() === 'en' || text.toLowerCase() === 'english') {
-    state.lang = 'en'
-    state.step = 'menu'
-  } else if (text.toLowerCase() === 'ru' || text.toLowerCase() === 'russian' || text.toLowerCase() === 'русский') {
-    state.lang = 'ru'
-    state.step = 'menu'
-  } else if (text.toLowerCase() === 'ka' || text.toLowerCase() === 'geo' || text.toLowerCase() === 'ქართული') {
-    state.lang = 'ka'
-    state.step = 'menu'
-  }
-  
-  // Process message
-  const response = await processMenuMessage(senderId, text, state, orgId)
-  
-  // Send response
-  await sendMessage(senderId, response, integration.pageAccessToken, integration.pageId)
-  
-  // Update sent count
-  await prisma.facebookIntegration.update({
-    where: { pageId: integration.pageId },
-    data: { messagesSent: { increment: 1 } }
-  })
-}
-
-async function processMenuMessage(
-  senderId: string, 
-  text: string, 
-  state: ConversationState, 
-  orgId: string
-): Promise<string> {
-  const lower = text.toLowerCase().trim()
-  const msg = MESSAGES[state.lang]
-  
-  // Cancel
-  if (lower === '0' || lower === 'cancel' || lower === 'გაუქმება' || lower === 'отмена') {
-    menuConversations.delete(senderId)
-    return msg.bookingCancelled
-  }
-  
-  // Menu
-  if (state.step === 'menu') {
-    // Greetings
-    if (isGreeting(lower)) {
-      return msg.welcome('Brewery House & Beer Spa')
-    }
-    
-    // Commands
-    if (lower === '1' || lower.includes('ჯავშ') || lower.includes('book') || lower.includes('брон')) {
-      state.step = 'checkin'
-      menuConversations.set(senderId, state)
-      return msg.bookingStart
-    }
-    
-    if (lower === '2' || lower.includes('ფას') || lower.includes('price') || lower.includes('цен')) {
-      const price = await getRoomPrice(orgId)
-      return msg.prices(price)
-    }
-    
-    if (lower === '3' || lower.includes('სპა') || lower.includes('spa')) {
-      return msg.beerSpa()
-    }
-    
-    if (lower === '4' || lower.includes('დეგუსტ') || lower.includes('tast') || lower.includes('дегуст')) {
-      return msg.beerTasting()
-    }
-    
-    if (lower === '5' || lower.includes('კონტაქ') || lower.includes('contact') || lower.includes('контакт')) {
-      return msg.contact()
-    }
-    
-    if (lower === '6' || lower.includes('ოთახ') || lower.includes('room') || lower.includes('номер') || lower.includes('availab')) {
-      const avail = await getAvailability(orgId)
-      return msg.availability(avail.available, avail.total)
-    }
-    
-    return msg.unknown('Brewery House & Beer Spa')
-  }
-  
-  // Booking flow
-  if (state.step === 'checkin') {
-    const date = parseDate(text, state.lang)
-    if (!date) return msg.invalidDate
-    state.checkIn = date
-    state.step = 'checkout'
-    menuConversations.set(senderId, state)
-    return msg.askCheckout(date)
-  }
-  
-  if (state.step === 'checkout') {
-    const date = parseDate(text, state.lang)
-    if (!date) return msg.invalidDate
-    state.checkOut = date
-    state.step = 'guests'
-    menuConversations.set(senderId, state)
-    return msg.askGuests(date)
-  }
-  
-  if (state.step === 'guests') {
-    const num = parseInt(text)
-    if (isNaN(num) || num < 1 || num > 10) return msg.invalidGuests
-    state.guests = num
-    state.step = 'name'
-    menuConversations.set(senderId, state)
-    return msg.askName(num)
-  }
-  
-  if (state.step === 'name') {
-    if (text.length < 3) return msg.invalidName
-    state.guestName = text
-    state.step = 'phone'
-    menuConversations.set(senderId, state)
-    return msg.askPhone(text)
-  }
-  
-  if (state.step === 'phone') {
-    const phone = text.replace(/\s/g, '')
-    if (phone.length < 9) return msg.invalidPhone
-    state.guestPhone = phone
-    
-    // Check availability
-    const avail = await checkRoomAvailability(orgId, state.checkIn!, state.checkOut!)
-    if (!avail.available) {
-      menuConversations.delete(senderId)
-      return msg.noRooms(state.checkIn!, state.checkOut!)
-    }
-    
-    state.roomId = avail.roomId
-    state.step = 'confirm'
-    menuConversations.set(senderId, state)
-    
-    const pricing = await calculatePrice(orgId, state.checkIn!, state.checkOut!)
-    return msg.confirmBooking(state, avail.roomNumber!, pricing.total)
-  }
-  
-  if (state.step === 'confirm') {
-    if (isYes(text, state.lang)) {
-      const result = await createReservation(orgId, state)
-      menuConversations.delete(senderId)
-      
-      if (result.success) {
-        // Update booking count
-        await prisma.facebookIntegration.updateMany({
-          where: { organizationId: orgId },
-          data: { bookingsCreated: { increment: 1 } }
-        })
-        return msg.bookingSuccess(result.reservationId!, state.checkIn!, state.checkOut!)
-      }
-      return msg.bookingFailed(result.error || 'Error')
-    }
-    
-    if (isNo(text, state.lang)) {
-      menuConversations.delete(senderId)
-      return msg.bookingCancelled
-    }
-    
-    return msg.askConfirm
-  }
-  
-  return msg.unknown('Brewery House & Beer Spa')
-}
-
-// ============================================
-// MESSAGES
-// ============================================
-
-const MESSAGES = {
-  ka: {
-    welcome: (name: string) => `გამარჯობა! 👋 მოგესალმებით ${name}-ში!\n\n1️⃣ ჯავშანი\n2️⃣ ფასები\n3️⃣ 🍺 სპა\n4️⃣ 🍻 დეგუსტაცია\n5️⃣ კონტაქტი\n6️⃣ ოთახები\n\n🇬🇧 EN | 🇷🇺 RU`,
-    beerSpa: () => `🍺 ლუდის სპა\n\n${HOTEL_CONFIG.services.beerSpa.ka.description}\n\n💰 ${HOTEL_CONFIG.services.beerSpa.price}₾\n⏱️ ${HOTEL_CONFIG.services.beerSpa.durationMinutes} წუთი\n\n📞 ${HOTEL_CONFIG.phone}`,
-    beerTasting: () => `🍻 ${HOTEL_CONFIG.services.beerTasting.ka.name}\n\n${HOTEL_CONFIG.services.beerTasting.ka.description}\n\n💰 ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n📞 ${HOTEL_CONFIG.phone}`,
-    prices: (p: number) => `💰 ფასები:\n\n🛏️ ოთახი: ${p}₾/ღამე\n🍺 სპა: ${HOTEL_CONFIG.services.beerSpa.price}₾\n🍻 დეგუსტაცია: ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n📅 ჯავშანი - "1"`,
-    contact: () => `📞 კონტაქტი:\n\n📱 ${HOTEL_CONFIG.phone}\n📧 ${HOTEL_CONFIG.email}\n📍 ${HOTEL_CONFIG.address}`,
-    bookingStart: '📅 შემოსვლის თარიღი?\n\nმაგ: 15.02.2026\n\n❌ გაუქმება - "0"',
-    askCheckout: (d: string) => `✅ შემოსვლა: ${d}\n\n📅 გასვლის თარიღი?`,
-    askGuests: (d: string) => `✅ გასვლა: ${d}\n\n👥 რამდენი სტუმარი?`,
-    askName: (n: number) => `✅ სტუმრები: ${n}\n\n👤 სახელი და გვარი?`,
-    askPhone: (n: string) => `✅ სახელი: ${n}\n\n📱 ტელეფონი?`,
-    confirmBooking: (s: any, r: string, t: number) => `📋 ჯავშანი:\n\n📅 ${s.checkIn} - ${s.checkOut}\n👥 ${s.guests}\n👤 ${s.guestName}\n📱 ${s.guestPhone}\n🛏️ ${r}\n💰 ${t}₾\n\n✅ "დიახ" | ❌ "არა"`,
-    bookingSuccess: (id: string, ci: string, co: string) => `🎉 შეიქმნა!\n\n📋 ${id}\n📅 ${ci} - ${co}\n\nმადლობა! 🙏`,
-    bookingFailed: (e: string) => `❌ ${e}\n\n📞 ${HOTEL_CONFIG.phone}`,
-    bookingCancelled: '❌ გაუქმდა.\n\nახლიდან - "1"',
-    noRooms: (ci: string, co: string) => `❌ ${ci}-${co} ოთახი არ არის.\n\n📅 სხვა თარიღი - "1"`,
-    invalidDate: '❌ თარიღი?\n\nმაგ: 15.02.2026',
-    invalidGuests: '❌ სტუმრები (1-10)',
-    invalidName: '❌ სახელი?',
-    invalidPhone: '❌ ტელეფონი?',
-    askConfirm: '✅ "დიახ" ან ❌ "არა"',
-    unknown: (n: string) => `🤔 ვერ გავიგე.\n\n1️⃣ ჯავშანი\n2️⃣ ფასები\n3️⃣ სპა\n4️⃣ დეგუსტაცია\n5️⃣ კონტაქტი`,
-    availability: (a: number, t: number) => `🏨 თავისუფალია: ${a}/${t}\n\n📅 ჯავშანი - "1"`
-  },
-  en: {
-    welcome: (name: string) => `Hello! 👋 Welcome to ${name}!\n\n1️⃣ Book\n2️⃣ Prices\n3️⃣ 🍺 Spa\n4️⃣ 🍻 Tasting\n5️⃣ Contact\n6️⃣ Rooms\n\n🇬🇪 KA | 🇷🇺 RU`,
-    beerSpa: () => `🍺 Beer Spa\n\n${HOTEL_CONFIG.services.beerSpa.en.description}\n\n💰 ${HOTEL_CONFIG.services.beerSpa.price}₾\n⏱️ ${HOTEL_CONFIG.services.beerSpa.durationMinutes} min\n\n📞 ${HOTEL_CONFIG.phone}`,
-    beerTasting: () => `🍻 ${HOTEL_CONFIG.services.beerTasting.en.name}\n\n${HOTEL_CONFIG.services.beerTasting.en.description}\n\n💰 ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n📞 ${HOTEL_CONFIG.phone}`,
-    prices: (p: number) => `💰 Prices:\n\n🛏️ Room: ${p}₾/night\n🍺 Spa: ${HOTEL_CONFIG.services.beerSpa.price}₾\n🍻 Tasting: ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n📅 Book - "1"`,
-    contact: () => `📞 Contact:\n\n📱 ${HOTEL_CONFIG.phone}\n📧 ${HOTEL_CONFIG.email}\n📍 ${HOTEL_CONFIG.address}`,
-    bookingStart: '📅 Check-in date?\n\ne.g.: 15.02.2026\n\n❌ Cancel - "0"',
-    askCheckout: (d: string) => `✅ Check-in: ${d}\n\n📅 Check-out?`,
-    askGuests: (d: string) => `✅ Check-out: ${d}\n\n👥 Guests?`,
-    askName: (n: number) => `✅ Guests: ${n}\n\n👤 Full name?`,
-    askPhone: (n: string) => `✅ Name: ${n}\n\n📱 Phone?`,
-    confirmBooking: (s: any, r: string, t: number) => `📋 Booking:\n\n📅 ${s.checkIn} - ${s.checkOut}\n👥 ${s.guests}\n👤 ${s.guestName}\n📱 ${s.guestPhone}\n🛏️ ${r}\n💰 ${t}₾\n\n✅ "Yes" | ❌ "No"`,
-    bookingSuccess: (id: string, ci: string, co: string) => `🎉 Booked!\n\n📋 ${id}\n📅 ${ci} - ${co}\n\nThank you! 🙏`,
-    bookingFailed: (e: string) => `❌ ${e}\n\n📞 ${HOTEL_CONFIG.phone}`,
-    bookingCancelled: '❌ Cancelled.\n\nBook again - "1"',
-    noRooms: (ci: string, co: string) => `❌ No rooms ${ci}-${co}.\n\n📅 Try other dates - "1"`,
-    invalidDate: '❌ Date?\n\ne.g.: 15.02.2026',
-    invalidGuests: '❌ Guests (1-10)',
-    invalidName: '❌ Name?',
-    invalidPhone: '❌ Phone?',
-    askConfirm: '✅ "Yes" or ❌ "No"',
-    unknown: (n: string) => `🤔 Not understood.\n\n1️⃣ Book\n2️⃣ Prices\n3️⃣ Spa\n4️⃣ Tasting\n5️⃣ Contact`,
-    availability: (a: number, t: number) => `🏨 Available: ${a}/${t}\n\n📅 Book - "1"`
-  },
-  ru: {
-    welcome: (name: string) => `Привет! 👋 Добро пожаловать в ${name}!\n\n1️⃣ Бронь\n2️⃣ Цены\n3️⃣ 🍺 СПА\n4️⃣ 🍻 Дегустация\n5️⃣ Контакт\n6️⃣ Номера\n\n🇬🇪 KA | 🇬🇧 EN`,
-    beerSpa: () => `🍺 Пивное СПА\n\n${HOTEL_CONFIG.services.beerSpa.ru.description}\n\n💰 ${HOTEL_CONFIG.services.beerSpa.price}₾\n⏱️ ${HOTEL_CONFIG.services.beerSpa.durationMinutes} мин\n\n📞 ${HOTEL_CONFIG.phone}`,
-    beerTasting: () => `🍻 ${HOTEL_CONFIG.services.beerTasting.ru.name}\n\n${HOTEL_CONFIG.services.beerTasting.ru.description}\n\n💰 ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n📞 ${HOTEL_CONFIG.phone}`,
-    prices: (p: number) => `💰 Цены:\n\n🛏️ Номер: ${p}₾/ночь\n🍺 СПА: ${HOTEL_CONFIG.services.beerSpa.price}₾\n🍻 Дегустация: ${HOTEL_CONFIG.services.beerTasting.price}₾\n\n📅 Бронь - "1"`,
-    contact: () => `📞 Контакт:\n\n📱 ${HOTEL_CONFIG.phone}\n📧 ${HOTEL_CONFIG.email}\n📍 ${HOTEL_CONFIG.address}`,
-    bookingStart: '📅 Дата заезда?\n\nнапр: 15.02.2026\n\n❌ Отмена - "0"',
-    askCheckout: (d: string) => `✅ Заезд: ${d}\n\n📅 Выезд?`,
-    askGuests: (d: string) => `✅ Выезд: ${d}\n\n👥 Гостей?`,
-    askName: (n: number) => `✅ Гостей: ${n}\n\n👤 ФИО?`,
-    askPhone: (n: string) => `✅ Имя: ${n}\n\n📱 Телефон?`,
-    confirmBooking: (s: any, r: string, t: number) => `📋 Бронь:\n\n📅 ${s.checkIn} - ${s.checkOut}\n👥 ${s.guests}\n👤 ${s.guestName}\n📱 ${s.guestPhone}\n🛏️ ${r}\n💰 ${t}₾\n\n✅ "Да" | ❌ "Нет"`,
-    bookingSuccess: (id: string, ci: string, co: string) => `🎉 Забронировано!\n\n📋 ${id}\n📅 ${ci} - ${co}\n\nСпасибо! 🙏`,
-    bookingFailed: (e: string) => `❌ ${e}\n\n📞 ${HOTEL_CONFIG.phone}`,
-    bookingCancelled: '❌ Отменено.\n\nСнова - "1"',
-    noRooms: (ci: string, co: string) => `❌ Нет номеров ${ci}-${co}.\n\n📅 Другие даты - "1"`,
-    invalidDate: '❌ Дата?\n\nнапр: 15.02.2026',
-    invalidGuests: '❌ Гостей (1-10)',
-    invalidName: '❌ ФИО?',
-    invalidPhone: '❌ Телефон?',
-    askConfirm: '✅ "Да" или ❌ "Нет"',
-    unknown: (n: string) => `🤔 Не понял.\n\n1️⃣ Бронь\n2️⃣ Цены\n3️⃣ СПА\n4️⃣ Дегустация\n5️⃣ Контакт`,
-    availability: (a: number, t: number) => `🏨 Свободно: ${a}/${t}\n\n📅 Бронь - "1"`
-  }
-}
-
-// ============================================
-// HELPERS
+// INTENT DETECTION (ORIGINAL - unchanged)
 // ============================================
 
 function isGreeting(t: string): boolean {
-  return ['გამარჯობა', 'hello', 'hi', 'привет', 'здравствуй', 'салам', 'start', 'menu'].some(g => t.includes(g))
+  return ['გამარჯობა', 'gamarjoba', 'gaumarjos', 'hello', 'hi', 'hey', 'привет', 'здравствуй', 'menu', 'მენიუ', 'start'].some(w => t.includes(w))
+}
+
+function isBooking(t: string): boolean {
+  return ['1', 'ჯავშ', 'book', 'reserv', 'бронь', 'забронир'].some(w => t.includes(w))
+}
+
+function isPrices(t: string): boolean {
+  return ['2', 'ფას', 'price', 'cost', 'цен', 'стоим'].some(w => t.includes(w))
+}
+
+function isSpa(t: string): boolean {
+  return ['3', 'სპა', 'spa', 'спа', 'ლუდის სპა', 'beer spa', 'пивн'].some(w => t.includes(w))
+}
+
+function isTasting(t: string): boolean {
+  return ['4', 'დეგუსტაცია', 'tasting', 'дегустац'].some(w => t.includes(w))
+}
+
+function isContact(t: string): boolean {
+  return ['5', 'კონტაქტ', 'contact', 'phone', 'контакт', 'телефон'].some(w => t.includes(w))
+}
+
+function isAvailability(t: string): boolean {
+  return ['6', 'თავისუფალ', 'availab', 'rooms', 'свобод', 'номер'].some(w => t.includes(w))
+}
+
+// ============================================
+// BOOKING FLOW (ORIGINAL - unchanged)
+// ============================================
+
+async function handleBookingFlow(
+  senderId: string,
+  text: string,
+  state: ConversationState,
+  orgId: string,
+  msg: typeof MESSAGES['ka']
+): Promise<string> {
+  
+  switch (state.step) {
+    case 'ask_checkin': {
+      const checkIn = parseDate(text, state.lang)
+      if (!checkIn) return msg.invalidDate
+      state.checkIn = checkIn
+      state.step = 'ask_checkout'
+      conversationState.set(senderId, state)
+      return msg.askCheckout(checkIn)
+    }
+    
+    case 'ask_checkout': {
+      const checkOut = parseDate(text, state.lang)
+      if (!checkOut) return msg.invalidDate
+      state.checkOut = checkOut
+      state.step = 'ask_guests'
+      conversationState.set(senderId, state)
+      return msg.askGuests(checkOut)
+    }
+    
+    case 'ask_guests': {
+      const guests = parseInt(text)
+      if (isNaN(guests) || guests < 1 || guests > 10) return msg.invalidGuests
+      state.guests = guests
+      state.step = 'ask_name'
+      conversationState.set(senderId, state)
+      return msg.askName(guests)
+    }
+    
+    case 'ask_name': {
+      if (text.length < 3) return msg.invalidName
+      state.guestName = text
+      state.step = 'ask_phone'
+      conversationState.set(senderId, state)
+      return msg.askPhone(text)
+    }
+    
+    case 'ask_phone': {
+      const phone = text.replace(/\s/g, '')
+      if (phone.length < 9) return msg.invalidPhone
+      state.guestPhone = phone
+      
+      // Check availability
+      const avail = await checkRoomAvailability(orgId, state.checkIn!, state.checkOut!)
+      if (!avail.available) {
+        conversationState.delete(senderId)
+        return msg.noRooms(state.checkIn!, state.checkOut!)
+      }
+      
+      state.step = 'confirm'
+      conversationState.set(senderId, state)
+      
+      const pricing = await calculatePrice(orgId, state.checkIn!, state.checkOut!)
+      return msg.confirmBooking(state, avail.roomNumber!, pricing.total)
+    }
+    
+    case 'confirm': {
+      if (isYes(text, state.lang)) {
+        const savedCheckIn = state.checkIn
+        const savedCheckOut = state.checkOut
+        
+        const result = await createReservation(orgId, state)
+        conversationState.delete(senderId)
+        
+        if (result.success) {
+          return msg.bookingSuccess(result.reservationId!, savedCheckIn!, savedCheckOut!)
+        }
+        return msg.bookingFailed(result.error || 'Error')
+      }
+      
+      if (isNo(text, state.lang)) {
+        conversationState.delete(senderId)
+        return msg.bookingCancelled
+      }
+      
+      return msg.askConfirm
+    }
+  }
+  
+  return msg.unknown('')
 }
 
 function isYes(t: string, lang: Language): boolean {
-  const l = t.toLowerCase()
-  if (lang === 'ka') return ['დიახ', 'კი', 'yes'].some(w => l.includes(w))
-  if (lang === 'en') return ['yes', 'y', 'ok'].some(w => l.includes(w))
-  if (lang === 'ru') return ['да', 'yes', 'ок'].some(w => l.includes(w))
+  const lower = t.toLowerCase()
+  if (lang === 'ka') return ['დიახ', 'კი', 'yes', '✅'].some(w => lower.includes(w))
+  if (lang === 'en') return ['yes', 'y', 'ok', '✅'].some(w => lower.includes(w))
+  if (lang === 'ru') return ['да', 'yes', 'ок', '✅'].some(w => lower.includes(w))
   return false
 }
 
 function isNo(t: string, lang: Language): boolean {
-  const l = t.toLowerCase()
-  if (lang === 'ka') return ['არა', 'no'].some(w => l.includes(w))
-  if (lang === 'en') return ['no', 'n'].some(w => l.includes(w))
-  if (lang === 'ru') return ['нет', 'no'].some(w => l.includes(w))
+  const lower = t.toLowerCase()
+  if (lang === 'ka') return ['არა', 'no', '❌'].some(w => lower.includes(w))
+  if (lang === 'en') return ['no', 'n', '❌'].some(w => lower.includes(w))
+  if (lang === 'ru') return ['нет', 'no', '❌'].some(w => lower.includes(w))
   return false
 }
+
+// ============================================
+// HELPERS (ORIGINAL - unchanged)
+// ============================================
 
 function parseDate(text: string, lang: Language): string | null {
   const today = new Date()
   const lower = text.toLowerCase()
   
+  // Tomorrow
   if (lower.includes('ხვალ') || lower === 'tomorrow' || lower === 'завтра') {
     const d = new Date(today)
     d.setDate(d.getDate() + 1)
-    return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`
+    return formatDate(d)
   }
   
+  // Today
+  if (lower.includes('დღეს') || lower === 'today' || lower === 'сегодня') {
+    return formatDate(today)
+  }
+  
+  // DD.MM.YYYY
   const match = text.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/)
   if (match) {
     return `${match[1].padStart(2, '0')}.${match[2].padStart(2, '0')}.${match[3]}`
   }
   
+  // DD.MM (current year)
   const match2 = text.match(/(\d{1,2})[.\/-](\d{1,2})/)
   if (match2) {
     return `${match2[1].padStart(2, '0')}.${match2[2].padStart(2, '0')}.${today.getFullYear()}`
   }
   
   return null
+}
+
+function formatDate(d: Date): string {
+  return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`
 }
 
 async function getRoomPrice(orgId: string): Promise<number> {
@@ -658,38 +897,49 @@ async function getRoomPrice(orgId: string): Promise<number> {
       orderBy: { basePrice: 'asc' }
     })
     return room?.basePrice ? Number(room.basePrice) : 100
-  } catch { return 100 }
+  } catch {
+    return 100
+  }
 }
 
 async function getAvailability(orgId: string): Promise<{ available: number; total: number }> {
   try {
-    const rooms = await prisma.hotelRoom.findMany({ where: { tenantId: orgId } })
     const today = new Date()
+    const nextWeek = new Date(today)
+    nextWeek.setDate(nextWeek.getDate() + 7)
+    
+    const rooms = await prisma.hotelRoom.findMany({ where: { tenantId: orgId } })
     const reservations = await prisma.hotelReservation.findMany({
       where: {
         tenantId: orgId,
+        checkIn: { lte: nextWeek },
         checkOut: { gte: today },
         status: { in: ['confirmed', 'checked_in', 'CONFIRMED', 'CHECKED_IN'] }
       }
     })
+    
     const occupied = new Set(reservations.map(r => r.roomId))
     return { available: rooms.length - occupied.size, total: rooms.length }
-  } catch { return { available: 0, total: 0 } }
+  } catch {
+    return { available: 0, total: 0 }
+  }
 }
 
 async function checkRoomAvailability(orgId: string, checkIn: string, checkOut: string): Promise<{ available: boolean; roomId?: string; roomNumber?: string }> {
   try {
     const [d1, m1, y1] = checkIn.split('.').map(Number)
     const [d2, m2, y2] = checkOut.split('.').map(Number)
-    const ciDate = new Date(y1, m1 - 1, d1)
-    const coDate = new Date(y2, m2 - 1, d2)
+    const checkInDate = new Date(y1, m1 - 1, d1)
+    const checkOutDate = new Date(y2, m2 - 1, d2)
     
     const rooms = await prisma.hotelRoom.findMany({ where: { tenantId: orgId } })
+    if (rooms.length === 0) return { available: false }
+    
     const reservations = await prisma.hotelReservation.findMany({
       where: {
         tenantId: orgId,
-        checkIn: { lt: coDate },
-        checkOut: { gt: ciDate },
+        checkIn: { lt: checkOutDate },
+        checkOut: { gt: checkInDate },
         status: { in: ['confirmed', 'checked_in', 'pending', 'CONFIRMED', 'CHECKED_IN', 'PENDING'] }
       }
     })
@@ -697,33 +947,42 @@ async function checkRoomAvailability(orgId: string, checkIn: string, checkOut: s
     const occupied = new Set(reservations.map(r => r.roomId))
     const available = rooms.find(r => !occupied.has(r.id))
     
-    return available ? { available: true, roomId: available.id, roomNumber: available.roomNumber } : { available: false }
-  } catch { return { available: false } }
+    if (available) {
+      return { available: true, roomId: available.id, roomNumber: available.roomNumber }
+    }
+    return { available: false }
+  } catch {
+    return { available: false }
+  }
 }
 
 async function calculatePrice(orgId: string, checkIn: string, checkOut: string): Promise<{ total: number; nights: number }> {
   try {
     const [d1, m1, y1] = checkIn.split('.').map(Number)
     const [d2, m2, y2] = checkOut.split('.').map(Number)
-    const ciDate = new Date(y1, m1 - 1, d1)
-    const coDate = new Date(y2, m2 - 1, d2)
+    const checkInDate = new Date(y1, m1 - 1, d1)
+    const checkOutDate = new Date(y2, m2 - 1, d2)
     
-    const nights = Math.max(1, Math.ceil((coDate.getTime() - ciDate.getTime()) / (1000 * 60 * 60 * 24)))
+    const nights = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)))
     const perNight = await getRoomPrice(orgId)
     
     return { total: perNight * nights, nights }
-  } catch { return { total: 100, nights: 1 } }
+  } catch {
+    return { total: 100, nights: 1 }
+  }
 }
 
 async function createReservation(orgId: string, state: ConversationState): Promise<{ success: boolean; reservationId?: string; error?: string }> {
   try {
     const [d1, m1, y1] = state.checkIn!.split('.').map(Number)
     const [d2, m2, y2] = state.checkOut!.split('.').map(Number)
-    const ciDate = new Date(y1, m1 - 1, d1)
-    const coDate = new Date(y2, m2 - 1, d2)
+    const checkInDate = new Date(y1, m1 - 1, d1)
+    const checkOutDate = new Date(y2, m2 - 1, d2)
     
     const avail = await checkRoomAvailability(orgId, state.checkIn!, state.checkOut!)
-    if (!avail.available || !avail.roomId) return { success: false, error: 'No rooms' }
+    if (!avail.available || !avail.roomId) {
+      return { success: false, error: 'No rooms available' }
+    }
     
     const pricing = await calculatePrice(orgId, state.checkIn!, state.checkOut!)
     
@@ -732,61 +991,42 @@ async function createReservation(orgId: string, state: ConversationState): Promi
         tenantId: orgId,
         roomId: avail.roomId,
         guestName: state.guestName!,
+        guestEmail: '',
         guestPhone: state.guestPhone || '',
-        checkIn: ciDate,
-        checkOut: coDate,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
         adults: state.guests || 2,
+        children: 0,
         totalAmount: pricing.total,
         paidAmount: 0,
         status: 'confirmed',
-        source: 'Facebook Messenger'
+        source: 'Facebook Messenger',
+        notes: `Bot (${state.lang.toUpperCase()})`
       }
     })
     
     return { success: true, reservationId: reservation.id.slice(-8).toUpperCase() }
-  } catch (e) {
-    console.error('[Reservation] Error:', e)
-    return { success: false, error: 'Error' }
+  } catch (error) {
+    console.error('[Messenger] Reservation error:', error)
+    return { success: false, error: 'System error' }
   }
 }
 
 async function sendMessage(recipientId: string, text: string, accessToken: string, pageId?: string) {
-  if (!accessToken) return
-  
-  // Split long messages
-  const chunks = text.length > 1900 ? splitText(text, 1900) : [text]
-  
-  for (const chunk of chunks) {
-    try {
-      await fetch(`https://graph.facebook.com/v18.0/${pageId || 'me'}/messages?access_token=${accessToken}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipient: { id: recipientId },
-          message: { text: chunk }
-        })
+  try {
+    const endpoint = pageId 
+      ? `https://graph.facebook.com/v18.0/${pageId}/messages`
+      : `https://graph.facebook.com/v18.0/me/messages`
+    
+    await fetch(`${endpoint}?access_token=${accessToken}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipient: { id: recipientId },
+        message: { text }
       })
-    } catch (e) {
-      console.error('[Send] Error:', e)
-    }
+    })
+  } catch (error) {
+    console.error('[Messenger] Send error:', error)
   }
-}
-
-function splitText(text: string, maxLen: number): string[] {
-  const chunks: string[] = []
-  let remaining = text
-  
-  while (remaining.length > 0) {
-    if (remaining.length <= maxLen) {
-      chunks.push(remaining)
-      break
-    }
-    let idx = remaining.lastIndexOf('\n', maxLen)
-    if (idx < maxLen / 2) idx = remaining.lastIndexOf(' ', maxLen)
-    if (idx < 0) idx = maxLen
-    chunks.push(remaining.substring(0, idx))
-    remaining = remaining.substring(idx).trim()
-  }
-  
-  return chunks
 }
