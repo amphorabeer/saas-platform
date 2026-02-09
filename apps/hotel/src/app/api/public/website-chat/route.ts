@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@repo/database'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 // POST - Save chat message
 export async function POST(request: NextRequest) {
