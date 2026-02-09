@@ -13,13 +13,14 @@ import {
   ComparisonChart,
   KPICard 
 } from './ReportCharts'
+import ChatHistoryReport from './ChatHistoryReport'
 
 interface ReportsProps {
   reservations: any[]
   rooms: any[]
 }
 
-type ReportType = 'reservations' | 'revenue' | 'occupancy' | 'guests' | 'rooms' | 'payments' | 'cancellations' | 'sources' | 'tax' | 'housekeeping'
+type ReportType = 'reservations' | 'revenue' | 'occupancy' | 'guests' | 'rooms' | 'payments' | 'cancellations' | 'sources' | 'tax' | 'housekeeping' | 'chat'
 type DateRange = 'today' | 'week' | 'month' | 'quarter' | 'year' | 'custom'
 
 export default function Reports({ reservations, rooms }: ReportsProps) {
@@ -917,7 +918,8 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
     { id: 'housekeeping', label: 'დასუფთავება', icon: '🧹' },
     { id: 'cancellations', label: 'გაუქმებები', icon: '❌' },
     { id: 'sources', label: 'წყაროები', icon: '📊' },
-    { id: 'tax', label: 'გადასახადები', icon: '🧾' }
+    { id: 'tax', label: 'გადასახადები', icon: '🧾' },
+    { id: 'chat', label: 'ჩატი', icon: '💬' }
   ]
   
   return (
@@ -1000,30 +1002,42 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
         </div>
       </div>
       
-      {/* Report Type Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border mb-6">
-        <div className="flex overflow-x-auto border-b scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pb-px" style={{ scrollbarWidth: 'thin' }}>
-          {reportTabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveReport(tab.id)}
-              className={`px-3 py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition flex-shrink-0 ${
-                activeReport === tab.id
-                  ? 'border-blue-500 text-blue-600 bg-blue-50'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              <span className="hidden sm:inline">{tab.icon} </span>{tab.label}
-            </button>
-          ))}
+      {/* Report Layout - Sidebar + Content */}
+      <div className="flex gap-6">
+        {/* Sidebar - Report Type Tabs */}
+        <div className="w-48 flex-shrink-0">
+          <div className="bg-white rounded-xl shadow-sm border sticky top-4">
+            <div className="p-3 border-b bg-gray-50 rounded-t-xl">
+              <span className="text-sm font-semibold text-gray-700">📑 რეპორტები</span>
+            </div>
+            <div className="py-2">
+              {reportTabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveReport(tab.id)}
+                  className={`w-full px-4 py-2.5 text-sm font-medium text-left transition flex items-center gap-2 ${
+                    activeReport === tab.id
+                      ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-500'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
         
-        {/* Report Content */}
-        <div className="p-6">
-          {/* RESERVATIONS REPORT */}
-          {activeReport === 'reservations' && (
-            <ReservationsReport reservations={reservations} rooms={rooms} dateRange={dateRange} startDate={startDate} endDate={endDate} />
-          )}
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          <div className="bg-white rounded-xl shadow-sm border">
+            {/* Report Content */}
+            <div className="p-6">
+              {/* RESERVATIONS REPORT */}
+              {activeReport === 'reservations' && (
+                <ReservationsReport reservations={reservations} rooms={rooms} dateRange={dateRange} startDate={startDate} endDate={endDate} />
+              )}
           
           {/* REVENUE REPORT */}
           {activeReport === 'revenue' && (
@@ -1734,6 +1748,13 @@ export default function Reports({ reservations, rooms }: ReportsProps) {
               )}
             </div>
           )}
+
+          {/* Chat History Report */}
+          {activeReport === 'chat' && (
+            <ChatHistoryReport />
+          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
