@@ -340,7 +340,25 @@ function generateSpaEmailHtml(data: {
   time: string
 }): string {
   return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>სპა ჯავშანი - ${data.confirmationCode}</title>
+      <style>
+        @media print {
+          .no-print { display: none !important; }
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      </style>
+    </head>
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div class="no-print" style="text-align: center; margin-bottom: 20px;">
+        <button onclick="window.print()" style="background: #d97706; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer;">
+          🖨️ დაბეჭდვა
+        </button>
+      </div>
+      
       <div style="background: linear-gradient(135deg, #d97706 0%, #92400e 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
         <h1 style="color: white; margin: 0;">🍺 ${data.orgName}</h1>
         <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">ლუდის სპა - ჯავშნის დადასტურება</p>
@@ -382,12 +400,16 @@ function generateSpaEmailHtml(data: {
         </div>
       </div>
       
-      <div style="padding: 20px; text-align: center; color: #666; font-size: 12px;">
-        <p>გმადლობთ რომ აირჩიეთ ${data.orgName}!</p>
-        <p>📍 ასპინძა, სამცხე-ჯავახეთი</p>
-        <p>📞 +995 599 50 05 05</p>
+      <div style="padding: 20px; text-align: center; color: #666; font-size: 12px; border: 1px solid #e9ecef; border-top: none; background: white;">
+        <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">გმადლობთ რომ აირჩიეთ ${data.orgName}!</p>
+        <p style="margin: 5px 0;">📍 ასპინძა, შორეთის ქ. 21, სამცხე-ჯავახეთი</p>
+        <p style="margin: 5px 0;">📞 +995 599 946 500</p>
+        <p style="margin: 15px 0 0 0;">
+          <a href="https://www.breweryhouse.ge" style="color: #d97706; text-decoration: none;">www.breweryhouse.ge</a>
+        </p>
       </div>
-    </div>
+    </body>
+    </html>
   `
 }
 
@@ -402,7 +424,25 @@ function generateRestaurantEmailHtml(data: {
   occasion?: string
 }): string {
   return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>მაგიდის ჯავშანი - ${data.confirmationCode}</title>
+      <style>
+        @media print {
+          .no-print { display: none !important; }
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      </style>
+    </head>
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div class="no-print" style="text-align: center; margin-bottom: 20px;">
+        <button onclick="window.print()" style="background: #d97706; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer;">
+          🖨️ დაბეჭდვა
+        </button>
+      </div>
+      
       <div style="background: linear-gradient(135deg, #d97706 0%, #92400e 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
         <h1 style="color: white; margin: 0;">🍽️ ${data.orgName}</h1>
         <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">რესტორანი - მაგიდის ჯავშანი</p>
@@ -445,12 +485,17 @@ function generateRestaurantEmailHtml(data: {
         </div>
       </div>
       
-      <div style="padding: 20px; text-align: center; color: #666; font-size: 12px;">
-        <p>გმადლობთ რომ აირჩიეთ ${data.orgName}!</p>
-        <p>📍 ასპინძა, სამცხე-ჯავახეთი</p>
-        <p>📞 +995 599 50 05 05</p>
-        <p style="margin-top: 15px;"><a href="https://breweryhouse.ge/menu" style="color: #d97706;">📖 იხილეთ მენიუ</a></p>
+      <div style="padding: 20px; text-align: center; color: #666; font-size: 12px; border: 1px solid #e9ecef; border-top: none; background: white;">
+        <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">გმადლობთ რომ აირჩიეთ ${data.orgName}!</p>
+        <p style="margin: 5px 0;">📍 ასპინძა, შორეთის ქ. 21, სამცხე-ჯავახეთი</p>
+        <p style="margin: 5px 0;">📞 +995 599 946 500</p>
+        <p style="margin: 15px 0 0 0;">
+          <a href="https://www.breweryhouse.ge/menu" style="color: #d97706; text-decoration: none;">📖 იხილეთ მენიუ</a>
+          &nbsp;|&nbsp;
+          <a href="https://www.breweryhouse.ge" style="color: #d97706; text-decoration: none;">www.breweryhouse.ge</a>
+        </p>
       </div>
-    </div>
+    </body>
+    </html>
   `
 }
