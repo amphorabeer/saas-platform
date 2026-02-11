@@ -10,26 +10,49 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
-// OPTIONS - CORS preflight
-export async function OPTIONS() {
-  return new NextResponse(null, { 
-    status: 200,
-    headers: corsHeaders 
-  })
+// All possible time slots
+const ALL_TIME_SLOTS = ['10:00', '11:15', '12:30', '13:45', '15:00', '16:15', '17:30', '18:45', '20:00', '21:15'];
+
+// Pricing packages
+const PRICING: Record<string, number> = {
+  '1-1': 100,  // 1 guest, 1 bath
+  '2-1': 150,  // 2 guests, 1 bath
+  '2-2': 200,  // 2 guests, 2 baths
+  '3-2': 250,  // 3 guests, 2 baths
+  '4-2': 300,  // 4 guests, 2 baths
 }
 
-// POST - Receive booking from website
+// Helper: Convert time to minutes
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + (m || 0)
+}
+
+// Helper: Calculate end time
+function calculateEndTime(startTime: string, durationMinutes: number): string {
+  const totalMinutes = timeToMinutes(startTime) + durationMinutes
+  const endHours = Math.floor(totalMinutes / 60) % 24
+  const endMinutes = totalMinutes % 60
+  return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
+}
+
+// OPTIONS - CORS preflight
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200, headers: corsHeaders })
+}
+
+// POST - Create booking
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { type, name, phone, email, date, time, guests, service, serviceName, servicePrice, occasion, notes, source } = body
+    const { type, name, phone, email, date, time, guests, baths, price, packageId, occasion, notes, source } = body
 
-    console.log(`[Public Bookings] New ${type} booking received:`, { name, phone, date, time })
+    console.log(`[Public Bookings] New ${type} booking:`, { name, phone, date, time, guests, baths })
 
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
 
-    // Find organization by name or use first one
+    // Find organization
     const organization = await prisma.organization.findFirst({
       where: {
         OR: [
@@ -50,107 +73,78 @@ export async function POST(request: NextRequest) {
     const tenantId = organization.tenantId
     const orgName = organization.name || 'Brewery House'
 
-    // Get default bath for spa bookings
-    let defaultBathId: string | null = null
-    try {
-      const firstBath = await prisma.spaBath.findFirst({
-        where: { tenantId, isActive: true },
-        orderBy: { name: 'asc' }
-      })
-      defaultBathId = firstBath?.id || null
-    } catch {
-      console.log('[Public Bookings] No spa baths found')
-    }
-
     // Generate confirmation code
     const confirmationCode = `${type === 'spa' ? 'SPA' : 'RST'}${Date.now().toString(36).toUpperCase()}`
 
     if (type === 'spa') {
-      // Check availability - find if the bath is already booked at this time
+      // Check availability first
       const bookingDate = new Date(date)
       const requestedStart = timeToMinutes(time)
-      const requestedEnd = requestedStart + 60 // 60 min duration
+      const requestedEnd = requestedStart + 60
 
-      // Get all bookings for this date
       const existingBookings = await prisma.spaBooking.findMany({
         where: {
           tenantId,
           date: bookingDate,
-          status: { not: 'cancelled' },
-          bathId: defaultBathId
+          status: { not: 'cancelled' }
         }
       })
 
-      // Check for time overlap
+      // Check if time slot is already booked
       const hasConflict = existingBookings.some((booking: { startTime: string; endTime: string }) => {
-        const existingStart = timeToMinutes(booking.startTime)
-        const existingEnd = timeToMinutes(booking.endTime)
-        return requestedStart < existingEnd && requestedEnd > existingStart
+        const bookingStart = timeToMinutes(booking.startTime)
+        const bookingEnd = timeToMinutes(booking.endTime)
+        return requestedStart < bookingEnd && requestedEnd > bookingStart
       })
 
-      if (hasConflict && defaultBathId) {
-        // Try second bath
-        const secondBath = await prisma.spaBath.findFirst({
-          where: { 
-            tenantId, 
-            isActive: true,
-            id: { not: defaultBathId }
-          }
-        })
-
-        if (secondBath) {
-          // Check second bath availability
-          const secondBathBookings = await prisma.spaBooking.findMany({
-            where: {
-              tenantId,
-              date: bookingDate,
-              status: { not: 'cancelled' },
-              bathId: secondBath.id
-            }
-          })
-
-          const secondBathConflict = secondBathBookings.some((booking: { startTime: string; endTime: string }) => {
-            const existingStart = timeToMinutes(booking.startTime)
-            const existingEnd = timeToMinutes(booking.endTime)
-            return requestedStart < existingEnd && requestedEnd > existingStart
-          })
-
-          if (secondBathConflict) {
-            return NextResponse.json(
-              { error: 'არჩეული დრო დაკავებულია. გთხოვთ აირჩიოთ სხვა დრო.', errorCode: 'TIME_UNAVAILABLE' },
-              { status: 409, headers: corsHeaders }
-            )
-          }
-          
-          // Use second bath
-          defaultBathId = secondBath.id
-        } else {
-          return NextResponse.json(
-            { error: 'არჩეული დრო დაკავებულია. გთხოვთ აირჩიოთ სხვა დრო.', errorCode: 'TIME_UNAVAILABLE' },
-            { status: 409, headers: corsHeaders }
-          )
-        }
+      if (hasConflict) {
+        return NextResponse.json(
+          { 
+            error: 'არჩეული დრო დაკავებულია. გთხოვთ აირჩიოთ სხვა დრო.', 
+            errorCode: 'TIME_UNAVAILABLE' 
+          },
+          { status: 409, headers: corsHeaders }
+        )
       }
+
+      // Calculate price based on guests and baths
+      const guestCount = guests || 2
+      const bathCount = baths || 1
+      const priceKey = `${guestCount}-${bathCount}`
+      const calculatedPrice = PRICING[priceKey] || price || 150
+
+      // Get bath IDs
+      const allBaths = await prisma.spaBath.findMany({
+        where: { tenantId, isActive: true },
+        orderBy: { name: 'asc' },
+        take: bathCount
+      })
+
+      const bathId = allBaths[0]?.id || null
 
       // Create spa booking
       const booking = await prisma.spaBooking.create({
         data: {
           tenantId,
           bookingNumber: confirmationCode,
-          bathId: defaultBathId, // Assign to first available bath
+          bathId,
           guestName: name,
           guestPhone: phone || null,
           guestEmail: email || null,
-          date: new Date(date),
+          date: bookingDate,
           startTime: time,
           endTime: calculateEndTime(time, 60),
           duration: 60,
-          guests: guests || 2,
+          guests: guestCount,
           status: 'confirmed',
           paymentStatus: 'pending',
           notes: notes || '',
-          totalPrice: servicePrice || 0,
-          services: { serviceId: service, serviceName: serviceName, source: source || 'website' }
+          totalPrice: calculatedPrice,
+          services: { 
+            packageId,
+            baths: bathCount,
+            source: source || 'website' 
+          }
         }
       })
 
@@ -159,15 +153,17 @@ export async function POST(request: NextRequest) {
       // Send confirmation email
       if (email) {
         try {
+          const bathLabel = bathCount === 1 ? '1 აბაზანა' : '2 აბაზანა'
           const emailHtml = generateSpaEmailHtml({
             orgName,
             confirmationCode,
             guestName: name,
-            serviceName: serviceName || 'ლუდის სპა',
-            servicePrice: servicePrice || 0,
+            guests: guestCount,
+            baths: bathCount,
+            bathLabel,
+            price: calculatedPrice,
             date,
-            time,
-            guests: guests || 2
+            time
           })
 
           await fetch(new URL('/api/email/send', request.url).toString(), {
@@ -179,19 +175,24 @@ export async function POST(request: NextRequest) {
               body: emailHtml
             })
           })
-          console.log(`[Public Bookings] Spa confirmation email sent to ${email}`)
+          console.log(`[Public Bookings] Confirmation email sent to ${email}`)
         } catch (emailError) {
-          console.error('[Public Bookings] Failed to send spa confirmation email:', emailError)
+          console.error('[Public Bookings] Failed to send email:', emailError)
         }
       }
 
       return NextResponse.json(
-        { success: true, bookingId: booking.id, confirmationCode },
+        { 
+          success: true, 
+          bookingId: booking.id, 
+          confirmationCode,
+          price: calculatedPrice
+        },
         { headers: corsHeaders }
       )
 
     } else if (type === 'restaurant') {
-      // Create restaurant reservation (using SpaBooking model with different type)
+      // Create restaurant reservation
       const reservation = await prisma.spaBooking.create({
         data: {
           tenantId,
@@ -201,14 +202,14 @@ export async function POST(request: NextRequest) {
           guestEmail: email || null,
           date: new Date(date),
           startTime: time,
-          endTime: calculateEndTime(time, 120), // 2 hours for restaurant
+          endTime: calculateEndTime(time, 120),
           duration: 120,
           guests: guests || 2,
           status: 'confirmed',
           paymentStatus: 'pending',
           notes: notes || '',
           totalPrice: 0,
-          services: { type: 'restaurant', occasion: occasion, source: source || 'website' }
+          services: { type: 'restaurant', occasion, source: source || 'website' }
         }
       })
 
@@ -236,9 +237,9 @@ export async function POST(request: NextRequest) {
               body: emailHtml
             })
           })
-          console.log(`[Public Bookings] Restaurant confirmation email sent to ${email}`)
+          console.log(`[Public Bookings] Restaurant email sent to ${email}`)
         } catch (emailError) {
-          console.error('[Public Bookings] Failed to send restaurant confirmation email:', emailError)
+          console.error('[Public Bookings] Failed to send email:', emailError)
         }
       }
 
@@ -264,7 +265,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - Get pending bookings (for admin)
+// GET - Get bookings
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -290,7 +291,6 @@ export async function GET(request: NextRequest) {
     const tenantId = organization.tenantId
     const results: Record<string, unknown> = {}
 
-    // Get all bookings first
     const allBookings = await prisma.spaBooking.findMany({
       where: {
         tenantId,
@@ -327,31 +327,17 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Helper: Calculate end time
-function calculateEndTime(startTime: string, durationMinutes: number): string {
-  const [hours, minutes] = startTime.split(':').map(Number)
-  const totalMinutes = hours * 60 + minutes + durationMinutes
-  const endHours = Math.floor(totalMinutes / 60) % 24
-  const endMinutes = totalMinutes % 60
-  return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
-}
-
-// Helper: Convert time string to minutes
-function timeToMinutes(time: string): number {
-  const [h, m] = time.split(':').map(Number)
-  return h * 60 + (m || 0)
-}
-
 // Generate Spa Email HTML
 function generateSpaEmailHtml(data: {
   orgName: string
   confirmationCode: string
   guestName: string
-  serviceName: string
-  servicePrice: number
+  guests: number
+  baths: number
+  bathLabel: string
+  price: number
   date: string
   time: string
-  guests: number
 }): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -376,8 +362,8 @@ function generateSpaEmailHtml(data: {
               <td style="padding: 8px 0; font-weight: bold;">${data.guestName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #666;">სერვისი:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.serviceName}</td>
+              <td style="padding: 8px 0; color: #666;">პაკეტი:</td>
+              <td style="padding: 8px 0; font-weight: bold;">${data.guests} სტუმარი - ${data.bathLabel}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; color: #666;">თარიღი:</td>
@@ -387,16 +373,12 @@ function generateSpaEmailHtml(data: {
               <td style="padding: 8px 0; color: #666;">დრო:</td>
               <td style="padding: 8px 0; font-weight: bold;">${data.time}</td>
             </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #666;">სტუმრები:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.guests}</td>
-            </tr>
           </table>
         </div>
         
         <div style="background: #d97706; color: white; padding: 20px; border-radius: 8px; text-align: center;">
           <p style="margin: 0; font-size: 14px;">სულ გადასახდელი</p>
-          <p style="margin: 5px 0 0 0; font-size: 32px; font-weight: bold;">₾${data.servicePrice}</p>
+          <p style="margin: 5px 0 0 0; font-size: 32px; font-weight: bold;">₾${data.price}</p>
         </div>
       </div>
       
@@ -434,7 +416,7 @@ function generateRestaurantEmailHtml(data: {
           </p>
         </div>
         
-        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="background: white; padding: 20px; border-radius: 8px;">
           <h3 style="color: #333; margin-top: 0;">📋 ჯავშნის დეტალები</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
