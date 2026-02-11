@@ -339,73 +339,69 @@ function generateSpaEmailHtml(data: {
   date: string
   time: string
 }): string {
+  const bookingUrl = `https://www.breweryhouse.ge/booking/${data.confirmationCode}`
+  
   return `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
       <title>სპა ჯავშანი - ${data.confirmationCode}</title>
-      <style>
-        @media print {
-          .no-print { display: none !important; }
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        }
-      </style>
     </head>
-    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div class="no-print" style="text-align: center; margin-bottom: 20px;">
-        <button onclick="window.print()" style="background: #d97706; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer;">
-          🖨️ დაბეჭდვა
-        </button>
-      </div>
-      
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
       <div style="background: linear-gradient(135deg, #d97706 0%, #92400e 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0;">🍺 ${data.orgName}</h1>
-        <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">ლუდის სპა - ჯავშნის დადასტურება</p>
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🍺 Brewery House & Beer Spa</h1>
+        <p style="color: #fef3c7; margin-top: 10px; font-size: 16px;">ლუდის სპა - ჯავშნის დადასტურება</p>
       </div>
       
-      <div style="background: #f8f9fa; padding: 30px; border: 1px solid #e9ecef;">
-        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="color: #333; margin-top: 0;">✅ ჯავშანი დადასტურებულია!</h2>
-          <p style="font-size: 24px; color: #d97706; font-weight: bold; margin: 10px 0;">
-            კოდი: ${data.confirmationCode}
+      <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb;">
+        <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+          <h2 style="color: #92400e; margin-top: 0;">✅ ჯავშანი დადასტურებულია!</h2>
+          <p style="font-size: 28px; color: #d97706; font-weight: bold; margin: 10px 0; letter-spacing: 2px;">
+            ${data.confirmationCode}
           </p>
         </div>
         
-        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h3 style="color: #333; margin-top: 0;">📋 ჯავშნის დეტალები</h3>
+        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h3 style="color: #374151; margin-top: 0; border-bottom: 2px solid #d97706; padding-bottom: 10px;">📋 ჯავშნის დეტალები</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="padding: 8px 0; color: #666;">სტუმარი:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.guestName}</td>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">სტუმარი:</td>
+              <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${data.guestName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #666;">პაკეტი:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.guests} სტუმარი - ${data.bathLabel}</td>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">პაკეტი:</td>
+              <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${data.guests} სტუმარი - ${data.bathLabel}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #666;">თარიღი:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.date}</td>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">თარიღი:</td>
+              <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${data.date}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #666;">დრო:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.time}</td>
+              <td style="padding: 12px 0; color: #6b7280;">დრო:</td>
+              <td style="padding: 12px 0; font-weight: bold; color: #111827;">${data.time}</td>
             </tr>
           </table>
         </div>
         
-        <div style="background: #d97706; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-          <p style="margin: 0; font-size: 14px;">სულ გადასახდელი</p>
-          <p style="margin: 5px 0 0 0; font-size: 32px; font-weight: bold;">₾${data.price}</p>
+        <div style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
+          <p style="margin: 0; font-size: 14px; opacity: 0.9;">სულ გადასახდელი</p>
+          <p style="margin: 5px 0 0 0; font-size: 36px; font-weight: bold;">₾${data.price}</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 25px;">
+          <a href="${bookingUrl}" style="display: inline-block; background: #059669; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+            📄 ჯავშნის ნახვა / დაბეჭდვა
+          </a>
         </div>
       </div>
       
-      <div style="padding: 20px; text-align: center; color: #666; font-size: 12px; border: 1px solid #e9ecef; border-top: none; background: white;">
-        <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">გმადლობთ რომ აირჩიეთ ${data.orgName}!</p>
-        <p style="margin: 5px 0;">📍 ასპინძა, შორეთის ქ. 21, სამცხე-ჯავახეთი</p>
-        <p style="margin: 5px 0;">📞 +995 599 946 500</p>
+      <div style="background: #1f2937; padding: 25px; text-align: center; color: #9ca3af; font-size: 13px; border-radius: 0 0 10px 10px;">
+        <p style="margin: 0 0 8px 0; font-weight: bold; color: #ffffff; font-size: 15px;">გმადლობთ რომ აირჩიეთ Brewery House!</p>
+        <p style="margin: 8px 0;">📍 ასპინძა, შორეთის ქ. 21, სამცხე-ჯავახეთი</p>
+        <p style="margin: 8px 0;">📞 +995 599 946 500</p>
         <p style="margin: 15px 0 0 0;">
-          <a href="https://www.breweryhouse.ge" style="color: #d97706; text-decoration: none;">www.breweryhouse.ge</a>
+          <a href="https://www.breweryhouse.ge" style="color: #fbbf24; text-decoration: none;">www.breweryhouse.ge</a>
         </p>
       </div>
     </body>
@@ -423,76 +419,74 @@ function generateRestaurantEmailHtml(data: {
   guests: number
   occasion?: string
 }): string {
+  const bookingUrl = `https://www.breweryhouse.ge/booking/${data.confirmationCode}`
+  
   return `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
       <title>მაგიდის ჯავშანი - ${data.confirmationCode}</title>
-      <style>
-        @media print {
-          .no-print { display: none !important; }
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        }
-      </style>
     </head>
-    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div class="no-print" style="text-align: center; margin-bottom: 20px;">
-        <button onclick="window.print()" style="background: #d97706; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer;">
-          🖨️ დაბეჭდვა
-        </button>
-      </div>
-      
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
       <div style="background: linear-gradient(135deg, #d97706 0%, #92400e 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0;">🍽️ ${data.orgName}</h1>
-        <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">რესტორანი - მაგიდის ჯავშანი</p>
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🍽️ Brewery House Restaurant</h1>
+        <p style="color: #fef3c7; margin-top: 10px; font-size: 16px;">რესტორანი - მაგიდის ჯავშანი</p>
       </div>
       
-      <div style="background: #f8f9fa; padding: 30px; border: 1px solid #e9ecef;">
-        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="color: #333; margin-top: 0;">✅ მაგიდა დაჯავშნილია!</h2>
-          <p style="font-size: 24px; color: #d97706; font-weight: bold; margin: 10px 0;">
-            კოდი: ${data.confirmationCode}
+      <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb;">
+        <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+          <h2 style="color: #92400e; margin-top: 0;">✅ მაგიდა დაჯავშნილია!</h2>
+          <p style="font-size: 28px; color: #d97706; font-weight: bold; margin: 10px 0; letter-spacing: 2px;">
+            ${data.confirmationCode}
           </p>
         </div>
         
-        <div style="background: white; padding: 20px; border-radius: 8px;">
-          <h3 style="color: #333; margin-top: 0;">📋 ჯავშნის დეტალები</h3>
+        <div style="background: #f9fafb; padding: 20px; border-radius: 8px;">
+          <h3 style="color: #374151; margin-top: 0; border-bottom: 2px solid #d97706; padding-bottom: 10px;">📋 ჯავშნის დეტალები</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="padding: 8px 0; color: #666;">სტუმარი:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.guestName}</td>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">სტუმარი:</td>
+              <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${data.guestName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #666;">თარიღი:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.date}</td>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">თარიღი:</td>
+              <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${data.date}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #666;">დრო:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.time}</td>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">დრო:</td>
+              <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${data.time}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #666;">სტუმრები:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.guests}</td>
+              <td style="padding: 12px 0; color: #6b7280;${data.occasion ? ' border-bottom: 1px solid #e5e7eb;' : ''}">სტუმრები:</td>
+              <td style="padding: 12px 0; font-weight: bold; color: #111827;${data.occasion ? ' border-bottom: 1px solid #e5e7eb;' : ''}">${data.guests}</td>
             </tr>
             ${data.occasion ? `
             <tr>
-              <td style="padding: 8px 0; color: #666;">ღონისძიება:</td>
-              <td style="padding: 8px 0; font-weight: bold;">${data.occasion}</td>
+              <td style="padding: 12px 0; color: #6b7280;">ღონისძიება:</td>
+              <td style="padding: 12px 0; font-weight: bold; color: #111827;">${data.occasion}</td>
             </tr>
             ` : ''}
           </table>
         </div>
+        
+        <div style="text-align: center; margin-top: 25px;">
+          <a href="${bookingUrl}" style="display: inline-block; background: #059669; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+            📄 ჯავშნის ნახვა / დაბეჭდვა
+          </a>
+        </div>
+        
+        <div style="text-align: center; margin-top: 15px;">
+          <a href="https://www.breweryhouse.ge/menu" style="color: #d97706; text-decoration: none; font-size: 14px;">📖 იხილეთ მენიუ</a>
+        </div>
       </div>
       
-      <div style="padding: 20px; text-align: center; color: #666; font-size: 12px; border: 1px solid #e9ecef; border-top: none; background: white;">
-        <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">გმადლობთ რომ აირჩიეთ ${data.orgName}!</p>
-        <p style="margin: 5px 0;">📍 ასპინძა, შორეთის ქ. 21, სამცხე-ჯავახეთი</p>
-        <p style="margin: 5px 0;">📞 +995 599 946 500</p>
+      <div style="background: #1f2937; padding: 25px; text-align: center; color: #9ca3af; font-size: 13px; border-radius: 0 0 10px 10px;">
+        <p style="margin: 0 0 8px 0; font-weight: bold; color: #ffffff; font-size: 15px;">გმადლობთ რომ აირჩიეთ Brewery House!</p>
+        <p style="margin: 8px 0;">📍 ასპინძა, შორეთის ქ. 21, სამცხე-ჯავახეთი</p>
+        <p style="margin: 8px 0;">📞 +995 599 946 500</p>
         <p style="margin: 15px 0 0 0;">
-          <a href="https://www.breweryhouse.ge/menu" style="color: #d97706; text-decoration: none;">📖 იხილეთ მენიუ</a>
-          &nbsp;|&nbsp;
-          <a href="https://www.breweryhouse.ge" style="color: #d97706; text-decoration: none;">www.breweryhouse.ge</a>
+          <a href="https://www.breweryhouse.ge" style="color: #fbbf24; text-decoration: none;">www.breweryhouse.ge</a>
         </p>
       </div>
     </body>
