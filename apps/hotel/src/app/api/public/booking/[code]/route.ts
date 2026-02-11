@@ -31,35 +31,73 @@ export async function GET(
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
 
-    // Find booking by bookingNumber
-    const booking = await prisma.spaBooking.findFirst({
+    // First try SpaBooking (for spa and restaurant)
+    const spaBooking = await prisma.spaBooking.findFirst({
       where: {
         bookingNumber: code
       }
     })
 
-    if (!booking) {
-      return NextResponse.json(
-        { error: 'Booking not found' },
-        { status: 404, headers: corsHeaders }
-      );
+    if (spaBooking) {
+      return NextResponse.json({
+        id: spaBooking.id,
+        type: 'spa',
+        bookingNumber: spaBooking.bookingNumber,
+        guestName: spaBooking.guestName,
+        guestPhone: spaBooking.guestPhone,
+        guestEmail: spaBooking.guestEmail,
+        date: spaBooking.date,
+        startTime: spaBooking.startTime,
+        endTime: spaBooking.endTime,
+        guests: spaBooking.guests,
+        totalPrice: spaBooking.totalPrice,
+        status: spaBooking.status,
+        services: spaBooking.services,
+        createdAt: spaBooking.createdAt
+      }, { headers: corsHeaders });
     }
 
-    return NextResponse.json({
-      id: booking.id,
-      bookingNumber: booking.bookingNumber,
-      guestName: booking.guestName,
-      guestPhone: booking.guestPhone,
-      guestEmail: booking.guestEmail,
-      date: booking.date,
-      startTime: booking.startTime,
-      endTime: booking.endTime,
-      guests: booking.guests,
-      totalPrice: booking.totalPrice,
-      status: booking.status,
-      services: booking.services,
-      createdAt: booking.createdAt
-    }, { headers: corsHeaders });
+    // Then try HotelReservation (for hotel bookings)
+    const hotelBooking = await prisma.hotelReservation.findFirst({
+      where: {
+        confirmationNumber: code
+      },
+      include: {
+        room: true
+      }
+    })
+
+    if (hotelBooking) {
+      const nights = Math.ceil((new Date(hotelBooking.checkOut).getTime() - new Date(hotelBooking.checkIn).getTime()) / (1000 * 60 * 60 * 24))
+      
+      return NextResponse.json({
+        id: hotelBooking.id,
+        type: 'hotel',
+        bookingNumber: hotelBooking.confirmationNumber,
+        guestName: hotelBooking.guestName,
+        guestPhone: hotelBooking.guestPhone,
+        guestEmail: hotelBooking.guestEmail,
+        checkIn: hotelBooking.checkIn,
+        checkOut: hotelBooking.checkOut,
+        nights,
+        adults: hotelBooking.adults,
+        children: hotelBooking.children,
+        room: hotelBooking.room ? {
+          number: hotelBooking.room.roomNumber,
+          type: hotelBooking.room.roomType
+        } : null,
+        totalPrice: hotelBooking.totalAmount,
+        status: hotelBooking.status,
+        specialRequests: hotelBooking.notes,
+        createdAt: hotelBooking.createdAt
+      }, { headers: corsHeaders });
+    }
+
+    // Not found in either table
+    return NextResponse.json(
+      { error: 'Booking not found' },
+      { status: 404, headers: corsHeaders }
+    );
 
   } catch (error) {
     console.error('[Public Booking] Error:', error)
