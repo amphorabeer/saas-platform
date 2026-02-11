@@ -66,6 +66,72 @@ export async function POST(request: NextRequest) {
     const confirmationCode = `${type === 'spa' ? 'SPA' : 'RST'}${Date.now().toString(36).toUpperCase()}`
 
     if (type === 'spa') {
+      // Check availability - find if the bath is already booked at this time
+      const bookingDate = new Date(date)
+      const requestedStart = timeToMinutes(time)
+      const requestedEnd = requestedStart + 60 // 60 min duration
+
+      // Get all bookings for this date
+      const existingBookings = await prisma.spaBooking.findMany({
+        where: {
+          tenantId,
+          date: bookingDate,
+          status: { not: 'cancelled' },
+          bathId: defaultBathId
+        }
+      })
+
+      // Check for time overlap
+      const hasConflict = existingBookings.some((booking: { startTime: string; endTime: string }) => {
+        const existingStart = timeToMinutes(booking.startTime)
+        const existingEnd = timeToMinutes(booking.endTime)
+        return requestedStart < existingEnd && requestedEnd > existingStart
+      })
+
+      if (hasConflict && defaultBathId) {
+        // Try second bath
+        const secondBath = await prisma.spaBath.findFirst({
+          where: { 
+            tenantId, 
+            isActive: true,
+            id: { not: defaultBathId }
+          }
+        })
+
+        if (secondBath) {
+          // Check second bath availability
+          const secondBathBookings = await prisma.spaBooking.findMany({
+            where: {
+              tenantId,
+              date: bookingDate,
+              status: { not: 'cancelled' },
+              bathId: secondBath.id
+            }
+          })
+
+          const secondBathConflict = secondBathBookings.some((booking: { startTime: string; endTime: string }) => {
+            const existingStart = timeToMinutes(booking.startTime)
+            const existingEnd = timeToMinutes(booking.endTime)
+            return requestedStart < existingEnd && requestedEnd > existingStart
+          })
+
+          if (secondBathConflict) {
+            return NextResponse.json(
+              { error: 'არჩეული დრო დაკავებულია. გთხოვთ აირჩიოთ სხვა დრო.', errorCode: 'TIME_UNAVAILABLE' },
+              { status: 409, headers: corsHeaders }
+            )
+          }
+          
+          // Use second bath
+          defaultBathId = secondBath.id
+        } else {
+          return NextResponse.json(
+            { error: 'არჩეული დრო დაკავებულია. გთხოვთ აირჩიოთ სხვა დრო.', errorCode: 'TIME_UNAVAILABLE' },
+            { status: 409, headers: corsHeaders }
+          )
+        }
+      }
+
       // Create spa booking
       const booking = await prisma.spaBooking.create({
         data: {
@@ -268,6 +334,12 @@ function calculateEndTime(startTime: string, durationMinutes: number): string {
   const endHours = Math.floor(totalMinutes / 60) % 24
   const endMinutes = totalMinutes % 60
   return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
+}
+
+// Helper: Convert time string to minutes
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + (m || 0)
 }
 
 // Generate Spa Email HTML
