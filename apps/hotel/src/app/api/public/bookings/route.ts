@@ -29,29 +29,26 @@ export async function POST(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
 
-    // Find default tenant
-    const tenant = await prisma.tenant.findFirst({
+    // Find organization by name or use first one
+    const organization = await prisma.organization.findFirst({
       where: {
         OR: [
-          { slug: 'brewery-house' },
-          { subdomain: 'brewery-house' }
+          { name: { contains: 'Brewery' } },
+          { name: { contains: 'brewery' } }
         ]
       }
     })
 
-    if (!tenant) {
-      console.error('[Public Bookings] Tenant not found')
+    if (!organization) {
+      console.error('[Public Bookings] Organization not found')
       return NextResponse.json(
         { error: 'Configuration error' },
         { status: 500, headers: corsHeaders }
       )
     }
 
-    // Get organization for hotel name
-    const organization = await prisma.organization.findFirst({
-      where: { tenantId: tenant.id }
-    })
-    const orgName = organization?.name || 'Brewery House'
+    const tenantId = organization.tenantId
+    const orgName = organization.name || 'Brewery House'
 
     // Generate confirmation code
     const confirmationCode = `${type === 'spa' ? 'SPA' : 'RST'}${Date.now().toString(36).toUpperCase()}`
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
       // Create spa booking
       const booking = await prisma.spaBooking.create({
         data: {
-          tenantId: tenant.id,
+          tenantId,
           bookingNumber: confirmationCode,
           guestName: name,
           guestPhone: phone || null,
@@ -118,7 +115,7 @@ export async function POST(request: NextRequest) {
       // Create restaurant reservation (using SpaBooking model with different type)
       const reservation = await prisma.spaBooking.create({
         data: {
-          tenantId: tenant.id,
+          tenantId,
           bookingNumber: confirmationCode,
           guestName: name,
           guestPhone: phone || null,
@@ -198,44 +195,44 @@ export async function GET(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
 
-    const tenant = await prisma.tenant.findFirst({
+    const organization = await prisma.organization.findFirst({
       where: {
         OR: [
-          { slug: 'brewery-house' },
-          { subdomain: 'brewery-house' }
+          { name: { contains: 'Brewery' } },
+          { name: { contains: 'brewery' } }
         ]
       }
     })
 
-    if (!tenant) {
-      return NextResponse.json({ error: 'Tenant not found' }, { status: 404, headers: corsHeaders })
+    if (!organization) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404, headers: corsHeaders })
     }
 
+    const tenantId = organization.tenantId
     const results: Record<string, unknown> = {}
 
+    // Get all bookings first
+    const allBookings = await prisma.spaBooking.findMany({
+      where: {
+        tenantId,
+        status: status,
+        date: { gte: new Date() }
+      },
+      orderBy: { date: 'asc' },
+      take: 50
+    })
+
     if (type === 'spa' || type === 'all' || !type) {
-      results.spaBookings = await prisma.spaBooking.findMany({
-        where: {
-          tenantId: tenant.id,
-          status: status,
-          date: { gte: new Date() },
-          services: { path: ['type'], equals: undefined } // Spa bookings don't have type=restaurant
-        },
-        orderBy: { date: 'asc' },
-        take: 50
+      results.spaBookings = allBookings.filter((b: { services: unknown }) => {
+        const services = b.services as Record<string, unknown> | null
+        return services?.type !== 'restaurant'
       })
     }
 
     if (type === 'restaurant' || type === 'all' || !type) {
-      results.restaurantReservations = await prisma.spaBooking.findMany({
-        where: {
-          tenantId: tenant.id,
-          status: status,
-          date: { gte: new Date() },
-          services: { path: ['type'], equals: 'restaurant' }
-        },
-        orderBy: { date: 'asc' },
-        take: 50
+      results.restaurantReservations = allBookings.filter((b: { services: unknown }) => {
+        const services = b.services as Record<string, unknown> | null
+        return services?.type === 'restaurant'
       })
     }
 
