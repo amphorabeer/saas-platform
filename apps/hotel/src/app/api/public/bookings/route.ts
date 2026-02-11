@@ -50,6 +50,18 @@ export async function POST(request: NextRequest) {
     const tenantId = organization.tenantId
     const orgName = organization.name || 'Brewery House'
 
+    // Get default bath for spa bookings
+    let defaultBathId: string | null = null
+    try {
+      const firstBath = await prisma.spaBath.findFirst({
+        where: { tenantId, isActive: true },
+        orderBy: { name: 'asc' }
+      })
+      defaultBathId = firstBath?.id || null
+    } catch {
+      console.log('[Public Bookings] No spa baths found')
+    }
+
     // Generate confirmation code
     const confirmationCode = `${type === 'spa' ? 'SPA' : 'RST'}${Date.now().toString(36).toUpperCase()}`
 
@@ -59,6 +71,7 @@ export async function POST(request: NextRequest) {
         data: {
           tenantId,
           bookingNumber: confirmationCode,
+          bathId: defaultBathId, // Assign to first available bath
           guestName: name,
           guestPhone: phone || null,
           guestEmail: email || null,
