@@ -10,6 +10,7 @@ export class PaymentService {
     { id: 'bank', name: 'Bank Transfer', icon: '🏦', requiresReference: true },
     { id: 'online', name: 'Online Payment', icon: '🌐', requiresReference: true },
     { id: 'company', name: 'Company Account', icon: '🏢', requiresReference: false },
+    { id: 'consignment', name: 'კონსიგნაცია', icon: '📋', requiresReference: false, requiresCompany: true },
     { id: 'voucher', name: 'Voucher', icon: '🎟️', requiresReference: true },
     { id: 'deposit', name: 'From Deposit', icon: '💰', requiresReference: false }
   ]

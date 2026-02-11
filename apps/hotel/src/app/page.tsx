@@ -24,6 +24,8 @@ import CashierManagement from '../components/CashierModule'
 import FinancialDashboard from '../components/FinancialDashboard'
 import KPIAlerts from '../components/KPIAlerts'
 import SettingsNew from '../components/SettingsNew'
+import SpaCalendar from '../components/SpaCalendar'
+import RestaurantPOS from '../components/RestaurantPOS'
 import { SystemLockService } from '../lib/systemLockService'
 import { ActivityLogger } from '../lib/activityLogger'
 import { FolioService } from '../services/FolioService'
@@ -93,7 +95,7 @@ function BusinessDayCard() {
     <div className="bg-purple-50 rounded-lg p-2 border border-purple-200 shadow-sm col-span-2 md:col-span-1">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-gray-500">Business Day</p>
+          <p className="text-xs text-gray-500">სამუშაო დღე</p>
           <p className="text-lg font-bold text-purple-600">{moment(businessDay).format('DD/MM/YYYY')}</p>
         </div>
         <span className="text-lg">📅</span>
@@ -373,7 +375,7 @@ export default function HotelDashboard() {
   const getTabLabel = (tabId: string) => {
     switch(tabId) {
       case 'dashboard': return '🏠 Dashboard'
-      case 'calendar': return '📅 კალენდარი'
+      case 'calendar': return '🏨 სასტუმრო'
       case 'rooms': return '🏨 ნომრები'
       case 'folios': return '💰 ანგარიშები'
       case 'housekeeping': return '🧹 დასუფთავება'
@@ -383,6 +385,8 @@ export default function HotelDashboard() {
       case 'cashier': return '💰 სალარო'
       case 'financial': return '💰 ფინანსური დეშბორდი'
       case 'settings-new': return '⚙️ პარამეტრები'
+      case 'restaurant': return '🍽️ რესტორანი'
+      case 'beerspa': return '🍺 ლუდის სპა'
       default: return ''
     }
   }
@@ -1171,6 +1175,22 @@ export default function HotelDashboard() {
                       >
                         ⚙️ პარამეტრები
                       </button>
+                      
+                      <div className="border-t my-1"></div>
+                      
+                      <button
+                        onClick={() => addTabFromMenu('restaurant')}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
+                      >
+                        🍽️ რესტორანი
+                      </button>
+                      
+                      <button
+                        onClick={() => addTabFromMenu('beerspa')}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
+                      >
+                        🍺 ლუდის სპა
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1317,8 +1337,8 @@ export default function HotelDashboard() {
                 }}
                 className="bg-blue-500 text-white p-6 rounded-lg hover:bg-blue-600 transition-all transform hover:scale-105 shadow-lg text-left"
               >
-                <div className="text-4xl mb-2">📅</div>
-                <div className="text-xl font-bold">კალენდარი</div>
+                <div className="text-4xl mb-2">🏨</div>
+                <div className="text-xl font-bold">სასტუმრო</div>
                 <div className="text-sm opacity-75">ჯავშნების ნახვა და მართვა</div>
               </button>
               
@@ -1351,12 +1371,21 @@ export default function HotelDashboard() {
               </button>
               
               <button
-                onClick={() => addTabFromMenu('folios')}
+                onClick={() => addTabFromMenu('restaurant')}
+                className="bg-orange-500 text-white p-6 rounded-lg hover:bg-orange-600 transition-all transform hover:scale-105 shadow-lg text-left"
+              >
+                <div className="text-4xl mb-2">🍽️</div>
+                <div className="text-xl font-bold">რესტორანი</div>
+                <div className="text-sm opacity-75">POS და შეკვეთების მართვა</div>
+              </button>
+              
+              <button
+                onClick={() => addTabFromMenu('beerspa')}
                 className="bg-purple-500 text-white p-6 rounded-lg hover:bg-purple-600 transition-all transform hover:scale-105 shadow-lg text-left"
               >
-                <div className="text-4xl mb-2">💰</div>
-                <div className="text-xl font-bold">ანგარიშები</div>
-                <div className="text-sm opacity-75">დარიცხვებისა და გადახდების მართვა</div>
+                <div className="text-4xl mb-2">🍺</div>
+                <div className="text-xl font-bold">ლუდის სპა</div>
+                <div className="text-sm opacity-75">სპა ჯავშნები და სერვისები</div>
               </button>
               
               <button
@@ -1364,7 +1393,7 @@ export default function HotelDashboard() {
                 className="bg-indigo-500 text-white p-6 rounded-lg hover:bg-indigo-600 transition-all transform hover:scale-105 shadow-lg text-left"
               >
                 <div className="text-4xl mb-2">📊</div>
-                <div className="text-xl font-bold">ფინანსური ანგარიშები</div>
+                <div className="text-xl font-bold">ფინანსები</div>
                 <div className="text-sm opacity-75">შემოსავლები და სტატისტიკა</div>
               </button>
               
@@ -1541,15 +1570,15 @@ export default function HotelDashboard() {
             {/* Statistics Cards */}
             <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-white p-4 rounded-lg shadow">
-                <div className="text-sm text-gray-600">Total Rooms</div>
+                <div className="text-sm text-gray-600">სულ ოთახი</div>
                 <div className="text-2xl font-bold">{stats.total}</div>
               </div>
               <div className="bg-white p-4 rounded-lg shadow">
-                <div className="text-sm text-gray-600">Occupied</div>
+                <div className="text-sm text-gray-600">დაკავებული</div>
                 <div className="text-2xl font-bold text-orange-600">{stats.occupied}</div>
               </div>
               <div className="bg-white p-4 rounded-lg shadow">
-                <div className="text-sm text-gray-600">Available</div>
+                <div className="text-sm text-gray-600">თავისუფალი</div>
                 <div className="text-2xl font-bold text-green-600">{stats.vacant}</div>
               </div>
               <div className="bg-white p-4 rounded-lg shadow">
@@ -1691,6 +1720,14 @@ export default function HotelDashboard() {
         
         {activeTab === 'settings-new' && (
           <SettingsNew />
+        )}
+        
+        {activeTab === 'restaurant' && (
+          <RestaurantPOS />
+        )}
+        
+        {activeTab === 'beerspa' && (
+          <SpaCalendar />
         )}
       </div>
 

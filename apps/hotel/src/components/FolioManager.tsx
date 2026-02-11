@@ -822,10 +822,37 @@ const PaymentModal = ({ amount, onPost, onCancel }: { amount: number; onPost: (p
   const [payment, setPayment] = useState({
     method: 'cash',
     amount: amount,
-    reference: ''
+    reference: '',
+    companyId: ''
   })
+  const [companies, setCompanies] = useState<any[]>([])
+  const [showCompanySelect, setShowCompanySelect] = useState(false)
   
-  const handleSubmit = () => {
+  // Load companies when invoice method selected
+  useEffect(() => {
+    if (payment.method === 'invoice') {
+      loadCompanies()
+      setShowCompanySelect(true)
+    } else {
+      setShowCompanySelect(false)
+    }
+  }, [payment.method])
+  
+  const loadCompanies = async () => {
+    try {
+      const response = await fetch('/api/hotel/tour-companies')
+      if (response.ok) {
+        const data = await response.json()
+        setCompanies(data || [])
+      }
+    } catch (e) {
+      // Fallback to localStorage
+      const saved = localStorage.getItem('tourCompanies')
+      if (saved) setCompanies(JSON.parse(saved))
+    }
+  }
+  
+  const handleSubmit = async () => {
     if (payment.amount <= 0) {
       alert('გთხოვთ შეიყვანოთ თანხა')
       return
@@ -834,6 +861,57 @@ const PaymentModal = ({ amount, onPost, onCancel }: { amount: number; onPost: (p
       alert('გადახდა აღემატება ბალანსს')
       return
     }
+    if (payment.method === 'invoice' && !payment.companyId) {
+      alert('გთხოვთ აირჩიოთ კომპანია')
+      return
+    }
+    
+    // If invoice payment, create invoice and receivable
+    if (payment.method === 'invoice' && payment.companyId) {
+      try {
+        // Create invoice
+        const invoiceResponse = await fetch('/api/hotel/company-invoices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            companyId: payment.companyId,
+            items: [{
+              description: 'Hotel Folio Payment',
+              quantity: 1,
+              unitPrice: payment.amount,
+              total: payment.amount
+            }],
+            subtotal: payment.amount,
+            tax: 0,
+            total: payment.amount,
+            notes: `Folio payment - Ref: ${payment.reference || 'N/A'}`
+          })
+        })
+        
+        if (invoiceResponse.ok) {
+          const invoice = await invoiceResponse.json()
+          
+          // Create accounts receivable
+          await fetch('/api/hotel/accounts-receivable', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              companyId: payment.companyId,
+              invoiceId: invoice.id,
+              amount: payment.amount,
+              description: `Folio Invoice: ${invoice.invoiceNumber}`,
+              sourceType: 'hotel',
+              sourceRef: payment.reference
+            })
+          })
+          
+          console.log('[FolioManager] Invoice created:', invoice.invoiceNumber)
+        }
+      } catch (e) {
+        console.error('[FolioManager] Error creating invoice:', e)
+      }
+    }
+    
     onPost(payment)
   }
   
@@ -853,10 +931,29 @@ const PaymentModal = ({ amount, onPost, onCancel }: { amount: number; onPost: (p
               <option value="cash">💵 Cash</option>
               <option value="card">💳 Credit Card</option>
               <option value="bank">🏦 Bank Transfer</option>
+              <option value="invoice">📄 Invoice (კომპანია)</option>
               <option value="company">🏢 Company Account</option>
               <option value="agency">🏛️ Agency</option>
             </select>
           </div>
+          
+          {/* Company Selection for Invoice */}
+          {showCompanySelect && (
+            <div>
+              <label className="block text-sm font-medium mb-1">კომპანია</label>
+              <select
+                value={payment.companyId}
+                onChange={(e) => setPayment({...payment, companyId: e.target.value})}
+                className="w-full border rounded px-3 py-2"
+              >
+                <option value="">აირჩიეთ კომპანია...</option>
+                {companies.map((c: any) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <p className="text-xs text-amber-600 mt-1">⚠️ შეიქმნება ინვოისი და დებიტორული ჩანაწერი</p>
+            </div>
+          )}
           
           <div>
             <label className="block text-sm font-medium mb-1">Amount (₾)</label>
