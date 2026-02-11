@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import moment from 'moment'
 import { ExtraChargesService } from '../services/ExtraChargesService'
 import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
+import RestaurantSettingsSection, { DEFAULT_RESTAURANT_SETTINGS, RestaurantSettings, MenuCategory, MenuItem } from './RestaurantSettingsSection'
+import BeerSpaSettingsSection, { DEFAULT_SPA_SETTINGS, SpaSettings, SpaBath, SpaService } from './BeerSpaSettingsSection'
+import TourCompaniesSettings from './TourCompaniesSettings'
 
 // ==================== TYPES ====================
 interface HotelInfo {
@@ -194,6 +197,13 @@ export default function SettingsNew() {
   const [packages, setPackages] = useState<Package[]>([])
   const [taxes, setTaxes] = useState({ VAT: 18, CITY_TAX: 2, TOURISM_TAX: 1, SERVICE_CHARGE: 10 })
   const [quickCharges, setQuickCharges] = useState<string[]>([])
+  
+  const [restaurantSettings, setRestaurantSettings] = useState<RestaurantSettings>(DEFAULT_RESTAURANT_SETTINGS)
+  const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([])
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+  const [spaSettings, setSpaSettings] = useState<SpaSettings>(DEFAULT_SPA_SETTINGS)
+  const [spaBaths, setSpaBaths] = useState<SpaBath[]>([])
+  const [spaServices, setSpaServices] = useState<SpaService[]>([])
   
   // Calendar settings state
   const [calendarSettings, setCalendarSettings] = useState<CalendarSettings>({
@@ -818,6 +828,142 @@ export default function SettingsNew() {
         }
       }
     }
+    
+    // Load Restaurant Settings from API
+    try {
+      const restSettingsRes = await fetch('/api/hotel/restaurant-settings')
+      if (restSettingsRes.ok) {
+        const restSettingsData = await restSettingsRes.json()
+        if (restSettingsData) {
+          setRestaurantSettings(prev => ({ ...prev, ...restSettingsData }))
+          console.log('✅ Loaded restaurant settings from API')
+        }
+      } else {
+        console.error('Restaurant settings API error:', restSettingsRes.status)
+      }
+    } catch (e) {
+      console.error('Error loading restaurant settings:', e)
+    }
+    
+    // Load Menu Categories from API
+    try {
+      const categoriesRes = await fetch('/api/hotel/menu-categories')
+      if (categoriesRes.ok) {
+        const categoriesData = await categoriesRes.json()
+        if (Array.isArray(categoriesData)) {
+          const mappedCategories = categoriesData.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            nameEn: c.nameEn || '',
+            icon: c.icon || '🍽️',
+            sortOrder: c.sortOrder || 0,
+            isActive: c.isActive ?? true
+          }))
+          setMenuCategories(mappedCategories)
+          console.log('✅ Loaded menu categories from API:', mappedCategories.length)
+        }
+      } else {
+        console.error('Menu categories API error:', categoriesRes.status)
+      }
+    } catch (e) {
+      console.error('Error loading menu categories:', e)
+    }
+    
+    // Load Menu Items from API
+    try {
+      const menuItemsRes = await fetch('/api/hotel/menu-items')
+      if (menuItemsRes.ok) {
+        const menuItemsData = await menuItemsRes.json()
+        if (Array.isArray(menuItemsData)) {
+          const mappedItems = menuItemsData.map((m: any) => ({
+            id: m.id,
+            categoryId: m.categoryId,
+            name: m.name,
+            nameEn: m.nameEn || '',
+            description: m.description || '',
+            descriptionEn: m.descriptionEn || '',
+            price: Number(m.price),
+            preparationTime: m.preparationTime || 15,
+            isAvailable: m.isAvailable ?? true,
+            isActive: m.isActive ?? true
+          }))
+          setMenuItems(mappedItems)
+          console.log('✅ Loaded menu items from API:', mappedItems.length)
+        }
+      } else {
+        console.error('Menu items API error:', menuItemsRes.status)
+      }
+    } catch (e) {
+      console.error('Error loading menu items:', e)
+    }
+    
+    // Load Spa Settings from API
+    try {
+      const spaSettingsRes = await fetch('/api/hotel/spa-settings')
+      if (spaSettingsRes.ok) {
+        const spaSettingsData = await spaSettingsRes.json()
+        if (spaSettingsData) {
+          setSpaSettings(prev => ({ ...prev, ...spaSettingsData }))
+          console.log('✅ Loaded spa settings from API')
+        }
+      } else {
+        console.error('Spa settings API error:', spaSettingsRes.status)
+      }
+    } catch (e) {
+      console.error('Error loading spa settings:', e)
+    }
+    
+    // Load Spa Baths from API
+    try {
+      const bathsRes = await fetch('/api/hotel/spa-baths')
+      if (bathsRes.ok) {
+        const bathsData = await bathsRes.json()
+        if (Array.isArray(bathsData)) {
+          const mappedBaths = bathsData.map((b: any) => ({
+            id: b.id,
+            name: b.name,
+            nameEn: b.nameEn || '',
+            capacity: b.capacity || 2,
+            price: Number(b.pricePerHour || b.price),
+            description: b.description || '',
+            features: b.features || [],
+            isActive: b.isActive ?? true
+          }))
+          setSpaBaths(mappedBaths)
+          console.log('✅ Loaded spa baths from API:', mappedBaths.length)
+        }
+      } else {
+        console.error('Spa baths API error:', bathsRes.status)
+      }
+    } catch (e) {
+      console.error('Error loading spa baths:', e)
+    }
+    
+    // Load Spa Services from API
+    try {
+      const servicesRes = await fetch('/api/hotel/spa-services')
+      if (servicesRes.ok) {
+        const servicesData = await servicesRes.json()
+        if (Array.isArray(servicesData)) {
+          const mappedServices = servicesData.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            nameEn: s.nameEn || '',
+            price: Number(s.price),
+            duration: s.duration || 30,
+            description: s.description || '',
+            category: s.category || '',
+            isActive: s.isActive ?? true
+          }))
+          setSpaServices(mappedServices)
+          console.log('✅ Loaded spa services from API:', mappedServices.length)
+        }
+      } else {
+        console.error('Spa services API error:', servicesRes.status)
+      }
+    } catch (e) {
+      console.error('Error loading spa services:', e)
+    }
   }
   
   // Save functions
@@ -1292,6 +1438,9 @@ export default function SettingsNew() {
     { id: 'housekeeping', label: 'დასუფთავება', icon: '🧹', description: 'Housekeeping ჩეკლისტი' },
     { id: 'cashier', label: 'სალარო', icon: '💰', description: 'სალაროს პარამეტრები' },
     { id: 'channels', label: 'არხები', icon: '🔗', description: 'Booking.com, Airbnb' },
+    { id: 'restaurant', label: 'რესტორანი', icon: '🍽️', description: 'მენიუ და შეკვეთები' },
+    { id: 'beerspa', label: 'ლუდის სპა', icon: '🍺', description: 'აბაზანები და ჯავშნები' },
+    { id: 'tourcompanies', label: 'ტურ. კომპანიები', icon: '🚌', description: 'კომპანიები და ინვოისები' },
     { id: 'facebook', label: 'Facebook Bot', icon: '📘', description: 'Messenger ჯავშნები' },
     { id: 'system', label: 'სისტემა', icon: '🖥️', description: 'სისტემის პარამეტრები' }
   ]
@@ -1459,6 +1608,105 @@ export default function SettingsNew() {
             {/* Channels Section */}
             {activeSection === 'channels' && (
               <ChannelManagerSection />
+            )}
+            
+            {activeSection === 'restaurant' && (
+              <RestaurantSettingsSection
+                settings={restaurantSettings}
+                setSettings={setRestaurantSettings}
+                categories={menuCategories}
+                setCategories={setMenuCategories}
+                menuItems={menuItems}
+                setMenuItems={setMenuItems}
+                onSave={async () => { 
+                  setIsSaving(true)
+                  try {
+                    // Save restaurant settings
+                    const res1 = await fetch('/api/hotel/restaurant-settings', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(restaurantSettings)
+                    })
+                    if (!res1.ok) throw new Error('Failed to save settings')
+                    
+                    // Save categories
+                    const res2 = await fetch('/api/hotel/menu-categories', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(menuCategories)
+                    })
+                    if (!res2.ok) throw new Error('Failed to save categories')
+                    
+                    // Save menu items
+                    const res3 = await fetch('/api/hotel/menu-items', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(menuItems)
+                    })
+                    if (!res3.ok) throw new Error('Failed to save menu items')
+                    
+                    showMessage('success', '✅ რესტორანის პარამეტრები შენახულია!')
+                  } catch (e) {
+                    console.error('Error saving restaurant data:', e)
+                    showMessage('error', '❌ შეცდომა შენახვისას')
+                  } finally {
+                    setIsSaving(false)
+                  }
+                }}
+                isSaving={isSaving}
+              />
+            )}
+            
+            {activeSection === 'beerspa' && (
+              <BeerSpaSettingsSection
+                settings={spaSettings}
+                setSettings={setSpaSettings}
+                baths={spaBaths}
+                setBaths={setSpaBaths}
+                services={spaServices}
+                setServices={setSpaServices}
+                onSave={async () => { 
+                  setIsSaving(true)
+                  try {
+                    // Save spa settings
+                    const res1 = await fetch('/api/hotel/spa-settings', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(spaSettings)
+                    })
+                    if (!res1.ok) throw new Error('Failed to save settings')
+                    
+                    // Save baths
+                    const res2 = await fetch('/api/hotel/spa-baths', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(spaBaths)
+                    })
+                    if (!res2.ok) throw new Error('Failed to save baths')
+                    
+                    // Save services
+                    const res3 = await fetch('/api/hotel/spa-services', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(spaServices)
+                    })
+                    if (!res3.ok) throw new Error('Failed to save services')
+                    
+                    showMessage('success', '✅ სპა პარამეტრები შენახულია!')
+                  } catch (e) {
+                    console.error('Error saving spa data:', e)
+                    showMessage('error', '❌ შეცდომა შენახვისას')
+                  } finally {
+                    setIsSaving(false)
+                  }
+                }}
+                isSaving={isSaving}
+              />
+            )}
+            
+            {/* Tour Companies Section - Only Companies Tab */}
+            {activeSection === 'tourcompanies' && (
+              <TourCompaniesSettings showOnlyCompanies={true} />
             )}
             
             {/* Facebook Bot Section */}

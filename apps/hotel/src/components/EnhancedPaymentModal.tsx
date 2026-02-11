@@ -29,9 +29,28 @@ export default function EnhancedPaymentModal({
   const [splits, setSplits] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   
+  // Consignment state
+  const [companies, setCompanies] = useState<any[]>([])
+  const [selectedCompanyId, setSelectedCompanyId] = useState('')
+  
   useEffect(() => {
     loadFolio()
+    loadCompanies()
   }, [reservation.id])
+  
+  // Load companies for consignment
+  const loadCompanies = async () => {
+    try {
+      const response = await fetch('/api/hotel/tour-companies')
+      if (response.ok) {
+        const data = await response.json()
+        setCompanies(data || [])
+      }
+    } catch (e) {
+      const saved = localStorage.getItem('tourCompanies')
+      if (saved) setCompanies(JSON.parse(saved))
+    }
+  }
   
   useEffect(() => {
     if (folio) {
@@ -175,6 +194,12 @@ export default function EnhancedPaymentModal({
       return
     }
     
+    // Validate consignment requires company
+    if (selectedMethod === 'consignment' && !selectedCompanyId) {
+      alert('გთხოვთ აირჩიოთ კომპანია კონსიგნაციისთვის')
+      return
+    }
+    
     if (splitPayment && splits.length === 0) {
       alert('Please add at least one split payment')
       return
@@ -193,6 +218,56 @@ export default function EnhancedPaymentModal({
     setProcessing(true)
     
     try {
+      // Process consignment - create invoice and receivable
+      if (selectedMethod === 'consignment' && selectedCompanyId) {
+        const company = companies.find(c => c.id === selectedCompanyId)
+        
+        // Create invoice
+        try {
+          const invoiceRes = await fetch('/api/hotel/company-invoices', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              companyId: selectedCompanyId,
+              items: [{
+                description: `სასტუმრო - ${reservation.guestName} - ოთახი ${reservation.roomNumber}`,
+                quantity: 1,
+                unitPrice: amount,
+                total: amount
+              }],
+              subtotal: amount,
+              tax: 0,
+              total: amount,
+              dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+              notes: `[hotel] Reservation: ${reservation.id}`
+            })
+          })
+          
+          if (invoiceRes.ok) {
+            const invoice = await invoiceRes.json()
+            
+            // Create receivable
+            await fetch('/api/hotel/accounts-receivable', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                companyId: selectedCompanyId,
+                invoiceId: invoice.id,
+                amount: amount,
+                dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                description: `Hotel Invoice: ${invoice.invoiceNumber}`,
+                sourceType: 'hotel',
+                sourceRef: `RES-${reservation.id}`
+              })
+            })
+            
+            console.log('[EnhancedPaymentModal] Consignment invoice created:', invoice.invoiceNumber)
+          }
+        } catch (invoiceError) {
+          console.error('[EnhancedPaymentModal] Error creating consignment:', invoiceError)
+        }
+      }
+      
       if (splitPayment && splits.length > 0) {
         // Process split payments
         const results = []
@@ -457,6 +532,26 @@ export default function EnhancedPaymentModal({
                     className="w-full border rounded px-3 py-2"
                     placeholder="Transaction ID, Card last 4 digits, etc."
                   />
+                </div>
+              )}
+              
+              {/* Company selection for consignment */}
+              {selectedMethod === 'consignment' && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    კომპანია <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={selectedCompanyId}
+                    onChange={(e) => setSelectedCompanyId(e.target.value)}
+                    className="w-full border rounded px-3 py-2"
+                  >
+                    <option value="">აირჩიეთ კომპანია...</option>
+                    {companies.map((c: any) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-amber-600 mt-1">⚠️ შეიქმნება კონსიგნაცია და დებიტორული ჩანაწერი</p>
                 </div>
               )}
               

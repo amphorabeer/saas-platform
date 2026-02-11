@@ -1336,3 +1336,398 @@ model MessengerSession {
 
   @@index([updatedAt])
 }
+
+// ============================================================
+// HOTEL RESTAURANT MODULE
+// ============================================================
+
+model RestaurantSettings {
+  id               String   @id @default(cuid())
+  tenantId         String   @unique
+  enabled          Boolean  @default(true)
+  name             String   @default("რესტორანი")
+  openTime         String   @default("08:00")
+  closeTime        String   @default("23:00")
+  breakfastStart   String   @default("08:00")
+  breakfastEnd     String   @default("11:00")
+  lunchStart       String   @default("12:00")
+  lunchEnd         String   @default("15:00")
+  dinnerStart      String   @default("18:00")
+  dinnerEnd        String   @default("22:00")
+  taxRate          Decimal  @default(0) @db.Decimal(5, 2)
+  serviceCharge    Decimal  @default(0) @db.Decimal(5, 2)
+  allowRoomCharge  Boolean  @default(true)
+  requireTableNumber Boolean @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("hotel_restaurant_settings")
+}
+
+model MenuCategory {
+  id        String     @id @default(cuid())
+  tenantId  String
+  name      String
+  nameEn    String?
+  icon      String     @default("🍽️")
+  sortOrder Int        @default(0)
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     MenuItem[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+  @@map("hotel_menu_categories")
+}
+
+model MenuItem {
+  id              String       @id @default(cuid())
+  tenantId        String
+  categoryId      String
+  name            String
+  nameEn          String?
+  description     String?
+  descriptionEn   String?
+  price           Decimal      @db.Decimal(10, 2)
+  preparationTime Int          @default(15)
+  isAvailable     Boolean      @default(true)
+  isActive        Boolean      @default(true)
+  imageUrl        String?
+  allergens       String[]     @default([])
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  category        MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, categoryId])
+  @@index([tenantId, isActive])
+  @@map("hotel_menu_items")
+}
+
+model RestaurantTable {
+  id        String   @id @default(cuid())
+  tenantId  String
+  number    String
+  seats     Int      @default(4)
+  zone      String   @default("inside")
+  shape     String   @default("rect")
+  status    String   @default("available")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, number])
+  @@index([tenantId, isActive])
+  @@map("hotel_restaurant_tables")
+}
+
+model BeerTasting {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  nameEn      String?
+  description String?
+  beers       String[] @default([])
+  price       Decimal  @db.Decimal(10, 2)
+  duration    Int      @default(30)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+  @@map("hotel_beer_tastings")
+}
+
+model GroupMenu {
+  id              String          @id @default(cuid())
+  tenantId        String
+  name            String
+  nameEn          String?
+  description     String?
+  pricePerPerson  Decimal         @db.Decimal(10, 2)
+  minPersons      Int?
+  maxPersons      Int?
+  includesDrinks  Boolean         @default(false)
+  includesDessert Boolean         @default(false)
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  items           GroupMenuItem[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+  @@map("hotel_group_menus")
+}
+
+model GroupMenuItem {
+  id          String    @id @default(cuid())
+  groupMenuId String
+  name        String
+  nameEn      String?
+  quantity    Int       @default(1)
+  unitPrice   Decimal   @db.Decimal(10, 2)
+  category    String?
+  sortOrder   Int       @default(0)
+  groupMenu   GroupMenu @relation(fields: [groupMenuId], references: [id], onDelete: Cascade)
+
+  @@index([groupMenuId])
+  @@map("hotel_group_menu_items")
+}
+
+model RestaurantOrder {
+  id              String                 @id @default(cuid())
+  tenantId        String
+  orderNumber     String
+  tableNumber     String?
+  tableId         String?
+  roomNumber      String?
+  reservationId   String?
+  guestName       String?
+  customerType    String                 @default("walkin")
+  companyId       String?
+  groupName       String?
+  groupSize       Int?
+  status          String                 @default("pending")
+  subtotal        Decimal                @db.Decimal(12, 2)
+  tax             Decimal                @default(0) @db.Decimal(12, 2)
+  serviceCharge   Decimal                @default(0) @db.Decimal(12, 2)
+  discount        Decimal                @default(0) @db.Decimal(12, 2)
+  total           Decimal                @db.Decimal(12, 2)
+  paymentMethod   String?
+  paidAt          DateTime?
+  notes           String?
+  createdBy       String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  items           RestaurantOrderItem[]
+  company         TourCompany?           @relation(fields: [companyId], references: [id])
+
+  @@unique([tenantId, orderNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, companyId])
+  @@map("hotel_restaurant_orders")
+}
+
+model RestaurantOrderItem {
+  id          String          @id @default(cuid())
+  orderId     String
+  menuItemId  String?
+  name        String
+  quantity    Int             @default(1)
+  unitPrice   Decimal         @db.Decimal(10, 2)
+  total       Decimal         @db.Decimal(12, 2)
+  status      String          @default("pending")
+  course      String          @default("main")
+  notes       String?
+  order       RestaurantOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("hotel_restaurant_order_items")
+}
+
+// ============================================================
+// TOUR COMPANIES MODULE
+// ============================================================
+
+model TourCompany {
+  id             String            @id @default(cuid())
+  tenantId       String
+  name           String
+  nameEn         String?
+  contactPerson  String?
+  email          String?
+  phone          String?
+  address        String?
+  taxId          String?
+  creditLimit    Decimal           @default(0) @db.Decimal(12, 2)
+  paymentTerms   Int               @default(30)
+  discountRate   Decimal           @default(0) @db.Decimal(5, 2)
+  notes          String?
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  invoices       CompanyInvoice[]
+  orders         RestaurantOrder[]
+  receivables    AccountReceivable[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+  @@map("hotel_tour_companies")
+}
+
+model CompanyInvoice {
+  id            String              @id @default(cuid())
+  tenantId      String
+  companyId     String
+  invoiceNumber String
+  issueDate     DateTime            @default(now())
+  dueDate       DateTime
+  status        String              @default("pending")
+  subtotal      Decimal             @db.Decimal(12, 2)
+  discount      Decimal             @default(0) @db.Decimal(12, 2)
+  tax           Decimal             @default(0) @db.Decimal(12, 2)
+  total         Decimal             @db.Decimal(12, 2)
+  paidAmount    Decimal             @default(0) @db.Decimal(12, 2)
+  notes         String?
+  createdBy     String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  company       TourCompany         @relation(fields: [companyId], references: [id])
+  items         CompanyInvoiceItem[]
+  payments      CompanyPayment[]
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId, companyId])
+  @@index([tenantId, status])
+  @@index([tenantId, dueDate])
+  @@map("hotel_company_invoices")
+}
+
+model CompanyInvoiceItem {
+  id          String         @id @default(cuid())
+  invoiceId   String
+  description String
+  date        DateTime?
+  quantity    Decimal        @db.Decimal(10, 2)
+  unitPrice   Decimal        @db.Decimal(10, 2)
+  total       Decimal        @db.Decimal(12, 2)
+  reference   String?
+  sortOrder   Int            @default(0)
+  invoice     CompanyInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("hotel_company_invoice_items")
+}
+
+model CompanyPayment {
+  id          String         @id @default(cuid())
+  tenantId    String
+  invoiceId   String?
+  companyId   String
+  amount      Decimal        @db.Decimal(12, 2)
+  method      String         @default("bank_transfer")
+  date        DateTime       @default(now())
+  reference   String?
+  notes       String?
+  createdBy   String?
+  createdAt   DateTime       @default(now())
+  invoice     CompanyInvoice? @relation(fields: [invoiceId], references: [id])
+
+  @@index([tenantId, companyId])
+  @@index([tenantId, invoiceId])
+  @@map("hotel_company_payments")
+}
+
+model AccountReceivable {
+  id           String       @id @default(cuid())
+  tenantId     String
+  companyId    String
+  type         String
+  description  String
+  date         DateTime     @default(now())
+  amount       Decimal      @db.Decimal(12, 2)
+  paidAmount   Decimal      @default(0) @db.Decimal(12, 2)
+  reference    String?
+  invoiceId    String?
+  status       String       @default("pending")
+  dueDate      DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  company      TourCompany  @relation(fields: [companyId], references: [id])
+
+  @@index([tenantId, companyId])
+  @@index([tenantId, status])
+  @@map("hotel_accounts_receivable")
+}
+
+// ============================================================
+// BEER SPA MODULE
+// ============================================================
+
+model SpaSettings {
+  id                  String   @id @default(cuid())
+  tenantId            String   @unique
+  enabled             Boolean  @default(true)
+  name                String   @default("ლუდის სპა")
+  openTime            String   @default("10:00")
+  closeTime           String   @default("22:00")
+  slotDuration        Int      @default(60)
+  maxAdvanceBooking   Int      @default(30)
+  cancellationHours   Int      @default(24)
+  requireDeposit      Boolean  @default(false)
+  depositPercent      Decimal  @default(0) @db.Decimal(5, 2)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("hotel_spa_settings")
+}
+
+model SpaBath {
+  id           String   @id @default(cuid())
+  tenantId     String
+  name         String
+  nameEn       String?
+  capacity     Int      @default(2)
+  pricePerHour Decimal  @db.Decimal(10, 2)
+  description  String?
+  features     String[] @default([])
+  imageUrl     String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+  @@map("hotel_spa_baths")
+}
+
+model SpaService {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  nameEn      String?
+  price       Decimal  @db.Decimal(10, 2)
+  duration    Int      @default(30)
+  description String?
+  category    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+  @@map("hotel_spa_services")
+}
+
+model SpaBooking {
+  id            String   @id @default(cuid())
+  tenantId      String
+  bookingNumber String
+  bathId        String?
+  guestName     String
+  guestPhone    String?
+  guestEmail    String?
+  roomNumber    String?
+  reservationId String?
+  date          DateTime
+  startTime     String
+  endTime       String
+  duration      Int      @default(60)
+  guests        Int      @default(2)
+  totalPrice    Decimal  @db.Decimal(10, 2)
+  status        String   @default("confirmed")
+  paymentStatus String   @default("pending")
+  paymentMethod String?
+  notes         String?
+  services      Json?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, bookingNumber])
+  @@index([tenantId, date])
+  @@index([tenantId, status])
+  @@map("hotel_spa_bookings")
+}
