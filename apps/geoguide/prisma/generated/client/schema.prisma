@@ -1277,8 +1277,6 @@ model Museum {
   updatedAt DateTime @updatedAt
 
   tours Tour[]
-
-  @@map("geoguide_museums")
 }
 
 // GeoGuide – ტური (მინიმალური მოდელი Museum რელაციისთვის)
@@ -1290,5 +1288,4 @@ model Tour {
   updatedAt DateTime @updatedAt
 
   @@index([museumId])
-  @@map("geoguide_tours")
 }
