@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npx prisma@5.22.0 generate --schema=../../packages/database/prisma/schema.prisma && next build",
     "start": "next start",
     "lint": "next lint",
     "generate-icons": "node scripts/generate-icons.js"
