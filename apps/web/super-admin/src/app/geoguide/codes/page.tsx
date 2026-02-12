@@ -695,7 +695,7 @@ export default function ActivationCodesPage() {
               <div className="bg-white p-4 rounded-lg">
                 <QRCode
                   id="qr-code-svg"
-                  value={selectedCode.code}
+                  value={`https://geoguide.ge/activate/${selectedCode.code}`}
                   size={200}
                   level="H"
                 />
