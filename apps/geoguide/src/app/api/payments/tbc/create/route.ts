@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       amount: toMinorUnits(amount),
       currency,
       orderDesc: `GeoGuide: ${tour.name}`.slice(0, 1024),
-      responseUrl: `${baseUrl}/museum/${museumSlug}/tour/${tourId}/payment/result?orderId=${orderId}`,
+      responseUrl: `${baseUrl}/api/payments/tbc/return?orderId=${orderId}`,
       serverCallbackUrl: `${baseUrl}/api/payments/tbc/callback`,
       language: language === "en" ? "en" : "ka",
       merchantData: JSON.stringify({ tourId, deviceId }),
