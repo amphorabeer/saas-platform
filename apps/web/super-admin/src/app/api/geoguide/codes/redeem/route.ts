@@ -53,7 +53,14 @@ export async function POST(request: NextRequest) {
         });
 
         if (existingEntitlement && existingEntitlement.isActive) {
-          return NextResponse.json({
+          // Get museum slug for redirect
+    let museumSlug = "";
+    if (targetTourId) {
+      const tour = await prisma.tour.findUnique({ where: { id: targetTourId }, include: { museum: { select: { slug: true } } } });
+      museumSlug = tour?.museum?.slug || "";
+    }
+
+    return NextResponse.json({
             success: true,
             message: "კოდი უკვე გააქტიურებულია ამ მოწყობილობაზე",
             entitlementId: existingEntitlement.id,
@@ -168,6 +175,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Get museum slug for redirect
+    let museumSlug = "";
+    if (targetTourId) {
+      const tour = await prisma.tour.findUnique({ where: { id: targetTourId }, include: { museum: { select: { slug: true } } } });
+      museumSlug = tour?.museum?.slug || "";
+    }
+
     return NextResponse.json({
       success: true,
       message: "კოდი წარმატებით გააქტიურდა",
@@ -175,6 +189,7 @@ export async function POST(request: NextRequest) {
       tourId: targetTourId,
       expiresAt: entitlement.expiresAt,
       durationDays: activationCode.durationDays,
+      museumSlug,
     });
   } catch (error) {
     console.error("Error redeeming code:", error);
