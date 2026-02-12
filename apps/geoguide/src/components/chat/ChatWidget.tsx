@@ -161,7 +161,7 @@ export default function ChatWidget() {
 
       {/* Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-4 left-3 right-3 sm:bottom-6 sm:right-6 sm:left-auto z-50 sm:w-96 h-[75dvh] sm:h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
+        <div className="fixed bottom-4 left-3 right-3 sm:bottom-6 sm:right-6 sm:left-auto z-50 sm:w-96 h-[55dvh] sm:h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
           {/* Header */}
           <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
             <span className="font-semibold text-sm">{ui.title}</span>
