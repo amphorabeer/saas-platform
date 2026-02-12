@@ -138,6 +138,21 @@ export default function RestaurantPOS() {
   // Restaurant reservations from website
   const [restaurantReservations, setRestaurantReservations] = useState<any[]>([])
   
+  // Reservation edit modal
+  const [showReservationModal, setShowReservationModal] = useState(false)
+  const [editingReservation, setEditingReservation] = useState<any>(null)
+  const [reservationForm, setReservationForm] = useState({
+    guestName: '',
+    guestPhone: '',
+    guestEmail: '',
+    date: '',
+    time: '',
+    guests: 2,
+    tableNumber: '',
+    occasion: '',
+    notes: ''
+  })
+  
   // Data state
   const [tables, setTables] = useState<TableConfig[]>(DEFAULT_TABLES)
   const [orders, setOrders] = useState<RestaurantOrder[]>([])
@@ -218,6 +233,162 @@ export default function RestaurantPOS() {
     }
     loadRestaurantReservations()
   }, [selectedDate])
+
+  // Open reservation modal for new or edit
+  const openReservationModal = (reservation?: any) => {
+    if (reservation) {
+      setEditingReservation(reservation)
+      setReservationForm({
+        guestName: reservation.guestName || '',
+        guestPhone: reservation.guestPhone || '',
+        guestEmail: reservation.guestEmail || '',
+        date: moment(reservation.date).format('YYYY-MM-DD'),
+        time: reservation.startTime || '',
+        guests: reservation.guests || 2,
+        tableNumber: reservation.tableNumber || '',
+        occasion: reservation.services?.occasion || '',
+        notes: reservation.notes || ''
+      })
+    } else {
+      setEditingReservation(null)
+      setReservationForm({
+        guestName: '',
+        guestPhone: '',
+        guestEmail: '',
+        date: selectedDate,
+        time: '19:00',
+        guests: 2,
+        tableNumber: '',
+        occasion: '',
+        notes: ''
+      })
+    }
+    setShowReservationModal(true)
+  }
+
+  // Save reservation (create or update)
+  const saveReservation = async () => {
+    try {
+      if (editingReservation) {
+        // Update existing
+        const response = await fetch(`/api/hotel/spa-bookings/${editingReservation.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            guestName: reservationForm.guestName,
+            guestPhone: reservationForm.guestPhone,
+            guestEmail: reservationForm.guestEmail,
+            date: reservationForm.date,
+            startTime: reservationForm.time,
+            guests: reservationForm.guests,
+            tableNumber: reservationForm.tableNumber,
+            notes: reservationForm.notes,
+            services: {
+              type: 'restaurant',
+              occasion: reservationForm.occasion,
+              source: 'pos'
+            }
+          })
+        })
+        if (response.ok) {
+          // Reload reservations
+          const reloadRes = await fetch(`/api/hotel/spa-bookings?type=restaurant&date=${selectedDate}`)
+          if (reloadRes.ok) {
+            const data = await reloadRes.json()
+            setRestaurantReservations(data.filter((b: any) => {
+              const bookingDate = moment(b.date).format('YYYY-MM-DD')
+              const isRestaurant = b.bookingNumber?.startsWith('RST') || b.services?.type === 'restaurant'
+              return bookingDate === selectedDate && isRestaurant
+            }))
+          }
+        }
+      } else {
+        // Create new
+        const response = await fetch('/api/hotel/spa-bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'restaurant',
+            guestName: reservationForm.guestName,
+            guestPhone: reservationForm.guestPhone,
+            guestEmail: reservationForm.guestEmail,
+            date: reservationForm.date,
+            startTime: reservationForm.time,
+            endTime: moment(reservationForm.time, 'HH:mm').add(2, 'hours').format('HH:mm'),
+            guests: reservationForm.guests,
+            tableNumber: reservationForm.tableNumber,
+            notes: reservationForm.notes,
+            status: 'confirmed',
+            services: {
+              type: 'restaurant',
+              occasion: reservationForm.occasion,
+              source: 'pos'
+            }
+          })
+        })
+        if (response.ok) {
+          // Reload reservations
+          const reloadRes = await fetch(`/api/hotel/spa-bookings?type=restaurant&date=${selectedDate}`)
+          if (reloadRes.ok) {
+            const data = await reloadRes.json()
+            setRestaurantReservations(data.filter((b: any) => {
+              const bookingDate = moment(b.date).format('YYYY-MM-DD')
+              const isRestaurant = b.bookingNumber?.startsWith('RST') || b.services?.type === 'restaurant'
+              return bookingDate === selectedDate && isRestaurant
+            }))
+          }
+        }
+      }
+      setShowReservationModal(false)
+    } catch (e) {
+      console.error('[RestaurantPOS] Error saving reservation:', e)
+      alert('შეცდომა ჯავშნის შენახვისას')
+    }
+  }
+
+  // Cancel/Delete reservation
+  const cancelReservation = async (reservation: any) => {
+    if (!confirm(`გსურთ ჯავშნის გაუქმება?\n${reservation.guestName} - ${reservation.startTime}`)) return
+    
+    try {
+      const response = await fetch(`/api/hotel/spa-bookings/${reservation.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...reservation,
+          status: 'cancelled'
+        })
+      })
+      if (response.ok) {
+        setRestaurantReservations(prev => 
+          prev.map(r => r.id === reservation.id ? { ...r, status: 'cancelled' } : r)
+        )
+      }
+    } catch (e) {
+      console.error('[RestaurantPOS] Error cancelling reservation:', e)
+    }
+  }
+
+  // Confirm reservation
+  const confirmReservation = async (reservation: any) => {
+    try {
+      const response = await fetch(`/api/hotel/spa-bookings/${reservation.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...reservation,
+          status: 'confirmed'
+        })
+      })
+      if (response.ok) {
+        setRestaurantReservations(prev => 
+          prev.map(r => r.id === reservation.id ? { ...r, status: 'confirmed' } : r)
+        )
+      }
+    } catch (e) {
+      console.error('[RestaurantPOS] Error confirming reservation:', e)
+    }
+  }
 
   // Load data from API
   useEffect(() => {
@@ -1235,6 +1406,12 @@ export default function RestaurantPOS() {
                 >
                   დღეს
                 </button>
+                <button
+                  onClick={() => openReservationModal()}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2"
+                >
+                  ➕ ახალი ჯავშანი
+                </button>
               </div>
             </div>
 
@@ -1253,6 +1430,12 @@ export default function RestaurantPOS() {
               <div className="text-center py-12 text-gray-500">
                 <div className="text-5xl mb-4">📭</div>
                 <p>ამ თარიღზე ჯავშნები არ არის</p>
+                <button
+                  onClick={() => openReservationModal()}
+                  className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                >
+                  ➕ დაამატე ჯავშანი
+                </button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -1272,19 +1455,24 @@ export default function RestaurantPOS() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           {/* Time */}
-                          <div className="text-center bg-white px-4 py-2 rounded-lg shadow-sm">
+                          <div className="text-center bg-white px-4 py-2 rounded-lg shadow-sm min-w-[80px]">
                             <div className="text-2xl font-bold text-amber-600">{reservation.startTime}</div>
                           </div>
                           
                           {/* Guest Info */}
                           <div>
                             <div className="font-bold text-lg">{reservation.guestName}</div>
-                            <div className="text-gray-600 flex items-center gap-3">
+                            <div className="text-gray-600 flex items-center gap-3 flex-wrap">
                               <span>👥 {reservation.guests} სტუმარი</span>
                               {reservation.guestPhone && (
                                 <a href={`tel:${reservation.guestPhone}`} className="text-blue-600 hover:underline">
                                   📞 {reservation.guestPhone}
                                 </a>
+                              )}
+                              {reservation.tableNumber && (
+                                <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                                  🪑 მაგიდა {reservation.tableNumber}
+                                </span>
                               )}
                             </div>
                             {reservation.services?.occasion && (
@@ -1292,23 +1480,41 @@ export default function RestaurantPOS() {
                                 🎉 {reservation.services.occasion}
                               </div>
                             )}
+                            {reservation.notes && (
+                              <div className="text-gray-500 text-sm mt-1">
+                                📝 {reservation.notes}
+                              </div>
+                            )}
                           </div>
                         </div>
 
                         {/* Status & Actions */}
-                        <div className="flex items-center gap-3">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            reservation.status === 'confirmed' 
-                              ? 'bg-green-200 text-green-800' 
-                              : reservation.status === 'cancelled'
-                              ? 'bg-red-200 text-red-800'
-                              : 'bg-yellow-200 text-yellow-800'
-                          }`}>
-                            {reservation.status === 'confirmed' ? '✓ დადასტურებული' : 
-                             reservation.status === 'cancelled' ? '✗ გაუქმებული' : 
-                             '⏳ მოლოდინში'}
-                          </span>
-                          <div className="text-xs text-gray-400">
+                        <div className="flex items-center gap-2">
+                          {reservation.status === 'pending' && (
+                            <button
+                              onClick={() => confirmReservation(reservation)}
+                              className="px-3 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm"
+                            >
+                              ✓ დადასტურება
+                            </button>
+                          )}
+                          {reservation.status !== 'cancelled' && (
+                            <>
+                              <button
+                                onClick={() => openReservationModal(reservation)}
+                                className="px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+                              >
+                                ✏️ რედაქტირება
+                              </button>
+                              <button
+                                onClick={() => cancelReservation(reservation)}
+                                className="px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
+                              >
+                                ✗ გაუქმება
+                              </button>
+                            </>
+                          )}
+                          <div className="text-xs text-gray-400 ml-2">
                             {reservation.bookingNumber}
                           </div>
                         </div>
@@ -1325,6 +1531,159 @@ export default function RestaurantPOS() {
                 <span>ვებსაიტიდან: {restaurantReservations.filter(r => r.services?.source === 'website').length}</span>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Reservation Edit Modal */}
+      {showReservationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl w-full max-w-lg p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">
+                {editingReservation ? '✏️ ჯავშნის რედაქტირება' : '➕ ახალი ჯავშანი'}
+              </h3>
+              <button
+                onClick={() => setShowReservationModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Guest Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">სახელი *</label>
+                <input
+                  type="text"
+                  value={reservationForm.guestName}
+                  onChange={(e) => setReservationForm({ ...reservationForm, guestName: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="სტუმრის სახელი"
+                />
+              </div>
+
+              {/* Phone & Email */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ტელეფონი *</label>
+                  <input
+                    type="tel"
+                    value={reservationForm.guestPhone}
+                    onChange={(e) => setReservationForm({ ...reservationForm, guestPhone: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="555 12 34 56"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ელფოსტა</label>
+                  <input
+                    type="email"
+                    value={reservationForm.guestEmail}
+                    onChange={(e) => setReservationForm({ ...reservationForm, guestEmail: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="email@example.com"
+                  />
+                </div>
+              </div>
+
+              {/* Date & Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">თარიღი *</label>
+                  <input
+                    type="date"
+                    value={reservationForm.date}
+                    onChange={(e) => setReservationForm({ ...reservationForm, date: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">დრო *</label>
+                  <select
+                    value={reservationForm.time}
+                    onChange={(e) => setReservationForm({ ...reservationForm, time: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">აირჩიეთ დრო</option>
+                    {['12:00', '12:30', '13:00', '13:30', '14:00', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00'].map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Guests & Table */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">სტუმრები *</label>
+                  <select
+                    value={reservationForm.guests}
+                    onChange={(e) => setReservationForm({ ...reservationForm, guests: Number(e.target.value) })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20].map(n => (
+                      <option key={n} value={n}>{n} სტუმარი</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">მაგიდა</label>
+                  <select
+                    value={reservationForm.tableNumber}
+                    onChange={(e) => setReservationForm({ ...reservationForm, tableNumber: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">არ არის მინიჭებული</option>
+                    {tables.map(t => (
+                      <option key={t.id} value={t.number}>მაგიდა {t.number} ({t.seats} ადგილი)</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Occasion */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ღონისძიება</label>
+                <input
+                  type="text"
+                  value={reservationForm.occasion}
+                  onChange={(e) => setReservationForm({ ...reservationForm, occasion: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="მაგ: დაბადების დღე, ბიზნეს შეხვედრა..."
+                />
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">შენიშვნა</label>
+                <textarea
+                  value={reservationForm.notes}
+                  onChange={(e) => setReservationForm({ ...reservationForm, notes: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={2}
+                  placeholder="დამატებითი ინფორმაცია..."
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+              <button
+                onClick={() => setShowReservationModal(false)}
+                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+              >
+                გაუქმება
+              </button>
+              <button
+                onClick={saveReservation}
+                disabled={!reservationForm.guestName || !reservationForm.guestPhone || !reservationForm.date || !reservationForm.time}
+                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {editingReservation ? '💾 შენახვა' : '➕ დამატება'}
+              </button>
+            </div>
           </div>
         </div>
       )}
