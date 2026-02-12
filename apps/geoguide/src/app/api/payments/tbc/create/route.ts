@@ -18,8 +18,16 @@ export async function POST(request: NextRequest) {
     if (!tour) return NextResponse.json({ error: "Tour not found" }, { status: 404 });
     if (tour.isFree || !tour.price) return NextResponse.json({ error: "This tour is free" }, { status: 400 });
 
+    // Ensure device exists, get device.id for Entitlement relation
+    const device = await prisma.device.upsert({
+      where: { deviceId },
+      create: { deviceId, platform: "web" },
+      update: { lastActiveAt: new Date() },
+    });
+
+    // Check existing entitlement using device.id (not plain deviceId)
     const existingEntitlement = await prisma.entitlement.findFirst({
-      where: { tourId, deviceId, isActive: true, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
+      where: { tourId, deviceId: device.id, isActive: true, expiresAt: { gt: new Date() } },
     });
     if (existingEntitlement) return NextResponse.json({ error: "Already have access" }, { status: 409 });
 
@@ -40,6 +48,7 @@ export async function POST(request: NextRequest) {
       merchantData: JSON.stringify({ tourId, deviceId }),
     });
 
+    // Payment stores plain deviceId string for later reference
     const payment = await prisma.payment.create({
       data: { orderId, tbcPaymentId: flittResult.paymentId, tbcStatus: "created", tourId, museumId: tour.museumId, deviceId, amount, currency, status: "PENDING" },
     });

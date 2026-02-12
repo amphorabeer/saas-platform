@@ -15,9 +15,14 @@ export async function GET(request: NextRequest) {
       try {
         const flittStatus = await getFlittOrderStatus(payment.orderId);
         if (flittStatus.order_status === "approved") {
+          const device = await prisma.device.upsert({
+            where: { deviceId: payment.deviceId },
+            create: { deviceId: payment.deviceId, platform: "web" },
+            update: { lastActiveAt: new Date() },
+          });
           await prisma.entitlement.upsert({
-            where: { deviceId_tourId: { tourId: payment.tourId, deviceId: payment.deviceId } },
-            create: { tourId: payment.tourId, deviceId: payment.deviceId, isActive: true, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), activatedAt: new Date() },
+            where: { deviceId_tourId: { tourId: payment.tourId, deviceId: device.id } },
+            create: { tourId: payment.tourId, deviceId: device.id, isActive: true, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), activatedAt: new Date() },
             update: { isActive: true, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
           });
           await prisma.payment.update({ where: { id: payment.id }, data: { status: "COMPLETED", tbcStatus: "approved", completedAt: new Date() } });
