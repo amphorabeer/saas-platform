@@ -122,646 +122,224 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.TenantScalarFieldEnum = {
+exports.Prisma.OrganizationScalarFieldEnum = {
   id: 'id',
   name: 'name',
   slug: 'slug',
-  plan: 'plan',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  code: 'code',
-  legalName: 'legalName',
-  taxId: 'taxId',
-  phone: 'phone',
   email: 'email',
+  phone: 'phone',
   address: 'address',
+  logo: 'logo',
+  company: 'company',
+  taxId: 'taxId',
+  city: 'city',
+  country: 'country',
   website: 'website',
   bankName: 'bankName',
   bankAccount: 'bankAccount',
-  bankSwift: 'bankSwift'
+  tenantId: 'tenantId',
+  tenantCode: 'tenantCode',
+  hotelCode: 'hotelCode',
+  databaseUrl: 'databaseUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
-  tenantId: 'tenantId',
   email: 'email',
   name: 'name',
-  role: 'role',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
   password: 'password',
-  resetToken: 'resetToken',
-  resetTokenExpiry: 'resetTokenExpiry'
+  avatar: 'avatar',
+  role: 'role',
+  organizationId: 'organizationId',
+  emailVerified: 'emailVerified',
+  lastLoginAt: 'lastLoginAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
-exports.Prisma.RecipeScalarFieldEnum = {
+exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
-  tenantId: 'tenantId',
-  createdBy: 'createdBy',
-  name: 'name',
-  style: 'style',
-  abv: 'abv',
-  ibu: 'ibu',
-  color: 'color',
-  og: 'og',
-  fg: 'fg',
-  batchSize: 'batchSize',
-  boilTime: 'boilTime',
-  efficiency: 'efficiency',
-  description: 'description',
-  notes: 'notes',
-  process: 'process',
+  userId: 'userId',
+  type: 'type',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  refresh_token: 'refresh_token',
+  access_token: 'access_token',
+  expires_at: 'expires_at',
+  token_type: 'token_type',
+  scope: 'scope',
+  id_token: 'id_token',
+  session_state: 'session_state'
+};
+
+exports.Prisma.SessionScalarFieldEnum = {
+  id: 'id',
+  sessionToken: 'sessionToken',
+  userId: 'userId',
+  expires: 'expires'
+};
+
+exports.Prisma.VerificationTokenScalarFieldEnum = {
+  identifier: 'identifier',
+  token: 'token',
+  expires: 'expires'
+};
+
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  plan: 'plan',
   status: 'status',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  yeastStrain: 'yeastStrain'
-};
-
-exports.Prisma.RecipeIngredientScalarFieldEnum = {
-  id: 'id',
-  recipeId: 'recipeId',
-  inventoryItemId: 'inventoryItemId',
-  name: 'name',
-  category: 'category',
-  amount: 'amount',
-  unit: 'unit',
-  additionTime: 'additionTime',
-  specs: 'specs'
-};
-
-exports.Prisma.InventoryItemScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  sku: 'sku',
-  name: 'name',
-  category: 'category',
-  ingredientType: 'ingredientType',
-  unit: 'unit',
-  reorderPoint: 'reorderPoint',
-  supplier: 'supplier',
-  location: 'location',
-  specs: 'specs',
-  cachedBalance: 'cachedBalance',
-  costPerUnit: 'costPerUnit',
-  balanceUpdatedAt: 'balanceUpdatedAt',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.InventoryLedgerScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  itemId: 'itemId',
-  quantity: 'quantity',
-  type: 'type',
-  batchId: 'batchId',
-  orderId: 'orderId',
-  packagingId: 'packagingId',
-  notes: 'notes',
-  createdBy: 'createdBy',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.IngredientCatalogScalarFieldEnum = {
-  id: 'id',
-  type: 'type',
-  name: 'name',
-  supplier: 'supplier',
-  origin: 'origin',
-  specs: 'specs',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.BatchScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  batchNumber: 'batchNumber',
-  recipeId: 'recipeId',
-  status: 'status',
-  volume: 'volume',
-  packagedVolume: 'packagedVolume',
-  originalGravity: 'originalGravity',
-  currentGravity: 'currentGravity',
-  finalGravity: 'finalGravity',
-  abv: 'abv',
-  tankId: 'tankId',
-  plannedDate: 'plannedDate',
-  brewedAt: 'brewedAt',
-  fermentationStartedAt: 'fermentationStartedAt',
-  conditioningStartedAt: 'conditioningStartedAt',
-  readyAt: 'readyAt',
-  completedAt: 'completedAt',
-  createdBy: 'createdBy',
-  notes: 'notes',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  targetOg: 'targetOg',
-  fermentationTankId: 'fermentationTankId'
-};
-
-exports.Prisma.BatchIngredientScalarFieldEnum = {
-  id: 'id',
-  batchId: 'batchId',
-  inventoryItemId: 'inventoryItemId',
-  name: 'name',
-  category: 'category',
-  plannedAmount: 'plannedAmount',
-  actualAmount: 'actualAmount',
-  unit: 'unit',
-  lotNumber: 'lotNumber',
-  addedAt: 'addedAt'
-};
-
-exports.Prisma.GravityReadingScalarFieldEnum = {
-  id: 'id',
-  batchId: 'batchId',
-  gravity: 'gravity',
-  temperature: 'temperature',
-  notes: 'notes',
-  recordedBy: 'recordedBy',
-  recordedAt: 'recordedAt'
-};
-
-exports.Prisma.BatchTimelineScalarFieldEnum = {
-  id: 'id',
-  batchId: 'batchId',
-  type: 'type',
-  title: 'title',
-  description: 'description',
-  data: 'data',
-  createdBy: 'createdBy',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.TankScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  name: 'name',
-  type: 'type',
-  capacity: 'capacity',
-  status: 'status',
-  currentBatchId: 'currentBatchId',
-  location: 'location',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  capabilities: 'capabilities',
-  currentLotId: 'currentLotId',
-  currentPhase: 'currentPhase',
-  defaultTurnaroundHours: 'defaultTurnaroundHours',
-  maxFillPercent: 'maxFillPercent',
-  minFillPercent: 'minFillPercent'
-};
-
-exports.Prisma.TankOccupationScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  tankId: 'tankId',
-  batchId: 'batchId',
-  phase: 'phase',
-  startedAt: 'startedAt',
-  endedAt: 'endedAt'
-};
-
-exports.Prisma.PackagingRunScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  batchId: 'batchId',
-  packageType: 'packageType',
-  quantity: 'quantity',
-  volumeTotal: 'volumeTotal',
-  lotNumber: 'lotNumber',
-  performedBy: 'performedBy',
-  notes: 'notes',
-  performedAt: 'performedAt'
-};
-
-exports.Prisma.CustomerScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  name: 'name',
-  type: 'type',
-  email: 'email',
-  phone: 'phone',
-  address: 'address',
-  city: 'city',
-  taxId: 'taxId',
-  kegReturnDays: 'kegReturnDays',
-  kegDepositRequired: 'kegDepositRequired',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.SupplierScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  name: 'name',
-  category: 'category',
-  email: 'email',
-  phone: 'phone',
-  address: 'address',
-  city: 'city',
-  taxId: 'taxId',
-  bankAccount: 'bankAccount',
-  notes: 'notes',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.SalesOrderScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  orderNumber: 'orderNumber',
-  customerId: 'customerId',
-  status: 'status',
-  paymentStatus: 'paymentStatus',
-  totalAmount: 'totalAmount',
-  paidAmount: 'paidAmount',
-  notes: 'notes',
-  orderedAt: 'orderedAt',
-  shippedAt: 'shippedAt',
-  deliveredAt: 'deliveredAt',
-  createdBy: 'createdBy',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.OrderItemScalarFieldEnum = {
-  id: 'id',
-  orderId: 'orderId',
-  productName: 'productName',
-  packageType: 'packageType',
-  quantity: 'quantity',
-  unitPrice: 'unitPrice',
-  totalPrice: 'totalPrice',
-  batchId: 'batchId'
-};
-
-exports.Prisma.TransactionScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  type: 'type',
-  date: 'date',
-  amount: 'amount',
-  incomeCategory: 'incomeCategory',
-  expenseCategory: 'expenseCategory',
-  description: 'description',
-  customerId: 'customerId',
-  supplierId: 'supplierId',
-  orderId: 'orderId',
-  invoiceId: 'invoiceId',
-  expenseId: 'expenseId',
-  paymentId: 'paymentId',
+  price: 'price',
+  currency: 'currency',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+  trialStart: 'trialStart',
+  trialEnd: 'trialEnd',
   paymentMethod: 'paymentMethod',
-  reference: 'reference',
-  notes: 'notes',
-  createdBy: 'createdBy',
+  lastPaymentDate: 'lastPaymentDate',
+  nextBillingDate: 'nextBillingDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ModuleAccessScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  moduleType: 'moduleType',
+  isActive: 'isActive',
+  settings: 'settings',
+  maxUsers: 'maxUsers',
+  maxRecords: 'maxRecords',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ModuleFeatureScalarFieldEnum = {
+  id: 'id',
+  moduleAccessId: 'moduleAccessId',
+  name: 'name',
+  isEnabled: 'isEnabled'
 };
 
 exports.Prisma.InvoiceScalarFieldEnum = {
   id: 'id',
-  tenantId: 'tenantId',
+  subscriptionId: 'subscriptionId',
   invoiceNumber: 'invoiceNumber',
-  type: 'type',
+  amount: 'amount',
+  currency: 'currency',
   status: 'status',
-  issueDate: 'issueDate',
   dueDate: 'dueDate',
   paidAt: 'paidAt',
-  customerId: 'customerId',
-  supplierId: 'supplierId',
-  orderId: 'orderId',
-  subtotal: 'subtotal',
-  discount: 'discount',
-  tax: 'tax',
-  total: 'total',
-  paidAmount: 'paidAmount',
-  notes: 'notes',
-  terms: 'terms',
-  createdBy: 'createdBy',
+  invoiceUrl: 'invoiceUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.InvoiceItemScalarFieldEnum = {
+exports.Prisma.ModuleConfigScalarFieldEnum = {
   id: 'id',
-  invoiceId: 'invoiceId',
+  moduleType: 'moduleType',
+  name: 'name',
+  nameEn: 'nameEn',
+  nameRu: 'nameRu',
   description: 'description',
-  quantity: 'quantity',
-  unit: 'unit',
-  unitPrice: 'unitPrice',
-  total: 'total',
-  productName: 'productName',
-  packageType: 'packageType',
-  batchId: 'batchId',
-  sortOrder: 'sortOrder'
+  descriptionEn: 'descriptionEn',
+  descriptionRu: 'descriptionRu',
+  icon: 'icon',
+  color: 'color',
+  isEnabled: 'isEnabled',
+  displayOrder: 'displayOrder',
+  starterPrice: 'starterPrice',
+  starterDuration: 'starterDuration',
+  starterFeatures: 'starterFeatures',
+  professionalPrice: 'professionalPrice',
+  professionalDuration: 'professionalDuration',
+  professionalFeatures: 'professionalFeatures',
+  enterprisePrice: 'enterprisePrice',
+  enterpriseDuration: 'enterpriseDuration',
+  enterpriseFeatures: 'enterpriseFeatures',
+  activeOrganizations: 'activeOrganizations',
+  totalUsers: 'totalUsers',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
-exports.Prisma.PaymentScalarFieldEnum = {
+exports.Prisma.LandingPageContentScalarFieldEnum = {
   id: 'id',
-  tenantId: 'tenantId',
-  invoiceId: 'invoiceId',
-  orderId: 'orderId',
-  amount: 'amount',
-  method: 'method',
-  date: 'date',
-  reference: 'reference',
-  notes: 'notes',
-  createdBy: 'createdBy',
-  createdAt: 'createdAt'
+  key: 'key',
+  heroTitle: 'heroTitle',
+  heroSubtitle: 'heroSubtitle',
+  heroDescription: 'heroDescription',
+  statsBusinesses: 'statsBusinesses',
+  statsTransactions: 'statsTransactions',
+  statsUsers: 'statsUsers',
+  statsUptime: 'statsUptime',
+  content: 'content',
+  updatedAt: 'updatedAt'
 };
 
-exports.Prisma.ExpenseScalarFieldEnum = {
+exports.Prisma.SupportTicketScalarFieldEnum = {
   id: 'id',
-  tenantId: 'tenantId',
-  category: 'category',
-  supplierId: 'supplierId',
-  amount: 'amount',
-  date: 'date',
+  organizationId: 'organizationId',
+  subject: 'subject',
   description: 'description',
-  invoiceNumber: 'invoiceNumber',
-  invoiceId: 'invoiceId',
-  isPaid: 'isPaid',
-  paidAt: 'paidAt',
-  paymentMethod: 'paymentMethod',
-  receiptUrl: 'receiptUrl',
-  notes: 'notes',
-  createdBy: 'createdBy',
+  priority: 'priority',
+  status: 'status',
+  assignedTo: 'assignedTo',
+  resolvedAt: 'resolvedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.BudgetScalarFieldEnum = {
+exports.Prisma.ActivityLogScalarFieldEnum = {
   id: 'id',
-  tenantId: 'tenantId',
-  category: 'category',
-  year: 'year',
-  month: 'month',
-  amount: 'amount',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.AuditLogScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
   userId: 'userId',
   action: 'action',
-  entityType: 'entityType',
-  entityId: 'entityId',
-  oldData: 'oldData',
-  newData: 'newData',
-  metadata: 'metadata',
-  correlationId: 'correlationId',
+  details: 'details',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
   createdAt: 'createdAt'
 };
 
-exports.Prisma.BlendingConfigScalarFieldEnum = {
+exports.Prisma.HotelRoomScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
-  requireRecipeMatch: 'requireRecipeMatch',
-  requireYeastMatch: 'requireYeastMatch',
-  requirePhaseMatch: 'requirePhaseMatch',
-  requireStyleMatch: 'requireStyleMatch',
-  maxBlendSources: 'maxBlendSources',
-  allowOverCapacity: 'allowOverCapacity',
-  maxAgeDifferenceHours: 'maxAgeDifferenceHours',
+  roomNumber: 'roomNumber',
+  roomType: 'roomType',
+  floor: 'floor',
+  status: 'status',
+  basePrice: 'basePrice',
+  amenities: 'amenities',
+  maxOccupancy: 'maxOccupancy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.CIPLogScalarFieldEnum = {
-  id: 'id',
-  equipmentId: 'equipmentId',
-  cipType: 'cipType',
-  date: 'date',
-  duration: 'duration',
-  temperature: 'temperature',
-  causticConcentration: 'causticConcentration',
-  performedBy: 'performedBy',
-  result: 'result',
-  notes: 'notes',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.EquipmentScalarFieldEnum = {
+exports.Prisma.HotelReservationScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
-  name: 'name',
-  type: 'type',
+  roomId: 'roomId',
+  guestName: 'guestName',
+  guestEmail: 'guestEmail',
+  guestPhone: 'guestPhone',
+  guestCountry: 'guestCountry',
+  checkIn: 'checkIn',
+  checkOut: 'checkOut',
+  adults: 'adults',
+  children: 'children',
+  totalAmount: 'totalAmount',
+  paidAmount: 'paidAmount',
   status: 'status',
-  capacity: 'capacity',
-  model: 'model',
-  manufacturer: 'manufacturer',
-  serialNumber: 'serialNumber',
-  location: 'location',
-  workingPressure: 'workingPressure',
-  currentTemp: 'currentTemp',
-  currentPressure: 'currentPressure',
-  installationDate: 'installationDate',
-  warrantyDate: 'warrantyDate',
-  lastCIP: 'lastCIP',
-  nextCIP: 'nextCIP',
-  lastMaintenance: 'lastMaintenance',
-  nextMaintenance: 'nextMaintenance',
-  cipIntervalDays: 'cipIntervalDays',
-  inspectionIntervalDays: 'inspectionIntervalDays',
-  annualMaintenanceDays: 'annualMaintenanceDays',
-  currentBatchId: 'currentBatchId',
-  currentBatchNumber: 'currentBatchNumber',
+  source: 'source',
+  companyName: 'companyName',
+  companyTaxId: 'companyTaxId',
+  companyAddress: 'companyAddress',
+  companyBank: 'companyBank',
+  companyBankAccount: 'companyBankAccount',
   notes: 'notes',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  purchaseDate: 'purchaseDate',
-  capabilities: 'capabilities'
-};
-
-exports.Prisma.LotScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  lotCode: 'lotCode',
-  phase: 'phase',
-  status: 'status',
-  plannedVolume: 'plannedVolume',
-  actualVolume: 'actualVolume',
-  notes: 'notes',
-  parentLotId: 'parentLotId',
-  splitRatio: 'splitRatio',
-  createdBy: 'createdBy',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  completedAt: 'completedAt',
-  lotNumber: 'lotNumber',
-  blendedAt: 'blendedAt',
-  isBlendResult: 'isBlendResult',
-  splitAt: 'splitAt'
-};
-
-exports.Prisma.LotBatchScalarFieldEnum = {
-  id: 'id',
-  lotId: 'lotId',
-  batchId: 'batchId',
-  volumeContribution: 'volumeContribution',
-  batchPercentage: 'batchPercentage',
-  addedAt: 'addedAt'
-};
-
-exports.Prisma.LotReadingScalarFieldEnum = {
-  id: 'id',
-  lotId: 'lotId',
-  tankId: 'tankId',
-  readingType: 'readingType',
-  value: 'value',
-  unit: 'unit',
-  notes: 'notes',
-  recordedBy: 'recordedBy',
-  recordedAt: 'recordedAt'
-};
-
-exports.Prisma.MaintenanceLogScalarFieldEnum = {
-  id: 'id',
-  equipmentId: 'equipmentId',
-  type: 'type',
-  status: 'status',
-  priority: 'priority',
-  scheduledDate: 'scheduledDate',
-  completedDate: 'completedDate',
-  duration: 'duration',
-  performedBy: 'performedBy',
-  cost: 'cost',
-  partsUsed: 'partsUsed',
-  description: 'description',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.ProblemReportScalarFieldEnum = {
-  id: 'id',
-  equipmentId: 'equipmentId',
-  problemType: 'problemType',
-  severity: 'severity',
-  status: 'status',
-  description: 'description',
-  reportedDate: 'reportedDate',
-  reportedBy: 'reportedBy',
-  resolvedDate: 'resolvedDate',
-  resolvedBy: 'resolvedBy',
-  resolution: 'resolution',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.TankAssignmentScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  tankId: 'tankId',
-  lotId: 'lotId',
-  phase: 'phase',
-  plannedStart: 'plannedStart',
-  plannedEnd: 'plannedEnd',
-  actualStart: 'actualStart',
-  actualEnd: 'actualEnd',
-  status: 'status',
-  plannedVolume: 'plannedVolume',
-  actualVolume: 'actualVolume',
-  isBlendTarget: 'isBlendTarget',
-  isSplitSource: 'isSplitSource',
-  createdBy: 'createdBy',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  startTime: 'startTime',
-  endTime: 'endTime',
-  notes: 'notes'
-};
-
-exports.Prisma.TransferScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  transferCode: 'transferCode',
-  sourceLotId: 'sourceLotId',
-  sourceTankId: 'sourceTankId',
-  destLotId: 'destLotId',
-  destTankId: 'destTankId',
-  transferType: 'transferType',
-  volume: 'volume',
-  plannedAt: 'plannedAt',
-  executedAt: 'executedAt',
-  status: 'status',
-  measuredLoss: 'measuredLoss',
-  lossReason: 'lossReason',
-  performedBy: 'performedBy',
-  notes: 'notes',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.KegScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  kegNumber: 'kegNumber',
-  size: 'size',
-  status: 'status',
-  condition: 'condition',
-  batchId: 'batchId',
-  filledAt: 'filledAt',
-  productName: 'productName',
-  lotNumber: 'lotNumber',
-  customerId: 'customerId',
-  orderId: 'orderId',
-  sentAt: 'sentAt',
-  returnedAt: 'returnedAt',
-  deposit: 'deposit',
-  notes: 'notes',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.KegMovementScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  kegId: 'kegId',
-  action: 'action',
-  fromStatus: 'fromStatus',
-  toStatus: 'toStatus',
-  productId: 'productId',
-  productName: 'productName',
-  customerId: 'customerId',
-  customerName: 'customerName',
-  orderId: 'orderId',
-  batchId: 'batchId',
-  notes: 'notes',
-  createdAt: 'createdAt',
-  createdBy: 'createdBy'
-};
-
-exports.Prisma.QCTestScalarFieldEnum = {
-  id: 'id',
-  tenantId: 'tenantId',
-  batchId: 'batchId',
-  lotId: 'lotId',
-  testType: 'testType',
-  status: 'status',
-  priority: 'priority',
-  scheduledDate: 'scheduledDate',
-  completedDate: 'completedDate',
-  minValue: 'minValue',
-  maxValue: 'maxValue',
-  targetValue: 'targetValue',
-  result: 'result',
-  unit: 'unit',
-  notes: 'notes',
-  performedBy: 'performedBy',
-  createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -772,6 +350,20 @@ exports.Prisma.ConfigurationScalarFieldEnum = {
   value: 'value',
   updatedAt: 'updatedAt',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.ContactRequestScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  message: 'message',
+  module: 'module',
+  status: 'status',
+  notes: 'notes',
+  repliedAt: 'repliedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.MuseumScalarFieldEnum = {
@@ -796,16 +388,30 @@ exports.Prisma.MuseumScalarFieldEnum = {
   descriptionFr: 'descriptionFr',
   cityFr: 'cityFr',
   addressFr: 'addressFr',
+  nameUk: 'nameUk',
+  descriptionUk: 'descriptionUk',
+  cityUk: 'cityUk',
+  addressUk: 'addressUk',
   slug: 'slug',
   coverImage: 'coverImage',
+  introAudioUrl: 'introAudioUrl',
+  introAudioUrlEn: 'introAudioUrlEn',
+  introAudioUrlRu: 'introAudioUrlRu',
+  introAudioUrlDe: 'introAudioUrlDe',
+  introAudioUrlFr: 'introAudioUrlFr',
+  introAudioUrlUk: 'introAudioUrlUk',
+  gallery: 'gallery',
   latitude: 'latitude',
   longitude: 'longitude',
   contactEmail: 'contactEmail',
   contactPhone: 'contactPhone',
   website: 'website',
+  workingHours: 'workingHours',
   showMap: 'showMap',
   showQrScanner: 'showQrScanner',
   isPublished: 'isPublished',
+  displayOrder: 'displayOrder',
+  category: 'category',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -813,8 +419,160 @@ exports.Prisma.MuseumScalarFieldEnum = {
 exports.Prisma.TourScalarFieldEnum = {
   id: 'id',
   museumId: 'museumId',
+  name: 'name',
+  nameEn: 'nameEn',
+  nameRu: 'nameRu',
+  nameUk: 'nameUk',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  descriptionRu: 'descriptionRu',
+  descriptionUk: 'descriptionUk',
+  duration: 'duration',
+  stopsCount: 'stopsCount',
+  isFree: 'isFree',
+  price: 'price',
+  currency: 'currency',
+  isPublished: 'isPublished',
+  displayOrder: 'displayOrder',
+  allowActivationCodes: 'allowActivationCodes',
+  allowBankPayment: 'allowBankPayment',
+  coverImage: 'coverImage',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.HallScalarFieldEnum = {
+  id: 'id',
+  tourId: 'tourId',
+  name: 'name',
+  nameEn: 'nameEn',
+  nameRu: 'nameRu',
+  nameUk: 'nameUk',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  descriptionRu: 'descriptionRu',
+  descriptionUk: 'descriptionUk',
+  floorNumber: 'floorNumber',
+  imageUrl: 'imageUrl',
+  orderIndex: 'orderIndex',
+  isPublished: 'isPublished',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TourStopScalarFieldEnum = {
+  id: 'id',
+  tourId: 'tourId',
+  hallId: 'hallId',
+  title: 'title',
+  titleEn: 'titleEn',
+  titleRu: 'titleRu',
+  titleUk: 'titleUk',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  descriptionRu: 'descriptionRu',
+  descriptionUk: 'descriptionUk',
+  transcript: 'transcript',
+  transcriptEn: 'transcriptEn',
+  transcriptRu: 'transcriptRu',
+  transcriptUk: 'transcriptUk',
+  audioUrl: 'audioUrl',
+  audioUrlEn: 'audioUrlEn',
+  audioUrlRu: 'audioUrlRu',
+  audioUrlUk: 'audioUrlUk',
+  audioDuration: 'audioDuration',
+  imageUrl: 'imageUrl',
+  images: 'images',
+  qrCode: 'qrCode',
+  orderIndex: 'orderIndex',
+  isPublished: 'isPublished',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TourPackScalarFieldEnum = {
+  id: 'id',
+  tourId: 'tourId',
+  locale: 'locale',
+  version: 'version',
+  manifestUrl: 'manifestUrl',
+  totalSize: 'totalSize',
+  status: 'status',
+  builtAt: 'builtAt',
+  buildLog: 'buildLog',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ActivationCodeScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  codeHash: 'codeHash',
+  durationDays: 'durationDays',
+  status: 'status',
+  tourIds: 'tourIds',
+  museumIds: 'museumIds',
+  redeemedAt: 'redeemedAt',
+  redeemedBy: 'redeemedBy',
+  batchId: 'batchId',
+  batchName: 'batchName',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DeviceScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  platform: 'platform',
+  deviceName: 'deviceName',
+  appVersion: 'appVersion',
+  pushToken: 'pushToken',
+  lastActiveAt: 'lastActiveAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EntitlementScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  tourId: 'tourId',
+  activationCodeId: 'activationCodeId',
+  activatedAt: 'activatedAt',
+  expiresAt: 'expiresAt',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  tbcPaymentId: 'tbcPaymentId',
+  tbcStatus: 'tbcStatus',
+  tourId: 'tourId',
+  museumId: 'museumId',
+  deviceId: 'deviceId',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  activationCodeId: 'activationCodeId',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GeoGuideEventScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  tourId: 'tourId',
+  stopId: 'stopId',
+  museumId: 'museumId',
+  eventType: 'eventType',
+  metadata: 'metadata',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -846,353 +604,100 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
+exports.Role = exports.$Enums.Role = {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  ORGANIZATION_OWNER: 'ORGANIZATION_OWNER',
+  MODULE_ADMIN: 'MODULE_ADMIN',
+  MANAGER: 'MANAGER',
+  USER: 'USER'
+};
+
 exports.PlanType = exports.$Enums.PlanType = {
   STARTER: 'STARTER',
   PROFESSIONAL: 'PROFESSIONAL',
   ENTERPRISE: 'ENTERPRISE'
 };
 
-exports.UserRole = exports.$Enums.UserRole = {
-  OWNER: 'OWNER',
-  ADMIN: 'ADMIN',
-  MANAGER: 'MANAGER',
-  OPERATOR: 'OPERATOR',
-  VIEWER: 'VIEWER'
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  TRIAL: 'TRIAL',
+  ACTIVE: 'ACTIVE',
+  PAST_DUE: 'PAST_DUE',
+  CANCELLED: 'CANCELLED',
+  EXPIRED: 'EXPIRED'
 };
 
-exports.RecipeStatus = exports.$Enums.RecipeStatus = {
+exports.ModuleType = exports.$Enums.ModuleType = {
+  HOTEL: 'HOTEL',
+  RESTAURANT: 'RESTAURANT',
+  BEAUTY: 'BEAUTY',
+  SHOP: 'SHOP',
+  BREWERY: 'BREWERY',
+  WINERY: 'WINERY',
+  DISTILLERY: 'DISTILLERY'
+};
+
+exports.TicketPriority = exports.$Enums.TicketPriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+};
+
+exports.TicketStatus = exports.$Enums.TicketStatus = {
+  OPEN: 'OPEN',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED'
+};
+
+exports.TourPackStatus = exports.$Enums.TourPackStatus = {
   DRAFT: 'DRAFT',
-  ACTIVE: 'ACTIVE',
+  PUBLISHED: 'PUBLISHED',
   ARCHIVED: 'ARCHIVED'
 };
 
-exports.IngredientCategory = exports.$Enums.IngredientCategory = {
-  MALT: 'MALT',
-  HOPS: 'HOPS',
-  YEAST: 'YEAST',
-  ADJUNCT: 'ADJUNCT',
-  WATER_CHEMISTRY: 'WATER_CHEMISTRY'
-};
-
-exports.InventoryCategory = exports.$Enums.InventoryCategory = {
-  RAW_MATERIAL: 'RAW_MATERIAL',
-  PACKAGING: 'PACKAGING',
-  FINISHED_GOOD: 'FINISHED_GOOD',
-  CONSUMABLE: 'CONSUMABLE'
-};
-
-exports.LedgerEntryType = exports.$Enums.LedgerEntryType = {
-  PURCHASE: 'PURCHASE',
-  CONSUMPTION: 'CONSUMPTION',
-  PRODUCTION: 'PRODUCTION',
-  ADJUSTMENT: 'ADJUSTMENT',
-  ADJUSTMENT_ADD: 'ADJUSTMENT_ADD',
-  ADJUSTMENT_REMOVE: 'ADJUSTMENT_REMOVE',
-  WASTE: 'WASTE',
-  SALE: 'SALE',
-  RETURN: 'RETURN',
-  REVERSAL: 'REVERSAL',
-  TRANSFER: 'TRANSFER'
-};
-
-exports.BatchStatus = exports.$Enums.BatchStatus = {
-  PLANNED: 'PLANNED',
-  BREWING: 'BREWING',
-  FERMENTING: 'FERMENTING',
-  CONDITIONING: 'CONDITIONING',
-  READY: 'READY',
-  PACKAGING: 'PACKAGING',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED'
-};
-
-exports.TimelineEventType = exports.$Enums.TimelineEventType = {
-  CREATED: 'CREATED',
-  STARTED: 'STARTED',
-  MASH: 'MASH',
-  BOIL: 'BOIL',
-  TRANSFER: 'TRANSFER',
-  GRAVITY_READING: 'GRAVITY_READING',
-  DRY_HOP: 'DRY_HOP',
-  TEMPERATURE_CHANGE: 'TEMPERATURE_CHANGE',
-  NOTE: 'NOTE',
-  COMPLETED: 'COMPLETED',
-  INGREDIENTS_RESERVED: 'INGREDIENTS_RESERVED',
-  BREWING_STARTED: 'BREWING_STARTED',
-  MASH_COMPLETE: 'MASH_COMPLETE',
-  BOIL_COMPLETE: 'BOIL_COMPLETE',
-  TRANSFER_TO_FERMENTER: 'TRANSFER_TO_FERMENTER',
-  FERMENTATION_STARTED: 'FERMENTATION_STARTED',
-  DRY_HOP_ADDED: 'DRY_HOP_ADDED',
-  CONDITIONING_STARTED: 'CONDITIONING_STARTED',
-  READY_FOR_PACKAGING: 'READY_FOR_PACKAGING',
-  PACKAGING_STARTED: 'PACKAGING_STARTED',
-  PACKAGING_COMPLETE: 'PACKAGING_COMPLETE',
-  CANCELLED: 'CANCELLED'
-};
-
-exports.TankType = exports.$Enums.TankType = {
-  FERMENTER: 'FERMENTER',
-  BRITE: 'BRITE',
-  UNITANK: 'UNITANK',
-  KETTLE: 'KETTLE',
-  MASH_TUN: 'MASH_TUN',
-  HLT: 'HLT'
-};
-
-exports.TankStatus = exports.$Enums.TankStatus = {
+exports.ActivationCodeStatus = exports.$Enums.ActivationCodeStatus = {
   AVAILABLE: 'AVAILABLE',
-  OCCUPIED: 'OCCUPIED',
-  CLEANING: 'CLEANING',
-  MAINTENANCE: 'MAINTENANCE',
-  OUT_OF_SERVICE: 'OUT_OF_SERVICE'
-};
-
-exports.LotPhase = exports.$Enums.LotPhase = {
-  FERMENTATION: 'FERMENTATION',
-  CONDITIONING: 'CONDITIONING',
-  BRIGHT: 'BRIGHT',
-  PACKAGING: 'PACKAGING'
-};
-
-exports.TankCapability = exports.$Enums.TankCapability = {
-  FERMENTING: 'FERMENTING',
-  CONDITIONING: 'CONDITIONING',
-  BREWING: 'BREWING',
-  BRIGHT: 'BRIGHT',
-  STORAGE: 'STORAGE'
-};
-
-exports.OccupationPhase = exports.$Enums.OccupationPhase = {
-  FERMENTATION: 'FERMENTATION',
-  CONDITIONING: 'CONDITIONING',
-  STORAGE: 'STORAGE'
-};
-
-exports.PackageType = exports.$Enums.PackageType = {
-  KEG_50: 'KEG_50',
-  KEG_30: 'KEG_30',
-  KEG_20: 'KEG_20',
-  BOTTLE_750: 'BOTTLE_750',
-  BOTTLE_500: 'BOTTLE_500',
-  BOTTLE_330: 'BOTTLE_330',
-  CAN_500: 'CAN_500',
-  CAN_330: 'CAN_330'
-};
-
-exports.CustomerType = exports.$Enums.CustomerType = {
-  RETAIL: 'RETAIL',
-  WHOLESALE: 'WHOLESALE',
-  DISTRIBUTOR: 'DISTRIBUTOR',
-  RESTAURANT: 'RESTAURANT',
-  BAR: 'BAR',
-  EXPORT: 'EXPORT'
-};
-
-exports.OrderStatus = exports.$Enums.OrderStatus = {
-  DRAFT: 'DRAFT',
-  PENDING: 'PENDING',
-  CONFIRMED: 'CONFIRMED',
-  PROCESSING: 'PROCESSING',
-  READY: 'READY',
-  SHIPPED: 'SHIPPED',
-  DELIVERED: 'DELIVERED',
-  CANCELLED: 'CANCELLED'
+  REDEEMED: 'REDEEMED',
+  EXPIRED: 'EXPIRED',
+  REVOKED: 'REVOKED'
 };
 
 exports.PaymentStatus = exports.$Enums.PaymentStatus = {
   PENDING: 'PENDING',
-  PARTIAL: 'PARTIAL',
-  PAID: 'PAID',
-  OVERDUE: 'OVERDUE',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
   REFUNDED: 'REFUNDED'
 };
 
-exports.TransactionType = exports.$Enums.TransactionType = {
-  INCOME: 'INCOME',
-  EXPENSE: 'EXPENSE',
-  TRANSFER: 'TRANSFER'
-};
-
-exports.IncomeCategory = exports.$Enums.IncomeCategory = {
-  SALE: 'SALE',
-  DEPOSIT: 'DEPOSIT',
-  REFUND: 'REFUND',
-  OTHER: 'OTHER'
-};
-
-exports.ExpenseCategory = exports.$Enums.ExpenseCategory = {
-  INGREDIENTS: 'INGREDIENTS',
-  PACKAGING: 'PACKAGING',
-  EQUIPMENT: 'EQUIPMENT',
-  UTILITIES: 'UTILITIES',
-  SALARY: 'SALARY',
-  RENT: 'RENT',
-  MARKETING: 'MARKETING',
-  MAINTENANCE: 'MAINTENANCE',
-  TRANSPORT: 'TRANSPORT',
-  OTHER: 'OTHER'
-};
-
-exports.PaymentMethod = exports.$Enums.PaymentMethod = {
-  CASH: 'CASH',
-  BANK_TRANSFER: 'BANK_TRANSFER',
-  CARD: 'CARD',
-  CHECK: 'CHECK'
-};
-
-exports.InvoiceType = exports.$Enums.InvoiceType = {
-  OUTGOING: 'OUTGOING',
-  INCOMING: 'INCOMING'
-};
-
-exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
-  DRAFT: 'DRAFT',
-  SENT: 'SENT',
-  PAID: 'PAID',
-  PARTIAL: 'PARTIAL',
-  OVERDUE: 'OVERDUE',
-  CANCELLED: 'CANCELLED'
-};
-
-exports.LotStatus = exports.$Enums.LotStatus = {
-  PLANNED: 'PLANNED',
-  ACTIVE: 'ACTIVE',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED'
-};
-
-exports.ReadingType = exports.$Enums.ReadingType = {
-  GRAVITY: 'GRAVITY',
-  TEMPERATURE: 'TEMPERATURE',
-  PH: 'PH',
-  PRESSURE: 'PRESSURE',
-  DISSOLVED_O2: 'DISSOLVED_O2',
-  TURBIDITY: 'TURBIDITY'
-};
-
-exports.AssignmentStatus = exports.$Enums.AssignmentStatus = {
-  PLANNED: 'PLANNED',
-  ACTIVE: 'ACTIVE',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED'
-};
-
-exports.TransferType = exports.$Enums.TransferType = {
-  FERMENT_TO_CONDITION: 'FERMENT_TO_CONDITION',
-  CONDITION_TO_BRIGHT: 'CONDITION_TO_BRIGHT',
-  TANK_TO_TANK: 'TANK_TO_TANK',
-  BLEND: 'BLEND',
-  SPLIT: 'SPLIT'
-};
-
-exports.TransferStatus = exports.$Enums.TransferStatus = {
-  PLANNED: 'PLANNED',
-  IN_PROGRESS: 'IN_PROGRESS',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED'
-};
-
-exports.KegStatus = exports.$Enums.KegStatus = {
-  AVAILABLE: 'AVAILABLE',
-  FILLED: 'FILLED',
-  WITH_CUSTOMER: 'WITH_CUSTOMER',
-  IN_TRANSIT: 'IN_TRANSIT',
-  CLEANING: 'CLEANING',
-  DAMAGED: 'DAMAGED',
-  LOST: 'LOST'
-};
-
-exports.KegCondition = exports.$Enums.KegCondition = {
-  GOOD: 'GOOD',
-  NEEDS_CLEANING: 'NEEDS_CLEANING',
-  DAMAGED: 'DAMAGED'
-};
-
-exports.KegAction = exports.$Enums.KegAction = {
-  CREATED: 'CREATED',
-  FILLED: 'FILLED',
-  SHIPPED: 'SHIPPED',
-  RETURNED: 'RETURNED',
-  CLEANED: 'CLEANED',
-  DAMAGED: 'DAMAGED',
-  LOST: 'LOST',
-  REPAIRED: 'REPAIRED'
-};
-
-exports.QCTestType = exports.$Enums.QCTestType = {
-  GRAVITY: 'GRAVITY',
-  TEMPERATURE: 'TEMPERATURE',
-  PH: 'PH',
-  DISSOLVED_O2: 'DISSOLVED_O2',
-  TURBIDITY: 'TURBIDITY',
-  COLOR: 'COLOR',
-  BITTERNESS: 'BITTERNESS',
-  ALCOHOL: 'ALCOHOL',
-  CARBONATION: 'CARBONATION',
-  APPEARANCE: 'APPEARANCE',
-  AROMA: 'AROMA',
-  TASTE: 'TASTE',
-  MICROBIOLOGICAL: 'MICROBIOLOGICAL'
-};
-
-exports.QCTestStatus = exports.$Enums.QCTestStatus = {
-  SCHEDULED: 'SCHEDULED',
-  IN_PROGRESS: 'IN_PROGRESS',
-  PASSED: 'PASSED',
-  WARNING: 'WARNING',
-  FAILED: 'FAILED',
-  CANCELLED: 'CANCELLED'
-};
-
-exports.QCTestPriority = exports.$Enums.QCTestPriority = {
-  HIGH: 'HIGH',
-  MEDIUM: 'MEDIUM',
-  LOW: 'LOW'
-};
-
 exports.Prisma.ModelName = {
-  Tenant: 'Tenant',
+  Organization: 'Organization',
   User: 'User',
-  Recipe: 'Recipe',
-  RecipeIngredient: 'RecipeIngredient',
-  InventoryItem: 'InventoryItem',
-  InventoryLedger: 'InventoryLedger',
-  IngredientCatalog: 'IngredientCatalog',
-  Batch: 'Batch',
-  BatchIngredient: 'BatchIngredient',
-  GravityReading: 'GravityReading',
-  BatchTimeline: 'BatchTimeline',
-  Tank: 'Tank',
-  TankOccupation: 'TankOccupation',
-  PackagingRun: 'PackagingRun',
-  Customer: 'Customer',
-  Supplier: 'Supplier',
-  SalesOrder: 'SalesOrder',
-  OrderItem: 'OrderItem',
-  Transaction: 'Transaction',
+  Account: 'Account',
+  Session: 'Session',
+  VerificationToken: 'VerificationToken',
+  Subscription: 'Subscription',
+  ModuleAccess: 'ModuleAccess',
+  ModuleFeature: 'ModuleFeature',
   Invoice: 'Invoice',
-  InvoiceItem: 'InvoiceItem',
-  Payment: 'Payment',
-  Expense: 'Expense',
-  Budget: 'Budget',
-  AuditLog: 'AuditLog',
-  BlendingConfig: 'BlendingConfig',
-  CIPLog: 'CIPLog',
-  Equipment: 'Equipment',
-  Lot: 'Lot',
-  LotBatch: 'LotBatch',
-  LotReading: 'LotReading',
-  MaintenanceLog: 'MaintenanceLog',
-  ProblemReport: 'ProblemReport',
-  TankAssignment: 'TankAssignment',
-  Transfer: 'Transfer',
-  Keg: 'Keg',
-  KegMovement: 'KegMovement',
-  QCTest: 'QCTest',
+  ModuleConfig: 'ModuleConfig',
+  LandingPageContent: 'LandingPageContent',
+  SupportTicket: 'SupportTicket',
+  ActivityLog: 'ActivityLog',
+  HotelRoom: 'HotelRoom',
+  HotelReservation: 'HotelReservation',
   Configuration: 'Configuration',
+  ContactRequest: 'ContactRequest',
   Museum: 'Museum',
-  Tour: 'Tour'
+  Tour: 'Tour',
+  Hall: 'Hall',
+  TourStop: 'TourStop',
+  TourPack: 'TourPack',
+  ActivationCode: 'ActivationCode',
+  Device: 'Device',
+  Entitlement: 'Entitlement',
+  Payment: 'Payment',
+  GeoGuideEvent: 'GeoGuideEvent'
 };
 
 /**

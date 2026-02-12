@@ -1,892 +1,32 @@
 generator client {
-  output        = "./generated/client"
   provider      = "prisma-client-js"
+  output        = "./generated/client"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model Tenant {
-  id           String          @id @default(cuid())
-  name         String
-  slug         String          @unique
-  plan         PlanType        @default(STARTER)
-  isActive     Boolean         @default(true)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  code         String          @unique
-  legalName    String?
-  taxId        String?
-  phone        String?
-  email        String?
-  address      String?
-  website      String?
-  bankName     String?
-  bankAccount  String?
-  bankSwift    String?
-  batches      Batch[]
-  budgets      Budget[]
-  customers    Customer[]
-  Equipment    Equipment[]
-  expenses     Expense[]
-  inventory    InventoryItem[]
-  invoices     Invoice[]
-  Keg          Keg[]
-  payments     Payment[]
-  recipes      Recipe[]
-  orders       SalesOrder[]
-  suppliers    Supplier[]
-  tanks        Tank[]
-  transactions Transaction[]
-  users        User[]
-
-  @@index([slug])
-  @@index([code])
+// ENUMS
+enum Role {
+  SUPER_ADMIN
+  ORGANIZATION_OWNER
+  MODULE_ADMIN
+  MANAGER
+  USER
 }
 
-model User {
-  id               String    @id @default(cuid())
-  tenantId         String
-  email            String
-  name             String
-  role             UserRole  @default(OPERATOR)
-  isActive         Boolean   @default(true)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  password         String?
-  resetToken       String?
-  resetTokenExpiry DateTime?
-  tenant           Tenant    @relation(fields: [tenantId], references: [id])
-
-  @@unique([tenantId, email])
-  @@index([tenantId])
-}
-
-model Recipe {
-  id          String             @id @default(cuid())
-  tenantId    String
-  createdBy   String?
-  name        String
-  style       String?
-  abv         Decimal?           @db.Decimal(4, 2)
-  ibu         Int?
-  color       Int?
-  og          Decimal?           @db.Decimal(5, 4)
-  fg          Decimal?           @db.Decimal(5, 4)
-  batchSize   Decimal?           @db.Decimal(10, 2)
-  boilTime    Int?
-  efficiency  Decimal?           @db.Decimal(5, 2)
-  description String?
-  notes       String?
-  process     Json?
-  status      RecipeStatus       @default(DRAFT)
-  isActive    Boolean            @default(true)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  yeastStrain String?
-  batches     Batch[]
-  tenant      Tenant             @relation(fields: [tenantId], references: [id])
-  ingredients RecipeIngredient[]
-
-  @@unique([tenantId, name])
-  @@index([tenantId, isActive])
-}
-
-model RecipeIngredient {
-  id              String             @id @default(cuid())
-  recipeId        String
-  inventoryItemId String?
-  name            String
-  category        IngredientCategory
-  amount          Decimal            @db.Decimal(10, 3)
-  unit            String
-  additionTime    Int?
-  specs           Json?
-  inventoryItem   InventoryItem?     @relation(fields: [inventoryItemId], references: [id])
-  recipe          Recipe             @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-
-  @@index([recipeId])
-  @@index([inventoryItemId])
-}
-
-model InventoryItem {
-  id                String             @id @default(cuid())
-  tenantId          String
-  sku               String
-  name              String
-  category          InventoryCategory  @default(RAW_MATERIAL)
-  ingredientType    String?
-  unit              String             @default("kg")
-  reorderPoint      Decimal?           @db.Decimal(10, 3)
-  supplier          String?
-  location          String?
-  specs             Json?
-  cachedBalance     Decimal            @default(0) @db.Decimal(12, 3)
-  costPerUnit       Decimal?           @db.Decimal(10, 4)
-  balanceUpdatedAt  DateTime           @default(now())
-  isActive          Boolean            @default(true)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  tenant            Tenant             @relation(fields: [tenantId], references: [id])
-  ledger            InventoryLedger[]
-  recipeIngredients RecipeIngredient[]
-
-  @@unique([tenantId, sku])
-  @@index([tenantId, category, isActive])
-}
-
-model InventoryLedger {
-  id          String          @id @default(cuid())
-  tenantId    String
-  itemId      String
-  quantity    Decimal         @db.Decimal(12, 3)
-  type        LedgerEntryType
-  batchId     String?
-  orderId     String?
-  packagingId String?
-  notes       String?
-  createdBy   String
-  createdAt   DateTime        @default(now())
-  batch       Batch?          @relation(fields: [batchId], references: [id])
-  item        InventoryItem   @relation(fields: [itemId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId, itemId, createdAt])
-  @@index([tenantId, batchId])
-  @@index([tenantId, createdAt])
-  @@index([itemId])
-}
-
-model IngredientCatalog {
-  id        String   @id @default(cuid())
-  type      String   @default("grain")
-  name      String
-  supplier  String?
-  origin    String?
-  specs     Json?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([type, isActive])
-}
-
-model Batch {
-  id                    String            @id @default(cuid())
-  tenantId              String
-  batchNumber           String
-  recipeId              String
-  status                BatchStatus       @default(PLANNED)
-  volume                Decimal           @db.Decimal(10, 2)
-  packagedVolume        Decimal?          @default(0) @db.Decimal(10, 2)
-  originalGravity       Decimal?          @db.Decimal(5, 4)
-  currentGravity        Decimal?          @db.Decimal(5, 4)
-  finalGravity          Decimal?          @db.Decimal(5, 4)
-  abv                   Decimal?          @db.Decimal(4, 2)
-  tankId                String?
-  plannedDate           DateTime
-  brewedAt              DateTime?
-  fermentationStartedAt DateTime?
-  conditioningStartedAt DateTime?
-  readyAt               DateTime?
-  completedAt           DateTime?
-  createdBy             String
-  notes                 String?
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
-  targetOg              Decimal?          @db.Decimal(5, 4)
-  fermentationTankId    String?
-  recipe                Recipe            @relation(fields: [recipeId], references: [id])
-  tank                  Tank?             @relation(fields: [tankId], references: [id])
-  tenant                Tenant            @relation(fields: [tenantId], references: [id])
-  ingredients           BatchIngredient[]
-  timeline              BatchTimeline[]
-  gravityReadings       GravityReading[]
-  ledgerEntries         InventoryLedger[]
-  Keg                   Keg[]
-  LotBatch              LotBatch[]
-  packagingRuns         PackagingRun[]
-  QCTest                QCTest[]
-
-  @@unique([tenantId, batchNumber])
-  @@index([tenantId, status])
-  @@index([tenantId, tankId])
-}
-
-model BatchIngredient {
-  id              String             @id @default(cuid())
-  batchId         String
-  inventoryItemId String?
-  name            String
-  category        IngredientCategory
-  plannedAmount   Decimal            @db.Decimal(10, 3)
-  actualAmount    Decimal?           @db.Decimal(10, 3)
-  unit            String
-  lotNumber       String?
-  addedAt         DateTime?
-  batch           Batch              @relation(fields: [batchId], references: [id], onDelete: Cascade)
-
-  @@index([batchId])
-}
-
-model GravityReading {
-  id          String   @id @default(cuid())
-  batchId     String
-  gravity     Decimal  @db.Decimal(5, 4)
-  temperature Decimal  @db.Decimal(4, 1)
-  notes       String?
-  recordedBy  String
-  recordedAt  DateTime @default(now())
-  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
-
-  @@index([batchId, recordedAt])
-}
-
-model BatchTimeline {
-  id          String            @id @default(cuid())
-  batchId     String
-  type        TimelineEventType
-  title       String
-  description String?
-  data        Json?
-  createdBy   String
-  createdAt   DateTime          @default(now())
-  batch       Batch             @relation(fields: [batchId], references: [id], onDelete: Cascade)
-
-  @@index([batchId, createdAt])
-}
-
-model Tank {
-  id                                   String           @id @default(cuid())
-  tenantId                             String
-  name                                 String
-  type                                 TankType
-  capacity                             Decimal          @db.Decimal(10, 2)
-  status                               TankStatus       @default(AVAILABLE)
-  currentBatchId                       String?
-  location                             String?
-  version                              Int              @default(0)
-  createdAt                            DateTime         @default(now())
-  updatedAt                            DateTime         @updatedAt
-  capabilities                         TankCapability[] @default([])
-  currentLotId                         String?
-  currentPhase                         LotPhase?
-  defaultTurnaroundHours               Int?             @default(4)
-  maxFillPercent                       Int?             @default(95)
-  minFillPercent                       Int?             @default(20)
-  batches                              Batch[]
-  LotReading                           LotReading[]
-  tenant                               Tenant           @relation(fields: [tenantId], references: [id])
-  TankAssignment                       TankAssignment[] @relation("TankAssignmentToTank")
-  occupations                          TankOccupation[]
-  Transfer_Transfer_destTankIdToTank   Transfer[]       @relation("Transfer_destTankIdToTank")
-  Transfer_Transfer_sourceTankIdToTank Transfer[]       @relation("Transfer_sourceTankIdToTank")
-
-  @@unique([tenantId, name])
-  @@index([tenantId, status])
-}
-
-model TankOccupation {
-  id        String          @id @default(cuid())
-  tenantId  String
-  tankId    String
-  batchId   String
-  phase     OccupationPhase
-  startedAt DateTime        @default(now())
-  endedAt   DateTime?
-  tank      Tank            @relation(fields: [tankId], references: [id])
-
-  @@index([tenantId, tankId, endedAt])
-}
-
-model PackagingRun {
-  id          String      @id @default(cuid())
-  tenantId    String
-  batchId     String
-  packageType PackageType
-  quantity    Int
-  volumeTotal Decimal     @db.Decimal(10, 2)
-  lotNumber   String?
-  performedBy String
-  notes       String?
-  performedAt DateTime    @default(now())
-  batch       Batch       @relation(fields: [batchId], references: [id])
-
-  @@index([tenantId, batchId])
-}
-
-model Customer {
-  id                 String        @id @default(cuid())
-  tenantId           String
-  name               String
-  type               CustomerType  @default(RETAIL)
-  email              String?
-  phone              String?
-  address            String?
-  city               String?
-  taxId              String?
-  kegReturnDays      Int           @default(14)
-  kegDepositRequired Boolean       @default(true)
-  isActive           Boolean       @default(true)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  tenant             Tenant        @relation(fields: [tenantId], references: [id])
-  invoices           Invoice[]
-  Keg                Keg[]
-  orders             SalesOrder[]
-  transactions       Transaction[]
-
-  @@unique([tenantId, name])
-  @@index([tenantId, isActive])
-}
-
-model Supplier {
-  id           String        @id @default(cuid())
-  tenantId     String
-  name         String
-  category     String?
-  email        String?
-  phone        String?
-  address      String?
-  city         String?
-  taxId        String?
-  bankAccount  String?
-  notes        String?
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  expenses     Expense[]
-  invoices     Invoice[]
-  tenant       Tenant        @relation(fields: [tenantId], references: [id])
-  transactions Transaction[]
-
-  @@unique([tenantId, name])
-  @@index([tenantId, isActive])
-}
-
-model SalesOrder {
-  id            String        @id @default(cuid())
-  tenantId      String
-  orderNumber   String
-  customerId    String
-  status        OrderStatus   @default(PENDING)
-  paymentStatus PaymentStatus @default(PENDING)
-  totalAmount   Decimal       @db.Decimal(12, 2)
-  paidAmount    Decimal       @default(0) @db.Decimal(12, 2)
-  notes         String?
-  orderedAt     DateTime      @default(now())
-  shippedAt     DateTime?
-  deliveredAt   DateTime?
-  createdBy     String
-  updatedAt     DateTime      @updatedAt
-  invoice       Invoice?
-  items         OrderItem[]
-  payments      Payment[]
-  customer      Customer      @relation(fields: [customerId], references: [id])
-  tenant        Tenant        @relation(fields: [tenantId], references: [id])
-  transactions  Transaction[]
-
-  @@unique([tenantId, orderNumber])
-  @@index([tenantId, status])
-  @@index([tenantId, customerId])
-}
-
-model OrderItem {
-  id          String      @id @default(cuid())
-  orderId     String
-  productName String
-  packageType PackageType
-  quantity    Int
-  unitPrice   Decimal     @db.Decimal(10, 2)
-  totalPrice  Decimal     @db.Decimal(12, 2)
-  batchId     String?
-  order       SalesOrder  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@index([orderId])
-}
-
-model Transaction {
-  id              String           @id @default(cuid())
-  tenantId        String
-  type            TransactionType
-  date            DateTime         @default(now())
-  amount          Decimal          @db.Decimal(12, 2)
-  incomeCategory  IncomeCategory?
-  expenseCategory ExpenseCategory?
-  description     String?
-  customerId      String?
-  supplierId      String?
-  orderId         String?
-  invoiceId       String?
-  expenseId       String?
-  paymentId       String?
-  paymentMethod   PaymentMethod?
-  reference       String?
-  notes           String?
-  createdBy       String
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  customer        Customer?        @relation(fields: [customerId], references: [id])
-  expense         Expense?         @relation(fields: [expenseId], references: [id])
-  invoice         Invoice?         @relation(fields: [invoiceId], references: [id])
-  order           SalesOrder?      @relation(fields: [orderId], references: [id])
-  supplier        Supplier?        @relation(fields: [supplierId], references: [id])
-  tenant          Tenant           @relation(fields: [tenantId], references: [id])
-
-  @@index([tenantId, date])
-  @@index([tenantId, type])
-  @@index([tenantId, customerId])
-  @@index([tenantId, supplierId])
-}
-
-model Invoice {
-  id            String        @id @default(cuid())
-  tenantId      String
-  invoiceNumber String
-  type          InvoiceType
-  status        InvoiceStatus @default(DRAFT)
-  issueDate     DateTime      @default(now())
-  dueDate       DateTime?
-  paidAt        DateTime?
-  customerId    String?
-  supplierId    String?
-  orderId       String?       @unique
-  subtotal      Decimal       @db.Decimal(12, 2)
-  discount      Decimal       @default(0) @db.Decimal(12, 2)
-  tax           Decimal       @default(0) @db.Decimal(12, 2)
-  total         Decimal       @db.Decimal(12, 2)
-  paidAmount    Decimal       @default(0) @db.Decimal(12, 2)
-  notes         String?
-  terms         String?
-  createdBy     String
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  customer      Customer?     @relation(fields: [customerId], references: [id])
-  order         SalesOrder?   @relation(fields: [orderId], references: [id])
-  supplier      Supplier?     @relation(fields: [supplierId], references: [id])
-  tenant        Tenant        @relation(fields: [tenantId], references: [id])
-  items         InvoiceItem[]
-  payments      Payment[]
-  transactions  Transaction[]
-
-  @@unique([tenantId, invoiceNumber])
-  @@index([tenantId, status])
-  @@index([tenantId, type])
-  @@index([tenantId, customerId])
-  @@index([tenantId, supplierId])
-  @@index([tenantId, dueDate])
-}
-
-model InvoiceItem {
-  id          String       @id @default(cuid())
-  invoiceId   String
-  description String
-  quantity    Decimal      @db.Decimal(10, 3)
-  unit        String?      @default("ცალი")
-  unitPrice   Decimal      @db.Decimal(10, 2)
-  total       Decimal      @db.Decimal(12, 2)
-  productName String?
-  packageType PackageType?
-  batchId     String?
-  sortOrder   Int          @default(0)
-  invoice     Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-
-  @@index([invoiceId])
-}
-
-model Payment {
-  id        String        @id @default(cuid())
-  tenantId  String
-  invoiceId String?
-  orderId   String?
-  amount    Decimal       @db.Decimal(12, 2)
-  method    PaymentMethod @default(BANK_TRANSFER)
-  date      DateTime      @default(now())
-  reference String?
-  notes     String?
-  createdBy String
-  createdAt DateTime      @default(now())
-  invoice   Invoice?      @relation(fields: [invoiceId], references: [id])
-  order     SalesOrder?   @relation(fields: [orderId], references: [id])
-  tenant    Tenant        @relation(fields: [tenantId], references: [id])
-
-  @@index([tenantId, date])
-  @@index([tenantId, invoiceId])
-  @@index([tenantId, orderId])
-}
-
-model Expense {
-  id            String          @id @default(cuid())
-  tenantId      String
-  category      ExpenseCategory
-  supplierId    String?
-  amount        Decimal         @db.Decimal(12, 2)
-  date          DateTime        @default(now())
-  description   String?
-  invoiceNumber String?
-  invoiceId     String?
-  isPaid        Boolean         @default(false)
-  paidAt        DateTime?
-  paymentMethod PaymentMethod?
-  receiptUrl    String?
-  notes         String?
-  createdBy     String
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  supplier      Supplier?       @relation(fields: [supplierId], references: [id])
-  tenant        Tenant          @relation(fields: [tenantId], references: [id])
-  transactions  Transaction[]
-
-  @@index([tenantId, date])
-  @@index([tenantId, category])
-  @@index([tenantId, supplierId])
-  @@index([tenantId, isPaid])
-}
-
-model Budget {
-  id        String          @id @default(cuid())
-  tenantId  String
-  category  ExpenseCategory
-  year      Int
-  month     Int?
-  amount    Decimal         @db.Decimal(12, 2)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  tenant    Tenant          @relation(fields: [tenantId], references: [id])
-
-  @@unique([tenantId, category, year, month])
-  @@index([tenantId, year])
-}
-
-model AuditLog {
-  id            String   @id @default(cuid())
-  tenantId      String
-  userId        String
-  action        String
-  entityType    String
-  entityId      String
-  oldData       Json?
-  newData       Json?
-  metadata      Json?
-  correlationId String?
-  ipAddress     String?
-  userAgent     String?
-  createdAt     DateTime @default(now())
-
-  @@index([tenantId, entityType, entityId])
-  @@index([tenantId, createdAt])
-  @@index([tenantId, userId])
-}
-
-model BlendingConfig {
-  id                    String   @id
-  tenantId              String   @unique
-  requireRecipeMatch    Boolean  @default(false)
-  requireYeastMatch     Boolean  @default(true)
-  requirePhaseMatch     Boolean  @default(true)
-  requireStyleMatch     Boolean  @default(false)
-  maxBlendSources       Int      @default(4)
-  allowOverCapacity     Boolean  @default(false)
-  maxAgeDifferenceHours Int      @default(48)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @default(now())
-}
-
-model CIPLog {
-  id                   String    @id
-  equipmentId          String
-  cipType              String
-  date                 DateTime
-  duration             Int
-  temperature          Float?
-  causticConcentration Float?
-  performedBy          String
-  result               String
-  notes                String?
-  createdAt            DateTime  @default(now())
-  Equipment            Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
-
-  @@index([date])
-  @@index([equipmentId])
-}
-
-model Equipment {
-  id                     String           @id
-  tenantId               String
-  name                   String
-  type                   String
-  status                 String           @default("OPERATIONAL")
-  capacity               Int?
-  model                  String?
-  manufacturer           String?
-  serialNumber           String?
-  location               String?
-  workingPressure        Float?
-  currentTemp            Float?
-  currentPressure        Float?
-  installationDate       DateTime?
-  warrantyDate           DateTime?
-  lastCIP                DateTime?
-  nextCIP                DateTime?
-  lastMaintenance        DateTime?
-  nextMaintenance        DateTime?
-  cipIntervalDays        Int              @default(7)
-  inspectionIntervalDays Int              @default(30)
-  annualMaintenanceDays  Int              @default(365)
-  currentBatchId         String?
-  currentBatchNumber     String?
-  notes                  String?
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime
-  purchaseDate           DateTime?
-  capabilities           String[]         @default([])
-  CIPLog                 CIPLog[]
-  Tenant                 Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  MaintenanceLog         MaintenanceLog[]
-  ProblemReport          ProblemReport[]
-
-  @@index([status])
-  @@index([tenantId])
-  @@index([type])
-}
-
-model Lot {
-  id                                 String           @id
-  tenantId                           String
-  lotCode                            String?
-  phase                              LotPhase         @default(FERMENTATION)
-  status                             LotStatus        @default(PLANNED)
-  plannedVolume                      Decimal          @db.Decimal(10, 2)
-  actualVolume                       Decimal?         @db.Decimal(10, 2)
-  notes                              String?
-  parentLotId                        String?
-  splitRatio                         Decimal?         @db.Decimal(5, 2)
-  createdBy                          String
-  createdAt                          DateTime         @default(now())
-  updatedAt                          DateTime         @default(now())
-  completedAt                        DateTime?
-  lotNumber                          String?
-  blendedAt                          DateTime?
-  isBlendResult                      Boolean?         @default(false)
-  splitAt                            DateTime?
-  Lot                                Lot?             @relation("LotToLot", fields: [parentLotId], references: [id])
-  other_Lot                          Lot[]            @relation("LotToLot")
-  LotBatch                           LotBatch[]
-  LotReading                         LotReading[]
-  QCTest                             QCTest[]
-  TankAssignment                     TankAssignment[]
-  Transfer_Transfer_destLotIdToLot   Transfer[]       @relation("Transfer_destLotIdToLot")
-  Transfer_Transfer_sourceLotIdToLot Transfer[]       @relation("Transfer_sourceLotIdToLot")
-
-  @@unique([tenantId, lotCode])
-  @@index([tenantId, status])
-}
-
-model LotBatch {
-  id                 String   @id
-  lotId              String
-  batchId            String
-  volumeContribution Decimal  @db.Decimal(10, 2)
-  batchPercentage    Decimal  @default(100.00) @db.Decimal(5, 2)
-  addedAt            DateTime @default(now())
-  Batch              Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  Lot                Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
-
-  @@unique([lotId, batchId])
-}
-
-model LotReading {
-  id          String      @id
-  lotId       String
-  tankId      String
-  readingType ReadingType
-  value       Decimal     @db.Decimal(10, 4)
-  unit        String
-  notes       String?
-  recordedBy  String
-  recordedAt  DateTime    @default(now())
-  Lot         Lot         @relation(fields: [lotId], references: [id], onDelete: Cascade)
-  Tank        Tank        @relation(fields: [tankId], references: [id], onDelete: Cascade)
-
-  @@index([lotId, readingType])
-}
-
-model MaintenanceLog {
-  id            String    @id
-  equipmentId   String
-  type          String
-  status        String
-  priority      String?
-  scheduledDate DateTime?
-  completedDate DateTime?
-  duration      Int?
-  performedBy   String?
-  cost          Float?
-  partsUsed     String[]
-  description   String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime
-  Equipment     Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
-
-  @@index([equipmentId])
-  @@index([status])
-}
-
-model ProblemReport {
-  id           String    @id
-  equipmentId  String
-  problemType  String
-  severity     String
-  status       String    @default("open")
-  description  String
-  reportedDate DateTime
-  reportedBy   String
-  resolvedDate DateTime?
-  resolvedBy   String?
-  resolution   String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime
-  Equipment    Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
-
-  @@index([equipmentId])
-  @@index([status])
-}
-
-model TankAssignment {
-  id            String           @id
-  tenantId      String
-  tankId        String
-  lotId         String
-  phase         LotPhase
-  plannedStart  DateTime?
-  plannedEnd    DateTime?
-  actualStart   DateTime?
-  actualEnd     DateTime?
-  status        AssignmentStatus @default(PLANNED)
-  plannedVolume Decimal?         @db.Decimal(10, 2)
-  actualVolume  Decimal?         @db.Decimal(10, 2)
-  isBlendTarget Boolean          @default(false)
-  isSplitSource Boolean          @default(false)
-  createdBy     String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @default(now())
-  startTime     DateTime?        @default(now())
-  endTime       DateTime?        @default(now())
-  notes         String?
-  Lot           Lot              @relation(fields: [lotId], references: [id], onDelete: Cascade)
-  Tank          Tank             @relation("TankAssignmentToTank", fields: [tankId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId, status])
-  @@index([tenantId, tankId])
-}
-
-model Transfer {
-  id                               String         @id
-  tenantId                         String
-  transferCode                     String
-  sourceLotId                      String?
-  sourceTankId                     String
-  destLotId                        String?
-  destTankId                       String
-  transferType                     TransferType
-  volume                           Decimal        @db.Decimal(10, 2)
-  plannedAt                        DateTime
-  executedAt                       DateTime?
-  status                           TransferStatus @default(PLANNED)
-  measuredLoss                     Decimal?       @db.Decimal(10, 2)
-  lossReason                       String?
-  performedBy                      String?
-  notes                            String?
-  createdAt                        DateTime       @default(now())
-  updatedAt                        DateTime       @default(now())
-  Lot_Transfer_destLotIdToLot      Lot?           @relation("Transfer_destLotIdToLot", fields: [destLotId], references: [id])
-  Tank_Transfer_destTankIdToTank   Tank           @relation("Transfer_destTankIdToTank", fields: [destTankId], references: [id], onDelete: Cascade)
-  Lot_Transfer_sourceLotIdToLot    Lot?           @relation("Transfer_sourceLotIdToLot", fields: [sourceLotId], references: [id])
-  Tank_Transfer_sourceTankIdToTank Tank           @relation("Transfer_sourceTankIdToTank", fields: [sourceTankId], references: [id], onDelete: Cascade)
-
-  @@unique([tenantId, transferCode])
-}
-
-model Keg {
-  id          String        @id @default(cuid())
-  tenantId    String
-  kegNumber   String
-  size        Int
-  status      KegStatus     @default(AVAILABLE)
-  condition   KegCondition  @default(GOOD)
-  batchId     String?
-  filledAt    DateTime?
-  productName String?
-  lotNumber   String?
-  customerId  String?
-  orderId     String?
-  sentAt      DateTime?
-  returnedAt  DateTime?
-  deposit     Decimal       @default(150) @db.Decimal(10, 2)
-  notes       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @default(now()) @updatedAt
-  Batch       Batch?        @relation(fields: [batchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Customer    Customer?     @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  movements   KegMovement[]
-
-  @@unique([tenantId, kegNumber])
-  @@index([tenantId, customerId])
-  @@index([tenantId, status])
-}
-
-model KegMovement {
-  id           String    @id @default(cuid())
-  tenantId     String
-  kegId        String
-  action       KegAction
-  fromStatus   KegStatus
-  toStatus     KegStatus
-  productId    String?
-  productName  String?
-  customerId   String?
-  customerName String?
-  orderId      String?
-  batchId      String?
-  notes        String?
-  createdAt    DateTime  @default(now())
-  createdBy    String?
-  keg          Keg       @relation(fields: [kegId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId, kegId])
-  @@index([tenantId, customerId])
-  @@index([tenantId, createdAt])
-}
-
-model QCTest {
-  id            String         @id
-  tenantId      String
-  batchId       String
-  lotId         String?
-  testType      QCTestType
-  status        QCTestStatus   @default(SCHEDULED)
-  priority      QCTestPriority @default(MEDIUM)
-  scheduledDate DateTime
-  completedDate DateTime?
-  minValue      Decimal?       @db.Decimal(10, 4)
-  maxValue      Decimal?       @db.Decimal(10, 4)
-  targetValue   Decimal?       @db.Decimal(10, 4)
-  result        Decimal?       @db.Decimal(10, 4)
-  unit          String?
-  notes         String?
-  performedBy   String?
-  createdBy     String
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime
-  Batch         Batch          @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  Lot           Lot?           @relation(fields: [lotId], references: [id], onDelete: Cascade)
-
-  @@index([scheduledDate])
-  @@index([tenantId, batchId])
-  @@index([tenantId, status])
+enum ModuleType {
+  HOTEL
+  RESTAURANT
+  BEAUTY
+  SHOP
+  BREWERY
+  WINERY
+  DISTILLERY
 }
 
 enum PlanType {
@@ -895,324 +35,394 @@ enum PlanType {
   ENTERPRISE
 }
 
-enum UserRole {
-  OWNER
-  ADMIN
-  MANAGER
-  OPERATOR
-  VIEWER
-}
-
-enum InventoryCategory {
-  RAW_MATERIAL
-  PACKAGING
-  FINISHED_GOOD
-  CONSUMABLE
-}
-
-enum LedgerEntryType {
-  PURCHASE
-  CONSUMPTION
-  PRODUCTION
-  ADJUSTMENT
-  ADJUSTMENT_ADD
-  ADJUSTMENT_REMOVE
-  WASTE
-  SALE
-  RETURN
-  REVERSAL
-  TRANSFER
-}
-
-enum IngredientCategory {
-  MALT
-  HOPS
-  YEAST
-  ADJUNCT
-  WATER_CHEMISTRY
-}
-
-enum BatchStatus {
-  PLANNED
-  BREWING
-  FERMENTING
-  CONDITIONING
-  READY
-  PACKAGING
-  COMPLETED
-  CANCELLED
-}
-
-enum TimelineEventType {
-  CREATED
-  STARTED
-  MASH
-  BOIL
-  TRANSFER
-  GRAVITY_READING
-  DRY_HOP
-  TEMPERATURE_CHANGE
-  NOTE
-  COMPLETED
-  INGREDIENTS_RESERVED
-  BREWING_STARTED
-  MASH_COMPLETE
-  BOIL_COMPLETE
-  TRANSFER_TO_FERMENTER
-  FERMENTATION_STARTED
-  DRY_HOP_ADDED
-  CONDITIONING_STARTED
-  READY_FOR_PACKAGING
-  PACKAGING_STARTED
-  PACKAGING_COMPLETE
-  CANCELLED
-}
-
-enum TankType {
-  FERMENTER
-  BRITE
-  UNITANK
-  KETTLE
-  MASH_TUN
-  HLT
-}
-
-enum TankStatus {
-  AVAILABLE
-  OCCUPIED
-  CLEANING
-  MAINTENANCE
-  OUT_OF_SERVICE
-}
-
-enum OccupationPhase {
-  FERMENTATION
-  CONDITIONING
-  STORAGE
-}
-
-enum PackageType {
-  KEG_50
-  KEG_30
-  KEG_20
-  BOTTLE_750
-  BOTTLE_500
-  BOTTLE_330
-  CAN_500
-  CAN_330
-}
-
-enum CustomerType {
-  RETAIL
-  WHOLESALE
-  DISTRIBUTOR
-  RESTAURANT
-  BAR
-  EXPORT
-}
-
-enum OrderStatus {
-  DRAFT
-  PENDING
-  CONFIRMED
-  PROCESSING
-  READY
-  SHIPPED
-  DELIVERED
-  CANCELLED
-}
-
-enum PaymentStatus {
-  PENDING
-  PARTIAL
-  PAID
-  OVERDUE
-  REFUNDED
-}
-
-enum AssignmentStatus {
-  PLANNED
+enum SubscriptionStatus {
+  TRIAL
   ACTIVE
-  COMPLETED
+  PAST_DUE
   CANCELLED
+  EXPIRED
 }
 
-enum EquipmentStatus {
-  OPERATIONAL
-  NEEDS_MAINTENANCE
-  UNDER_MAINTENANCE
-  OUT_OF_SERVICE
-  NEEDS_CIP
-}
-
-enum EquipmentType {
-  FERMENTER
-  UNITANK
-  BRITE
-  KETTLE
-  MASH_TUN
-  HLT
-  PUMP
-  CHILLER
-  FILTER
-  OTHER
-}
-
-enum LotPhase {
-  FERMENTATION
-  CONDITIONING
-  BRIGHT
-  PACKAGING
-}
-
-enum LotStatus {
-  PLANNED
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
-
-enum ReadingType {
-  GRAVITY
-  TEMPERATURE
-  PH
-  PRESSURE
-  DISSOLVED_O2
-  TURBIDITY
-}
-
-enum RecipeStatus {
-  DRAFT
-  ACTIVE
-  ARCHIVED
-}
-
-enum TankCapability {
-  FERMENTING
-  CONDITIONING
-  BREWING
-  BRIGHT
-  STORAGE
-}
-
-enum TransferStatus {
-  PLANNED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
-
-enum TransferType {
-  FERMENT_TO_CONDITION
-  CONDITION_TO_BRIGHT
-  TANK_TO_TANK
-  BLEND
-  SPLIT
-}
-
-enum KegCondition {
-  GOOD
-  NEEDS_CLEANING
-  DAMAGED
-}
-
-enum KegStatus {
-  AVAILABLE
-  FILLED
-  WITH_CUSTOMER
-  IN_TRANSIT
-  CLEANING
-  DAMAGED
-  LOST
-}
-
-enum KegAction {
-  CREATED
-  FILLED
-  SHIPPED
-  RETURNED
-  CLEANED
-  DAMAGED
-  LOST
-  REPAIRED
-}
-
-enum QCTestPriority {
-  HIGH
-  MEDIUM
+enum TicketPriority {
   LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
-enum QCTestStatus {
-  SCHEDULED
+enum TicketStatus {
+  OPEN
   IN_PROGRESS
-  PASSED
-  WARNING
-  FAILED
-  CANCELLED
+  RESOLVED
+  CLOSED
 }
 
-enum QCTestType {
-  GRAVITY
-  TEMPERATURE
-  PH
-  DISSOLVED_O2
-  TURBIDITY
-  COLOR
-  BITTERNESS
-  ALCOHOL
-  CARBONATION
-  APPEARANCE
-  AROMA
-  TASTE
-  MICROBIOLOGICAL
+// MODELS
+model Organization {
+  id      String  @id @default(cuid())
+  name    String
+  slug    String  @unique
+  email   String
+  phone   String?
+  address String?
+  logo    String?
+
+  // Hotel Info
+  company     String?
+  taxId       String?
+  city        String?
+  country     String? @default("Georgia")
+  website     String?
+  bankName    String?
+  bankAccount String?
+
+  // Multi-tenancy
+  tenantId    String? @unique // ID from Neon Tenant table (for breweries)
+  tenantCode  String? @unique // BREW-XXXX format code (for breweries)
+  hotelCode   String? @unique // 4-digit code (for hotels)
+  databaseUrl String?
+
+  // Relations
+  subscription Subscription?
+  users        User[]
+  modules      ModuleAccess[]
+  tickets      SupportTicket[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([tenantId])
+  @@index([tenantCode])
 }
 
-enum TransactionType {
-  INCOME
-  EXPENSE
-  TRANSFER
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  name     String?
+  password String
+  avatar   String?
+  role     Role    @default(USER)
+
+  // Organization
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  // Auth
+  emailVerified DateTime?
+  sessions      Session[]
+  accounts      Account[]
+
+  // Activity
+  lastLoginAt DateTime?
+  activities  ActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([organizationId])
 }
 
-enum IncomeCategory {
-  SALE
-  DEPOSIT
-  REFUND
-  OTHER
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
-enum ExpenseCategory {
-  INGREDIENTS
-  PACKAGING
-  EQUIPMENT
-  UTILITIES
-  SALARY
-  RENT
-  MARKETING
-  MAINTENANCE
-  TRANSPORT
-  OTHER
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+
+  @@index([userId])
 }
 
-enum InvoiceType {
-  OUTGOING
-  INCOMING
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
-enum InvoiceStatus {
-  DRAFT
-  SENT
-  PAID
-  PARTIAL
-  OVERDUE
-  CANCELLED
+model Subscription {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  plan   PlanType           @default(STARTER)
+  status SubscriptionStatus @default(TRIAL)
+
+  // Pricing
+  price    Decimal @db.Decimal(10, 2)
+  currency String  @default("GEL")
+
+  // Billing
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean  @default(false)
+
+  // Trial
+  trialStart DateTime?
+  trialEnd   DateTime?
+
+  // Payment
+  paymentMethod   String?
+  lastPaymentDate DateTime?
+  nextBillingDate DateTime?
+
+  // Relations
+  invoices Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
 }
 
-enum PaymentMethod {
-  CASH
-  BANK_TRANSFER
-  CARD
-  CHECK
+model ModuleAccess {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  moduleType ModuleType
+  isActive   Boolean    @default(true)
+
+  // Module-specific settings
+  settings Json?
+
+  // Module limits
+  maxUsers   Int?
+  maxRecords Int?
+
+  // Module features
+  features ModuleFeature[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, moduleType])
+  @@index([organizationId])
+  @@index([moduleType])
+}
+
+model ModuleFeature {
+  id             String       @id @default(cuid())
+  moduleAccessId String
+  moduleAccess   ModuleAccess @relation(fields: [moduleAccessId], references: [id])
+
+  name      String
+  isEnabled Boolean @default(true)
+
+  @@index([moduleAccessId])
+}
+
+model Invoice {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+
+  invoiceNumber String  @unique @default(cuid())
+  amount        Decimal @db.Decimal(10, 2)
+  currency      String  @default("GEL")
+  status        String
+
+  dueDate DateTime
+  paidAt  DateTime?
+
+  invoiceUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([subscriptionId])
+  @@index([status])
+}
+
+// Landing Page Configuration
+model ModuleConfig {
+  id         String     @id @default(cuid())
+  moduleType ModuleType @unique
+
+  // Display info
+  name   String
+  nameEn String?
+  nameRu String?
+
+  description   String
+  descriptionEn String?
+  descriptionRu String?
+
+  icon         String
+  color        String
+  isEnabled    Boolean @default(true)
+  displayOrder Int     @default(0)
+
+  // Pricing
+  starterPrice    Decimal? @db.Decimal(10, 2)
+  starterDuration String?  @default("15 დღე")
+  starterFeatures String[]
+
+  professionalPrice    Decimal? @db.Decimal(10, 2)
+  professionalDuration String?  @default("თვეში")
+  professionalFeatures String[]
+
+  enterprisePrice    Decimal? @db.Decimal(10, 2)
+  enterpriseDuration String?  @default("თვეში")
+  enterpriseFeatures String[]
+
+  // Stats
+  activeOrganizations Int @default(0)
+  totalUsers          Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LandingPageContent {
+  id  String @id @default(cuid())
+  key String @unique
+
+  // Hero section
+  heroTitle       String?
+  heroSubtitle    String?
+  heroDescription String?
+
+  // Statistics
+  statsBusinesses   Int?
+  statsTransactions Int?
+  statsUsers        Int?
+  statsUptime       Decimal? @db.Decimal(5, 2)
+
+  // Other content
+  content Json?
+
+  updatedAt DateTime @updatedAt
+}
+
+model SupportTicket {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  subject     String
+  description String         @db.Text
+  priority    TicketPriority @default(MEDIUM)
+  status      TicketStatus   @default(OPEN)
+
+  assignedTo String?
+  resolvedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([priority])
+}
+
+model ActivityLog {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+}
+
+// Module-specific schemas
+model HotelRoom {
+  id       String @id @default(cuid())
+  tenantId String
+
+  roomNumber String
+  roomType   String
+  floor      Int
+  status     String
+
+  basePrice Decimal @db.Decimal(10, 2)
+
+  amenities    String[]
+  maxOccupancy Int
+
+  reservations HotelReservation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, roomNumber])
+  @@index([tenantId])
+  @@index([status])
+}
+
+model HotelReservation {
+  id       String @id @default(cuid())
+  tenantId String
+
+  roomId String
+  room   HotelRoom @relation(fields: [roomId], references: [id])
+
+  guestName    String
+  guestEmail   String?
+  guestPhone   String?
+  guestCountry String?
+
+  checkIn  DateTime
+  checkOut DateTime
+
+  adults   Int
+  children Int @default(0)
+
+  totalAmount Decimal @db.Decimal(10, 2)
+  paidAmount  Decimal @default(0) @db.Decimal(10, 2)
+
+  status String
+
+  // Booking source
+  source String? @default("Direct")
+
+  // Company fields
+  companyName        String?
+  companyTaxId       String?
+  companyAddress     String?
+  companyBank        String?
+  companyBankAccount String?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([roomId])
+  @@index([status])
 }
 
 model Configuration {
@@ -1225,67 +435,443 @@ model Configuration {
   @@index([key])
 }
 
-// GeoGuide – მუზეუმი
+// Contact Form Submissions from Landing Page
+model ContactRequest {
+  id        String    @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String    @db.Text
+  module    String? // რომელი მოდულიდან მოვიდა (hotel, brewery...)
+  status    String    @default("NEW") // NEW, READ, REPLIED, ARCHIVED
+  notes     String?   @db.Text // ადმინის შენიშვნები
+  repliedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([status])
+  @@index([module])
+  @@index([createdAt])
+}
+
+// ===================================
+// GEOGUIDE - Audio Guide Platform
+// დაამატე ეს super-admin/prisma/schema.prisma ფაილის ბოლოს
+// ===================================
+
+// ENUMS
+enum ActivationCodeStatus {
+  AVAILABLE // კოდი ხელმისაწვდომია
+  REDEEMED // კოდი გამოყენებულია
+  EXPIRED // კოდი ვადაგასულია
+  REVOKED // კოდი გაუქმებულია
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum TourPackStatus {
+  DRAFT // შექმნის პროცესში
+  PUBLISHED // გამოქვეყნებული
+  ARCHIVED // არქივირებული
+}
+
+// MODELS
+
+// მუზეუმი / ლოკაცია
 model Museum {
   id String @id @default(cuid())
 
-  // Georgian (default)
+  // ქართული (ძირითადი)
   name        String
   description String? @db.Text
   city        String?
   address     String?
 
-  // English
+  // ინგლისური
   nameEn        String?
   descriptionEn String? @db.Text
   cityEn        String?
   addressEn     String?
 
-  // Russian
+  // რუსული
   nameRu        String?
   descriptionRu String? @db.Text
   cityRu        String?
   addressRu     String?
 
-  // German
+  // გერმანული
   nameDe        String?
   descriptionDe String? @db.Text
   cityDe        String?
   addressDe     String?
 
-  // French
+  // ფრანგული
   nameFr        String?
   descriptionFr String? @db.Text
   cityFr        String?
   addressFr     String?
 
-  // Common fields (same for all languages)
-  slug         String  @unique
-  coverImage   String?
-  latitude     Float?
-  longitude    Float?
+  // უკრაინული
+  nameUk        String?
+  descriptionUk String? @db.Text
+  cityUk        String?
+  addressUk     String?
+
+  // URL და მედია
+  slug            String   @unique
+  coverImage      String?
+  introAudioUrl   String?
+  introAudioUrlEn String?
+  introAudioUrlRu String?
+  introAudioUrlDe String?
+  introAudioUrlFr String?
+  introAudioUrlUk String?
+  gallery         String[]
+
+  // მდებარეობა (კოორდინატები)
+  latitude  Float?
+  longitude Float?
+
+  // საკონტაქტო
   contactEmail String?
   contactPhone String?
   website      String?
 
-  // Settings
+  // სამუშაო საათები
+  workingHours Json?
+
+  // პარამეტრები
   showMap       Boolean @default(false)
   showQrScanner Boolean @default(false)
   isPublished   Boolean @default(false)
+  displayOrder  Int     @default(0)
+  category      String?
+
+  // რელაციები
+  tours    Tour[]
+  payments Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tours Tour[]
+  @@index([slug])
+  @@index([isPublished])
+  @@index([category])
 }
 
-// GeoGuide – ტური (მინიმალური მოდელი Museum რელაციისთვის)
+// ტური
 model Tour {
-  id        String   @id @default(cuid())
-  museumId  String
-  museum    Museum   @relation(fields: [museumId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  museumId String
+  museum   Museum @relation(fields: [museumId], references: [id], onDelete: Cascade)
+
+  // ძირითადი ინფორმაცია
+  name   String
+  nameEn String?
+  nameRu String?
+  nameUk String?
+
+  description   String? @db.Text
+  descriptionEn String? @db.Text
+  descriptionRu String? @db.Text
+  descriptionUk String? @db.Text
+
+  // პარამეტრები
+  duration   Int? // წუთებში
+  stopsCount Int  @default(0)
+
+  // ფასი
+  isFree   Boolean  @default(false)
+  price    Decimal? @db.Decimal(10, 2)
+  currency String   @default("GEL")
+
+  // სტატუსი
+  isPublished  Boolean @default(false)
+  displayOrder Int     @default(0)
+
+  // ფასი/წვდომა
+  allowActivationCodes Boolean @default(true)
+  allowBankPayment     Boolean @default(true)
+
+  // მედია
+  coverImage String?
+
+  // რელაციები
+  halls        Hall[]
+  stops        TourStop[]
+  packs        TourPack[]
+  entitlements Entitlement[]
+  payments     Payment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([museumId])
+  @@index([isPublished])
+}
+
+model Hall {
+  id     String @id @default(cuid())
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  name   String
+  nameEn String?
+  nameRu String?
+  nameUk String?
+
+  description   String?
+  descriptionEn String?
+  descriptionRu String?
+  descriptionUk String?
+
+  floorNumber Int?
+  imageUrl    String?
+  orderIndex  Int     @default(0)
+  isPublished Boolean @default(true)
+
+  stops TourStop[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ტურის გაჩერება (Stop/Exhibit)
+model TourStop {
+  id String @id @default(cuid())
+
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  hallId String?
+  hall   Hall?   @relation(fields: [hallId], references: [id])
+
+  // ძირითადი ინფორმაცია
+  title   String
+  titleEn String?
+  titleRu String?
+  titleUk String?
+
+  description   String? @db.Text
+  descriptionEn String? @db.Text
+  descriptionRu String? @db.Text
+  descriptionUk String? @db.Text
+
+  // აუდიო ტრანსკრიპტი
+  transcript   String? @db.Text
+  transcriptEn String? @db.Text
+  transcriptRu String? @db.Text
+  transcriptUk String? @db.Text
+
+  // მედია
+  audioUrl   String? // აუდიო ფაილის URL
+  audioUrlEn String?
+  audioUrlRu String?
+  audioUrlUk String?
+
+  audioDuration Int? // წამებში
+
+  imageUrl String? // სურათი
+  images   String[] // დამატებითი სურათები
+
+  // QR კოდი
+  qrCode String? @unique // უნიკალური QR კოდი
+
+  // თანმიმდევრობა
+  orderIndex Int @default(0)
+
+  // სტატუსი
+  isPublished Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tourId])
+  @@index([qrCode])
+  @@index([orderIndex])
+}
+
+// ოფლაინ პაკეტი
+model TourPack {
+  id String @id @default(cuid())
+
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  // ენა
+  locale String // "ka", "en", "ru"
+
+  // ვერსია
+  version Int @default(1)
+
+  // ფაილები
+  manifestUrl String? // manifest.json URL
+  totalSize   BigInt? // ბაიტებში
+
+  // სტატუსი
+  status TourPackStatus @default(DRAFT)
+
+  // Build info
+  builtAt  DateTime?
+  buildLog String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tourId, locale])
+  @@index([tourId])
+  @@index([status])
+}
+
+// აქტივაციის კოდი
+model ActivationCode {
+  id String @id @default(cuid())
+
+  // კოდი (hashed)
+  code     String @unique // დისპლეისთვის: "GEOG-XXXX-XXXX"
+  codeHash String @unique // SHA256 hash ვერიფიკაციისთვის
+
+  // ვადა
+  durationDays Int // რამდენი დღე მოქმედებს
+
+  // სტატუსი
+  status ActivationCodeStatus @default(AVAILABLE)
+
+  // ტურები რომლებზეც წვდომა აქვს
+  tourIds   String[] // ცარიელი = ყველა ტური
+  museumIds String[] // ცარიელი = ყველა მუზეუმი
+
+  // Redeem ინფორმაცია
+  redeemedAt DateTime?
+  redeemedBy String? // deviceId
+
+  // Batch ინფორმაცია (ჯგუფური გენერაციისთვის)
+  batchId   String?
+  batchName String?
+
+  // მეტადატა
+  notes String?
+
+  // რელაცია
+  entitlement Entitlement?
+  payments    Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+  @@index([codeHash])
+  @@index([status])
+  @@index([batchId])
+}
+
+// მოწყობილობა
+model Device {
+  id String @id @default(cuid())
+
+  deviceId String @unique // უნიკალური მოწყობილობის ID
+
+  // მოწყობილობის ინფო
+  platform   String? // "ios", "android", "web"
+  deviceName String?
+  appVersion String?
+
+  // Push notifications
+  pushToken String?
+
+  // რელაციები
+  entitlements Entitlement[]
+
+  // აქტივობა
+  lastActiveAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([deviceId])
+}
+
+// უფლებამოსილება (Device + Tour წვდომა)
+model Entitlement {
+  id String @id @default(cuid())
+
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id])
+
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id])
+
+  // აქტივაციის კოდი
+  activationCodeId String?         @unique
+  activationCode   ActivationCode? @relation(fields: [activationCodeId], references: [id])
+
+  // ვადა
+  activatedAt DateTime @default(now())
+  expiresAt   DateTime
+
+  // სტატუსი
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([deviceId, tourId])
+  @@index([deviceId])
+  @@index([tourId])
+  @@index([expiresAt])
+  @@index([isActive])
+}
+
+// გადახდა (TBC Pay / ტურის შეძენა)
+model Payment {
+  id               String          @id @default(cuid())
+  orderId          String          @unique
+  tbcPaymentId     String?
+  tbcStatus        String?
+  tourId           String
+  tour             Tour            @relation(fields: [tourId], references: [id])
+  museumId         String?
+  museum           Museum?         @relation(fields: [museumId], references: [id])
+  deviceId         String
+  amount           Decimal         @db.Decimal(10, 2)
+  currency         String          @default("GEL")
+  status           PaymentStatus   @default(PENDING)
+  activationCodeId String?
+  activationCode   ActivationCode? @relation(fields: [activationCodeId], references: [id])
+  completedAt      DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+// ანალიტიკა (Optional)
+model GeoGuideEvent {
+  id String @id @default(cuid())
+
+  deviceId String?
+  tourId   String?
+  stopId   String?
+  museumId String?
+
+  // Event type
+  eventType String // "tour_start", "stop_play", "download", "qr_scan"
+
+  // მეტადატა
+  metadata Json?
+
+  // Location (optional)
+  latitude  Decimal? @db.Decimal(10, 8)
+  longitude Decimal? @db.Decimal(11, 8)
+
+  createdAt DateTime @default(now())
+
+  @@index([deviceId])
+  @@index([tourId])
+  @@index([eventType])
+  @@index([createdAt])
 }
