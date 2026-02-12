@@ -245,7 +245,7 @@ export default function RestaurantPOS() {
         date: moment(reservation.date).format('YYYY-MM-DD'),
         time: reservation.startTime || '',
         guests: reservation.guests || 2,
-        tableNumber: reservation.tableNumber || '',
+        tableNumber: reservation.services?.tableNumber || '',
         occasion: reservation.services?.occasion || '',
         notes: reservation.notes || ''
       })
@@ -269,6 +269,13 @@ export default function RestaurantPOS() {
   // Save reservation (create or update)
   const saveReservation = async () => {
     try {
+      const servicesData = {
+        type: 'restaurant',
+        occasion: reservationForm.occasion || undefined,
+        tableNumber: reservationForm.tableNumber || undefined,
+        source: editingReservation?.services?.source || 'pos'
+      }
+
       if (editingReservation) {
         // Update existing
         const response = await fetch(`/api/hotel/spa-bookings/${editingReservation.id}`, {
@@ -281,13 +288,8 @@ export default function RestaurantPOS() {
             date: reservationForm.date,
             startTime: reservationForm.time,
             guests: reservationForm.guests,
-            tableNumber: reservationForm.tableNumber,
             notes: reservationForm.notes,
-            services: {
-              type: 'restaurant',
-              occasion: reservationForm.occasion,
-              source: 'pos'
-            }
+            services: servicesData
           })
         })
         if (response.ok) {
@@ -316,14 +318,9 @@ export default function RestaurantPOS() {
             startTime: reservationForm.time,
             endTime: moment(reservationForm.time, 'HH:mm').add(2, 'hours').format('HH:mm'),
             guests: reservationForm.guests,
-            tableNumber: reservationForm.tableNumber,
             notes: reservationForm.notes,
             status: 'confirmed',
-            services: {
-              type: 'restaurant',
-              occasion: reservationForm.occasion,
-              source: 'pos'
-            }
+            services: servicesData
           })
         })
         if (response.ok) {
@@ -1101,6 +1098,21 @@ export default function RestaurantPOS() {
     }
   }
 
+  // Get reservation for a specific table (today only)
+  const getTableReservation = (tableNumber: string) => {
+    const today = moment().format('YYYY-MM-DD')
+    return restaurantReservations.find(r => 
+      r.services?.tableNumber === tableNumber && 
+      moment(r.date).format('YYYY-MM-DD') === today &&
+      r.status !== 'cancelled'
+    )
+  }
+
+  // Check if table is reserved for today
+  const isTableReservedToday = (tableNumber: string) => {
+    return !!getTableReservation(tableNumber)
+  }
+
   // Today's stats
   const todayOrders = orders.filter(o => moment(o.createdAt).isSame(moment(), 'day'))
   const todayRevenue = todayOrders.filter(o => o.status === 'paid').reduce((sum, o) => sum + o.total, 0)
@@ -1205,23 +1217,40 @@ export default function RestaurantPOS() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
               {zoneTables.map(table => {
                 const order = getTableOrder(table.id)
+                const reservation = getTableReservation(table.number)
+                const hasReservation = !!reservation
                 return (
                   <button
                     key={table.id}
                     onClick={() => openTable(table)}
                     className={`p-4 rounded-xl border-2 transition-all hover:scale-105 ${
-                      table.status === 'available' ? 'bg-green-50 border-green-300 hover:border-green-500' :
                       table.status === 'occupied' ? 'bg-red-50 border-red-300 hover:border-red-500' :
-                      table.status === 'reserved' ? 'bg-yellow-50 border-yellow-300 hover:border-yellow-500' :
-                      'bg-blue-50 border-blue-300 hover:border-blue-500'
+                      hasReservation ? 'bg-yellow-50 border-yellow-300 hover:border-yellow-500' :
+                      table.status === 'cleaning' ? 'bg-blue-50 border-blue-300 hover:border-blue-500' :
+                      'bg-green-50 border-green-300 hover:border-green-500'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-2xl">{table.shape === 'round' ? '⭕' : '🔲'}</span>
-                      <span className={`w-3 h-3 rounded-full ${getStatusColor(table.status)}`}></span>
+                      <span className={`w-3 h-3 rounded-full ${
+                        table.status === 'occupied' ? 'bg-red-500' :
+                        hasReservation ? 'bg-yellow-500' :
+                        table.status === 'cleaning' ? 'bg-blue-500' :
+                        'bg-green-500'
+                      }`}></span>
                     </div>
                     <div className="text-lg font-bold">მაგიდა {table.number}</div>
                     <div className="text-sm text-gray-500">{table.seats} ადგილი</div>
+                    
+                    {/* Show reservation info */}
+                    {hasReservation && table.status !== 'occupied' && (
+                      <div className="mt-2 pt-2 border-t text-sm text-yellow-700">
+                        <div className="font-medium">📅 {reservation.startTime}</div>
+                        <div className="text-xs">{reservation.guestName}</div>
+                        <div className="text-xs text-gray-500">👥 {reservation.guests} სტუმარი</div>
+                      </div>
+                    )}
+                    
                     {table.status === 'cleaning' && (
                       <div className="mt-2 pt-2 border-t text-sm text-blue-600 font-medium">
                         🧹 იწმინდება
@@ -1469,9 +1498,9 @@ export default function RestaurantPOS() {
                                   📞 {reservation.guestPhone}
                                 </a>
                               )}
-                              {reservation.tableNumber && (
+                              {reservation.services?.tableNumber && (
                                 <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
-                                  🪑 მაგიდა {reservation.tableNumber}
+                                  🪑 მაგიდა {reservation.services.tableNumber}
                                 </span>
                               )}
                             </div>
