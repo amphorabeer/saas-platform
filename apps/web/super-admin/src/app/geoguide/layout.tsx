@@ -13,6 +13,7 @@ const geoguideMenuItems = [
   { label: "აქტივაციის კოდები", href: "/geoguide/codes", icon: "🔑" },
   { label: "მოწყობილობები", href: "/geoguide/devices", icon: "📱" },
   { label: "ანალიტიკა", href: "/geoguide/analytics", icon: "📈" },
+  { label: "ჩატბოტი", href: "/geoguide/chatbot", icon: "🤖" },
 ];
 
 export default function GeoGuideLayout({
