@@ -199,7 +199,7 @@ export default function BuyPage() {
       }
 
       // Create payment
-      const res = await fetch("/api/payments/create", {
+      const res = await fetch("/api/payments/tbc/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -214,9 +214,9 @@ export default function BuyPage() {
 
       const data = await res.json();
 
-      if (res.ok && data.paymentUrl) {
+      if (res.ok && data.redirectUrl) {
         // Redirect to TBC payment page
-        window.location.href = data.paymentUrl;
+        window.location.href = data.redirectUrl;
       } else {
         setError(data.message || ui.errorPayment);
       }
