@@ -18,7 +18,7 @@ function PaymentResult() {
   const { language } = useLanguage();
   const ui = uiTexts[language] || uiTexts.ka;
   const [status, setStatus] = useState<"checking" | "success" | "failed">("checking");
-  const [tourInfo, setTourInfo] = useState<{ tourId: string; tourName: string } | null>(null);
+  const [tourInfo, setTourInfo] = useState<{ tourId: string; tourName: string; museumSlug: string } | null>(null);
   const orderId = searchParams.get("orderId");
 
   useEffect(() => {
@@ -28,7 +28,7 @@ function PaymentResult() {
       try {
         const res = await fetch(`/api/payments/tbc/status?orderId=${orderId}`);
         const data = await res.json();
-        if (data.tourId) setTourInfo({ tourId: data.tourId, tourName: data.tourName });
+        if (data.tourId) setTourInfo({ tourId: data.tourId, tourName: data.tourName, museumSlug: data.museumSlug });
         if (data.status === "COMPLETED") { setStatus("success"); return; }
         if (data.status === "FAILED") { setStatus("failed"); return; }
         attempts++;
@@ -38,6 +38,14 @@ function PaymentResult() {
     };
     check();
   }, [orderId]);
+
+  const goToTour = () => {
+    if (tourInfo?.museumSlug && tourInfo?.tourId) {
+      router.push(`/museum/${tourInfo.museumSlug}/tour/${tourInfo.tourId}`);
+    } else {
+      router.push("/");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -55,7 +63,7 @@ function PaymentResult() {
             </div>
             <h2 className="text-xl font-bold text-green-600 mb-2">{ui.success}</h2>
             {tourInfo && <p className="text-gray-600 mb-6">{tourInfo.tourName}</p>}
-            <button onClick={() => router.push("/")} className="w-full py-3 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600">
+            <button onClick={goToTour} className="w-full py-3 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600">
               {ui.startTour}
             </button>
           </>
