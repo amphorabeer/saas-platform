@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/language-context";
+import ChatWidget from "@/components/chat/ChatWidget";
 
 const inter = Inter({ subsets: ["latin", "cyrillic", "cyrillic-ext"] });
 
@@ -60,6 +61,7 @@ export default function RootLayout({
           <main className="min-h-screen bg-gray-50 pt-safe pb-safe">
             {children}
           </main>
+          <ChatWidget />
         </LanguageProvider>
       </body>
     </html>
