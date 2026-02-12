@@ -129,8 +129,14 @@ const DEFAULT_BEER_TASTINGS: BeerTasting[] = [
 // ==================== MAIN COMPONENT ====================
 export default function RestaurantPOS() {
   // View state
-  const [activeView, setActiveView] = useState<'floor' | 'orders' | 'kds' | 'reports' | 'settings'>('floor')
+  const [activeView, setActiveView] = useState<'floor' | 'orders' | 'kds' | 'reports' | 'reservations'>('floor')
   const [activeZone, setActiveZone] = useState<'inside' | 'outside' | 'lobby'>('inside')
+  
+  // Date selection
+  const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'))
+  
+  // Restaurant reservations from website
+  const [restaurantReservations, setRestaurantReservations] = useState<any[]>([])
   
   // Data state
   const [tables, setTables] = useState<TableConfig[]>(DEFAULT_TABLES)
@@ -189,6 +195,29 @@ export default function RestaurantPOS() {
     }
     loadCheckedInRooms()
   }, [])
+
+  // Load restaurant reservations for selected date
+  useEffect(() => {
+    const loadRestaurantReservations = async () => {
+      try {
+        const response = await fetch(`/api/hotel/spa-bookings?type=restaurant&date=${selectedDate}`)
+        if (response.ok) {
+          const data = await response.json()
+          // Filter only restaurant bookings for selected date
+          const filtered = data.filter((b: any) => {
+            const bookingDate = moment(b.date).format('YYYY-MM-DD')
+            const isRestaurant = b.bookingNumber?.startsWith('RST') || b.services?.type === 'restaurant'
+            return bookingDate === selectedDate && isRestaurant
+          })
+          console.log('[RestaurantPOS] Loaded restaurant reservations:', filtered.length)
+          setRestaurantReservations(filtered)
+        }
+      } catch (e) {
+        console.error('[RestaurantPOS] Error loading restaurant reservations:', e)
+      }
+    }
+    loadRestaurantReservations()
+  }, [selectedDate])
 
   // Load data from API
   useEffect(() => {
@@ -929,7 +958,7 @@ export default function RestaurantPOS() {
               { id: 'orders', label: '📋 შეკვეთები', count: todayOrders.filter(o => o.status !== 'paid' && o.status !== 'cancelled').length },
               { id: 'kds', label: '👨‍🍳 სამზარეულო', count: orders.filter(o => o.status === 'pending' || o.status === 'preparing').length },
               { id: 'reports', label: '📊 რეპორტი', count: 0 },
-              { id: 'settings', label: '⚙️', count: 0 }
+              { id: 'reservations', label: '📅 ჯავშნები', count: restaurantReservations.length }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1174,43 +1203,128 @@ export default function RestaurantPOS() {
       )}
 
       {/* Settings View */}
-      {activeView === 'settings' && (
-        <div className="p-4 max-w-2xl mx-auto">
-          <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-            <h2 className="text-xl font-bold">⚙️ რესტორნის პარამეტრები</h2>
-            
-            {/* Group Menus */}
-            <div>
-              <h3 className="font-medium mb-3">👥 ჯგუფის მენიუები</h3>
-              {groupMenus.map(menu => (
-                <div key={menu.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
-                  <div>
-                    <div className="font-medium">{menu.name}</div>
-                    <div className="text-sm text-gray-500">{menu.description}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-green-600">₾{menu.pricePerPerson}/კაცი</div>
-                  </div>
-                </div>
-              ))}
+      {/* Reservations View */}
+      {activeView === 'reservations' && (
+        <div className="p-4 max-w-4xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            {/* Header with Date Picker */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">📅 რესტორნის ჯავშნები</h2>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSelectedDate(moment(selectedDate).subtract(1, 'day').format('YYYY-MM-DD'))}
+                  className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                >
+                  ←
+                </button>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="px-4 py-2 border rounded-lg font-medium"
+                />
+                <button
+                  onClick={() => setSelectedDate(moment(selectedDate).add(1, 'day').format('YYYY-MM-DD'))}
+                  className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                >
+                  →
+                </button>
+                <button
+                  onClick={() => setSelectedDate(moment().format('YYYY-MM-DD'))}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  დღეს
+                </button>
+              </div>
             </div>
-            
-            {/* Beer Tastings */}
-            <div>
-              <h3 className="font-medium mb-3">🍺 ლუდის დეგუსტაციები</h3>
-              {beerTastings.map(tasting => (
-                <div key={tasting.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg mb-2">
-                  <div>
-                    <div className="font-medium">{tasting.name}</div>
-                    <div className="text-sm text-gray-500">{tasting.beers.join(', ')}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-amber-600">₾{tasting.price}</div>
-                    <div className="text-xs text-gray-500">{tasting.duration} წთ</div>
-                  </div>
-                </div>
-              ))}
+
+            {/* Date Display */}
+            <div className="text-center mb-6">
+              <div className="text-2xl font-bold text-gray-800">
+                {moment(selectedDate).format('dddd, D MMMM YYYY')}
+              </div>
+              <div className="text-gray-500">
+                {restaurantReservations.length} ჯავშანი
+              </div>
             </div>
+
+            {/* Reservations List */}
+            {restaurantReservations.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <div className="text-5xl mb-4">📭</div>
+                <p>ამ თარიღზე ჯავშნები არ არის</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {restaurantReservations
+                  .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+                  .map((reservation) => (
+                    <div
+                      key={reservation.id}
+                      className={`p-4 rounded-xl border-2 ${
+                        reservation.status === 'confirmed' 
+                          ? 'border-green-200 bg-green-50' 
+                          : reservation.status === 'cancelled'
+                          ? 'border-red-200 bg-red-50'
+                          : 'border-yellow-200 bg-yellow-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          {/* Time */}
+                          <div className="text-center bg-white px-4 py-2 rounded-lg shadow-sm">
+                            <div className="text-2xl font-bold text-amber-600">{reservation.startTime}</div>
+                          </div>
+                          
+                          {/* Guest Info */}
+                          <div>
+                            <div className="font-bold text-lg">{reservation.guestName}</div>
+                            <div className="text-gray-600 flex items-center gap-3">
+                              <span>👥 {reservation.guests} სტუმარი</span>
+                              {reservation.guestPhone && (
+                                <a href={`tel:${reservation.guestPhone}`} className="text-blue-600 hover:underline">
+                                  📞 {reservation.guestPhone}
+                                </a>
+                              )}
+                            </div>
+                            {reservation.services?.occasion && (
+                              <div className="text-purple-600 text-sm mt-1">
+                                🎉 {reservation.services.occasion}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Status & Actions */}
+                        <div className="flex items-center gap-3">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            reservation.status === 'confirmed' 
+                              ? 'bg-green-200 text-green-800' 
+                              : reservation.status === 'cancelled'
+                              ? 'bg-red-200 text-red-800'
+                              : 'bg-yellow-200 text-yellow-800'
+                          }`}>
+                            {reservation.status === 'confirmed' ? '✓ დადასტურებული' : 
+                             reservation.status === 'cancelled' ? '✗ გაუქმებული' : 
+                             '⏳ მოლოდინში'}
+                          </span>
+                          <div className="text-xs text-gray-400">
+                            {reservation.bookingNumber}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {/* Summary */}
+            {restaurantReservations.length > 0 && (
+              <div className="mt-6 pt-4 border-t flex justify-between text-sm text-gray-600">
+                <span>სულ სტუმრები: {restaurantReservations.reduce((sum, r) => sum + (r.guests || 0), 0)}</span>
+                <span>ვებსაიტიდან: {restaurantReservations.filter(r => r.services?.source === 'website').length}</span>
+              </div>
+            )}
           </div>
         </div>
       )}
