@@ -6,7 +6,7 @@ import crypto from "crypto";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { code, deviceId, tourId, museumSlug } = body;
+    const { code, deviceId, tourId, museumSlug: requestMuseumSlug } = body;
 
     if (!code || !deviceId) {
       return NextResponse.json(
@@ -53,20 +53,16 @@ export async function POST(request: NextRequest) {
         });
 
         if (existingEntitlement && existingEntitlement.isActive) {
-          // Get museum slug for redirect
-    let museumSlug = "";
-    if (targetTourId) {
-      const tour = await prisma.tour.findUnique({ where: { id: targetTourId }, include: { museum: { select: { slug: true } } } });
-      museumSlug = tour?.museum?.slug || "";
-    }
-
-    return NextResponse.json({
-            success: true,
-            message: "კოდი უკვე გააქტიურებულია ამ მოწყობილობაზე",
-            entitlementId: existingEntitlement.id,
-            expiresAt: existingEntitlement.expiresAt,
-          });
-        }
+            const tour = await prisma.tour.findUnique({ where: { id: existingEntitlement.tourId }, include: { museum: { select: { slug: true } } } });
+            return NextResponse.json({
+              success: true,
+              message: "კოდი უკვე გააქტიურებულია ამ მოწყობილობაზე",
+              entitlementId: existingEntitlement.id,
+              tourId: existingEntitlement.tourId,
+              museumSlug: tour?.museum?.slug || "",
+              expiresAt: existingEntitlement.expiresAt,
+            });
+          }
       } else {
         // Different device
         return NextResponse.json(
@@ -77,9 +73,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate museum if specified
-    if (activationCode.museumIds && activationCode.museumIds.length > 0 && museumSlug) {
+    if (activationCode.museumIds && activationCode.museumIds.length > 0 && requestMuseumSlug) {
       const museum = await prisma.museum.findUnique({
-        where: { slug: museumSlug },
+        where: { slug: requestMuseumSlug },
       });
 
       if (museum && !activationCode.museumIds.includes(museum.id)) {
