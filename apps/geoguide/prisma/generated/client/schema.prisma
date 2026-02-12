@@ -1,0 +1,1293 @@
+generator client {
+  output   = "./generated/client"
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id           String          @id @default(cuid())
+  name         String
+  slug         String          @unique
+  plan         PlanType        @default(STARTER)
+  isActive     Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  code         String          @unique
+  legalName    String?
+  taxId        String?
+  phone        String?
+  email        String?
+  address      String?
+  website      String?
+  bankName     String?
+  bankAccount  String?
+  bankSwift    String?
+  batches      Batch[]
+  budgets      Budget[]
+  customers    Customer[]
+  Equipment    Equipment[]
+  expenses     Expense[]
+  inventory    InventoryItem[]
+  invoices     Invoice[]
+  Keg          Keg[]
+  payments     Payment[]
+  recipes      Recipe[]
+  orders       SalesOrder[]
+  suppliers    Supplier[]
+  tanks        Tank[]
+  transactions Transaction[]
+  users        User[]
+
+  @@index([slug])
+  @@index([code])
+}
+
+model User {
+  id               String    @id @default(cuid())
+  tenantId         String
+  email            String
+  name             String
+  role             UserRole  @default(OPERATOR)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  password         String?
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  tenant           Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+model Recipe {
+  id          String             @id @default(cuid())
+  tenantId    String
+  createdBy   String?
+  name        String
+  style       String?
+  abv         Decimal?           @db.Decimal(4, 2)
+  ibu         Int?
+  color       Int?
+  og          Decimal?           @db.Decimal(5, 4)
+  fg          Decimal?           @db.Decimal(5, 4)
+  batchSize   Decimal?           @db.Decimal(10, 2)
+  boilTime    Int?
+  efficiency  Decimal?           @db.Decimal(5, 2)
+  description String?
+  notes       String?
+  process     Json?
+  status      RecipeStatus       @default(DRAFT)
+  isActive    Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  yeastStrain String?
+  batches     Batch[]
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  ingredients RecipeIngredient[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model RecipeIngredient {
+  id              String             @id @default(cuid())
+  recipeId        String
+  inventoryItemId String?
+  name            String
+  category        IngredientCategory
+  amount          Decimal            @db.Decimal(10, 3)
+  unit            String
+  additionTime    Int?
+  specs           Json?
+  inventoryItem   InventoryItem?     @relation(fields: [inventoryItemId], references: [id])
+  recipe          Recipe             @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@index([inventoryItemId])
+}
+
+model InventoryItem {
+  id                String             @id @default(cuid())
+  tenantId          String
+  sku               String
+  name              String
+  category          InventoryCategory  @default(RAW_MATERIAL)
+  ingredientType    String?
+  unit              String             @default("kg")
+  reorderPoint      Decimal?           @db.Decimal(10, 3)
+  supplier          String?
+  location          String?
+  specs             Json?
+  cachedBalance     Decimal            @default(0) @db.Decimal(12, 3)
+  costPerUnit       Decimal?           @db.Decimal(10, 4)
+  balanceUpdatedAt  DateTime           @default(now())
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenant            Tenant             @relation(fields: [tenantId], references: [id])
+  ledger            InventoryLedger[]
+  recipeIngredients RecipeIngredient[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, category, isActive])
+}
+
+model InventoryLedger {
+  id          String          @id @default(cuid())
+  tenantId    String
+  itemId      String
+  quantity    Decimal         @db.Decimal(12, 3)
+  type        LedgerEntryType
+  batchId     String?
+  orderId     String?
+  packagingId String?
+  notes       String?
+  createdBy   String
+  createdAt   DateTime        @default(now())
+  batch       Batch?          @relation(fields: [batchId], references: [id])
+  item        InventoryItem   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, itemId, createdAt])
+  @@index([tenantId, batchId])
+  @@index([tenantId, createdAt])
+  @@index([itemId])
+}
+
+model IngredientCatalog {
+  id        String   @id @default(cuid())
+  type      String   @default("grain")
+  name      String
+  supplier  String?
+  origin    String?
+  specs     Json?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type, isActive])
+}
+
+model Batch {
+  id                    String            @id @default(cuid())
+  tenantId              String
+  batchNumber           String
+  recipeId              String
+  status                BatchStatus       @default(PLANNED)
+  volume                Decimal           @db.Decimal(10, 2)
+  packagedVolume        Decimal?          @default(0) @db.Decimal(10, 2)
+  originalGravity       Decimal?          @db.Decimal(5, 4)
+  currentGravity        Decimal?          @db.Decimal(5, 4)
+  finalGravity          Decimal?          @db.Decimal(5, 4)
+  abv                   Decimal?          @db.Decimal(4, 2)
+  tankId                String?
+  plannedDate           DateTime
+  brewedAt              DateTime?
+  fermentationStartedAt DateTime?
+  conditioningStartedAt DateTime?
+  readyAt               DateTime?
+  completedAt           DateTime?
+  createdBy             String
+  notes                 String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  targetOg              Decimal?          @db.Decimal(5, 4)
+  fermentationTankId    String?
+  recipe                Recipe            @relation(fields: [recipeId], references: [id])
+  tank                  Tank?             @relation(fields: [tankId], references: [id])
+  tenant                Tenant            @relation(fields: [tenantId], references: [id])
+  ingredients           BatchIngredient[]
+  timeline              BatchTimeline[]
+  gravityReadings       GravityReading[]
+  ledgerEntries         InventoryLedger[]
+  Keg                   Keg[]
+  LotBatch              LotBatch[]
+  packagingRuns         PackagingRun[]
+  QCTest                QCTest[]
+
+  @@unique([tenantId, batchNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, tankId])
+}
+
+model BatchIngredient {
+  id              String             @id @default(cuid())
+  batchId         String
+  inventoryItemId String?
+  name            String
+  category        IngredientCategory
+  plannedAmount   Decimal            @db.Decimal(10, 3)
+  actualAmount    Decimal?           @db.Decimal(10, 3)
+  unit            String
+  lotNumber       String?
+  addedAt         DateTime?
+  batch           Batch              @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId])
+}
+
+model GravityReading {
+  id          String   @id @default(cuid())
+  batchId     String
+  gravity     Decimal  @db.Decimal(5, 4)
+  temperature Decimal  @db.Decimal(4, 1)
+  notes       String?
+  recordedBy  String
+  recordedAt  DateTime @default(now())
+  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, recordedAt])
+}
+
+model BatchTimeline {
+  id          String            @id @default(cuid())
+  batchId     String
+  type        TimelineEventType
+  title       String
+  description String?
+  data        Json?
+  createdBy   String
+  createdAt   DateTime          @default(now())
+  batch       Batch             @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, createdAt])
+}
+
+model Tank {
+  id                                   String           @id @default(cuid())
+  tenantId                             String
+  name                                 String
+  type                                 TankType
+  capacity                             Decimal          @db.Decimal(10, 2)
+  status                               TankStatus       @default(AVAILABLE)
+  currentBatchId                       String?
+  location                             String?
+  version                              Int              @default(0)
+  createdAt                            DateTime         @default(now())
+  updatedAt                            DateTime         @updatedAt
+  capabilities                         TankCapability[] @default([])
+  currentLotId                         String?
+  currentPhase                         LotPhase?
+  defaultTurnaroundHours               Int?             @default(4)
+  maxFillPercent                       Int?             @default(95)
+  minFillPercent                       Int?             @default(20)
+  batches                              Batch[]
+  LotReading                           LotReading[]
+  tenant                               Tenant           @relation(fields: [tenantId], references: [id])
+  TankAssignment                       TankAssignment[] @relation("TankAssignmentToTank")
+  occupations                          TankOccupation[]
+  Transfer_Transfer_destTankIdToTank   Transfer[]       @relation("Transfer_destTankIdToTank")
+  Transfer_Transfer_sourceTankIdToTank Transfer[]       @relation("Transfer_sourceTankIdToTank")
+
+  @@unique([tenantId, name])
+  @@index([tenantId, status])
+}
+
+model TankOccupation {
+  id        String          @id @default(cuid())
+  tenantId  String
+  tankId    String
+  batchId   String
+  phase     OccupationPhase
+  startedAt DateTime        @default(now())
+  endedAt   DateTime?
+  tank      Tank            @relation(fields: [tankId], references: [id])
+
+  @@index([tenantId, tankId, endedAt])
+}
+
+model PackagingRun {
+  id          String      @id @default(cuid())
+  tenantId    String
+  batchId     String
+  packageType PackageType
+  quantity    Int
+  volumeTotal Decimal     @db.Decimal(10, 2)
+  lotNumber   String?
+  performedBy String
+  notes       String?
+  performedAt DateTime    @default(now())
+  batch       Batch       @relation(fields: [batchId], references: [id])
+
+  @@index([tenantId, batchId])
+}
+
+model Customer {
+  id                 String        @id @default(cuid())
+  tenantId           String
+  name               String
+  type               CustomerType  @default(RETAIL)
+  email              String?
+  phone              String?
+  address            String?
+  city               String?
+  taxId              String?
+  kegReturnDays      Int           @default(14)
+  kegDepositRequired Boolean       @default(true)
+  isActive           Boolean       @default(true)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  tenant             Tenant        @relation(fields: [tenantId], references: [id])
+  invoices           Invoice[]
+  Keg                Keg[]
+  orders             SalesOrder[]
+  transactions       Transaction[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model Supplier {
+  id           String        @id @default(cuid())
+  tenantId     String
+  name         String
+  category     String?
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  taxId        String?
+  bankAccount  String?
+  notes        String?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  expenses     Expense[]
+  invoices     Invoice[]
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  transactions Transaction[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model SalesOrder {
+  id            String        @id @default(cuid())
+  tenantId      String
+  orderNumber   String
+  customerId    String
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  totalAmount   Decimal       @db.Decimal(12, 2)
+  paidAmount    Decimal       @default(0) @db.Decimal(12, 2)
+  notes         String?
+  orderedAt     DateTime      @default(now())
+  shippedAt     DateTime?
+  deliveredAt   DateTime?
+  createdBy     String
+  updatedAt     DateTime      @updatedAt
+  invoice       Invoice?
+  items         OrderItem[]
+  payments      Payment[]
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  transactions  Transaction[]
+
+  @@unique([tenantId, orderNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+}
+
+model OrderItem {
+  id          String      @id @default(cuid())
+  orderId     String
+  productName String
+  packageType PackageType
+  quantity    Int
+  unitPrice   Decimal     @db.Decimal(10, 2)
+  totalPrice  Decimal     @db.Decimal(12, 2)
+  batchId     String?
+  order       SalesOrder  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model Transaction {
+  id              String           @id @default(cuid())
+  tenantId        String
+  type            TransactionType
+  date            DateTime         @default(now())
+  amount          Decimal          @db.Decimal(12, 2)
+  incomeCategory  IncomeCategory?
+  expenseCategory ExpenseCategory?
+  description     String?
+  customerId      String?
+  supplierId      String?
+  orderId         String?
+  invoiceId       String?
+  expenseId       String?
+  paymentId       String?
+  paymentMethod   PaymentMethod?
+  reference       String?
+  notes           String?
+  createdBy       String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  customer        Customer?        @relation(fields: [customerId], references: [id])
+  expense         Expense?         @relation(fields: [expenseId], references: [id])
+  invoice         Invoice?         @relation(fields: [invoiceId], references: [id])
+  order           SalesOrder?      @relation(fields: [orderId], references: [id])
+  supplier        Supplier?        @relation(fields: [supplierId], references: [id])
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, date])
+  @@index([tenantId, type])
+  @@index([tenantId, customerId])
+  @@index([tenantId, supplierId])
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  tenantId      String
+  invoiceNumber String
+  type          InvoiceType
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime?
+  paidAt        DateTime?
+  customerId    String?
+  supplierId    String?
+  orderId       String?       @unique
+  subtotal      Decimal       @db.Decimal(12, 2)
+  discount      Decimal       @default(0) @db.Decimal(12, 2)
+  tax           Decimal       @default(0) @db.Decimal(12, 2)
+  total         Decimal       @db.Decimal(12, 2)
+  paidAmount    Decimal       @default(0) @db.Decimal(12, 2)
+  notes         String?
+  terms         String?
+  createdBy     String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  order         SalesOrder?   @relation(fields: [orderId], references: [id])
+  supplier      Supplier?     @relation(fields: [supplierId], references: [id])
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  items         InvoiceItem[]
+  payments      Payment[]
+  transactions  Transaction[]
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, type])
+  @@index([tenantId, customerId])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, dueDate])
+}
+
+model InvoiceItem {
+  id          String       @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Decimal      @db.Decimal(10, 3)
+  unit        String?      @default("ცალი")
+  unitPrice   Decimal      @db.Decimal(10, 2)
+  total       Decimal      @db.Decimal(12, 2)
+  productName String?
+  packageType PackageType?
+  batchId     String?
+  sortOrder   Int          @default(0)
+  invoice     Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  tenantId  String
+  invoiceId String?
+  orderId   String?
+  amount    Decimal       @db.Decimal(12, 2)
+  method    PaymentMethod @default(BANK_TRANSFER)
+  date      DateTime      @default(now())
+  reference String?
+  notes     String?
+  createdBy String
+  createdAt DateTime      @default(now())
+  invoice   Invoice?      @relation(fields: [invoiceId], references: [id])
+  order     SalesOrder?   @relation(fields: [orderId], references: [id])
+  tenant    Tenant        @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, date])
+  @@index([tenantId, invoiceId])
+  @@index([tenantId, orderId])
+}
+
+model Expense {
+  id            String          @id @default(cuid())
+  tenantId      String
+  category      ExpenseCategory
+  supplierId    String?
+  amount        Decimal         @db.Decimal(12, 2)
+  date          DateTime        @default(now())
+  description   String?
+  invoiceNumber String?
+  invoiceId     String?
+  isPaid        Boolean         @default(false)
+  paidAt        DateTime?
+  paymentMethod PaymentMethod?
+  receiptUrl    String?
+  notes         String?
+  createdBy     String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  supplier      Supplier?       @relation(fields: [supplierId], references: [id])
+  tenant        Tenant          @relation(fields: [tenantId], references: [id])
+  transactions  Transaction[]
+
+  @@index([tenantId, date])
+  @@index([tenantId, category])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, isPaid])
+}
+
+model Budget {
+  id        String          @id @default(cuid())
+  tenantId  String
+  category  ExpenseCategory
+  year      Int
+  month     Int?
+  amount    Decimal         @db.Decimal(12, 2)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  tenant    Tenant          @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, category, year, month])
+  @@index([tenantId, year])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  tenantId      String
+  userId        String
+  action        String
+  entityType    String
+  entityId      String
+  oldData       Json?
+  newData       Json?
+  metadata      Json?
+  correlationId String?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  @@index([tenantId, entityType, entityId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, userId])
+}
+
+model BlendingConfig {
+  id                    String   @id
+  tenantId              String   @unique
+  requireRecipeMatch    Boolean  @default(false)
+  requireYeastMatch     Boolean  @default(true)
+  requirePhaseMatch     Boolean  @default(true)
+  requireStyleMatch     Boolean  @default(false)
+  maxBlendSources       Int      @default(4)
+  allowOverCapacity     Boolean  @default(false)
+  maxAgeDifferenceHours Int      @default(48)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now())
+}
+
+model CIPLog {
+  id                   String    @id
+  equipmentId          String
+  cipType              String
+  date                 DateTime
+  duration             Int
+  temperature          Float?
+  causticConcentration Float?
+  performedBy          String
+  result               String
+  notes                String?
+  createdAt            DateTime  @default(now())
+  Equipment            Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([equipmentId])
+}
+
+model Equipment {
+  id                     String           @id
+  tenantId               String
+  name                   String
+  type                   String
+  status                 String           @default("OPERATIONAL")
+  capacity               Int?
+  model                  String?
+  manufacturer           String?
+  serialNumber           String?
+  location               String?
+  workingPressure        Float?
+  currentTemp            Float?
+  currentPressure        Float?
+  installationDate       DateTime?
+  warrantyDate           DateTime?
+  lastCIP                DateTime?
+  nextCIP                DateTime?
+  lastMaintenance        DateTime?
+  nextMaintenance        DateTime?
+  cipIntervalDays        Int              @default(7)
+  inspectionIntervalDays Int              @default(30)
+  annualMaintenanceDays  Int              @default(365)
+  currentBatchId         String?
+  currentBatchNumber     String?
+  notes                  String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime
+  purchaseDate           DateTime?
+  capabilities           String[]         @default([])
+  CIPLog                 CIPLog[]
+  Tenant                 Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  MaintenanceLog         MaintenanceLog[]
+  ProblemReport          ProblemReport[]
+
+  @@index([status])
+  @@index([tenantId])
+  @@index([type])
+}
+
+model Lot {
+  id                                 String           @id
+  tenantId                           String
+  lotCode                            String?
+  phase                              LotPhase         @default(FERMENTATION)
+  status                             LotStatus        @default(PLANNED)
+  plannedVolume                      Decimal          @db.Decimal(10, 2)
+  actualVolume                       Decimal?         @db.Decimal(10, 2)
+  notes                              String?
+  parentLotId                        String?
+  splitRatio                         Decimal?         @db.Decimal(5, 2)
+  createdBy                          String
+  createdAt                          DateTime         @default(now())
+  updatedAt                          DateTime         @default(now())
+  completedAt                        DateTime?
+  lotNumber                          String?
+  blendedAt                          DateTime?
+  isBlendResult                      Boolean?         @default(false)
+  splitAt                            DateTime?
+  Lot                                Lot?             @relation("LotToLot", fields: [parentLotId], references: [id])
+  other_Lot                          Lot[]            @relation("LotToLot")
+  LotBatch                           LotBatch[]
+  LotReading                         LotReading[]
+  QCTest                             QCTest[]
+  TankAssignment                     TankAssignment[]
+  Transfer_Transfer_destLotIdToLot   Transfer[]       @relation("Transfer_destLotIdToLot")
+  Transfer_Transfer_sourceLotIdToLot Transfer[]       @relation("Transfer_sourceLotIdToLot")
+
+  @@unique([tenantId, lotCode])
+  @@index([tenantId, status])
+}
+
+model LotBatch {
+  id                 String   @id
+  lotId              String
+  batchId            String
+  volumeContribution Decimal  @db.Decimal(10, 2)
+  batchPercentage    Decimal  @default(100.00) @db.Decimal(5, 2)
+  addedAt            DateTime @default(now())
+  Batch              Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  Lot                Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@unique([lotId, batchId])
+}
+
+model LotReading {
+  id          String      @id
+  lotId       String
+  tankId      String
+  readingType ReadingType
+  value       Decimal     @db.Decimal(10, 4)
+  unit        String
+  notes       String?
+  recordedBy  String
+  recordedAt  DateTime    @default(now())
+  Lot         Lot         @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  Tank        Tank        @relation(fields: [tankId], references: [id], onDelete: Cascade)
+
+  @@index([lotId, readingType])
+}
+
+model MaintenanceLog {
+  id            String    @id
+  equipmentId   String
+  type          String
+  status        String
+  priority      String?
+  scheduledDate DateTime?
+  completedDate DateTime?
+  duration      Int?
+  performedBy   String?
+  cost          Float?
+  partsUsed     String[]
+  description   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime
+  Equipment     Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId])
+  @@index([status])
+}
+
+model ProblemReport {
+  id           String    @id
+  equipmentId  String
+  problemType  String
+  severity     String
+  status       String    @default("open")
+  description  String
+  reportedDate DateTime
+  reportedBy   String
+  resolvedDate DateTime?
+  resolvedBy   String?
+  resolution   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime
+  Equipment    Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId])
+  @@index([status])
+}
+
+model TankAssignment {
+  id            String           @id
+  tenantId      String
+  tankId        String
+  lotId         String
+  phase         LotPhase
+  plannedStart  DateTime?
+  plannedEnd    DateTime?
+  actualStart   DateTime?
+  actualEnd     DateTime?
+  status        AssignmentStatus @default(PLANNED)
+  plannedVolume Decimal?         @db.Decimal(10, 2)
+  actualVolume  Decimal?         @db.Decimal(10, 2)
+  isBlendTarget Boolean          @default(false)
+  isSplitSource Boolean          @default(false)
+  createdBy     String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @default(now())
+  startTime     DateTime?        @default(now())
+  endTime       DateTime?        @default(now())
+  notes         String?
+  Lot           Lot              @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  Tank          Tank             @relation("TankAssignmentToTank", fields: [tankId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, tankId])
+}
+
+model Transfer {
+  id                               String         @id
+  tenantId                         String
+  transferCode                     String
+  sourceLotId                      String?
+  sourceTankId                     String
+  destLotId                        String?
+  destTankId                       String
+  transferType                     TransferType
+  volume                           Decimal        @db.Decimal(10, 2)
+  plannedAt                        DateTime
+  executedAt                       DateTime?
+  status                           TransferStatus @default(PLANNED)
+  measuredLoss                     Decimal?       @db.Decimal(10, 2)
+  lossReason                       String?
+  performedBy                      String?
+  notes                            String?
+  createdAt                        DateTime       @default(now())
+  updatedAt                        DateTime       @default(now())
+  Lot_Transfer_destLotIdToLot      Lot?           @relation("Transfer_destLotIdToLot", fields: [destLotId], references: [id])
+  Tank_Transfer_destTankIdToTank   Tank           @relation("Transfer_destTankIdToTank", fields: [destTankId], references: [id], onDelete: Cascade)
+  Lot_Transfer_sourceLotIdToLot    Lot?           @relation("Transfer_sourceLotIdToLot", fields: [sourceLotId], references: [id])
+  Tank_Transfer_sourceTankIdToTank Tank           @relation("Transfer_sourceTankIdToTank", fields: [sourceTankId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, transferCode])
+}
+
+model Keg {
+  id          String        @id @default(cuid())
+  tenantId    String
+  kegNumber   String
+  size        Int
+  status      KegStatus     @default(AVAILABLE)
+  condition   KegCondition  @default(GOOD)
+  batchId     String?
+  filledAt    DateTime?
+  productName String?
+  lotNumber   String?
+  customerId  String?
+  orderId     String?
+  sentAt      DateTime?
+  returnedAt  DateTime?
+  deposit     Decimal       @default(150) @db.Decimal(10, 2)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+  Batch       Batch?        @relation(fields: [batchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Customer    Customer?     @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  movements   KegMovement[]
+
+  @@unique([tenantId, kegNumber])
+  @@index([tenantId, customerId])
+  @@index([tenantId, status])
+}
+
+model KegMovement {
+  id           String    @id @default(cuid())
+  tenantId     String
+  kegId        String
+  action       KegAction
+  fromStatus   KegStatus
+  toStatus     KegStatus
+  productId    String?
+  productName  String?
+  customerId   String?
+  customerName String?
+  orderId      String?
+  batchId      String?
+  notes        String?
+  createdAt    DateTime  @default(now())
+  createdBy    String?
+  keg          Keg       @relation(fields: [kegId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, kegId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, createdAt])
+}
+
+model QCTest {
+  id            String         @id
+  tenantId      String
+  batchId       String
+  lotId         String?
+  testType      QCTestType
+  status        QCTestStatus   @default(SCHEDULED)
+  priority      QCTestPriority @default(MEDIUM)
+  scheduledDate DateTime
+  completedDate DateTime?
+  minValue      Decimal?       @db.Decimal(10, 4)
+  maxValue      Decimal?       @db.Decimal(10, 4)
+  targetValue   Decimal?       @db.Decimal(10, 4)
+  result        Decimal?       @db.Decimal(10, 4)
+  unit          String?
+  notes         String?
+  performedBy   String?
+  createdBy     String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime
+  Batch         Batch          @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  Lot           Lot?           @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledDate])
+  @@index([tenantId, batchId])
+  @@index([tenantId, status])
+}
+
+enum PlanType {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MANAGER
+  OPERATOR
+  VIEWER
+}
+
+enum InventoryCategory {
+  RAW_MATERIAL
+  PACKAGING
+  FINISHED_GOOD
+  CONSUMABLE
+}
+
+enum LedgerEntryType {
+  PURCHASE
+  CONSUMPTION
+  PRODUCTION
+  ADJUSTMENT
+  ADJUSTMENT_ADD
+  ADJUSTMENT_REMOVE
+  WASTE
+  SALE
+  RETURN
+  REVERSAL
+  TRANSFER
+}
+
+enum IngredientCategory {
+  MALT
+  HOPS
+  YEAST
+  ADJUNCT
+  WATER_CHEMISTRY
+}
+
+enum BatchStatus {
+  PLANNED
+  BREWING
+  FERMENTING
+  CONDITIONING
+  READY
+  PACKAGING
+  COMPLETED
+  CANCELLED
+}
+
+enum TimelineEventType {
+  CREATED
+  STARTED
+  MASH
+  BOIL
+  TRANSFER
+  GRAVITY_READING
+  DRY_HOP
+  TEMPERATURE_CHANGE
+  NOTE
+  COMPLETED
+  INGREDIENTS_RESERVED
+  BREWING_STARTED
+  MASH_COMPLETE
+  BOIL_COMPLETE
+  TRANSFER_TO_FERMENTER
+  FERMENTATION_STARTED
+  DRY_HOP_ADDED
+  CONDITIONING_STARTED
+  READY_FOR_PACKAGING
+  PACKAGING_STARTED
+  PACKAGING_COMPLETE
+  CANCELLED
+}
+
+enum TankType {
+  FERMENTER
+  BRITE
+  UNITANK
+  KETTLE
+  MASH_TUN
+  HLT
+}
+
+enum TankStatus {
+  AVAILABLE
+  OCCUPIED
+  CLEANING
+  MAINTENANCE
+  OUT_OF_SERVICE
+}
+
+enum OccupationPhase {
+  FERMENTATION
+  CONDITIONING
+  STORAGE
+}
+
+enum PackageType {
+  KEG_50
+  KEG_30
+  KEG_20
+  BOTTLE_750
+  BOTTLE_500
+  BOTTLE_330
+  CAN_500
+  CAN_330
+}
+
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+  RESTAURANT
+  BAR
+  EXPORT
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  PROCESSING
+  READY
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+  REFUNDED
+}
+
+enum AssignmentStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum EquipmentStatus {
+  OPERATIONAL
+  NEEDS_MAINTENANCE
+  UNDER_MAINTENANCE
+  OUT_OF_SERVICE
+  NEEDS_CIP
+}
+
+enum EquipmentType {
+  FERMENTER
+  UNITANK
+  BRITE
+  KETTLE
+  MASH_TUN
+  HLT
+  PUMP
+  CHILLER
+  FILTER
+  OTHER
+}
+
+enum LotPhase {
+  FERMENTATION
+  CONDITIONING
+  BRIGHT
+  PACKAGING
+}
+
+enum LotStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ReadingType {
+  GRAVITY
+  TEMPERATURE
+  PH
+  PRESSURE
+  DISSOLVED_O2
+  TURBIDITY
+}
+
+enum RecipeStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum TankCapability {
+  FERMENTING
+  CONDITIONING
+  BREWING
+  BRIGHT
+  STORAGE
+}
+
+enum TransferStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TransferType {
+  FERMENT_TO_CONDITION
+  CONDITION_TO_BRIGHT
+  TANK_TO_TANK
+  BLEND
+  SPLIT
+}
+
+enum KegCondition {
+  GOOD
+  NEEDS_CLEANING
+  DAMAGED
+}
+
+enum KegStatus {
+  AVAILABLE
+  FILLED
+  WITH_CUSTOMER
+  IN_TRANSIT
+  CLEANING
+  DAMAGED
+  LOST
+}
+
+enum KegAction {
+  CREATED
+  FILLED
+  SHIPPED
+  RETURNED
+  CLEANED
+  DAMAGED
+  LOST
+  REPAIRED
+}
+
+enum QCTestPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum QCTestStatus {
+  SCHEDULED
+  IN_PROGRESS
+  PASSED
+  WARNING
+  FAILED
+  CANCELLED
+}
+
+enum QCTestType {
+  GRAVITY
+  TEMPERATURE
+  PH
+  DISSOLVED_O2
+  TURBIDITY
+  COLOR
+  BITTERNESS
+  ALCOHOL
+  CARBONATION
+  APPEARANCE
+  AROMA
+  TASTE
+  MICROBIOLOGICAL
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum IncomeCategory {
+  SALE
+  DEPOSIT
+  REFUND
+  OTHER
+}
+
+enum ExpenseCategory {
+  INGREDIENTS
+  PACKAGING
+  EQUIPMENT
+  UTILITIES
+  SALARY
+  RENT
+  MARKETING
+  MAINTENANCE
+  TRANSPORT
+  OTHER
+}
+
+enum InvoiceType {
+  OUTGOING
+  INCOMING
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIAL
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  CHECK
+}
+
+model Configuration {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([key])
+}
+
+// GeoGuide – მუზეუმი
+model Museum {
+  id String @id @default(cuid())
+
+  // Georgian (default)
+  name        String
+  description String? @db.Text
+  city        String?
+  address     String?
+
+  // English
+  nameEn        String?
+  descriptionEn String? @db.Text
+  cityEn        String?
+  addressEn     String?
+
+  // Russian
+  nameRu        String?
+  descriptionRu String? @db.Text
+  cityRu        String?
+  addressRu     String?
+
+  // German
+  nameDe        String?
+  descriptionDe String? @db.Text
+  cityDe        String?
+  addressDe     String?
+
+  // French
+  nameFr        String?
+  descriptionFr String? @db.Text
+  cityFr        String?
+  addressFr     String?
+
+  // Common fields (same for all languages)
+  slug         String  @unique
+  coverImage   String?
+  latitude     Float?
+  longitude    Float?
+  contactEmail String?
+  contactPhone String?
+  website      String?
+
+  // Settings
+  showMap       Boolean @default(false)
+  showQrScanner Boolean @default(false)
+  isPublished   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tours Tour[]
+
+  @@map("geoguide_museums")
+}
+
+// GeoGuide – ტური (მინიმალური მოდელი Museum რელაციისთვის)
+model Tour {
+  id        String   @id @default(cuid())
+  museumId  String
+  museum    Museum   @relation(fields: [museumId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([museumId])
+  @@map("geoguide_tours")
+}
