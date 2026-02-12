@@ -19,13 +19,20 @@ export async function POST(request: NextRequest) {
     if (["COMPLETED", "FAILED", "REFUNDED"].includes(payment.status)) return new Response("OK", { status: 200 });
 
     if (order_status === "approved") {
+      // Ensure device exists
+      const device = await prisma.device.upsert({
+        where: { deviceId: payment.deviceId },
+        create: { deviceId: payment.deviceId, platform: "web" },
+        update: { lastActiveAt: new Date() },
+      });
+
       await prisma.entitlement.upsert({
-        where: { deviceId_tourId: { tourId: payment.tourId, deviceId: payment.deviceId } },
-        create: { tourId: payment.tourId, deviceId: payment.deviceId, isActive: true, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), activatedAt: new Date() },
+        where: { deviceId_tourId: { tourId: payment.tourId, deviceId: device.id } },
+        create: { tourId: payment.tourId, deviceId: device.id, isActive: true, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), activatedAt: new Date() },
         update: { isActive: true, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
       });
       await prisma.payment.update({ where: { id: payment.id }, data: { status: "COMPLETED", tbcStatus: order_status, completedAt: new Date() } });
-      console.log(`[Flitt] ✅ Payment ${payment.id} APPROVED`);
+      console.log("[Flitt] Payment APPROVED:", payment.id);
     } else if (order_status === "declined" || order_status === "expired") {
       await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED", tbcStatus: order_status } });
     } else if (order_status === "reversed") {
