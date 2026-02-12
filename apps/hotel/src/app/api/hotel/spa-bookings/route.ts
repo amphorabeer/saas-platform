@@ -4,14 +4,15 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Generate booking number
-function generateBookingNumber(): string {
+function generateBookingNumber(type?: string): string {
   const date = new Date()
   const dateStr = date.toISOString().slice(2, 10).replace(/-/g, '')
   const random = Math.random().toString(36).substring(2, 6).toUpperCase()
-  return `SPA-${dateStr}-${random}`
+  const prefix = type === 'restaurant' ? 'RST' : 'SPA'
+  return `${prefix}${dateStr}${random}`
 }
 
-// GET - ყველა სპა ჯავშანი
+// GET - ყველა სპა/რესტორნის ჯავშანი
 export async function GET(request: NextRequest) {
   try {
     const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
@@ -27,6 +28,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date')
     const status = searchParams.get('status')
+    const type = searchParams.get('type') // 'spa' or 'restaurant'
 
     const where: any = { tenantId }
     if (date) where.date = new Date(date)
@@ -40,13 +42,29 @@ export async function GET(request: NextRequest) {
       ]
     })
 
+    // Filter by type if specified
+    let filtered = bookings
+    if (type === 'restaurant') {
+      filtered = bookings.filter((b: any) => 
+        b.bookingNumber?.startsWith('RST') || 
+        (b.services as any)?.type === 'restaurant'
+      )
+    } else if (type === 'spa') {
+      filtered = bookings.filter((b: any) => 
+        b.bookingNumber?.startsWith('SPA') || 
+        !(b.services as any)?.type || 
+        (b.services as any)?.type === 'spa'
+      )
+    }
+
     // Map to frontend expected format
-    const mapped = bookings.map((b: any) => ({
+    const mapped = filtered.map((b: any) => ({
       id: b.id,
       bookingNumber: b.bookingNumber,
       bathId: b.bathId,
       guestName: b.guestName,
       guestPhone: b.guestPhone || '',
+      guestEmail: b.guestEmail || '',
       guestCount: b.guests,
       guests: b.guests,
       bookingDate: b.date,
@@ -62,6 +80,7 @@ export async function GET(request: NextRequest) {
       notes: b.notes || '',
       roomNumber: b.roomNumber,
       reservationId: b.reservationId,
+      services: b.services || {},
       createdAt: b.createdAt
     }))
 
@@ -87,16 +106,17 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json()
     const { 
-      bathId, guestName, guestPhone, guestCount, guests,
+      type, // 'spa' or 'restaurant'
+      bathId, guestName, guestPhone, guestEmail, guestCount, guests,
       bookingDate, date, startTime, endTime, duration,
-      price, totalPrice, notes, roomNumber, status 
+      price, totalPrice, notes, roomNumber, status, services
     } = body
 
     if (!guestName || !(bookingDate || date) || !startTime) {
       return NextResponse.json({ error: 'Required fields missing' }, { status: 400 })
     }
 
-    const bookingNumber = generateBookingNumber()
+    const bookingNumber = generateBookingNumber(type || services?.type)
     const bookingDateValue = new Date(bookingDate || date)
 
     const booking = await prisma.spaBooking.create({
@@ -106,6 +126,7 @@ export async function POST(request: NextRequest) {
         bathId: bathId || null,
         guestName,
         guestPhone: guestPhone || null,
+        guestEmail: guestEmail || null,
         roomNumber: roomNumber || null,
         date: bookingDateValue,
         startTime,
@@ -115,7 +136,8 @@ export async function POST(request: NextRequest) {
         totalPrice: price || totalPrice || 0,
         notes: notes || null,
         status: status || 'confirmed',
-        paymentStatus: 'pending'
+        paymentStatus: 'pending',
+        services: services || { type: type || 'spa', source: 'pos' }
       }
     })
 
@@ -125,16 +147,20 @@ export async function POST(request: NextRequest) {
       bathId: booking.bathId,
       guestName: booking.guestName,
       guestPhone: booking.guestPhone,
+      guestEmail: booking.guestEmail,
       guestCount: booking.guests,
+      guests: booking.guests,
       bookingDate: booking.date,
       date: booking.date,
       startTime: booking.startTime,
       endTime: booking.endTime,
       price: Number(booking.totalPrice),
+      totalPrice: Number(booking.totalPrice),
       status: booking.status,
       paymentStatus: booking.paymentStatus,
       notes: booking.notes,
-      roomNumber: booking.roomNumber
+      roomNumber: booking.roomNumber,
+      services: booking.services
     }, { status: 201 })
   } catch (error: any) {
     console.error('Error creating spa booking:', error)
@@ -142,7 +168,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT - ჯავშნის განახლება
+// PUT - ჯავშნის განახლება (query param-ით)
 export async function PUT(request: NextRequest) {
   try {
     const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
@@ -164,7 +190,7 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     
-    // Build update data dynamically - map frontend fields to schema fields
+    // Build update data dynamically
     const updateData: any = {}
     
     if (body.status !== undefined) updateData.status = body.status
@@ -172,12 +198,17 @@ export async function PUT(request: NextRequest) {
     if (body.paymentMethod !== undefined) updateData.paymentMethod = body.paymentMethod
     if (body.guestName !== undefined) updateData.guestName = body.guestName
     if (body.guestPhone !== undefined) updateData.guestPhone = body.guestPhone
+    if (body.guestEmail !== undefined) updateData.guestEmail = body.guestEmail
     if (body.guestCount !== undefined) updateData.guests = body.guestCount
     if (body.guests !== undefined) updateData.guests = body.guests
     if (body.roomNumber !== undefined) updateData.roomNumber = body.roomNumber
     if (body.notes !== undefined) updateData.notes = body.notes
     if (body.price !== undefined) updateData.totalPrice = body.price
     if (body.totalPrice !== undefined) updateData.totalPrice = body.totalPrice
+    if (body.startTime !== undefined) updateData.startTime = body.startTime
+    if (body.endTime !== undefined) updateData.endTime = body.endTime
+    if (body.date !== undefined) updateData.date = new Date(body.date)
+    if (body.services !== undefined) updateData.services = body.services
 
     const booking = await prisma.spaBooking.update({
       where: { id },
@@ -188,12 +219,20 @@ export async function PUT(request: NextRequest) {
       id: booking.id,
       bookingNumber: booking.bookingNumber,
       guestName: booking.guestName,
-      guestCount: booking.guests,
+      guestPhone: booking.guestPhone,
+      guestEmail: booking.guestEmail,
+      guests: booking.guests,
+      date: booking.date,
+      startTime: booking.startTime,
+      endTime: booking.endTime,
       price: Number(booking.totalPrice),
+      totalPrice: Number(booking.totalPrice),
       status: booking.status,
       paymentStatus: booking.paymentStatus,
       paymentMethod: booking.paymentMethod,
-      roomNumber: booking.roomNumber
+      roomNumber: booking.roomNumber,
+      notes: booking.notes,
+      services: booking.services
     })
   } catch (error: any) {
     console.error('Error updating spa booking:', error)
