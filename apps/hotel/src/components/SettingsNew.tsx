@@ -7,6 +7,7 @@ import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
 import RestaurantSettingsSection, { DEFAULT_RESTAURANT_SETTINGS, RestaurantSettings, MenuCategory, MenuItem } from './RestaurantSettingsSection'
 import BeerSpaSettingsSection, { DEFAULT_SPA_SETTINGS, SpaSettings, SpaBath, SpaService } from './BeerSpaSettingsSection'
 import TourCompaniesSettings from './TourCompaniesSettings'
+import BookingSettingsSection from './settings/BookingSettingsSection'
 
 // ==================== TYPES ====================
 interface HotelInfo {
@@ -1441,6 +1442,7 @@ export default function SettingsNew() {
     { id: 'restaurant', label: 'რესტორანი', icon: '🍽️', description: 'მენიუ და შეკვეთები' },
     { id: 'beerspa', label: 'ლუდის სპა', icon: '🍺', description: 'აბაზანები და ჯავშნები' },
     { id: 'tourcompanies', label: 'ტურ. კომპანიები', icon: '🚌', description: 'კომპანიები და ინვოისები' },
+    { id: 'bookings', label: 'ჯავშნები', icon: '📅', description: 'ავტო-დადასტურება' },
     { id: 'facebook', label: 'Facebook Bot', icon: '📘', description: 'Messenger ჯავშნები' },
     { id: 'system', label: 'სისტემა', icon: '🖥️', description: 'სისტემის პარამეტრები' }
   ]
@@ -1712,6 +1714,11 @@ export default function SettingsNew() {
             {/* Facebook Bot Section */}
             {activeSection === 'facebook' && (
               <FacebookBotSection />
+            )}
+            
+            {/* Bookings Settings Section */}
+            {activeSection === 'bookings' && (
+              <BookingSettingsSection />
             )}
           </div>
         </div>
