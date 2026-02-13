@@ -114,6 +114,7 @@ export default function ReservationsView({ reservations, rooms }: any) {
   const stats = {
     total: filteredReservations.length,
     totalRevenue: filteredReservations.reduce((sum: number, r: any) => sum + (r.totalAmount || 0), 0),
+    pending: filteredReservations.filter((r: any) => r.status === 'PENDING').length,
     confirmed: filteredReservations.filter((r: any) => r.status === 'CONFIRMED').length,
     checkedIn: filteredReservations.filter((r: any) => r.status === 'CHECKED_IN').length,
     checkedOut: filteredReservations.filter((r: any) => r.status === 'CHECKED_OUT').length,
@@ -229,6 +230,7 @@ export default function ReservationsView({ reservations, rooms }: any) {
                 <td className="p-3 text-right font-medium">₾{r.totalAmount}</td>
                 <td className="p-3 text-center">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    r.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
                     r.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
                     r.status === 'CHECKED_IN' ? 'bg-blue-100 text-blue-700' :
                     r.status === 'CHECKED_OUT' ? 'bg-gray-100 text-gray-700' :
