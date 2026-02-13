@@ -10,6 +10,50 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, X-Hotel-ID',
 }
 
+// Telegram notification
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || ''
+
+async function sendTelegramNotification(booking: {
+  type: 'spa' | 'restaurant' | 'hotel'
+  bookingNumber: string
+  guestName: string
+  guestPhone: string
+  date: string
+  time?: string
+  guests?: number
+  price?: number
+  details?: string
+}): Promise<void> {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return
+
+  const typeEmoji: Record<string, string> = { spa: '🍺', restaurant: '🍽️', hotel: '🏨' }
+  const typeName: Record<string, string> = { spa: 'ლუდის სპა', restaurant: 'რესტორანი', hotel: 'სასტუმრო' }
+
+  const message = `
+🔔 *ახალი ჯავშანი!*
+
+${typeEmoji[booking.type]} *${typeName[booking.type]}*
+📋 \`${booking.bookingNumber}\`
+👤 ${booking.guestName}
+📞 ${booking.guestPhone}
+🗓 ${booking.date}${booking.time ? ` • ${booking.time}` : ''}
+${booking.guests ? `👥 ${booking.guests} სტუმარი` : ''}
+${booking.price ? `💰 ₾${booking.price}` : ''}
+${booking.details ? `\n📝 ${booking.details}` : ''}
+`.trim()
+
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'Markdown' })
+    })
+  } catch (error) {
+    console.error('[Telegram] Failed:', error)
+  }
+}
+
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders })
 }
@@ -221,6 +265,18 @@ export async function POST(request: NextRequest) {
       console.error('[Public Book] Failed to send confirmation email:', emailError)
       // Don't fail the booking if email fails
     }
+
+    // Send Telegram notification
+    await sendTelegramNotification({
+      type: 'hotel',
+      bookingNumber: confirmationNumber,
+      guestName: `${guest.firstName} ${guest.lastName}`,
+      guestPhone: guest.phone,
+      date: `${checkIn} → ${checkOut}`,
+      guests: adults + children,
+      price: totalAmount,
+      details: `ოთახი #${room.roomNumber} (${room.roomType}) • ${nights} ღამე`
+    })
     
     return NextResponse.json({
       success: true,

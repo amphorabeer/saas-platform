@@ -10,6 +10,58 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
+// Telegram notification
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || ''
+
+async function sendTelegramNotification(booking: {
+  type: 'spa' | 'restaurant' | 'hotel'
+  bookingNumber: string
+  guestName: string
+  guestPhone: string
+  date: string
+  time?: string
+  guests?: number
+  price?: number
+  details?: string
+}): Promise<void> {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    console.log('[Telegram] Missing credentials, skipping notification')
+    return
+  }
+
+  const typeEmoji: Record<string, string> = { spa: '🍺', restaurant: '🍽️', hotel: '🏨' }
+  const typeName: Record<string, string> = { spa: 'ლუდის სპა', restaurant: 'რესტორანი', hotel: 'სასტუმრო' }
+
+  const message = `
+🔔 *ახალი ჯავშანი!*
+
+${typeEmoji[booking.type]} *${typeName[booking.type]}*
+📋 \`${booking.bookingNumber}\`
+👤 ${booking.guestName}
+📞 ${booking.guestPhone}
+🗓 ${booking.date}${booking.time ? ` • ${booking.time}` : ''}
+${booking.guests ? `👥 ${booking.guests} სტუმარი` : ''}
+${booking.price ? `💰 ₾${booking.price}` : ''}
+${booking.details ? `\n📝 ${booking.details}` : ''}
+`.trim()
+
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: 'Markdown'
+      })
+    })
+    console.log('[Telegram] Notification sent')
+  } catch (error) {
+    console.error('[Telegram] Failed to send:', error)
+  }
+}
+
 // All possible time slots
 const ALL_TIME_SLOTS = ['10:00', '11:15', '12:30', '13:45', '15:00', '16:15', '17:30', '18:45', '20:00', '21:15'];
 
@@ -181,6 +233,19 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Send Telegram notification
+      await sendTelegramNotification({
+        type: 'spa',
+        bookingNumber: confirmationCode,
+        guestName: name,
+        guestPhone: phone || 'არ არის მითითებული',
+        date: date,
+        time: time,
+        guests: guestCount,
+        price: calculatedPrice,
+        details: `${bathCount} აბაზანა`
+      })
+
       return NextResponse.json(
         { 
           success: true, 
@@ -242,6 +307,18 @@ export async function POST(request: NextRequest) {
           console.error('[Public Bookings] Failed to send email:', emailError)
         }
       }
+
+      // Send Telegram notification
+      await sendTelegramNotification({
+        type: 'restaurant',
+        bookingNumber: confirmationCode,
+        guestName: name,
+        guestPhone: phone || 'არ არის მითითებული',
+        date: date,
+        time: time,
+        guests: guests || 2,
+        details: occasion ? `🎉 ${occasion}` : undefined
+      })
 
       return NextResponse.json(
         { success: true, bookingId: reservation.id, confirmationCode },
