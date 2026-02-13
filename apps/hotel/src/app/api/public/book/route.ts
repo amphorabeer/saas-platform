@@ -57,8 +57,8 @@ ${booking.details ? `\n📝 ${booking.details}` : ''}
   }
 }
 
-// Get booking settings for organization
-async function getBookingSettings(prisma: any, tenantId: string): Promise<{
+// Get booking settings for organization (works in public context)
+async function getBookingSettings(prisma: any, hotelId: string): Promise<{
   autoConfirmHotel: boolean
   sendEmailOnConfirm: boolean
   sendTelegramNotification: boolean
@@ -66,10 +66,18 @@ async function getBookingSettings(prisma: any, tenantId: string): Promise<{
   const defaults = { autoConfirmHotel: true, sendEmailOnConfirm: true, sendTelegramNotification: true }
   
   try {
-    const org = await prisma.organization.findFirst({
-      where: { tenantId },
+    // Try to find by id first, then by tenantId
+    let org = await prisma.organization.findUnique({
+      where: { id: hotelId },
       include: { hotelSettings: true }
     })
+    
+    if (!org) {
+      org = await prisma.organization.findFirst({
+        where: { tenantId: hotelId },
+        include: { hotelSettings: true }
+      })
+    }
     
     if (!org?.hotelSettings?.settingsData) return defaults
     
@@ -78,6 +86,7 @@ async function getBookingSettings(prisma: any, tenantId: string): Promise<{
     
     return { ...defaults, ...booking }
   } catch (e) {
+    console.error('[BookingSettings] Error:', e)
     return defaults
   }
 }
