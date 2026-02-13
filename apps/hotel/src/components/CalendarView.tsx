@@ -316,6 +316,7 @@ export default function CalendarView({
         <div className="font-semibold text-xs truncate">{event.resource?.guestName}</div>
         <div className="text-xs opacity-90 truncate">Room {event.resource?.roomNumber || '-'}</div>
         <div className="text-xs mt-0.5">
+          {event.resource?.status === 'PENDING' && '⏳'}
           {event.resource?.status === 'CHECKED_IN' && '✓ IN'}
           {event.resource?.status === 'CONFIRMED' && '📅'}
           {event.resource?.status === 'CANCELLED' && '❌'}

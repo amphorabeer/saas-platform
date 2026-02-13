@@ -2360,6 +2360,35 @@ export default function RoomCalendar({
     }
   }
   
+  const handleConfirmReservation = async () => {
+    if (!selectedReservation || !onReservationUpdate) return
+    try {
+      await onReservationUpdate(selectedReservation.id, { status: 'CONFIRMED' })
+      if (loadReservations) await loadReservations()
+      setShowDetails(false)
+      setSelectedReservation(null)
+    } catch (e) {
+      console.error('Confirm failed:', e)
+      alert('დადასტურება ვერ მოხერხდა')
+    }
+  }
+  
+  const handleCancelReservationFromDetails = async () => {
+    if (!selectedReservation || !onReservationUpdate) return
+    try {
+      await onReservationUpdate(selectedReservation.id, {
+        status: 'CANCELLED',
+        cancelledAt: new Date().toISOString()
+      })
+      if (loadReservations) await loadReservations()
+      setShowDetails(false)
+      setSelectedReservation(null)
+    } catch (e) {
+      console.error('Cancel failed:', e)
+      alert('გაუქმება ვერ მოხერხდა')
+    }
+  }
+  
   const handleCheckOut = async () => {
     if (!selectedReservation) return
     
@@ -4118,6 +4147,8 @@ export default function RoomCalendar({
             setShowDetails(false)
             handleCheckIn()
           }}
+          onConfirm={handleConfirmReservation}
+          onCancel={handleCancelReservationFromDetails}
         />
       )}
       
@@ -4930,7 +4961,7 @@ function ViewOnlyReservationModal({ reservation, onClose }: any) {
   )
 }
 
-function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, onCheckIn }: any) {
+function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, onCheckIn, onConfirm, onCancel }: any) {
   const [hotelInfo, setHotelInfo] = useState<any>({
     name: 'Hotel Tbilisi',
     companyName: '',
@@ -5167,13 +5198,15 @@ function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, on
             </div>
             <div>
               <span className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                reservation.status === 'CONFIRMED' ? 'bg-yellow-100 text-yellow-700' :
+                reservation.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                reservation.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
                 reservation.status === 'CHECKED_IN' ? 'bg-blue-100 text-blue-700' :
                 reservation.status === 'CHECKED_OUT' ? 'bg-gray-100 text-gray-700' :
                 reservation.status === 'NO_SHOW' ? 'bg-red-100 text-red-700' :
                 'bg-red-100 text-red-700'
               }`}>
-                {reservation.status === 'CONFIRMED' ? '📅 დადასტურებული' :
+                {reservation.status === 'PENDING' ? '⏳ მოლოდინში' :
+                 reservation.status === 'CONFIRMED' ? '📅 დადასტურებული' :
                  reservation.status === 'CHECKED_IN' ? '🏨 შემოსული' :
                  reservation.status === 'CHECKED_OUT' ? '✓ გასული' :
                  reservation.status === 'NO_SHOW' ? '❌ No-Show' :
@@ -5351,6 +5384,23 @@ function ReservationDetails({ reservation, rooms, onClose, onPayment, onEdit, on
         {/* Footer Actions */}
         <div className="border-t p-4 bg-gray-50 flex justify-between">
           <div className="flex gap-2">
+            {/* Confirm/Cancel buttons - only for PENDING reservations */}
+            {reservation.status === 'PENDING' && onConfirm && (
+              <button 
+                onClick={onConfirm}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              >
+                ✅ დადასტურება
+              </button>
+            )}
+            {reservation.status === 'PENDING' && onCancel && (
+              <button 
+                onClick={onCancel}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+              >
+                ❌ გაუქმება
+              </button>
+            )}
             {/* Check-in button - only for CONFIRMED reservations */}
             {reservation.status === 'CONFIRMED' && onCheckIn && (
               <button 
