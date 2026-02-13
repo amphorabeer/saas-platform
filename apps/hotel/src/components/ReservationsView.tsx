@@ -134,6 +134,7 @@ export default function ReservationsView({ reservations, rooms }: any) {
               className="ml-2 border rounded px-3 py-2"
             >
               <option value="all">ყველა</option>
+              <option value="PENDING">მოლოდინში</option>
               <option value="CONFIRMED">დადასტურებული</option>
               <option value="CHECKED_IN">Check In</option>
               <option value="CHECKED_OUT">Check Out</option>

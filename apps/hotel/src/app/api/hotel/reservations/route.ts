@@ -2,10 +2,10 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
+import moment from 'moment'
 
 export async function GET() {
   try {
-    // Lazy import to prevent build-time evaluation
     const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
@@ -21,7 +21,6 @@ export async function GET() {
       orderBy: { checkIn: 'desc' },
     })
     
-    // Map reservations to include roomNumber from room object
     const reservationsWithRoomNumber = reservations.map(res => ({
       ...res,
       roomNumber: res.room?.roomNumber || res.roomId,
@@ -38,7 +37,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    // Lazy import to prevent build-time evaluation
     const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
@@ -50,7 +48,6 @@ export async function POST(request: NextRequest) {
     const prisma = getPrismaClient()
     const data = await request.json()
     
-    // Check for overlapping reservations
     const existingReservations = await prisma.hotelReservation.findMany({
       where: {
         tenantId,
@@ -105,7 +102,6 @@ export async function POST(request: NextRequest) {
         status: data.status || 'CONFIRMED',
         source: data.source || 'direct',
         notes: data.notes || '',
-        // Company fields
         companyName: data.companyName || '',
         companyTaxId: data.companyTaxId || '',
         companyAddress: data.companyAddress || '',
@@ -122,7 +118,6 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    // Return reservation with roomNumber
     return NextResponse.json({
       ...newReservation,
       roomNumber: newReservation.room?.roomNumber || newReservation.roomId,
@@ -139,7 +134,6 @@ export async function PUT(request: NextRequest) {
   let body: any = {}
   let updateData: any = {}
   try {
-    // Lazy import to prevent build-time evaluation
     const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
@@ -148,14 +142,18 @@ export async function PUT(request: NextRequest) {
     }
     const { getPrismaClient } = await import('@/lib/prisma')
     const prisma = getPrismaClient()
+    
+    // Check for ID in query params (for NotificationBell) or body
+    const { searchParams } = new URL(request.url)
+    const queryId = searchParams.get('id')
+    
     body = await request.json()
-    const { id } = body
+    const id = queryId || body.id
     
     if (!id) {
       return NextResponse.json({ error: 'Reservation ID required' }, { status: 400 })
     }
     
-    // First verify reservation exists and belongs to tenant
     const existingReservation = await prisma.hotelReservation.findUnique({
       where: { id },
       include: { room: true },
@@ -169,12 +167,15 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
     
-    // Only allow valid fields - filter out unknown fields
+    // Check if status is being changed to CONFIRMED (for email)
+    const wasNotConfirmed = existingReservation.status !== 'CONFIRMED'
+    const isBeingConfirmed = body.status === 'CONFIRMED'
+    const shouldSendEmail = body.sendEmail || (wasNotConfirmed && isBeingConfirmed)
+    
     const validFields = [
       'guestName', 'guestEmail', 'guestPhone', 'guestCountry',
       'checkIn', 'checkOut', 'adults', 'children',
       'totalAmount', 'paidAmount', 'status', 'source', 'notes',
-      // Company fields
       'companyName', 'companyTaxId', 'companyAddress', 'companyBank', 'companyBankAccount'
     ]
     
@@ -203,12 +204,10 @@ export async function PUT(request: NextRequest) {
             updateData[field] = numVal
           }
         } else if (field === 'guestEmail' || field === 'guestPhone' || field === 'notes' || field === 'guestCountry') {
-          // ✅ FIX: Use empty string, NOT null (guestEmail is required)
           updateData[field] = body[field] || ''
         } else if (field === 'source') {
           updateData[field] = body[field] || 'direct'
         } else if (field.startsWith('company')) {
-          // Company fields - use empty string if not provided
           updateData[field] = body[field] || ''
         } else {
           updateData[field] = body[field]
@@ -216,14 +215,11 @@ export async function PUT(request: NextRequest) {
       }
     }
     
-    // If no fields to update, return early
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(existingReservation)
     }
     
-    // Handle roomId update
     if (body.roomId && body.roomId !== existingReservation.roomId) {
-      // Verify room belongs to tenant
       const room = await prisma.hotelRoom.findUnique({
         where: { id: body.roomId, tenantId },
       })
@@ -233,7 +229,6 @@ export async function PUT(request: NextRequest) {
       updateData.roomId = body.roomId
     }
     
-    // Check for overlapping reservations if dates or room are being changed
     if (updateData.checkIn || updateData.checkOut || updateData.roomId) {
       const checkIn = updateData.checkIn ? new Date(updateData.checkIn) : new Date(existingReservation.checkIn)
       const checkOut = updateData.checkOut ? new Date(updateData.checkOut) : new Date(existingReservation.checkOut)
@@ -243,7 +238,7 @@ export async function PUT(request: NextRequest) {
         where: {
           tenantId,
           roomId,
-          id: { not: id }, // Exclude current reservation
+          id: { not: id },
           status: { notIn: ['CANCELLED', 'NO_SHOW'] },
         },
       })
@@ -262,15 +257,12 @@ export async function PUT(request: NextRequest) {
       }
     }
     
-    // Validate updateData before attempting update
-    
     const updatedReservation = await prisma.hotelReservation.update({
       where: { id },
       data: updateData,
       include: { room: true },
     })
     
-    // Update room status based on reservation status
     const finalRoomId = updateData.roomId || existingReservation.roomId
     if (updateData.status === 'CHECKED_IN' && finalRoomId) {
       await prisma.hotelRoom.update({
@@ -284,26 +276,110 @@ export async function PUT(request: NextRequest) {
       })
     }
     
-    // Return reservation with roomNumber
+    // Send confirmation email if status changed to CONFIRMED
+    if (shouldSendEmail && updatedReservation.guestEmail) {
+      try {
+        const org = await prisma.organization.findFirst({ where: { tenantId } })
+        const orgName = org?.name || 'Brewery House'
+        const room = updatedReservation.room
+        const checkIn = moment(updatedReservation.checkIn).format('DD/MM/YYYY')
+        const checkOut = moment(updatedReservation.checkOut).format('DD/MM/YYYY')
+        const nights = moment(updatedReservation.checkOut).diff(moment(updatedReservation.checkIn), 'days')
+        const bookingUrl = `https://www.breweryhouse.ge/booking/${updatedReservation.confirmationNumber}`
+        
+        const emailHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"><title>სასტუმროს ჯავშანი - ${updatedReservation.confirmationNumber}</title></head>
+          <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🏨 ${orgName}</h1>
+              <p style="color: #e0e7ff; margin-top: 10px; font-size: 16px;">სასტუმრო - ჯავშნის დადასტურება</p>
+            </div>
+            
+            <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb;">
+              <div style="background: #ede9fe; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <h2 style="color: #5b21b6; margin-top: 0;">✅ ჯავშანი დადასტურებულია!</h2>
+                <p style="font-size: 28px; color: #7c3aed; font-weight: bold; margin: 10px 0; letter-spacing: 2px;">
+                  ${updatedReservation.confirmationNumber}
+                </p>
+              </div>
+              
+              <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #374151; margin-top: 0; border-bottom: 2px solid #7c3aed; padding-bottom: 10px;">📋 ჯავშნის დეტალები</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">სტუმარი:</td>
+                    <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${updatedReservation.guestName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">ოთახი:</td>
+                    <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">#${room?.roomNumber} (${room?.roomType})</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">შესვლა:</td>
+                    <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${checkIn} (14:00-დან)</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">გასვლა:</td>
+                    <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${checkOut} (12:00-მდე)</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">ღამეები:</td>
+                    <td style="padding: 12px 0; font-weight: bold; color: #111827; border-bottom: 1px solid #e5e7eb;">${nights}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0; color: #6b7280;">სტუმრები:</td>
+                    <td style="padding: 12px 0; font-weight: bold; color: #111827;">${updatedReservation.adults} მოზრდილი${updatedReservation.children > 0 ? `, ${updatedReservation.children} ბავშვი` : ''}</td>
+                  </tr>
+                </table>
+              </div>
+              
+              <div style="background: linear-gradient(135deg, #7c3aed 0%, #1e40af 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px;">
+                <p style="margin: 0; font-size: 14px;">გადასახდელი თანხა</p>
+                <p style="margin: 5px 0 0 0; font-size: 36px; font-weight: bold;">₾${Number(updatedReservation.totalAmount)}</p>
+              </div>
+              
+              <div style="text-align: center;">
+                <a href="${bookingUrl}" style="display: inline-block; background: #059669; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">📄 ჯავშნის ნახვა</a>
+              </div>
+            </div>
+            
+            <div style="background: #1f2937; padding: 20px; text-align: center; color: #9ca3af; font-size: 13px; border-radius: 0 0 10px 10px;">
+              <p style="margin: 0;">📍 ასპინძა, შორეთის ქ. 21, სამცხე-ჯავახეთი</p>
+              <p style="margin: 8px 0;">📞 +995 599 946 500</p>
+            </div>
+          </body>
+          </html>
+        `
+        
+        await fetch(new URL('/api/email/send', request.url).toString(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: [updatedReservation.guestEmail],
+            subject: `✅ სასტუმროს ჯავშანი დადასტურებულია - ${updatedReservation.confirmationNumber} | ${orgName}`,
+            body: emailHtml
+          })
+        })
+        console.log(`[Reservations] Confirmation email sent to ${updatedReservation.guestEmail}`)
+      } catch (emailError) {
+        console.error('[Reservations] Failed to send confirmation email:', emailError)
+      }
+    }
+    
     return NextResponse.json({
       ...updatedReservation,
       roomNumber: updatedReservation.room?.roomNumber || updatedReservation.roomId,
       roomType: updatedReservation.room?.roomType || null,
-      roomPrice: updatedReservation.room?.basePrice || null
+      roomPrice: updatedReservation.room?.basePrice || null,
+      emailSent: shouldSendEmail && !!updatedReservation.guestEmail
     })
   } catch (error: any) {
     if (error.code === 'P2025') {
       return NextResponse.json({ error: 'Reservation not found' }, { status: 404 })
     }
     console.error('Error updating reservation:', error)
-    console.error('Error name:', error.name)
-    console.error('Error code:', error.code)
-    console.error('Error message:', error.message)
-    console.error('Error stack:', error.stack)
-    console.error('Request body:', JSON.stringify(body, null, 2))
-    console.error('Update data that was attempted:', JSON.stringify(updateData || {}, null, 2))
-    
-    // Return more detailed error for debugging
     return NextResponse.json({ 
       error: 'Failed to update reservation', 
       details: error.message,
@@ -315,7 +391,6 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE() {
   try {
-    // Lazy import to prevent build-time evaluation
     const { getTenantId, unauthorizedResponse } = await import('@/lib/tenant')
     const tenantId = await getTenantId()
     
