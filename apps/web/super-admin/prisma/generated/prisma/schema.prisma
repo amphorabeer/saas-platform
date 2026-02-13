@@ -875,3 +875,71 @@ model GeoGuideEvent {
   @@index([eventType])
   @@index([createdAt])
 }
+
+// =============================================
+// GeoGuide RAG Chatbot
+// =============================================
+
+// RAG კონტენტის chunks
+model GeoGuideChunk {
+  id       String  @id @default(cuid())
+  tourId   String
+  stopId   String?
+  museumId String
+
+  language   String // ka, en, ru
+  title      String
+  content    String @db.Text
+  chunkIndex Int
+
+  keywords   String[]
+  hallName   String?
+  stopNumber Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tourId])
+  @@index([museumId, language])
+  @@index([museumId])
+  @@index([language])
+  @@map("geoguide_chunks")
+}
+
+// ჩატის სესიები
+model GeoGuideChatSession {
+  id       String  @id @default(cuid())
+  museumId String
+  tourId   String?
+  language String  @default("ka")
+
+  sessionToken String  @unique
+  deviceType   String?
+
+  messages GeoGuideChatMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([museumId])
+  @@index([createdAt])
+  @@map("geoguide_chat_sessions")
+}
+
+// ჩატის შეტყობინებები
+model GeoGuideChatMessage {
+  id        String              @id @default(cuid())
+  sessionId String
+  session   GeoGuideChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  role    String // user | assistant
+  content String @db.Text
+
+  chunksUsed String[]
+  tokensUsed Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@map("geoguide_chat_messages")
+}

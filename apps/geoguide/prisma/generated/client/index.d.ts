@@ -148,6 +148,21 @@ export type Payment = $Result.DefaultSelection<Prisma.$PaymentPayload>
  * 
  */
 export type GeoGuideEvent = $Result.DefaultSelection<Prisma.$GeoGuideEventPayload>
+/**
+ * Model GeoGuideChunk
+ * 
+ */
+export type GeoGuideChunk = $Result.DefaultSelection<Prisma.$GeoGuideChunkPayload>
+/**
+ * Model GeoGuideChatSession
+ * 
+ */
+export type GeoGuideChatSession = $Result.DefaultSelection<Prisma.$GeoGuideChatSessionPayload>
+/**
+ * Model GeoGuideChatMessage
+ * 
+ */
+export type GeoGuideChatMessage = $Result.DefaultSelection<Prisma.$GeoGuideChatMessagePayload>
 
 /**
  * Enums
@@ -675,6 +690,36 @@ export class PrismaClient<
     * ```
     */
   get geoGuideEvent(): Prisma.GeoGuideEventDelegate<ExtArgs>;
+
+  /**
+   * `prisma.geoGuideChunk`: Exposes CRUD operations for the **GeoGuideChunk** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GeoGuideChunks
+    * const geoGuideChunks = await prisma.geoGuideChunk.findMany()
+    * ```
+    */
+  get geoGuideChunk(): Prisma.GeoGuideChunkDelegate<ExtArgs>;
+
+  /**
+   * `prisma.geoGuideChatSession`: Exposes CRUD operations for the **GeoGuideChatSession** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GeoGuideChatSessions
+    * const geoGuideChatSessions = await prisma.geoGuideChatSession.findMany()
+    * ```
+    */
+  get geoGuideChatSession(): Prisma.GeoGuideChatSessionDelegate<ExtArgs>;
+
+  /**
+   * `prisma.geoGuideChatMessage`: Exposes CRUD operations for the **GeoGuideChatMessage** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GeoGuideChatMessages
+    * const geoGuideChatMessages = await prisma.geoGuideChatMessage.findMany()
+    * ```
+    */
+  get geoGuideChatMessage(): Prisma.GeoGuideChatMessageDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1142,7 +1187,10 @@ export namespace Prisma {
     Device: 'Device',
     Entitlement: 'Entitlement',
     Payment: 'Payment',
-    GeoGuideEvent: 'GeoGuideEvent'
+    GeoGuideEvent: 'GeoGuideEvent',
+    GeoGuideChunk: 'GeoGuideChunk',
+    GeoGuideChatSession: 'GeoGuideChatSession',
+    GeoGuideChatMessage: 'GeoGuideChatMessage'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1158,7 +1206,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "organization" | "user" | "account" | "session" | "verificationToken" | "subscription" | "moduleAccess" | "moduleFeature" | "invoice" | "moduleConfig" | "landingPageContent" | "supportTicket" | "activityLog" | "hotelRoom" | "hotelReservation" | "configuration" | "contactRequest" | "museum" | "tour" | "hall" | "tourStop" | "tourPack" | "activationCode" | "device" | "entitlement" | "payment" | "geoGuideEvent"
+      modelProps: "organization" | "user" | "account" | "session" | "verificationToken" | "subscription" | "moduleAccess" | "moduleFeature" | "invoice" | "moduleConfig" | "landingPageContent" | "supportTicket" | "activityLog" | "hotelRoom" | "hotelReservation" | "configuration" | "contactRequest" | "museum" | "tour" | "hall" | "tourStop" | "tourPack" | "activationCode" | "device" | "entitlement" | "payment" | "geoGuideEvent" | "geoGuideChunk" | "geoGuideChatSession" | "geoGuideChatMessage"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3052,6 +3100,216 @@ export namespace Prisma {
           }
         }
       }
+      GeoGuideChunk: {
+        payload: Prisma.$GeoGuideChunkPayload<ExtArgs>
+        fields: Prisma.GeoGuideChunkFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GeoGuideChunkFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GeoGuideChunkFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload>
+          }
+          findFirst: {
+            args: Prisma.GeoGuideChunkFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GeoGuideChunkFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload>
+          }
+          findMany: {
+            args: Prisma.GeoGuideChunkFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload>[]
+          }
+          create: {
+            args: Prisma.GeoGuideChunkCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload>
+          }
+          createMany: {
+            args: Prisma.GeoGuideChunkCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GeoGuideChunkCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload>[]
+          }
+          delete: {
+            args: Prisma.GeoGuideChunkDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload>
+          }
+          update: {
+            args: Prisma.GeoGuideChunkUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload>
+          }
+          deleteMany: {
+            args: Prisma.GeoGuideChunkDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GeoGuideChunkUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GeoGuideChunkUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChunkPayload>
+          }
+          aggregate: {
+            args: Prisma.GeoGuideChunkAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGeoGuideChunk>
+          }
+          groupBy: {
+            args: Prisma.GeoGuideChunkGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GeoGuideChunkGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GeoGuideChunkCountArgs<ExtArgs>
+            result: $Utils.Optional<GeoGuideChunkCountAggregateOutputType> | number
+          }
+        }
+      }
+      GeoGuideChatSession: {
+        payload: Prisma.$GeoGuideChatSessionPayload<ExtArgs>
+        fields: Prisma.GeoGuideChatSessionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GeoGuideChatSessionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GeoGuideChatSessionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload>
+          }
+          findFirst: {
+            args: Prisma.GeoGuideChatSessionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GeoGuideChatSessionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload>
+          }
+          findMany: {
+            args: Prisma.GeoGuideChatSessionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload>[]
+          }
+          create: {
+            args: Prisma.GeoGuideChatSessionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload>
+          }
+          createMany: {
+            args: Prisma.GeoGuideChatSessionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GeoGuideChatSessionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload>[]
+          }
+          delete: {
+            args: Prisma.GeoGuideChatSessionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload>
+          }
+          update: {
+            args: Prisma.GeoGuideChatSessionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload>
+          }
+          deleteMany: {
+            args: Prisma.GeoGuideChatSessionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GeoGuideChatSessionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GeoGuideChatSessionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatSessionPayload>
+          }
+          aggregate: {
+            args: Prisma.GeoGuideChatSessionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGeoGuideChatSession>
+          }
+          groupBy: {
+            args: Prisma.GeoGuideChatSessionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GeoGuideChatSessionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GeoGuideChatSessionCountArgs<ExtArgs>
+            result: $Utils.Optional<GeoGuideChatSessionCountAggregateOutputType> | number
+          }
+        }
+      }
+      GeoGuideChatMessage: {
+        payload: Prisma.$GeoGuideChatMessagePayload<ExtArgs>
+        fields: Prisma.GeoGuideChatMessageFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GeoGuideChatMessageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GeoGuideChatMessageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload>
+          }
+          findFirst: {
+            args: Prisma.GeoGuideChatMessageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GeoGuideChatMessageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload>
+          }
+          findMany: {
+            args: Prisma.GeoGuideChatMessageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload>[]
+          }
+          create: {
+            args: Prisma.GeoGuideChatMessageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload>
+          }
+          createMany: {
+            args: Prisma.GeoGuideChatMessageCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GeoGuideChatMessageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload>[]
+          }
+          delete: {
+            args: Prisma.GeoGuideChatMessageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload>
+          }
+          update: {
+            args: Prisma.GeoGuideChatMessageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload>
+          }
+          deleteMany: {
+            args: Prisma.GeoGuideChatMessageDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GeoGuideChatMessageUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GeoGuideChatMessageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GeoGuideChatMessagePayload>
+          }
+          aggregate: {
+            args: Prisma.GeoGuideChatMessageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGeoGuideChatMessage>
+          }
+          groupBy: {
+            args: Prisma.GeoGuideChatMessageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GeoGuideChatMessageGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GeoGuideChatMessageCountArgs<ExtArgs>
+            result: $Utils.Optional<GeoGuideChatMessageCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3596,6 +3854,37 @@ export namespace Prisma {
    */
   export type DeviceCountOutputTypeCountEntitlementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: EntitlementWhereInput
+  }
+
+
+  /**
+   * Count Type GeoGuideChatSessionCountOutputType
+   */
+
+  export type GeoGuideChatSessionCountOutputType = {
+    messages: number
+  }
+
+  export type GeoGuideChatSessionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    messages?: boolean | GeoGuideChatSessionCountOutputTypeCountMessagesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * GeoGuideChatSessionCountOutputType without action
+   */
+  export type GeoGuideChatSessionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSessionCountOutputType
+     */
+    select?: GeoGuideChatSessionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * GeoGuideChatSessionCountOutputType without action
+   */
+  export type GeoGuideChatSessionCountOutputTypeCountMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GeoGuideChatMessageWhereInput
   }
 
 
@@ -32453,6 +32742,2985 @@ export namespace Prisma {
 
 
   /**
+   * Model GeoGuideChunk
+   */
+
+  export type AggregateGeoGuideChunk = {
+    _count: GeoGuideChunkCountAggregateOutputType | null
+    _avg: GeoGuideChunkAvgAggregateOutputType | null
+    _sum: GeoGuideChunkSumAggregateOutputType | null
+    _min: GeoGuideChunkMinAggregateOutputType | null
+    _max: GeoGuideChunkMaxAggregateOutputType | null
+  }
+
+  export type GeoGuideChunkAvgAggregateOutputType = {
+    chunkIndex: number | null
+    stopNumber: number | null
+  }
+
+  export type GeoGuideChunkSumAggregateOutputType = {
+    chunkIndex: number | null
+    stopNumber: number | null
+  }
+
+  export type GeoGuideChunkMinAggregateOutputType = {
+    id: string | null
+    tourId: string | null
+    stopId: string | null
+    museumId: string | null
+    language: string | null
+    title: string | null
+    content: string | null
+    chunkIndex: number | null
+    hallName: string | null
+    stopNumber: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GeoGuideChunkMaxAggregateOutputType = {
+    id: string | null
+    tourId: string | null
+    stopId: string | null
+    museumId: string | null
+    language: string | null
+    title: string | null
+    content: string | null
+    chunkIndex: number | null
+    hallName: string | null
+    stopNumber: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GeoGuideChunkCountAggregateOutputType = {
+    id: number
+    tourId: number
+    stopId: number
+    museumId: number
+    language: number
+    title: number
+    content: number
+    chunkIndex: number
+    keywords: number
+    hallName: number
+    stopNumber: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type GeoGuideChunkAvgAggregateInputType = {
+    chunkIndex?: true
+    stopNumber?: true
+  }
+
+  export type GeoGuideChunkSumAggregateInputType = {
+    chunkIndex?: true
+    stopNumber?: true
+  }
+
+  export type GeoGuideChunkMinAggregateInputType = {
+    id?: true
+    tourId?: true
+    stopId?: true
+    museumId?: true
+    language?: true
+    title?: true
+    content?: true
+    chunkIndex?: true
+    hallName?: true
+    stopNumber?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GeoGuideChunkMaxAggregateInputType = {
+    id?: true
+    tourId?: true
+    stopId?: true
+    museumId?: true
+    language?: true
+    title?: true
+    content?: true
+    chunkIndex?: true
+    hallName?: true
+    stopNumber?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GeoGuideChunkCountAggregateInputType = {
+    id?: true
+    tourId?: true
+    stopId?: true
+    museumId?: true
+    language?: true
+    title?: true
+    content?: true
+    chunkIndex?: true
+    keywords?: true
+    hallName?: true
+    stopNumber?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type GeoGuideChunkAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GeoGuideChunk to aggregate.
+     */
+    where?: GeoGuideChunkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChunks to fetch.
+     */
+    orderBy?: GeoGuideChunkOrderByWithRelationInput | GeoGuideChunkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GeoGuideChunkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChunks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChunks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GeoGuideChunks
+    **/
+    _count?: true | GeoGuideChunkCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GeoGuideChunkAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GeoGuideChunkSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GeoGuideChunkMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GeoGuideChunkMaxAggregateInputType
+  }
+
+  export type GetGeoGuideChunkAggregateType<T extends GeoGuideChunkAggregateArgs> = {
+        [P in keyof T & keyof AggregateGeoGuideChunk]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGeoGuideChunk[P]>
+      : GetScalarType<T[P], AggregateGeoGuideChunk[P]>
+  }
+
+
+
+
+  export type GeoGuideChunkGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GeoGuideChunkWhereInput
+    orderBy?: GeoGuideChunkOrderByWithAggregationInput | GeoGuideChunkOrderByWithAggregationInput[]
+    by: GeoGuideChunkScalarFieldEnum[] | GeoGuideChunkScalarFieldEnum
+    having?: GeoGuideChunkScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GeoGuideChunkCountAggregateInputType | true
+    _avg?: GeoGuideChunkAvgAggregateInputType
+    _sum?: GeoGuideChunkSumAggregateInputType
+    _min?: GeoGuideChunkMinAggregateInputType
+    _max?: GeoGuideChunkMaxAggregateInputType
+  }
+
+  export type GeoGuideChunkGroupByOutputType = {
+    id: string
+    tourId: string
+    stopId: string | null
+    museumId: string
+    language: string
+    title: string
+    content: string
+    chunkIndex: number
+    keywords: string[]
+    hallName: string | null
+    stopNumber: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: GeoGuideChunkCountAggregateOutputType | null
+    _avg: GeoGuideChunkAvgAggregateOutputType | null
+    _sum: GeoGuideChunkSumAggregateOutputType | null
+    _min: GeoGuideChunkMinAggregateOutputType | null
+    _max: GeoGuideChunkMaxAggregateOutputType | null
+  }
+
+  type GetGeoGuideChunkGroupByPayload<T extends GeoGuideChunkGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GeoGuideChunkGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GeoGuideChunkGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GeoGuideChunkGroupByOutputType[P]>
+            : GetScalarType<T[P], GeoGuideChunkGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GeoGuideChunkSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tourId?: boolean
+    stopId?: boolean
+    museumId?: boolean
+    language?: boolean
+    title?: boolean
+    content?: boolean
+    chunkIndex?: boolean
+    keywords?: boolean
+    hallName?: boolean
+    stopNumber?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["geoGuideChunk"]>
+
+  export type GeoGuideChunkSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tourId?: boolean
+    stopId?: boolean
+    museumId?: boolean
+    language?: boolean
+    title?: boolean
+    content?: boolean
+    chunkIndex?: boolean
+    keywords?: boolean
+    hallName?: boolean
+    stopNumber?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["geoGuideChunk"]>
+
+  export type GeoGuideChunkSelectScalar = {
+    id?: boolean
+    tourId?: boolean
+    stopId?: boolean
+    museumId?: boolean
+    language?: boolean
+    title?: boolean
+    content?: boolean
+    chunkIndex?: boolean
+    keywords?: boolean
+    hallName?: boolean
+    stopNumber?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+
+  export type $GeoGuideChunkPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GeoGuideChunk"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tourId: string
+      stopId: string | null
+      museumId: string
+      language: string
+      title: string
+      content: string
+      chunkIndex: number
+      keywords: string[]
+      hallName: string | null
+      stopNumber: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["geoGuideChunk"]>
+    composites: {}
+  }
+
+  type GeoGuideChunkGetPayload<S extends boolean | null | undefined | GeoGuideChunkDefaultArgs> = $Result.GetResult<Prisma.$GeoGuideChunkPayload, S>
+
+  type GeoGuideChunkCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GeoGuideChunkFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GeoGuideChunkCountAggregateInputType | true
+    }
+
+  export interface GeoGuideChunkDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GeoGuideChunk'], meta: { name: 'GeoGuideChunk' } }
+    /**
+     * Find zero or one GeoGuideChunk that matches the filter.
+     * @param {GeoGuideChunkFindUniqueArgs} args - Arguments to find a GeoGuideChunk
+     * @example
+     * // Get one GeoGuideChunk
+     * const geoGuideChunk = await prisma.geoGuideChunk.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GeoGuideChunkFindUniqueArgs>(args: SelectSubset<T, GeoGuideChunkFindUniqueArgs<ExtArgs>>): Prisma__GeoGuideChunkClient<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one GeoGuideChunk that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GeoGuideChunkFindUniqueOrThrowArgs} args - Arguments to find a GeoGuideChunk
+     * @example
+     * // Get one GeoGuideChunk
+     * const geoGuideChunk = await prisma.geoGuideChunk.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GeoGuideChunkFindUniqueOrThrowArgs>(args: SelectSubset<T, GeoGuideChunkFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GeoGuideChunkClient<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first GeoGuideChunk that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChunkFindFirstArgs} args - Arguments to find a GeoGuideChunk
+     * @example
+     * // Get one GeoGuideChunk
+     * const geoGuideChunk = await prisma.geoGuideChunk.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GeoGuideChunkFindFirstArgs>(args?: SelectSubset<T, GeoGuideChunkFindFirstArgs<ExtArgs>>): Prisma__GeoGuideChunkClient<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first GeoGuideChunk that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChunkFindFirstOrThrowArgs} args - Arguments to find a GeoGuideChunk
+     * @example
+     * // Get one GeoGuideChunk
+     * const geoGuideChunk = await prisma.geoGuideChunk.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GeoGuideChunkFindFirstOrThrowArgs>(args?: SelectSubset<T, GeoGuideChunkFindFirstOrThrowArgs<ExtArgs>>): Prisma__GeoGuideChunkClient<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more GeoGuideChunks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChunkFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GeoGuideChunks
+     * const geoGuideChunks = await prisma.geoGuideChunk.findMany()
+     * 
+     * // Get first 10 GeoGuideChunks
+     * const geoGuideChunks = await prisma.geoGuideChunk.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const geoGuideChunkWithIdOnly = await prisma.geoGuideChunk.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GeoGuideChunkFindManyArgs>(args?: SelectSubset<T, GeoGuideChunkFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a GeoGuideChunk.
+     * @param {GeoGuideChunkCreateArgs} args - Arguments to create a GeoGuideChunk.
+     * @example
+     * // Create one GeoGuideChunk
+     * const GeoGuideChunk = await prisma.geoGuideChunk.create({
+     *   data: {
+     *     // ... data to create a GeoGuideChunk
+     *   }
+     * })
+     * 
+     */
+    create<T extends GeoGuideChunkCreateArgs>(args: SelectSubset<T, GeoGuideChunkCreateArgs<ExtArgs>>): Prisma__GeoGuideChunkClient<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many GeoGuideChunks.
+     * @param {GeoGuideChunkCreateManyArgs} args - Arguments to create many GeoGuideChunks.
+     * @example
+     * // Create many GeoGuideChunks
+     * const geoGuideChunk = await prisma.geoGuideChunk.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GeoGuideChunkCreateManyArgs>(args?: SelectSubset<T, GeoGuideChunkCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GeoGuideChunks and returns the data saved in the database.
+     * @param {GeoGuideChunkCreateManyAndReturnArgs} args - Arguments to create many GeoGuideChunks.
+     * @example
+     * // Create many GeoGuideChunks
+     * const geoGuideChunk = await prisma.geoGuideChunk.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GeoGuideChunks and only return the `id`
+     * const geoGuideChunkWithIdOnly = await prisma.geoGuideChunk.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GeoGuideChunkCreateManyAndReturnArgs>(args?: SelectSubset<T, GeoGuideChunkCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a GeoGuideChunk.
+     * @param {GeoGuideChunkDeleteArgs} args - Arguments to delete one GeoGuideChunk.
+     * @example
+     * // Delete one GeoGuideChunk
+     * const GeoGuideChunk = await prisma.geoGuideChunk.delete({
+     *   where: {
+     *     // ... filter to delete one GeoGuideChunk
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GeoGuideChunkDeleteArgs>(args: SelectSubset<T, GeoGuideChunkDeleteArgs<ExtArgs>>): Prisma__GeoGuideChunkClient<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one GeoGuideChunk.
+     * @param {GeoGuideChunkUpdateArgs} args - Arguments to update one GeoGuideChunk.
+     * @example
+     * // Update one GeoGuideChunk
+     * const geoGuideChunk = await prisma.geoGuideChunk.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GeoGuideChunkUpdateArgs>(args: SelectSubset<T, GeoGuideChunkUpdateArgs<ExtArgs>>): Prisma__GeoGuideChunkClient<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more GeoGuideChunks.
+     * @param {GeoGuideChunkDeleteManyArgs} args - Arguments to filter GeoGuideChunks to delete.
+     * @example
+     * // Delete a few GeoGuideChunks
+     * const { count } = await prisma.geoGuideChunk.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GeoGuideChunkDeleteManyArgs>(args?: SelectSubset<T, GeoGuideChunkDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GeoGuideChunks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChunkUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GeoGuideChunks
+     * const geoGuideChunk = await prisma.geoGuideChunk.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GeoGuideChunkUpdateManyArgs>(args: SelectSubset<T, GeoGuideChunkUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one GeoGuideChunk.
+     * @param {GeoGuideChunkUpsertArgs} args - Arguments to update or create a GeoGuideChunk.
+     * @example
+     * // Update or create a GeoGuideChunk
+     * const geoGuideChunk = await prisma.geoGuideChunk.upsert({
+     *   create: {
+     *     // ... data to create a GeoGuideChunk
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GeoGuideChunk we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GeoGuideChunkUpsertArgs>(args: SelectSubset<T, GeoGuideChunkUpsertArgs<ExtArgs>>): Prisma__GeoGuideChunkClient<$Result.GetResult<Prisma.$GeoGuideChunkPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of GeoGuideChunks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChunkCountArgs} args - Arguments to filter GeoGuideChunks to count.
+     * @example
+     * // Count the number of GeoGuideChunks
+     * const count = await prisma.geoGuideChunk.count({
+     *   where: {
+     *     // ... the filter for the GeoGuideChunks we want to count
+     *   }
+     * })
+    **/
+    count<T extends GeoGuideChunkCountArgs>(
+      args?: Subset<T, GeoGuideChunkCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GeoGuideChunkCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GeoGuideChunk.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChunkAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GeoGuideChunkAggregateArgs>(args: Subset<T, GeoGuideChunkAggregateArgs>): Prisma.PrismaPromise<GetGeoGuideChunkAggregateType<T>>
+
+    /**
+     * Group by GeoGuideChunk.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChunkGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GeoGuideChunkGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GeoGuideChunkGroupByArgs['orderBy'] }
+        : { orderBy?: GeoGuideChunkGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GeoGuideChunkGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGeoGuideChunkGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GeoGuideChunk model
+   */
+  readonly fields: GeoGuideChunkFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GeoGuideChunk.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GeoGuideChunkClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GeoGuideChunk model
+   */ 
+  interface GeoGuideChunkFieldRefs {
+    readonly id: FieldRef<"GeoGuideChunk", 'String'>
+    readonly tourId: FieldRef<"GeoGuideChunk", 'String'>
+    readonly stopId: FieldRef<"GeoGuideChunk", 'String'>
+    readonly museumId: FieldRef<"GeoGuideChunk", 'String'>
+    readonly language: FieldRef<"GeoGuideChunk", 'String'>
+    readonly title: FieldRef<"GeoGuideChunk", 'String'>
+    readonly content: FieldRef<"GeoGuideChunk", 'String'>
+    readonly chunkIndex: FieldRef<"GeoGuideChunk", 'Int'>
+    readonly keywords: FieldRef<"GeoGuideChunk", 'String[]'>
+    readonly hallName: FieldRef<"GeoGuideChunk", 'String'>
+    readonly stopNumber: FieldRef<"GeoGuideChunk", 'Int'>
+    readonly createdAt: FieldRef<"GeoGuideChunk", 'DateTime'>
+    readonly updatedAt: FieldRef<"GeoGuideChunk", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GeoGuideChunk findUnique
+   */
+  export type GeoGuideChunkFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChunk to fetch.
+     */
+    where: GeoGuideChunkWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChunk findUniqueOrThrow
+   */
+  export type GeoGuideChunkFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChunk to fetch.
+     */
+    where: GeoGuideChunkWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChunk findFirst
+   */
+  export type GeoGuideChunkFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChunk to fetch.
+     */
+    where?: GeoGuideChunkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChunks to fetch.
+     */
+    orderBy?: GeoGuideChunkOrderByWithRelationInput | GeoGuideChunkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GeoGuideChunks.
+     */
+    cursor?: GeoGuideChunkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChunks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChunks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GeoGuideChunks.
+     */
+    distinct?: GeoGuideChunkScalarFieldEnum | GeoGuideChunkScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChunk findFirstOrThrow
+   */
+  export type GeoGuideChunkFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChunk to fetch.
+     */
+    where?: GeoGuideChunkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChunks to fetch.
+     */
+    orderBy?: GeoGuideChunkOrderByWithRelationInput | GeoGuideChunkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GeoGuideChunks.
+     */
+    cursor?: GeoGuideChunkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChunks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChunks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GeoGuideChunks.
+     */
+    distinct?: GeoGuideChunkScalarFieldEnum | GeoGuideChunkScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChunk findMany
+   */
+  export type GeoGuideChunkFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChunks to fetch.
+     */
+    where?: GeoGuideChunkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChunks to fetch.
+     */
+    orderBy?: GeoGuideChunkOrderByWithRelationInput | GeoGuideChunkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GeoGuideChunks.
+     */
+    cursor?: GeoGuideChunkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChunks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChunks.
+     */
+    skip?: number
+    distinct?: GeoGuideChunkScalarFieldEnum | GeoGuideChunkScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChunk create
+   */
+  export type GeoGuideChunkCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+    /**
+     * The data needed to create a GeoGuideChunk.
+     */
+    data: XOR<GeoGuideChunkCreateInput, GeoGuideChunkUncheckedCreateInput>
+  }
+
+  /**
+   * GeoGuideChunk createMany
+   */
+  export type GeoGuideChunkCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GeoGuideChunks.
+     */
+    data: GeoGuideChunkCreateManyInput | GeoGuideChunkCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GeoGuideChunk createManyAndReturn
+   */
+  export type GeoGuideChunkCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many GeoGuideChunks.
+     */
+    data: GeoGuideChunkCreateManyInput | GeoGuideChunkCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GeoGuideChunk update
+   */
+  export type GeoGuideChunkUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+    /**
+     * The data needed to update a GeoGuideChunk.
+     */
+    data: XOR<GeoGuideChunkUpdateInput, GeoGuideChunkUncheckedUpdateInput>
+    /**
+     * Choose, which GeoGuideChunk to update.
+     */
+    where: GeoGuideChunkWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChunk updateMany
+   */
+  export type GeoGuideChunkUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GeoGuideChunks.
+     */
+    data: XOR<GeoGuideChunkUpdateManyMutationInput, GeoGuideChunkUncheckedUpdateManyInput>
+    /**
+     * Filter which GeoGuideChunks to update
+     */
+    where?: GeoGuideChunkWhereInput
+  }
+
+  /**
+   * GeoGuideChunk upsert
+   */
+  export type GeoGuideChunkUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+    /**
+     * The filter to search for the GeoGuideChunk to update in case it exists.
+     */
+    where: GeoGuideChunkWhereUniqueInput
+    /**
+     * In case the GeoGuideChunk found by the `where` argument doesn't exist, create a new GeoGuideChunk with this data.
+     */
+    create: XOR<GeoGuideChunkCreateInput, GeoGuideChunkUncheckedCreateInput>
+    /**
+     * In case the GeoGuideChunk was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GeoGuideChunkUpdateInput, GeoGuideChunkUncheckedUpdateInput>
+  }
+
+  /**
+   * GeoGuideChunk delete
+   */
+  export type GeoGuideChunkDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+    /**
+     * Filter which GeoGuideChunk to delete.
+     */
+    where: GeoGuideChunkWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChunk deleteMany
+   */
+  export type GeoGuideChunkDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GeoGuideChunks to delete
+     */
+    where?: GeoGuideChunkWhereInput
+  }
+
+  /**
+   * GeoGuideChunk without action
+   */
+  export type GeoGuideChunkDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChunk
+     */
+    select?: GeoGuideChunkSelect<ExtArgs> | null
+  }
+
+
+  /**
+   * Model GeoGuideChatSession
+   */
+
+  export type AggregateGeoGuideChatSession = {
+    _count: GeoGuideChatSessionCountAggregateOutputType | null
+    _min: GeoGuideChatSessionMinAggregateOutputType | null
+    _max: GeoGuideChatSessionMaxAggregateOutputType | null
+  }
+
+  export type GeoGuideChatSessionMinAggregateOutputType = {
+    id: string | null
+    museumId: string | null
+    tourId: string | null
+    language: string | null
+    sessionToken: string | null
+    deviceType: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GeoGuideChatSessionMaxAggregateOutputType = {
+    id: string | null
+    museumId: string | null
+    tourId: string | null
+    language: string | null
+    sessionToken: string | null
+    deviceType: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GeoGuideChatSessionCountAggregateOutputType = {
+    id: number
+    museumId: number
+    tourId: number
+    language: number
+    sessionToken: number
+    deviceType: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type GeoGuideChatSessionMinAggregateInputType = {
+    id?: true
+    museumId?: true
+    tourId?: true
+    language?: true
+    sessionToken?: true
+    deviceType?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GeoGuideChatSessionMaxAggregateInputType = {
+    id?: true
+    museumId?: true
+    tourId?: true
+    language?: true
+    sessionToken?: true
+    deviceType?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GeoGuideChatSessionCountAggregateInputType = {
+    id?: true
+    museumId?: true
+    tourId?: true
+    language?: true
+    sessionToken?: true
+    deviceType?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type GeoGuideChatSessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GeoGuideChatSession to aggregate.
+     */
+    where?: GeoGuideChatSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChatSessions to fetch.
+     */
+    orderBy?: GeoGuideChatSessionOrderByWithRelationInput | GeoGuideChatSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GeoGuideChatSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChatSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChatSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GeoGuideChatSessions
+    **/
+    _count?: true | GeoGuideChatSessionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GeoGuideChatSessionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GeoGuideChatSessionMaxAggregateInputType
+  }
+
+  export type GetGeoGuideChatSessionAggregateType<T extends GeoGuideChatSessionAggregateArgs> = {
+        [P in keyof T & keyof AggregateGeoGuideChatSession]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGeoGuideChatSession[P]>
+      : GetScalarType<T[P], AggregateGeoGuideChatSession[P]>
+  }
+
+
+
+
+  export type GeoGuideChatSessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GeoGuideChatSessionWhereInput
+    orderBy?: GeoGuideChatSessionOrderByWithAggregationInput | GeoGuideChatSessionOrderByWithAggregationInput[]
+    by: GeoGuideChatSessionScalarFieldEnum[] | GeoGuideChatSessionScalarFieldEnum
+    having?: GeoGuideChatSessionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GeoGuideChatSessionCountAggregateInputType | true
+    _min?: GeoGuideChatSessionMinAggregateInputType
+    _max?: GeoGuideChatSessionMaxAggregateInputType
+  }
+
+  export type GeoGuideChatSessionGroupByOutputType = {
+    id: string
+    museumId: string
+    tourId: string | null
+    language: string
+    sessionToken: string
+    deviceType: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: GeoGuideChatSessionCountAggregateOutputType | null
+    _min: GeoGuideChatSessionMinAggregateOutputType | null
+    _max: GeoGuideChatSessionMaxAggregateOutputType | null
+  }
+
+  type GetGeoGuideChatSessionGroupByPayload<T extends GeoGuideChatSessionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GeoGuideChatSessionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GeoGuideChatSessionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GeoGuideChatSessionGroupByOutputType[P]>
+            : GetScalarType<T[P], GeoGuideChatSessionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GeoGuideChatSessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    museumId?: boolean
+    tourId?: boolean
+    language?: boolean
+    sessionToken?: boolean
+    deviceType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    messages?: boolean | GeoGuideChatSession$messagesArgs<ExtArgs>
+    _count?: boolean | GeoGuideChatSessionCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["geoGuideChatSession"]>
+
+  export type GeoGuideChatSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    museumId?: boolean
+    tourId?: boolean
+    language?: boolean
+    sessionToken?: boolean
+    deviceType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["geoGuideChatSession"]>
+
+  export type GeoGuideChatSessionSelectScalar = {
+    id?: boolean
+    museumId?: boolean
+    tourId?: boolean
+    language?: boolean
+    sessionToken?: boolean
+    deviceType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type GeoGuideChatSessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    messages?: boolean | GeoGuideChatSession$messagesArgs<ExtArgs>
+    _count?: boolean | GeoGuideChatSessionCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type GeoGuideChatSessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $GeoGuideChatSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GeoGuideChatSession"
+    objects: {
+      messages: Prisma.$GeoGuideChatMessagePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      museumId: string
+      tourId: string | null
+      language: string
+      sessionToken: string
+      deviceType: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["geoGuideChatSession"]>
+    composites: {}
+  }
+
+  type GeoGuideChatSessionGetPayload<S extends boolean | null | undefined | GeoGuideChatSessionDefaultArgs> = $Result.GetResult<Prisma.$GeoGuideChatSessionPayload, S>
+
+  type GeoGuideChatSessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GeoGuideChatSessionFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GeoGuideChatSessionCountAggregateInputType | true
+    }
+
+  export interface GeoGuideChatSessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GeoGuideChatSession'], meta: { name: 'GeoGuideChatSession' } }
+    /**
+     * Find zero or one GeoGuideChatSession that matches the filter.
+     * @param {GeoGuideChatSessionFindUniqueArgs} args - Arguments to find a GeoGuideChatSession
+     * @example
+     * // Get one GeoGuideChatSession
+     * const geoGuideChatSession = await prisma.geoGuideChatSession.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GeoGuideChatSessionFindUniqueArgs>(args: SelectSubset<T, GeoGuideChatSessionFindUniqueArgs<ExtArgs>>): Prisma__GeoGuideChatSessionClient<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one GeoGuideChatSession that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GeoGuideChatSessionFindUniqueOrThrowArgs} args - Arguments to find a GeoGuideChatSession
+     * @example
+     * // Get one GeoGuideChatSession
+     * const geoGuideChatSession = await prisma.geoGuideChatSession.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GeoGuideChatSessionFindUniqueOrThrowArgs>(args: SelectSubset<T, GeoGuideChatSessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GeoGuideChatSessionClient<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first GeoGuideChatSession that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatSessionFindFirstArgs} args - Arguments to find a GeoGuideChatSession
+     * @example
+     * // Get one GeoGuideChatSession
+     * const geoGuideChatSession = await prisma.geoGuideChatSession.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GeoGuideChatSessionFindFirstArgs>(args?: SelectSubset<T, GeoGuideChatSessionFindFirstArgs<ExtArgs>>): Prisma__GeoGuideChatSessionClient<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first GeoGuideChatSession that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatSessionFindFirstOrThrowArgs} args - Arguments to find a GeoGuideChatSession
+     * @example
+     * // Get one GeoGuideChatSession
+     * const geoGuideChatSession = await prisma.geoGuideChatSession.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GeoGuideChatSessionFindFirstOrThrowArgs>(args?: SelectSubset<T, GeoGuideChatSessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__GeoGuideChatSessionClient<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more GeoGuideChatSessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatSessionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GeoGuideChatSessions
+     * const geoGuideChatSessions = await prisma.geoGuideChatSession.findMany()
+     * 
+     * // Get first 10 GeoGuideChatSessions
+     * const geoGuideChatSessions = await prisma.geoGuideChatSession.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const geoGuideChatSessionWithIdOnly = await prisma.geoGuideChatSession.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GeoGuideChatSessionFindManyArgs>(args?: SelectSubset<T, GeoGuideChatSessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a GeoGuideChatSession.
+     * @param {GeoGuideChatSessionCreateArgs} args - Arguments to create a GeoGuideChatSession.
+     * @example
+     * // Create one GeoGuideChatSession
+     * const GeoGuideChatSession = await prisma.geoGuideChatSession.create({
+     *   data: {
+     *     // ... data to create a GeoGuideChatSession
+     *   }
+     * })
+     * 
+     */
+    create<T extends GeoGuideChatSessionCreateArgs>(args: SelectSubset<T, GeoGuideChatSessionCreateArgs<ExtArgs>>): Prisma__GeoGuideChatSessionClient<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many GeoGuideChatSessions.
+     * @param {GeoGuideChatSessionCreateManyArgs} args - Arguments to create many GeoGuideChatSessions.
+     * @example
+     * // Create many GeoGuideChatSessions
+     * const geoGuideChatSession = await prisma.geoGuideChatSession.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GeoGuideChatSessionCreateManyArgs>(args?: SelectSubset<T, GeoGuideChatSessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GeoGuideChatSessions and returns the data saved in the database.
+     * @param {GeoGuideChatSessionCreateManyAndReturnArgs} args - Arguments to create many GeoGuideChatSessions.
+     * @example
+     * // Create many GeoGuideChatSessions
+     * const geoGuideChatSession = await prisma.geoGuideChatSession.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GeoGuideChatSessions and only return the `id`
+     * const geoGuideChatSessionWithIdOnly = await prisma.geoGuideChatSession.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GeoGuideChatSessionCreateManyAndReturnArgs>(args?: SelectSubset<T, GeoGuideChatSessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a GeoGuideChatSession.
+     * @param {GeoGuideChatSessionDeleteArgs} args - Arguments to delete one GeoGuideChatSession.
+     * @example
+     * // Delete one GeoGuideChatSession
+     * const GeoGuideChatSession = await prisma.geoGuideChatSession.delete({
+     *   where: {
+     *     // ... filter to delete one GeoGuideChatSession
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GeoGuideChatSessionDeleteArgs>(args: SelectSubset<T, GeoGuideChatSessionDeleteArgs<ExtArgs>>): Prisma__GeoGuideChatSessionClient<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one GeoGuideChatSession.
+     * @param {GeoGuideChatSessionUpdateArgs} args - Arguments to update one GeoGuideChatSession.
+     * @example
+     * // Update one GeoGuideChatSession
+     * const geoGuideChatSession = await prisma.geoGuideChatSession.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GeoGuideChatSessionUpdateArgs>(args: SelectSubset<T, GeoGuideChatSessionUpdateArgs<ExtArgs>>): Prisma__GeoGuideChatSessionClient<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more GeoGuideChatSessions.
+     * @param {GeoGuideChatSessionDeleteManyArgs} args - Arguments to filter GeoGuideChatSessions to delete.
+     * @example
+     * // Delete a few GeoGuideChatSessions
+     * const { count } = await prisma.geoGuideChatSession.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GeoGuideChatSessionDeleteManyArgs>(args?: SelectSubset<T, GeoGuideChatSessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GeoGuideChatSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatSessionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GeoGuideChatSessions
+     * const geoGuideChatSession = await prisma.geoGuideChatSession.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GeoGuideChatSessionUpdateManyArgs>(args: SelectSubset<T, GeoGuideChatSessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one GeoGuideChatSession.
+     * @param {GeoGuideChatSessionUpsertArgs} args - Arguments to update or create a GeoGuideChatSession.
+     * @example
+     * // Update or create a GeoGuideChatSession
+     * const geoGuideChatSession = await prisma.geoGuideChatSession.upsert({
+     *   create: {
+     *     // ... data to create a GeoGuideChatSession
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GeoGuideChatSession we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GeoGuideChatSessionUpsertArgs>(args: SelectSubset<T, GeoGuideChatSessionUpsertArgs<ExtArgs>>): Prisma__GeoGuideChatSessionClient<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of GeoGuideChatSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatSessionCountArgs} args - Arguments to filter GeoGuideChatSessions to count.
+     * @example
+     * // Count the number of GeoGuideChatSessions
+     * const count = await prisma.geoGuideChatSession.count({
+     *   where: {
+     *     // ... the filter for the GeoGuideChatSessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends GeoGuideChatSessionCountArgs>(
+      args?: Subset<T, GeoGuideChatSessionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GeoGuideChatSessionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GeoGuideChatSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatSessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GeoGuideChatSessionAggregateArgs>(args: Subset<T, GeoGuideChatSessionAggregateArgs>): Prisma.PrismaPromise<GetGeoGuideChatSessionAggregateType<T>>
+
+    /**
+     * Group by GeoGuideChatSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatSessionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GeoGuideChatSessionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GeoGuideChatSessionGroupByArgs['orderBy'] }
+        : { orderBy?: GeoGuideChatSessionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GeoGuideChatSessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGeoGuideChatSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GeoGuideChatSession model
+   */
+  readonly fields: GeoGuideChatSessionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GeoGuideChatSession.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GeoGuideChatSessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    messages<T extends GeoGuideChatSession$messagesArgs<ExtArgs> = {}>(args?: Subset<T, GeoGuideChatSession$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GeoGuideChatSession model
+   */ 
+  interface GeoGuideChatSessionFieldRefs {
+    readonly id: FieldRef<"GeoGuideChatSession", 'String'>
+    readonly museumId: FieldRef<"GeoGuideChatSession", 'String'>
+    readonly tourId: FieldRef<"GeoGuideChatSession", 'String'>
+    readonly language: FieldRef<"GeoGuideChatSession", 'String'>
+    readonly sessionToken: FieldRef<"GeoGuideChatSession", 'String'>
+    readonly deviceType: FieldRef<"GeoGuideChatSession", 'String'>
+    readonly createdAt: FieldRef<"GeoGuideChatSession", 'DateTime'>
+    readonly updatedAt: FieldRef<"GeoGuideChatSession", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GeoGuideChatSession findUnique
+   */
+  export type GeoGuideChatSessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatSession to fetch.
+     */
+    where: GeoGuideChatSessionWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChatSession findUniqueOrThrow
+   */
+  export type GeoGuideChatSessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatSession to fetch.
+     */
+    where: GeoGuideChatSessionWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChatSession findFirst
+   */
+  export type GeoGuideChatSessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatSession to fetch.
+     */
+    where?: GeoGuideChatSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChatSessions to fetch.
+     */
+    orderBy?: GeoGuideChatSessionOrderByWithRelationInput | GeoGuideChatSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GeoGuideChatSessions.
+     */
+    cursor?: GeoGuideChatSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChatSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChatSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GeoGuideChatSessions.
+     */
+    distinct?: GeoGuideChatSessionScalarFieldEnum | GeoGuideChatSessionScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChatSession findFirstOrThrow
+   */
+  export type GeoGuideChatSessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatSession to fetch.
+     */
+    where?: GeoGuideChatSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChatSessions to fetch.
+     */
+    orderBy?: GeoGuideChatSessionOrderByWithRelationInput | GeoGuideChatSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GeoGuideChatSessions.
+     */
+    cursor?: GeoGuideChatSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChatSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChatSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GeoGuideChatSessions.
+     */
+    distinct?: GeoGuideChatSessionScalarFieldEnum | GeoGuideChatSessionScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChatSession findMany
+   */
+  export type GeoGuideChatSessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatSessions to fetch.
+     */
+    where?: GeoGuideChatSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChatSessions to fetch.
+     */
+    orderBy?: GeoGuideChatSessionOrderByWithRelationInput | GeoGuideChatSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GeoGuideChatSessions.
+     */
+    cursor?: GeoGuideChatSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChatSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChatSessions.
+     */
+    skip?: number
+    distinct?: GeoGuideChatSessionScalarFieldEnum | GeoGuideChatSessionScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChatSession create
+   */
+  export type GeoGuideChatSessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a GeoGuideChatSession.
+     */
+    data: XOR<GeoGuideChatSessionCreateInput, GeoGuideChatSessionUncheckedCreateInput>
+  }
+
+  /**
+   * GeoGuideChatSession createMany
+   */
+  export type GeoGuideChatSessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GeoGuideChatSessions.
+     */
+    data: GeoGuideChatSessionCreateManyInput | GeoGuideChatSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GeoGuideChatSession createManyAndReturn
+   */
+  export type GeoGuideChatSessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many GeoGuideChatSessions.
+     */
+    data: GeoGuideChatSessionCreateManyInput | GeoGuideChatSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GeoGuideChatSession update
+   */
+  export type GeoGuideChatSessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a GeoGuideChatSession.
+     */
+    data: XOR<GeoGuideChatSessionUpdateInput, GeoGuideChatSessionUncheckedUpdateInput>
+    /**
+     * Choose, which GeoGuideChatSession to update.
+     */
+    where: GeoGuideChatSessionWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChatSession updateMany
+   */
+  export type GeoGuideChatSessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GeoGuideChatSessions.
+     */
+    data: XOR<GeoGuideChatSessionUpdateManyMutationInput, GeoGuideChatSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which GeoGuideChatSessions to update
+     */
+    where?: GeoGuideChatSessionWhereInput
+  }
+
+  /**
+   * GeoGuideChatSession upsert
+   */
+  export type GeoGuideChatSessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the GeoGuideChatSession to update in case it exists.
+     */
+    where: GeoGuideChatSessionWhereUniqueInput
+    /**
+     * In case the GeoGuideChatSession found by the `where` argument doesn't exist, create a new GeoGuideChatSession with this data.
+     */
+    create: XOR<GeoGuideChatSessionCreateInput, GeoGuideChatSessionUncheckedCreateInput>
+    /**
+     * In case the GeoGuideChatSession was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GeoGuideChatSessionUpdateInput, GeoGuideChatSessionUncheckedUpdateInput>
+  }
+
+  /**
+   * GeoGuideChatSession delete
+   */
+  export type GeoGuideChatSessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter which GeoGuideChatSession to delete.
+     */
+    where: GeoGuideChatSessionWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChatSession deleteMany
+   */
+  export type GeoGuideChatSessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GeoGuideChatSessions to delete
+     */
+    where?: GeoGuideChatSessionWhereInput
+  }
+
+  /**
+   * GeoGuideChatSession.messages
+   */
+  export type GeoGuideChatSession$messagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    where?: GeoGuideChatMessageWhereInput
+    orderBy?: GeoGuideChatMessageOrderByWithRelationInput | GeoGuideChatMessageOrderByWithRelationInput[]
+    cursor?: GeoGuideChatMessageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: GeoGuideChatMessageScalarFieldEnum | GeoGuideChatMessageScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChatSession without action
+   */
+  export type GeoGuideChatSessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatSession
+     */
+    select?: GeoGuideChatSessionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatSessionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model GeoGuideChatMessage
+   */
+
+  export type AggregateGeoGuideChatMessage = {
+    _count: GeoGuideChatMessageCountAggregateOutputType | null
+    _avg: GeoGuideChatMessageAvgAggregateOutputType | null
+    _sum: GeoGuideChatMessageSumAggregateOutputType | null
+    _min: GeoGuideChatMessageMinAggregateOutputType | null
+    _max: GeoGuideChatMessageMaxAggregateOutputType | null
+  }
+
+  export type GeoGuideChatMessageAvgAggregateOutputType = {
+    tokensUsed: number | null
+  }
+
+  export type GeoGuideChatMessageSumAggregateOutputType = {
+    tokensUsed: number | null
+  }
+
+  export type GeoGuideChatMessageMinAggregateOutputType = {
+    id: string | null
+    sessionId: string | null
+    role: string | null
+    content: string | null
+    tokensUsed: number | null
+    createdAt: Date | null
+  }
+
+  export type GeoGuideChatMessageMaxAggregateOutputType = {
+    id: string | null
+    sessionId: string | null
+    role: string | null
+    content: string | null
+    tokensUsed: number | null
+    createdAt: Date | null
+  }
+
+  export type GeoGuideChatMessageCountAggregateOutputType = {
+    id: number
+    sessionId: number
+    role: number
+    content: number
+    chunksUsed: number
+    tokensUsed: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type GeoGuideChatMessageAvgAggregateInputType = {
+    tokensUsed?: true
+  }
+
+  export type GeoGuideChatMessageSumAggregateInputType = {
+    tokensUsed?: true
+  }
+
+  export type GeoGuideChatMessageMinAggregateInputType = {
+    id?: true
+    sessionId?: true
+    role?: true
+    content?: true
+    tokensUsed?: true
+    createdAt?: true
+  }
+
+  export type GeoGuideChatMessageMaxAggregateInputType = {
+    id?: true
+    sessionId?: true
+    role?: true
+    content?: true
+    tokensUsed?: true
+    createdAt?: true
+  }
+
+  export type GeoGuideChatMessageCountAggregateInputType = {
+    id?: true
+    sessionId?: true
+    role?: true
+    content?: true
+    chunksUsed?: true
+    tokensUsed?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type GeoGuideChatMessageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GeoGuideChatMessage to aggregate.
+     */
+    where?: GeoGuideChatMessageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChatMessages to fetch.
+     */
+    orderBy?: GeoGuideChatMessageOrderByWithRelationInput | GeoGuideChatMessageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GeoGuideChatMessageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChatMessages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChatMessages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GeoGuideChatMessages
+    **/
+    _count?: true | GeoGuideChatMessageCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GeoGuideChatMessageAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GeoGuideChatMessageSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GeoGuideChatMessageMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GeoGuideChatMessageMaxAggregateInputType
+  }
+
+  export type GetGeoGuideChatMessageAggregateType<T extends GeoGuideChatMessageAggregateArgs> = {
+        [P in keyof T & keyof AggregateGeoGuideChatMessage]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGeoGuideChatMessage[P]>
+      : GetScalarType<T[P], AggregateGeoGuideChatMessage[P]>
+  }
+
+
+
+
+  export type GeoGuideChatMessageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GeoGuideChatMessageWhereInput
+    orderBy?: GeoGuideChatMessageOrderByWithAggregationInput | GeoGuideChatMessageOrderByWithAggregationInput[]
+    by: GeoGuideChatMessageScalarFieldEnum[] | GeoGuideChatMessageScalarFieldEnum
+    having?: GeoGuideChatMessageScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GeoGuideChatMessageCountAggregateInputType | true
+    _avg?: GeoGuideChatMessageAvgAggregateInputType
+    _sum?: GeoGuideChatMessageSumAggregateInputType
+    _min?: GeoGuideChatMessageMinAggregateInputType
+    _max?: GeoGuideChatMessageMaxAggregateInputType
+  }
+
+  export type GeoGuideChatMessageGroupByOutputType = {
+    id: string
+    sessionId: string
+    role: string
+    content: string
+    chunksUsed: string[]
+    tokensUsed: number | null
+    createdAt: Date
+    _count: GeoGuideChatMessageCountAggregateOutputType | null
+    _avg: GeoGuideChatMessageAvgAggregateOutputType | null
+    _sum: GeoGuideChatMessageSumAggregateOutputType | null
+    _min: GeoGuideChatMessageMinAggregateOutputType | null
+    _max: GeoGuideChatMessageMaxAggregateOutputType | null
+  }
+
+  type GetGeoGuideChatMessageGroupByPayload<T extends GeoGuideChatMessageGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GeoGuideChatMessageGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GeoGuideChatMessageGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GeoGuideChatMessageGroupByOutputType[P]>
+            : GetScalarType<T[P], GeoGuideChatMessageGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GeoGuideChatMessageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sessionId?: boolean
+    role?: boolean
+    content?: boolean
+    chunksUsed?: boolean
+    tokensUsed?: boolean
+    createdAt?: boolean
+    session?: boolean | GeoGuideChatSessionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["geoGuideChatMessage"]>
+
+  export type GeoGuideChatMessageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sessionId?: boolean
+    role?: boolean
+    content?: boolean
+    chunksUsed?: boolean
+    tokensUsed?: boolean
+    createdAt?: boolean
+    session?: boolean | GeoGuideChatSessionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["geoGuideChatMessage"]>
+
+  export type GeoGuideChatMessageSelectScalar = {
+    id?: boolean
+    sessionId?: boolean
+    role?: boolean
+    content?: boolean
+    chunksUsed?: boolean
+    tokensUsed?: boolean
+    createdAt?: boolean
+  }
+
+  export type GeoGuideChatMessageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    session?: boolean | GeoGuideChatSessionDefaultArgs<ExtArgs>
+  }
+  export type GeoGuideChatMessageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    session?: boolean | GeoGuideChatSessionDefaultArgs<ExtArgs>
+  }
+
+  export type $GeoGuideChatMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GeoGuideChatMessage"
+    objects: {
+      session: Prisma.$GeoGuideChatSessionPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      sessionId: string
+      role: string
+      content: string
+      chunksUsed: string[]
+      tokensUsed: number | null
+      createdAt: Date
+    }, ExtArgs["result"]["geoGuideChatMessage"]>
+    composites: {}
+  }
+
+  type GeoGuideChatMessageGetPayload<S extends boolean | null | undefined | GeoGuideChatMessageDefaultArgs> = $Result.GetResult<Prisma.$GeoGuideChatMessagePayload, S>
+
+  type GeoGuideChatMessageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GeoGuideChatMessageFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GeoGuideChatMessageCountAggregateInputType | true
+    }
+
+  export interface GeoGuideChatMessageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GeoGuideChatMessage'], meta: { name: 'GeoGuideChatMessage' } }
+    /**
+     * Find zero or one GeoGuideChatMessage that matches the filter.
+     * @param {GeoGuideChatMessageFindUniqueArgs} args - Arguments to find a GeoGuideChatMessage
+     * @example
+     * // Get one GeoGuideChatMessage
+     * const geoGuideChatMessage = await prisma.geoGuideChatMessage.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GeoGuideChatMessageFindUniqueArgs>(args: SelectSubset<T, GeoGuideChatMessageFindUniqueArgs<ExtArgs>>): Prisma__GeoGuideChatMessageClient<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one GeoGuideChatMessage that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GeoGuideChatMessageFindUniqueOrThrowArgs} args - Arguments to find a GeoGuideChatMessage
+     * @example
+     * // Get one GeoGuideChatMessage
+     * const geoGuideChatMessage = await prisma.geoGuideChatMessage.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GeoGuideChatMessageFindUniqueOrThrowArgs>(args: SelectSubset<T, GeoGuideChatMessageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GeoGuideChatMessageClient<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first GeoGuideChatMessage that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatMessageFindFirstArgs} args - Arguments to find a GeoGuideChatMessage
+     * @example
+     * // Get one GeoGuideChatMessage
+     * const geoGuideChatMessage = await prisma.geoGuideChatMessage.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GeoGuideChatMessageFindFirstArgs>(args?: SelectSubset<T, GeoGuideChatMessageFindFirstArgs<ExtArgs>>): Prisma__GeoGuideChatMessageClient<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first GeoGuideChatMessage that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatMessageFindFirstOrThrowArgs} args - Arguments to find a GeoGuideChatMessage
+     * @example
+     * // Get one GeoGuideChatMessage
+     * const geoGuideChatMessage = await prisma.geoGuideChatMessage.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GeoGuideChatMessageFindFirstOrThrowArgs>(args?: SelectSubset<T, GeoGuideChatMessageFindFirstOrThrowArgs<ExtArgs>>): Prisma__GeoGuideChatMessageClient<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more GeoGuideChatMessages that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatMessageFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GeoGuideChatMessages
+     * const geoGuideChatMessages = await prisma.geoGuideChatMessage.findMany()
+     * 
+     * // Get first 10 GeoGuideChatMessages
+     * const geoGuideChatMessages = await prisma.geoGuideChatMessage.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const geoGuideChatMessageWithIdOnly = await prisma.geoGuideChatMessage.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GeoGuideChatMessageFindManyArgs>(args?: SelectSubset<T, GeoGuideChatMessageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a GeoGuideChatMessage.
+     * @param {GeoGuideChatMessageCreateArgs} args - Arguments to create a GeoGuideChatMessage.
+     * @example
+     * // Create one GeoGuideChatMessage
+     * const GeoGuideChatMessage = await prisma.geoGuideChatMessage.create({
+     *   data: {
+     *     // ... data to create a GeoGuideChatMessage
+     *   }
+     * })
+     * 
+     */
+    create<T extends GeoGuideChatMessageCreateArgs>(args: SelectSubset<T, GeoGuideChatMessageCreateArgs<ExtArgs>>): Prisma__GeoGuideChatMessageClient<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many GeoGuideChatMessages.
+     * @param {GeoGuideChatMessageCreateManyArgs} args - Arguments to create many GeoGuideChatMessages.
+     * @example
+     * // Create many GeoGuideChatMessages
+     * const geoGuideChatMessage = await prisma.geoGuideChatMessage.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GeoGuideChatMessageCreateManyArgs>(args?: SelectSubset<T, GeoGuideChatMessageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GeoGuideChatMessages and returns the data saved in the database.
+     * @param {GeoGuideChatMessageCreateManyAndReturnArgs} args - Arguments to create many GeoGuideChatMessages.
+     * @example
+     * // Create many GeoGuideChatMessages
+     * const geoGuideChatMessage = await prisma.geoGuideChatMessage.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GeoGuideChatMessages and only return the `id`
+     * const geoGuideChatMessageWithIdOnly = await prisma.geoGuideChatMessage.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GeoGuideChatMessageCreateManyAndReturnArgs>(args?: SelectSubset<T, GeoGuideChatMessageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a GeoGuideChatMessage.
+     * @param {GeoGuideChatMessageDeleteArgs} args - Arguments to delete one GeoGuideChatMessage.
+     * @example
+     * // Delete one GeoGuideChatMessage
+     * const GeoGuideChatMessage = await prisma.geoGuideChatMessage.delete({
+     *   where: {
+     *     // ... filter to delete one GeoGuideChatMessage
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GeoGuideChatMessageDeleteArgs>(args: SelectSubset<T, GeoGuideChatMessageDeleteArgs<ExtArgs>>): Prisma__GeoGuideChatMessageClient<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one GeoGuideChatMessage.
+     * @param {GeoGuideChatMessageUpdateArgs} args - Arguments to update one GeoGuideChatMessage.
+     * @example
+     * // Update one GeoGuideChatMessage
+     * const geoGuideChatMessage = await prisma.geoGuideChatMessage.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GeoGuideChatMessageUpdateArgs>(args: SelectSubset<T, GeoGuideChatMessageUpdateArgs<ExtArgs>>): Prisma__GeoGuideChatMessageClient<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more GeoGuideChatMessages.
+     * @param {GeoGuideChatMessageDeleteManyArgs} args - Arguments to filter GeoGuideChatMessages to delete.
+     * @example
+     * // Delete a few GeoGuideChatMessages
+     * const { count } = await prisma.geoGuideChatMessage.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GeoGuideChatMessageDeleteManyArgs>(args?: SelectSubset<T, GeoGuideChatMessageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GeoGuideChatMessages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatMessageUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GeoGuideChatMessages
+     * const geoGuideChatMessage = await prisma.geoGuideChatMessage.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GeoGuideChatMessageUpdateManyArgs>(args: SelectSubset<T, GeoGuideChatMessageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one GeoGuideChatMessage.
+     * @param {GeoGuideChatMessageUpsertArgs} args - Arguments to update or create a GeoGuideChatMessage.
+     * @example
+     * // Update or create a GeoGuideChatMessage
+     * const geoGuideChatMessage = await prisma.geoGuideChatMessage.upsert({
+     *   create: {
+     *     // ... data to create a GeoGuideChatMessage
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GeoGuideChatMessage we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GeoGuideChatMessageUpsertArgs>(args: SelectSubset<T, GeoGuideChatMessageUpsertArgs<ExtArgs>>): Prisma__GeoGuideChatMessageClient<$Result.GetResult<Prisma.$GeoGuideChatMessagePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of GeoGuideChatMessages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatMessageCountArgs} args - Arguments to filter GeoGuideChatMessages to count.
+     * @example
+     * // Count the number of GeoGuideChatMessages
+     * const count = await prisma.geoGuideChatMessage.count({
+     *   where: {
+     *     // ... the filter for the GeoGuideChatMessages we want to count
+     *   }
+     * })
+    **/
+    count<T extends GeoGuideChatMessageCountArgs>(
+      args?: Subset<T, GeoGuideChatMessageCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GeoGuideChatMessageCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GeoGuideChatMessage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatMessageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GeoGuideChatMessageAggregateArgs>(args: Subset<T, GeoGuideChatMessageAggregateArgs>): Prisma.PrismaPromise<GetGeoGuideChatMessageAggregateType<T>>
+
+    /**
+     * Group by GeoGuideChatMessage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GeoGuideChatMessageGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GeoGuideChatMessageGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GeoGuideChatMessageGroupByArgs['orderBy'] }
+        : { orderBy?: GeoGuideChatMessageGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GeoGuideChatMessageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGeoGuideChatMessageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GeoGuideChatMessage model
+   */
+  readonly fields: GeoGuideChatMessageFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GeoGuideChatMessage.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GeoGuideChatMessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    session<T extends GeoGuideChatSessionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, GeoGuideChatSessionDefaultArgs<ExtArgs>>): Prisma__GeoGuideChatSessionClient<$Result.GetResult<Prisma.$GeoGuideChatSessionPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GeoGuideChatMessage model
+   */ 
+  interface GeoGuideChatMessageFieldRefs {
+    readonly id: FieldRef<"GeoGuideChatMessage", 'String'>
+    readonly sessionId: FieldRef<"GeoGuideChatMessage", 'String'>
+    readonly role: FieldRef<"GeoGuideChatMessage", 'String'>
+    readonly content: FieldRef<"GeoGuideChatMessage", 'String'>
+    readonly chunksUsed: FieldRef<"GeoGuideChatMessage", 'String[]'>
+    readonly tokensUsed: FieldRef<"GeoGuideChatMessage", 'Int'>
+    readonly createdAt: FieldRef<"GeoGuideChatMessage", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GeoGuideChatMessage findUnique
+   */
+  export type GeoGuideChatMessageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatMessage to fetch.
+     */
+    where: GeoGuideChatMessageWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChatMessage findUniqueOrThrow
+   */
+  export type GeoGuideChatMessageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatMessage to fetch.
+     */
+    where: GeoGuideChatMessageWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChatMessage findFirst
+   */
+  export type GeoGuideChatMessageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatMessage to fetch.
+     */
+    where?: GeoGuideChatMessageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChatMessages to fetch.
+     */
+    orderBy?: GeoGuideChatMessageOrderByWithRelationInput | GeoGuideChatMessageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GeoGuideChatMessages.
+     */
+    cursor?: GeoGuideChatMessageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChatMessages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChatMessages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GeoGuideChatMessages.
+     */
+    distinct?: GeoGuideChatMessageScalarFieldEnum | GeoGuideChatMessageScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChatMessage findFirstOrThrow
+   */
+  export type GeoGuideChatMessageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatMessage to fetch.
+     */
+    where?: GeoGuideChatMessageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChatMessages to fetch.
+     */
+    orderBy?: GeoGuideChatMessageOrderByWithRelationInput | GeoGuideChatMessageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GeoGuideChatMessages.
+     */
+    cursor?: GeoGuideChatMessageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChatMessages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChatMessages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GeoGuideChatMessages.
+     */
+    distinct?: GeoGuideChatMessageScalarFieldEnum | GeoGuideChatMessageScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChatMessage findMany
+   */
+  export type GeoGuideChatMessageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    /**
+     * Filter, which GeoGuideChatMessages to fetch.
+     */
+    where?: GeoGuideChatMessageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GeoGuideChatMessages to fetch.
+     */
+    orderBy?: GeoGuideChatMessageOrderByWithRelationInput | GeoGuideChatMessageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GeoGuideChatMessages.
+     */
+    cursor?: GeoGuideChatMessageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GeoGuideChatMessages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GeoGuideChatMessages.
+     */
+    skip?: number
+    distinct?: GeoGuideChatMessageScalarFieldEnum | GeoGuideChatMessageScalarFieldEnum[]
+  }
+
+  /**
+   * GeoGuideChatMessage create
+   */
+  export type GeoGuideChatMessageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    /**
+     * The data needed to create a GeoGuideChatMessage.
+     */
+    data: XOR<GeoGuideChatMessageCreateInput, GeoGuideChatMessageUncheckedCreateInput>
+  }
+
+  /**
+   * GeoGuideChatMessage createMany
+   */
+  export type GeoGuideChatMessageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GeoGuideChatMessages.
+     */
+    data: GeoGuideChatMessageCreateManyInput | GeoGuideChatMessageCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GeoGuideChatMessage createManyAndReturn
+   */
+  export type GeoGuideChatMessageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many GeoGuideChatMessages.
+     */
+    data: GeoGuideChatMessageCreateManyInput | GeoGuideChatMessageCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * GeoGuideChatMessage update
+   */
+  export type GeoGuideChatMessageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    /**
+     * The data needed to update a GeoGuideChatMessage.
+     */
+    data: XOR<GeoGuideChatMessageUpdateInput, GeoGuideChatMessageUncheckedUpdateInput>
+    /**
+     * Choose, which GeoGuideChatMessage to update.
+     */
+    where: GeoGuideChatMessageWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChatMessage updateMany
+   */
+  export type GeoGuideChatMessageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GeoGuideChatMessages.
+     */
+    data: XOR<GeoGuideChatMessageUpdateManyMutationInput, GeoGuideChatMessageUncheckedUpdateManyInput>
+    /**
+     * Filter which GeoGuideChatMessages to update
+     */
+    where?: GeoGuideChatMessageWhereInput
+  }
+
+  /**
+   * GeoGuideChatMessage upsert
+   */
+  export type GeoGuideChatMessageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    /**
+     * The filter to search for the GeoGuideChatMessage to update in case it exists.
+     */
+    where: GeoGuideChatMessageWhereUniqueInput
+    /**
+     * In case the GeoGuideChatMessage found by the `where` argument doesn't exist, create a new GeoGuideChatMessage with this data.
+     */
+    create: XOR<GeoGuideChatMessageCreateInput, GeoGuideChatMessageUncheckedCreateInput>
+    /**
+     * In case the GeoGuideChatMessage was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GeoGuideChatMessageUpdateInput, GeoGuideChatMessageUncheckedUpdateInput>
+  }
+
+  /**
+   * GeoGuideChatMessage delete
+   */
+  export type GeoGuideChatMessageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+    /**
+     * Filter which GeoGuideChatMessage to delete.
+     */
+    where: GeoGuideChatMessageWhereUniqueInput
+  }
+
+  /**
+   * GeoGuideChatMessage deleteMany
+   */
+  export type GeoGuideChatMessageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GeoGuideChatMessages to delete
+     */
+    where?: GeoGuideChatMessageWhereInput
+  }
+
+  /**
+   * GeoGuideChatMessage without action
+   */
+  export type GeoGuideChatMessageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GeoGuideChatMessage
+     */
+    select?: GeoGuideChatMessageSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GeoGuideChatMessageInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -32998,6 +36266,52 @@ export namespace Prisma {
   };
 
   export type GeoGuideEventScalarFieldEnum = (typeof GeoGuideEventScalarFieldEnum)[keyof typeof GeoGuideEventScalarFieldEnum]
+
+
+  export const GeoGuideChunkScalarFieldEnum: {
+    id: 'id',
+    tourId: 'tourId',
+    stopId: 'stopId',
+    museumId: 'museumId',
+    language: 'language',
+    title: 'title',
+    content: 'content',
+    chunkIndex: 'chunkIndex',
+    keywords: 'keywords',
+    hallName: 'hallName',
+    stopNumber: 'stopNumber',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type GeoGuideChunkScalarFieldEnum = (typeof GeoGuideChunkScalarFieldEnum)[keyof typeof GeoGuideChunkScalarFieldEnum]
+
+
+  export const GeoGuideChatSessionScalarFieldEnum: {
+    id: 'id',
+    museumId: 'museumId',
+    tourId: 'tourId',
+    language: 'language',
+    sessionToken: 'sessionToken',
+    deviceType: 'deviceType',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type GeoGuideChatSessionScalarFieldEnum = (typeof GeoGuideChatSessionScalarFieldEnum)[keyof typeof GeoGuideChatSessionScalarFieldEnum]
+
+
+  export const GeoGuideChatMessageScalarFieldEnum: {
+    id: 'id',
+    sessionId: 'sessionId',
+    role: 'role',
+    content: 'content',
+    chunksUsed: 'chunksUsed',
+    tokensUsed: 'tokensUsed',
+    createdAt: 'createdAt'
+  };
+
+  export type GeoGuideChatMessageScalarFieldEnum = (typeof GeoGuideChatMessageScalarFieldEnum)[keyof typeof GeoGuideChatMessageScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -36031,6 +39345,237 @@ export namespace Prisma {
     latitude?: DecimalNullableWithAggregatesFilter<"GeoGuideEvent"> | Decimal | DecimalJsLike | number | string | null
     longitude?: DecimalNullableWithAggregatesFilter<"GeoGuideEvent"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeWithAggregatesFilter<"GeoGuideEvent"> | Date | string
+  }
+
+  export type GeoGuideChunkWhereInput = {
+    AND?: GeoGuideChunkWhereInput | GeoGuideChunkWhereInput[]
+    OR?: GeoGuideChunkWhereInput[]
+    NOT?: GeoGuideChunkWhereInput | GeoGuideChunkWhereInput[]
+    id?: StringFilter<"GeoGuideChunk"> | string
+    tourId?: StringFilter<"GeoGuideChunk"> | string
+    stopId?: StringNullableFilter<"GeoGuideChunk"> | string | null
+    museumId?: StringFilter<"GeoGuideChunk"> | string
+    language?: StringFilter<"GeoGuideChunk"> | string
+    title?: StringFilter<"GeoGuideChunk"> | string
+    content?: StringFilter<"GeoGuideChunk"> | string
+    chunkIndex?: IntFilter<"GeoGuideChunk"> | number
+    keywords?: StringNullableListFilter<"GeoGuideChunk">
+    hallName?: StringNullableFilter<"GeoGuideChunk"> | string | null
+    stopNumber?: IntNullableFilter<"GeoGuideChunk"> | number | null
+    createdAt?: DateTimeFilter<"GeoGuideChunk"> | Date | string
+    updatedAt?: DateTimeFilter<"GeoGuideChunk"> | Date | string
+  }
+
+  export type GeoGuideChunkOrderByWithRelationInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    stopId?: SortOrderInput | SortOrder
+    museumId?: SortOrder
+    language?: SortOrder
+    title?: SortOrder
+    content?: SortOrder
+    chunkIndex?: SortOrder
+    keywords?: SortOrder
+    hallName?: SortOrderInput | SortOrder
+    stopNumber?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GeoGuideChunkWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: GeoGuideChunkWhereInput | GeoGuideChunkWhereInput[]
+    OR?: GeoGuideChunkWhereInput[]
+    NOT?: GeoGuideChunkWhereInput | GeoGuideChunkWhereInput[]
+    tourId?: StringFilter<"GeoGuideChunk"> | string
+    stopId?: StringNullableFilter<"GeoGuideChunk"> | string | null
+    museumId?: StringFilter<"GeoGuideChunk"> | string
+    language?: StringFilter<"GeoGuideChunk"> | string
+    title?: StringFilter<"GeoGuideChunk"> | string
+    content?: StringFilter<"GeoGuideChunk"> | string
+    chunkIndex?: IntFilter<"GeoGuideChunk"> | number
+    keywords?: StringNullableListFilter<"GeoGuideChunk">
+    hallName?: StringNullableFilter<"GeoGuideChunk"> | string | null
+    stopNumber?: IntNullableFilter<"GeoGuideChunk"> | number | null
+    createdAt?: DateTimeFilter<"GeoGuideChunk"> | Date | string
+    updatedAt?: DateTimeFilter<"GeoGuideChunk"> | Date | string
+  }, "id">
+
+  export type GeoGuideChunkOrderByWithAggregationInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    stopId?: SortOrderInput | SortOrder
+    museumId?: SortOrder
+    language?: SortOrder
+    title?: SortOrder
+    content?: SortOrder
+    chunkIndex?: SortOrder
+    keywords?: SortOrder
+    hallName?: SortOrderInput | SortOrder
+    stopNumber?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: GeoGuideChunkCountOrderByAggregateInput
+    _avg?: GeoGuideChunkAvgOrderByAggregateInput
+    _max?: GeoGuideChunkMaxOrderByAggregateInput
+    _min?: GeoGuideChunkMinOrderByAggregateInput
+    _sum?: GeoGuideChunkSumOrderByAggregateInput
+  }
+
+  export type GeoGuideChunkScalarWhereWithAggregatesInput = {
+    AND?: GeoGuideChunkScalarWhereWithAggregatesInput | GeoGuideChunkScalarWhereWithAggregatesInput[]
+    OR?: GeoGuideChunkScalarWhereWithAggregatesInput[]
+    NOT?: GeoGuideChunkScalarWhereWithAggregatesInput | GeoGuideChunkScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"GeoGuideChunk"> | string
+    tourId?: StringWithAggregatesFilter<"GeoGuideChunk"> | string
+    stopId?: StringNullableWithAggregatesFilter<"GeoGuideChunk"> | string | null
+    museumId?: StringWithAggregatesFilter<"GeoGuideChunk"> | string
+    language?: StringWithAggregatesFilter<"GeoGuideChunk"> | string
+    title?: StringWithAggregatesFilter<"GeoGuideChunk"> | string
+    content?: StringWithAggregatesFilter<"GeoGuideChunk"> | string
+    chunkIndex?: IntWithAggregatesFilter<"GeoGuideChunk"> | number
+    keywords?: StringNullableListFilter<"GeoGuideChunk">
+    hallName?: StringNullableWithAggregatesFilter<"GeoGuideChunk"> | string | null
+    stopNumber?: IntNullableWithAggregatesFilter<"GeoGuideChunk"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"GeoGuideChunk"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"GeoGuideChunk"> | Date | string
+  }
+
+  export type GeoGuideChatSessionWhereInput = {
+    AND?: GeoGuideChatSessionWhereInput | GeoGuideChatSessionWhereInput[]
+    OR?: GeoGuideChatSessionWhereInput[]
+    NOT?: GeoGuideChatSessionWhereInput | GeoGuideChatSessionWhereInput[]
+    id?: StringFilter<"GeoGuideChatSession"> | string
+    museumId?: StringFilter<"GeoGuideChatSession"> | string
+    tourId?: StringNullableFilter<"GeoGuideChatSession"> | string | null
+    language?: StringFilter<"GeoGuideChatSession"> | string
+    sessionToken?: StringFilter<"GeoGuideChatSession"> | string
+    deviceType?: StringNullableFilter<"GeoGuideChatSession"> | string | null
+    createdAt?: DateTimeFilter<"GeoGuideChatSession"> | Date | string
+    updatedAt?: DateTimeFilter<"GeoGuideChatSession"> | Date | string
+    messages?: GeoGuideChatMessageListRelationFilter
+  }
+
+  export type GeoGuideChatSessionOrderByWithRelationInput = {
+    id?: SortOrder
+    museumId?: SortOrder
+    tourId?: SortOrderInput | SortOrder
+    language?: SortOrder
+    sessionToken?: SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    messages?: GeoGuideChatMessageOrderByRelationAggregateInput
+  }
+
+  export type GeoGuideChatSessionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    sessionToken?: string
+    AND?: GeoGuideChatSessionWhereInput | GeoGuideChatSessionWhereInput[]
+    OR?: GeoGuideChatSessionWhereInput[]
+    NOT?: GeoGuideChatSessionWhereInput | GeoGuideChatSessionWhereInput[]
+    museumId?: StringFilter<"GeoGuideChatSession"> | string
+    tourId?: StringNullableFilter<"GeoGuideChatSession"> | string | null
+    language?: StringFilter<"GeoGuideChatSession"> | string
+    deviceType?: StringNullableFilter<"GeoGuideChatSession"> | string | null
+    createdAt?: DateTimeFilter<"GeoGuideChatSession"> | Date | string
+    updatedAt?: DateTimeFilter<"GeoGuideChatSession"> | Date | string
+    messages?: GeoGuideChatMessageListRelationFilter
+  }, "id" | "sessionToken">
+
+  export type GeoGuideChatSessionOrderByWithAggregationInput = {
+    id?: SortOrder
+    museumId?: SortOrder
+    tourId?: SortOrderInput | SortOrder
+    language?: SortOrder
+    sessionToken?: SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: GeoGuideChatSessionCountOrderByAggregateInput
+    _max?: GeoGuideChatSessionMaxOrderByAggregateInput
+    _min?: GeoGuideChatSessionMinOrderByAggregateInput
+  }
+
+  export type GeoGuideChatSessionScalarWhereWithAggregatesInput = {
+    AND?: GeoGuideChatSessionScalarWhereWithAggregatesInput | GeoGuideChatSessionScalarWhereWithAggregatesInput[]
+    OR?: GeoGuideChatSessionScalarWhereWithAggregatesInput[]
+    NOT?: GeoGuideChatSessionScalarWhereWithAggregatesInput | GeoGuideChatSessionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"GeoGuideChatSession"> | string
+    museumId?: StringWithAggregatesFilter<"GeoGuideChatSession"> | string
+    tourId?: StringNullableWithAggregatesFilter<"GeoGuideChatSession"> | string | null
+    language?: StringWithAggregatesFilter<"GeoGuideChatSession"> | string
+    sessionToken?: StringWithAggregatesFilter<"GeoGuideChatSession"> | string
+    deviceType?: StringNullableWithAggregatesFilter<"GeoGuideChatSession"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"GeoGuideChatSession"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"GeoGuideChatSession"> | Date | string
+  }
+
+  export type GeoGuideChatMessageWhereInput = {
+    AND?: GeoGuideChatMessageWhereInput | GeoGuideChatMessageWhereInput[]
+    OR?: GeoGuideChatMessageWhereInput[]
+    NOT?: GeoGuideChatMessageWhereInput | GeoGuideChatMessageWhereInput[]
+    id?: StringFilter<"GeoGuideChatMessage"> | string
+    sessionId?: StringFilter<"GeoGuideChatMessage"> | string
+    role?: StringFilter<"GeoGuideChatMessage"> | string
+    content?: StringFilter<"GeoGuideChatMessage"> | string
+    chunksUsed?: StringNullableListFilter<"GeoGuideChatMessage">
+    tokensUsed?: IntNullableFilter<"GeoGuideChatMessage"> | number | null
+    createdAt?: DateTimeFilter<"GeoGuideChatMessage"> | Date | string
+    session?: XOR<GeoGuideChatSessionRelationFilter, GeoGuideChatSessionWhereInput>
+  }
+
+  export type GeoGuideChatMessageOrderByWithRelationInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    role?: SortOrder
+    content?: SortOrder
+    chunksUsed?: SortOrder
+    tokensUsed?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    session?: GeoGuideChatSessionOrderByWithRelationInput
+  }
+
+  export type GeoGuideChatMessageWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: GeoGuideChatMessageWhereInput | GeoGuideChatMessageWhereInput[]
+    OR?: GeoGuideChatMessageWhereInput[]
+    NOT?: GeoGuideChatMessageWhereInput | GeoGuideChatMessageWhereInput[]
+    sessionId?: StringFilter<"GeoGuideChatMessage"> | string
+    role?: StringFilter<"GeoGuideChatMessage"> | string
+    content?: StringFilter<"GeoGuideChatMessage"> | string
+    chunksUsed?: StringNullableListFilter<"GeoGuideChatMessage">
+    tokensUsed?: IntNullableFilter<"GeoGuideChatMessage"> | number | null
+    createdAt?: DateTimeFilter<"GeoGuideChatMessage"> | Date | string
+    session?: XOR<GeoGuideChatSessionRelationFilter, GeoGuideChatSessionWhereInput>
+  }, "id">
+
+  export type GeoGuideChatMessageOrderByWithAggregationInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    role?: SortOrder
+    content?: SortOrder
+    chunksUsed?: SortOrder
+    tokensUsed?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: GeoGuideChatMessageCountOrderByAggregateInput
+    _avg?: GeoGuideChatMessageAvgOrderByAggregateInput
+    _max?: GeoGuideChatMessageMaxOrderByAggregateInput
+    _min?: GeoGuideChatMessageMinOrderByAggregateInput
+    _sum?: GeoGuideChatMessageSumOrderByAggregateInput
+  }
+
+  export type GeoGuideChatMessageScalarWhereWithAggregatesInput = {
+    AND?: GeoGuideChatMessageScalarWhereWithAggregatesInput | GeoGuideChatMessageScalarWhereWithAggregatesInput[]
+    OR?: GeoGuideChatMessageScalarWhereWithAggregatesInput[]
+    NOT?: GeoGuideChatMessageScalarWhereWithAggregatesInput | GeoGuideChatMessageScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"GeoGuideChatMessage"> | string
+    sessionId?: StringWithAggregatesFilter<"GeoGuideChatMessage"> | string
+    role?: StringWithAggregatesFilter<"GeoGuideChatMessage"> | string
+    content?: StringWithAggregatesFilter<"GeoGuideChatMessage"> | string
+    chunksUsed?: StringNullableListFilter<"GeoGuideChatMessage">
+    tokensUsed?: IntNullableWithAggregatesFilter<"GeoGuideChatMessage"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"GeoGuideChatMessage"> | Date | string
   }
 
   export type OrganizationCreateInput = {
@@ -39267,6 +42812,268 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type GeoGuideChunkCreateInput = {
+    id?: string
+    tourId: string
+    stopId?: string | null
+    museumId: string
+    language: string
+    title: string
+    content: string
+    chunkIndex: number
+    keywords?: GeoGuideChunkCreatekeywordsInput | string[]
+    hallName?: string | null
+    stopNumber?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GeoGuideChunkUncheckedCreateInput = {
+    id?: string
+    tourId: string
+    stopId?: string | null
+    museumId: string
+    language: string
+    title: string
+    content: string
+    chunkIndex: number
+    keywords?: GeoGuideChunkCreatekeywordsInput | string[]
+    hallName?: string | null
+    stopNumber?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GeoGuideChunkUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    stopId?: NullableStringFieldUpdateOperationsInput | string | null
+    museumId?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunkIndex?: IntFieldUpdateOperationsInput | number
+    keywords?: GeoGuideChunkUpdatekeywordsInput | string[]
+    hallName?: NullableStringFieldUpdateOperationsInput | string | null
+    stopNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChunkUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    stopId?: NullableStringFieldUpdateOperationsInput | string | null
+    museumId?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunkIndex?: IntFieldUpdateOperationsInput | number
+    keywords?: GeoGuideChunkUpdatekeywordsInput | string[]
+    hallName?: NullableStringFieldUpdateOperationsInput | string | null
+    stopNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChunkCreateManyInput = {
+    id?: string
+    tourId: string
+    stopId?: string | null
+    museumId: string
+    language: string
+    title: string
+    content: string
+    chunkIndex: number
+    keywords?: GeoGuideChunkCreatekeywordsInput | string[]
+    hallName?: string | null
+    stopNumber?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GeoGuideChunkUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    stopId?: NullableStringFieldUpdateOperationsInput | string | null
+    museumId?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunkIndex?: IntFieldUpdateOperationsInput | number
+    keywords?: GeoGuideChunkUpdatekeywordsInput | string[]
+    hallName?: NullableStringFieldUpdateOperationsInput | string | null
+    stopNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChunkUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    stopId?: NullableStringFieldUpdateOperationsInput | string | null
+    museumId?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunkIndex?: IntFieldUpdateOperationsInput | number
+    keywords?: GeoGuideChunkUpdatekeywordsInput | string[]
+    hallName?: NullableStringFieldUpdateOperationsInput | string | null
+    stopNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChatSessionCreateInput = {
+    id?: string
+    museumId: string
+    tourId?: string | null
+    language?: string
+    sessionToken: string
+    deviceType?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    messages?: GeoGuideChatMessageCreateNestedManyWithoutSessionInput
+  }
+
+  export type GeoGuideChatSessionUncheckedCreateInput = {
+    id?: string
+    museumId: string
+    tourId?: string | null
+    language?: string
+    sessionToken: string
+    deviceType?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    messages?: GeoGuideChatMessageUncheckedCreateNestedManyWithoutSessionInput
+  }
+
+  export type GeoGuideChatSessionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    museumId?: StringFieldUpdateOperationsInput | string
+    tourId?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: StringFieldUpdateOperationsInput | string
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    messages?: GeoGuideChatMessageUpdateManyWithoutSessionNestedInput
+  }
+
+  export type GeoGuideChatSessionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    museumId?: StringFieldUpdateOperationsInput | string
+    tourId?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: StringFieldUpdateOperationsInput | string
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    messages?: GeoGuideChatMessageUncheckedUpdateManyWithoutSessionNestedInput
+  }
+
+  export type GeoGuideChatSessionCreateManyInput = {
+    id?: string
+    museumId: string
+    tourId?: string | null
+    language?: string
+    sessionToken: string
+    deviceType?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GeoGuideChatSessionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    museumId?: StringFieldUpdateOperationsInput | string
+    tourId?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: StringFieldUpdateOperationsInput | string
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChatSessionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    museumId?: StringFieldUpdateOperationsInput | string
+    tourId?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: StringFieldUpdateOperationsInput | string
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChatMessageCreateInput = {
+    id?: string
+    role: string
+    content: string
+    chunksUsed?: GeoGuideChatMessageCreatechunksUsedInput | string[]
+    tokensUsed?: number | null
+    createdAt?: Date | string
+    session: GeoGuideChatSessionCreateNestedOneWithoutMessagesInput
+  }
+
+  export type GeoGuideChatMessageUncheckedCreateInput = {
+    id?: string
+    sessionId: string
+    role: string
+    content: string
+    chunksUsed?: GeoGuideChatMessageCreatechunksUsedInput | string[]
+    tokensUsed?: number | null
+    createdAt?: Date | string
+  }
+
+  export type GeoGuideChatMessageUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunksUsed?: GeoGuideChatMessageUpdatechunksUsedInput | string[]
+    tokensUsed?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    session?: GeoGuideChatSessionUpdateOneRequiredWithoutMessagesNestedInput
+  }
+
+  export type GeoGuideChatMessageUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunksUsed?: GeoGuideChatMessageUpdatechunksUsedInput | string[]
+    tokensUsed?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChatMessageCreateManyInput = {
+    id?: string
+    sessionId: string
+    role: string
+    content: string
+    chunksUsed?: GeoGuideChatMessageCreatechunksUsedInput | string[]
+    tokensUsed?: number | null
+    createdAt?: Date | string
+  }
+
+  export type GeoGuideChatMessageUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunksUsed?: GeoGuideChatMessageUpdatechunksUsedInput | string[]
+    tokensUsed?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChatMessageUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunksUsed?: GeoGuideChatMessageUpdatechunksUsedInput | string[]
+    tokensUsed?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -41573,6 +45380,146 @@ export namespace Prisma {
     longitude?: SortOrder
   }
 
+  export type GeoGuideChunkCountOrderByAggregateInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    stopId?: SortOrder
+    museumId?: SortOrder
+    language?: SortOrder
+    title?: SortOrder
+    content?: SortOrder
+    chunkIndex?: SortOrder
+    keywords?: SortOrder
+    hallName?: SortOrder
+    stopNumber?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GeoGuideChunkAvgOrderByAggregateInput = {
+    chunkIndex?: SortOrder
+    stopNumber?: SortOrder
+  }
+
+  export type GeoGuideChunkMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    stopId?: SortOrder
+    museumId?: SortOrder
+    language?: SortOrder
+    title?: SortOrder
+    content?: SortOrder
+    chunkIndex?: SortOrder
+    hallName?: SortOrder
+    stopNumber?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GeoGuideChunkMinOrderByAggregateInput = {
+    id?: SortOrder
+    tourId?: SortOrder
+    stopId?: SortOrder
+    museumId?: SortOrder
+    language?: SortOrder
+    title?: SortOrder
+    content?: SortOrder
+    chunkIndex?: SortOrder
+    hallName?: SortOrder
+    stopNumber?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GeoGuideChunkSumOrderByAggregateInput = {
+    chunkIndex?: SortOrder
+    stopNumber?: SortOrder
+  }
+
+  export type GeoGuideChatMessageListRelationFilter = {
+    every?: GeoGuideChatMessageWhereInput
+    some?: GeoGuideChatMessageWhereInput
+    none?: GeoGuideChatMessageWhereInput
+  }
+
+  export type GeoGuideChatMessageOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type GeoGuideChatSessionCountOrderByAggregateInput = {
+    id?: SortOrder
+    museumId?: SortOrder
+    tourId?: SortOrder
+    language?: SortOrder
+    sessionToken?: SortOrder
+    deviceType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GeoGuideChatSessionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    museumId?: SortOrder
+    tourId?: SortOrder
+    language?: SortOrder
+    sessionToken?: SortOrder
+    deviceType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GeoGuideChatSessionMinOrderByAggregateInput = {
+    id?: SortOrder
+    museumId?: SortOrder
+    tourId?: SortOrder
+    language?: SortOrder
+    sessionToken?: SortOrder
+    deviceType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GeoGuideChatSessionRelationFilter = {
+    is?: GeoGuideChatSessionWhereInput
+    isNot?: GeoGuideChatSessionWhereInput
+  }
+
+  export type GeoGuideChatMessageCountOrderByAggregateInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    role?: SortOrder
+    content?: SortOrder
+    chunksUsed?: SortOrder
+    tokensUsed?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type GeoGuideChatMessageAvgOrderByAggregateInput = {
+    tokensUsed?: SortOrder
+  }
+
+  export type GeoGuideChatMessageMaxOrderByAggregateInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    role?: SortOrder
+    content?: SortOrder
+    tokensUsed?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type GeoGuideChatMessageMinOrderByAggregateInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    role?: SortOrder
+    content?: SortOrder
+    tokensUsed?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type GeoGuideChatMessageSumOrderByAggregateInput = {
+    tokensUsed?: SortOrder
+  }
+
   export type SubscriptionCreateNestedOneWithoutOrganizationInput = {
     create?: XOR<SubscriptionCreateWithoutOrganizationInput, SubscriptionUncheckedCreateWithoutOrganizationInput>
     connectOrCreate?: SubscriptionCreateOrConnectWithoutOrganizationInput
@@ -42913,6 +46860,80 @@ export namespace Prisma {
     delete?: ActivationCodeWhereInput | boolean
     connect?: ActivationCodeWhereUniqueInput
     update?: XOR<XOR<ActivationCodeUpdateToOneWithWhereWithoutPaymentsInput, ActivationCodeUpdateWithoutPaymentsInput>, ActivationCodeUncheckedUpdateWithoutPaymentsInput>
+  }
+
+  export type GeoGuideChunkCreatekeywordsInput = {
+    set: string[]
+  }
+
+  export type GeoGuideChunkUpdatekeywordsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type GeoGuideChatMessageCreateNestedManyWithoutSessionInput = {
+    create?: XOR<GeoGuideChatMessageCreateWithoutSessionInput, GeoGuideChatMessageUncheckedCreateWithoutSessionInput> | GeoGuideChatMessageCreateWithoutSessionInput[] | GeoGuideChatMessageUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: GeoGuideChatMessageCreateOrConnectWithoutSessionInput | GeoGuideChatMessageCreateOrConnectWithoutSessionInput[]
+    createMany?: GeoGuideChatMessageCreateManySessionInputEnvelope
+    connect?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+  }
+
+  export type GeoGuideChatMessageUncheckedCreateNestedManyWithoutSessionInput = {
+    create?: XOR<GeoGuideChatMessageCreateWithoutSessionInput, GeoGuideChatMessageUncheckedCreateWithoutSessionInput> | GeoGuideChatMessageCreateWithoutSessionInput[] | GeoGuideChatMessageUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: GeoGuideChatMessageCreateOrConnectWithoutSessionInput | GeoGuideChatMessageCreateOrConnectWithoutSessionInput[]
+    createMany?: GeoGuideChatMessageCreateManySessionInputEnvelope
+    connect?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+  }
+
+  export type GeoGuideChatMessageUpdateManyWithoutSessionNestedInput = {
+    create?: XOR<GeoGuideChatMessageCreateWithoutSessionInput, GeoGuideChatMessageUncheckedCreateWithoutSessionInput> | GeoGuideChatMessageCreateWithoutSessionInput[] | GeoGuideChatMessageUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: GeoGuideChatMessageCreateOrConnectWithoutSessionInput | GeoGuideChatMessageCreateOrConnectWithoutSessionInput[]
+    upsert?: GeoGuideChatMessageUpsertWithWhereUniqueWithoutSessionInput | GeoGuideChatMessageUpsertWithWhereUniqueWithoutSessionInput[]
+    createMany?: GeoGuideChatMessageCreateManySessionInputEnvelope
+    set?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+    disconnect?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+    delete?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+    connect?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+    update?: GeoGuideChatMessageUpdateWithWhereUniqueWithoutSessionInput | GeoGuideChatMessageUpdateWithWhereUniqueWithoutSessionInput[]
+    updateMany?: GeoGuideChatMessageUpdateManyWithWhereWithoutSessionInput | GeoGuideChatMessageUpdateManyWithWhereWithoutSessionInput[]
+    deleteMany?: GeoGuideChatMessageScalarWhereInput | GeoGuideChatMessageScalarWhereInput[]
+  }
+
+  export type GeoGuideChatMessageUncheckedUpdateManyWithoutSessionNestedInput = {
+    create?: XOR<GeoGuideChatMessageCreateWithoutSessionInput, GeoGuideChatMessageUncheckedCreateWithoutSessionInput> | GeoGuideChatMessageCreateWithoutSessionInput[] | GeoGuideChatMessageUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: GeoGuideChatMessageCreateOrConnectWithoutSessionInput | GeoGuideChatMessageCreateOrConnectWithoutSessionInput[]
+    upsert?: GeoGuideChatMessageUpsertWithWhereUniqueWithoutSessionInput | GeoGuideChatMessageUpsertWithWhereUniqueWithoutSessionInput[]
+    createMany?: GeoGuideChatMessageCreateManySessionInputEnvelope
+    set?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+    disconnect?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+    delete?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+    connect?: GeoGuideChatMessageWhereUniqueInput | GeoGuideChatMessageWhereUniqueInput[]
+    update?: GeoGuideChatMessageUpdateWithWhereUniqueWithoutSessionInput | GeoGuideChatMessageUpdateWithWhereUniqueWithoutSessionInput[]
+    updateMany?: GeoGuideChatMessageUpdateManyWithWhereWithoutSessionInput | GeoGuideChatMessageUpdateManyWithWhereWithoutSessionInput[]
+    deleteMany?: GeoGuideChatMessageScalarWhereInput | GeoGuideChatMessageScalarWhereInput[]
+  }
+
+  export type GeoGuideChatMessageCreatechunksUsedInput = {
+    set: string[]
+  }
+
+  export type GeoGuideChatSessionCreateNestedOneWithoutMessagesInput = {
+    create?: XOR<GeoGuideChatSessionCreateWithoutMessagesInput, GeoGuideChatSessionUncheckedCreateWithoutMessagesInput>
+    connectOrCreate?: GeoGuideChatSessionCreateOrConnectWithoutMessagesInput
+    connect?: GeoGuideChatSessionWhereUniqueInput
+  }
+
+  export type GeoGuideChatMessageUpdatechunksUsedInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type GeoGuideChatSessionUpdateOneRequiredWithoutMessagesNestedInput = {
+    create?: XOR<GeoGuideChatSessionCreateWithoutMessagesInput, GeoGuideChatSessionUncheckedCreateWithoutMessagesInput>
+    connectOrCreate?: GeoGuideChatSessionCreateOrConnectWithoutMessagesInput
+    upsert?: GeoGuideChatSessionUpsertWithoutMessagesInput
+    connect?: GeoGuideChatSessionWhereUniqueInput
+    update?: XOR<XOR<GeoGuideChatSessionUpdateToOneWithWhereWithoutMessagesInput, GeoGuideChatSessionUpdateWithoutMessagesInput>, GeoGuideChatSessionUncheckedUpdateWithoutMessagesInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -47320,6 +51341,123 @@ export namespace Prisma {
     entitlement?: EntitlementUncheckedUpdateOneWithoutActivationCodeNestedInput
   }
 
+  export type GeoGuideChatMessageCreateWithoutSessionInput = {
+    id?: string
+    role: string
+    content: string
+    chunksUsed?: GeoGuideChatMessageCreatechunksUsedInput | string[]
+    tokensUsed?: number | null
+    createdAt?: Date | string
+  }
+
+  export type GeoGuideChatMessageUncheckedCreateWithoutSessionInput = {
+    id?: string
+    role: string
+    content: string
+    chunksUsed?: GeoGuideChatMessageCreatechunksUsedInput | string[]
+    tokensUsed?: number | null
+    createdAt?: Date | string
+  }
+
+  export type GeoGuideChatMessageCreateOrConnectWithoutSessionInput = {
+    where: GeoGuideChatMessageWhereUniqueInput
+    create: XOR<GeoGuideChatMessageCreateWithoutSessionInput, GeoGuideChatMessageUncheckedCreateWithoutSessionInput>
+  }
+
+  export type GeoGuideChatMessageCreateManySessionInputEnvelope = {
+    data: GeoGuideChatMessageCreateManySessionInput | GeoGuideChatMessageCreateManySessionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type GeoGuideChatMessageUpsertWithWhereUniqueWithoutSessionInput = {
+    where: GeoGuideChatMessageWhereUniqueInput
+    update: XOR<GeoGuideChatMessageUpdateWithoutSessionInput, GeoGuideChatMessageUncheckedUpdateWithoutSessionInput>
+    create: XOR<GeoGuideChatMessageCreateWithoutSessionInput, GeoGuideChatMessageUncheckedCreateWithoutSessionInput>
+  }
+
+  export type GeoGuideChatMessageUpdateWithWhereUniqueWithoutSessionInput = {
+    where: GeoGuideChatMessageWhereUniqueInput
+    data: XOR<GeoGuideChatMessageUpdateWithoutSessionInput, GeoGuideChatMessageUncheckedUpdateWithoutSessionInput>
+  }
+
+  export type GeoGuideChatMessageUpdateManyWithWhereWithoutSessionInput = {
+    where: GeoGuideChatMessageScalarWhereInput
+    data: XOR<GeoGuideChatMessageUpdateManyMutationInput, GeoGuideChatMessageUncheckedUpdateManyWithoutSessionInput>
+  }
+
+  export type GeoGuideChatMessageScalarWhereInput = {
+    AND?: GeoGuideChatMessageScalarWhereInput | GeoGuideChatMessageScalarWhereInput[]
+    OR?: GeoGuideChatMessageScalarWhereInput[]
+    NOT?: GeoGuideChatMessageScalarWhereInput | GeoGuideChatMessageScalarWhereInput[]
+    id?: StringFilter<"GeoGuideChatMessage"> | string
+    sessionId?: StringFilter<"GeoGuideChatMessage"> | string
+    role?: StringFilter<"GeoGuideChatMessage"> | string
+    content?: StringFilter<"GeoGuideChatMessage"> | string
+    chunksUsed?: StringNullableListFilter<"GeoGuideChatMessage">
+    tokensUsed?: IntNullableFilter<"GeoGuideChatMessage"> | number | null
+    createdAt?: DateTimeFilter<"GeoGuideChatMessage"> | Date | string
+  }
+
+  export type GeoGuideChatSessionCreateWithoutMessagesInput = {
+    id?: string
+    museumId: string
+    tourId?: string | null
+    language?: string
+    sessionToken: string
+    deviceType?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GeoGuideChatSessionUncheckedCreateWithoutMessagesInput = {
+    id?: string
+    museumId: string
+    tourId?: string | null
+    language?: string
+    sessionToken: string
+    deviceType?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GeoGuideChatSessionCreateOrConnectWithoutMessagesInput = {
+    where: GeoGuideChatSessionWhereUniqueInput
+    create: XOR<GeoGuideChatSessionCreateWithoutMessagesInput, GeoGuideChatSessionUncheckedCreateWithoutMessagesInput>
+  }
+
+  export type GeoGuideChatSessionUpsertWithoutMessagesInput = {
+    update: XOR<GeoGuideChatSessionUpdateWithoutMessagesInput, GeoGuideChatSessionUncheckedUpdateWithoutMessagesInput>
+    create: XOR<GeoGuideChatSessionCreateWithoutMessagesInput, GeoGuideChatSessionUncheckedCreateWithoutMessagesInput>
+    where?: GeoGuideChatSessionWhereInput
+  }
+
+  export type GeoGuideChatSessionUpdateToOneWithWhereWithoutMessagesInput = {
+    where?: GeoGuideChatSessionWhereInput
+    data: XOR<GeoGuideChatSessionUpdateWithoutMessagesInput, GeoGuideChatSessionUncheckedUpdateWithoutMessagesInput>
+  }
+
+  export type GeoGuideChatSessionUpdateWithoutMessagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    museumId?: StringFieldUpdateOperationsInput | string
+    tourId?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: StringFieldUpdateOperationsInput | string
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChatSessionUncheckedUpdateWithoutMessagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    museumId?: StringFieldUpdateOperationsInput | string
+    tourId?: NullableStringFieldUpdateOperationsInput | string | null
+    language?: StringFieldUpdateOperationsInput | string
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserCreateManyOrganizationInput = {
     id?: string
     email: string
@@ -48508,6 +52646,42 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type GeoGuideChatMessageCreateManySessionInput = {
+    id?: string
+    role: string
+    content: string
+    chunksUsed?: GeoGuideChatMessageCreatechunksUsedInput | string[]
+    tokensUsed?: number | null
+    createdAt?: Date | string
+  }
+
+  export type GeoGuideChatMessageUpdateWithoutSessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunksUsed?: GeoGuideChatMessageUpdatechunksUsedInput | string[]
+    tokensUsed?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChatMessageUncheckedUpdateWithoutSessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunksUsed?: GeoGuideChatMessageUpdatechunksUsedInput | string[]
+    tokensUsed?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GeoGuideChatMessageUncheckedUpdateManyWithoutSessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    chunksUsed?: GeoGuideChatMessageUpdatechunksUsedInput | string[]
+    tokensUsed?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
 
 
   /**
@@ -48553,6 +52727,10 @@ export namespace Prisma {
      * @deprecated Use DeviceCountOutputTypeDefaultArgs instead
      */
     export type DeviceCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DeviceCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GeoGuideChatSessionCountOutputTypeDefaultArgs instead
+     */
+    export type GeoGuideChatSessionCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GeoGuideChatSessionCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use OrganizationDefaultArgs instead
      */
@@ -48661,6 +52839,18 @@ export namespace Prisma {
      * @deprecated Use GeoGuideEventDefaultArgs instead
      */
     export type GeoGuideEventArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GeoGuideEventDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GeoGuideChunkDefaultArgs instead
+     */
+    export type GeoGuideChunkArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GeoGuideChunkDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GeoGuideChatSessionDefaultArgs instead
+     */
+    export type GeoGuideChatSessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GeoGuideChatSessionDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GeoGuideChatMessageDefaultArgs instead
+     */
+    export type GeoGuideChatMessageArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GeoGuideChatMessageDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

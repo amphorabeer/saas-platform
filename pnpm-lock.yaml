@@ -190,6 +190,9 @@ importers:
 
   apps/geoguide:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^0.74.0
+        version: 0.74.0
       '@capacitor/cli':
         specifier: ^8.0.2
         version: 8.0.2
@@ -254,6 +257,8 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+
+  apps/geoguide/prisma/generated/client: {}
 
   apps/hotel:
     dependencies:

@@ -575,6 +575,43 @@ exports.Prisma.GeoGuideEventScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.GeoGuideChunkScalarFieldEnum = {
+  id: 'id',
+  tourId: 'tourId',
+  stopId: 'stopId',
+  museumId: 'museumId',
+  language: 'language',
+  title: 'title',
+  content: 'content',
+  chunkIndex: 'chunkIndex',
+  keywords: 'keywords',
+  hallName: 'hallName',
+  stopNumber: 'stopNumber',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GeoGuideChatSessionScalarFieldEnum = {
+  id: 'id',
+  museumId: 'museumId',
+  tourId: 'tourId',
+  language: 'language',
+  sessionToken: 'sessionToken',
+  deviceType: 'deviceType',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GeoGuideChatMessageScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  role: 'role',
+  content: 'content',
+  chunksUsed: 'chunksUsed',
+  tokensUsed: 'tokensUsed',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -697,7 +734,10 @@ exports.Prisma.ModelName = {
   Device: 'Device',
   Entitlement: 'Entitlement',
   Payment: 'Payment',
-  GeoGuideEvent: 'GeoGuideEvent'
+  GeoGuideEvent: 'GeoGuideEvent',
+  GeoGuideChunk: 'GeoGuideChunk',
+  GeoGuideChatSession: 'GeoGuideChatSession',
+  GeoGuideChatMessage: 'GeoGuideChatMessage'
 };
 
 /**

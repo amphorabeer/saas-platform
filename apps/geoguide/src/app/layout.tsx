@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/language-context";
 import ChatWidget from "@/components/chat/ChatWidget";
+import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin", "cyrillic", "cyrillic-ext"] });
 
@@ -58,9 +59,12 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <LanguageProvider>
-          <main className="min-h-screen bg-gray-50 pt-safe pb-safe">
-            {children}
-          </main>
+          <div className="flex flex-col min-h-screen">
+            <main className="flex-1 bg-gray-50 pt-safe pb-safe">
+              {children}
+            </main>
+            <Footer />
+          </div>
           <ChatWidget />
         </LanguageProvider>
       </body>
