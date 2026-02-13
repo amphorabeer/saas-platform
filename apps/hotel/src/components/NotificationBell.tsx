@@ -63,15 +63,31 @@ export default function NotificationBell() {
   // Confirm booking
   const confirmBooking = async (booking: PendingBooking) => {
     try {
-      const response = await fetch(`/api/hotel/spa-bookings/${booking.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'confirmed', sendEmail: true })
-      })
+      let response: Response
+      
+      if (booking.type === 'hotel') {
+        // Hotel reservation - use reservations API
+        response = await fetch(`/api/hotel/reservations?id=${booking.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'CONFIRMED', sendEmail: true })
+        })
+      } else {
+        // Spa/Restaurant - use spa-bookings API
+        response = await fetch(`/api/hotel/spa-bookings/${booking.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'confirmed', sendEmail: true })
+        })
+      }
       
       if (response.ok) {
         // Remove from list
         setPendingBookings(prev => prev.filter(b => b.id !== booking.id))
+        // Refresh to update calendar/other views
+        window.dispatchEvent(new CustomEvent('bookingConfirmed', { detail: booking }))
+      } else {
+        console.error('[NotificationBell] Failed to confirm:', await response.text())
       }
     } catch (error) {
       console.error('[NotificationBell] Error confirming:', error)

@@ -546,6 +546,7 @@ export default function EditReservationModal({
                   onChange={(e) => setFormData({...formData, status: e.target.value})}
                   disabled={!isEditable}
                 >
+                  <option value="PENDING">⏳ მოლოდინში</option>
                   <option value="CONFIRMED">📅 დადასტურებული</option>
                   <option value="CHECKED_IN">✅ შემოსული</option>
                   <option value="CHECKED_OUT">🚪 გასული</option>
