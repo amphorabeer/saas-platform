@@ -25,6 +25,7 @@ import FinancialDashboard from '../components/FinancialDashboard'
 import KPIAlerts from '../components/KPIAlerts'
 import SettingsNew from '../components/SettingsNew'
 import SpaCalendar from '../components/SpaCalendar'
+import NotificationBell from '../components/NotificationBell'
 import RestaurantPOS from '../components/RestaurantPOS'
 import { SystemLockService } from '../lib/systemLockService'
 import { ActivityLogger } from '../lib/activityLogger'
@@ -1042,7 +1043,10 @@ export default function HotelDashboard() {
               </button>
             </div>
             
-            <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+            <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto items-center">
+              {/* Notification Bell */}
+              <NotificationBell />
+              
               {/* User Info Badge */}
               <div className="bg-gray-100 px-3 md:px-4 py-2 rounded-lg flex items-center gap-2 order-3 md:order-1">
                 <span className="text-xl md:text-2xl">
