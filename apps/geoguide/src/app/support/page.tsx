@@ -23,9 +23,18 @@ export default function SupportPage() {
             </p>
             <p className="mb-2">
               <strong>Email:</strong>{' '}
-              <a href="mailto:support@geoguide.ge" className="text-amber-600 hover:underline">
-                support@geoguide.ge
+              <a href="mailto:info@geoguide.ge" className="text-amber-600 hover:underline">
+                info@geoguide.ge
               </a>
+            </p>
+            <p className="mb-2">
+              <strong>Phone:</strong>{' '}
+              <a href="tel:+995599946500" className="text-amber-600 hover:underline">
+                +995599946500
+              </a>
+            </p>
+            <p className="mb-2">
+              <strong>Address:</strong> შორეთის ქ 21, ასპინძა
             </p>
             <p>
               <strong>Response time:</strong> Within 24-48 hours
@@ -68,7 +77,7 @@ export default function SupportPage() {
               <div className="border-b pb-4">
                 <h3 className="font-medium text-gray-900">I have a problem with my purchase</h3>
                 <p className="text-gray-600 mt-1">
-                  Please contact us at support@geoguide.ge with your device ID and purchase details. We will resolve the issue within 24 hours.
+                  Please contact us at info@geoguide.ge with your device ID and purchase details. We will resolve the issue within 24 hours.
                 </p>
               </div>
 
@@ -85,7 +94,7 @@ export default function SupportPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">📱 App Information</h2>
             <p className="mb-2"><strong>App Name:</strong> GeoGuide - Audio Museum Guide</p>
-            <p className="mb-2"><strong>Developer:</strong> Zaza Zedginidze</p>
+            <p className="mb-2"><strong>Developer:</strong> შპს GeoGuide</p>
             <p className="mb-2"><strong>Version:</strong> 1.0</p>
             <p>
               <strong>Privacy Policy:</strong>{' '}

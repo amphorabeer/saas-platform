@@ -37,7 +37,7 @@ const uiTexts: Record<string, {
     days: "დღე",
     price: "ფასი",
     securePayment: "უსაფრთხო გადახდა",
-    payWith: "გადახდა TBC-ით",
+    payWith: "გადახდა ბარათით",
     processing: "მიმდინარეობს...",
     successTitle: "გადახდა წარმატებულია!",
     successMessage: "თქვენ შეიძინეთ ტურზე წვდომა.",
@@ -60,7 +60,7 @@ const uiTexts: Record<string, {
     days: "days",
     price: "Price",
     securePayment: "Secure payment",
-    payWith: "Pay with TBC",
+    payWith: "Pay with Card",
     processing: "Processing...",
     successTitle: "Payment successful!",
     successMessage: "You have purchased tour access.",
@@ -83,7 +83,7 @@ const uiTexts: Record<string, {
     days: "дней",
     price: "Цена",
     securePayment: "Безопасная оплата",
-    payWith: "Оплатить через TBC",
+    payWith: "Оплатить картой",
     processing: "Обработка...",
     successTitle: "Оплата успешна!",
     successMessage: "Вы приобрели доступ к туру.",
@@ -106,7 +106,7 @@ const uiTexts: Record<string, {
     days: "днів",
     price: "Ціна",
     securePayment: "Безпечна оплата",
-    payWith: "Сплатити через TBC",
+    payWith: "Сплатити карткою",
     processing: "Обробка...",
     successTitle: "Оплата успішна!",
     successMessage: "Ви придбали доступ до туру.",
@@ -373,10 +373,20 @@ export default function BuyPage() {
                   )}
                 </button>
 
-                {/* Security Note */}
-                <div className="flex items-center justify-center gap-2 mt-4 text-sm text-gray-500">
-                  <ShieldCheckIcon className="w-4 h-4" />
-                  {ui.securePayment}
+                {/* Security Note + Card logos */}
+                <div className="flex flex-col items-center gap-2 mt-4">
+                  <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                    <ShieldCheckIcon className="w-4 h-4" />
+                    {ui.securePayment}
+                  </div>
+                  <div className="flex items-center justify-center gap-3 mt-1">
+                    <span className="inline-flex items-center text-[10px] font-bold text-[#1A1F71] tracking-wider" title="Visa">VISA</span>
+                    <svg className="h-6 w-auto" viewBox="0 0 50 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Mastercard">
+                      <circle cx="18" cy="16" r="10" fill="#EB001B"/>
+                      <circle cx="32" cy="16" r="10" fill="#F79E1B"/>
+                      <path d="M25 6.5a10 10 0 0 1 0 19 10 10 0 0 1 0-19z" fill="#FF5F00"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
             </>

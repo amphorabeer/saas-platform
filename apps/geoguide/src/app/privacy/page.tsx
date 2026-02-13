@@ -10,7 +10,12 @@ export default function PrivacyPolicyPage() {
     <div className="min-h-screen bg-white">
       <div className="max-w-3xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-        <p className="text-sm text-gray-500 mb-8">Last updated: February 1, 2026</p>
+        <p className="text-sm text-gray-500 mb-4">Last updated: February 1, 2026</p>
+
+        <div className="bg-amber-50 rounded-xl p-4 mb-8 text-gray-700 text-sm">
+          <p className="font-medium text-gray-900">შპს GeoGuide, საიდენტიფიკაციო კოდი: 401956594</p>
+          <p>მისამართი: შორეთის ქ 21, ასპინძა</p>
+        </div>
 
         <div className="prose prose-gray max-w-none space-y-6 text-gray-700 leading-relaxed">
           <section>
@@ -106,9 +111,9 @@ export default function PrivacyPolicyPage() {
             <p>
               If you have any questions about this Privacy Policy, please contact us at:
             </p>
-            <p>
-              Email: info@geoguide.ge
-            </p>
+            <p>Email: <a href="mailto:info@geoguide.ge" className="text-amber-600 hover:underline">info@geoguide.ge</a></p>
+            <p>Phone: <a href="tel:+995599946500" className="text-amber-600 hover:underline">+995599946500</a></p>
+            <p>Address: შორეთის ქ 21, ასპინძა</p>
           </section>
         </div>
       </div>
