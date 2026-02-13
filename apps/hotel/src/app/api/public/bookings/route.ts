@@ -14,7 +14,7 @@ const corsHeaders = {
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || ''
 
-// Get booking settings for organization
+// Get booking settings for organization (works in public context)
 async function getBookingSettings(prisma: any, tenantId: string): Promise<{
   autoConfirmSpa: boolean
   autoConfirmRestaurant: boolean
@@ -31,16 +31,21 @@ async function getBookingSettings(prisma: any, tenantId: string): Promise<{
   }
   
   try {
+    // Find organization by tenantId and include hotelSettings
     const org = await prisma.organization.findFirst({
       where: { tenantId },
       include: { hotelSettings: true }
     })
     
-    if (!org?.hotelSettings?.settingsData) return defaults
+    if (!org?.hotelSettings?.settingsData) {
+      console.log('[BookingSettings] No settings found, using defaults')
+      return defaults
+    }
     
     const settingsData = org.hotelSettings.settingsData as any
     const booking = settingsData.booking || {}
     
+    console.log('[BookingSettings] Loaded:', booking)
     return { ...defaults, ...booking }
   } catch (e) {
     console.error('[BookingSettings] Error:', e)
