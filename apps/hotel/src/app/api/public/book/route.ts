@@ -24,11 +24,14 @@ async function sendTelegramNotification(booking: {
   guests?: number
   price?: number
   details?: string
+  isPending?: boolean
 }): Promise<void> {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return
 
   const typeEmoji: Record<string, string> = { spa: '🍺', restaurant: '🍽️', hotel: '🏨' }
   const typeName: Record<string, string> = { spa: 'ლუდის სპა', restaurant: 'რესტორანი', hotel: 'სასტუმრო' }
+
+  const statusLine = booking.isPending ? '\n⏳ *მოლოდინშია - საჭიროებს დადასტურებას*' : ''
 
   const message = `
 🔔 *ახალი ჯავშანი!*
@@ -39,7 +42,7 @@ ${typeEmoji[booking.type]} *${typeName[booking.type]}*
 📞 ${booking.guestPhone}
 🗓 ${booking.date}${booking.time ? ` • ${booking.time}` : ''}
 ${booking.guests ? `👥 ${booking.guests} სტუმარი` : ''}
-${booking.price ? `💰 ₾${booking.price}` : ''}
+${booking.price ? `💰 ₾${booking.price}` : ''}${statusLine}
 ${booking.details ? `\n📝 ${booking.details}` : ''}
 `.trim()
 
@@ -51,6 +54,31 @@ ${booking.details ? `\n📝 ${booking.details}` : ''}
     })
   } catch (error) {
     console.error('[Telegram] Failed:', error)
+  }
+}
+
+// Get booking settings for organization
+async function getBookingSettings(prisma: any, tenantId: string): Promise<{
+  autoConfirmHotel: boolean
+  sendEmailOnConfirm: boolean
+  sendTelegramNotification: boolean
+}> {
+  const defaults = { autoConfirmHotel: true, sendEmailOnConfirm: true, sendTelegramNotification: true }
+  
+  try {
+    const org = await prisma.organization.findFirst({
+      where: { tenantId },
+      include: { hotelSettings: true }
+    })
+    
+    if (!org?.hotelSettings?.settingsData) return defaults
+    
+    const settingsData = org.hotelSettings.settingsData as any
+    const booking = settingsData.booking || {}
+    
+    return { ...defaults, ...booking }
+  } catch (e) {
+    return defaults
   }
 }
 
@@ -143,6 +171,11 @@ export async function POST(request: NextRequest) {
     
     const confirmationNumber = `WEB${moment().format('YYMMDD')}${Math.random().toString(36).substring(2, 8).toUpperCase()}`
     
+    // Get booking settings
+    const bookingSettings = await getBookingSettings(prisma, hotelId)
+    const autoConfirm = bookingSettings.autoConfirmHotel
+    const bookingStatus = autoConfirm ? 'CONFIRMED' : 'PENDING'
+    
     // HotelReservation uses tenantId
     const reservation = await prisma.hotelReservation.create({
       data: {
@@ -156,14 +189,14 @@ export async function POST(request: NextRequest) {
         adults,
         children,
         totalAmount,
-        status: 'CONFIRMED',
+        status: bookingStatus,
         source: 'WEBSITE',
         notes: specialRequests || '',
         confirmationNumber
       }
     })
     
-    console.log(`[Public Book] New booking: ${confirmationNumber}`)
+    console.log(`[Public Book] New booking: ${confirmationNumber}, status: ${bookingStatus}`)
     
     // Send confirmation email
     try {
@@ -251,39 +284,45 @@ export async function POST(request: NextRequest) {
         </html>
       `
       
-      await fetch(new URL('/api/email/send', request.url).toString(), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: [guest.email],
-          subject: `✅ სასტუმროს ჯავშანი დადასტურებულია - ${confirmationNumber} | ${orgName}`,
-          body: emailHtml
+      // Only send email if auto-confirmed
+      if (autoConfirm && bookingSettings.sendEmailOnConfirm) {
+        await fetch(new URL('/api/email/send', request.url).toString(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: [guest.email],
+            subject: `✅ სასტუმროს ჯავშანი დადასტურებულია - ${confirmationNumber} | ${orgName}`,
+            body: emailHtml
+          })
         })
-      })
-      console.log(`[Public Book] Confirmation email sent to ${guest.email}`)
+        console.log(`[Public Book] Confirmation email sent to ${guest.email}`)
+      }
     } catch (emailError) {
       console.error('[Public Book] Failed to send confirmation email:', emailError)
       // Don't fail the booking if email fails
     }
 
-    // Send Telegram notification
-    await sendTelegramNotification({
-      type: 'hotel',
-      bookingNumber: confirmationNumber,
-      guestName: `${guest.firstName} ${guest.lastName}`,
-      guestPhone: guest.phone,
-      date: `${checkIn} → ${checkOut}`,
-      guests: adults + children,
-      price: totalAmount,
-      details: `ოთახი #${room.roomNumber} (${room.roomType}) • ${nights} ღამე`
-    })
+    // Send Telegram notification (always)
+    if (bookingSettings.sendTelegramNotification) {
+      await sendTelegramNotification({
+        type: 'hotel',
+        bookingNumber: confirmationNumber,
+        guestName: `${guest.firstName} ${guest.lastName}`,
+        guestPhone: guest.phone,
+        date: `${checkIn} → ${checkOut}`,
+        guests: adults + children,
+        price: totalAmount,
+        details: `ოთახი #${room.roomNumber} (${room.roomType}) • ${nights} ღამე`,
+        isPending: !autoConfirm
+      })
+    }
     
     return NextResponse.json({
       success: true,
       booking: {
         confirmationNumber,
         reservationId: reservation.id,
-        status: 'CONFIRMED',
+        status: bookingStatus,
         hotel: { id: hotelId, name: orgName },
         room: { id: room.id, number: room.roomNumber, type: room.roomType },
         dates: { checkIn, checkOut, nights },

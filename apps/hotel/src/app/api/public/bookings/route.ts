@@ -14,6 +14,40 @@ const corsHeaders = {
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || ''
 
+// Get booking settings for organization
+async function getBookingSettings(prisma: any, tenantId: string): Promise<{
+  autoConfirmSpa: boolean
+  autoConfirmRestaurant: boolean
+  autoConfirmHotel: boolean
+  sendEmailOnConfirm: boolean
+  sendTelegramNotification: boolean
+}> {
+  const defaults = {
+    autoConfirmSpa: true,
+    autoConfirmRestaurant: true,
+    autoConfirmHotel: true,
+    sendEmailOnConfirm: true,
+    sendTelegramNotification: true
+  }
+  
+  try {
+    const org = await prisma.organization.findFirst({
+      where: { tenantId },
+      include: { hotelSettings: true }
+    })
+    
+    if (!org?.hotelSettings?.settingsData) return defaults
+    
+    const settingsData = org.hotelSettings.settingsData as any
+    const booking = settingsData.booking || {}
+    
+    return { ...defaults, ...booking }
+  } catch (e) {
+    console.error('[BookingSettings] Error:', e)
+    return defaults
+  }
+}
+
 async function sendTelegramNotification(booking: {
   type: 'spa' | 'restaurant' | 'hotel'
   bookingNumber: string
@@ -24,6 +58,7 @@ async function sendTelegramNotification(booking: {
   guests?: number
   price?: number
   details?: string
+  isPending?: boolean
 }): Promise<void> {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     console.log('[Telegram] Missing credentials, skipping notification')
@@ -32,6 +67,8 @@ async function sendTelegramNotification(booking: {
 
   const typeEmoji: Record<string, string> = { spa: '🍺', restaurant: '🍽️', hotel: '🏨' }
   const typeName: Record<string, string> = { spa: 'ლუდის სპა', restaurant: 'რესტორანი', hotel: 'სასტუმრო' }
+
+  const statusLine = booking.isPending ? '\n⏳ *მოლოდინშია - საჭიროებს დადასტურებას*' : ''
 
   const message = `
 🔔 *ახალი ჯავშანი!*
@@ -42,7 +79,7 @@ ${typeEmoji[booking.type]} *${typeName[booking.type]}*
 📞 ${booking.guestPhone}
 🗓 ${booking.date}${booking.time ? ` • ${booking.time}` : ''}
 ${booking.guests ? `👥 ${booking.guests} სტუმარი` : ''}
-${booking.price ? `💰 ₾${booking.price}` : ''}
+${booking.price ? `💰 ₾${booking.price}` : ''}${statusLine}
 ${booking.details ? `\n📝 ${booking.details}` : ''}
 `.trim()
 
@@ -125,10 +162,17 @@ export async function POST(request: NextRequest) {
     const tenantId = organization.tenantId
     const orgName = organization.name || 'Brewery House'
 
+    // Get booking settings
+    const bookingSettings = await getBookingSettings(prisma, tenantId)
+
     // Generate confirmation code
     const confirmationCode = `${type === 'spa' ? 'SPA' : 'RST'}${Date.now().toString(36).toUpperCase()}`
 
     if (type === 'spa') {
+      // Determine status based on settings
+      const autoConfirm = bookingSettings.autoConfirmSpa
+      const bookingStatus = autoConfirm ? 'confirmed' : 'pending'
+      
       // Check availability first
       const bookingDate = new Date(date)
       const requestedStart = timeToMinutes(time)
@@ -188,7 +232,7 @@ export async function POST(request: NextRequest) {
           endTime: calculateEndTime(time, 60),
           duration: 60,
           guests: guestCount,
-          status: 'confirmed',
+          status: bookingStatus,
           paymentStatus: 'pending',
           notes: notes || '',
           totalPrice: calculatedPrice,
@@ -200,10 +244,10 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      console.log('[Public Bookings] Spa booking created:', booking.id)
+      console.log('[Public Bookings] Spa booking created:', booking.id, 'status:', bookingStatus)
 
-      // Send confirmation email
-      if (email) {
+      // Send confirmation email ONLY if auto-confirmed
+      if (email && autoConfirm && bookingSettings.sendEmailOnConfirm) {
         try {
           const bathLabel = bathCount === 1 ? '1 აბაზანა' : '2 აბაზანა'
           const emailHtml = generateSpaEmailHtml({
@@ -233,30 +277,38 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Send Telegram notification
-      await sendTelegramNotification({
-        type: 'spa',
-        bookingNumber: confirmationCode,
-        guestName: name,
-        guestPhone: phone || 'არ არის მითითებული',
-        date: date,
-        time: time,
-        guests: guestCount,
-        price: calculatedPrice,
-        details: `${bathCount} აბაზანა`
-      })
+      // Send Telegram notification (always, regardless of auto-confirm)
+      if (bookingSettings.sendTelegramNotification) {
+        await sendTelegramNotification({
+          type: 'spa',
+          bookingNumber: confirmationCode,
+          guestName: name,
+          guestPhone: phone || 'არ არის მითითებული',
+          date: date,
+          time: time,
+          guests: guestCount,
+          price: calculatedPrice,
+          details: `${bathCount} აბაზანა`,
+          isPending: !autoConfirm
+        })
+      }
 
       return NextResponse.json(
         { 
           success: true, 
           bookingId: booking.id, 
           confirmationCode,
-          price: calculatedPrice
+          price: calculatedPrice,
+          status: bookingStatus
         },
         { headers: corsHeaders }
       )
 
     } else if (type === 'restaurant') {
+      // Determine status based on settings
+      const autoConfirm = bookingSettings.autoConfirmRestaurant
+      const bookingStatus = autoConfirm ? 'confirmed' : 'pending'
+      
       // Create restaurant reservation
       const reservation = await prisma.spaBooking.create({
         data: {
@@ -270,7 +322,7 @@ export async function POST(request: NextRequest) {
           endTime: calculateEndTime(time, 120),
           duration: 120,
           guests: guests || 2,
-          status: 'confirmed',
+          status: bookingStatus,
           paymentStatus: 'pending',
           notes: notes || '',
           totalPrice: 0,
@@ -278,10 +330,10 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      console.log('[Public Bookings] Restaurant reservation created:', reservation.id)
+      console.log('[Public Bookings] Restaurant reservation created:', reservation.id, 'status:', bookingStatus)
 
-      // Send confirmation email
-      if (email) {
+      // Send confirmation email ONLY if auto-confirmed
+      if (email && autoConfirm && bookingSettings.sendEmailOnConfirm) {
         try {
           const emailHtml = generateRestaurantEmailHtml({
             orgName,
@@ -308,20 +360,23 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Send Telegram notification
-      await sendTelegramNotification({
-        type: 'restaurant',
-        bookingNumber: confirmationCode,
-        guestName: name,
-        guestPhone: phone || 'არ არის მითითებული',
-        date: date,
-        time: time,
-        guests: guests || 2,
-        details: occasion ? `🎉 ${occasion}` : undefined
-      })
+      // Send Telegram notification (always)
+      if (bookingSettings.sendTelegramNotification) {
+        await sendTelegramNotification({
+          type: 'restaurant',
+          bookingNumber: confirmationCode,
+          guestName: name,
+          guestPhone: phone || 'არ არის მითითებული',
+          date: date,
+          time: time,
+          guests: guests || 2,
+          details: occasion ? `🎉 ${occasion}` : undefined,
+          isPending: !autoConfirm
+        })
+      }
 
       return NextResponse.json(
-        { success: true, bookingId: reservation.id, confirmationCode },
+        { success: true, bookingId: reservation.id, confirmationCode, status: bookingStatus },
         { headers: corsHeaders }
       )
 
