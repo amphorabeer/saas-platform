@@ -1,9 +1,14 @@
+import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
-import SignupContent from './SignupContent'
+
+const SignupContent = dynamic(() => import('./SignupContent'), {
+  loading: () => <div className="min-h-screen flex items-center justify-center">იტვირთება...</div>,
+  ssr: false,
+})
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div>იტვირთება...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">იტვირთება...</div>}>
       <SignupContent />
     </Suspense>
   )
