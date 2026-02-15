@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --copper: #b87333;
+  --copper-light: #d4945a;
+  --copper-dark: #8b5a2b;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --bg-card: #141414;
+  --text-primary: #ffffff;
+  --text-secondary: #e5e5e5;
+  --text-muted: #737373;
+  --border: #262626;
+  --border-light: #333333;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  /* UI package compatibility */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+  --primary: var(--copper);
+  --primary-foreground: #fff;
+  --muted: var(--bg-tertiary);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--bg-tertiary);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--danger);
+  --destructive-foreground: #fff;
+  --input: var(--border);
+  --ring: var(--copper);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
