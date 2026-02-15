@@ -78,6 +78,8 @@ export function generateStoreWelcomeEmail(
         <p style="color: #dc2626; font-size: 12px; margin-top: 10px;">⚠️ უსაფრთხოების მიზნით, გთხოვთ შეცვალოთ პაროლი შესვლის შემდეგ!</p>
       </div>
       
+      <p>შესვლისთვის გამოიყენეთ: <a href="https://shop.geobiz.app/login" style="color: #b45309;">shop.geobiz.app/login</a></p>
+      
       <p style="color: #666; font-size: 14px; margin-top: 30px;">გმადლობთ რომ აირჩიეთ GeoBiz Platform!</p>
     </div>
   `

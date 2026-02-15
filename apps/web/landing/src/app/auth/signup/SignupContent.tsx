@@ -33,7 +33,7 @@ const moduleConfig: Record<string, { icon: string; title: string; subtitle: stri
     bizSectionTitle: 'მაღაზიის ინფორმაცია',
     successTitle: 'რეგისტრაცია წარმატებულია!',
     successSubtitle: 'თქვენი POS სისტემა მზადაა',
-    loginUrl: process.env.NEXT_PUBLIC_STORE_URL || 'https://store.saas-platform.ge',
+    loginUrl: process.env.NEXT_PUBLIC_STORE_URL || 'https://shop.geobiz.app',
   },
 }
 
