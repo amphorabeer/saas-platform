@@ -29,7 +29,7 @@ const defaultModules = [
   {
     name: "მაღაზია",
     slug: "shop",
-    description: "ინვენტარის მართვა, გაყიდვები, მომხმარებლები და ანალიტიკა ერთ ადგილას",
+    description: "თანამედროვე სალარო სისტემა — POS ტერმინალი, მარაგების მართვა, ფისკალური ინტეგრაცია, RS.ge",
     icon: "🛍️",
   },
   {
@@ -110,20 +110,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <Navigation />
-      {/* Refresh indicator - only visible in dev */}
-      {process.env.NODE_ENV === "development" && lastUpdated && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={checkStorage}
-            className="bg-background/80 backdrop-blur-sm"
-            title={`ბოლო განახლება: ${new Date(lastUpdated).toLocaleTimeString("ka-GE")}`}
-          >
-            🔄 განახლება
-          </Button>
-        </div>
-      )}
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-16">

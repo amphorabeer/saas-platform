@@ -27,6 +27,7 @@ model Organization {
   bankAccount  String?
   tenantId     String          @unique @default(cuid())
   hotelCode    String          @unique
+  storeCode    String?         @unique
   databaseUrl  String?
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
@@ -37,6 +38,44 @@ model Organization {
 
   @@index([slug])
   @@index([tenantId])
+}
+
+model Store {
+  id        String    @id @default(cuid())
+  tenantId  String
+  name      String
+  slug      String    @unique
+  address   String?
+  phone     String?
+  email     String?
+  taxId     String?
+  currency  String    @default("GEL")
+  timezone  String    @default("Asia/Tbilisi")
+  logoUrl   String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  employees StoreEmployee[]
+
+  @@index([tenantId])
+}
+
+model StoreEmployee {
+  id        String   @id @default(cuid())
+  storeId   String
+  userId    String?
+  firstName String
+  lastName  String
+  phone     String?
+  email     String?
+  role      String   @default("STORE_CASHIER")
+  pin       String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
 }
 
 model User {

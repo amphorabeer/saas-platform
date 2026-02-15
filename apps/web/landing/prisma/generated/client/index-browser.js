@@ -139,7 +139,40 @@ exports.Prisma.OrganizationScalarFieldEnum = {
   bankAccount: 'bankAccount',
   tenantId: 'tenantId',
   hotelCode: 'hotelCode',
+  storeCode: 'storeCode',
   databaseUrl: 'databaseUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StoreScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  name: 'name',
+  slug: 'slug',
+  address: 'address',
+  phone: 'phone',
+  email: 'email',
+  taxId: 'taxId',
+  currency: 'currency',
+  timezone: 'timezone',
+  logoUrl: 'logoUrl',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StoreEmployeeScalarFieldEnum = {
+  id: 'id',
+  storeId: 'storeId',
+  userId: 'userId',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  phone: 'phone',
+  email: 'email',
+  role: 'role',
+  pin: 'pin',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -436,6 +469,8 @@ exports.TicketStatus = exports.$Enums.TicketStatus = {
 
 exports.Prisma.ModelName = {
   Organization: 'Organization',
+  Store: 'Store',
+  StoreEmployee: 'StoreEmployee',
   User: 'User',
   Account: 'Account',
   Session: 'Session',

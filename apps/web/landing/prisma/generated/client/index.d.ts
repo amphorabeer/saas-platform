@@ -19,6 +19,16 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type Organization = $Result.DefaultSelection<Prisma.$OrganizationPayload>
 /**
+ * Model Store
+ * 
+ */
+export type Store = $Result.DefaultSelection<Prisma.$StorePayload>
+/**
+ * Model StoreEmployee
+ * 
+ */
+export type StoreEmployee = $Result.DefaultSelection<Prisma.$StoreEmployeePayload>
+/**
  * Model User
  * 
  */
@@ -324,6 +334,26 @@ export class PrismaClient<
     * ```
     */
   get organization(): Prisma.OrganizationDelegate<ExtArgs>;
+
+  /**
+   * `prisma.store`: Exposes CRUD operations for the **Store** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Stores
+    * const stores = await prisma.store.findMany()
+    * ```
+    */
+  get store(): Prisma.StoreDelegate<ExtArgs>;
+
+  /**
+   * `prisma.storeEmployee`: Exposes CRUD operations for the **StoreEmployee** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StoreEmployees
+    * const storeEmployees = await prisma.storeEmployee.findMany()
+    * ```
+    */
+  get storeEmployee(): Prisma.StoreEmployeeDelegate<ExtArgs>;
 
   /**
    * `prisma.user`: Exposes CRUD operations for the **User** model.
@@ -926,6 +956,8 @@ export namespace Prisma {
 
   export const ModelName: {
     Organization: 'Organization',
+    Store: 'Store',
+    StoreEmployee: 'StoreEmployee',
     User: 'User',
     Account: 'Account',
     Session: 'Session',
@@ -957,7 +989,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "organization" | "user" | "account" | "session" | "verificationToken" | "subscription" | "moduleAccess" | "moduleFeature" | "invoice" | "moduleConfig" | "landingPageContent" | "supportTicket" | "activityLog" | "hotelRoom" | "hotelReservation" | "configuration" | "siteConfig"
+      modelProps: "organization" | "store" | "storeEmployee" | "user" | "account" | "session" | "verificationToken" | "subscription" | "moduleAccess" | "moduleFeature" | "invoice" | "moduleConfig" | "landingPageContent" | "supportTicket" | "activityLog" | "hotelRoom" | "hotelReservation" | "configuration" | "siteConfig"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1028,6 +1060,146 @@ export namespace Prisma {
           count: {
             args: Prisma.OrganizationCountArgs<ExtArgs>
             result: $Utils.Optional<OrganizationCountAggregateOutputType> | number
+          }
+        }
+      }
+      Store: {
+        payload: Prisma.$StorePayload<ExtArgs>
+        fields: Prisma.StoreFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StoreFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StoreFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload>
+          }
+          findFirst: {
+            args: Prisma.StoreFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StoreFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload>
+          }
+          findMany: {
+            args: Prisma.StoreFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload>[]
+          }
+          create: {
+            args: Prisma.StoreCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload>
+          }
+          createMany: {
+            args: Prisma.StoreCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StoreCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload>[]
+          }
+          delete: {
+            args: Prisma.StoreDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload>
+          }
+          update: {
+            args: Prisma.StoreUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload>
+          }
+          deleteMany: {
+            args: Prisma.StoreDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StoreUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.StoreUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StorePayload>
+          }
+          aggregate: {
+            args: Prisma.StoreAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStore>
+          }
+          groupBy: {
+            args: Prisma.StoreGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StoreGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StoreCountArgs<ExtArgs>
+            result: $Utils.Optional<StoreCountAggregateOutputType> | number
+          }
+        }
+      }
+      StoreEmployee: {
+        payload: Prisma.$StoreEmployeePayload<ExtArgs>
+        fields: Prisma.StoreEmployeeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StoreEmployeeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StoreEmployeeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload>
+          }
+          findFirst: {
+            args: Prisma.StoreEmployeeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StoreEmployeeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload>
+          }
+          findMany: {
+            args: Prisma.StoreEmployeeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload>[]
+          }
+          create: {
+            args: Prisma.StoreEmployeeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload>
+          }
+          createMany: {
+            args: Prisma.StoreEmployeeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StoreEmployeeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload>[]
+          }
+          delete: {
+            args: Prisma.StoreEmployeeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload>
+          }
+          update: {
+            args: Prisma.StoreEmployeeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload>
+          }
+          deleteMany: {
+            args: Prisma.StoreEmployeeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StoreEmployeeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.StoreEmployeeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StoreEmployeePayload>
+          }
+          aggregate: {
+            args: Prisma.StoreEmployeeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStoreEmployee>
+          }
+          groupBy: {
+            args: Prisma.StoreEmployeeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StoreEmployeeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StoreEmployeeCountArgs<ExtArgs>
+            result: $Utils.Optional<StoreEmployeeCountAggregateOutputType> | number
           }
         }
       }
@@ -2357,6 +2529,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type StoreCountOutputType
+   */
+
+  export type StoreCountOutputType = {
+    employees: number
+  }
+
+  export type StoreCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    employees?: boolean | StoreCountOutputTypeCountEmployeesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * StoreCountOutputType without action
+   */
+  export type StoreCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreCountOutputType
+     */
+    select?: StoreCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * StoreCountOutputType without action
+   */
+  export type StoreCountOutputTypeCountEmployeesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StoreEmployeeWhereInput
+  }
+
+
+  /**
    * Count Type UserCountOutputType
    */
 
@@ -2529,6 +2732,7 @@ export namespace Prisma {
     bankAccount: string | null
     tenantId: string | null
     hotelCode: string | null
+    storeCode: string | null
     databaseUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2551,6 +2755,7 @@ export namespace Prisma {
     bankAccount: string | null
     tenantId: string | null
     hotelCode: string | null
+    storeCode: string | null
     databaseUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2573,6 +2778,7 @@ export namespace Prisma {
     bankAccount: number
     tenantId: number
     hotelCode: number
+    storeCode: number
     databaseUrl: number
     createdAt: number
     updatedAt: number
@@ -2597,6 +2803,7 @@ export namespace Prisma {
     bankAccount?: true
     tenantId?: true
     hotelCode?: true
+    storeCode?: true
     databaseUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -2619,6 +2826,7 @@ export namespace Prisma {
     bankAccount?: true
     tenantId?: true
     hotelCode?: true
+    storeCode?: true
     databaseUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -2641,6 +2849,7 @@ export namespace Prisma {
     bankAccount?: true
     tenantId?: true
     hotelCode?: true
+    storeCode?: true
     databaseUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -2736,6 +2945,7 @@ export namespace Prisma {
     bankAccount: string | null
     tenantId: string
     hotelCode: string
+    storeCode: string | null
     databaseUrl: string | null
     createdAt: Date
     updatedAt: Date
@@ -2775,6 +2985,7 @@ export namespace Prisma {
     bankAccount?: boolean
     tenantId?: boolean
     hotelCode?: boolean
+    storeCode?: boolean
     databaseUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2802,6 +3013,7 @@ export namespace Prisma {
     bankAccount?: boolean
     tenantId?: boolean
     hotelCode?: boolean
+    storeCode?: boolean
     databaseUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2824,6 +3036,7 @@ export namespace Prisma {
     bankAccount?: boolean
     tenantId?: boolean
     hotelCode?: boolean
+    storeCode?: boolean
     databaseUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2863,6 +3076,7 @@ export namespace Prisma {
       bankAccount: string | null
       tenantId: string
       hotelCode: string
+      storeCode: string | null
       databaseUrl: string | null
       createdAt: Date
       updatedAt: Date
@@ -3279,6 +3493,7 @@ export namespace Prisma {
     readonly bankAccount: FieldRef<"Organization", 'String'>
     readonly tenantId: FieldRef<"Organization", 'String'>
     readonly hotelCode: FieldRef<"Organization", 'String'>
+    readonly storeCode: FieldRef<"Organization", 'String'>
     readonly databaseUrl: FieldRef<"Organization", 'String'>
     readonly createdAt: FieldRef<"Organization", 'DateTime'>
     readonly updatedAt: FieldRef<"Organization", 'DateTime'>
@@ -3682,6 +3897,2079 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: OrganizationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Store
+   */
+
+  export type AggregateStore = {
+    _count: StoreCountAggregateOutputType | null
+    _min: StoreMinAggregateOutputType | null
+    _max: StoreMaxAggregateOutputType | null
+  }
+
+  export type StoreMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    name: string | null
+    slug: string | null
+    address: string | null
+    phone: string | null
+    email: string | null
+    taxId: string | null
+    currency: string | null
+    timezone: string | null
+    logoUrl: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StoreMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    name: string | null
+    slug: string | null
+    address: string | null
+    phone: string | null
+    email: string | null
+    taxId: string | null
+    currency: string | null
+    timezone: string | null
+    logoUrl: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StoreCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    name: number
+    slug: number
+    address: number
+    phone: number
+    email: number
+    taxId: number
+    currency: number
+    timezone: number
+    logoUrl: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type StoreMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    name?: true
+    slug?: true
+    address?: true
+    phone?: true
+    email?: true
+    taxId?: true
+    currency?: true
+    timezone?: true
+    logoUrl?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StoreMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    name?: true
+    slug?: true
+    address?: true
+    phone?: true
+    email?: true
+    taxId?: true
+    currency?: true
+    timezone?: true
+    logoUrl?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StoreCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    name?: true
+    slug?: true
+    address?: true
+    phone?: true
+    email?: true
+    taxId?: true
+    currency?: true
+    timezone?: true
+    logoUrl?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type StoreAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Store to aggregate.
+     */
+    where?: StoreWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Stores to fetch.
+     */
+    orderBy?: StoreOrderByWithRelationInput | StoreOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StoreWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Stores from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Stores.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Stores
+    **/
+    _count?: true | StoreCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StoreMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StoreMaxAggregateInputType
+  }
+
+  export type GetStoreAggregateType<T extends StoreAggregateArgs> = {
+        [P in keyof T & keyof AggregateStore]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStore[P]>
+      : GetScalarType<T[P], AggregateStore[P]>
+  }
+
+
+
+
+  export type StoreGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StoreWhereInput
+    orderBy?: StoreOrderByWithAggregationInput | StoreOrderByWithAggregationInput[]
+    by: StoreScalarFieldEnum[] | StoreScalarFieldEnum
+    having?: StoreScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StoreCountAggregateInputType | true
+    _min?: StoreMinAggregateInputType
+    _max?: StoreMaxAggregateInputType
+  }
+
+  export type StoreGroupByOutputType = {
+    id: string
+    tenantId: string
+    name: string
+    slug: string
+    address: string | null
+    phone: string | null
+    email: string | null
+    taxId: string | null
+    currency: string
+    timezone: string
+    logoUrl: string | null
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: StoreCountAggregateOutputType | null
+    _min: StoreMinAggregateOutputType | null
+    _max: StoreMaxAggregateOutputType | null
+  }
+
+  type GetStoreGroupByPayload<T extends StoreGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StoreGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StoreGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StoreGroupByOutputType[P]>
+            : GetScalarType<T[P], StoreGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StoreSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    name?: boolean
+    slug?: boolean
+    address?: boolean
+    phone?: boolean
+    email?: boolean
+    taxId?: boolean
+    currency?: boolean
+    timezone?: boolean
+    logoUrl?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    employees?: boolean | Store$employeesArgs<ExtArgs>
+    _count?: boolean | StoreCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["store"]>
+
+  export type StoreSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    name?: boolean
+    slug?: boolean
+    address?: boolean
+    phone?: boolean
+    email?: boolean
+    taxId?: boolean
+    currency?: boolean
+    timezone?: boolean
+    logoUrl?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["store"]>
+
+  export type StoreSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    name?: boolean
+    slug?: boolean
+    address?: boolean
+    phone?: boolean
+    email?: boolean
+    taxId?: boolean
+    currency?: boolean
+    timezone?: boolean
+    logoUrl?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type StoreInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    employees?: boolean | Store$employeesArgs<ExtArgs>
+    _count?: boolean | StoreCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type StoreIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $StorePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Store"
+    objects: {
+      employees: Prisma.$StoreEmployeePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      name: string
+      slug: string
+      address: string | null
+      phone: string | null
+      email: string | null
+      taxId: string | null
+      currency: string
+      timezone: string
+      logoUrl: string | null
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["store"]>
+    composites: {}
+  }
+
+  type StoreGetPayload<S extends boolean | null | undefined | StoreDefaultArgs> = $Result.GetResult<Prisma.$StorePayload, S>
+
+  type StoreCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<StoreFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: StoreCountAggregateInputType | true
+    }
+
+  export interface StoreDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Store'], meta: { name: 'Store' } }
+    /**
+     * Find zero or one Store that matches the filter.
+     * @param {StoreFindUniqueArgs} args - Arguments to find a Store
+     * @example
+     * // Get one Store
+     * const store = await prisma.store.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StoreFindUniqueArgs>(args: SelectSubset<T, StoreFindUniqueArgs<ExtArgs>>): Prisma__StoreClient<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Store that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {StoreFindUniqueOrThrowArgs} args - Arguments to find a Store
+     * @example
+     * // Get one Store
+     * const store = await prisma.store.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StoreFindUniqueOrThrowArgs>(args: SelectSubset<T, StoreFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StoreClient<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Store that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreFindFirstArgs} args - Arguments to find a Store
+     * @example
+     * // Get one Store
+     * const store = await prisma.store.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StoreFindFirstArgs>(args?: SelectSubset<T, StoreFindFirstArgs<ExtArgs>>): Prisma__StoreClient<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Store that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreFindFirstOrThrowArgs} args - Arguments to find a Store
+     * @example
+     * // Get one Store
+     * const store = await prisma.store.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StoreFindFirstOrThrowArgs>(args?: SelectSubset<T, StoreFindFirstOrThrowArgs<ExtArgs>>): Prisma__StoreClient<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Stores that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Stores
+     * const stores = await prisma.store.findMany()
+     * 
+     * // Get first 10 Stores
+     * const stores = await prisma.store.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const storeWithIdOnly = await prisma.store.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends StoreFindManyArgs>(args?: SelectSubset<T, StoreFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Store.
+     * @param {StoreCreateArgs} args - Arguments to create a Store.
+     * @example
+     * // Create one Store
+     * const Store = await prisma.store.create({
+     *   data: {
+     *     // ... data to create a Store
+     *   }
+     * })
+     * 
+     */
+    create<T extends StoreCreateArgs>(args: SelectSubset<T, StoreCreateArgs<ExtArgs>>): Prisma__StoreClient<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Stores.
+     * @param {StoreCreateManyArgs} args - Arguments to create many Stores.
+     * @example
+     * // Create many Stores
+     * const store = await prisma.store.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StoreCreateManyArgs>(args?: SelectSubset<T, StoreCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Stores and returns the data saved in the database.
+     * @param {StoreCreateManyAndReturnArgs} args - Arguments to create many Stores.
+     * @example
+     * // Create many Stores
+     * const store = await prisma.store.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Stores and only return the `id`
+     * const storeWithIdOnly = await prisma.store.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StoreCreateManyAndReturnArgs>(args?: SelectSubset<T, StoreCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Store.
+     * @param {StoreDeleteArgs} args - Arguments to delete one Store.
+     * @example
+     * // Delete one Store
+     * const Store = await prisma.store.delete({
+     *   where: {
+     *     // ... filter to delete one Store
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StoreDeleteArgs>(args: SelectSubset<T, StoreDeleteArgs<ExtArgs>>): Prisma__StoreClient<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Store.
+     * @param {StoreUpdateArgs} args - Arguments to update one Store.
+     * @example
+     * // Update one Store
+     * const store = await prisma.store.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StoreUpdateArgs>(args: SelectSubset<T, StoreUpdateArgs<ExtArgs>>): Prisma__StoreClient<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Stores.
+     * @param {StoreDeleteManyArgs} args - Arguments to filter Stores to delete.
+     * @example
+     * // Delete a few Stores
+     * const { count } = await prisma.store.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StoreDeleteManyArgs>(args?: SelectSubset<T, StoreDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Stores.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Stores
+     * const store = await prisma.store.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StoreUpdateManyArgs>(args: SelectSubset<T, StoreUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Store.
+     * @param {StoreUpsertArgs} args - Arguments to update or create a Store.
+     * @example
+     * // Update or create a Store
+     * const store = await prisma.store.upsert({
+     *   create: {
+     *     // ... data to create a Store
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Store we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StoreUpsertArgs>(args: SelectSubset<T, StoreUpsertArgs<ExtArgs>>): Prisma__StoreClient<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Stores.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreCountArgs} args - Arguments to filter Stores to count.
+     * @example
+     * // Count the number of Stores
+     * const count = await prisma.store.count({
+     *   where: {
+     *     // ... the filter for the Stores we want to count
+     *   }
+     * })
+    **/
+    count<T extends StoreCountArgs>(
+      args?: Subset<T, StoreCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StoreCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Store.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StoreAggregateArgs>(args: Subset<T, StoreAggregateArgs>): Prisma.PrismaPromise<GetStoreAggregateType<T>>
+
+    /**
+     * Group by Store.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StoreGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StoreGroupByArgs['orderBy'] }
+        : { orderBy?: StoreGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StoreGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStoreGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Store model
+   */
+  readonly fields: StoreFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Store.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StoreClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    employees<T extends Store$employeesArgs<ExtArgs> = {}>(args?: Subset<T, Store$employeesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Store model
+   */ 
+  interface StoreFieldRefs {
+    readonly id: FieldRef<"Store", 'String'>
+    readonly tenantId: FieldRef<"Store", 'String'>
+    readonly name: FieldRef<"Store", 'String'>
+    readonly slug: FieldRef<"Store", 'String'>
+    readonly address: FieldRef<"Store", 'String'>
+    readonly phone: FieldRef<"Store", 'String'>
+    readonly email: FieldRef<"Store", 'String'>
+    readonly taxId: FieldRef<"Store", 'String'>
+    readonly currency: FieldRef<"Store", 'String'>
+    readonly timezone: FieldRef<"Store", 'String'>
+    readonly logoUrl: FieldRef<"Store", 'String'>
+    readonly isActive: FieldRef<"Store", 'Boolean'>
+    readonly createdAt: FieldRef<"Store", 'DateTime'>
+    readonly updatedAt: FieldRef<"Store", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Store findUnique
+   */
+  export type StoreFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+    /**
+     * Filter, which Store to fetch.
+     */
+    where: StoreWhereUniqueInput
+  }
+
+  /**
+   * Store findUniqueOrThrow
+   */
+  export type StoreFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+    /**
+     * Filter, which Store to fetch.
+     */
+    where: StoreWhereUniqueInput
+  }
+
+  /**
+   * Store findFirst
+   */
+  export type StoreFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+    /**
+     * Filter, which Store to fetch.
+     */
+    where?: StoreWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Stores to fetch.
+     */
+    orderBy?: StoreOrderByWithRelationInput | StoreOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Stores.
+     */
+    cursor?: StoreWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Stores from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Stores.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Stores.
+     */
+    distinct?: StoreScalarFieldEnum | StoreScalarFieldEnum[]
+  }
+
+  /**
+   * Store findFirstOrThrow
+   */
+  export type StoreFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+    /**
+     * Filter, which Store to fetch.
+     */
+    where?: StoreWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Stores to fetch.
+     */
+    orderBy?: StoreOrderByWithRelationInput | StoreOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Stores.
+     */
+    cursor?: StoreWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Stores from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Stores.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Stores.
+     */
+    distinct?: StoreScalarFieldEnum | StoreScalarFieldEnum[]
+  }
+
+  /**
+   * Store findMany
+   */
+  export type StoreFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+    /**
+     * Filter, which Stores to fetch.
+     */
+    where?: StoreWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Stores to fetch.
+     */
+    orderBy?: StoreOrderByWithRelationInput | StoreOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Stores.
+     */
+    cursor?: StoreWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Stores from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Stores.
+     */
+    skip?: number
+    distinct?: StoreScalarFieldEnum | StoreScalarFieldEnum[]
+  }
+
+  /**
+   * Store create
+   */
+  export type StoreCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Store.
+     */
+    data: XOR<StoreCreateInput, StoreUncheckedCreateInput>
+  }
+
+  /**
+   * Store createMany
+   */
+  export type StoreCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Stores.
+     */
+    data: StoreCreateManyInput | StoreCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Store createManyAndReturn
+   */
+  export type StoreCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Stores.
+     */
+    data: StoreCreateManyInput | StoreCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Store update
+   */
+  export type StoreUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Store.
+     */
+    data: XOR<StoreUpdateInput, StoreUncheckedUpdateInput>
+    /**
+     * Choose, which Store to update.
+     */
+    where: StoreWhereUniqueInput
+  }
+
+  /**
+   * Store updateMany
+   */
+  export type StoreUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Stores.
+     */
+    data: XOR<StoreUpdateManyMutationInput, StoreUncheckedUpdateManyInput>
+    /**
+     * Filter which Stores to update
+     */
+    where?: StoreWhereInput
+  }
+
+  /**
+   * Store upsert
+   */
+  export type StoreUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Store to update in case it exists.
+     */
+    where: StoreWhereUniqueInput
+    /**
+     * In case the Store found by the `where` argument doesn't exist, create a new Store with this data.
+     */
+    create: XOR<StoreCreateInput, StoreUncheckedCreateInput>
+    /**
+     * In case the Store was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StoreUpdateInput, StoreUncheckedUpdateInput>
+  }
+
+  /**
+   * Store delete
+   */
+  export type StoreDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+    /**
+     * Filter which Store to delete.
+     */
+    where: StoreWhereUniqueInput
+  }
+
+  /**
+   * Store deleteMany
+   */
+  export type StoreDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Stores to delete
+     */
+    where?: StoreWhereInput
+  }
+
+  /**
+   * Store.employees
+   */
+  export type Store$employeesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    where?: StoreEmployeeWhereInput
+    orderBy?: StoreEmployeeOrderByWithRelationInput | StoreEmployeeOrderByWithRelationInput[]
+    cursor?: StoreEmployeeWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StoreEmployeeScalarFieldEnum | StoreEmployeeScalarFieldEnum[]
+  }
+
+  /**
+   * Store without action
+   */
+  export type StoreDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Store
+     */
+    select?: StoreSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StoreEmployee
+   */
+
+  export type AggregateStoreEmployee = {
+    _count: StoreEmployeeCountAggregateOutputType | null
+    _min: StoreEmployeeMinAggregateOutputType | null
+    _max: StoreEmployeeMaxAggregateOutputType | null
+  }
+
+  export type StoreEmployeeMinAggregateOutputType = {
+    id: string | null
+    storeId: string | null
+    userId: string | null
+    firstName: string | null
+    lastName: string | null
+    phone: string | null
+    email: string | null
+    role: string | null
+    pin: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StoreEmployeeMaxAggregateOutputType = {
+    id: string | null
+    storeId: string | null
+    userId: string | null
+    firstName: string | null
+    lastName: string | null
+    phone: string | null
+    email: string | null
+    role: string | null
+    pin: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StoreEmployeeCountAggregateOutputType = {
+    id: number
+    storeId: number
+    userId: number
+    firstName: number
+    lastName: number
+    phone: number
+    email: number
+    role: number
+    pin: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type StoreEmployeeMinAggregateInputType = {
+    id?: true
+    storeId?: true
+    userId?: true
+    firstName?: true
+    lastName?: true
+    phone?: true
+    email?: true
+    role?: true
+    pin?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StoreEmployeeMaxAggregateInputType = {
+    id?: true
+    storeId?: true
+    userId?: true
+    firstName?: true
+    lastName?: true
+    phone?: true
+    email?: true
+    role?: true
+    pin?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StoreEmployeeCountAggregateInputType = {
+    id?: true
+    storeId?: true
+    userId?: true
+    firstName?: true
+    lastName?: true
+    phone?: true
+    email?: true
+    role?: true
+    pin?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type StoreEmployeeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StoreEmployee to aggregate.
+     */
+    where?: StoreEmployeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StoreEmployees to fetch.
+     */
+    orderBy?: StoreEmployeeOrderByWithRelationInput | StoreEmployeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StoreEmployeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StoreEmployees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StoreEmployees.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StoreEmployees
+    **/
+    _count?: true | StoreEmployeeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StoreEmployeeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StoreEmployeeMaxAggregateInputType
+  }
+
+  export type GetStoreEmployeeAggregateType<T extends StoreEmployeeAggregateArgs> = {
+        [P in keyof T & keyof AggregateStoreEmployee]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStoreEmployee[P]>
+      : GetScalarType<T[P], AggregateStoreEmployee[P]>
+  }
+
+
+
+
+  export type StoreEmployeeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StoreEmployeeWhereInput
+    orderBy?: StoreEmployeeOrderByWithAggregationInput | StoreEmployeeOrderByWithAggregationInput[]
+    by: StoreEmployeeScalarFieldEnum[] | StoreEmployeeScalarFieldEnum
+    having?: StoreEmployeeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StoreEmployeeCountAggregateInputType | true
+    _min?: StoreEmployeeMinAggregateInputType
+    _max?: StoreEmployeeMaxAggregateInputType
+  }
+
+  export type StoreEmployeeGroupByOutputType = {
+    id: string
+    storeId: string
+    userId: string | null
+    firstName: string
+    lastName: string
+    phone: string | null
+    email: string | null
+    role: string
+    pin: string | null
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: StoreEmployeeCountAggregateOutputType | null
+    _min: StoreEmployeeMinAggregateOutputType | null
+    _max: StoreEmployeeMaxAggregateOutputType | null
+  }
+
+  type GetStoreEmployeeGroupByPayload<T extends StoreEmployeeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StoreEmployeeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StoreEmployeeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StoreEmployeeGroupByOutputType[P]>
+            : GetScalarType<T[P], StoreEmployeeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StoreEmployeeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    storeId?: boolean
+    userId?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    phone?: boolean
+    email?: boolean
+    role?: boolean
+    pin?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    store?: boolean | StoreDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["storeEmployee"]>
+
+  export type StoreEmployeeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    storeId?: boolean
+    userId?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    phone?: boolean
+    email?: boolean
+    role?: boolean
+    pin?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    store?: boolean | StoreDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["storeEmployee"]>
+
+  export type StoreEmployeeSelectScalar = {
+    id?: boolean
+    storeId?: boolean
+    userId?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    phone?: boolean
+    email?: boolean
+    role?: boolean
+    pin?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type StoreEmployeeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    store?: boolean | StoreDefaultArgs<ExtArgs>
+  }
+  export type StoreEmployeeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    store?: boolean | StoreDefaultArgs<ExtArgs>
+  }
+
+  export type $StoreEmployeePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StoreEmployee"
+    objects: {
+      store: Prisma.$StorePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      storeId: string
+      userId: string | null
+      firstName: string
+      lastName: string
+      phone: string | null
+      email: string | null
+      role: string
+      pin: string | null
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["storeEmployee"]>
+    composites: {}
+  }
+
+  type StoreEmployeeGetPayload<S extends boolean | null | undefined | StoreEmployeeDefaultArgs> = $Result.GetResult<Prisma.$StoreEmployeePayload, S>
+
+  type StoreEmployeeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<StoreEmployeeFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: StoreEmployeeCountAggregateInputType | true
+    }
+
+  export interface StoreEmployeeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StoreEmployee'], meta: { name: 'StoreEmployee' } }
+    /**
+     * Find zero or one StoreEmployee that matches the filter.
+     * @param {StoreEmployeeFindUniqueArgs} args - Arguments to find a StoreEmployee
+     * @example
+     * // Get one StoreEmployee
+     * const storeEmployee = await prisma.storeEmployee.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StoreEmployeeFindUniqueArgs>(args: SelectSubset<T, StoreEmployeeFindUniqueArgs<ExtArgs>>): Prisma__StoreEmployeeClient<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one StoreEmployee that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {StoreEmployeeFindUniqueOrThrowArgs} args - Arguments to find a StoreEmployee
+     * @example
+     * // Get one StoreEmployee
+     * const storeEmployee = await prisma.storeEmployee.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StoreEmployeeFindUniqueOrThrowArgs>(args: SelectSubset<T, StoreEmployeeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StoreEmployeeClient<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first StoreEmployee that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreEmployeeFindFirstArgs} args - Arguments to find a StoreEmployee
+     * @example
+     * // Get one StoreEmployee
+     * const storeEmployee = await prisma.storeEmployee.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StoreEmployeeFindFirstArgs>(args?: SelectSubset<T, StoreEmployeeFindFirstArgs<ExtArgs>>): Prisma__StoreEmployeeClient<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first StoreEmployee that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreEmployeeFindFirstOrThrowArgs} args - Arguments to find a StoreEmployee
+     * @example
+     * // Get one StoreEmployee
+     * const storeEmployee = await prisma.storeEmployee.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StoreEmployeeFindFirstOrThrowArgs>(args?: SelectSubset<T, StoreEmployeeFindFirstOrThrowArgs<ExtArgs>>): Prisma__StoreEmployeeClient<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more StoreEmployees that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreEmployeeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StoreEmployees
+     * const storeEmployees = await prisma.storeEmployee.findMany()
+     * 
+     * // Get first 10 StoreEmployees
+     * const storeEmployees = await prisma.storeEmployee.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const storeEmployeeWithIdOnly = await prisma.storeEmployee.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends StoreEmployeeFindManyArgs>(args?: SelectSubset<T, StoreEmployeeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a StoreEmployee.
+     * @param {StoreEmployeeCreateArgs} args - Arguments to create a StoreEmployee.
+     * @example
+     * // Create one StoreEmployee
+     * const StoreEmployee = await prisma.storeEmployee.create({
+     *   data: {
+     *     // ... data to create a StoreEmployee
+     *   }
+     * })
+     * 
+     */
+    create<T extends StoreEmployeeCreateArgs>(args: SelectSubset<T, StoreEmployeeCreateArgs<ExtArgs>>): Prisma__StoreEmployeeClient<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many StoreEmployees.
+     * @param {StoreEmployeeCreateManyArgs} args - Arguments to create many StoreEmployees.
+     * @example
+     * // Create many StoreEmployees
+     * const storeEmployee = await prisma.storeEmployee.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StoreEmployeeCreateManyArgs>(args?: SelectSubset<T, StoreEmployeeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StoreEmployees and returns the data saved in the database.
+     * @param {StoreEmployeeCreateManyAndReturnArgs} args - Arguments to create many StoreEmployees.
+     * @example
+     * // Create many StoreEmployees
+     * const storeEmployee = await prisma.storeEmployee.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StoreEmployees and only return the `id`
+     * const storeEmployeeWithIdOnly = await prisma.storeEmployee.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StoreEmployeeCreateManyAndReturnArgs>(args?: SelectSubset<T, StoreEmployeeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a StoreEmployee.
+     * @param {StoreEmployeeDeleteArgs} args - Arguments to delete one StoreEmployee.
+     * @example
+     * // Delete one StoreEmployee
+     * const StoreEmployee = await prisma.storeEmployee.delete({
+     *   where: {
+     *     // ... filter to delete one StoreEmployee
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StoreEmployeeDeleteArgs>(args: SelectSubset<T, StoreEmployeeDeleteArgs<ExtArgs>>): Prisma__StoreEmployeeClient<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one StoreEmployee.
+     * @param {StoreEmployeeUpdateArgs} args - Arguments to update one StoreEmployee.
+     * @example
+     * // Update one StoreEmployee
+     * const storeEmployee = await prisma.storeEmployee.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StoreEmployeeUpdateArgs>(args: SelectSubset<T, StoreEmployeeUpdateArgs<ExtArgs>>): Prisma__StoreEmployeeClient<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more StoreEmployees.
+     * @param {StoreEmployeeDeleteManyArgs} args - Arguments to filter StoreEmployees to delete.
+     * @example
+     * // Delete a few StoreEmployees
+     * const { count } = await prisma.storeEmployee.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StoreEmployeeDeleteManyArgs>(args?: SelectSubset<T, StoreEmployeeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StoreEmployees.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreEmployeeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StoreEmployees
+     * const storeEmployee = await prisma.storeEmployee.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StoreEmployeeUpdateManyArgs>(args: SelectSubset<T, StoreEmployeeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one StoreEmployee.
+     * @param {StoreEmployeeUpsertArgs} args - Arguments to update or create a StoreEmployee.
+     * @example
+     * // Update or create a StoreEmployee
+     * const storeEmployee = await prisma.storeEmployee.upsert({
+     *   create: {
+     *     // ... data to create a StoreEmployee
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StoreEmployee we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StoreEmployeeUpsertArgs>(args: SelectSubset<T, StoreEmployeeUpsertArgs<ExtArgs>>): Prisma__StoreEmployeeClient<$Result.GetResult<Prisma.$StoreEmployeePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of StoreEmployees.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreEmployeeCountArgs} args - Arguments to filter StoreEmployees to count.
+     * @example
+     * // Count the number of StoreEmployees
+     * const count = await prisma.storeEmployee.count({
+     *   where: {
+     *     // ... the filter for the StoreEmployees we want to count
+     *   }
+     * })
+    **/
+    count<T extends StoreEmployeeCountArgs>(
+      args?: Subset<T, StoreEmployeeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StoreEmployeeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StoreEmployee.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreEmployeeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StoreEmployeeAggregateArgs>(args: Subset<T, StoreEmployeeAggregateArgs>): Prisma.PrismaPromise<GetStoreEmployeeAggregateType<T>>
+
+    /**
+     * Group by StoreEmployee.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StoreEmployeeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StoreEmployeeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StoreEmployeeGroupByArgs['orderBy'] }
+        : { orderBy?: StoreEmployeeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StoreEmployeeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStoreEmployeeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StoreEmployee model
+   */
+  readonly fields: StoreEmployeeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StoreEmployee.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StoreEmployeeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    store<T extends StoreDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StoreDefaultArgs<ExtArgs>>): Prisma__StoreClient<$Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StoreEmployee model
+   */ 
+  interface StoreEmployeeFieldRefs {
+    readonly id: FieldRef<"StoreEmployee", 'String'>
+    readonly storeId: FieldRef<"StoreEmployee", 'String'>
+    readonly userId: FieldRef<"StoreEmployee", 'String'>
+    readonly firstName: FieldRef<"StoreEmployee", 'String'>
+    readonly lastName: FieldRef<"StoreEmployee", 'String'>
+    readonly phone: FieldRef<"StoreEmployee", 'String'>
+    readonly email: FieldRef<"StoreEmployee", 'String'>
+    readonly role: FieldRef<"StoreEmployee", 'String'>
+    readonly pin: FieldRef<"StoreEmployee", 'String'>
+    readonly isActive: FieldRef<"StoreEmployee", 'Boolean'>
+    readonly createdAt: FieldRef<"StoreEmployee", 'DateTime'>
+    readonly updatedAt: FieldRef<"StoreEmployee", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StoreEmployee findUnique
+   */
+  export type StoreEmployeeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which StoreEmployee to fetch.
+     */
+    where: StoreEmployeeWhereUniqueInput
+  }
+
+  /**
+   * StoreEmployee findUniqueOrThrow
+   */
+  export type StoreEmployeeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which StoreEmployee to fetch.
+     */
+    where: StoreEmployeeWhereUniqueInput
+  }
+
+  /**
+   * StoreEmployee findFirst
+   */
+  export type StoreEmployeeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which StoreEmployee to fetch.
+     */
+    where?: StoreEmployeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StoreEmployees to fetch.
+     */
+    orderBy?: StoreEmployeeOrderByWithRelationInput | StoreEmployeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StoreEmployees.
+     */
+    cursor?: StoreEmployeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StoreEmployees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StoreEmployees.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StoreEmployees.
+     */
+    distinct?: StoreEmployeeScalarFieldEnum | StoreEmployeeScalarFieldEnum[]
+  }
+
+  /**
+   * StoreEmployee findFirstOrThrow
+   */
+  export type StoreEmployeeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which StoreEmployee to fetch.
+     */
+    where?: StoreEmployeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StoreEmployees to fetch.
+     */
+    orderBy?: StoreEmployeeOrderByWithRelationInput | StoreEmployeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StoreEmployees.
+     */
+    cursor?: StoreEmployeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StoreEmployees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StoreEmployees.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StoreEmployees.
+     */
+    distinct?: StoreEmployeeScalarFieldEnum | StoreEmployeeScalarFieldEnum[]
+  }
+
+  /**
+   * StoreEmployee findMany
+   */
+  export type StoreEmployeeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which StoreEmployees to fetch.
+     */
+    where?: StoreEmployeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StoreEmployees to fetch.
+     */
+    orderBy?: StoreEmployeeOrderByWithRelationInput | StoreEmployeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StoreEmployees.
+     */
+    cursor?: StoreEmployeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StoreEmployees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StoreEmployees.
+     */
+    skip?: number
+    distinct?: StoreEmployeeScalarFieldEnum | StoreEmployeeScalarFieldEnum[]
+  }
+
+  /**
+   * StoreEmployee create
+   */
+  export type StoreEmployeeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    /**
+     * The data needed to create a StoreEmployee.
+     */
+    data: XOR<StoreEmployeeCreateInput, StoreEmployeeUncheckedCreateInput>
+  }
+
+  /**
+   * StoreEmployee createMany
+   */
+  export type StoreEmployeeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StoreEmployees.
+     */
+    data: StoreEmployeeCreateManyInput | StoreEmployeeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StoreEmployee createManyAndReturn
+   */
+  export type StoreEmployeeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many StoreEmployees.
+     */
+    data: StoreEmployeeCreateManyInput | StoreEmployeeCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StoreEmployee update
+   */
+  export type StoreEmployeeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    /**
+     * The data needed to update a StoreEmployee.
+     */
+    data: XOR<StoreEmployeeUpdateInput, StoreEmployeeUncheckedUpdateInput>
+    /**
+     * Choose, which StoreEmployee to update.
+     */
+    where: StoreEmployeeWhereUniqueInput
+  }
+
+  /**
+   * StoreEmployee updateMany
+   */
+  export type StoreEmployeeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StoreEmployees.
+     */
+    data: XOR<StoreEmployeeUpdateManyMutationInput, StoreEmployeeUncheckedUpdateManyInput>
+    /**
+     * Filter which StoreEmployees to update
+     */
+    where?: StoreEmployeeWhereInput
+  }
+
+  /**
+   * StoreEmployee upsert
+   */
+  export type StoreEmployeeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    /**
+     * The filter to search for the StoreEmployee to update in case it exists.
+     */
+    where: StoreEmployeeWhereUniqueInput
+    /**
+     * In case the StoreEmployee found by the `where` argument doesn't exist, create a new StoreEmployee with this data.
+     */
+    create: XOR<StoreEmployeeCreateInput, StoreEmployeeUncheckedCreateInput>
+    /**
+     * In case the StoreEmployee was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StoreEmployeeUpdateInput, StoreEmployeeUncheckedUpdateInput>
+  }
+
+  /**
+   * StoreEmployee delete
+   */
+  export type StoreEmployeeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter which StoreEmployee to delete.
+     */
+    where: StoreEmployeeWhereUniqueInput
+  }
+
+  /**
+   * StoreEmployee deleteMany
+   */
+  export type StoreEmployeeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StoreEmployees to delete
+     */
+    where?: StoreEmployeeWhereInput
+  }
+
+  /**
+   * StoreEmployee without action
+   */
+  export type StoreEmployeeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StoreEmployee
+     */
+    select?: StoreEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StoreEmployeeInclude<ExtArgs> | null
   }
 
 
@@ -19861,12 +22149,51 @@ export namespace Prisma {
     bankAccount: 'bankAccount',
     tenantId: 'tenantId',
     hotelCode: 'hotelCode',
+    storeCode: 'storeCode',
     databaseUrl: 'databaseUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
+
+
+  export const StoreScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    name: 'name',
+    slug: 'slug',
+    address: 'address',
+    phone: 'phone',
+    email: 'email',
+    taxId: 'taxId',
+    currency: 'currency',
+    timezone: 'timezone',
+    logoUrl: 'logoUrl',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type StoreScalarFieldEnum = (typeof StoreScalarFieldEnum)[keyof typeof StoreScalarFieldEnum]
+
+
+  export const StoreEmployeeScalarFieldEnum: {
+    id: 'id',
+    storeId: 'storeId',
+    userId: 'userId',
+    firstName: 'firstName',
+    lastName: 'lastName',
+    phone: 'phone',
+    email: 'email',
+    role: 'role',
+    pin: 'pin',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type StoreEmployeeScalarFieldEnum = (typeof StoreEmployeeScalarFieldEnum)[keyof typeof StoreEmployeeScalarFieldEnum]
 
 
   export const UserScalarFieldEnum: {
@@ -20214,6 +22541,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Role'
    */
   export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role'>
@@ -20280,13 +22614,6 @@ export namespace Prisma {
    * Reference to a field of type 'Decimal[]'
    */
   export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -20376,6 +22703,7 @@ export namespace Prisma {
     bankAccount?: StringNullableFilter<"Organization"> | string | null
     tenantId?: StringFilter<"Organization"> | string
     hotelCode?: StringFilter<"Organization"> | string
+    storeCode?: StringNullableFilter<"Organization"> | string | null
     databaseUrl?: StringNullableFilter<"Organization"> | string | null
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
@@ -20402,6 +22730,7 @@ export namespace Prisma {
     bankAccount?: SortOrderInput | SortOrder
     tenantId?: SortOrder
     hotelCode?: SortOrder
+    storeCode?: SortOrderInput | SortOrder
     databaseUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20416,6 +22745,7 @@ export namespace Prisma {
     slug?: string
     tenantId?: string
     hotelCode?: string
+    storeCode?: string
     AND?: OrganizationWhereInput | OrganizationWhereInput[]
     OR?: OrganizationWhereInput[]
     NOT?: OrganizationWhereInput | OrganizationWhereInput[]
@@ -20438,7 +22768,7 @@ export namespace Prisma {
     subscription?: XOR<SubscriptionNullableRelationFilter, SubscriptionWhereInput> | null
     tickets?: SupportTicketListRelationFilter
     users?: UserListRelationFilter
-  }, "id" | "slug" | "tenantId" | "hotelCode">
+  }, "id" | "slug" | "tenantId" | "hotelCode" | "storeCode">
 
   export type OrganizationOrderByWithAggregationInput = {
     id?: SortOrder
@@ -20457,6 +22787,7 @@ export namespace Prisma {
     bankAccount?: SortOrderInput | SortOrder
     tenantId?: SortOrder
     hotelCode?: SortOrder
+    storeCode?: SortOrderInput | SortOrder
     databaseUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20485,9 +22816,200 @@ export namespace Prisma {
     bankAccount?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     tenantId?: StringWithAggregatesFilter<"Organization"> | string
     hotelCode?: StringWithAggregatesFilter<"Organization"> | string
+    storeCode?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     databaseUrl?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
+  }
+
+  export type StoreWhereInput = {
+    AND?: StoreWhereInput | StoreWhereInput[]
+    OR?: StoreWhereInput[]
+    NOT?: StoreWhereInput | StoreWhereInput[]
+    id?: StringFilter<"Store"> | string
+    tenantId?: StringFilter<"Store"> | string
+    name?: StringFilter<"Store"> | string
+    slug?: StringFilter<"Store"> | string
+    address?: StringNullableFilter<"Store"> | string | null
+    phone?: StringNullableFilter<"Store"> | string | null
+    email?: StringNullableFilter<"Store"> | string | null
+    taxId?: StringNullableFilter<"Store"> | string | null
+    currency?: StringFilter<"Store"> | string
+    timezone?: StringFilter<"Store"> | string
+    logoUrl?: StringNullableFilter<"Store"> | string | null
+    isActive?: BoolFilter<"Store"> | boolean
+    createdAt?: DateTimeFilter<"Store"> | Date | string
+    updatedAt?: DateTimeFilter<"Store"> | Date | string
+    employees?: StoreEmployeeListRelationFilter
+  }
+
+  export type StoreOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    taxId?: SortOrderInput | SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    employees?: StoreEmployeeOrderByRelationAggregateInput
+  }
+
+  export type StoreWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    slug?: string
+    AND?: StoreWhereInput | StoreWhereInput[]
+    OR?: StoreWhereInput[]
+    NOT?: StoreWhereInput | StoreWhereInput[]
+    tenantId?: StringFilter<"Store"> | string
+    name?: StringFilter<"Store"> | string
+    address?: StringNullableFilter<"Store"> | string | null
+    phone?: StringNullableFilter<"Store"> | string | null
+    email?: StringNullableFilter<"Store"> | string | null
+    taxId?: StringNullableFilter<"Store"> | string | null
+    currency?: StringFilter<"Store"> | string
+    timezone?: StringFilter<"Store"> | string
+    logoUrl?: StringNullableFilter<"Store"> | string | null
+    isActive?: BoolFilter<"Store"> | boolean
+    createdAt?: DateTimeFilter<"Store"> | Date | string
+    updatedAt?: DateTimeFilter<"Store"> | Date | string
+    employees?: StoreEmployeeListRelationFilter
+  }, "id" | "slug">
+
+  export type StoreOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    taxId?: SortOrderInput | SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: StoreCountOrderByAggregateInput
+    _max?: StoreMaxOrderByAggregateInput
+    _min?: StoreMinOrderByAggregateInput
+  }
+
+  export type StoreScalarWhereWithAggregatesInput = {
+    AND?: StoreScalarWhereWithAggregatesInput | StoreScalarWhereWithAggregatesInput[]
+    OR?: StoreScalarWhereWithAggregatesInput[]
+    NOT?: StoreScalarWhereWithAggregatesInput | StoreScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Store"> | string
+    tenantId?: StringWithAggregatesFilter<"Store"> | string
+    name?: StringWithAggregatesFilter<"Store"> | string
+    slug?: StringWithAggregatesFilter<"Store"> | string
+    address?: StringNullableWithAggregatesFilter<"Store"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"Store"> | string | null
+    email?: StringNullableWithAggregatesFilter<"Store"> | string | null
+    taxId?: StringNullableWithAggregatesFilter<"Store"> | string | null
+    currency?: StringWithAggregatesFilter<"Store"> | string
+    timezone?: StringWithAggregatesFilter<"Store"> | string
+    logoUrl?: StringNullableWithAggregatesFilter<"Store"> | string | null
+    isActive?: BoolWithAggregatesFilter<"Store"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"Store"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Store"> | Date | string
+  }
+
+  export type StoreEmployeeWhereInput = {
+    AND?: StoreEmployeeWhereInput | StoreEmployeeWhereInput[]
+    OR?: StoreEmployeeWhereInput[]
+    NOT?: StoreEmployeeWhereInput | StoreEmployeeWhereInput[]
+    id?: StringFilter<"StoreEmployee"> | string
+    storeId?: StringFilter<"StoreEmployee"> | string
+    userId?: StringNullableFilter<"StoreEmployee"> | string | null
+    firstName?: StringFilter<"StoreEmployee"> | string
+    lastName?: StringFilter<"StoreEmployee"> | string
+    phone?: StringNullableFilter<"StoreEmployee"> | string | null
+    email?: StringNullableFilter<"StoreEmployee"> | string | null
+    role?: StringFilter<"StoreEmployee"> | string
+    pin?: StringNullableFilter<"StoreEmployee"> | string | null
+    isActive?: BoolFilter<"StoreEmployee"> | boolean
+    createdAt?: DateTimeFilter<"StoreEmployee"> | Date | string
+    updatedAt?: DateTimeFilter<"StoreEmployee"> | Date | string
+    store?: XOR<StoreRelationFilter, StoreWhereInput>
+  }
+
+  export type StoreEmployeeOrderByWithRelationInput = {
+    id?: SortOrder
+    storeId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    role?: SortOrder
+    pin?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    store?: StoreOrderByWithRelationInput
+  }
+
+  export type StoreEmployeeWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: StoreEmployeeWhereInput | StoreEmployeeWhereInput[]
+    OR?: StoreEmployeeWhereInput[]
+    NOT?: StoreEmployeeWhereInput | StoreEmployeeWhereInput[]
+    storeId?: StringFilter<"StoreEmployee"> | string
+    userId?: StringNullableFilter<"StoreEmployee"> | string | null
+    firstName?: StringFilter<"StoreEmployee"> | string
+    lastName?: StringFilter<"StoreEmployee"> | string
+    phone?: StringNullableFilter<"StoreEmployee"> | string | null
+    email?: StringNullableFilter<"StoreEmployee"> | string | null
+    role?: StringFilter<"StoreEmployee"> | string
+    pin?: StringNullableFilter<"StoreEmployee"> | string | null
+    isActive?: BoolFilter<"StoreEmployee"> | boolean
+    createdAt?: DateTimeFilter<"StoreEmployee"> | Date | string
+    updatedAt?: DateTimeFilter<"StoreEmployee"> | Date | string
+    store?: XOR<StoreRelationFilter, StoreWhereInput>
+  }, "id">
+
+  export type StoreEmployeeOrderByWithAggregationInput = {
+    id?: SortOrder
+    storeId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    role?: SortOrder
+    pin?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: StoreEmployeeCountOrderByAggregateInput
+    _max?: StoreEmployeeMaxOrderByAggregateInput
+    _min?: StoreEmployeeMinOrderByAggregateInput
+  }
+
+  export type StoreEmployeeScalarWhereWithAggregatesInput = {
+    AND?: StoreEmployeeScalarWhereWithAggregatesInput | StoreEmployeeScalarWhereWithAggregatesInput[]
+    OR?: StoreEmployeeScalarWhereWithAggregatesInput[]
+    NOT?: StoreEmployeeScalarWhereWithAggregatesInput | StoreEmployeeScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"StoreEmployee"> | string
+    storeId?: StringWithAggregatesFilter<"StoreEmployee"> | string
+    userId?: StringNullableWithAggregatesFilter<"StoreEmployee"> | string | null
+    firstName?: StringWithAggregatesFilter<"StoreEmployee"> | string
+    lastName?: StringWithAggregatesFilter<"StoreEmployee"> | string
+    phone?: StringNullableWithAggregatesFilter<"StoreEmployee"> | string | null
+    email?: StringNullableWithAggregatesFilter<"StoreEmployee"> | string | null
+    role?: StringWithAggregatesFilter<"StoreEmployee"> | string
+    pin?: StringNullableWithAggregatesFilter<"StoreEmployee"> | string | null
+    isActive?: BoolWithAggregatesFilter<"StoreEmployee"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"StoreEmployee"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"StoreEmployee"> | Date | string
   }
 
   export type UserWhereInput = {
@@ -21842,6 +24364,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -21868,6 +24391,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -21894,6 +24418,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21920,6 +24445,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21946,6 +24472,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -21968,6 +24495,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21990,7 +24518,235 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StoreCreateInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: StoreEmployeeCreateNestedManyWithoutStoreInput
+  }
+
+  export type StoreUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: StoreEmployeeUncheckedCreateNestedManyWithoutStoreInput
+  }
+
+  export type StoreUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: StoreEmployeeUpdateManyWithoutStoreNestedInput
+  }
+
+  export type StoreUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: StoreEmployeeUncheckedUpdateManyWithoutStoreNestedInput
+  }
+
+  export type StoreCreateManyInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StoreUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StoreUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StoreEmployeeCreateInput = {
+    id?: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    store: StoreCreateNestedOneWithoutEmployeesInput
+  }
+
+  export type StoreEmployeeUncheckedCreateInput = {
+    id?: string
+    storeId: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StoreEmployeeUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    store?: StoreUpdateOneRequiredWithoutEmployeesNestedInput
+  }
+
+  export type StoreEmployeeUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    storeId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StoreEmployeeCreateManyInput = {
+    id?: string
+    storeId: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StoreEmployeeUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StoreEmployeeUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    storeId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23612,6 +26368,7 @@ export namespace Prisma {
     bankAccount?: SortOrder
     tenantId?: SortOrder
     hotelCode?: SortOrder
+    storeCode?: SortOrder
     databaseUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -23634,6 +26391,7 @@ export namespace Prisma {
     bankAccount?: SortOrder
     tenantId?: SortOrder
     hotelCode?: SortOrder
+    storeCode?: SortOrder
     databaseUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -23656,6 +26414,7 @@ export namespace Prisma {
     bankAccount?: SortOrder
     tenantId?: SortOrder
     hotelCode?: SortOrder
+    storeCode?: SortOrder
     databaseUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -23709,6 +26468,130 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type StoreEmployeeListRelationFilter = {
+    every?: StoreEmployeeWhereInput
+    some?: StoreEmployeeWhereInput
+    none?: StoreEmployeeWhereInput
+  }
+
+  export type StoreEmployeeOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type StoreCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    taxId?: SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StoreMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    taxId?: SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StoreMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    taxId?: SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type StoreRelationFilter = {
+    is?: StoreWhereInput
+    isNot?: StoreWhereInput
+  }
+
+  export type StoreEmployeeCountOrderByAggregateInput = {
+    id?: SortOrder
+    storeId?: SortOrder
+    userId?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    pin?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StoreEmployeeMaxOrderByAggregateInput = {
+    id?: SortOrder
+    storeId?: SortOrder
+    userId?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    pin?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StoreEmployeeMinOrderByAggregateInput = {
+    id?: SortOrder
+    storeId?: SortOrder
+    userId?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    pin?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -23989,11 +26872,6 @@ export namespace Prisma {
     not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type InvoiceListRelationFilter = {
     every?: InvoiceWhereInput
     some?: InvoiceWhereInput
@@ -24108,14 +26986,6 @@ export namespace Prisma {
     _sum?: NestedDecimalFilter<$PrismaModel>
     _min?: NestedDecimalFilter<$PrismaModel>
     _max?: NestedDecimalFilter<$PrismaModel>
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type EnumModuleTypeFilter<$PrismaModel = never> = {
@@ -25060,6 +27930,66 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type StoreEmployeeCreateNestedManyWithoutStoreInput = {
+    create?: XOR<StoreEmployeeCreateWithoutStoreInput, StoreEmployeeUncheckedCreateWithoutStoreInput> | StoreEmployeeCreateWithoutStoreInput[] | StoreEmployeeUncheckedCreateWithoutStoreInput[]
+    connectOrCreate?: StoreEmployeeCreateOrConnectWithoutStoreInput | StoreEmployeeCreateOrConnectWithoutStoreInput[]
+    createMany?: StoreEmployeeCreateManyStoreInputEnvelope
+    connect?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+  }
+
+  export type StoreEmployeeUncheckedCreateNestedManyWithoutStoreInput = {
+    create?: XOR<StoreEmployeeCreateWithoutStoreInput, StoreEmployeeUncheckedCreateWithoutStoreInput> | StoreEmployeeCreateWithoutStoreInput[] | StoreEmployeeUncheckedCreateWithoutStoreInput[]
+    connectOrCreate?: StoreEmployeeCreateOrConnectWithoutStoreInput | StoreEmployeeCreateOrConnectWithoutStoreInput[]
+    createMany?: StoreEmployeeCreateManyStoreInputEnvelope
+    connect?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type StoreEmployeeUpdateManyWithoutStoreNestedInput = {
+    create?: XOR<StoreEmployeeCreateWithoutStoreInput, StoreEmployeeUncheckedCreateWithoutStoreInput> | StoreEmployeeCreateWithoutStoreInput[] | StoreEmployeeUncheckedCreateWithoutStoreInput[]
+    connectOrCreate?: StoreEmployeeCreateOrConnectWithoutStoreInput | StoreEmployeeCreateOrConnectWithoutStoreInput[]
+    upsert?: StoreEmployeeUpsertWithWhereUniqueWithoutStoreInput | StoreEmployeeUpsertWithWhereUniqueWithoutStoreInput[]
+    createMany?: StoreEmployeeCreateManyStoreInputEnvelope
+    set?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+    disconnect?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+    delete?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+    connect?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+    update?: StoreEmployeeUpdateWithWhereUniqueWithoutStoreInput | StoreEmployeeUpdateWithWhereUniqueWithoutStoreInput[]
+    updateMany?: StoreEmployeeUpdateManyWithWhereWithoutStoreInput | StoreEmployeeUpdateManyWithWhereWithoutStoreInput[]
+    deleteMany?: StoreEmployeeScalarWhereInput | StoreEmployeeScalarWhereInput[]
+  }
+
+  export type StoreEmployeeUncheckedUpdateManyWithoutStoreNestedInput = {
+    create?: XOR<StoreEmployeeCreateWithoutStoreInput, StoreEmployeeUncheckedCreateWithoutStoreInput> | StoreEmployeeCreateWithoutStoreInput[] | StoreEmployeeUncheckedCreateWithoutStoreInput[]
+    connectOrCreate?: StoreEmployeeCreateOrConnectWithoutStoreInput | StoreEmployeeCreateOrConnectWithoutStoreInput[]
+    upsert?: StoreEmployeeUpsertWithWhereUniqueWithoutStoreInput | StoreEmployeeUpsertWithWhereUniqueWithoutStoreInput[]
+    createMany?: StoreEmployeeCreateManyStoreInputEnvelope
+    set?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+    disconnect?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+    delete?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+    connect?: StoreEmployeeWhereUniqueInput | StoreEmployeeWhereUniqueInput[]
+    update?: StoreEmployeeUpdateWithWhereUniqueWithoutStoreInput | StoreEmployeeUpdateWithWhereUniqueWithoutStoreInput[]
+    updateMany?: StoreEmployeeUpdateManyWithWhereWithoutStoreInput | StoreEmployeeUpdateManyWithWhereWithoutStoreInput[]
+    deleteMany?: StoreEmployeeScalarWhereInput | StoreEmployeeScalarWhereInput[]
+  }
+
+  export type StoreCreateNestedOneWithoutEmployeesInput = {
+    create?: XOR<StoreCreateWithoutEmployeesInput, StoreUncheckedCreateWithoutEmployeesInput>
+    connectOrCreate?: StoreCreateOrConnectWithoutEmployeesInput
+    connect?: StoreWhereUniqueInput
+  }
+
+  export type StoreUpdateOneRequiredWithoutEmployeesNestedInput = {
+    create?: XOR<StoreCreateWithoutEmployeesInput, StoreUncheckedCreateWithoutEmployeesInput>
+    connectOrCreate?: StoreCreateOrConnectWithoutEmployeesInput
+    upsert?: StoreUpsertWithoutEmployeesInput
+    connect?: StoreWhereUniqueInput
+    update?: XOR<XOR<StoreUpdateToOneWithWhereWithoutEmployeesInput, StoreUpdateWithoutEmployeesInput>, StoreUncheckedUpdateWithoutEmployeesInput>
+  }
+
   export type AccountCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -25280,10 +28210,6 @@ export namespace Prisma {
     decrement?: Decimal | DecimalJsLike | number | string
     multiply?: Decimal | DecimalJsLike | number | string
     divide?: Decimal | DecimalJsLike | number | string
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
   }
 
   export type InvoiceUpdateManyWithoutSubscriptionNestedInput = {
@@ -25663,6 +28589,19 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -25757,11 +28696,6 @@ export namespace Prisma {
     not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NestedEnumPlanTypeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.PlanType | EnumPlanTypeFieldRefInput<$PrismaModel>
     in?: $Enums.PlanType[] | ListEnumPlanTypeFieldRefInput<$PrismaModel>
@@ -25796,14 +28730,6 @@ export namespace Prisma {
     _sum?: NestedDecimalFilter<$PrismaModel>
     _min?: NestedDecimalFilter<$PrismaModel>
     _max?: NestedDecimalFilter<$PrismaModel>
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedEnumModuleTypeFilter<$PrismaModel = never> = {
@@ -26253,6 +29179,162 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
   }
 
+  export type StoreEmployeeCreateWithoutStoreInput = {
+    id?: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StoreEmployeeUncheckedCreateWithoutStoreInput = {
+    id?: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StoreEmployeeCreateOrConnectWithoutStoreInput = {
+    where: StoreEmployeeWhereUniqueInput
+    create: XOR<StoreEmployeeCreateWithoutStoreInput, StoreEmployeeUncheckedCreateWithoutStoreInput>
+  }
+
+  export type StoreEmployeeCreateManyStoreInputEnvelope = {
+    data: StoreEmployeeCreateManyStoreInput | StoreEmployeeCreateManyStoreInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StoreEmployeeUpsertWithWhereUniqueWithoutStoreInput = {
+    where: StoreEmployeeWhereUniqueInput
+    update: XOR<StoreEmployeeUpdateWithoutStoreInput, StoreEmployeeUncheckedUpdateWithoutStoreInput>
+    create: XOR<StoreEmployeeCreateWithoutStoreInput, StoreEmployeeUncheckedCreateWithoutStoreInput>
+  }
+
+  export type StoreEmployeeUpdateWithWhereUniqueWithoutStoreInput = {
+    where: StoreEmployeeWhereUniqueInput
+    data: XOR<StoreEmployeeUpdateWithoutStoreInput, StoreEmployeeUncheckedUpdateWithoutStoreInput>
+  }
+
+  export type StoreEmployeeUpdateManyWithWhereWithoutStoreInput = {
+    where: StoreEmployeeScalarWhereInput
+    data: XOR<StoreEmployeeUpdateManyMutationInput, StoreEmployeeUncheckedUpdateManyWithoutStoreInput>
+  }
+
+  export type StoreEmployeeScalarWhereInput = {
+    AND?: StoreEmployeeScalarWhereInput | StoreEmployeeScalarWhereInput[]
+    OR?: StoreEmployeeScalarWhereInput[]
+    NOT?: StoreEmployeeScalarWhereInput | StoreEmployeeScalarWhereInput[]
+    id?: StringFilter<"StoreEmployee"> | string
+    storeId?: StringFilter<"StoreEmployee"> | string
+    userId?: StringNullableFilter<"StoreEmployee"> | string | null
+    firstName?: StringFilter<"StoreEmployee"> | string
+    lastName?: StringFilter<"StoreEmployee"> | string
+    phone?: StringNullableFilter<"StoreEmployee"> | string | null
+    email?: StringNullableFilter<"StoreEmployee"> | string | null
+    role?: StringFilter<"StoreEmployee"> | string
+    pin?: StringNullableFilter<"StoreEmployee"> | string | null
+    isActive?: BoolFilter<"StoreEmployee"> | boolean
+    createdAt?: DateTimeFilter<"StoreEmployee"> | Date | string
+    updatedAt?: DateTimeFilter<"StoreEmployee"> | Date | string
+  }
+
+  export type StoreCreateWithoutEmployeesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StoreUncheckedCreateWithoutEmployeesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StoreCreateOrConnectWithoutEmployeesInput = {
+    where: StoreWhereUniqueInput
+    create: XOR<StoreCreateWithoutEmployeesInput, StoreUncheckedCreateWithoutEmployeesInput>
+  }
+
+  export type StoreUpsertWithoutEmployeesInput = {
+    update: XOR<StoreUpdateWithoutEmployeesInput, StoreUncheckedUpdateWithoutEmployeesInput>
+    create: XOR<StoreCreateWithoutEmployeesInput, StoreUncheckedCreateWithoutEmployeesInput>
+    where?: StoreWhereInput
+  }
+
+  export type StoreUpdateToOneWithWhereWithoutEmployeesInput = {
+    where?: StoreWhereInput
+    data: XOR<StoreUpdateWithoutEmployeesInput, StoreUncheckedUpdateWithoutEmployeesInput>
+  }
+
+  export type StoreUpdateWithoutEmployeesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StoreUncheckedUpdateWithoutEmployeesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AccountCreateWithoutUserInput = {
     id?: string
     type: string
@@ -26358,6 +29440,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26383,6 +29466,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26513,6 +29597,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26538,6 +29623,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26759,6 +29845,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26784,6 +29871,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26858,6 +29946,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26883,6 +29972,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26908,6 +29998,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26933,6 +30024,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26996,6 +30088,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27021,6 +30114,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27228,6 +30322,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -27253,6 +30348,7 @@ export namespace Prisma {
     bankAccount?: string | null
     tenantId?: string
     hotelCode: string
+    storeCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -27294,6 +30390,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27319,6 +30416,7 @@ export namespace Prisma {
     bankAccount?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
+    storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27736,6 +30834,62 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
   }
 
+  export type StoreEmployeeCreateManyStoreInput = {
+    id?: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StoreEmployeeUpdateWithoutStoreInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StoreEmployeeUncheckedUpdateWithoutStoreInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StoreEmployeeUncheckedUpdateManyWithoutStoreInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AccountCreateManyUserInput = {
     id?: string
     type: string
@@ -28038,6 +31192,10 @@ export namespace Prisma {
      */
     export type OrganizationCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = OrganizationCountOutputTypeDefaultArgs<ExtArgs>
     /**
+     * @deprecated Use StoreCountOutputTypeDefaultArgs instead
+     */
+    export type StoreCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = StoreCountOutputTypeDefaultArgs<ExtArgs>
+    /**
      * @deprecated Use UserCountOutputTypeDefaultArgs instead
      */
     export type UserCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -28057,6 +31215,14 @@ export namespace Prisma {
      * @deprecated Use OrganizationDefaultArgs instead
      */
     export type OrganizationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = OrganizationDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use StoreDefaultArgs instead
+     */
+    export type StoreArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = StoreDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use StoreEmployeeDefaultArgs instead
+     */
+    export type StoreEmployeeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = StoreEmployeeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use UserDefaultArgs instead
      */

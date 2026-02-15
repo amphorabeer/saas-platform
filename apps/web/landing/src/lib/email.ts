@@ -58,6 +58,31 @@ export function generateHotelWelcomeEmail(
   `
 }
 
+export function generateStoreWelcomeEmail(
+  storeCode: string,
+  storeName: string,
+  email: string,
+  password: string
+) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #b45309;">მოგესალმებით GeoBiz Store-ში! 🏪</h2>
+      <p>გამარჯობა,</p>
+      <p>თქვენი მაღაზიის <strong>${storeName}</strong> რეგისტრაცია წარმატებით დასრულდა!</p>
+      
+      <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin: 0 0 10px 0; color: #92400e;">თქვენი შესვლის მონაცემები:</h3>
+        <p style="margin: 5px 0;"><strong>მაღაზიის კოდი:</strong> ${storeCode}</p>
+        <p style="margin: 5px 0;"><strong>ელ-ფოსტა:</strong> ${email}</p>
+        <p style="margin: 5px 0;"><strong>პაროლი:</strong> ${password}</p>
+        <p style="color: #dc2626; font-size: 12px; margin-top: 10px;">⚠️ უსაფრთხოების მიზნით, გთხოვთ შეცვალოთ პაროლი შესვლის შემდეგ!</p>
+      </div>
+      
+      <p style="color: #666; font-size: 14px; margin-top: 30px;">გმადლობთ რომ აირჩიეთ GeoBiz Platform!</p>
+    </div>
+  `
+}
+
 export function generateHotelPasswordResetEmail(resetUrl: string, hotelName: string) {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

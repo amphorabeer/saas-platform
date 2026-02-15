@@ -12,16 +12,45 @@ const planNames: Record<PlanType, string> = {
   ENTERPRISE: 'Enterprise',
 }
 
+const moduleConfig: Record<string, { icon: string; title: string; subtitle: string; bizLabel: string; bizPlaceholder: string; bizSectionTitle: string; successTitle: string; successSubtitle: string; loginUrl: string }> = {
+  hotel: {
+    icon: '🏨',
+    title: 'რეგისტრაცია',
+    subtitle: 'შექმენით თქვენი სასტუმროს ანგარიში',
+    bizLabel: 'სასტუმროს სახელი *',
+    bizPlaceholder: 'Hotel Tbilisi',
+    bizSectionTitle: 'სასტუმროს ინფორმაცია',
+    successTitle: 'რეგისტრაცია წარმატებულია!',
+    successSubtitle: 'თქვენი სასტუმროს სისტემა მზადაა',
+    loginUrl: process.env.NEXT_PUBLIC_HOTEL_URL || 'https://saas-hotel.vercel.app',
+  },
+  shop: {
+    icon: '🛍️',
+    title: 'რეგისტრაცია',
+    subtitle: 'შექმენით თქვენი მაღაზიის ანგარიში',
+    bizLabel: 'მაღაზიის სახელი *',
+    bizPlaceholder: 'ჩემი მაღაზია',
+    bizSectionTitle: 'მაღაზიის ინფორმაცია',
+    successTitle: 'რეგისტრაცია წარმატებულია!',
+    successSubtitle: 'თქვენი POS სისტემა მზადაა',
+    loginUrl: process.env.NEXT_PUBLIC_STORE_URL || 'https://store.saas-platform.ge',
+  },
+}
+
+const defaultConfig = moduleConfig.hotel
+
 export default function SignupPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  const moduleFromUrl = searchParams.get('module') || 'hotel'
-  const planFromUrl = (searchParams.get('plan')?.toUpperCase() || 'STARTER') as PlanType
+  const moduleFromUrl = searchParams?.get('module') || 'hotel'
+  const planFromUrl = (searchParams?.get('plan')?.toUpperCase() || 'STARTER') as PlanType
   const validPlan = ['STARTER', 'PROFESSIONAL', 'ENTERPRISE'].includes(planFromUrl) ? planFromUrl : 'STARTER'
   
   const [module, setModule] = useState(moduleFromUrl)
   const [plan, setPlan] = useState(validPlan)
+  
+  const config = moduleConfig[module] || defaultConfig
   
   const [formData, setFormData] = useState({
     name: '',
@@ -41,9 +70,8 @@ export default function SignupPage() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState<{ hotelCode: string } | null>(null)
+  const [success, setSuccess] = useState<{ hotelCode?: string } | null>(null)
   
-  // Update when URL changes
   useEffect(() => {
     setModule(moduleFromUrl)
     setPlan(validPlan)
@@ -75,8 +103,10 @@ export default function SignupPage() {
       }
     }
     
+    const apiUrl = module === 'shop' ? '/api/store/register' : '/api/register'
+    
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -115,23 +145,28 @@ export default function SignupPage() {
   }
   
   if (success) {
+    const isShop = module === 'shop'
+    const loginBase = isShop ? config.loginUrl : (process.env.NEXT_PUBLIC_HOTEL_URL || 'https://saas-hotel.vercel.app')
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8 text-center">
           <div className="text-6xl mb-4">🎉</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">რეგისტრაცია წარმატებულია!</h1>
-          <p className="text-gray-600 mb-6">თქვენი სასტუმროს სისტემა მზადაა</p>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">{config.successTitle}</h1>
+          <p className="text-gray-600 mb-6">{config.successSubtitle}</p>
           
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
-            <p className="text-sm text-blue-600 mb-2">თქვენი სასტუმროს კოდი:</p>
-            <div className="text-5xl font-mono font-bold text-blue-700 tracking-widest">
-              {success.hotelCode}
+          {success.hotelCode && (
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+              <p className="text-sm text-blue-600 mb-2">თქვენი კოდი:</p>
+              <div className="text-5xl font-mono font-bold text-blue-700 tracking-widest">
+                {success.hotelCode}
+              </div>
+              <p className="text-xs text-blue-500 mt-2">შეინახეთ ეს კოდი</p>
             </div>
-            <p className="text-xs text-blue-500 mt-2">შეინახეთ ეს კოდი</p>
-          </div>
+          )}
           
           <a
-            href="https://saas-hotel.vercel.app/login"
+            href={`${loginBase}/login`}
             className="block w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium"
           >
             შესვლა სისტემაში
@@ -145,12 +180,11 @@ export default function SignupPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-8">
         <div className="text-center mb-6">
-          <div className="text-5xl mb-2">🏨</div>
-          <h1 className="text-2xl font-bold text-gray-800">რეგისტრაცია</h1>
-          <p className="text-gray-500 mt-1">შექმენით თქვენი სასტუმროს ანგარიში</p>
+          <div className="text-5xl mb-2">{config.icon}</div>
+          <h1 className="text-2xl font-bold text-gray-800">{config.title}</h1>
+          <p className="text-gray-500 mt-1">{config.subtitle}</p>
         </div>
         
-        {/* არჩეული პაკეტის ჩვენება */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-center justify-between">
             <div>
@@ -158,7 +192,7 @@ export default function SignupPage() {
               <p className="text-lg font-semibold text-blue-600">{planNames[plan as PlanType]}</p>
             </div>
             <Link 
-              href="/modules/hotel/pricing"
+              href={`/modules/${module}/pricing`}
               className="text-sm text-blue-600 hover:text-blue-700 underline"
             >
               შეცვლა
@@ -192,15 +226,15 @@ export default function SignupPage() {
           </div>
           
           <div className="bg-blue-50 p-4 rounded-lg">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">🏨 სასტუმროს ინფორმაცია</h2>
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">{config.icon} {config.bizSectionTitle}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">სასტუმროს სახელი *</label>
-                <input type="text" value={formData.hotelName} onChange={(e) => setFormData({...formData, hotelName: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="Hotel Tbilisi" required disabled={loading} />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{config.bizLabel}</label>
+                <input type="text" value={formData.hotelName} onChange={(e) => setFormData({...formData, hotelName: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder={config.bizPlaceholder} required disabled={loading} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">კომპანიის სახელი *</label>
-                <input type="text" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="შპს სასტუმრო" required disabled={loading} />
+                <input type="text" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder={module === 'shop' ? 'შპს ჩემი მაღაზია' : 'შპს სასტუმრო'} required disabled={loading} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">საიდენტიფიკაციო კოდი *</label>
@@ -228,7 +262,7 @@ export default function SignupPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">ვებსაიტი</label>
-                <input type="url" value={formData.website} onChange={(e) => setFormData({...formData, website: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="https://www.hotel.ge" disabled={loading} />
+                <input type="url" value={formData.website} onChange={(e) => setFormData({...formData, website: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="https://" disabled={loading} />
               </div>
             </div>
           </div>
@@ -253,7 +287,7 @@ export default function SignupPage() {
         </form>
         
         <div className="mt-4 text-center text-sm text-gray-500">
-          უკვე გაქვთ ანგარიში? <a href="https://saas-hotel.vercel.app/login" className="text-blue-600 hover:underline">შესვლა</a>
+          უკვე გაქვთ ანგარიში? <a href={`${config.loginUrl}/login`} className="text-blue-600 hover:underline">შესვლა</a>
         </div>
       </div>
     </div>

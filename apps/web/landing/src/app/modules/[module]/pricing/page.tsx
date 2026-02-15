@@ -196,29 +196,55 @@ const moduleData: Record<string, {
   },
   shop: {
     name: "მაღაზიის მართვის სისტემა",
-    description: "ინვენტარის, გაყიდვებისა და მომხმარებლების მართვა",
+    description: "თანამედროვე სალარო სისტემა — POS ტერმინალი, მარაგების მართვა, ფისკალური ინტეგრაცია, RS.ge",
     icon: "🛍️",
     pricing: {
       starter: {
         name: "Starter",
-        price: "უფასო",
-        duration: "15 დღე",
-        features: ["1 ლოკაცია", "100 პროდუქტი", "გაყიდვების მართვა"],
+        price: "₾40",
+        duration: "თვე",
+        features: [
+          "1 მოლარე",
+          "500 პროდუქტი",
+          "POS ტერმინალი",
+          "მარაგების მართვა",
+          "ჩეკის ბეჭდვა",
+        ],
       },
       professional: {
         name: "Professional",
-        price: "₾99",
+        price: "₾80",
         popular: true,
-        features: ["1 ლოკაცია", "ულიმიტო პროდუქტი", "ყველა ფუნქცია", "ბარკოდის სკანერი"],
+        features: [
+          "5 მოლარე",
+          "ულიმიტო პროდუქტი",
+          "ყველა ფუნქცია",
+          "ბარკოდ სკანერი",
+          "ფისკალური აპარატი (Kasa.ge / Daisy)",
+          "RS.ge ინტეგრაცია",
+          "მომხმარებლების მართვა",
+        ],
       },
       enterprise: {
         name: "Enterprise",
-        price: "₾299",
-        features: ["მრავალი ლოკაცია", "ულიმიტო მომხმარებლები", "Custom features", "E-commerce ინტეგრაცია"],
+        price: "₾150",
+        features: [
+          "ულიმიტო მოლარე",
+          "მრავალი ლოკაცია",
+          "ონლაინ მაღაზია (WooCommerce / Shopify)",
+          "ბანკის ტერმინალის ECR ინტეგრაცია",
+          "API access",
+          "პრიორიტეტული მხარდაჭერა",
+        ],
       },
     },
     faq: [
-      { question: "როგორ მუშაობს ინვენტარის მართვა?", answer: "სისტემა ავტომატურად აკონტროლებს ინვენტარს და გაგზავნის შეტყობინებებს დაბალი მარაგის შემთხვევაში." },
+      { question: "როგორ მუშაობს ფისკალური აპარატის ინტეგრაცია?", answer: "სისტემა მხარდაჭერს Kasa.ge და Daisy Expert ფისკალურ აპარატებს. ყველა გაყიდვა ავტომატურად იბეჭდება ფისკალურ ჩეკზე." },
+      { question: "რა ბარკოდ სკანერები მუშაობს?", answer: "მხარდაჭერილია USB და Bluetooth ბარკოდ სკანერები — Epson, Bixolon, Star, Honeywell, ACLAS, Rongta, Xprinter." },
+      { question: "შემიძლია ძველი სისტემიდან მონაცემების იმპორტი?", answer: "დიახ. შეგიძლიათ CSV/Excel ფორმატით იმპორტი პროდუქტების, კატეგორიების, მომწოდებლების და მომხმარებლების." },
+      { question: "რა არის RS.ge ინტეგრაცია?", answer: "RS.ge ინტეგრაცია საშუალებას გაძლევთ ავტომატურად გაგზავნოთ გაყიდვის მონაცემები RS.ge სისტემაში კანონიერი შესაბამისობისთვის." },
+      { question: "როგორ მუშაობს ონლაინ მაღაზიის ინტეგრაცია?", answer: "Enterprise გეგმაში შედის WooCommerce და Shopify ინტეგრაცია — ინვენტარი და ბრუნვა სინქრონიზდება ონლაინ მაღაზიასთან." },
+      { question: "რა ჰარდვერი მუშაობს სისტემასთან?", answer: "მხარდაჭერილია ჩეკის პრინტერები (Epson, Bixolon, Star, Xprinter), ბარკოდ სკანერები და ფისკალური აპარატები Kasa.ge და Daisy." },
     ],
   },
   winery: {
@@ -285,8 +311,12 @@ function getRegistrationUrl(moduleSlug: string, plan: string): string {
       return `${appUrl}/register?plan=${plan}`;
     }
   }
-  // All other modules (including hotel) use Landing's signup
+  // Hotel and Shop use Landing's signup → respective app dashboards
   return `/auth/signup?module=${moduleSlug}&plan=${plan}`;
+}
+
+function hasRegistrationFlow(moduleSlug: string): boolean {
+  return moduleSlug === "brewery" || moduleSlug === "hotel" || moduleSlug === "shop";
 }
 
 export default function ModulePricingPage({ params }: { params: { module: string } }) {
@@ -386,10 +416,10 @@ export default function ModulePricingPage({ params }: { params: { module: string
                 <Button
                   className="w-full min-h-[44px]"
                   variant="outline"
-                  disabled={moduleSlug !== "brewery" && moduleSlug !== "hotel"}
-                  asChild={moduleSlug === "brewery" || moduleSlug === "hotel"}
+                  disabled={!hasRegistrationFlow(moduleSlug)}
+                  asChild={hasRegistrationFlow(moduleSlug)}
                 >
-                  {moduleSlug === "brewery" || moduleSlug === "hotel" ? (
+                  {hasRegistrationFlow(moduleSlug) ? (
                     <Link href={getRegistrationUrl(moduleSlug, "STARTER")}>დაწყება</Link>
                   ) : (
                     <span>დაწყება</span>
@@ -426,10 +456,10 @@ export default function ModulePricingPage({ params }: { params: { module: string
                 </ul>
                 <Button
                   className="w-full min-h-[44px]"
-                  disabled={moduleSlug !== "brewery" && moduleSlug !== "hotel"}
-                  asChild={moduleSlug === "brewery" || moduleSlug === "hotel"}
+                  disabled={!hasRegistrationFlow(moduleSlug)}
+                  asChild={hasRegistrationFlow(moduleSlug)}
                 >
-                  {moduleSlug === "brewery" || moduleSlug === "hotel" ? (
+                  {hasRegistrationFlow(moduleSlug) ? (
                     <Link href={getRegistrationUrl(moduleSlug, "PROFESSIONAL")}>არჩევა</Link>
                   ) : (
                     <span>არჩევა</span>
@@ -460,10 +490,10 @@ export default function ModulePricingPage({ params }: { params: { module: string
                 <Button
                   className="w-full min-h-[44px]"
                   variant="outline"
-                  disabled={moduleSlug !== "brewery" && moduleSlug !== "hotel"}
-                  asChild={moduleSlug === "brewery" || moduleSlug === "hotel"}
+                  disabled={!hasRegistrationFlow(moduleSlug)}
+                  asChild={hasRegistrationFlow(moduleSlug)}
                 >
-                  {moduleSlug === "brewery" || moduleSlug === "hotel" ? (
+                  {hasRegistrationFlow(moduleSlug) ? (
                     <Link href={getRegistrationUrl(moduleSlug, "ENTERPRISE")}>არჩევა</Link>
                   ) : (
                     <span>არჩევა</span>
@@ -474,7 +504,7 @@ export default function ModulePricingPage({ params }: { params: { module: string
           </div>
         </section>
 
-        {/* Key Features Section - Only for Hotel */}
+        {/* Key Features Section - Hotel */}
         {moduleSlug === "hotel" && (
           <section className="container mx-auto px-4 py-12 bg-muted/30">
             <div className="max-w-5xl mx-auto">
@@ -547,6 +577,59 @@ export default function ModulePricingPage({ params }: { params: { module: string
                         ავტომატური რეზერვაცია PMS-ში
                       </li>
                     </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Key Features Section - Shop */}
+        {moduleSlug === "shop" && (
+          <section className="container mx-auto px-4 py-12 bg-muted/30">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-3xl font-bold text-center mb-4">🚀 ძირითადი ფუნქციები</h2>
+              <p className="text-center text-muted-foreground mb-10">
+                თანამედროვე POS სისტემა ფისკალური ინტეგრაციით და სალაროს აღჭურვილობით
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <Card className="hover:shadow-lg transition-shadow border-2 border-blue-200">
+                  <CardHeader>
+                    <div className="text-4xl mb-2">🧾</div>
+                    <CardTitle className="text-xl">ფისკალური ინტეგრაცია</CardTitle>
+                    <CardDescription>Kasa.ge & Daisy Expert</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground text-sm">
+                      ყველა გაყიდვა ავტომატურად იბეჭდება ფისკალურ ჩეკზე. მხარდაჭერილია Kasa.ge და Daisy Expert ფისკალური აპარატები.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="hover:shadow-lg transition-shadow border-2 border-green-200">
+                  <CardHeader>
+                    <div className="text-4xl mb-2">📟</div>
+                    <CardTitle className="text-xl">Hardware თავსებადობა</CardTitle>
+                    <CardDescription>Epson, Bixolon, Star, Honeywell, ACLAS, Rongta, Xprinter</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground text-sm">
+                      ჩეკის პრინტერები, ბარკოდ სკანერები და ფისკალური აპარატები — ყველა მწარმოებელი მხარდაჭერილია.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="hover:shadow-lg transition-shadow border-2 border-purple-200">
+                  <CardHeader>
+                    <div className="text-4xl mb-2">📊</div>
+                    <CardTitle className="text-xl">RS.ge ინტეგრაცია</CardTitle>
+                    <CardDescription>ავტომატური რეპორტირება</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground text-sm">
+                      გაყიდვების მონაცემების ავტომატური გაგზავნა RS.ge სისტემაში კანონიერი შესაბამისობისთვის.
+                    </p>
                   </CardContent>
                 </Card>
               </div>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GeoGuide</string>
+    <string name="title_activity_main">GeoGuide</string>
+    <string name="package_name">ge.geoguide.app</string>
+    <string name="custom_url_scheme">ge.geoguide.app</string>
+</resources>
