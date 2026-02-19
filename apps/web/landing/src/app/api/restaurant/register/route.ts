@@ -178,9 +178,12 @@ export async function POST(req: NextRequest) {
         return { organization, restaurant }
       })
 
+      const restaurantBase = (process.env.NEXT_PUBLIC_RESTAURANT_URL || 'https://rest.geobiz.app').replace(/\/$/, '')
+      const loginUrl = `${restaurantBase.startsWith('http') ? restaurantBase : `https://${restaurantBase}`}/login`
+
       // Send welcome email
       try {
-        const welcomeHtml = generateRestaurantWelcomeEmail(restCode, organizationName || result.organization.name, email, '(არსებული პაროლი)')
+        const welcomeHtml = generateRestaurantWelcomeEmail(restCode, organizationName || result.organization.name, email, '(არსებული პაროლი)', loginUrl)
         await sendEmail({ to: email, subject: 'RestoPOS დაემატა თქვენს ანგარიშს! 🍽️', html: welcomeHtml })
       } catch (e) { console.error('Email failed:', e) }
 
@@ -189,6 +192,7 @@ export async function POST(req: NextRequest) {
         restCode,
         restaurantId: result.restaurant.id,
         message: `რესტორანი დაემატა თქვენს ანგარიშს! კოდი: ${restCode}`,
+        loginUrl,
       }, { status: 201 })
     }
 
@@ -332,12 +336,16 @@ export async function POST(req: NextRequest) {
       restCode: result.organization.restCode,
     })
 
+    const restaurantBase = (process.env.NEXT_PUBLIC_RESTAURANT_URL || 'https://rest.geobiz.app').replace(/\/$/, '')
+    const loginUrl = `${restaurantBase.startsWith('http') ? restaurantBase : `https://${restaurantBase}`}/login`
+
     try {
       const welcomeHtml = generateRestaurantWelcomeEmail(
         restCode,
         organizationName,
         email,
-        plainPassword
+        plainPassword,
+        loginUrl
       )
       await sendEmail({
         to: email,
@@ -358,6 +366,7 @@ export async function POST(req: NextRequest) {
         tenantId: result.organization.tenantId,
         restCode: result.organization.restCode,
         message: `რეგისტრაცია წარმატებით დასრულდა! თქვენი რესტორნის კოდია: ${restCode}`,
+        loginUrl,
       },
       { status: 201 }
     )

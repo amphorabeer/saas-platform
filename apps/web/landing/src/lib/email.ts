@@ -89,7 +89,8 @@ export function generateRestaurantWelcomeEmail(
   restCode: string,
   restaurantName: string,
   email: string,
-  password: string
+  password: string,
+  loginUrl: string = 'https://rest.geobiz.app/login'
 ) {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0F172A; color: #F1F5F9; padding: 32px; border-radius: 12px;">
@@ -105,7 +106,7 @@ export function generateRestaurantWelcomeEmail(
         <p style="color: #EF4444; font-size: 12px; margin-top: 10px;">⚠️ უსაფრთხოების მიზნით, გთხოვთ შეცვალოთ პაროლი შესვლის შემდეგ!</p>
       </div>
       
-      <p style="margin: 16px 0;">შესვლისთვის გამოიყენეთ: <a href="https://rest.geobiz.app/login" style="color: #F97316;">rest.geobiz.app/login</a></p>
+      <p style="margin: 16px 0;">შესვლისთვის გამოიყენეთ: <a href="${loginUrl}" style="color: #F97316;">${loginUrl.replace(/^https?:\/\//, '')}</a></p>
       
       <p style="color: #94A3B8; font-size: 14px; margin-top: 24px;">15-დღიანი ტრიალი აქტიურია. გმადლობთ რომ აირჩიეთ GeoBiz Platform!</p>
     </div>

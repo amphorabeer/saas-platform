@@ -81,7 +81,7 @@ export default function SignupContent() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState<{ hotelCode?: string } | null>(null)
+  const [success, setSuccess] = useState<{ hotelCode?: string; loginUrl?: string } | null>(null)
   
   useEffect(() => {
     setModule(moduleFromUrl)
@@ -148,7 +148,10 @@ export default function SignupContent() {
         return
       }
       
-      setSuccess({ hotelCode: data.hotelCode || data.restCode || data.storeCode })
+      setSuccess({
+        hotelCode: data.hotelCode || data.restCode || data.storeCode,
+        loginUrl: data.loginUrl,
+      })
       
     } catch (err) {
       setError('სისტემური შეცდომა. სცადეთ თავიდან.')
@@ -157,7 +160,11 @@ export default function SignupContent() {
   }
   
   if (success) {
-    const loginBase = config.loginUrl
+    const loginUrl =
+      success.loginUrl ||
+      (config.loginUrl.startsWith('http')
+        ? `${config.loginUrl.replace(/\/$/, '')}/login`
+        : `https://${config.loginUrl.replace(/\/$/, '')}/login`)
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center p-4">
@@ -179,7 +186,7 @@ export default function SignupContent() {
           )}
           
           <a
-            href={`${loginBase}/login`}
+            href={loginUrl}
             className="block w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium"
           >
             შესვლა სისტემაში
@@ -318,7 +325,7 @@ export default function SignupContent() {
         </form>
         
         <div className="mt-4 text-center text-sm text-gray-500">
-          უკვე გაქვთ ანგარიში? <a href={`${config.loginUrl}/login`} className="text-blue-600 hover:underline">შესვლა</a>
+          უკვე გაქვთ ანგარიში? <a href={config.loginUrl.startsWith('http') ? `${config.loginUrl.replace(/\/$/, '')}/login` : `https://${config.loginUrl.replace(/\/$/, '')}/login`} className="text-blue-600 hover:underline">შესვლა</a>
         </div>
       </div>
     </div>
