@@ -29,6 +29,31 @@ export type Store = $Result.DefaultSelection<Prisma.$StorePayload>
  */
 export type StoreEmployee = $Result.DefaultSelection<Prisma.$StoreEmployeePayload>
 /**
+ * Model Restaurant
+ * 
+ */
+export type Restaurant = $Result.DefaultSelection<Prisma.$RestaurantPayload>
+/**
+ * Model RestaurantEmployee
+ * 
+ */
+export type RestaurantEmployee = $Result.DefaultSelection<Prisma.$RestaurantEmployeePayload>
+/**
+ * Model RestaurantZone
+ * 
+ */
+export type RestaurantZone = $Result.DefaultSelection<Prisma.$RestaurantZonePayload>
+/**
+ * Model RestaurantTable
+ * 
+ */
+export type RestaurantTable = $Result.DefaultSelection<Prisma.$RestaurantTablePayload>
+/**
+ * Model MenuCategory
+ * 
+ */
+export type MenuCategory = $Result.DefaultSelection<Prisma.$MenuCategoryPayload>
+/**
  * Model User
  * 
  */
@@ -354,6 +379,56 @@ export class PrismaClient<
     * ```
     */
   get storeEmployee(): Prisma.StoreEmployeeDelegate<ExtArgs>;
+
+  /**
+   * `prisma.restaurant`: Exposes CRUD operations for the **Restaurant** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Restaurants
+    * const restaurants = await prisma.restaurant.findMany()
+    * ```
+    */
+  get restaurant(): Prisma.RestaurantDelegate<ExtArgs>;
+
+  /**
+   * `prisma.restaurantEmployee`: Exposes CRUD operations for the **RestaurantEmployee** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RestaurantEmployees
+    * const restaurantEmployees = await prisma.restaurantEmployee.findMany()
+    * ```
+    */
+  get restaurantEmployee(): Prisma.RestaurantEmployeeDelegate<ExtArgs>;
+
+  /**
+   * `prisma.restaurantZone`: Exposes CRUD operations for the **RestaurantZone** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RestaurantZones
+    * const restaurantZones = await prisma.restaurantZone.findMany()
+    * ```
+    */
+  get restaurantZone(): Prisma.RestaurantZoneDelegate<ExtArgs>;
+
+  /**
+   * `prisma.restaurantTable`: Exposes CRUD operations for the **RestaurantTable** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RestaurantTables
+    * const restaurantTables = await prisma.restaurantTable.findMany()
+    * ```
+    */
+  get restaurantTable(): Prisma.RestaurantTableDelegate<ExtArgs>;
+
+  /**
+   * `prisma.menuCategory`: Exposes CRUD operations for the **MenuCategory** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MenuCategories
+    * const menuCategories = await prisma.menuCategory.findMany()
+    * ```
+    */
+  get menuCategory(): Prisma.MenuCategoryDelegate<ExtArgs>;
 
   /**
    * `prisma.user`: Exposes CRUD operations for the **User** model.
@@ -958,6 +1033,11 @@ export namespace Prisma {
     Organization: 'Organization',
     Store: 'Store',
     StoreEmployee: 'StoreEmployee',
+    Restaurant: 'Restaurant',
+    RestaurantEmployee: 'RestaurantEmployee',
+    RestaurantZone: 'RestaurantZone',
+    RestaurantTable: 'RestaurantTable',
+    MenuCategory: 'MenuCategory',
     User: 'User',
     Account: 'Account',
     Session: 'Session',
@@ -989,7 +1069,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "organization" | "store" | "storeEmployee" | "user" | "account" | "session" | "verificationToken" | "subscription" | "moduleAccess" | "moduleFeature" | "invoice" | "moduleConfig" | "landingPageContent" | "supportTicket" | "activityLog" | "hotelRoom" | "hotelReservation" | "configuration" | "siteConfig"
+      modelProps: "organization" | "store" | "storeEmployee" | "restaurant" | "restaurantEmployee" | "restaurantZone" | "restaurantTable" | "menuCategory" | "user" | "account" | "session" | "verificationToken" | "subscription" | "moduleAccess" | "moduleFeature" | "invoice" | "moduleConfig" | "landingPageContent" | "supportTicket" | "activityLog" | "hotelRoom" | "hotelReservation" | "configuration" | "siteConfig"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1200,6 +1280,356 @@ export namespace Prisma {
           count: {
             args: Prisma.StoreEmployeeCountArgs<ExtArgs>
             result: $Utils.Optional<StoreEmployeeCountAggregateOutputType> | number
+          }
+        }
+      }
+      Restaurant: {
+        payload: Prisma.$RestaurantPayload<ExtArgs>
+        fields: Prisma.RestaurantFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RestaurantFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RestaurantFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload>
+          }
+          findFirst: {
+            args: Prisma.RestaurantFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RestaurantFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload>
+          }
+          findMany: {
+            args: Prisma.RestaurantFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload>[]
+          }
+          create: {
+            args: Prisma.RestaurantCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload>
+          }
+          createMany: {
+            args: Prisma.RestaurantCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RestaurantCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload>[]
+          }
+          delete: {
+            args: Prisma.RestaurantDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload>
+          }
+          update: {
+            args: Prisma.RestaurantUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload>
+          }
+          deleteMany: {
+            args: Prisma.RestaurantDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RestaurantUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.RestaurantUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantPayload>
+          }
+          aggregate: {
+            args: Prisma.RestaurantAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRestaurant>
+          }
+          groupBy: {
+            args: Prisma.RestaurantGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RestaurantGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RestaurantCountArgs<ExtArgs>
+            result: $Utils.Optional<RestaurantCountAggregateOutputType> | number
+          }
+        }
+      }
+      RestaurantEmployee: {
+        payload: Prisma.$RestaurantEmployeePayload<ExtArgs>
+        fields: Prisma.RestaurantEmployeeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RestaurantEmployeeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RestaurantEmployeeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload>
+          }
+          findFirst: {
+            args: Prisma.RestaurantEmployeeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RestaurantEmployeeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload>
+          }
+          findMany: {
+            args: Prisma.RestaurantEmployeeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload>[]
+          }
+          create: {
+            args: Prisma.RestaurantEmployeeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload>
+          }
+          createMany: {
+            args: Prisma.RestaurantEmployeeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RestaurantEmployeeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload>[]
+          }
+          delete: {
+            args: Prisma.RestaurantEmployeeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload>
+          }
+          update: {
+            args: Prisma.RestaurantEmployeeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload>
+          }
+          deleteMany: {
+            args: Prisma.RestaurantEmployeeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RestaurantEmployeeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.RestaurantEmployeeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantEmployeePayload>
+          }
+          aggregate: {
+            args: Prisma.RestaurantEmployeeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRestaurantEmployee>
+          }
+          groupBy: {
+            args: Prisma.RestaurantEmployeeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RestaurantEmployeeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RestaurantEmployeeCountArgs<ExtArgs>
+            result: $Utils.Optional<RestaurantEmployeeCountAggregateOutputType> | number
+          }
+        }
+      }
+      RestaurantZone: {
+        payload: Prisma.$RestaurantZonePayload<ExtArgs>
+        fields: Prisma.RestaurantZoneFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RestaurantZoneFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RestaurantZoneFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload>
+          }
+          findFirst: {
+            args: Prisma.RestaurantZoneFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RestaurantZoneFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload>
+          }
+          findMany: {
+            args: Prisma.RestaurantZoneFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload>[]
+          }
+          create: {
+            args: Prisma.RestaurantZoneCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload>
+          }
+          createMany: {
+            args: Prisma.RestaurantZoneCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RestaurantZoneCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload>[]
+          }
+          delete: {
+            args: Prisma.RestaurantZoneDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload>
+          }
+          update: {
+            args: Prisma.RestaurantZoneUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload>
+          }
+          deleteMany: {
+            args: Prisma.RestaurantZoneDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RestaurantZoneUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.RestaurantZoneUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantZonePayload>
+          }
+          aggregate: {
+            args: Prisma.RestaurantZoneAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRestaurantZone>
+          }
+          groupBy: {
+            args: Prisma.RestaurantZoneGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RestaurantZoneGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RestaurantZoneCountArgs<ExtArgs>
+            result: $Utils.Optional<RestaurantZoneCountAggregateOutputType> | number
+          }
+        }
+      }
+      RestaurantTable: {
+        payload: Prisma.$RestaurantTablePayload<ExtArgs>
+        fields: Prisma.RestaurantTableFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RestaurantTableFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RestaurantTableFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload>
+          }
+          findFirst: {
+            args: Prisma.RestaurantTableFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RestaurantTableFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload>
+          }
+          findMany: {
+            args: Prisma.RestaurantTableFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload>[]
+          }
+          create: {
+            args: Prisma.RestaurantTableCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload>
+          }
+          createMany: {
+            args: Prisma.RestaurantTableCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RestaurantTableCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload>[]
+          }
+          delete: {
+            args: Prisma.RestaurantTableDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload>
+          }
+          update: {
+            args: Prisma.RestaurantTableUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload>
+          }
+          deleteMany: {
+            args: Prisma.RestaurantTableDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RestaurantTableUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.RestaurantTableUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RestaurantTablePayload>
+          }
+          aggregate: {
+            args: Prisma.RestaurantTableAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRestaurantTable>
+          }
+          groupBy: {
+            args: Prisma.RestaurantTableGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RestaurantTableGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RestaurantTableCountArgs<ExtArgs>
+            result: $Utils.Optional<RestaurantTableCountAggregateOutputType> | number
+          }
+        }
+      }
+      MenuCategory: {
+        payload: Prisma.$MenuCategoryPayload<ExtArgs>
+        fields: Prisma.MenuCategoryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MenuCategoryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MenuCategoryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload>
+          }
+          findFirst: {
+            args: Prisma.MenuCategoryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MenuCategoryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload>
+          }
+          findMany: {
+            args: Prisma.MenuCategoryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload>[]
+          }
+          create: {
+            args: Prisma.MenuCategoryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload>
+          }
+          createMany: {
+            args: Prisma.MenuCategoryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MenuCategoryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload>[]
+          }
+          delete: {
+            args: Prisma.MenuCategoryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload>
+          }
+          update: {
+            args: Prisma.MenuCategoryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload>
+          }
+          deleteMany: {
+            args: Prisma.MenuCategoryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MenuCategoryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.MenuCategoryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MenuCategoryPayload>
+          }
+          aggregate: {
+            args: Prisma.MenuCategoryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMenuCategory>
+          }
+          groupBy: {
+            args: Prisma.MenuCategoryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MenuCategoryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MenuCategoryCountArgs<ExtArgs>
+            result: $Utils.Optional<MenuCategoryCountAggregateOutputType> | number
           }
         }
       }
@@ -2560,6 +2990,95 @@ export namespace Prisma {
 
 
   /**
+   * Count Type RestaurantCountOutputType
+   */
+
+  export type RestaurantCountOutputType = {
+    employees: number
+    zones: number
+    tables: number
+    menuCategories: number
+  }
+
+  export type RestaurantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    employees?: boolean | RestaurantCountOutputTypeCountEmployeesArgs
+    zones?: boolean | RestaurantCountOutputTypeCountZonesArgs
+    tables?: boolean | RestaurantCountOutputTypeCountTablesArgs
+    menuCategories?: boolean | RestaurantCountOutputTypeCountMenuCategoriesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * RestaurantCountOutputType without action
+   */
+  export type RestaurantCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantCountOutputType
+     */
+    select?: RestaurantCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * RestaurantCountOutputType without action
+   */
+  export type RestaurantCountOutputTypeCountEmployeesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RestaurantEmployeeWhereInput
+  }
+
+  /**
+   * RestaurantCountOutputType without action
+   */
+  export type RestaurantCountOutputTypeCountZonesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RestaurantZoneWhereInput
+  }
+
+  /**
+   * RestaurantCountOutputType without action
+   */
+  export type RestaurantCountOutputTypeCountTablesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RestaurantTableWhereInput
+  }
+
+  /**
+   * RestaurantCountOutputType without action
+   */
+  export type RestaurantCountOutputTypeCountMenuCategoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MenuCategoryWhereInput
+  }
+
+
+  /**
+   * Count Type RestaurantZoneCountOutputType
+   */
+
+  export type RestaurantZoneCountOutputType = {
+    tables: number
+  }
+
+  export type RestaurantZoneCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tables?: boolean | RestaurantZoneCountOutputTypeCountTablesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * RestaurantZoneCountOutputType without action
+   */
+  export type RestaurantZoneCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZoneCountOutputType
+     */
+    select?: RestaurantZoneCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * RestaurantZoneCountOutputType without action
+   */
+  export type RestaurantZoneCountOutputTypeCountTablesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RestaurantTableWhereInput
+  }
+
+
+  /**
    * Count Type UserCountOutputType
    */
 
@@ -2733,6 +3252,7 @@ export namespace Prisma {
     tenantId: string | null
     hotelCode: string | null
     storeCode: string | null
+    restCode: string | null
     databaseUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2756,6 +3276,7 @@ export namespace Prisma {
     tenantId: string | null
     hotelCode: string | null
     storeCode: string | null
+    restCode: string | null
     databaseUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2779,6 +3300,7 @@ export namespace Prisma {
     tenantId: number
     hotelCode: number
     storeCode: number
+    restCode: number
     databaseUrl: number
     createdAt: number
     updatedAt: number
@@ -2804,6 +3326,7 @@ export namespace Prisma {
     tenantId?: true
     hotelCode?: true
     storeCode?: true
+    restCode?: true
     databaseUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -2827,6 +3350,7 @@ export namespace Prisma {
     tenantId?: true
     hotelCode?: true
     storeCode?: true
+    restCode?: true
     databaseUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -2850,6 +3374,7 @@ export namespace Prisma {
     tenantId?: true
     hotelCode?: true
     storeCode?: true
+    restCode?: true
     databaseUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -2946,6 +3471,7 @@ export namespace Prisma {
     tenantId: string
     hotelCode: string
     storeCode: string | null
+    restCode: string | null
     databaseUrl: string | null
     createdAt: Date
     updatedAt: Date
@@ -2986,6 +3512,7 @@ export namespace Prisma {
     tenantId?: boolean
     hotelCode?: boolean
     storeCode?: boolean
+    restCode?: boolean
     databaseUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3014,6 +3541,7 @@ export namespace Prisma {
     tenantId?: boolean
     hotelCode?: boolean
     storeCode?: boolean
+    restCode?: boolean
     databaseUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3037,6 +3565,7 @@ export namespace Prisma {
     tenantId?: boolean
     hotelCode?: boolean
     storeCode?: boolean
+    restCode?: boolean
     databaseUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3077,6 +3606,7 @@ export namespace Prisma {
       tenantId: string
       hotelCode: string
       storeCode: string | null
+      restCode: string | null
       databaseUrl: string | null
       createdAt: Date
       updatedAt: Date
@@ -3494,6 +4024,7 @@ export namespace Prisma {
     readonly tenantId: FieldRef<"Organization", 'String'>
     readonly hotelCode: FieldRef<"Organization", 'String'>
     readonly storeCode: FieldRef<"Organization", 'String'>
+    readonly restCode: FieldRef<"Organization", 'String'>
     readonly databaseUrl: FieldRef<"Organization", 'String'>
     readonly createdAt: FieldRef<"Organization", 'DateTime'>
     readonly updatedAt: FieldRef<"Organization", 'DateTime'>
@@ -5970,6 +6501,5388 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: StoreEmployeeInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Restaurant
+   */
+
+  export type AggregateRestaurant = {
+    _count: RestaurantCountAggregateOutputType | null
+    _min: RestaurantMinAggregateOutputType | null
+    _max: RestaurantMaxAggregateOutputType | null
+  }
+
+  export type RestaurantMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    name: string | null
+    slug: string | null
+    type: string | null
+    address: string | null
+    phone: string | null
+    email: string | null
+    taxId: string | null
+    currency: string | null
+    timezone: string | null
+    logoUrl: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RestaurantMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    name: string | null
+    slug: string | null
+    type: string | null
+    address: string | null
+    phone: string | null
+    email: string | null
+    taxId: string | null
+    currency: string | null
+    timezone: string | null
+    logoUrl: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RestaurantCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    name: number
+    slug: number
+    type: number
+    address: number
+    phone: number
+    email: number
+    taxId: number
+    currency: number
+    timezone: number
+    logoUrl: number
+    isActive: number
+    settings: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RestaurantMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    name?: true
+    slug?: true
+    type?: true
+    address?: true
+    phone?: true
+    email?: true
+    taxId?: true
+    currency?: true
+    timezone?: true
+    logoUrl?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RestaurantMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    name?: true
+    slug?: true
+    type?: true
+    address?: true
+    phone?: true
+    email?: true
+    taxId?: true
+    currency?: true
+    timezone?: true
+    logoUrl?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RestaurantCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    name?: true
+    slug?: true
+    type?: true
+    address?: true
+    phone?: true
+    email?: true
+    taxId?: true
+    currency?: true
+    timezone?: true
+    logoUrl?: true
+    isActive?: true
+    settings?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RestaurantAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Restaurant to aggregate.
+     */
+    where?: RestaurantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Restaurants to fetch.
+     */
+    orderBy?: RestaurantOrderByWithRelationInput | RestaurantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RestaurantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Restaurants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Restaurants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Restaurants
+    **/
+    _count?: true | RestaurantCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RestaurantMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RestaurantMaxAggregateInputType
+  }
+
+  export type GetRestaurantAggregateType<T extends RestaurantAggregateArgs> = {
+        [P in keyof T & keyof AggregateRestaurant]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRestaurant[P]>
+      : GetScalarType<T[P], AggregateRestaurant[P]>
+  }
+
+
+
+
+  export type RestaurantGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RestaurantWhereInput
+    orderBy?: RestaurantOrderByWithAggregationInput | RestaurantOrderByWithAggregationInput[]
+    by: RestaurantScalarFieldEnum[] | RestaurantScalarFieldEnum
+    having?: RestaurantScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RestaurantCountAggregateInputType | true
+    _min?: RestaurantMinAggregateInputType
+    _max?: RestaurantMaxAggregateInputType
+  }
+
+  export type RestaurantGroupByOutputType = {
+    id: string
+    tenantId: string
+    name: string
+    slug: string
+    type: string
+    address: string | null
+    phone: string | null
+    email: string | null
+    taxId: string | null
+    currency: string
+    timezone: string
+    logoUrl: string | null
+    isActive: boolean
+    settings: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: RestaurantCountAggregateOutputType | null
+    _min: RestaurantMinAggregateOutputType | null
+    _max: RestaurantMaxAggregateOutputType | null
+  }
+
+  type GetRestaurantGroupByPayload<T extends RestaurantGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RestaurantGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RestaurantGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RestaurantGroupByOutputType[P]>
+            : GetScalarType<T[P], RestaurantGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RestaurantSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    name?: boolean
+    slug?: boolean
+    type?: boolean
+    address?: boolean
+    phone?: boolean
+    email?: boolean
+    taxId?: boolean
+    currency?: boolean
+    timezone?: boolean
+    logoUrl?: boolean
+    isActive?: boolean
+    settings?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    employees?: boolean | Restaurant$employeesArgs<ExtArgs>
+    zones?: boolean | Restaurant$zonesArgs<ExtArgs>
+    tables?: boolean | Restaurant$tablesArgs<ExtArgs>
+    menuCategories?: boolean | Restaurant$menuCategoriesArgs<ExtArgs>
+    _count?: boolean | RestaurantCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["restaurant"]>
+
+  export type RestaurantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    name?: boolean
+    slug?: boolean
+    type?: boolean
+    address?: boolean
+    phone?: boolean
+    email?: boolean
+    taxId?: boolean
+    currency?: boolean
+    timezone?: boolean
+    logoUrl?: boolean
+    isActive?: boolean
+    settings?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["restaurant"]>
+
+  export type RestaurantSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    name?: boolean
+    slug?: boolean
+    type?: boolean
+    address?: boolean
+    phone?: boolean
+    email?: boolean
+    taxId?: boolean
+    currency?: boolean
+    timezone?: boolean
+    logoUrl?: boolean
+    isActive?: boolean
+    settings?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RestaurantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    employees?: boolean | Restaurant$employeesArgs<ExtArgs>
+    zones?: boolean | Restaurant$zonesArgs<ExtArgs>
+    tables?: boolean | Restaurant$tablesArgs<ExtArgs>
+    menuCategories?: boolean | Restaurant$menuCategoriesArgs<ExtArgs>
+    _count?: boolean | RestaurantCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type RestaurantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $RestaurantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Restaurant"
+    objects: {
+      employees: Prisma.$RestaurantEmployeePayload<ExtArgs>[]
+      zones: Prisma.$RestaurantZonePayload<ExtArgs>[]
+      tables: Prisma.$RestaurantTablePayload<ExtArgs>[]
+      menuCategories: Prisma.$MenuCategoryPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      name: string
+      slug: string
+      type: string
+      address: string | null
+      phone: string | null
+      email: string | null
+      taxId: string | null
+      currency: string
+      timezone: string
+      logoUrl: string | null
+      isActive: boolean
+      settings: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["restaurant"]>
+    composites: {}
+  }
+
+  type RestaurantGetPayload<S extends boolean | null | undefined | RestaurantDefaultArgs> = $Result.GetResult<Prisma.$RestaurantPayload, S>
+
+  type RestaurantCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<RestaurantFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: RestaurantCountAggregateInputType | true
+    }
+
+  export interface RestaurantDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Restaurant'], meta: { name: 'Restaurant' } }
+    /**
+     * Find zero or one Restaurant that matches the filter.
+     * @param {RestaurantFindUniqueArgs} args - Arguments to find a Restaurant
+     * @example
+     * // Get one Restaurant
+     * const restaurant = await prisma.restaurant.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RestaurantFindUniqueArgs>(args: SelectSubset<T, RestaurantFindUniqueArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Restaurant that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {RestaurantFindUniqueOrThrowArgs} args - Arguments to find a Restaurant
+     * @example
+     * // Get one Restaurant
+     * const restaurant = await prisma.restaurant.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RestaurantFindUniqueOrThrowArgs>(args: SelectSubset<T, RestaurantFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Restaurant that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantFindFirstArgs} args - Arguments to find a Restaurant
+     * @example
+     * // Get one Restaurant
+     * const restaurant = await prisma.restaurant.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RestaurantFindFirstArgs>(args?: SelectSubset<T, RestaurantFindFirstArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Restaurant that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantFindFirstOrThrowArgs} args - Arguments to find a Restaurant
+     * @example
+     * // Get one Restaurant
+     * const restaurant = await prisma.restaurant.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RestaurantFindFirstOrThrowArgs>(args?: SelectSubset<T, RestaurantFindFirstOrThrowArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Restaurants that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Restaurants
+     * const restaurants = await prisma.restaurant.findMany()
+     * 
+     * // Get first 10 Restaurants
+     * const restaurants = await prisma.restaurant.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const restaurantWithIdOnly = await prisma.restaurant.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RestaurantFindManyArgs>(args?: SelectSubset<T, RestaurantFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Restaurant.
+     * @param {RestaurantCreateArgs} args - Arguments to create a Restaurant.
+     * @example
+     * // Create one Restaurant
+     * const Restaurant = await prisma.restaurant.create({
+     *   data: {
+     *     // ... data to create a Restaurant
+     *   }
+     * })
+     * 
+     */
+    create<T extends RestaurantCreateArgs>(args: SelectSubset<T, RestaurantCreateArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Restaurants.
+     * @param {RestaurantCreateManyArgs} args - Arguments to create many Restaurants.
+     * @example
+     * // Create many Restaurants
+     * const restaurant = await prisma.restaurant.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RestaurantCreateManyArgs>(args?: SelectSubset<T, RestaurantCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Restaurants and returns the data saved in the database.
+     * @param {RestaurantCreateManyAndReturnArgs} args - Arguments to create many Restaurants.
+     * @example
+     * // Create many Restaurants
+     * const restaurant = await prisma.restaurant.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Restaurants and only return the `id`
+     * const restaurantWithIdOnly = await prisma.restaurant.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RestaurantCreateManyAndReturnArgs>(args?: SelectSubset<T, RestaurantCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Restaurant.
+     * @param {RestaurantDeleteArgs} args - Arguments to delete one Restaurant.
+     * @example
+     * // Delete one Restaurant
+     * const Restaurant = await prisma.restaurant.delete({
+     *   where: {
+     *     // ... filter to delete one Restaurant
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RestaurantDeleteArgs>(args: SelectSubset<T, RestaurantDeleteArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Restaurant.
+     * @param {RestaurantUpdateArgs} args - Arguments to update one Restaurant.
+     * @example
+     * // Update one Restaurant
+     * const restaurant = await prisma.restaurant.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RestaurantUpdateArgs>(args: SelectSubset<T, RestaurantUpdateArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Restaurants.
+     * @param {RestaurantDeleteManyArgs} args - Arguments to filter Restaurants to delete.
+     * @example
+     * // Delete a few Restaurants
+     * const { count } = await prisma.restaurant.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RestaurantDeleteManyArgs>(args?: SelectSubset<T, RestaurantDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Restaurants.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Restaurants
+     * const restaurant = await prisma.restaurant.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RestaurantUpdateManyArgs>(args: SelectSubset<T, RestaurantUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Restaurant.
+     * @param {RestaurantUpsertArgs} args - Arguments to update or create a Restaurant.
+     * @example
+     * // Update or create a Restaurant
+     * const restaurant = await prisma.restaurant.upsert({
+     *   create: {
+     *     // ... data to create a Restaurant
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Restaurant we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RestaurantUpsertArgs>(args: SelectSubset<T, RestaurantUpsertArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Restaurants.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantCountArgs} args - Arguments to filter Restaurants to count.
+     * @example
+     * // Count the number of Restaurants
+     * const count = await prisma.restaurant.count({
+     *   where: {
+     *     // ... the filter for the Restaurants we want to count
+     *   }
+     * })
+    **/
+    count<T extends RestaurantCountArgs>(
+      args?: Subset<T, RestaurantCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RestaurantCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Restaurant.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RestaurantAggregateArgs>(args: Subset<T, RestaurantAggregateArgs>): Prisma.PrismaPromise<GetRestaurantAggregateType<T>>
+
+    /**
+     * Group by Restaurant.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RestaurantGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RestaurantGroupByArgs['orderBy'] }
+        : { orderBy?: RestaurantGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RestaurantGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRestaurantGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Restaurant model
+   */
+  readonly fields: RestaurantFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Restaurant.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RestaurantClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    employees<T extends Restaurant$employeesArgs<ExtArgs> = {}>(args?: Subset<T, Restaurant$employeesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "findMany"> | Null>
+    zones<T extends Restaurant$zonesArgs<ExtArgs> = {}>(args?: Subset<T, Restaurant$zonesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "findMany"> | Null>
+    tables<T extends Restaurant$tablesArgs<ExtArgs> = {}>(args?: Subset<T, Restaurant$tablesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "findMany"> | Null>
+    menuCategories<T extends Restaurant$menuCategoriesArgs<ExtArgs> = {}>(args?: Subset<T, Restaurant$menuCategoriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Restaurant model
+   */ 
+  interface RestaurantFieldRefs {
+    readonly id: FieldRef<"Restaurant", 'String'>
+    readonly tenantId: FieldRef<"Restaurant", 'String'>
+    readonly name: FieldRef<"Restaurant", 'String'>
+    readonly slug: FieldRef<"Restaurant", 'String'>
+    readonly type: FieldRef<"Restaurant", 'String'>
+    readonly address: FieldRef<"Restaurant", 'String'>
+    readonly phone: FieldRef<"Restaurant", 'String'>
+    readonly email: FieldRef<"Restaurant", 'String'>
+    readonly taxId: FieldRef<"Restaurant", 'String'>
+    readonly currency: FieldRef<"Restaurant", 'String'>
+    readonly timezone: FieldRef<"Restaurant", 'String'>
+    readonly logoUrl: FieldRef<"Restaurant", 'String'>
+    readonly isActive: FieldRef<"Restaurant", 'Boolean'>
+    readonly settings: FieldRef<"Restaurant", 'Json'>
+    readonly createdAt: FieldRef<"Restaurant", 'DateTime'>
+    readonly updatedAt: FieldRef<"Restaurant", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Restaurant findUnique
+   */
+  export type RestaurantFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+    /**
+     * Filter, which Restaurant to fetch.
+     */
+    where: RestaurantWhereUniqueInput
+  }
+
+  /**
+   * Restaurant findUniqueOrThrow
+   */
+  export type RestaurantFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+    /**
+     * Filter, which Restaurant to fetch.
+     */
+    where: RestaurantWhereUniqueInput
+  }
+
+  /**
+   * Restaurant findFirst
+   */
+  export type RestaurantFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+    /**
+     * Filter, which Restaurant to fetch.
+     */
+    where?: RestaurantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Restaurants to fetch.
+     */
+    orderBy?: RestaurantOrderByWithRelationInput | RestaurantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Restaurants.
+     */
+    cursor?: RestaurantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Restaurants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Restaurants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Restaurants.
+     */
+    distinct?: RestaurantScalarFieldEnum | RestaurantScalarFieldEnum[]
+  }
+
+  /**
+   * Restaurant findFirstOrThrow
+   */
+  export type RestaurantFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+    /**
+     * Filter, which Restaurant to fetch.
+     */
+    where?: RestaurantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Restaurants to fetch.
+     */
+    orderBy?: RestaurantOrderByWithRelationInput | RestaurantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Restaurants.
+     */
+    cursor?: RestaurantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Restaurants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Restaurants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Restaurants.
+     */
+    distinct?: RestaurantScalarFieldEnum | RestaurantScalarFieldEnum[]
+  }
+
+  /**
+   * Restaurant findMany
+   */
+  export type RestaurantFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+    /**
+     * Filter, which Restaurants to fetch.
+     */
+    where?: RestaurantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Restaurants to fetch.
+     */
+    orderBy?: RestaurantOrderByWithRelationInput | RestaurantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Restaurants.
+     */
+    cursor?: RestaurantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Restaurants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Restaurants.
+     */
+    skip?: number
+    distinct?: RestaurantScalarFieldEnum | RestaurantScalarFieldEnum[]
+  }
+
+  /**
+   * Restaurant create
+   */
+  export type RestaurantCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Restaurant.
+     */
+    data: XOR<RestaurantCreateInput, RestaurantUncheckedCreateInput>
+  }
+
+  /**
+   * Restaurant createMany
+   */
+  export type RestaurantCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Restaurants.
+     */
+    data: RestaurantCreateManyInput | RestaurantCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Restaurant createManyAndReturn
+   */
+  export type RestaurantCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Restaurants.
+     */
+    data: RestaurantCreateManyInput | RestaurantCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Restaurant update
+   */
+  export type RestaurantUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Restaurant.
+     */
+    data: XOR<RestaurantUpdateInput, RestaurantUncheckedUpdateInput>
+    /**
+     * Choose, which Restaurant to update.
+     */
+    where: RestaurantWhereUniqueInput
+  }
+
+  /**
+   * Restaurant updateMany
+   */
+  export type RestaurantUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Restaurants.
+     */
+    data: XOR<RestaurantUpdateManyMutationInput, RestaurantUncheckedUpdateManyInput>
+    /**
+     * Filter which Restaurants to update
+     */
+    where?: RestaurantWhereInput
+  }
+
+  /**
+   * Restaurant upsert
+   */
+  export type RestaurantUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Restaurant to update in case it exists.
+     */
+    where: RestaurantWhereUniqueInput
+    /**
+     * In case the Restaurant found by the `where` argument doesn't exist, create a new Restaurant with this data.
+     */
+    create: XOR<RestaurantCreateInput, RestaurantUncheckedCreateInput>
+    /**
+     * In case the Restaurant was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RestaurantUpdateInput, RestaurantUncheckedUpdateInput>
+  }
+
+  /**
+   * Restaurant delete
+   */
+  export type RestaurantDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+    /**
+     * Filter which Restaurant to delete.
+     */
+    where: RestaurantWhereUniqueInput
+  }
+
+  /**
+   * Restaurant deleteMany
+   */
+  export type RestaurantDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Restaurants to delete
+     */
+    where?: RestaurantWhereInput
+  }
+
+  /**
+   * Restaurant.employees
+   */
+  export type Restaurant$employeesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    where?: RestaurantEmployeeWhereInput
+    orderBy?: RestaurantEmployeeOrderByWithRelationInput | RestaurantEmployeeOrderByWithRelationInput[]
+    cursor?: RestaurantEmployeeWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RestaurantEmployeeScalarFieldEnum | RestaurantEmployeeScalarFieldEnum[]
+  }
+
+  /**
+   * Restaurant.zones
+   */
+  export type Restaurant$zonesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    where?: RestaurantZoneWhereInput
+    orderBy?: RestaurantZoneOrderByWithRelationInput | RestaurantZoneOrderByWithRelationInput[]
+    cursor?: RestaurantZoneWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RestaurantZoneScalarFieldEnum | RestaurantZoneScalarFieldEnum[]
+  }
+
+  /**
+   * Restaurant.tables
+   */
+  export type Restaurant$tablesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    where?: RestaurantTableWhereInput
+    orderBy?: RestaurantTableOrderByWithRelationInput | RestaurantTableOrderByWithRelationInput[]
+    cursor?: RestaurantTableWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RestaurantTableScalarFieldEnum | RestaurantTableScalarFieldEnum[]
+  }
+
+  /**
+   * Restaurant.menuCategories
+   */
+  export type Restaurant$menuCategoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    where?: MenuCategoryWhereInput
+    orderBy?: MenuCategoryOrderByWithRelationInput | MenuCategoryOrderByWithRelationInput[]
+    cursor?: MenuCategoryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MenuCategoryScalarFieldEnum | MenuCategoryScalarFieldEnum[]
+  }
+
+  /**
+   * Restaurant without action
+   */
+  export type RestaurantDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Restaurant
+     */
+    select?: RestaurantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RestaurantEmployee
+   */
+
+  export type AggregateRestaurantEmployee = {
+    _count: RestaurantEmployeeCountAggregateOutputType | null
+    _min: RestaurantEmployeeMinAggregateOutputType | null
+    _max: RestaurantEmployeeMaxAggregateOutputType | null
+  }
+
+  export type RestaurantEmployeeMinAggregateOutputType = {
+    id: string | null
+    restaurantId: string | null
+    userId: string | null
+    firstName: string | null
+    lastName: string | null
+    phone: string | null
+    email: string | null
+    role: string | null
+    pin: string | null
+    isActive: boolean | null
+    photoUrl: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RestaurantEmployeeMaxAggregateOutputType = {
+    id: string | null
+    restaurantId: string | null
+    userId: string | null
+    firstName: string | null
+    lastName: string | null
+    phone: string | null
+    email: string | null
+    role: string | null
+    pin: string | null
+    isActive: boolean | null
+    photoUrl: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RestaurantEmployeeCountAggregateOutputType = {
+    id: number
+    restaurantId: number
+    userId: number
+    firstName: number
+    lastName: number
+    phone: number
+    email: number
+    role: number
+    pin: number
+    isActive: number
+    photoUrl: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RestaurantEmployeeMinAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    userId?: true
+    firstName?: true
+    lastName?: true
+    phone?: true
+    email?: true
+    role?: true
+    pin?: true
+    isActive?: true
+    photoUrl?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RestaurantEmployeeMaxAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    userId?: true
+    firstName?: true
+    lastName?: true
+    phone?: true
+    email?: true
+    role?: true
+    pin?: true
+    isActive?: true
+    photoUrl?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RestaurantEmployeeCountAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    userId?: true
+    firstName?: true
+    lastName?: true
+    phone?: true
+    email?: true
+    role?: true
+    pin?: true
+    isActive?: true
+    photoUrl?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RestaurantEmployeeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RestaurantEmployee to aggregate.
+     */
+    where?: RestaurantEmployeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantEmployees to fetch.
+     */
+    orderBy?: RestaurantEmployeeOrderByWithRelationInput | RestaurantEmployeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RestaurantEmployeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantEmployees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantEmployees.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RestaurantEmployees
+    **/
+    _count?: true | RestaurantEmployeeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RestaurantEmployeeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RestaurantEmployeeMaxAggregateInputType
+  }
+
+  export type GetRestaurantEmployeeAggregateType<T extends RestaurantEmployeeAggregateArgs> = {
+        [P in keyof T & keyof AggregateRestaurantEmployee]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRestaurantEmployee[P]>
+      : GetScalarType<T[P], AggregateRestaurantEmployee[P]>
+  }
+
+
+
+
+  export type RestaurantEmployeeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RestaurantEmployeeWhereInput
+    orderBy?: RestaurantEmployeeOrderByWithAggregationInput | RestaurantEmployeeOrderByWithAggregationInput[]
+    by: RestaurantEmployeeScalarFieldEnum[] | RestaurantEmployeeScalarFieldEnum
+    having?: RestaurantEmployeeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RestaurantEmployeeCountAggregateInputType | true
+    _min?: RestaurantEmployeeMinAggregateInputType
+    _max?: RestaurantEmployeeMaxAggregateInputType
+  }
+
+  export type RestaurantEmployeeGroupByOutputType = {
+    id: string
+    restaurantId: string
+    userId: string | null
+    firstName: string
+    lastName: string
+    phone: string | null
+    email: string | null
+    role: string
+    pin: string | null
+    isActive: boolean
+    photoUrl: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: RestaurantEmployeeCountAggregateOutputType | null
+    _min: RestaurantEmployeeMinAggregateOutputType | null
+    _max: RestaurantEmployeeMaxAggregateOutputType | null
+  }
+
+  type GetRestaurantEmployeeGroupByPayload<T extends RestaurantEmployeeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RestaurantEmployeeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RestaurantEmployeeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RestaurantEmployeeGroupByOutputType[P]>
+            : GetScalarType<T[P], RestaurantEmployeeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RestaurantEmployeeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    restaurantId?: boolean
+    userId?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    phone?: boolean
+    email?: boolean
+    role?: boolean
+    pin?: boolean
+    isActive?: boolean
+    photoUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["restaurantEmployee"]>
+
+  export type RestaurantEmployeeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    restaurantId?: boolean
+    userId?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    phone?: boolean
+    email?: boolean
+    role?: boolean
+    pin?: boolean
+    isActive?: boolean
+    photoUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["restaurantEmployee"]>
+
+  export type RestaurantEmployeeSelectScalar = {
+    id?: boolean
+    restaurantId?: boolean
+    userId?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    phone?: boolean
+    email?: boolean
+    role?: boolean
+    pin?: boolean
+    isActive?: boolean
+    photoUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RestaurantEmployeeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }
+  export type RestaurantEmployeeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }
+
+  export type $RestaurantEmployeePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RestaurantEmployee"
+    objects: {
+      restaurant: Prisma.$RestaurantPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      restaurantId: string
+      userId: string | null
+      firstName: string
+      lastName: string
+      phone: string | null
+      email: string | null
+      role: string
+      pin: string | null
+      isActive: boolean
+      photoUrl: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["restaurantEmployee"]>
+    composites: {}
+  }
+
+  type RestaurantEmployeeGetPayload<S extends boolean | null | undefined | RestaurantEmployeeDefaultArgs> = $Result.GetResult<Prisma.$RestaurantEmployeePayload, S>
+
+  type RestaurantEmployeeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<RestaurantEmployeeFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: RestaurantEmployeeCountAggregateInputType | true
+    }
+
+  export interface RestaurantEmployeeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RestaurantEmployee'], meta: { name: 'RestaurantEmployee' } }
+    /**
+     * Find zero or one RestaurantEmployee that matches the filter.
+     * @param {RestaurantEmployeeFindUniqueArgs} args - Arguments to find a RestaurantEmployee
+     * @example
+     * // Get one RestaurantEmployee
+     * const restaurantEmployee = await prisma.restaurantEmployee.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RestaurantEmployeeFindUniqueArgs>(args: SelectSubset<T, RestaurantEmployeeFindUniqueArgs<ExtArgs>>): Prisma__RestaurantEmployeeClient<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one RestaurantEmployee that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {RestaurantEmployeeFindUniqueOrThrowArgs} args - Arguments to find a RestaurantEmployee
+     * @example
+     * // Get one RestaurantEmployee
+     * const restaurantEmployee = await prisma.restaurantEmployee.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RestaurantEmployeeFindUniqueOrThrowArgs>(args: SelectSubset<T, RestaurantEmployeeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RestaurantEmployeeClient<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first RestaurantEmployee that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantEmployeeFindFirstArgs} args - Arguments to find a RestaurantEmployee
+     * @example
+     * // Get one RestaurantEmployee
+     * const restaurantEmployee = await prisma.restaurantEmployee.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RestaurantEmployeeFindFirstArgs>(args?: SelectSubset<T, RestaurantEmployeeFindFirstArgs<ExtArgs>>): Prisma__RestaurantEmployeeClient<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first RestaurantEmployee that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantEmployeeFindFirstOrThrowArgs} args - Arguments to find a RestaurantEmployee
+     * @example
+     * // Get one RestaurantEmployee
+     * const restaurantEmployee = await prisma.restaurantEmployee.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RestaurantEmployeeFindFirstOrThrowArgs>(args?: SelectSubset<T, RestaurantEmployeeFindFirstOrThrowArgs<ExtArgs>>): Prisma__RestaurantEmployeeClient<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more RestaurantEmployees that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantEmployeeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RestaurantEmployees
+     * const restaurantEmployees = await prisma.restaurantEmployee.findMany()
+     * 
+     * // Get first 10 RestaurantEmployees
+     * const restaurantEmployees = await prisma.restaurantEmployee.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const restaurantEmployeeWithIdOnly = await prisma.restaurantEmployee.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RestaurantEmployeeFindManyArgs>(args?: SelectSubset<T, RestaurantEmployeeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a RestaurantEmployee.
+     * @param {RestaurantEmployeeCreateArgs} args - Arguments to create a RestaurantEmployee.
+     * @example
+     * // Create one RestaurantEmployee
+     * const RestaurantEmployee = await prisma.restaurantEmployee.create({
+     *   data: {
+     *     // ... data to create a RestaurantEmployee
+     *   }
+     * })
+     * 
+     */
+    create<T extends RestaurantEmployeeCreateArgs>(args: SelectSubset<T, RestaurantEmployeeCreateArgs<ExtArgs>>): Prisma__RestaurantEmployeeClient<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many RestaurantEmployees.
+     * @param {RestaurantEmployeeCreateManyArgs} args - Arguments to create many RestaurantEmployees.
+     * @example
+     * // Create many RestaurantEmployees
+     * const restaurantEmployee = await prisma.restaurantEmployee.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RestaurantEmployeeCreateManyArgs>(args?: SelectSubset<T, RestaurantEmployeeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RestaurantEmployees and returns the data saved in the database.
+     * @param {RestaurantEmployeeCreateManyAndReturnArgs} args - Arguments to create many RestaurantEmployees.
+     * @example
+     * // Create many RestaurantEmployees
+     * const restaurantEmployee = await prisma.restaurantEmployee.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RestaurantEmployees and only return the `id`
+     * const restaurantEmployeeWithIdOnly = await prisma.restaurantEmployee.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RestaurantEmployeeCreateManyAndReturnArgs>(args?: SelectSubset<T, RestaurantEmployeeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a RestaurantEmployee.
+     * @param {RestaurantEmployeeDeleteArgs} args - Arguments to delete one RestaurantEmployee.
+     * @example
+     * // Delete one RestaurantEmployee
+     * const RestaurantEmployee = await prisma.restaurantEmployee.delete({
+     *   where: {
+     *     // ... filter to delete one RestaurantEmployee
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RestaurantEmployeeDeleteArgs>(args: SelectSubset<T, RestaurantEmployeeDeleteArgs<ExtArgs>>): Prisma__RestaurantEmployeeClient<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one RestaurantEmployee.
+     * @param {RestaurantEmployeeUpdateArgs} args - Arguments to update one RestaurantEmployee.
+     * @example
+     * // Update one RestaurantEmployee
+     * const restaurantEmployee = await prisma.restaurantEmployee.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RestaurantEmployeeUpdateArgs>(args: SelectSubset<T, RestaurantEmployeeUpdateArgs<ExtArgs>>): Prisma__RestaurantEmployeeClient<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more RestaurantEmployees.
+     * @param {RestaurantEmployeeDeleteManyArgs} args - Arguments to filter RestaurantEmployees to delete.
+     * @example
+     * // Delete a few RestaurantEmployees
+     * const { count } = await prisma.restaurantEmployee.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RestaurantEmployeeDeleteManyArgs>(args?: SelectSubset<T, RestaurantEmployeeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RestaurantEmployees.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantEmployeeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RestaurantEmployees
+     * const restaurantEmployee = await prisma.restaurantEmployee.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RestaurantEmployeeUpdateManyArgs>(args: SelectSubset<T, RestaurantEmployeeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one RestaurantEmployee.
+     * @param {RestaurantEmployeeUpsertArgs} args - Arguments to update or create a RestaurantEmployee.
+     * @example
+     * // Update or create a RestaurantEmployee
+     * const restaurantEmployee = await prisma.restaurantEmployee.upsert({
+     *   create: {
+     *     // ... data to create a RestaurantEmployee
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RestaurantEmployee we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RestaurantEmployeeUpsertArgs>(args: SelectSubset<T, RestaurantEmployeeUpsertArgs<ExtArgs>>): Prisma__RestaurantEmployeeClient<$Result.GetResult<Prisma.$RestaurantEmployeePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of RestaurantEmployees.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantEmployeeCountArgs} args - Arguments to filter RestaurantEmployees to count.
+     * @example
+     * // Count the number of RestaurantEmployees
+     * const count = await prisma.restaurantEmployee.count({
+     *   where: {
+     *     // ... the filter for the RestaurantEmployees we want to count
+     *   }
+     * })
+    **/
+    count<T extends RestaurantEmployeeCountArgs>(
+      args?: Subset<T, RestaurantEmployeeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RestaurantEmployeeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RestaurantEmployee.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantEmployeeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RestaurantEmployeeAggregateArgs>(args: Subset<T, RestaurantEmployeeAggregateArgs>): Prisma.PrismaPromise<GetRestaurantEmployeeAggregateType<T>>
+
+    /**
+     * Group by RestaurantEmployee.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantEmployeeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RestaurantEmployeeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RestaurantEmployeeGroupByArgs['orderBy'] }
+        : { orderBy?: RestaurantEmployeeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RestaurantEmployeeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRestaurantEmployeeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RestaurantEmployee model
+   */
+  readonly fields: RestaurantEmployeeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RestaurantEmployee.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RestaurantEmployeeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    restaurant<T extends RestaurantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RestaurantDefaultArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RestaurantEmployee model
+   */ 
+  interface RestaurantEmployeeFieldRefs {
+    readonly id: FieldRef<"RestaurantEmployee", 'String'>
+    readonly restaurantId: FieldRef<"RestaurantEmployee", 'String'>
+    readonly userId: FieldRef<"RestaurantEmployee", 'String'>
+    readonly firstName: FieldRef<"RestaurantEmployee", 'String'>
+    readonly lastName: FieldRef<"RestaurantEmployee", 'String'>
+    readonly phone: FieldRef<"RestaurantEmployee", 'String'>
+    readonly email: FieldRef<"RestaurantEmployee", 'String'>
+    readonly role: FieldRef<"RestaurantEmployee", 'String'>
+    readonly pin: FieldRef<"RestaurantEmployee", 'String'>
+    readonly isActive: FieldRef<"RestaurantEmployee", 'Boolean'>
+    readonly photoUrl: FieldRef<"RestaurantEmployee", 'String'>
+    readonly createdAt: FieldRef<"RestaurantEmployee", 'DateTime'>
+    readonly updatedAt: FieldRef<"RestaurantEmployee", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RestaurantEmployee findUnique
+   */
+  export type RestaurantEmployeeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantEmployee to fetch.
+     */
+    where: RestaurantEmployeeWhereUniqueInput
+  }
+
+  /**
+   * RestaurantEmployee findUniqueOrThrow
+   */
+  export type RestaurantEmployeeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantEmployee to fetch.
+     */
+    where: RestaurantEmployeeWhereUniqueInput
+  }
+
+  /**
+   * RestaurantEmployee findFirst
+   */
+  export type RestaurantEmployeeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantEmployee to fetch.
+     */
+    where?: RestaurantEmployeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantEmployees to fetch.
+     */
+    orderBy?: RestaurantEmployeeOrderByWithRelationInput | RestaurantEmployeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RestaurantEmployees.
+     */
+    cursor?: RestaurantEmployeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantEmployees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantEmployees.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RestaurantEmployees.
+     */
+    distinct?: RestaurantEmployeeScalarFieldEnum | RestaurantEmployeeScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantEmployee findFirstOrThrow
+   */
+  export type RestaurantEmployeeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantEmployee to fetch.
+     */
+    where?: RestaurantEmployeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantEmployees to fetch.
+     */
+    orderBy?: RestaurantEmployeeOrderByWithRelationInput | RestaurantEmployeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RestaurantEmployees.
+     */
+    cursor?: RestaurantEmployeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantEmployees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantEmployees.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RestaurantEmployees.
+     */
+    distinct?: RestaurantEmployeeScalarFieldEnum | RestaurantEmployeeScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantEmployee findMany
+   */
+  export type RestaurantEmployeeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantEmployees to fetch.
+     */
+    where?: RestaurantEmployeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantEmployees to fetch.
+     */
+    orderBy?: RestaurantEmployeeOrderByWithRelationInput | RestaurantEmployeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RestaurantEmployees.
+     */
+    cursor?: RestaurantEmployeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantEmployees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantEmployees.
+     */
+    skip?: number
+    distinct?: RestaurantEmployeeScalarFieldEnum | RestaurantEmployeeScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantEmployee create
+   */
+  export type RestaurantEmployeeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RestaurantEmployee.
+     */
+    data: XOR<RestaurantEmployeeCreateInput, RestaurantEmployeeUncheckedCreateInput>
+  }
+
+  /**
+   * RestaurantEmployee createMany
+   */
+  export type RestaurantEmployeeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RestaurantEmployees.
+     */
+    data: RestaurantEmployeeCreateManyInput | RestaurantEmployeeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RestaurantEmployee createManyAndReturn
+   */
+  export type RestaurantEmployeeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many RestaurantEmployees.
+     */
+    data: RestaurantEmployeeCreateManyInput | RestaurantEmployeeCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RestaurantEmployee update
+   */
+  export type RestaurantEmployeeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RestaurantEmployee.
+     */
+    data: XOR<RestaurantEmployeeUpdateInput, RestaurantEmployeeUncheckedUpdateInput>
+    /**
+     * Choose, which RestaurantEmployee to update.
+     */
+    where: RestaurantEmployeeWhereUniqueInput
+  }
+
+  /**
+   * RestaurantEmployee updateMany
+   */
+  export type RestaurantEmployeeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RestaurantEmployees.
+     */
+    data: XOR<RestaurantEmployeeUpdateManyMutationInput, RestaurantEmployeeUncheckedUpdateManyInput>
+    /**
+     * Filter which RestaurantEmployees to update
+     */
+    where?: RestaurantEmployeeWhereInput
+  }
+
+  /**
+   * RestaurantEmployee upsert
+   */
+  export type RestaurantEmployeeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RestaurantEmployee to update in case it exists.
+     */
+    where: RestaurantEmployeeWhereUniqueInput
+    /**
+     * In case the RestaurantEmployee found by the `where` argument doesn't exist, create a new RestaurantEmployee with this data.
+     */
+    create: XOR<RestaurantEmployeeCreateInput, RestaurantEmployeeUncheckedCreateInput>
+    /**
+     * In case the RestaurantEmployee was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RestaurantEmployeeUpdateInput, RestaurantEmployeeUncheckedUpdateInput>
+  }
+
+  /**
+   * RestaurantEmployee delete
+   */
+  export type RestaurantEmployeeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+    /**
+     * Filter which RestaurantEmployee to delete.
+     */
+    where: RestaurantEmployeeWhereUniqueInput
+  }
+
+  /**
+   * RestaurantEmployee deleteMany
+   */
+  export type RestaurantEmployeeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RestaurantEmployees to delete
+     */
+    where?: RestaurantEmployeeWhereInput
+  }
+
+  /**
+   * RestaurantEmployee without action
+   */
+  export type RestaurantEmployeeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantEmployee
+     */
+    select?: RestaurantEmployeeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantEmployeeInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RestaurantZone
+   */
+
+  export type AggregateRestaurantZone = {
+    _count: RestaurantZoneCountAggregateOutputType | null
+    _avg: RestaurantZoneAvgAggregateOutputType | null
+    _sum: RestaurantZoneSumAggregateOutputType | null
+    _min: RestaurantZoneMinAggregateOutputType | null
+    _max: RestaurantZoneMaxAggregateOutputType | null
+  }
+
+  export type RestaurantZoneAvgAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type RestaurantZoneSumAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type RestaurantZoneMinAggregateOutputType = {
+    id: string | null
+    restaurantId: string | null
+    name: string | null
+    color: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RestaurantZoneMaxAggregateOutputType = {
+    id: string | null
+    restaurantId: string | null
+    name: string | null
+    color: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RestaurantZoneCountAggregateOutputType = {
+    id: number
+    restaurantId: number
+    name: number
+    color: number
+    sortOrder: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RestaurantZoneAvgAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type RestaurantZoneSumAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type RestaurantZoneMinAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    name?: true
+    color?: true
+    sortOrder?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RestaurantZoneMaxAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    name?: true
+    color?: true
+    sortOrder?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RestaurantZoneCountAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    name?: true
+    color?: true
+    sortOrder?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RestaurantZoneAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RestaurantZone to aggregate.
+     */
+    where?: RestaurantZoneWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantZones to fetch.
+     */
+    orderBy?: RestaurantZoneOrderByWithRelationInput | RestaurantZoneOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RestaurantZoneWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantZones from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantZones.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RestaurantZones
+    **/
+    _count?: true | RestaurantZoneCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RestaurantZoneAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RestaurantZoneSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RestaurantZoneMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RestaurantZoneMaxAggregateInputType
+  }
+
+  export type GetRestaurantZoneAggregateType<T extends RestaurantZoneAggregateArgs> = {
+        [P in keyof T & keyof AggregateRestaurantZone]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRestaurantZone[P]>
+      : GetScalarType<T[P], AggregateRestaurantZone[P]>
+  }
+
+
+
+
+  export type RestaurantZoneGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RestaurantZoneWhereInput
+    orderBy?: RestaurantZoneOrderByWithAggregationInput | RestaurantZoneOrderByWithAggregationInput[]
+    by: RestaurantZoneScalarFieldEnum[] | RestaurantZoneScalarFieldEnum
+    having?: RestaurantZoneScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RestaurantZoneCountAggregateInputType | true
+    _avg?: RestaurantZoneAvgAggregateInputType
+    _sum?: RestaurantZoneSumAggregateInputType
+    _min?: RestaurantZoneMinAggregateInputType
+    _max?: RestaurantZoneMaxAggregateInputType
+  }
+
+  export type RestaurantZoneGroupByOutputType = {
+    id: string
+    restaurantId: string
+    name: string
+    color: string | null
+    sortOrder: number
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: RestaurantZoneCountAggregateOutputType | null
+    _avg: RestaurantZoneAvgAggregateOutputType | null
+    _sum: RestaurantZoneSumAggregateOutputType | null
+    _min: RestaurantZoneMinAggregateOutputType | null
+    _max: RestaurantZoneMaxAggregateOutputType | null
+  }
+
+  type GetRestaurantZoneGroupByPayload<T extends RestaurantZoneGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RestaurantZoneGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RestaurantZoneGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RestaurantZoneGroupByOutputType[P]>
+            : GetScalarType<T[P], RestaurantZoneGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RestaurantZoneSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    restaurantId?: boolean
+    name?: boolean
+    color?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+    tables?: boolean | RestaurantZone$tablesArgs<ExtArgs>
+    _count?: boolean | RestaurantZoneCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["restaurantZone"]>
+
+  export type RestaurantZoneSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    restaurantId?: boolean
+    name?: boolean
+    color?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["restaurantZone"]>
+
+  export type RestaurantZoneSelectScalar = {
+    id?: boolean
+    restaurantId?: boolean
+    name?: boolean
+    color?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RestaurantZoneInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+    tables?: boolean | RestaurantZone$tablesArgs<ExtArgs>
+    _count?: boolean | RestaurantZoneCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type RestaurantZoneIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }
+
+  export type $RestaurantZonePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RestaurantZone"
+    objects: {
+      restaurant: Prisma.$RestaurantPayload<ExtArgs>
+      tables: Prisma.$RestaurantTablePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      restaurantId: string
+      name: string
+      color: string | null
+      sortOrder: number
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["restaurantZone"]>
+    composites: {}
+  }
+
+  type RestaurantZoneGetPayload<S extends boolean | null | undefined | RestaurantZoneDefaultArgs> = $Result.GetResult<Prisma.$RestaurantZonePayload, S>
+
+  type RestaurantZoneCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<RestaurantZoneFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: RestaurantZoneCountAggregateInputType | true
+    }
+
+  export interface RestaurantZoneDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RestaurantZone'], meta: { name: 'RestaurantZone' } }
+    /**
+     * Find zero or one RestaurantZone that matches the filter.
+     * @param {RestaurantZoneFindUniqueArgs} args - Arguments to find a RestaurantZone
+     * @example
+     * // Get one RestaurantZone
+     * const restaurantZone = await prisma.restaurantZone.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RestaurantZoneFindUniqueArgs>(args: SelectSubset<T, RestaurantZoneFindUniqueArgs<ExtArgs>>): Prisma__RestaurantZoneClient<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one RestaurantZone that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {RestaurantZoneFindUniqueOrThrowArgs} args - Arguments to find a RestaurantZone
+     * @example
+     * // Get one RestaurantZone
+     * const restaurantZone = await prisma.restaurantZone.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RestaurantZoneFindUniqueOrThrowArgs>(args: SelectSubset<T, RestaurantZoneFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RestaurantZoneClient<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first RestaurantZone that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantZoneFindFirstArgs} args - Arguments to find a RestaurantZone
+     * @example
+     * // Get one RestaurantZone
+     * const restaurantZone = await prisma.restaurantZone.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RestaurantZoneFindFirstArgs>(args?: SelectSubset<T, RestaurantZoneFindFirstArgs<ExtArgs>>): Prisma__RestaurantZoneClient<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first RestaurantZone that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantZoneFindFirstOrThrowArgs} args - Arguments to find a RestaurantZone
+     * @example
+     * // Get one RestaurantZone
+     * const restaurantZone = await prisma.restaurantZone.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RestaurantZoneFindFirstOrThrowArgs>(args?: SelectSubset<T, RestaurantZoneFindFirstOrThrowArgs<ExtArgs>>): Prisma__RestaurantZoneClient<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more RestaurantZones that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantZoneFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RestaurantZones
+     * const restaurantZones = await prisma.restaurantZone.findMany()
+     * 
+     * // Get first 10 RestaurantZones
+     * const restaurantZones = await prisma.restaurantZone.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const restaurantZoneWithIdOnly = await prisma.restaurantZone.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RestaurantZoneFindManyArgs>(args?: SelectSubset<T, RestaurantZoneFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a RestaurantZone.
+     * @param {RestaurantZoneCreateArgs} args - Arguments to create a RestaurantZone.
+     * @example
+     * // Create one RestaurantZone
+     * const RestaurantZone = await prisma.restaurantZone.create({
+     *   data: {
+     *     // ... data to create a RestaurantZone
+     *   }
+     * })
+     * 
+     */
+    create<T extends RestaurantZoneCreateArgs>(args: SelectSubset<T, RestaurantZoneCreateArgs<ExtArgs>>): Prisma__RestaurantZoneClient<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many RestaurantZones.
+     * @param {RestaurantZoneCreateManyArgs} args - Arguments to create many RestaurantZones.
+     * @example
+     * // Create many RestaurantZones
+     * const restaurantZone = await prisma.restaurantZone.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RestaurantZoneCreateManyArgs>(args?: SelectSubset<T, RestaurantZoneCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RestaurantZones and returns the data saved in the database.
+     * @param {RestaurantZoneCreateManyAndReturnArgs} args - Arguments to create many RestaurantZones.
+     * @example
+     * // Create many RestaurantZones
+     * const restaurantZone = await prisma.restaurantZone.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RestaurantZones and only return the `id`
+     * const restaurantZoneWithIdOnly = await prisma.restaurantZone.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RestaurantZoneCreateManyAndReturnArgs>(args?: SelectSubset<T, RestaurantZoneCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a RestaurantZone.
+     * @param {RestaurantZoneDeleteArgs} args - Arguments to delete one RestaurantZone.
+     * @example
+     * // Delete one RestaurantZone
+     * const RestaurantZone = await prisma.restaurantZone.delete({
+     *   where: {
+     *     // ... filter to delete one RestaurantZone
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RestaurantZoneDeleteArgs>(args: SelectSubset<T, RestaurantZoneDeleteArgs<ExtArgs>>): Prisma__RestaurantZoneClient<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one RestaurantZone.
+     * @param {RestaurantZoneUpdateArgs} args - Arguments to update one RestaurantZone.
+     * @example
+     * // Update one RestaurantZone
+     * const restaurantZone = await prisma.restaurantZone.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RestaurantZoneUpdateArgs>(args: SelectSubset<T, RestaurantZoneUpdateArgs<ExtArgs>>): Prisma__RestaurantZoneClient<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more RestaurantZones.
+     * @param {RestaurantZoneDeleteManyArgs} args - Arguments to filter RestaurantZones to delete.
+     * @example
+     * // Delete a few RestaurantZones
+     * const { count } = await prisma.restaurantZone.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RestaurantZoneDeleteManyArgs>(args?: SelectSubset<T, RestaurantZoneDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RestaurantZones.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantZoneUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RestaurantZones
+     * const restaurantZone = await prisma.restaurantZone.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RestaurantZoneUpdateManyArgs>(args: SelectSubset<T, RestaurantZoneUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one RestaurantZone.
+     * @param {RestaurantZoneUpsertArgs} args - Arguments to update or create a RestaurantZone.
+     * @example
+     * // Update or create a RestaurantZone
+     * const restaurantZone = await prisma.restaurantZone.upsert({
+     *   create: {
+     *     // ... data to create a RestaurantZone
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RestaurantZone we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RestaurantZoneUpsertArgs>(args: SelectSubset<T, RestaurantZoneUpsertArgs<ExtArgs>>): Prisma__RestaurantZoneClient<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of RestaurantZones.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantZoneCountArgs} args - Arguments to filter RestaurantZones to count.
+     * @example
+     * // Count the number of RestaurantZones
+     * const count = await prisma.restaurantZone.count({
+     *   where: {
+     *     // ... the filter for the RestaurantZones we want to count
+     *   }
+     * })
+    **/
+    count<T extends RestaurantZoneCountArgs>(
+      args?: Subset<T, RestaurantZoneCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RestaurantZoneCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RestaurantZone.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantZoneAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RestaurantZoneAggregateArgs>(args: Subset<T, RestaurantZoneAggregateArgs>): Prisma.PrismaPromise<GetRestaurantZoneAggregateType<T>>
+
+    /**
+     * Group by RestaurantZone.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantZoneGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RestaurantZoneGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RestaurantZoneGroupByArgs['orderBy'] }
+        : { orderBy?: RestaurantZoneGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RestaurantZoneGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRestaurantZoneGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RestaurantZone model
+   */
+  readonly fields: RestaurantZoneFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RestaurantZone.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RestaurantZoneClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    restaurant<T extends RestaurantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RestaurantDefaultArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    tables<T extends RestaurantZone$tablesArgs<ExtArgs> = {}>(args?: Subset<T, RestaurantZone$tablesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RestaurantZone model
+   */ 
+  interface RestaurantZoneFieldRefs {
+    readonly id: FieldRef<"RestaurantZone", 'String'>
+    readonly restaurantId: FieldRef<"RestaurantZone", 'String'>
+    readonly name: FieldRef<"RestaurantZone", 'String'>
+    readonly color: FieldRef<"RestaurantZone", 'String'>
+    readonly sortOrder: FieldRef<"RestaurantZone", 'Int'>
+    readonly isActive: FieldRef<"RestaurantZone", 'Boolean'>
+    readonly createdAt: FieldRef<"RestaurantZone", 'DateTime'>
+    readonly updatedAt: FieldRef<"RestaurantZone", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RestaurantZone findUnique
+   */
+  export type RestaurantZoneFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantZone to fetch.
+     */
+    where: RestaurantZoneWhereUniqueInput
+  }
+
+  /**
+   * RestaurantZone findUniqueOrThrow
+   */
+  export type RestaurantZoneFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantZone to fetch.
+     */
+    where: RestaurantZoneWhereUniqueInput
+  }
+
+  /**
+   * RestaurantZone findFirst
+   */
+  export type RestaurantZoneFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantZone to fetch.
+     */
+    where?: RestaurantZoneWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantZones to fetch.
+     */
+    orderBy?: RestaurantZoneOrderByWithRelationInput | RestaurantZoneOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RestaurantZones.
+     */
+    cursor?: RestaurantZoneWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantZones from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantZones.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RestaurantZones.
+     */
+    distinct?: RestaurantZoneScalarFieldEnum | RestaurantZoneScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantZone findFirstOrThrow
+   */
+  export type RestaurantZoneFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantZone to fetch.
+     */
+    where?: RestaurantZoneWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantZones to fetch.
+     */
+    orderBy?: RestaurantZoneOrderByWithRelationInput | RestaurantZoneOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RestaurantZones.
+     */
+    cursor?: RestaurantZoneWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantZones from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantZones.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RestaurantZones.
+     */
+    distinct?: RestaurantZoneScalarFieldEnum | RestaurantZoneScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantZone findMany
+   */
+  export type RestaurantZoneFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantZones to fetch.
+     */
+    where?: RestaurantZoneWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantZones to fetch.
+     */
+    orderBy?: RestaurantZoneOrderByWithRelationInput | RestaurantZoneOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RestaurantZones.
+     */
+    cursor?: RestaurantZoneWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantZones from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantZones.
+     */
+    skip?: number
+    distinct?: RestaurantZoneScalarFieldEnum | RestaurantZoneScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantZone create
+   */
+  export type RestaurantZoneCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RestaurantZone.
+     */
+    data: XOR<RestaurantZoneCreateInput, RestaurantZoneUncheckedCreateInput>
+  }
+
+  /**
+   * RestaurantZone createMany
+   */
+  export type RestaurantZoneCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RestaurantZones.
+     */
+    data: RestaurantZoneCreateManyInput | RestaurantZoneCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RestaurantZone createManyAndReturn
+   */
+  export type RestaurantZoneCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many RestaurantZones.
+     */
+    data: RestaurantZoneCreateManyInput | RestaurantZoneCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RestaurantZone update
+   */
+  export type RestaurantZoneUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RestaurantZone.
+     */
+    data: XOR<RestaurantZoneUpdateInput, RestaurantZoneUncheckedUpdateInput>
+    /**
+     * Choose, which RestaurantZone to update.
+     */
+    where: RestaurantZoneWhereUniqueInput
+  }
+
+  /**
+   * RestaurantZone updateMany
+   */
+  export type RestaurantZoneUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RestaurantZones.
+     */
+    data: XOR<RestaurantZoneUpdateManyMutationInput, RestaurantZoneUncheckedUpdateManyInput>
+    /**
+     * Filter which RestaurantZones to update
+     */
+    where?: RestaurantZoneWhereInput
+  }
+
+  /**
+   * RestaurantZone upsert
+   */
+  export type RestaurantZoneUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RestaurantZone to update in case it exists.
+     */
+    where: RestaurantZoneWhereUniqueInput
+    /**
+     * In case the RestaurantZone found by the `where` argument doesn't exist, create a new RestaurantZone with this data.
+     */
+    create: XOR<RestaurantZoneCreateInput, RestaurantZoneUncheckedCreateInput>
+    /**
+     * In case the RestaurantZone was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RestaurantZoneUpdateInput, RestaurantZoneUncheckedUpdateInput>
+  }
+
+  /**
+   * RestaurantZone delete
+   */
+  export type RestaurantZoneDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+    /**
+     * Filter which RestaurantZone to delete.
+     */
+    where: RestaurantZoneWhereUniqueInput
+  }
+
+  /**
+   * RestaurantZone deleteMany
+   */
+  export type RestaurantZoneDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RestaurantZones to delete
+     */
+    where?: RestaurantZoneWhereInput
+  }
+
+  /**
+   * RestaurantZone.tables
+   */
+  export type RestaurantZone$tablesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    where?: RestaurantTableWhereInput
+    orderBy?: RestaurantTableOrderByWithRelationInput | RestaurantTableOrderByWithRelationInput[]
+    cursor?: RestaurantTableWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RestaurantTableScalarFieldEnum | RestaurantTableScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantZone without action
+   */
+  export type RestaurantZoneDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantZone
+     */
+    select?: RestaurantZoneSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantZoneInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RestaurantTable
+   */
+
+  export type AggregateRestaurantTable = {
+    _count: RestaurantTableCountAggregateOutputType | null
+    _avg: RestaurantTableAvgAggregateOutputType | null
+    _sum: RestaurantTableSumAggregateOutputType | null
+    _min: RestaurantTableMinAggregateOutputType | null
+    _max: RestaurantTableMaxAggregateOutputType | null
+  }
+
+  export type RestaurantTableAvgAggregateOutputType = {
+    seats: number | null
+    posX: number | null
+    posY: number | null
+    width: number | null
+    height: number | null
+    rotation: number | null
+  }
+
+  export type RestaurantTableSumAggregateOutputType = {
+    seats: number | null
+    posX: number | null
+    posY: number | null
+    width: number | null
+    height: number | null
+    rotation: number | null
+  }
+
+  export type RestaurantTableMinAggregateOutputType = {
+    id: string | null
+    restaurantId: string | null
+    zoneId: string | null
+    number: string | null
+    label: string | null
+    seats: number | null
+    shape: string | null
+    status: string | null
+    posX: number | null
+    posY: number | null
+    width: number | null
+    height: number | null
+    rotation: number | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RestaurantTableMaxAggregateOutputType = {
+    id: string | null
+    restaurantId: string | null
+    zoneId: string | null
+    number: string | null
+    label: string | null
+    seats: number | null
+    shape: string | null
+    status: string | null
+    posX: number | null
+    posY: number | null
+    width: number | null
+    height: number | null
+    rotation: number | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RestaurantTableCountAggregateOutputType = {
+    id: number
+    restaurantId: number
+    zoneId: number
+    number: number
+    label: number
+    seats: number
+    shape: number
+    status: number
+    posX: number
+    posY: number
+    width: number
+    height: number
+    rotation: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RestaurantTableAvgAggregateInputType = {
+    seats?: true
+    posX?: true
+    posY?: true
+    width?: true
+    height?: true
+    rotation?: true
+  }
+
+  export type RestaurantTableSumAggregateInputType = {
+    seats?: true
+    posX?: true
+    posY?: true
+    width?: true
+    height?: true
+    rotation?: true
+  }
+
+  export type RestaurantTableMinAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    zoneId?: true
+    number?: true
+    label?: true
+    seats?: true
+    shape?: true
+    status?: true
+    posX?: true
+    posY?: true
+    width?: true
+    height?: true
+    rotation?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RestaurantTableMaxAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    zoneId?: true
+    number?: true
+    label?: true
+    seats?: true
+    shape?: true
+    status?: true
+    posX?: true
+    posY?: true
+    width?: true
+    height?: true
+    rotation?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RestaurantTableCountAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    zoneId?: true
+    number?: true
+    label?: true
+    seats?: true
+    shape?: true
+    status?: true
+    posX?: true
+    posY?: true
+    width?: true
+    height?: true
+    rotation?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RestaurantTableAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RestaurantTable to aggregate.
+     */
+    where?: RestaurantTableWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantTables to fetch.
+     */
+    orderBy?: RestaurantTableOrderByWithRelationInput | RestaurantTableOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RestaurantTableWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantTables from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantTables.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RestaurantTables
+    **/
+    _count?: true | RestaurantTableCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RestaurantTableAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RestaurantTableSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RestaurantTableMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RestaurantTableMaxAggregateInputType
+  }
+
+  export type GetRestaurantTableAggregateType<T extends RestaurantTableAggregateArgs> = {
+        [P in keyof T & keyof AggregateRestaurantTable]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRestaurantTable[P]>
+      : GetScalarType<T[P], AggregateRestaurantTable[P]>
+  }
+
+
+
+
+  export type RestaurantTableGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RestaurantTableWhereInput
+    orderBy?: RestaurantTableOrderByWithAggregationInput | RestaurantTableOrderByWithAggregationInput[]
+    by: RestaurantTableScalarFieldEnum[] | RestaurantTableScalarFieldEnum
+    having?: RestaurantTableScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RestaurantTableCountAggregateInputType | true
+    _avg?: RestaurantTableAvgAggregateInputType
+    _sum?: RestaurantTableSumAggregateInputType
+    _min?: RestaurantTableMinAggregateInputType
+    _max?: RestaurantTableMaxAggregateInputType
+  }
+
+  export type RestaurantTableGroupByOutputType = {
+    id: string
+    restaurantId: string
+    zoneId: string
+    number: string
+    label: string | null
+    seats: number
+    shape: string
+    status: string
+    posX: number
+    posY: number
+    width: number
+    height: number
+    rotation: number
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: RestaurantTableCountAggregateOutputType | null
+    _avg: RestaurantTableAvgAggregateOutputType | null
+    _sum: RestaurantTableSumAggregateOutputType | null
+    _min: RestaurantTableMinAggregateOutputType | null
+    _max: RestaurantTableMaxAggregateOutputType | null
+  }
+
+  type GetRestaurantTableGroupByPayload<T extends RestaurantTableGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RestaurantTableGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RestaurantTableGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RestaurantTableGroupByOutputType[P]>
+            : GetScalarType<T[P], RestaurantTableGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RestaurantTableSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    restaurantId?: boolean
+    zoneId?: boolean
+    number?: boolean
+    label?: boolean
+    seats?: boolean
+    shape?: boolean
+    status?: boolean
+    posX?: boolean
+    posY?: boolean
+    width?: boolean
+    height?: boolean
+    rotation?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+    zone?: boolean | RestaurantZoneDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["restaurantTable"]>
+
+  export type RestaurantTableSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    restaurantId?: boolean
+    zoneId?: boolean
+    number?: boolean
+    label?: boolean
+    seats?: boolean
+    shape?: boolean
+    status?: boolean
+    posX?: boolean
+    posY?: boolean
+    width?: boolean
+    height?: boolean
+    rotation?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+    zone?: boolean | RestaurantZoneDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["restaurantTable"]>
+
+  export type RestaurantTableSelectScalar = {
+    id?: boolean
+    restaurantId?: boolean
+    zoneId?: boolean
+    number?: boolean
+    label?: boolean
+    seats?: boolean
+    shape?: boolean
+    status?: boolean
+    posX?: boolean
+    posY?: boolean
+    width?: boolean
+    height?: boolean
+    rotation?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RestaurantTableInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+    zone?: boolean | RestaurantZoneDefaultArgs<ExtArgs>
+  }
+  export type RestaurantTableIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+    zone?: boolean | RestaurantZoneDefaultArgs<ExtArgs>
+  }
+
+  export type $RestaurantTablePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RestaurantTable"
+    objects: {
+      restaurant: Prisma.$RestaurantPayload<ExtArgs>
+      zone: Prisma.$RestaurantZonePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      restaurantId: string
+      zoneId: string
+      number: string
+      label: string | null
+      seats: number
+      shape: string
+      status: string
+      posX: number
+      posY: number
+      width: number
+      height: number
+      rotation: number
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["restaurantTable"]>
+    composites: {}
+  }
+
+  type RestaurantTableGetPayload<S extends boolean | null | undefined | RestaurantTableDefaultArgs> = $Result.GetResult<Prisma.$RestaurantTablePayload, S>
+
+  type RestaurantTableCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<RestaurantTableFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: RestaurantTableCountAggregateInputType | true
+    }
+
+  export interface RestaurantTableDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RestaurantTable'], meta: { name: 'RestaurantTable' } }
+    /**
+     * Find zero or one RestaurantTable that matches the filter.
+     * @param {RestaurantTableFindUniqueArgs} args - Arguments to find a RestaurantTable
+     * @example
+     * // Get one RestaurantTable
+     * const restaurantTable = await prisma.restaurantTable.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RestaurantTableFindUniqueArgs>(args: SelectSubset<T, RestaurantTableFindUniqueArgs<ExtArgs>>): Prisma__RestaurantTableClient<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one RestaurantTable that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {RestaurantTableFindUniqueOrThrowArgs} args - Arguments to find a RestaurantTable
+     * @example
+     * // Get one RestaurantTable
+     * const restaurantTable = await prisma.restaurantTable.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RestaurantTableFindUniqueOrThrowArgs>(args: SelectSubset<T, RestaurantTableFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RestaurantTableClient<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first RestaurantTable that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantTableFindFirstArgs} args - Arguments to find a RestaurantTable
+     * @example
+     * // Get one RestaurantTable
+     * const restaurantTable = await prisma.restaurantTable.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RestaurantTableFindFirstArgs>(args?: SelectSubset<T, RestaurantTableFindFirstArgs<ExtArgs>>): Prisma__RestaurantTableClient<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first RestaurantTable that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantTableFindFirstOrThrowArgs} args - Arguments to find a RestaurantTable
+     * @example
+     * // Get one RestaurantTable
+     * const restaurantTable = await prisma.restaurantTable.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RestaurantTableFindFirstOrThrowArgs>(args?: SelectSubset<T, RestaurantTableFindFirstOrThrowArgs<ExtArgs>>): Prisma__RestaurantTableClient<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more RestaurantTables that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantTableFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RestaurantTables
+     * const restaurantTables = await prisma.restaurantTable.findMany()
+     * 
+     * // Get first 10 RestaurantTables
+     * const restaurantTables = await prisma.restaurantTable.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const restaurantTableWithIdOnly = await prisma.restaurantTable.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RestaurantTableFindManyArgs>(args?: SelectSubset<T, RestaurantTableFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a RestaurantTable.
+     * @param {RestaurantTableCreateArgs} args - Arguments to create a RestaurantTable.
+     * @example
+     * // Create one RestaurantTable
+     * const RestaurantTable = await prisma.restaurantTable.create({
+     *   data: {
+     *     // ... data to create a RestaurantTable
+     *   }
+     * })
+     * 
+     */
+    create<T extends RestaurantTableCreateArgs>(args: SelectSubset<T, RestaurantTableCreateArgs<ExtArgs>>): Prisma__RestaurantTableClient<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many RestaurantTables.
+     * @param {RestaurantTableCreateManyArgs} args - Arguments to create many RestaurantTables.
+     * @example
+     * // Create many RestaurantTables
+     * const restaurantTable = await prisma.restaurantTable.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RestaurantTableCreateManyArgs>(args?: SelectSubset<T, RestaurantTableCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RestaurantTables and returns the data saved in the database.
+     * @param {RestaurantTableCreateManyAndReturnArgs} args - Arguments to create many RestaurantTables.
+     * @example
+     * // Create many RestaurantTables
+     * const restaurantTable = await prisma.restaurantTable.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RestaurantTables and only return the `id`
+     * const restaurantTableWithIdOnly = await prisma.restaurantTable.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RestaurantTableCreateManyAndReturnArgs>(args?: SelectSubset<T, RestaurantTableCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a RestaurantTable.
+     * @param {RestaurantTableDeleteArgs} args - Arguments to delete one RestaurantTable.
+     * @example
+     * // Delete one RestaurantTable
+     * const RestaurantTable = await prisma.restaurantTable.delete({
+     *   where: {
+     *     // ... filter to delete one RestaurantTable
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RestaurantTableDeleteArgs>(args: SelectSubset<T, RestaurantTableDeleteArgs<ExtArgs>>): Prisma__RestaurantTableClient<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one RestaurantTable.
+     * @param {RestaurantTableUpdateArgs} args - Arguments to update one RestaurantTable.
+     * @example
+     * // Update one RestaurantTable
+     * const restaurantTable = await prisma.restaurantTable.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RestaurantTableUpdateArgs>(args: SelectSubset<T, RestaurantTableUpdateArgs<ExtArgs>>): Prisma__RestaurantTableClient<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more RestaurantTables.
+     * @param {RestaurantTableDeleteManyArgs} args - Arguments to filter RestaurantTables to delete.
+     * @example
+     * // Delete a few RestaurantTables
+     * const { count } = await prisma.restaurantTable.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RestaurantTableDeleteManyArgs>(args?: SelectSubset<T, RestaurantTableDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RestaurantTables.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantTableUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RestaurantTables
+     * const restaurantTable = await prisma.restaurantTable.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RestaurantTableUpdateManyArgs>(args: SelectSubset<T, RestaurantTableUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one RestaurantTable.
+     * @param {RestaurantTableUpsertArgs} args - Arguments to update or create a RestaurantTable.
+     * @example
+     * // Update or create a RestaurantTable
+     * const restaurantTable = await prisma.restaurantTable.upsert({
+     *   create: {
+     *     // ... data to create a RestaurantTable
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RestaurantTable we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RestaurantTableUpsertArgs>(args: SelectSubset<T, RestaurantTableUpsertArgs<ExtArgs>>): Prisma__RestaurantTableClient<$Result.GetResult<Prisma.$RestaurantTablePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of RestaurantTables.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantTableCountArgs} args - Arguments to filter RestaurantTables to count.
+     * @example
+     * // Count the number of RestaurantTables
+     * const count = await prisma.restaurantTable.count({
+     *   where: {
+     *     // ... the filter for the RestaurantTables we want to count
+     *   }
+     * })
+    **/
+    count<T extends RestaurantTableCountArgs>(
+      args?: Subset<T, RestaurantTableCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RestaurantTableCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RestaurantTable.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantTableAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RestaurantTableAggregateArgs>(args: Subset<T, RestaurantTableAggregateArgs>): Prisma.PrismaPromise<GetRestaurantTableAggregateType<T>>
+
+    /**
+     * Group by RestaurantTable.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RestaurantTableGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RestaurantTableGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RestaurantTableGroupByArgs['orderBy'] }
+        : { orderBy?: RestaurantTableGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RestaurantTableGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRestaurantTableGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RestaurantTable model
+   */
+  readonly fields: RestaurantTableFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RestaurantTable.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RestaurantTableClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    restaurant<T extends RestaurantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RestaurantDefaultArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    zone<T extends RestaurantZoneDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RestaurantZoneDefaultArgs<ExtArgs>>): Prisma__RestaurantZoneClient<$Result.GetResult<Prisma.$RestaurantZonePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RestaurantTable model
+   */ 
+  interface RestaurantTableFieldRefs {
+    readonly id: FieldRef<"RestaurantTable", 'String'>
+    readonly restaurantId: FieldRef<"RestaurantTable", 'String'>
+    readonly zoneId: FieldRef<"RestaurantTable", 'String'>
+    readonly number: FieldRef<"RestaurantTable", 'String'>
+    readonly label: FieldRef<"RestaurantTable", 'String'>
+    readonly seats: FieldRef<"RestaurantTable", 'Int'>
+    readonly shape: FieldRef<"RestaurantTable", 'String'>
+    readonly status: FieldRef<"RestaurantTable", 'String'>
+    readonly posX: FieldRef<"RestaurantTable", 'Float'>
+    readonly posY: FieldRef<"RestaurantTable", 'Float'>
+    readonly width: FieldRef<"RestaurantTable", 'Float'>
+    readonly height: FieldRef<"RestaurantTable", 'Float'>
+    readonly rotation: FieldRef<"RestaurantTable", 'Float'>
+    readonly isActive: FieldRef<"RestaurantTable", 'Boolean'>
+    readonly createdAt: FieldRef<"RestaurantTable", 'DateTime'>
+    readonly updatedAt: FieldRef<"RestaurantTable", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RestaurantTable findUnique
+   */
+  export type RestaurantTableFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantTable to fetch.
+     */
+    where: RestaurantTableWhereUniqueInput
+  }
+
+  /**
+   * RestaurantTable findUniqueOrThrow
+   */
+  export type RestaurantTableFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantTable to fetch.
+     */
+    where: RestaurantTableWhereUniqueInput
+  }
+
+  /**
+   * RestaurantTable findFirst
+   */
+  export type RestaurantTableFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantTable to fetch.
+     */
+    where?: RestaurantTableWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantTables to fetch.
+     */
+    orderBy?: RestaurantTableOrderByWithRelationInput | RestaurantTableOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RestaurantTables.
+     */
+    cursor?: RestaurantTableWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantTables from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantTables.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RestaurantTables.
+     */
+    distinct?: RestaurantTableScalarFieldEnum | RestaurantTableScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantTable findFirstOrThrow
+   */
+  export type RestaurantTableFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantTable to fetch.
+     */
+    where?: RestaurantTableWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantTables to fetch.
+     */
+    orderBy?: RestaurantTableOrderByWithRelationInput | RestaurantTableOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RestaurantTables.
+     */
+    cursor?: RestaurantTableWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantTables from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantTables.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RestaurantTables.
+     */
+    distinct?: RestaurantTableScalarFieldEnum | RestaurantTableScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantTable findMany
+   */
+  export type RestaurantTableFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    /**
+     * Filter, which RestaurantTables to fetch.
+     */
+    where?: RestaurantTableWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RestaurantTables to fetch.
+     */
+    orderBy?: RestaurantTableOrderByWithRelationInput | RestaurantTableOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RestaurantTables.
+     */
+    cursor?: RestaurantTableWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RestaurantTables from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RestaurantTables.
+     */
+    skip?: number
+    distinct?: RestaurantTableScalarFieldEnum | RestaurantTableScalarFieldEnum[]
+  }
+
+  /**
+   * RestaurantTable create
+   */
+  export type RestaurantTableCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RestaurantTable.
+     */
+    data: XOR<RestaurantTableCreateInput, RestaurantTableUncheckedCreateInput>
+  }
+
+  /**
+   * RestaurantTable createMany
+   */
+  export type RestaurantTableCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RestaurantTables.
+     */
+    data: RestaurantTableCreateManyInput | RestaurantTableCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RestaurantTable createManyAndReturn
+   */
+  export type RestaurantTableCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many RestaurantTables.
+     */
+    data: RestaurantTableCreateManyInput | RestaurantTableCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RestaurantTable update
+   */
+  export type RestaurantTableUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RestaurantTable.
+     */
+    data: XOR<RestaurantTableUpdateInput, RestaurantTableUncheckedUpdateInput>
+    /**
+     * Choose, which RestaurantTable to update.
+     */
+    where: RestaurantTableWhereUniqueInput
+  }
+
+  /**
+   * RestaurantTable updateMany
+   */
+  export type RestaurantTableUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RestaurantTables.
+     */
+    data: XOR<RestaurantTableUpdateManyMutationInput, RestaurantTableUncheckedUpdateManyInput>
+    /**
+     * Filter which RestaurantTables to update
+     */
+    where?: RestaurantTableWhereInput
+  }
+
+  /**
+   * RestaurantTable upsert
+   */
+  export type RestaurantTableUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RestaurantTable to update in case it exists.
+     */
+    where: RestaurantTableWhereUniqueInput
+    /**
+     * In case the RestaurantTable found by the `where` argument doesn't exist, create a new RestaurantTable with this data.
+     */
+    create: XOR<RestaurantTableCreateInput, RestaurantTableUncheckedCreateInput>
+    /**
+     * In case the RestaurantTable was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RestaurantTableUpdateInput, RestaurantTableUncheckedUpdateInput>
+  }
+
+  /**
+   * RestaurantTable delete
+   */
+  export type RestaurantTableDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+    /**
+     * Filter which RestaurantTable to delete.
+     */
+    where: RestaurantTableWhereUniqueInput
+  }
+
+  /**
+   * RestaurantTable deleteMany
+   */
+  export type RestaurantTableDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RestaurantTables to delete
+     */
+    where?: RestaurantTableWhereInput
+  }
+
+  /**
+   * RestaurantTable without action
+   */
+  export type RestaurantTableDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RestaurantTable
+     */
+    select?: RestaurantTableSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RestaurantTableInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model MenuCategory
+   */
+
+  export type AggregateMenuCategory = {
+    _count: MenuCategoryCountAggregateOutputType | null
+    _avg: MenuCategoryAvgAggregateOutputType | null
+    _sum: MenuCategorySumAggregateOutputType | null
+    _min: MenuCategoryMinAggregateOutputType | null
+    _max: MenuCategoryMaxAggregateOutputType | null
+  }
+
+  export type MenuCategoryAvgAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type MenuCategorySumAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type MenuCategoryMinAggregateOutputType = {
+    id: string | null
+    restaurantId: string | null
+    name: string | null
+    nameEn: string | null
+    icon: string | null
+    color: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    isSeasonal: boolean | null
+    parentId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type MenuCategoryMaxAggregateOutputType = {
+    id: string | null
+    restaurantId: string | null
+    name: string | null
+    nameEn: string | null
+    icon: string | null
+    color: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    isSeasonal: boolean | null
+    parentId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type MenuCategoryCountAggregateOutputType = {
+    id: number
+    restaurantId: number
+    name: number
+    nameEn: number
+    icon: number
+    color: number
+    sortOrder: number
+    isActive: number
+    isSeasonal: number
+    parentId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type MenuCategoryAvgAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type MenuCategorySumAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type MenuCategoryMinAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    name?: true
+    nameEn?: true
+    icon?: true
+    color?: true
+    sortOrder?: true
+    isActive?: true
+    isSeasonal?: true
+    parentId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type MenuCategoryMaxAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    name?: true
+    nameEn?: true
+    icon?: true
+    color?: true
+    sortOrder?: true
+    isActive?: true
+    isSeasonal?: true
+    parentId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type MenuCategoryCountAggregateInputType = {
+    id?: true
+    restaurantId?: true
+    name?: true
+    nameEn?: true
+    icon?: true
+    color?: true
+    sortOrder?: true
+    isActive?: true
+    isSeasonal?: true
+    parentId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type MenuCategoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MenuCategory to aggregate.
+     */
+    where?: MenuCategoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MenuCategories to fetch.
+     */
+    orderBy?: MenuCategoryOrderByWithRelationInput | MenuCategoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MenuCategoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MenuCategories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MenuCategories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MenuCategories
+    **/
+    _count?: true | MenuCategoryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MenuCategoryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MenuCategorySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MenuCategoryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MenuCategoryMaxAggregateInputType
+  }
+
+  export type GetMenuCategoryAggregateType<T extends MenuCategoryAggregateArgs> = {
+        [P in keyof T & keyof AggregateMenuCategory]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMenuCategory[P]>
+      : GetScalarType<T[P], AggregateMenuCategory[P]>
+  }
+
+
+
+
+  export type MenuCategoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MenuCategoryWhereInput
+    orderBy?: MenuCategoryOrderByWithAggregationInput | MenuCategoryOrderByWithAggregationInput[]
+    by: MenuCategoryScalarFieldEnum[] | MenuCategoryScalarFieldEnum
+    having?: MenuCategoryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MenuCategoryCountAggregateInputType | true
+    _avg?: MenuCategoryAvgAggregateInputType
+    _sum?: MenuCategorySumAggregateInputType
+    _min?: MenuCategoryMinAggregateInputType
+    _max?: MenuCategoryMaxAggregateInputType
+  }
+
+  export type MenuCategoryGroupByOutputType = {
+    id: string
+    restaurantId: string
+    name: string
+    nameEn: string | null
+    icon: string | null
+    color: string | null
+    sortOrder: number
+    isActive: boolean
+    isSeasonal: boolean
+    parentId: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: MenuCategoryCountAggregateOutputType | null
+    _avg: MenuCategoryAvgAggregateOutputType | null
+    _sum: MenuCategorySumAggregateOutputType | null
+    _min: MenuCategoryMinAggregateOutputType | null
+    _max: MenuCategoryMaxAggregateOutputType | null
+  }
+
+  type GetMenuCategoryGroupByPayload<T extends MenuCategoryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MenuCategoryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MenuCategoryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MenuCategoryGroupByOutputType[P]>
+            : GetScalarType<T[P], MenuCategoryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MenuCategorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    restaurantId?: boolean
+    name?: boolean
+    nameEn?: boolean
+    icon?: boolean
+    color?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    isSeasonal?: boolean
+    parentId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["menuCategory"]>
+
+  export type MenuCategorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    restaurantId?: boolean
+    name?: boolean
+    nameEn?: boolean
+    icon?: boolean
+    color?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    isSeasonal?: boolean
+    parentId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["menuCategory"]>
+
+  export type MenuCategorySelectScalar = {
+    id?: boolean
+    restaurantId?: boolean
+    name?: boolean
+    nameEn?: boolean
+    icon?: boolean
+    color?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    isSeasonal?: boolean
+    parentId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type MenuCategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }
+  export type MenuCategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    restaurant?: boolean | RestaurantDefaultArgs<ExtArgs>
+  }
+
+  export type $MenuCategoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MenuCategory"
+    objects: {
+      restaurant: Prisma.$RestaurantPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      restaurantId: string
+      name: string
+      nameEn: string | null
+      icon: string | null
+      color: string | null
+      sortOrder: number
+      isActive: boolean
+      isSeasonal: boolean
+      parentId: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["menuCategory"]>
+    composites: {}
+  }
+
+  type MenuCategoryGetPayload<S extends boolean | null | undefined | MenuCategoryDefaultArgs> = $Result.GetResult<Prisma.$MenuCategoryPayload, S>
+
+  type MenuCategoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<MenuCategoryFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: MenuCategoryCountAggregateInputType | true
+    }
+
+  export interface MenuCategoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MenuCategory'], meta: { name: 'MenuCategory' } }
+    /**
+     * Find zero or one MenuCategory that matches the filter.
+     * @param {MenuCategoryFindUniqueArgs} args - Arguments to find a MenuCategory
+     * @example
+     * // Get one MenuCategory
+     * const menuCategory = await prisma.menuCategory.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MenuCategoryFindUniqueArgs>(args: SelectSubset<T, MenuCategoryFindUniqueArgs<ExtArgs>>): Prisma__MenuCategoryClient<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one MenuCategory that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {MenuCategoryFindUniqueOrThrowArgs} args - Arguments to find a MenuCategory
+     * @example
+     * // Get one MenuCategory
+     * const menuCategory = await prisma.menuCategory.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MenuCategoryFindUniqueOrThrowArgs>(args: SelectSubset<T, MenuCategoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MenuCategoryClient<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first MenuCategory that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MenuCategoryFindFirstArgs} args - Arguments to find a MenuCategory
+     * @example
+     * // Get one MenuCategory
+     * const menuCategory = await prisma.menuCategory.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MenuCategoryFindFirstArgs>(args?: SelectSubset<T, MenuCategoryFindFirstArgs<ExtArgs>>): Prisma__MenuCategoryClient<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first MenuCategory that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MenuCategoryFindFirstOrThrowArgs} args - Arguments to find a MenuCategory
+     * @example
+     * // Get one MenuCategory
+     * const menuCategory = await prisma.menuCategory.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MenuCategoryFindFirstOrThrowArgs>(args?: SelectSubset<T, MenuCategoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__MenuCategoryClient<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more MenuCategories that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MenuCategoryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MenuCategories
+     * const menuCategories = await prisma.menuCategory.findMany()
+     * 
+     * // Get first 10 MenuCategories
+     * const menuCategories = await prisma.menuCategory.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const menuCategoryWithIdOnly = await prisma.menuCategory.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MenuCategoryFindManyArgs>(args?: SelectSubset<T, MenuCategoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a MenuCategory.
+     * @param {MenuCategoryCreateArgs} args - Arguments to create a MenuCategory.
+     * @example
+     * // Create one MenuCategory
+     * const MenuCategory = await prisma.menuCategory.create({
+     *   data: {
+     *     // ... data to create a MenuCategory
+     *   }
+     * })
+     * 
+     */
+    create<T extends MenuCategoryCreateArgs>(args: SelectSubset<T, MenuCategoryCreateArgs<ExtArgs>>): Prisma__MenuCategoryClient<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many MenuCategories.
+     * @param {MenuCategoryCreateManyArgs} args - Arguments to create many MenuCategories.
+     * @example
+     * // Create many MenuCategories
+     * const menuCategory = await prisma.menuCategory.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MenuCategoryCreateManyArgs>(args?: SelectSubset<T, MenuCategoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MenuCategories and returns the data saved in the database.
+     * @param {MenuCategoryCreateManyAndReturnArgs} args - Arguments to create many MenuCategories.
+     * @example
+     * // Create many MenuCategories
+     * const menuCategory = await prisma.menuCategory.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MenuCategories and only return the `id`
+     * const menuCategoryWithIdOnly = await prisma.menuCategory.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MenuCategoryCreateManyAndReturnArgs>(args?: SelectSubset<T, MenuCategoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a MenuCategory.
+     * @param {MenuCategoryDeleteArgs} args - Arguments to delete one MenuCategory.
+     * @example
+     * // Delete one MenuCategory
+     * const MenuCategory = await prisma.menuCategory.delete({
+     *   where: {
+     *     // ... filter to delete one MenuCategory
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MenuCategoryDeleteArgs>(args: SelectSubset<T, MenuCategoryDeleteArgs<ExtArgs>>): Prisma__MenuCategoryClient<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one MenuCategory.
+     * @param {MenuCategoryUpdateArgs} args - Arguments to update one MenuCategory.
+     * @example
+     * // Update one MenuCategory
+     * const menuCategory = await prisma.menuCategory.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MenuCategoryUpdateArgs>(args: SelectSubset<T, MenuCategoryUpdateArgs<ExtArgs>>): Prisma__MenuCategoryClient<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more MenuCategories.
+     * @param {MenuCategoryDeleteManyArgs} args - Arguments to filter MenuCategories to delete.
+     * @example
+     * // Delete a few MenuCategories
+     * const { count } = await prisma.menuCategory.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MenuCategoryDeleteManyArgs>(args?: SelectSubset<T, MenuCategoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MenuCategories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MenuCategoryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MenuCategories
+     * const menuCategory = await prisma.menuCategory.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MenuCategoryUpdateManyArgs>(args: SelectSubset<T, MenuCategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one MenuCategory.
+     * @param {MenuCategoryUpsertArgs} args - Arguments to update or create a MenuCategory.
+     * @example
+     * // Update or create a MenuCategory
+     * const menuCategory = await prisma.menuCategory.upsert({
+     *   create: {
+     *     // ... data to create a MenuCategory
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MenuCategory we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MenuCategoryUpsertArgs>(args: SelectSubset<T, MenuCategoryUpsertArgs<ExtArgs>>): Prisma__MenuCategoryClient<$Result.GetResult<Prisma.$MenuCategoryPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of MenuCategories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MenuCategoryCountArgs} args - Arguments to filter MenuCategories to count.
+     * @example
+     * // Count the number of MenuCategories
+     * const count = await prisma.menuCategory.count({
+     *   where: {
+     *     // ... the filter for the MenuCategories we want to count
+     *   }
+     * })
+    **/
+    count<T extends MenuCategoryCountArgs>(
+      args?: Subset<T, MenuCategoryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MenuCategoryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MenuCategory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MenuCategoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MenuCategoryAggregateArgs>(args: Subset<T, MenuCategoryAggregateArgs>): Prisma.PrismaPromise<GetMenuCategoryAggregateType<T>>
+
+    /**
+     * Group by MenuCategory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MenuCategoryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MenuCategoryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MenuCategoryGroupByArgs['orderBy'] }
+        : { orderBy?: MenuCategoryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MenuCategoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMenuCategoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MenuCategory model
+   */
+  readonly fields: MenuCategoryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MenuCategory.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MenuCategoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    restaurant<T extends RestaurantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RestaurantDefaultArgs<ExtArgs>>): Prisma__RestaurantClient<$Result.GetResult<Prisma.$RestaurantPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MenuCategory model
+   */ 
+  interface MenuCategoryFieldRefs {
+    readonly id: FieldRef<"MenuCategory", 'String'>
+    readonly restaurantId: FieldRef<"MenuCategory", 'String'>
+    readonly name: FieldRef<"MenuCategory", 'String'>
+    readonly nameEn: FieldRef<"MenuCategory", 'String'>
+    readonly icon: FieldRef<"MenuCategory", 'String'>
+    readonly color: FieldRef<"MenuCategory", 'String'>
+    readonly sortOrder: FieldRef<"MenuCategory", 'Int'>
+    readonly isActive: FieldRef<"MenuCategory", 'Boolean'>
+    readonly isSeasonal: FieldRef<"MenuCategory", 'Boolean'>
+    readonly parentId: FieldRef<"MenuCategory", 'String'>
+    readonly createdAt: FieldRef<"MenuCategory", 'DateTime'>
+    readonly updatedAt: FieldRef<"MenuCategory", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MenuCategory findUnique
+   */
+  export type MenuCategoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which MenuCategory to fetch.
+     */
+    where: MenuCategoryWhereUniqueInput
+  }
+
+  /**
+   * MenuCategory findUniqueOrThrow
+   */
+  export type MenuCategoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which MenuCategory to fetch.
+     */
+    where: MenuCategoryWhereUniqueInput
+  }
+
+  /**
+   * MenuCategory findFirst
+   */
+  export type MenuCategoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which MenuCategory to fetch.
+     */
+    where?: MenuCategoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MenuCategories to fetch.
+     */
+    orderBy?: MenuCategoryOrderByWithRelationInput | MenuCategoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MenuCategories.
+     */
+    cursor?: MenuCategoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MenuCategories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MenuCategories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MenuCategories.
+     */
+    distinct?: MenuCategoryScalarFieldEnum | MenuCategoryScalarFieldEnum[]
+  }
+
+  /**
+   * MenuCategory findFirstOrThrow
+   */
+  export type MenuCategoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which MenuCategory to fetch.
+     */
+    where?: MenuCategoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MenuCategories to fetch.
+     */
+    orderBy?: MenuCategoryOrderByWithRelationInput | MenuCategoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MenuCategories.
+     */
+    cursor?: MenuCategoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MenuCategories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MenuCategories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MenuCategories.
+     */
+    distinct?: MenuCategoryScalarFieldEnum | MenuCategoryScalarFieldEnum[]
+  }
+
+  /**
+   * MenuCategory findMany
+   */
+  export type MenuCategoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which MenuCategories to fetch.
+     */
+    where?: MenuCategoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MenuCategories to fetch.
+     */
+    orderBy?: MenuCategoryOrderByWithRelationInput | MenuCategoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MenuCategories.
+     */
+    cursor?: MenuCategoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MenuCategories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MenuCategories.
+     */
+    skip?: number
+    distinct?: MenuCategoryScalarFieldEnum | MenuCategoryScalarFieldEnum[]
+  }
+
+  /**
+   * MenuCategory create
+   */
+  export type MenuCategoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a MenuCategory.
+     */
+    data: XOR<MenuCategoryCreateInput, MenuCategoryUncheckedCreateInput>
+  }
+
+  /**
+   * MenuCategory createMany
+   */
+  export type MenuCategoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MenuCategories.
+     */
+    data: MenuCategoryCreateManyInput | MenuCategoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MenuCategory createManyAndReturn
+   */
+  export type MenuCategoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many MenuCategories.
+     */
+    data: MenuCategoryCreateManyInput | MenuCategoryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MenuCategory update
+   */
+  export type MenuCategoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a MenuCategory.
+     */
+    data: XOR<MenuCategoryUpdateInput, MenuCategoryUncheckedUpdateInput>
+    /**
+     * Choose, which MenuCategory to update.
+     */
+    where: MenuCategoryWhereUniqueInput
+  }
+
+  /**
+   * MenuCategory updateMany
+   */
+  export type MenuCategoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MenuCategories.
+     */
+    data: XOR<MenuCategoryUpdateManyMutationInput, MenuCategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which MenuCategories to update
+     */
+    where?: MenuCategoryWhereInput
+  }
+
+  /**
+   * MenuCategory upsert
+   */
+  export type MenuCategoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the MenuCategory to update in case it exists.
+     */
+    where: MenuCategoryWhereUniqueInput
+    /**
+     * In case the MenuCategory found by the `where` argument doesn't exist, create a new MenuCategory with this data.
+     */
+    create: XOR<MenuCategoryCreateInput, MenuCategoryUncheckedCreateInput>
+    /**
+     * In case the MenuCategory was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MenuCategoryUpdateInput, MenuCategoryUncheckedUpdateInput>
+  }
+
+  /**
+   * MenuCategory delete
+   */
+  export type MenuCategoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
+    /**
+     * Filter which MenuCategory to delete.
+     */
+    where: MenuCategoryWhereUniqueInput
+  }
+
+  /**
+   * MenuCategory deleteMany
+   */
+  export type MenuCategoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MenuCategories to delete
+     */
+    where?: MenuCategoryWhereInput
+  }
+
+  /**
+   * MenuCategory without action
+   */
+  export type MenuCategoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MenuCategory
+     */
+    select?: MenuCategorySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MenuCategoryInclude<ExtArgs> | null
   }
 
 
@@ -22150,6 +28063,7 @@ export namespace Prisma {
     tenantId: 'tenantId',
     hotelCode: 'hotelCode',
     storeCode: 'storeCode',
+    restCode: 'restCode',
     databaseUrl: 'databaseUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -22194,6 +28108,101 @@ export namespace Prisma {
   };
 
   export type StoreEmployeeScalarFieldEnum = (typeof StoreEmployeeScalarFieldEnum)[keyof typeof StoreEmployeeScalarFieldEnum]
+
+
+  export const RestaurantScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    name: 'name',
+    slug: 'slug',
+    type: 'type',
+    address: 'address',
+    phone: 'phone',
+    email: 'email',
+    taxId: 'taxId',
+    currency: 'currency',
+    timezone: 'timezone',
+    logoUrl: 'logoUrl',
+    isActive: 'isActive',
+    settings: 'settings',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RestaurantScalarFieldEnum = (typeof RestaurantScalarFieldEnum)[keyof typeof RestaurantScalarFieldEnum]
+
+
+  export const RestaurantEmployeeScalarFieldEnum: {
+    id: 'id',
+    restaurantId: 'restaurantId',
+    userId: 'userId',
+    firstName: 'firstName',
+    lastName: 'lastName',
+    phone: 'phone',
+    email: 'email',
+    role: 'role',
+    pin: 'pin',
+    isActive: 'isActive',
+    photoUrl: 'photoUrl',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RestaurantEmployeeScalarFieldEnum = (typeof RestaurantEmployeeScalarFieldEnum)[keyof typeof RestaurantEmployeeScalarFieldEnum]
+
+
+  export const RestaurantZoneScalarFieldEnum: {
+    id: 'id',
+    restaurantId: 'restaurantId',
+    name: 'name',
+    color: 'color',
+    sortOrder: 'sortOrder',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RestaurantZoneScalarFieldEnum = (typeof RestaurantZoneScalarFieldEnum)[keyof typeof RestaurantZoneScalarFieldEnum]
+
+
+  export const RestaurantTableScalarFieldEnum: {
+    id: 'id',
+    restaurantId: 'restaurantId',
+    zoneId: 'zoneId',
+    number: 'number',
+    label: 'label',
+    seats: 'seats',
+    shape: 'shape',
+    status: 'status',
+    posX: 'posX',
+    posY: 'posY',
+    width: 'width',
+    height: 'height',
+    rotation: 'rotation',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RestaurantTableScalarFieldEnum = (typeof RestaurantTableScalarFieldEnum)[keyof typeof RestaurantTableScalarFieldEnum]
+
+
+  export const MenuCategoryScalarFieldEnum: {
+    id: 'id',
+    restaurantId: 'restaurantId',
+    name: 'name',
+    nameEn: 'nameEn',
+    icon: 'icon',
+    color: 'color',
+    sortOrder: 'sortOrder',
+    isActive: 'isActive',
+    isSeasonal: 'isSeasonal',
+    parentId: 'parentId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type MenuCategoryScalarFieldEnum = (typeof MenuCategoryScalarFieldEnum)[keyof typeof MenuCategoryScalarFieldEnum]
 
 
   export const UserScalarFieldEnum: {
@@ -22548,16 +28557,9 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Role'
+   * Reference to a field of type 'Json'
    */
-  export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role'>
-    
-
-
-  /**
-   * Reference to a field of type 'Role[]'
-   */
-  export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role[]'>
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
     
 
 
@@ -22572,6 +28574,34 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Role'
+   */
+  export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role'>
+    
+
+
+  /**
+   * Reference to a field of type 'Role[]'
+   */
+  export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role[]'>
     
 
 
@@ -22632,13 +28662,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Json'
-   */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-  /**
    * Reference to a field of type 'TicketPriority'
    */
   export type EnumTicketPriorityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketPriority'>
@@ -22663,20 +28686,6 @@ export namespace Prisma {
    * Reference to a field of type 'TicketStatus[]'
    */
   export type ListEnumTicketStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketStatus[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
   /**
    * Deep Input Types
@@ -22704,6 +28713,7 @@ export namespace Prisma {
     tenantId?: StringFilter<"Organization"> | string
     hotelCode?: StringFilter<"Organization"> | string
     storeCode?: StringNullableFilter<"Organization"> | string | null
+    restCode?: StringNullableFilter<"Organization"> | string | null
     databaseUrl?: StringNullableFilter<"Organization"> | string | null
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
@@ -22731,6 +28741,7 @@ export namespace Prisma {
     tenantId?: SortOrder
     hotelCode?: SortOrder
     storeCode?: SortOrderInput | SortOrder
+    restCode?: SortOrderInput | SortOrder
     databaseUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -22746,6 +28757,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode?: string
     storeCode?: string
+    restCode?: string
     AND?: OrganizationWhereInput | OrganizationWhereInput[]
     OR?: OrganizationWhereInput[]
     NOT?: OrganizationWhereInput | OrganizationWhereInput[]
@@ -22768,7 +28780,7 @@ export namespace Prisma {
     subscription?: XOR<SubscriptionNullableRelationFilter, SubscriptionWhereInput> | null
     tickets?: SupportTicketListRelationFilter
     users?: UserListRelationFilter
-  }, "id" | "slug" | "tenantId" | "hotelCode" | "storeCode">
+  }, "id" | "slug" | "tenantId" | "hotelCode" | "storeCode" | "restCode">
 
   export type OrganizationOrderByWithAggregationInput = {
     id?: SortOrder
@@ -22788,6 +28800,7 @@ export namespace Prisma {
     tenantId?: SortOrder
     hotelCode?: SortOrder
     storeCode?: SortOrderInput | SortOrder
+    restCode?: SortOrderInput | SortOrder
     databaseUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -22817,6 +28830,7 @@ export namespace Prisma {
     tenantId?: StringWithAggregatesFilter<"Organization"> | string
     hotelCode?: StringWithAggregatesFilter<"Organization"> | string
     storeCode?: StringNullableWithAggregatesFilter<"Organization"> | string | null
+    restCode?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     databaseUrl?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
@@ -23010,6 +29024,503 @@ export namespace Prisma {
     isActive?: BoolWithAggregatesFilter<"StoreEmployee"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"StoreEmployee"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"StoreEmployee"> | Date | string
+  }
+
+  export type RestaurantWhereInput = {
+    AND?: RestaurantWhereInput | RestaurantWhereInput[]
+    OR?: RestaurantWhereInput[]
+    NOT?: RestaurantWhereInput | RestaurantWhereInput[]
+    id?: StringFilter<"Restaurant"> | string
+    tenantId?: StringFilter<"Restaurant"> | string
+    name?: StringFilter<"Restaurant"> | string
+    slug?: StringFilter<"Restaurant"> | string
+    type?: StringFilter<"Restaurant"> | string
+    address?: StringNullableFilter<"Restaurant"> | string | null
+    phone?: StringNullableFilter<"Restaurant"> | string | null
+    email?: StringNullableFilter<"Restaurant"> | string | null
+    taxId?: StringNullableFilter<"Restaurant"> | string | null
+    currency?: StringFilter<"Restaurant"> | string
+    timezone?: StringFilter<"Restaurant"> | string
+    logoUrl?: StringNullableFilter<"Restaurant"> | string | null
+    isActive?: BoolFilter<"Restaurant"> | boolean
+    settings?: JsonNullableFilter<"Restaurant">
+    createdAt?: DateTimeFilter<"Restaurant"> | Date | string
+    updatedAt?: DateTimeFilter<"Restaurant"> | Date | string
+    employees?: RestaurantEmployeeListRelationFilter
+    zones?: RestaurantZoneListRelationFilter
+    tables?: RestaurantTableListRelationFilter
+    menuCategories?: MenuCategoryListRelationFilter
+  }
+
+  export type RestaurantOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    type?: SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    taxId?: SortOrderInput | SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    settings?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    employees?: RestaurantEmployeeOrderByRelationAggregateInput
+    zones?: RestaurantZoneOrderByRelationAggregateInput
+    tables?: RestaurantTableOrderByRelationAggregateInput
+    menuCategories?: MenuCategoryOrderByRelationAggregateInput
+  }
+
+  export type RestaurantWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    slug?: string
+    AND?: RestaurantWhereInput | RestaurantWhereInput[]
+    OR?: RestaurantWhereInput[]
+    NOT?: RestaurantWhereInput | RestaurantWhereInput[]
+    tenantId?: StringFilter<"Restaurant"> | string
+    name?: StringFilter<"Restaurant"> | string
+    type?: StringFilter<"Restaurant"> | string
+    address?: StringNullableFilter<"Restaurant"> | string | null
+    phone?: StringNullableFilter<"Restaurant"> | string | null
+    email?: StringNullableFilter<"Restaurant"> | string | null
+    taxId?: StringNullableFilter<"Restaurant"> | string | null
+    currency?: StringFilter<"Restaurant"> | string
+    timezone?: StringFilter<"Restaurant"> | string
+    logoUrl?: StringNullableFilter<"Restaurant"> | string | null
+    isActive?: BoolFilter<"Restaurant"> | boolean
+    settings?: JsonNullableFilter<"Restaurant">
+    createdAt?: DateTimeFilter<"Restaurant"> | Date | string
+    updatedAt?: DateTimeFilter<"Restaurant"> | Date | string
+    employees?: RestaurantEmployeeListRelationFilter
+    zones?: RestaurantZoneListRelationFilter
+    tables?: RestaurantTableListRelationFilter
+    menuCategories?: MenuCategoryListRelationFilter
+  }, "id" | "slug">
+
+  export type RestaurantOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    type?: SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    taxId?: SortOrderInput | SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    settings?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: RestaurantCountOrderByAggregateInput
+    _max?: RestaurantMaxOrderByAggregateInput
+    _min?: RestaurantMinOrderByAggregateInput
+  }
+
+  export type RestaurantScalarWhereWithAggregatesInput = {
+    AND?: RestaurantScalarWhereWithAggregatesInput | RestaurantScalarWhereWithAggregatesInput[]
+    OR?: RestaurantScalarWhereWithAggregatesInput[]
+    NOT?: RestaurantScalarWhereWithAggregatesInput | RestaurantScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Restaurant"> | string
+    tenantId?: StringWithAggregatesFilter<"Restaurant"> | string
+    name?: StringWithAggregatesFilter<"Restaurant"> | string
+    slug?: StringWithAggregatesFilter<"Restaurant"> | string
+    type?: StringWithAggregatesFilter<"Restaurant"> | string
+    address?: StringNullableWithAggregatesFilter<"Restaurant"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"Restaurant"> | string | null
+    email?: StringNullableWithAggregatesFilter<"Restaurant"> | string | null
+    taxId?: StringNullableWithAggregatesFilter<"Restaurant"> | string | null
+    currency?: StringWithAggregatesFilter<"Restaurant"> | string
+    timezone?: StringWithAggregatesFilter<"Restaurant"> | string
+    logoUrl?: StringNullableWithAggregatesFilter<"Restaurant"> | string | null
+    isActive?: BoolWithAggregatesFilter<"Restaurant"> | boolean
+    settings?: JsonNullableWithAggregatesFilter<"Restaurant">
+    createdAt?: DateTimeWithAggregatesFilter<"Restaurant"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Restaurant"> | Date | string
+  }
+
+  export type RestaurantEmployeeWhereInput = {
+    AND?: RestaurantEmployeeWhereInput | RestaurantEmployeeWhereInput[]
+    OR?: RestaurantEmployeeWhereInput[]
+    NOT?: RestaurantEmployeeWhereInput | RestaurantEmployeeWhereInput[]
+    id?: StringFilter<"RestaurantEmployee"> | string
+    restaurantId?: StringFilter<"RestaurantEmployee"> | string
+    userId?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    firstName?: StringFilter<"RestaurantEmployee"> | string
+    lastName?: StringFilter<"RestaurantEmployee"> | string
+    phone?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    email?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    role?: StringFilter<"RestaurantEmployee"> | string
+    pin?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    isActive?: BoolFilter<"RestaurantEmployee"> | boolean
+    photoUrl?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    createdAt?: DateTimeFilter<"RestaurantEmployee"> | Date | string
+    updatedAt?: DateTimeFilter<"RestaurantEmployee"> | Date | string
+    restaurant?: XOR<RestaurantRelationFilter, RestaurantWhereInput>
+  }
+
+  export type RestaurantEmployeeOrderByWithRelationInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    role?: SortOrder
+    pin?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    photoUrl?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    restaurant?: RestaurantOrderByWithRelationInput
+  }
+
+  export type RestaurantEmployeeWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: RestaurantEmployeeWhereInput | RestaurantEmployeeWhereInput[]
+    OR?: RestaurantEmployeeWhereInput[]
+    NOT?: RestaurantEmployeeWhereInput | RestaurantEmployeeWhereInput[]
+    restaurantId?: StringFilter<"RestaurantEmployee"> | string
+    userId?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    firstName?: StringFilter<"RestaurantEmployee"> | string
+    lastName?: StringFilter<"RestaurantEmployee"> | string
+    phone?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    email?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    role?: StringFilter<"RestaurantEmployee"> | string
+    pin?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    isActive?: BoolFilter<"RestaurantEmployee"> | boolean
+    photoUrl?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    createdAt?: DateTimeFilter<"RestaurantEmployee"> | Date | string
+    updatedAt?: DateTimeFilter<"RestaurantEmployee"> | Date | string
+    restaurant?: XOR<RestaurantRelationFilter, RestaurantWhereInput>
+  }, "id">
+
+  export type RestaurantEmployeeOrderByWithAggregationInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    role?: SortOrder
+    pin?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    photoUrl?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: RestaurantEmployeeCountOrderByAggregateInput
+    _max?: RestaurantEmployeeMaxOrderByAggregateInput
+    _min?: RestaurantEmployeeMinOrderByAggregateInput
+  }
+
+  export type RestaurantEmployeeScalarWhereWithAggregatesInput = {
+    AND?: RestaurantEmployeeScalarWhereWithAggregatesInput | RestaurantEmployeeScalarWhereWithAggregatesInput[]
+    OR?: RestaurantEmployeeScalarWhereWithAggregatesInput[]
+    NOT?: RestaurantEmployeeScalarWhereWithAggregatesInput | RestaurantEmployeeScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"RestaurantEmployee"> | string
+    restaurantId?: StringWithAggregatesFilter<"RestaurantEmployee"> | string
+    userId?: StringNullableWithAggregatesFilter<"RestaurantEmployee"> | string | null
+    firstName?: StringWithAggregatesFilter<"RestaurantEmployee"> | string
+    lastName?: StringWithAggregatesFilter<"RestaurantEmployee"> | string
+    phone?: StringNullableWithAggregatesFilter<"RestaurantEmployee"> | string | null
+    email?: StringNullableWithAggregatesFilter<"RestaurantEmployee"> | string | null
+    role?: StringWithAggregatesFilter<"RestaurantEmployee"> | string
+    pin?: StringNullableWithAggregatesFilter<"RestaurantEmployee"> | string | null
+    isActive?: BoolWithAggregatesFilter<"RestaurantEmployee"> | boolean
+    photoUrl?: StringNullableWithAggregatesFilter<"RestaurantEmployee"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"RestaurantEmployee"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RestaurantEmployee"> | Date | string
+  }
+
+  export type RestaurantZoneWhereInput = {
+    AND?: RestaurantZoneWhereInput | RestaurantZoneWhereInput[]
+    OR?: RestaurantZoneWhereInput[]
+    NOT?: RestaurantZoneWhereInput | RestaurantZoneWhereInput[]
+    id?: StringFilter<"RestaurantZone"> | string
+    restaurantId?: StringFilter<"RestaurantZone"> | string
+    name?: StringFilter<"RestaurantZone"> | string
+    color?: StringNullableFilter<"RestaurantZone"> | string | null
+    sortOrder?: IntFilter<"RestaurantZone"> | number
+    isActive?: BoolFilter<"RestaurantZone"> | boolean
+    createdAt?: DateTimeFilter<"RestaurantZone"> | Date | string
+    updatedAt?: DateTimeFilter<"RestaurantZone"> | Date | string
+    restaurant?: XOR<RestaurantRelationFilter, RestaurantWhereInput>
+    tables?: RestaurantTableListRelationFilter
+  }
+
+  export type RestaurantZoneOrderByWithRelationInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    color?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    restaurant?: RestaurantOrderByWithRelationInput
+    tables?: RestaurantTableOrderByRelationAggregateInput
+  }
+
+  export type RestaurantZoneWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: RestaurantZoneWhereInput | RestaurantZoneWhereInput[]
+    OR?: RestaurantZoneWhereInput[]
+    NOT?: RestaurantZoneWhereInput | RestaurantZoneWhereInput[]
+    restaurantId?: StringFilter<"RestaurantZone"> | string
+    name?: StringFilter<"RestaurantZone"> | string
+    color?: StringNullableFilter<"RestaurantZone"> | string | null
+    sortOrder?: IntFilter<"RestaurantZone"> | number
+    isActive?: BoolFilter<"RestaurantZone"> | boolean
+    createdAt?: DateTimeFilter<"RestaurantZone"> | Date | string
+    updatedAt?: DateTimeFilter<"RestaurantZone"> | Date | string
+    restaurant?: XOR<RestaurantRelationFilter, RestaurantWhereInput>
+    tables?: RestaurantTableListRelationFilter
+  }, "id">
+
+  export type RestaurantZoneOrderByWithAggregationInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    color?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: RestaurantZoneCountOrderByAggregateInput
+    _avg?: RestaurantZoneAvgOrderByAggregateInput
+    _max?: RestaurantZoneMaxOrderByAggregateInput
+    _min?: RestaurantZoneMinOrderByAggregateInput
+    _sum?: RestaurantZoneSumOrderByAggregateInput
+  }
+
+  export type RestaurantZoneScalarWhereWithAggregatesInput = {
+    AND?: RestaurantZoneScalarWhereWithAggregatesInput | RestaurantZoneScalarWhereWithAggregatesInput[]
+    OR?: RestaurantZoneScalarWhereWithAggregatesInput[]
+    NOT?: RestaurantZoneScalarWhereWithAggregatesInput | RestaurantZoneScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"RestaurantZone"> | string
+    restaurantId?: StringWithAggregatesFilter<"RestaurantZone"> | string
+    name?: StringWithAggregatesFilter<"RestaurantZone"> | string
+    color?: StringNullableWithAggregatesFilter<"RestaurantZone"> | string | null
+    sortOrder?: IntWithAggregatesFilter<"RestaurantZone"> | number
+    isActive?: BoolWithAggregatesFilter<"RestaurantZone"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"RestaurantZone"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RestaurantZone"> | Date | string
+  }
+
+  export type RestaurantTableWhereInput = {
+    AND?: RestaurantTableWhereInput | RestaurantTableWhereInput[]
+    OR?: RestaurantTableWhereInput[]
+    NOT?: RestaurantTableWhereInput | RestaurantTableWhereInput[]
+    id?: StringFilter<"RestaurantTable"> | string
+    restaurantId?: StringFilter<"RestaurantTable"> | string
+    zoneId?: StringFilter<"RestaurantTable"> | string
+    number?: StringFilter<"RestaurantTable"> | string
+    label?: StringNullableFilter<"RestaurantTable"> | string | null
+    seats?: IntFilter<"RestaurantTable"> | number
+    shape?: StringFilter<"RestaurantTable"> | string
+    status?: StringFilter<"RestaurantTable"> | string
+    posX?: FloatFilter<"RestaurantTable"> | number
+    posY?: FloatFilter<"RestaurantTable"> | number
+    width?: FloatFilter<"RestaurantTable"> | number
+    height?: FloatFilter<"RestaurantTable"> | number
+    rotation?: FloatFilter<"RestaurantTable"> | number
+    isActive?: BoolFilter<"RestaurantTable"> | boolean
+    createdAt?: DateTimeFilter<"RestaurantTable"> | Date | string
+    updatedAt?: DateTimeFilter<"RestaurantTable"> | Date | string
+    restaurant?: XOR<RestaurantRelationFilter, RestaurantWhereInput>
+    zone?: XOR<RestaurantZoneRelationFilter, RestaurantZoneWhereInput>
+  }
+
+  export type RestaurantTableOrderByWithRelationInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    zoneId?: SortOrder
+    number?: SortOrder
+    label?: SortOrderInput | SortOrder
+    seats?: SortOrder
+    shape?: SortOrder
+    status?: SortOrder
+    posX?: SortOrder
+    posY?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    rotation?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    restaurant?: RestaurantOrderByWithRelationInput
+    zone?: RestaurantZoneOrderByWithRelationInput
+  }
+
+  export type RestaurantTableWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    restaurantId_number?: RestaurantTableRestaurantIdNumberCompoundUniqueInput
+    AND?: RestaurantTableWhereInput | RestaurantTableWhereInput[]
+    OR?: RestaurantTableWhereInput[]
+    NOT?: RestaurantTableWhereInput | RestaurantTableWhereInput[]
+    restaurantId?: StringFilter<"RestaurantTable"> | string
+    zoneId?: StringFilter<"RestaurantTable"> | string
+    number?: StringFilter<"RestaurantTable"> | string
+    label?: StringNullableFilter<"RestaurantTable"> | string | null
+    seats?: IntFilter<"RestaurantTable"> | number
+    shape?: StringFilter<"RestaurantTable"> | string
+    status?: StringFilter<"RestaurantTable"> | string
+    posX?: FloatFilter<"RestaurantTable"> | number
+    posY?: FloatFilter<"RestaurantTable"> | number
+    width?: FloatFilter<"RestaurantTable"> | number
+    height?: FloatFilter<"RestaurantTable"> | number
+    rotation?: FloatFilter<"RestaurantTable"> | number
+    isActive?: BoolFilter<"RestaurantTable"> | boolean
+    createdAt?: DateTimeFilter<"RestaurantTable"> | Date | string
+    updatedAt?: DateTimeFilter<"RestaurantTable"> | Date | string
+    restaurant?: XOR<RestaurantRelationFilter, RestaurantWhereInput>
+    zone?: XOR<RestaurantZoneRelationFilter, RestaurantZoneWhereInput>
+  }, "id" | "restaurantId_number">
+
+  export type RestaurantTableOrderByWithAggregationInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    zoneId?: SortOrder
+    number?: SortOrder
+    label?: SortOrderInput | SortOrder
+    seats?: SortOrder
+    shape?: SortOrder
+    status?: SortOrder
+    posX?: SortOrder
+    posY?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    rotation?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: RestaurantTableCountOrderByAggregateInput
+    _avg?: RestaurantTableAvgOrderByAggregateInput
+    _max?: RestaurantTableMaxOrderByAggregateInput
+    _min?: RestaurantTableMinOrderByAggregateInput
+    _sum?: RestaurantTableSumOrderByAggregateInput
+  }
+
+  export type RestaurantTableScalarWhereWithAggregatesInput = {
+    AND?: RestaurantTableScalarWhereWithAggregatesInput | RestaurantTableScalarWhereWithAggregatesInput[]
+    OR?: RestaurantTableScalarWhereWithAggregatesInput[]
+    NOT?: RestaurantTableScalarWhereWithAggregatesInput | RestaurantTableScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"RestaurantTable"> | string
+    restaurantId?: StringWithAggregatesFilter<"RestaurantTable"> | string
+    zoneId?: StringWithAggregatesFilter<"RestaurantTable"> | string
+    number?: StringWithAggregatesFilter<"RestaurantTable"> | string
+    label?: StringNullableWithAggregatesFilter<"RestaurantTable"> | string | null
+    seats?: IntWithAggregatesFilter<"RestaurantTable"> | number
+    shape?: StringWithAggregatesFilter<"RestaurantTable"> | string
+    status?: StringWithAggregatesFilter<"RestaurantTable"> | string
+    posX?: FloatWithAggregatesFilter<"RestaurantTable"> | number
+    posY?: FloatWithAggregatesFilter<"RestaurantTable"> | number
+    width?: FloatWithAggregatesFilter<"RestaurantTable"> | number
+    height?: FloatWithAggregatesFilter<"RestaurantTable"> | number
+    rotation?: FloatWithAggregatesFilter<"RestaurantTable"> | number
+    isActive?: BoolWithAggregatesFilter<"RestaurantTable"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"RestaurantTable"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RestaurantTable"> | Date | string
+  }
+
+  export type MenuCategoryWhereInput = {
+    AND?: MenuCategoryWhereInput | MenuCategoryWhereInput[]
+    OR?: MenuCategoryWhereInput[]
+    NOT?: MenuCategoryWhereInput | MenuCategoryWhereInput[]
+    id?: StringFilter<"MenuCategory"> | string
+    restaurantId?: StringFilter<"MenuCategory"> | string
+    name?: StringFilter<"MenuCategory"> | string
+    nameEn?: StringNullableFilter<"MenuCategory"> | string | null
+    icon?: StringNullableFilter<"MenuCategory"> | string | null
+    color?: StringNullableFilter<"MenuCategory"> | string | null
+    sortOrder?: IntFilter<"MenuCategory"> | number
+    isActive?: BoolFilter<"MenuCategory"> | boolean
+    isSeasonal?: BoolFilter<"MenuCategory"> | boolean
+    parentId?: StringNullableFilter<"MenuCategory"> | string | null
+    createdAt?: DateTimeFilter<"MenuCategory"> | Date | string
+    updatedAt?: DateTimeFilter<"MenuCategory"> | Date | string
+    restaurant?: XOR<RestaurantRelationFilter, RestaurantWhereInput>
+  }
+
+  export type MenuCategoryOrderByWithRelationInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrderInput | SortOrder
+    icon?: SortOrderInput | SortOrder
+    color?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    isSeasonal?: SortOrder
+    parentId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    restaurant?: RestaurantOrderByWithRelationInput
+  }
+
+  export type MenuCategoryWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: MenuCategoryWhereInput | MenuCategoryWhereInput[]
+    OR?: MenuCategoryWhereInput[]
+    NOT?: MenuCategoryWhereInput | MenuCategoryWhereInput[]
+    restaurantId?: StringFilter<"MenuCategory"> | string
+    name?: StringFilter<"MenuCategory"> | string
+    nameEn?: StringNullableFilter<"MenuCategory"> | string | null
+    icon?: StringNullableFilter<"MenuCategory"> | string | null
+    color?: StringNullableFilter<"MenuCategory"> | string | null
+    sortOrder?: IntFilter<"MenuCategory"> | number
+    isActive?: BoolFilter<"MenuCategory"> | boolean
+    isSeasonal?: BoolFilter<"MenuCategory"> | boolean
+    parentId?: StringNullableFilter<"MenuCategory"> | string | null
+    createdAt?: DateTimeFilter<"MenuCategory"> | Date | string
+    updatedAt?: DateTimeFilter<"MenuCategory"> | Date | string
+    restaurant?: XOR<RestaurantRelationFilter, RestaurantWhereInput>
+  }, "id">
+
+  export type MenuCategoryOrderByWithAggregationInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrderInput | SortOrder
+    icon?: SortOrderInput | SortOrder
+    color?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    isSeasonal?: SortOrder
+    parentId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: MenuCategoryCountOrderByAggregateInput
+    _avg?: MenuCategoryAvgOrderByAggregateInput
+    _max?: MenuCategoryMaxOrderByAggregateInput
+    _min?: MenuCategoryMinOrderByAggregateInput
+    _sum?: MenuCategorySumOrderByAggregateInput
+  }
+
+  export type MenuCategoryScalarWhereWithAggregatesInput = {
+    AND?: MenuCategoryScalarWhereWithAggregatesInput | MenuCategoryScalarWhereWithAggregatesInput[]
+    OR?: MenuCategoryScalarWhereWithAggregatesInput[]
+    NOT?: MenuCategoryScalarWhereWithAggregatesInput | MenuCategoryScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"MenuCategory"> | string
+    restaurantId?: StringWithAggregatesFilter<"MenuCategory"> | string
+    name?: StringWithAggregatesFilter<"MenuCategory"> | string
+    nameEn?: StringNullableWithAggregatesFilter<"MenuCategory"> | string | null
+    icon?: StringNullableWithAggregatesFilter<"MenuCategory"> | string | null
+    color?: StringNullableWithAggregatesFilter<"MenuCategory"> | string | null
+    sortOrder?: IntWithAggregatesFilter<"MenuCategory"> | number
+    isActive?: BoolWithAggregatesFilter<"MenuCategory"> | boolean
+    isSeasonal?: BoolWithAggregatesFilter<"MenuCategory"> | boolean
+    parentId?: StringNullableWithAggregatesFilter<"MenuCategory"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"MenuCategory"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"MenuCategory"> | Date | string
   }
 
   export type UserWhereInput = {
@@ -24365,6 +30876,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24392,6 +30904,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24419,6 +30932,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24446,6 +30960,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24473,6 +30988,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24496,6 +31012,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24519,6 +31036,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24747,6 +31265,581 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     pin?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantCreateInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: RestaurantEmployeeCreateNestedManyWithoutRestaurantInput
+    zones?: RestaurantZoneCreateNestedManyWithoutRestaurantInput
+    tables?: RestaurantTableCreateNestedManyWithoutRestaurantInput
+    menuCategories?: MenuCategoryCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: RestaurantEmployeeUncheckedCreateNestedManyWithoutRestaurantInput
+    zones?: RestaurantZoneUncheckedCreateNestedManyWithoutRestaurantInput
+    tables?: RestaurantTableUncheckedCreateNestedManyWithoutRestaurantInput
+    menuCategories?: MenuCategoryUncheckedCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: RestaurantEmployeeUpdateManyWithoutRestaurantNestedInput
+    zones?: RestaurantZoneUpdateManyWithoutRestaurantNestedInput
+    tables?: RestaurantTableUpdateManyWithoutRestaurantNestedInput
+    menuCategories?: MenuCategoryUpdateManyWithoutRestaurantNestedInput
+  }
+
+  export type RestaurantUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: RestaurantEmployeeUncheckedUpdateManyWithoutRestaurantNestedInput
+    zones?: RestaurantZoneUncheckedUpdateManyWithoutRestaurantNestedInput
+    tables?: RestaurantTableUncheckedUpdateManyWithoutRestaurantNestedInput
+    menuCategories?: MenuCategoryUncheckedUpdateManyWithoutRestaurantNestedInput
+  }
+
+  export type RestaurantCreateManyInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantEmployeeCreateInput = {
+    id?: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    restaurant: RestaurantCreateNestedOneWithoutEmployeesInput
+  }
+
+  export type RestaurantEmployeeUncheckedCreateInput = {
+    id?: string
+    restaurantId: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantEmployeeUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    restaurant?: RestaurantUpdateOneRequiredWithoutEmployeesNestedInput
+  }
+
+  export type RestaurantEmployeeUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantEmployeeCreateManyInput = {
+    id?: string
+    restaurantId: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantEmployeeUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantEmployeeUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantZoneCreateInput = {
+    id?: string
+    name: string
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    restaurant: RestaurantCreateNestedOneWithoutZonesInput
+    tables?: RestaurantTableCreateNestedManyWithoutZoneInput
+  }
+
+  export type RestaurantZoneUncheckedCreateInput = {
+    id?: string
+    restaurantId: string
+    name: string
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tables?: RestaurantTableUncheckedCreateNestedManyWithoutZoneInput
+  }
+
+  export type RestaurantZoneUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    restaurant?: RestaurantUpdateOneRequiredWithoutZonesNestedInput
+    tables?: RestaurantTableUpdateManyWithoutZoneNestedInput
+  }
+
+  export type RestaurantZoneUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tables?: RestaurantTableUncheckedUpdateManyWithoutZoneNestedInput
+  }
+
+  export type RestaurantZoneCreateManyInput = {
+    id?: string
+    restaurantId: string
+    name: string
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantZoneUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantZoneUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantTableCreateInput = {
+    id?: string
+    number: string
+    label?: string | null
+    seats?: number
+    shape?: string
+    status?: string
+    posX?: number
+    posY?: number
+    width?: number
+    height?: number
+    rotation?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    restaurant: RestaurantCreateNestedOneWithoutTablesInput
+    zone: RestaurantZoneCreateNestedOneWithoutTablesInput
+  }
+
+  export type RestaurantTableUncheckedCreateInput = {
+    id?: string
+    restaurantId: string
+    zoneId: string
+    number: string
+    label?: string | null
+    seats?: number
+    shape?: string
+    status?: string
+    posX?: number
+    posY?: number
+    width?: number
+    height?: number
+    rotation?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantTableUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    restaurant?: RestaurantUpdateOneRequiredWithoutTablesNestedInput
+    zone?: RestaurantZoneUpdateOneRequiredWithoutTablesNestedInput
+  }
+
+  export type RestaurantTableUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    zoneId?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantTableCreateManyInput = {
+    id?: string
+    restaurantId: string
+    zoneId: string
+    number: string
+    label?: string | null
+    seats?: number
+    shape?: string
+    status?: string
+    posX?: number
+    posY?: number
+    width?: number
+    height?: number
+    rotation?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantTableUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantTableUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    zoneId?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MenuCategoryCreateInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    icon?: string | null
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    isSeasonal?: boolean
+    parentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    restaurant: RestaurantCreateNestedOneWithoutMenuCategoriesInput
+  }
+
+  export type MenuCategoryUncheckedCreateInput = {
+    id?: string
+    restaurantId: string
+    name: string
+    nameEn?: string | null
+    icon?: string | null
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    isSeasonal?: boolean
+    parentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MenuCategoryUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSeasonal?: BoolFieldUpdateOperationsInput | boolean
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    restaurant?: RestaurantUpdateOneRequiredWithoutMenuCategoriesNestedInput
+  }
+
+  export type MenuCategoryUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSeasonal?: BoolFieldUpdateOperationsInput | boolean
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MenuCategoryCreateManyInput = {
+    id?: string
+    restaurantId: string
+    name: string
+    nameEn?: string | null
+    icon?: string | null
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    isSeasonal?: boolean
+    parentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MenuCategoryUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSeasonal?: BoolFieldUpdateOperationsInput | boolean
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MenuCategoryUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSeasonal?: BoolFieldUpdateOperationsInput | boolean
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26369,6 +33462,7 @@ export namespace Prisma {
     tenantId?: SortOrder
     hotelCode?: SortOrder
     storeCode?: SortOrder
+    restCode?: SortOrder
     databaseUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -26392,6 +33486,7 @@ export namespace Prisma {
     tenantId?: SortOrder
     hotelCode?: SortOrder
     storeCode?: SortOrder
+    restCode?: SortOrder
     databaseUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -26415,6 +33510,7 @@ export namespace Prisma {
     tenantId?: SortOrder
     hotelCode?: SortOrder
     storeCode?: SortOrder
+    restCode?: SortOrder
     databaseUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -26592,6 +33688,434 @@ export namespace Prisma {
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+  export type JsonNullableFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type RestaurantEmployeeListRelationFilter = {
+    every?: RestaurantEmployeeWhereInput
+    some?: RestaurantEmployeeWhereInput
+    none?: RestaurantEmployeeWhereInput
+  }
+
+  export type RestaurantZoneListRelationFilter = {
+    every?: RestaurantZoneWhereInput
+    some?: RestaurantZoneWhereInput
+    none?: RestaurantZoneWhereInput
+  }
+
+  export type RestaurantTableListRelationFilter = {
+    every?: RestaurantTableWhereInput
+    some?: RestaurantTableWhereInput
+    none?: RestaurantTableWhereInput
+  }
+
+  export type MenuCategoryListRelationFilter = {
+    every?: MenuCategoryWhereInput
+    some?: MenuCategoryWhereInput
+    none?: MenuCategoryWhereInput
+  }
+
+  export type RestaurantEmployeeOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RestaurantZoneOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RestaurantTableOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type MenuCategoryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RestaurantCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    type?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    taxId?: SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrder
+    isActive?: SortOrder
+    settings?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    type?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    taxId?: SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    name?: SortOrder
+    slug?: SortOrder
+    type?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    taxId?: SortOrder
+    currency?: SortOrder
+    timezone?: SortOrder
+    logoUrl?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type RestaurantRelationFilter = {
+    is?: RestaurantWhereInput
+    isNot?: RestaurantWhereInput
+  }
+
+  export type RestaurantEmployeeCountOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    userId?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    pin?: SortOrder
+    isActive?: SortOrder
+    photoUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantEmployeeMaxOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    userId?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    pin?: SortOrder
+    isActive?: SortOrder
+    photoUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantEmployeeMinOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    userId?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    pin?: SortOrder
+    isActive?: SortOrder
+    photoUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type RestaurantZoneCountOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    color?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantZoneAvgOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type RestaurantZoneMaxOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    color?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantZoneMinOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    color?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantZoneSumOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type RestaurantZoneRelationFilter = {
+    is?: RestaurantZoneWhereInput
+    isNot?: RestaurantZoneWhereInput
+  }
+
+  export type RestaurantTableRestaurantIdNumberCompoundUniqueInput = {
+    restaurantId: string
+    number: string
+  }
+
+  export type RestaurantTableCountOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    zoneId?: SortOrder
+    number?: SortOrder
+    label?: SortOrder
+    seats?: SortOrder
+    shape?: SortOrder
+    status?: SortOrder
+    posX?: SortOrder
+    posY?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    rotation?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantTableAvgOrderByAggregateInput = {
+    seats?: SortOrder
+    posX?: SortOrder
+    posY?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    rotation?: SortOrder
+  }
+
+  export type RestaurantTableMaxOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    zoneId?: SortOrder
+    number?: SortOrder
+    label?: SortOrder
+    seats?: SortOrder
+    shape?: SortOrder
+    status?: SortOrder
+    posX?: SortOrder
+    posY?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    rotation?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantTableMinOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    zoneId?: SortOrder
+    number?: SortOrder
+    label?: SortOrder
+    seats?: SortOrder
+    shape?: SortOrder
+    status?: SortOrder
+    posX?: SortOrder
+    posY?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    rotation?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RestaurantTableSumOrderByAggregateInput = {
+    seats?: SortOrder
+    posX?: SortOrder
+    posY?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    rotation?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type MenuCategoryCountOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrder
+    icon?: SortOrder
+    color?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    isSeasonal?: SortOrder
+    parentId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MenuCategoryAvgOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type MenuCategoryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrder
+    icon?: SortOrder
+    color?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    isSeasonal?: SortOrder
+    parentId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MenuCategoryMinOrderByAggregateInput = {
+    id?: SortOrder
+    restaurantId?: SortOrder
+    name?: SortOrder
+    nameEn?: SortOrder
+    icon?: SortOrder
+    color?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    isSeasonal?: SortOrder
+    parentId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MenuCategorySumOrderByAggregateInput = {
+    sortOrder?: SortOrder
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -26994,28 +34518,6 @@ export namespace Prisma {
     notIn?: $Enums.ModuleType[] | ListEnumModuleTypeFieldRefInput<$PrismaModel>
     not?: NestedEnumModuleTypeFilter<$PrismaModel> | $Enums.ModuleType
   }
-  export type JsonNullableFilter<$PrismaModel = never> = 
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type ModuleFeatureListRelationFilter = {
     every?: ModuleFeatureWhereInput
@@ -27084,31 +34586,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumModuleTypeFilter<$PrismaModel>
     _max?: NestedEnumModuleTypeFilter<$PrismaModel>
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type ModuleAccessRelationFilter = {
@@ -27190,17 +34667,6 @@ export namespace Prisma {
 
   export type InvoiceSumOrderByAggregateInput = {
     amount?: SortOrder
-  }
-
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type DecimalNullableFilter<$PrismaModel = never> = {
@@ -27316,22 +34782,6 @@ export namespace Prisma {
     enterprisePrice?: SortOrder
     activeOrganizations?: SortOrder
     totalUsers?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -27990,6 +35440,302 @@ export namespace Prisma {
     update?: XOR<XOR<StoreUpdateToOneWithWhereWithoutEmployeesInput, StoreUpdateWithoutEmployeesInput>, StoreUncheckedUpdateWithoutEmployeesInput>
   }
 
+  export type RestaurantEmployeeCreateNestedManyWithoutRestaurantInput = {
+    create?: XOR<RestaurantEmployeeCreateWithoutRestaurantInput, RestaurantEmployeeUncheckedCreateWithoutRestaurantInput> | RestaurantEmployeeCreateWithoutRestaurantInput[] | RestaurantEmployeeUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantEmployeeCreateOrConnectWithoutRestaurantInput | RestaurantEmployeeCreateOrConnectWithoutRestaurantInput[]
+    createMany?: RestaurantEmployeeCreateManyRestaurantInputEnvelope
+    connect?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+  }
+
+  export type RestaurantZoneCreateNestedManyWithoutRestaurantInput = {
+    create?: XOR<RestaurantZoneCreateWithoutRestaurantInput, RestaurantZoneUncheckedCreateWithoutRestaurantInput> | RestaurantZoneCreateWithoutRestaurantInput[] | RestaurantZoneUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantZoneCreateOrConnectWithoutRestaurantInput | RestaurantZoneCreateOrConnectWithoutRestaurantInput[]
+    createMany?: RestaurantZoneCreateManyRestaurantInputEnvelope
+    connect?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+  }
+
+  export type RestaurantTableCreateNestedManyWithoutRestaurantInput = {
+    create?: XOR<RestaurantTableCreateWithoutRestaurantInput, RestaurantTableUncheckedCreateWithoutRestaurantInput> | RestaurantTableCreateWithoutRestaurantInput[] | RestaurantTableUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantTableCreateOrConnectWithoutRestaurantInput | RestaurantTableCreateOrConnectWithoutRestaurantInput[]
+    createMany?: RestaurantTableCreateManyRestaurantInputEnvelope
+    connect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+  }
+
+  export type MenuCategoryCreateNestedManyWithoutRestaurantInput = {
+    create?: XOR<MenuCategoryCreateWithoutRestaurantInput, MenuCategoryUncheckedCreateWithoutRestaurantInput> | MenuCategoryCreateWithoutRestaurantInput[] | MenuCategoryUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: MenuCategoryCreateOrConnectWithoutRestaurantInput | MenuCategoryCreateOrConnectWithoutRestaurantInput[]
+    createMany?: MenuCategoryCreateManyRestaurantInputEnvelope
+    connect?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+  }
+
+  export type RestaurantEmployeeUncheckedCreateNestedManyWithoutRestaurantInput = {
+    create?: XOR<RestaurantEmployeeCreateWithoutRestaurantInput, RestaurantEmployeeUncheckedCreateWithoutRestaurantInput> | RestaurantEmployeeCreateWithoutRestaurantInput[] | RestaurantEmployeeUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantEmployeeCreateOrConnectWithoutRestaurantInput | RestaurantEmployeeCreateOrConnectWithoutRestaurantInput[]
+    createMany?: RestaurantEmployeeCreateManyRestaurantInputEnvelope
+    connect?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+  }
+
+  export type RestaurantZoneUncheckedCreateNestedManyWithoutRestaurantInput = {
+    create?: XOR<RestaurantZoneCreateWithoutRestaurantInput, RestaurantZoneUncheckedCreateWithoutRestaurantInput> | RestaurantZoneCreateWithoutRestaurantInput[] | RestaurantZoneUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantZoneCreateOrConnectWithoutRestaurantInput | RestaurantZoneCreateOrConnectWithoutRestaurantInput[]
+    createMany?: RestaurantZoneCreateManyRestaurantInputEnvelope
+    connect?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+  }
+
+  export type RestaurantTableUncheckedCreateNestedManyWithoutRestaurantInput = {
+    create?: XOR<RestaurantTableCreateWithoutRestaurantInput, RestaurantTableUncheckedCreateWithoutRestaurantInput> | RestaurantTableCreateWithoutRestaurantInput[] | RestaurantTableUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantTableCreateOrConnectWithoutRestaurantInput | RestaurantTableCreateOrConnectWithoutRestaurantInput[]
+    createMany?: RestaurantTableCreateManyRestaurantInputEnvelope
+    connect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+  }
+
+  export type MenuCategoryUncheckedCreateNestedManyWithoutRestaurantInput = {
+    create?: XOR<MenuCategoryCreateWithoutRestaurantInput, MenuCategoryUncheckedCreateWithoutRestaurantInput> | MenuCategoryCreateWithoutRestaurantInput[] | MenuCategoryUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: MenuCategoryCreateOrConnectWithoutRestaurantInput | MenuCategoryCreateOrConnectWithoutRestaurantInput[]
+    createMany?: MenuCategoryCreateManyRestaurantInputEnvelope
+    connect?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+  }
+
+  export type RestaurantEmployeeUpdateManyWithoutRestaurantNestedInput = {
+    create?: XOR<RestaurantEmployeeCreateWithoutRestaurantInput, RestaurantEmployeeUncheckedCreateWithoutRestaurantInput> | RestaurantEmployeeCreateWithoutRestaurantInput[] | RestaurantEmployeeUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantEmployeeCreateOrConnectWithoutRestaurantInput | RestaurantEmployeeCreateOrConnectWithoutRestaurantInput[]
+    upsert?: RestaurantEmployeeUpsertWithWhereUniqueWithoutRestaurantInput | RestaurantEmployeeUpsertWithWhereUniqueWithoutRestaurantInput[]
+    createMany?: RestaurantEmployeeCreateManyRestaurantInputEnvelope
+    set?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+    disconnect?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+    delete?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+    connect?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+    update?: RestaurantEmployeeUpdateWithWhereUniqueWithoutRestaurantInput | RestaurantEmployeeUpdateWithWhereUniqueWithoutRestaurantInput[]
+    updateMany?: RestaurantEmployeeUpdateManyWithWhereWithoutRestaurantInput | RestaurantEmployeeUpdateManyWithWhereWithoutRestaurantInput[]
+    deleteMany?: RestaurantEmployeeScalarWhereInput | RestaurantEmployeeScalarWhereInput[]
+  }
+
+  export type RestaurantZoneUpdateManyWithoutRestaurantNestedInput = {
+    create?: XOR<RestaurantZoneCreateWithoutRestaurantInput, RestaurantZoneUncheckedCreateWithoutRestaurantInput> | RestaurantZoneCreateWithoutRestaurantInput[] | RestaurantZoneUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantZoneCreateOrConnectWithoutRestaurantInput | RestaurantZoneCreateOrConnectWithoutRestaurantInput[]
+    upsert?: RestaurantZoneUpsertWithWhereUniqueWithoutRestaurantInput | RestaurantZoneUpsertWithWhereUniqueWithoutRestaurantInput[]
+    createMany?: RestaurantZoneCreateManyRestaurantInputEnvelope
+    set?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+    disconnect?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+    delete?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+    connect?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+    update?: RestaurantZoneUpdateWithWhereUniqueWithoutRestaurantInput | RestaurantZoneUpdateWithWhereUniqueWithoutRestaurantInput[]
+    updateMany?: RestaurantZoneUpdateManyWithWhereWithoutRestaurantInput | RestaurantZoneUpdateManyWithWhereWithoutRestaurantInput[]
+    deleteMany?: RestaurantZoneScalarWhereInput | RestaurantZoneScalarWhereInput[]
+  }
+
+  export type RestaurantTableUpdateManyWithoutRestaurantNestedInput = {
+    create?: XOR<RestaurantTableCreateWithoutRestaurantInput, RestaurantTableUncheckedCreateWithoutRestaurantInput> | RestaurantTableCreateWithoutRestaurantInput[] | RestaurantTableUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantTableCreateOrConnectWithoutRestaurantInput | RestaurantTableCreateOrConnectWithoutRestaurantInput[]
+    upsert?: RestaurantTableUpsertWithWhereUniqueWithoutRestaurantInput | RestaurantTableUpsertWithWhereUniqueWithoutRestaurantInput[]
+    createMany?: RestaurantTableCreateManyRestaurantInputEnvelope
+    set?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    disconnect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    delete?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    connect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    update?: RestaurantTableUpdateWithWhereUniqueWithoutRestaurantInput | RestaurantTableUpdateWithWhereUniqueWithoutRestaurantInput[]
+    updateMany?: RestaurantTableUpdateManyWithWhereWithoutRestaurantInput | RestaurantTableUpdateManyWithWhereWithoutRestaurantInput[]
+    deleteMany?: RestaurantTableScalarWhereInput | RestaurantTableScalarWhereInput[]
+  }
+
+  export type MenuCategoryUpdateManyWithoutRestaurantNestedInput = {
+    create?: XOR<MenuCategoryCreateWithoutRestaurantInput, MenuCategoryUncheckedCreateWithoutRestaurantInput> | MenuCategoryCreateWithoutRestaurantInput[] | MenuCategoryUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: MenuCategoryCreateOrConnectWithoutRestaurantInput | MenuCategoryCreateOrConnectWithoutRestaurantInput[]
+    upsert?: MenuCategoryUpsertWithWhereUniqueWithoutRestaurantInput | MenuCategoryUpsertWithWhereUniqueWithoutRestaurantInput[]
+    createMany?: MenuCategoryCreateManyRestaurantInputEnvelope
+    set?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+    disconnect?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+    delete?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+    connect?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+    update?: MenuCategoryUpdateWithWhereUniqueWithoutRestaurantInput | MenuCategoryUpdateWithWhereUniqueWithoutRestaurantInput[]
+    updateMany?: MenuCategoryUpdateManyWithWhereWithoutRestaurantInput | MenuCategoryUpdateManyWithWhereWithoutRestaurantInput[]
+    deleteMany?: MenuCategoryScalarWhereInput | MenuCategoryScalarWhereInput[]
+  }
+
+  export type RestaurantEmployeeUncheckedUpdateManyWithoutRestaurantNestedInput = {
+    create?: XOR<RestaurantEmployeeCreateWithoutRestaurantInput, RestaurantEmployeeUncheckedCreateWithoutRestaurantInput> | RestaurantEmployeeCreateWithoutRestaurantInput[] | RestaurantEmployeeUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantEmployeeCreateOrConnectWithoutRestaurantInput | RestaurantEmployeeCreateOrConnectWithoutRestaurantInput[]
+    upsert?: RestaurantEmployeeUpsertWithWhereUniqueWithoutRestaurantInput | RestaurantEmployeeUpsertWithWhereUniqueWithoutRestaurantInput[]
+    createMany?: RestaurantEmployeeCreateManyRestaurantInputEnvelope
+    set?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+    disconnect?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+    delete?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+    connect?: RestaurantEmployeeWhereUniqueInput | RestaurantEmployeeWhereUniqueInput[]
+    update?: RestaurantEmployeeUpdateWithWhereUniqueWithoutRestaurantInput | RestaurantEmployeeUpdateWithWhereUniqueWithoutRestaurantInput[]
+    updateMany?: RestaurantEmployeeUpdateManyWithWhereWithoutRestaurantInput | RestaurantEmployeeUpdateManyWithWhereWithoutRestaurantInput[]
+    deleteMany?: RestaurantEmployeeScalarWhereInput | RestaurantEmployeeScalarWhereInput[]
+  }
+
+  export type RestaurantZoneUncheckedUpdateManyWithoutRestaurantNestedInput = {
+    create?: XOR<RestaurantZoneCreateWithoutRestaurantInput, RestaurantZoneUncheckedCreateWithoutRestaurantInput> | RestaurantZoneCreateWithoutRestaurantInput[] | RestaurantZoneUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantZoneCreateOrConnectWithoutRestaurantInput | RestaurantZoneCreateOrConnectWithoutRestaurantInput[]
+    upsert?: RestaurantZoneUpsertWithWhereUniqueWithoutRestaurantInput | RestaurantZoneUpsertWithWhereUniqueWithoutRestaurantInput[]
+    createMany?: RestaurantZoneCreateManyRestaurantInputEnvelope
+    set?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+    disconnect?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+    delete?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+    connect?: RestaurantZoneWhereUniqueInput | RestaurantZoneWhereUniqueInput[]
+    update?: RestaurantZoneUpdateWithWhereUniqueWithoutRestaurantInput | RestaurantZoneUpdateWithWhereUniqueWithoutRestaurantInput[]
+    updateMany?: RestaurantZoneUpdateManyWithWhereWithoutRestaurantInput | RestaurantZoneUpdateManyWithWhereWithoutRestaurantInput[]
+    deleteMany?: RestaurantZoneScalarWhereInput | RestaurantZoneScalarWhereInput[]
+  }
+
+  export type RestaurantTableUncheckedUpdateManyWithoutRestaurantNestedInput = {
+    create?: XOR<RestaurantTableCreateWithoutRestaurantInput, RestaurantTableUncheckedCreateWithoutRestaurantInput> | RestaurantTableCreateWithoutRestaurantInput[] | RestaurantTableUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: RestaurantTableCreateOrConnectWithoutRestaurantInput | RestaurantTableCreateOrConnectWithoutRestaurantInput[]
+    upsert?: RestaurantTableUpsertWithWhereUniqueWithoutRestaurantInput | RestaurantTableUpsertWithWhereUniqueWithoutRestaurantInput[]
+    createMany?: RestaurantTableCreateManyRestaurantInputEnvelope
+    set?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    disconnect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    delete?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    connect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    update?: RestaurantTableUpdateWithWhereUniqueWithoutRestaurantInput | RestaurantTableUpdateWithWhereUniqueWithoutRestaurantInput[]
+    updateMany?: RestaurantTableUpdateManyWithWhereWithoutRestaurantInput | RestaurantTableUpdateManyWithWhereWithoutRestaurantInput[]
+    deleteMany?: RestaurantTableScalarWhereInput | RestaurantTableScalarWhereInput[]
+  }
+
+  export type MenuCategoryUncheckedUpdateManyWithoutRestaurantNestedInput = {
+    create?: XOR<MenuCategoryCreateWithoutRestaurantInput, MenuCategoryUncheckedCreateWithoutRestaurantInput> | MenuCategoryCreateWithoutRestaurantInput[] | MenuCategoryUncheckedCreateWithoutRestaurantInput[]
+    connectOrCreate?: MenuCategoryCreateOrConnectWithoutRestaurantInput | MenuCategoryCreateOrConnectWithoutRestaurantInput[]
+    upsert?: MenuCategoryUpsertWithWhereUniqueWithoutRestaurantInput | MenuCategoryUpsertWithWhereUniqueWithoutRestaurantInput[]
+    createMany?: MenuCategoryCreateManyRestaurantInputEnvelope
+    set?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+    disconnect?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+    delete?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+    connect?: MenuCategoryWhereUniqueInput | MenuCategoryWhereUniqueInput[]
+    update?: MenuCategoryUpdateWithWhereUniqueWithoutRestaurantInput | MenuCategoryUpdateWithWhereUniqueWithoutRestaurantInput[]
+    updateMany?: MenuCategoryUpdateManyWithWhereWithoutRestaurantInput | MenuCategoryUpdateManyWithWhereWithoutRestaurantInput[]
+    deleteMany?: MenuCategoryScalarWhereInput | MenuCategoryScalarWhereInput[]
+  }
+
+  export type RestaurantCreateNestedOneWithoutEmployeesInput = {
+    create?: XOR<RestaurantCreateWithoutEmployeesInput, RestaurantUncheckedCreateWithoutEmployeesInput>
+    connectOrCreate?: RestaurantCreateOrConnectWithoutEmployeesInput
+    connect?: RestaurantWhereUniqueInput
+  }
+
+  export type RestaurantUpdateOneRequiredWithoutEmployeesNestedInput = {
+    create?: XOR<RestaurantCreateWithoutEmployeesInput, RestaurantUncheckedCreateWithoutEmployeesInput>
+    connectOrCreate?: RestaurantCreateOrConnectWithoutEmployeesInput
+    upsert?: RestaurantUpsertWithoutEmployeesInput
+    connect?: RestaurantWhereUniqueInput
+    update?: XOR<XOR<RestaurantUpdateToOneWithWhereWithoutEmployeesInput, RestaurantUpdateWithoutEmployeesInput>, RestaurantUncheckedUpdateWithoutEmployeesInput>
+  }
+
+  export type RestaurantCreateNestedOneWithoutZonesInput = {
+    create?: XOR<RestaurantCreateWithoutZonesInput, RestaurantUncheckedCreateWithoutZonesInput>
+    connectOrCreate?: RestaurantCreateOrConnectWithoutZonesInput
+    connect?: RestaurantWhereUniqueInput
+  }
+
+  export type RestaurantTableCreateNestedManyWithoutZoneInput = {
+    create?: XOR<RestaurantTableCreateWithoutZoneInput, RestaurantTableUncheckedCreateWithoutZoneInput> | RestaurantTableCreateWithoutZoneInput[] | RestaurantTableUncheckedCreateWithoutZoneInput[]
+    connectOrCreate?: RestaurantTableCreateOrConnectWithoutZoneInput | RestaurantTableCreateOrConnectWithoutZoneInput[]
+    createMany?: RestaurantTableCreateManyZoneInputEnvelope
+    connect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+  }
+
+  export type RestaurantTableUncheckedCreateNestedManyWithoutZoneInput = {
+    create?: XOR<RestaurantTableCreateWithoutZoneInput, RestaurantTableUncheckedCreateWithoutZoneInput> | RestaurantTableCreateWithoutZoneInput[] | RestaurantTableUncheckedCreateWithoutZoneInput[]
+    connectOrCreate?: RestaurantTableCreateOrConnectWithoutZoneInput | RestaurantTableCreateOrConnectWithoutZoneInput[]
+    createMany?: RestaurantTableCreateManyZoneInputEnvelope
+    connect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type RestaurantUpdateOneRequiredWithoutZonesNestedInput = {
+    create?: XOR<RestaurantCreateWithoutZonesInput, RestaurantUncheckedCreateWithoutZonesInput>
+    connectOrCreate?: RestaurantCreateOrConnectWithoutZonesInput
+    upsert?: RestaurantUpsertWithoutZonesInput
+    connect?: RestaurantWhereUniqueInput
+    update?: XOR<XOR<RestaurantUpdateToOneWithWhereWithoutZonesInput, RestaurantUpdateWithoutZonesInput>, RestaurantUncheckedUpdateWithoutZonesInput>
+  }
+
+  export type RestaurantTableUpdateManyWithoutZoneNestedInput = {
+    create?: XOR<RestaurantTableCreateWithoutZoneInput, RestaurantTableUncheckedCreateWithoutZoneInput> | RestaurantTableCreateWithoutZoneInput[] | RestaurantTableUncheckedCreateWithoutZoneInput[]
+    connectOrCreate?: RestaurantTableCreateOrConnectWithoutZoneInput | RestaurantTableCreateOrConnectWithoutZoneInput[]
+    upsert?: RestaurantTableUpsertWithWhereUniqueWithoutZoneInput | RestaurantTableUpsertWithWhereUniqueWithoutZoneInput[]
+    createMany?: RestaurantTableCreateManyZoneInputEnvelope
+    set?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    disconnect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    delete?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    connect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    update?: RestaurantTableUpdateWithWhereUniqueWithoutZoneInput | RestaurantTableUpdateWithWhereUniqueWithoutZoneInput[]
+    updateMany?: RestaurantTableUpdateManyWithWhereWithoutZoneInput | RestaurantTableUpdateManyWithWhereWithoutZoneInput[]
+    deleteMany?: RestaurantTableScalarWhereInput | RestaurantTableScalarWhereInput[]
+  }
+
+  export type RestaurantTableUncheckedUpdateManyWithoutZoneNestedInput = {
+    create?: XOR<RestaurantTableCreateWithoutZoneInput, RestaurantTableUncheckedCreateWithoutZoneInput> | RestaurantTableCreateWithoutZoneInput[] | RestaurantTableUncheckedCreateWithoutZoneInput[]
+    connectOrCreate?: RestaurantTableCreateOrConnectWithoutZoneInput | RestaurantTableCreateOrConnectWithoutZoneInput[]
+    upsert?: RestaurantTableUpsertWithWhereUniqueWithoutZoneInput | RestaurantTableUpsertWithWhereUniqueWithoutZoneInput[]
+    createMany?: RestaurantTableCreateManyZoneInputEnvelope
+    set?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    disconnect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    delete?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    connect?: RestaurantTableWhereUniqueInput | RestaurantTableWhereUniqueInput[]
+    update?: RestaurantTableUpdateWithWhereUniqueWithoutZoneInput | RestaurantTableUpdateWithWhereUniqueWithoutZoneInput[]
+    updateMany?: RestaurantTableUpdateManyWithWhereWithoutZoneInput | RestaurantTableUpdateManyWithWhereWithoutZoneInput[]
+    deleteMany?: RestaurantTableScalarWhereInput | RestaurantTableScalarWhereInput[]
+  }
+
+  export type RestaurantCreateNestedOneWithoutTablesInput = {
+    create?: XOR<RestaurantCreateWithoutTablesInput, RestaurantUncheckedCreateWithoutTablesInput>
+    connectOrCreate?: RestaurantCreateOrConnectWithoutTablesInput
+    connect?: RestaurantWhereUniqueInput
+  }
+
+  export type RestaurantZoneCreateNestedOneWithoutTablesInput = {
+    create?: XOR<RestaurantZoneCreateWithoutTablesInput, RestaurantZoneUncheckedCreateWithoutTablesInput>
+    connectOrCreate?: RestaurantZoneCreateOrConnectWithoutTablesInput
+    connect?: RestaurantZoneWhereUniqueInput
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type RestaurantUpdateOneRequiredWithoutTablesNestedInput = {
+    create?: XOR<RestaurantCreateWithoutTablesInput, RestaurantUncheckedCreateWithoutTablesInput>
+    connectOrCreate?: RestaurantCreateOrConnectWithoutTablesInput
+    upsert?: RestaurantUpsertWithoutTablesInput
+    connect?: RestaurantWhereUniqueInput
+    update?: XOR<XOR<RestaurantUpdateToOneWithWhereWithoutTablesInput, RestaurantUpdateWithoutTablesInput>, RestaurantUncheckedUpdateWithoutTablesInput>
+  }
+
+  export type RestaurantZoneUpdateOneRequiredWithoutTablesNestedInput = {
+    create?: XOR<RestaurantZoneCreateWithoutTablesInput, RestaurantZoneUncheckedCreateWithoutTablesInput>
+    connectOrCreate?: RestaurantZoneCreateOrConnectWithoutTablesInput
+    upsert?: RestaurantZoneUpsertWithoutTablesInput
+    connect?: RestaurantZoneWhereUniqueInput
+    update?: XOR<XOR<RestaurantZoneUpdateToOneWithWhereWithoutTablesInput, RestaurantZoneUpdateWithoutTablesInput>, RestaurantZoneUncheckedUpdateWithoutTablesInput>
+  }
+
+  export type RestaurantCreateNestedOneWithoutMenuCategoriesInput = {
+    create?: XOR<RestaurantCreateWithoutMenuCategoriesInput, RestaurantUncheckedCreateWithoutMenuCategoriesInput>
+    connectOrCreate?: RestaurantCreateOrConnectWithoutMenuCategoriesInput
+    connect?: RestaurantWhereUniqueInput
+  }
+
+  export type RestaurantUpdateOneRequiredWithoutMenuCategoriesNestedInput = {
+    create?: XOR<RestaurantCreateWithoutMenuCategoriesInput, RestaurantUncheckedCreateWithoutMenuCategoriesInput>
+    connectOrCreate?: RestaurantCreateOrConnectWithoutMenuCategoriesInput
+    upsert?: RestaurantUpsertWithoutMenuCategoriesInput
+    connect?: RestaurantWhereUniqueInput
+    update?: XOR<XOR<RestaurantUpdateToOneWithWhereWithoutMenuCategoriesInput, RestaurantUpdateWithoutMenuCategoriesInput>, RestaurantUncheckedUpdateWithoutMenuCategoriesInput>
+  }
+
   export type AccountCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -28348,14 +36094,6 @@ export namespace Prisma {
     set: string[]
   }
 
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
   export type NullableDecimalFieldUpdateOperationsInput = {
     set?: Decimal | DecimalJsLike | number | string | null
     increment?: Decimal | DecimalJsLike | number | string
@@ -28601,6 +36339,71 @@ export namespace Prisma {
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
 
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
@@ -28748,28 +36551,6 @@ export namespace Prisma {
     _min?: NestedEnumModuleTypeFilter<$PrismaModel>
     _max?: NestedEnumModuleTypeFilter<$PrismaModel>
   }
-  export type NestedJsonNullableFilter<$PrismaModel = never> = 
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type NestedDecimalNullableFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
@@ -28780,33 +36561,6 @@ export namespace Prisma {
     gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-  }
-
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
   export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -29335,6 +37089,837 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RestaurantEmployeeCreateWithoutRestaurantInput = {
+    id?: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantEmployeeUncheckedCreateWithoutRestaurantInput = {
+    id?: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantEmployeeCreateOrConnectWithoutRestaurantInput = {
+    where: RestaurantEmployeeWhereUniqueInput
+    create: XOR<RestaurantEmployeeCreateWithoutRestaurantInput, RestaurantEmployeeUncheckedCreateWithoutRestaurantInput>
+  }
+
+  export type RestaurantEmployeeCreateManyRestaurantInputEnvelope = {
+    data: RestaurantEmployeeCreateManyRestaurantInput | RestaurantEmployeeCreateManyRestaurantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RestaurantZoneCreateWithoutRestaurantInput = {
+    id?: string
+    name: string
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tables?: RestaurantTableCreateNestedManyWithoutZoneInput
+  }
+
+  export type RestaurantZoneUncheckedCreateWithoutRestaurantInput = {
+    id?: string
+    name: string
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tables?: RestaurantTableUncheckedCreateNestedManyWithoutZoneInput
+  }
+
+  export type RestaurantZoneCreateOrConnectWithoutRestaurantInput = {
+    where: RestaurantZoneWhereUniqueInput
+    create: XOR<RestaurantZoneCreateWithoutRestaurantInput, RestaurantZoneUncheckedCreateWithoutRestaurantInput>
+  }
+
+  export type RestaurantZoneCreateManyRestaurantInputEnvelope = {
+    data: RestaurantZoneCreateManyRestaurantInput | RestaurantZoneCreateManyRestaurantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RestaurantTableCreateWithoutRestaurantInput = {
+    id?: string
+    number: string
+    label?: string | null
+    seats?: number
+    shape?: string
+    status?: string
+    posX?: number
+    posY?: number
+    width?: number
+    height?: number
+    rotation?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    zone: RestaurantZoneCreateNestedOneWithoutTablesInput
+  }
+
+  export type RestaurantTableUncheckedCreateWithoutRestaurantInput = {
+    id?: string
+    zoneId: string
+    number: string
+    label?: string | null
+    seats?: number
+    shape?: string
+    status?: string
+    posX?: number
+    posY?: number
+    width?: number
+    height?: number
+    rotation?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantTableCreateOrConnectWithoutRestaurantInput = {
+    where: RestaurantTableWhereUniqueInput
+    create: XOR<RestaurantTableCreateWithoutRestaurantInput, RestaurantTableUncheckedCreateWithoutRestaurantInput>
+  }
+
+  export type RestaurantTableCreateManyRestaurantInputEnvelope = {
+    data: RestaurantTableCreateManyRestaurantInput | RestaurantTableCreateManyRestaurantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MenuCategoryCreateWithoutRestaurantInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    icon?: string | null
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    isSeasonal?: boolean
+    parentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MenuCategoryUncheckedCreateWithoutRestaurantInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    icon?: string | null
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    isSeasonal?: boolean
+    parentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MenuCategoryCreateOrConnectWithoutRestaurantInput = {
+    where: MenuCategoryWhereUniqueInput
+    create: XOR<MenuCategoryCreateWithoutRestaurantInput, MenuCategoryUncheckedCreateWithoutRestaurantInput>
+  }
+
+  export type MenuCategoryCreateManyRestaurantInputEnvelope = {
+    data: MenuCategoryCreateManyRestaurantInput | MenuCategoryCreateManyRestaurantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RestaurantEmployeeUpsertWithWhereUniqueWithoutRestaurantInput = {
+    where: RestaurantEmployeeWhereUniqueInput
+    update: XOR<RestaurantEmployeeUpdateWithoutRestaurantInput, RestaurantEmployeeUncheckedUpdateWithoutRestaurantInput>
+    create: XOR<RestaurantEmployeeCreateWithoutRestaurantInput, RestaurantEmployeeUncheckedCreateWithoutRestaurantInput>
+  }
+
+  export type RestaurantEmployeeUpdateWithWhereUniqueWithoutRestaurantInput = {
+    where: RestaurantEmployeeWhereUniqueInput
+    data: XOR<RestaurantEmployeeUpdateWithoutRestaurantInput, RestaurantEmployeeUncheckedUpdateWithoutRestaurantInput>
+  }
+
+  export type RestaurantEmployeeUpdateManyWithWhereWithoutRestaurantInput = {
+    where: RestaurantEmployeeScalarWhereInput
+    data: XOR<RestaurantEmployeeUpdateManyMutationInput, RestaurantEmployeeUncheckedUpdateManyWithoutRestaurantInput>
+  }
+
+  export type RestaurantEmployeeScalarWhereInput = {
+    AND?: RestaurantEmployeeScalarWhereInput | RestaurantEmployeeScalarWhereInput[]
+    OR?: RestaurantEmployeeScalarWhereInput[]
+    NOT?: RestaurantEmployeeScalarWhereInput | RestaurantEmployeeScalarWhereInput[]
+    id?: StringFilter<"RestaurantEmployee"> | string
+    restaurantId?: StringFilter<"RestaurantEmployee"> | string
+    userId?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    firstName?: StringFilter<"RestaurantEmployee"> | string
+    lastName?: StringFilter<"RestaurantEmployee"> | string
+    phone?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    email?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    role?: StringFilter<"RestaurantEmployee"> | string
+    pin?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    isActive?: BoolFilter<"RestaurantEmployee"> | boolean
+    photoUrl?: StringNullableFilter<"RestaurantEmployee"> | string | null
+    createdAt?: DateTimeFilter<"RestaurantEmployee"> | Date | string
+    updatedAt?: DateTimeFilter<"RestaurantEmployee"> | Date | string
+  }
+
+  export type RestaurantZoneUpsertWithWhereUniqueWithoutRestaurantInput = {
+    where: RestaurantZoneWhereUniqueInput
+    update: XOR<RestaurantZoneUpdateWithoutRestaurantInput, RestaurantZoneUncheckedUpdateWithoutRestaurantInput>
+    create: XOR<RestaurantZoneCreateWithoutRestaurantInput, RestaurantZoneUncheckedCreateWithoutRestaurantInput>
+  }
+
+  export type RestaurantZoneUpdateWithWhereUniqueWithoutRestaurantInput = {
+    where: RestaurantZoneWhereUniqueInput
+    data: XOR<RestaurantZoneUpdateWithoutRestaurantInput, RestaurantZoneUncheckedUpdateWithoutRestaurantInput>
+  }
+
+  export type RestaurantZoneUpdateManyWithWhereWithoutRestaurantInput = {
+    where: RestaurantZoneScalarWhereInput
+    data: XOR<RestaurantZoneUpdateManyMutationInput, RestaurantZoneUncheckedUpdateManyWithoutRestaurantInput>
+  }
+
+  export type RestaurantZoneScalarWhereInput = {
+    AND?: RestaurantZoneScalarWhereInput | RestaurantZoneScalarWhereInput[]
+    OR?: RestaurantZoneScalarWhereInput[]
+    NOT?: RestaurantZoneScalarWhereInput | RestaurantZoneScalarWhereInput[]
+    id?: StringFilter<"RestaurantZone"> | string
+    restaurantId?: StringFilter<"RestaurantZone"> | string
+    name?: StringFilter<"RestaurantZone"> | string
+    color?: StringNullableFilter<"RestaurantZone"> | string | null
+    sortOrder?: IntFilter<"RestaurantZone"> | number
+    isActive?: BoolFilter<"RestaurantZone"> | boolean
+    createdAt?: DateTimeFilter<"RestaurantZone"> | Date | string
+    updatedAt?: DateTimeFilter<"RestaurantZone"> | Date | string
+  }
+
+  export type RestaurantTableUpsertWithWhereUniqueWithoutRestaurantInput = {
+    where: RestaurantTableWhereUniqueInput
+    update: XOR<RestaurantTableUpdateWithoutRestaurantInput, RestaurantTableUncheckedUpdateWithoutRestaurantInput>
+    create: XOR<RestaurantTableCreateWithoutRestaurantInput, RestaurantTableUncheckedCreateWithoutRestaurantInput>
+  }
+
+  export type RestaurantTableUpdateWithWhereUniqueWithoutRestaurantInput = {
+    where: RestaurantTableWhereUniqueInput
+    data: XOR<RestaurantTableUpdateWithoutRestaurantInput, RestaurantTableUncheckedUpdateWithoutRestaurantInput>
+  }
+
+  export type RestaurantTableUpdateManyWithWhereWithoutRestaurantInput = {
+    where: RestaurantTableScalarWhereInput
+    data: XOR<RestaurantTableUpdateManyMutationInput, RestaurantTableUncheckedUpdateManyWithoutRestaurantInput>
+  }
+
+  export type RestaurantTableScalarWhereInput = {
+    AND?: RestaurantTableScalarWhereInput | RestaurantTableScalarWhereInput[]
+    OR?: RestaurantTableScalarWhereInput[]
+    NOT?: RestaurantTableScalarWhereInput | RestaurantTableScalarWhereInput[]
+    id?: StringFilter<"RestaurantTable"> | string
+    restaurantId?: StringFilter<"RestaurantTable"> | string
+    zoneId?: StringFilter<"RestaurantTable"> | string
+    number?: StringFilter<"RestaurantTable"> | string
+    label?: StringNullableFilter<"RestaurantTable"> | string | null
+    seats?: IntFilter<"RestaurantTable"> | number
+    shape?: StringFilter<"RestaurantTable"> | string
+    status?: StringFilter<"RestaurantTable"> | string
+    posX?: FloatFilter<"RestaurantTable"> | number
+    posY?: FloatFilter<"RestaurantTable"> | number
+    width?: FloatFilter<"RestaurantTable"> | number
+    height?: FloatFilter<"RestaurantTable"> | number
+    rotation?: FloatFilter<"RestaurantTable"> | number
+    isActive?: BoolFilter<"RestaurantTable"> | boolean
+    createdAt?: DateTimeFilter<"RestaurantTable"> | Date | string
+    updatedAt?: DateTimeFilter<"RestaurantTable"> | Date | string
+  }
+
+  export type MenuCategoryUpsertWithWhereUniqueWithoutRestaurantInput = {
+    where: MenuCategoryWhereUniqueInput
+    update: XOR<MenuCategoryUpdateWithoutRestaurantInput, MenuCategoryUncheckedUpdateWithoutRestaurantInput>
+    create: XOR<MenuCategoryCreateWithoutRestaurantInput, MenuCategoryUncheckedCreateWithoutRestaurantInput>
+  }
+
+  export type MenuCategoryUpdateWithWhereUniqueWithoutRestaurantInput = {
+    where: MenuCategoryWhereUniqueInput
+    data: XOR<MenuCategoryUpdateWithoutRestaurantInput, MenuCategoryUncheckedUpdateWithoutRestaurantInput>
+  }
+
+  export type MenuCategoryUpdateManyWithWhereWithoutRestaurantInput = {
+    where: MenuCategoryScalarWhereInput
+    data: XOR<MenuCategoryUpdateManyMutationInput, MenuCategoryUncheckedUpdateManyWithoutRestaurantInput>
+  }
+
+  export type MenuCategoryScalarWhereInput = {
+    AND?: MenuCategoryScalarWhereInput | MenuCategoryScalarWhereInput[]
+    OR?: MenuCategoryScalarWhereInput[]
+    NOT?: MenuCategoryScalarWhereInput | MenuCategoryScalarWhereInput[]
+    id?: StringFilter<"MenuCategory"> | string
+    restaurantId?: StringFilter<"MenuCategory"> | string
+    name?: StringFilter<"MenuCategory"> | string
+    nameEn?: StringNullableFilter<"MenuCategory"> | string | null
+    icon?: StringNullableFilter<"MenuCategory"> | string | null
+    color?: StringNullableFilter<"MenuCategory"> | string | null
+    sortOrder?: IntFilter<"MenuCategory"> | number
+    isActive?: BoolFilter<"MenuCategory"> | boolean
+    isSeasonal?: BoolFilter<"MenuCategory"> | boolean
+    parentId?: StringNullableFilter<"MenuCategory"> | string | null
+    createdAt?: DateTimeFilter<"MenuCategory"> | Date | string
+    updatedAt?: DateTimeFilter<"MenuCategory"> | Date | string
+  }
+
+  export type RestaurantCreateWithoutEmployeesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    zones?: RestaurantZoneCreateNestedManyWithoutRestaurantInput
+    tables?: RestaurantTableCreateNestedManyWithoutRestaurantInput
+    menuCategories?: MenuCategoryCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantUncheckedCreateWithoutEmployeesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    zones?: RestaurantZoneUncheckedCreateNestedManyWithoutRestaurantInput
+    tables?: RestaurantTableUncheckedCreateNestedManyWithoutRestaurantInput
+    menuCategories?: MenuCategoryUncheckedCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantCreateOrConnectWithoutEmployeesInput = {
+    where: RestaurantWhereUniqueInput
+    create: XOR<RestaurantCreateWithoutEmployeesInput, RestaurantUncheckedCreateWithoutEmployeesInput>
+  }
+
+  export type RestaurantUpsertWithoutEmployeesInput = {
+    update: XOR<RestaurantUpdateWithoutEmployeesInput, RestaurantUncheckedUpdateWithoutEmployeesInput>
+    create: XOR<RestaurantCreateWithoutEmployeesInput, RestaurantUncheckedCreateWithoutEmployeesInput>
+    where?: RestaurantWhereInput
+  }
+
+  export type RestaurantUpdateToOneWithWhereWithoutEmployeesInput = {
+    where?: RestaurantWhereInput
+    data: XOR<RestaurantUpdateWithoutEmployeesInput, RestaurantUncheckedUpdateWithoutEmployeesInput>
+  }
+
+  export type RestaurantUpdateWithoutEmployeesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    zones?: RestaurantZoneUpdateManyWithoutRestaurantNestedInput
+    tables?: RestaurantTableUpdateManyWithoutRestaurantNestedInput
+    menuCategories?: MenuCategoryUpdateManyWithoutRestaurantNestedInput
+  }
+
+  export type RestaurantUncheckedUpdateWithoutEmployeesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    zones?: RestaurantZoneUncheckedUpdateManyWithoutRestaurantNestedInput
+    tables?: RestaurantTableUncheckedUpdateManyWithoutRestaurantNestedInput
+    menuCategories?: MenuCategoryUncheckedUpdateManyWithoutRestaurantNestedInput
+  }
+
+  export type RestaurantCreateWithoutZonesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: RestaurantEmployeeCreateNestedManyWithoutRestaurantInput
+    tables?: RestaurantTableCreateNestedManyWithoutRestaurantInput
+    menuCategories?: MenuCategoryCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantUncheckedCreateWithoutZonesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: RestaurantEmployeeUncheckedCreateNestedManyWithoutRestaurantInput
+    tables?: RestaurantTableUncheckedCreateNestedManyWithoutRestaurantInput
+    menuCategories?: MenuCategoryUncheckedCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantCreateOrConnectWithoutZonesInput = {
+    where: RestaurantWhereUniqueInput
+    create: XOR<RestaurantCreateWithoutZonesInput, RestaurantUncheckedCreateWithoutZonesInput>
+  }
+
+  export type RestaurantTableCreateWithoutZoneInput = {
+    id?: string
+    number: string
+    label?: string | null
+    seats?: number
+    shape?: string
+    status?: string
+    posX?: number
+    posY?: number
+    width?: number
+    height?: number
+    rotation?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    restaurant: RestaurantCreateNestedOneWithoutTablesInput
+  }
+
+  export type RestaurantTableUncheckedCreateWithoutZoneInput = {
+    id?: string
+    restaurantId: string
+    number: string
+    label?: string | null
+    seats?: number
+    shape?: string
+    status?: string
+    posX?: number
+    posY?: number
+    width?: number
+    height?: number
+    rotation?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantTableCreateOrConnectWithoutZoneInput = {
+    where: RestaurantTableWhereUniqueInput
+    create: XOR<RestaurantTableCreateWithoutZoneInput, RestaurantTableUncheckedCreateWithoutZoneInput>
+  }
+
+  export type RestaurantTableCreateManyZoneInputEnvelope = {
+    data: RestaurantTableCreateManyZoneInput | RestaurantTableCreateManyZoneInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RestaurantUpsertWithoutZonesInput = {
+    update: XOR<RestaurantUpdateWithoutZonesInput, RestaurantUncheckedUpdateWithoutZonesInput>
+    create: XOR<RestaurantCreateWithoutZonesInput, RestaurantUncheckedCreateWithoutZonesInput>
+    where?: RestaurantWhereInput
+  }
+
+  export type RestaurantUpdateToOneWithWhereWithoutZonesInput = {
+    where?: RestaurantWhereInput
+    data: XOR<RestaurantUpdateWithoutZonesInput, RestaurantUncheckedUpdateWithoutZonesInput>
+  }
+
+  export type RestaurantUpdateWithoutZonesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: RestaurantEmployeeUpdateManyWithoutRestaurantNestedInput
+    tables?: RestaurantTableUpdateManyWithoutRestaurantNestedInput
+    menuCategories?: MenuCategoryUpdateManyWithoutRestaurantNestedInput
+  }
+
+  export type RestaurantUncheckedUpdateWithoutZonesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: RestaurantEmployeeUncheckedUpdateManyWithoutRestaurantNestedInput
+    tables?: RestaurantTableUncheckedUpdateManyWithoutRestaurantNestedInput
+    menuCategories?: MenuCategoryUncheckedUpdateManyWithoutRestaurantNestedInput
+  }
+
+  export type RestaurantTableUpsertWithWhereUniqueWithoutZoneInput = {
+    where: RestaurantTableWhereUniqueInput
+    update: XOR<RestaurantTableUpdateWithoutZoneInput, RestaurantTableUncheckedUpdateWithoutZoneInput>
+    create: XOR<RestaurantTableCreateWithoutZoneInput, RestaurantTableUncheckedCreateWithoutZoneInput>
+  }
+
+  export type RestaurantTableUpdateWithWhereUniqueWithoutZoneInput = {
+    where: RestaurantTableWhereUniqueInput
+    data: XOR<RestaurantTableUpdateWithoutZoneInput, RestaurantTableUncheckedUpdateWithoutZoneInput>
+  }
+
+  export type RestaurantTableUpdateManyWithWhereWithoutZoneInput = {
+    where: RestaurantTableScalarWhereInput
+    data: XOR<RestaurantTableUpdateManyMutationInput, RestaurantTableUncheckedUpdateManyWithoutZoneInput>
+  }
+
+  export type RestaurantCreateWithoutTablesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: RestaurantEmployeeCreateNestedManyWithoutRestaurantInput
+    zones?: RestaurantZoneCreateNestedManyWithoutRestaurantInput
+    menuCategories?: MenuCategoryCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantUncheckedCreateWithoutTablesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: RestaurantEmployeeUncheckedCreateNestedManyWithoutRestaurantInput
+    zones?: RestaurantZoneUncheckedCreateNestedManyWithoutRestaurantInput
+    menuCategories?: MenuCategoryUncheckedCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantCreateOrConnectWithoutTablesInput = {
+    where: RestaurantWhereUniqueInput
+    create: XOR<RestaurantCreateWithoutTablesInput, RestaurantUncheckedCreateWithoutTablesInput>
+  }
+
+  export type RestaurantZoneCreateWithoutTablesInput = {
+    id?: string
+    name: string
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    restaurant: RestaurantCreateNestedOneWithoutZonesInput
+  }
+
+  export type RestaurantZoneUncheckedCreateWithoutTablesInput = {
+    id?: string
+    restaurantId: string
+    name: string
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantZoneCreateOrConnectWithoutTablesInput = {
+    where: RestaurantZoneWhereUniqueInput
+    create: XOR<RestaurantZoneCreateWithoutTablesInput, RestaurantZoneUncheckedCreateWithoutTablesInput>
+  }
+
+  export type RestaurantUpsertWithoutTablesInput = {
+    update: XOR<RestaurantUpdateWithoutTablesInput, RestaurantUncheckedUpdateWithoutTablesInput>
+    create: XOR<RestaurantCreateWithoutTablesInput, RestaurantUncheckedCreateWithoutTablesInput>
+    where?: RestaurantWhereInput
+  }
+
+  export type RestaurantUpdateToOneWithWhereWithoutTablesInput = {
+    where?: RestaurantWhereInput
+    data: XOR<RestaurantUpdateWithoutTablesInput, RestaurantUncheckedUpdateWithoutTablesInput>
+  }
+
+  export type RestaurantUpdateWithoutTablesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: RestaurantEmployeeUpdateManyWithoutRestaurantNestedInput
+    zones?: RestaurantZoneUpdateManyWithoutRestaurantNestedInput
+    menuCategories?: MenuCategoryUpdateManyWithoutRestaurantNestedInput
+  }
+
+  export type RestaurantUncheckedUpdateWithoutTablesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: RestaurantEmployeeUncheckedUpdateManyWithoutRestaurantNestedInput
+    zones?: RestaurantZoneUncheckedUpdateManyWithoutRestaurantNestedInput
+    menuCategories?: MenuCategoryUncheckedUpdateManyWithoutRestaurantNestedInput
+  }
+
+  export type RestaurantZoneUpsertWithoutTablesInput = {
+    update: XOR<RestaurantZoneUpdateWithoutTablesInput, RestaurantZoneUncheckedUpdateWithoutTablesInput>
+    create: XOR<RestaurantZoneCreateWithoutTablesInput, RestaurantZoneUncheckedCreateWithoutTablesInput>
+    where?: RestaurantZoneWhereInput
+  }
+
+  export type RestaurantZoneUpdateToOneWithWhereWithoutTablesInput = {
+    where?: RestaurantZoneWhereInput
+    data: XOR<RestaurantZoneUpdateWithoutTablesInput, RestaurantZoneUncheckedUpdateWithoutTablesInput>
+  }
+
+  export type RestaurantZoneUpdateWithoutTablesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    restaurant?: RestaurantUpdateOneRequiredWithoutZonesNestedInput
+  }
+
+  export type RestaurantZoneUncheckedUpdateWithoutTablesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantCreateWithoutMenuCategoriesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: RestaurantEmployeeCreateNestedManyWithoutRestaurantInput
+    zones?: RestaurantZoneCreateNestedManyWithoutRestaurantInput
+    tables?: RestaurantTableCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantUncheckedCreateWithoutMenuCategoriesInput = {
+    id?: string
+    tenantId: string
+    name: string
+    slug: string
+    type?: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    taxId?: string | null
+    currency?: string
+    timezone?: string
+    logoUrl?: string | null
+    isActive?: boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    employees?: RestaurantEmployeeUncheckedCreateNestedManyWithoutRestaurantInput
+    zones?: RestaurantZoneUncheckedCreateNestedManyWithoutRestaurantInput
+    tables?: RestaurantTableUncheckedCreateNestedManyWithoutRestaurantInput
+  }
+
+  export type RestaurantCreateOrConnectWithoutMenuCategoriesInput = {
+    where: RestaurantWhereUniqueInput
+    create: XOR<RestaurantCreateWithoutMenuCategoriesInput, RestaurantUncheckedCreateWithoutMenuCategoriesInput>
+  }
+
+  export type RestaurantUpsertWithoutMenuCategoriesInput = {
+    update: XOR<RestaurantUpdateWithoutMenuCategoriesInput, RestaurantUncheckedUpdateWithoutMenuCategoriesInput>
+    create: XOR<RestaurantCreateWithoutMenuCategoriesInput, RestaurantUncheckedCreateWithoutMenuCategoriesInput>
+    where?: RestaurantWhereInput
+  }
+
+  export type RestaurantUpdateToOneWithWhereWithoutMenuCategoriesInput = {
+    where?: RestaurantWhereInput
+    data: XOR<RestaurantUpdateWithoutMenuCategoriesInput, RestaurantUncheckedUpdateWithoutMenuCategoriesInput>
+  }
+
+  export type RestaurantUpdateWithoutMenuCategoriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: RestaurantEmployeeUpdateManyWithoutRestaurantNestedInput
+    zones?: RestaurantZoneUpdateManyWithoutRestaurantNestedInput
+    tables?: RestaurantTableUpdateManyWithoutRestaurantNestedInput
+  }
+
+  export type RestaurantUncheckedUpdateWithoutMenuCategoriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    taxId?: NullableStringFieldUpdateOperationsInput | string | null
+    currency?: StringFieldUpdateOperationsInput | string
+    timezone?: StringFieldUpdateOperationsInput | string
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    employees?: RestaurantEmployeeUncheckedUpdateManyWithoutRestaurantNestedInput
+    zones?: RestaurantZoneUncheckedUpdateManyWithoutRestaurantNestedInput
+    tables?: RestaurantTableUncheckedUpdateManyWithoutRestaurantNestedInput
+  }
+
   export type AccountCreateWithoutUserInput = {
     id?: string
     type: string
@@ -29441,6 +38026,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29467,6 +38053,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29598,6 +38185,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29624,6 +38212,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29846,6 +38435,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29872,6 +38462,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29947,6 +38538,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29973,6 +38565,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29999,6 +38592,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30025,6 +38619,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30089,6 +38684,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30115,6 +38711,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30323,6 +38920,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30349,6 +38947,7 @@ export namespace Prisma {
     tenantId?: string
     hotelCode: string
     storeCode?: string | null
+    restCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30391,6 +38990,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30417,6 +39017,7 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30890,6 +39491,308 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RestaurantEmployeeCreateManyRestaurantInput = {
+    id?: string
+    userId?: string | null
+    firstName: string
+    lastName: string
+    phone?: string | null
+    email?: string | null
+    role?: string
+    pin?: string | null
+    isActive?: boolean
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantZoneCreateManyRestaurantInput = {
+    id?: string
+    name: string
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantTableCreateManyRestaurantInput = {
+    id?: string
+    zoneId: string
+    number: string
+    label?: string | null
+    seats?: number
+    shape?: string
+    status?: string
+    posX?: number
+    posY?: number
+    width?: number
+    height?: number
+    rotation?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MenuCategoryCreateManyRestaurantInput = {
+    id?: string
+    name: string
+    nameEn?: string | null
+    icon?: string | null
+    color?: string | null
+    sortOrder?: number
+    isActive?: boolean
+    isSeasonal?: boolean
+    parentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantEmployeeUpdateWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantEmployeeUncheckedUpdateWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantEmployeeUncheckedUpdateManyWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    pin?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantZoneUpdateWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tables?: RestaurantTableUpdateManyWithoutZoneNestedInput
+  }
+
+  export type RestaurantZoneUncheckedUpdateWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tables?: RestaurantTableUncheckedUpdateManyWithoutZoneNestedInput
+  }
+
+  export type RestaurantZoneUncheckedUpdateManyWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantTableUpdateWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    zone?: RestaurantZoneUpdateOneRequiredWithoutTablesNestedInput
+  }
+
+  export type RestaurantTableUncheckedUpdateWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    zoneId?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantTableUncheckedUpdateManyWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    zoneId?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MenuCategoryUpdateWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSeasonal?: BoolFieldUpdateOperationsInput | boolean
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MenuCategoryUncheckedUpdateWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSeasonal?: BoolFieldUpdateOperationsInput | boolean
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MenuCategoryUncheckedUpdateManyWithoutRestaurantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    nameEn?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isSeasonal?: BoolFieldUpdateOperationsInput | boolean
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantTableCreateManyZoneInput = {
+    id?: string
+    restaurantId: string
+    number: string
+    label?: string | null
+    seats?: number
+    shape?: string
+    status?: string
+    posX?: number
+    posY?: number
+    width?: number
+    height?: number
+    rotation?: number
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RestaurantTableUpdateWithoutZoneInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    restaurant?: RestaurantUpdateOneRequiredWithoutTablesNestedInput
+  }
+
+  export type RestaurantTableUncheckedUpdateWithoutZoneInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RestaurantTableUncheckedUpdateManyWithoutZoneInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    restaurantId?: StringFieldUpdateOperationsInput | string
+    number?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    seats?: IntFieldUpdateOperationsInput | number
+    shape?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    posX?: FloatFieldUpdateOperationsInput | number
+    posY?: FloatFieldUpdateOperationsInput | number
+    width?: FloatFieldUpdateOperationsInput | number
+    height?: FloatFieldUpdateOperationsInput | number
+    rotation?: FloatFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AccountCreateManyUserInput = {
     id?: string
     type: string
@@ -31196,6 +40099,14 @@ export namespace Prisma {
      */
     export type StoreCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = StoreCountOutputTypeDefaultArgs<ExtArgs>
     /**
+     * @deprecated Use RestaurantCountOutputTypeDefaultArgs instead
+     */
+    export type RestaurantCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RestaurantCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use RestaurantZoneCountOutputTypeDefaultArgs instead
+     */
+    export type RestaurantZoneCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RestaurantZoneCountOutputTypeDefaultArgs<ExtArgs>
+    /**
      * @deprecated Use UserCountOutputTypeDefaultArgs instead
      */
     export type UserCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -31223,6 +40134,26 @@ export namespace Prisma {
      * @deprecated Use StoreEmployeeDefaultArgs instead
      */
     export type StoreEmployeeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = StoreEmployeeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use RestaurantDefaultArgs instead
+     */
+    export type RestaurantArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RestaurantDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use RestaurantEmployeeDefaultArgs instead
+     */
+    export type RestaurantEmployeeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RestaurantEmployeeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use RestaurantZoneDefaultArgs instead
+     */
+    export type RestaurantZoneArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RestaurantZoneDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use RestaurantTableDefaultArgs instead
+     */
+    export type RestaurantTableArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RestaurantTableDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use MenuCategoryDefaultArgs instead
+     */
+    export type MenuCategoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = MenuCategoryDefaultArgs<ExtArgs>
     /**
      * @deprecated Use UserDefaultArgs instead
      */

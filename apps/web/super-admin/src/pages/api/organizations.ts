@@ -46,6 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           { email: { contains: search as string, mode: 'insensitive' } },
           { hotelCode: { contains: search as string, mode: 'insensitive' } },
           { tenantCode: { contains: search as string, mode: 'insensitive' } },
+          { storeCode: { contains: search as string, mode: 'insensitive' } },
+          { restCode: { contains: search as string, mode: 'insensitive' } },
         ]
       }
 
@@ -88,8 +90,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         name: org.name,
         email: org.email,
         slug: org.slug,
-        // Support both hotel and brewery codes
-        hotelCode: org.tenantCode || org.hotelCode || '',
+        // Support hotel, shop, restaurant, brewery codes
+        hotelCode: org.hotelCode ?? '',
+        storeCode: org.storeCode ?? '',
+        restCode: org.restCode ?? '',
         tenantCode: (org as any).tenantCode || '',
         tenantId: (org as any).tenantId || '',
         // Company info

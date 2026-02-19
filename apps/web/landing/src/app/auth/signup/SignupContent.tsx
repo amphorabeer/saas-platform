@@ -35,6 +35,17 @@ const moduleConfig: Record<string, { icon: string; title: string; subtitle: stri
     successSubtitle: 'თქვენი POS სისტემა მზადაა',
     loginUrl: process.env.NEXT_PUBLIC_STORE_URL || 'https://shop.geobiz.app',
   },
+  restaurant: {
+    icon: '🍽️',
+    title: 'რეგისტრაცია',
+    subtitle: 'შექმენით თქვენი რესტორნის ანგარიში',
+    bizLabel: 'რესტორნის სახელი *',
+    bizPlaceholder: 'ჩემი რესტორანი',
+    bizSectionTitle: 'რესტორნის ინფორმაცია',
+    successTitle: 'რეგისტრაცია წარმატებულია!',
+    successSubtitle: 'თქვენი RestoPOS სისტემა მზადაა',
+    loginUrl: process.env.NEXT_PUBLIC_RESTAURANT_URL || 'https://rest.geobiz.app',
+  },
 }
 
 const defaultConfig = moduleConfig.hotel
@@ -57,6 +68,7 @@ export default function SignupContent() {
     password: '',
     confirmPassword: '',
     hotelName: '',
+    restaurantType: 'restaurant',
     company: '',
     taxId: '',
     address: '',
@@ -102,7 +114,7 @@ export default function SignupContent() {
       }
     }
     
-    const apiUrl = module === 'shop' ? '/api/store/register' : '/api/register'
+    const apiUrl = module === 'shop' ? '/api/store/register' : module === 'restaurant' ? '/api/restaurant/register' : '/api/register'
     
     try {
       const response = await fetch(apiUrl, {
@@ -113,6 +125,7 @@ export default function SignupContent() {
           email: formData.email,
           password: formData.password,
           organizationName: formData.hotelName,
+          restaurantType: formData.restaurantType,
           module,
           plan,
           company: formData.company,
@@ -135,7 +148,7 @@ export default function SignupContent() {
         return
       }
       
-      setSuccess({ hotelCode: data.hotelCode })
+      setSuccess({ hotelCode: data.hotelCode || data.restCode || data.storeCode })
       
     } catch (err) {
       setError('სისტემური შეცდომა. სცადეთ თავიდან.')
@@ -144,9 +157,8 @@ export default function SignupContent() {
   }
   
   if (success) {
-    const isShop = module === 'shop'
-    const loginBase = isShop ? config.loginUrl : (process.env.NEXT_PUBLIC_HOTEL_URL || 'https://saas-hotel.vercel.app')
-    
+    const loginBase = config.loginUrl
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8 text-center">
@@ -156,7 +168,9 @@ export default function SignupContent() {
           
           {success.hotelCode && (
             <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
-              <p className="text-sm text-blue-600 mb-2">თქვენი კოდი:</p>
+              <p className="text-sm text-blue-600 mb-2">
+                {module === 'restaurant' ? 'რესტორნის კოდი:' : module === 'shop' ? 'მაღაზიის კოდი:' : 'სასტუმროს კოდი:'}
+              </p>
               <div className="text-5xl font-mono font-bold text-blue-700 tracking-widest">
                 {success.hotelCode}
               </div>
@@ -231,6 +245,24 @@ export default function SignupContent() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">{config.bizLabel}</label>
                 <input type="text" value={formData.hotelName} onChange={(e) => setFormData({...formData, hotelName: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder={config.bizPlaceholder} required disabled={loading} />
               </div>
+              {module === 'restaurant' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">რესტორნის ტიპი *</label>
+                  <select
+                    value={formData.restaurantType}
+                    onChange={(e) => setFormData({...formData, restaurantType: e.target.value})}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                    disabled={loading}
+                  >
+                    <option value="restaurant">რესტორანი</option>
+                    <option value="cafe">კაფე</option>
+                    <option value="bar">ბარი</option>
+                    <option value="pub">პაბი</option>
+                    <option value="bistro">ბისტრო</option>
+                    <option value="fastfood">ფასტფუდი</option>
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">კომპანიის სახელი *</label>
                 <input type="text" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder={module === 'shop' ? 'შპს ჩემი მაღაზია' : 'შპს სასტუმრო'} required disabled={loading} />

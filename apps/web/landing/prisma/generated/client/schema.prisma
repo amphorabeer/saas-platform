@@ -28,6 +28,7 @@ model Organization {
   tenantId     String          @unique @default(cuid())
   hotelCode    String          @unique
   storeCode    String?         @unique
+  restCode     String?         @unique
   databaseUrl  String?
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
@@ -76,6 +77,113 @@ model StoreEmployee {
   store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   @@index([storeId])
+}
+
+// ── RESTAURANT (RestoPOS) ──
+
+model Restaurant {
+  id             String               @id @default(cuid())
+  tenantId       String
+  name           String
+  slug           String               @unique
+  type           String               @default("restaurant")
+  address        String?
+  phone          String?
+  email          String?
+  taxId          String?
+  currency       String               @default("GEL")
+  timezone       String               @default("Asia/Tbilisi")
+  logoUrl        String?
+  isActive       Boolean              @default(true)
+  settings       Json?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  employees      RestaurantEmployee[]
+  zones          RestaurantZone[]
+  tables         RestaurantTable[]
+  menuCategories MenuCategory[]
+
+  @@index([tenantId])
+}
+
+model RestaurantEmployee {
+  id           String     @id @default(cuid())
+  restaurantId String
+  userId       String?
+  firstName    String
+  lastName     String
+  phone        String?
+  email        String?
+  role         String     @default("WAITER")
+  pin          String?
+  isActive     Boolean    @default(true)
+  photoUrl     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
+  @@index([pin])
+}
+
+model RestaurantZone {
+  id           String            @id @default(cuid())
+  restaurantId String
+  name         String
+  color        String?           @default("#6366F1")
+  sortOrder    Int               @default(0)
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  restaurant   Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  tables       RestaurantTable[]
+
+  @@index([restaurantId])
+}
+
+model RestaurantTable {
+  id           String         @id @default(cuid())
+  restaurantId String
+  zoneId       String
+  number       String
+  label        String?
+  seats        Int            @default(4)
+  shape        String         @default("SQUARE")
+  status       String         @default("FREE")
+  posX         Float          @default(0)
+  posY         Float          @default(0)
+  width        Float          @default(80)
+  height       Float          @default(80)
+  rotation     Float          @default(0)
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  zone         RestaurantZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, number])
+  @@index([restaurantId])
+  @@index([zoneId])
+  @@index([status])
+}
+
+model MenuCategory {
+  id           String     @id @default(cuid())
+  restaurantId String
+  name         String
+  nameEn       String?
+  icon         String?
+  color        String?    @default("#F97316")
+  sortOrder    Int        @default(0)
+  isActive     Boolean    @default(true)
+  isSeasonal   Boolean    @default(false)
+  parentId     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
+  @@index([parentId])
 }
 
 model User {

@@ -27,6 +27,8 @@ interface Organization {
   email: string;
   slug: string;
   hotelCode: string;
+  storeCode?: string;
+  restCode?: string;
   status: string;
   plan: string;
   users: number;
@@ -44,6 +46,27 @@ const moduleLabels: Record<string, string> = {
   WINERY: "ღვინის მარანი",
   DISTILLERY: "დისტილერია",
 };
+
+function CodeWithCopy({ label, code, color }: { label: string; code: string; color: string }) {
+  const fullCode = `${label}-${code}`;
+  return (
+    <span className={`flex items-center gap-1 ${color} font-mono text-sm`}>
+      {fullCode}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          navigator.clipboard.writeText(code);
+          toast.success(`${fullCode} დაკოპირდა!`);
+        }}
+        className="p-0.5 rounded hover:bg-white/10 transition"
+        title="კოპირება"
+      >
+        <Copy className="h-3 w-3" />
+      </button>
+    </span>
+  );
+}
 
 export default function OrganizationsPage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -188,7 +211,9 @@ export default function OrganizationsPage() {
     const matchesSearch =
       org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       org.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (org.hotelCode && org.hotelCode.includes(searchQuery));
+      (org.hotelCode && org.hotelCode.includes(searchQuery)) ||
+      (org.storeCode && org.storeCode.includes(searchQuery)) ||
+      (org.restCode && org.restCode.includes(searchQuery));
     const matchesModule =
       moduleFilter === "all" ||
       org.modules.some((m) => m === moduleFilter);
@@ -299,19 +324,18 @@ export default function OrganizationsPage() {
                   {filteredOrganizations.map((org) => (
                     <tr key={org.id} className="border-b hover:bg-muted/50">
                       <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <code className="bg-blue-100 text-blue-700 px-2 py-1 rounded font-mono font-bold text-lg">
-                            {org.hotelCode || '----'}
-                          </code>
-                          {org.hotelCode && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0"
-                              onClick={() => handleCopyCode(org.hotelCode)}
-                            >
-                              <Copy className="h-3 w-3" />
-                            </Button>
+                        <div className="space-y-1">
+                          {org.hotelCode && !org.hotelCode.startsWith('REST-') && !org.hotelCode.startsWith('SHOP-') && (
+                            <CodeWithCopy label="HOTEL" code={org.hotelCode} color="text-blue-400" />
+                          )}
+                          {org.storeCode && (
+                            <CodeWithCopy label="SHOP" code={org.storeCode} color="text-green-400" />
+                          )}
+                          {org.restCode && (
+                            <CodeWithCopy label="REST" code={org.restCode} color="text-orange-400" />
+                          )}
+                          {!org.hotelCode && !org.storeCode && !org.restCode && (
+                            <span className="block text-slate-400 font-mono text-sm">----</span>
                           )}
                         </div>
                       </td>
@@ -385,14 +409,22 @@ export default function OrganizationsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {editingOrg && editingOrg.hotelCode && (
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <label className="block text-sm font-medium mb-1 text-blue-700">
-                      ორგანიზაციის კოდი
+                {editingOrg && (editingOrg.hotelCode || editingOrg.storeCode || editingOrg.restCode) && (
+                  <div className="bg-muted/50 p-3 rounded-lg space-y-1">
+                    <label className="block text-sm font-medium mb-1">
+                      ორგანიზაციის კოდები
                     </label>
-                    <code className="text-2xl font-mono font-bold text-blue-700">
-                      {editingOrg.hotelCode}
-                    </code>
+                    <div className="font-mono text-sm space-y-1">
+                      {editingOrg.hotelCode && !editingOrg.hotelCode.startsWith('REST-') && !editingOrg.hotelCode.startsWith('SHOP-') && (
+                        <CodeWithCopy label="HOTEL" code={editingOrg.hotelCode} color="text-blue-600" />
+                      )}
+                      {editingOrg.storeCode && (
+                        <CodeWithCopy label="SHOP" code={editingOrg.storeCode} color="text-green-600" />
+                      )}
+                      {editingOrg.restCode && (
+                        <CodeWithCopy label="REST" code={editingOrg.restCode} color="text-orange-600" />
+                      )}
+                    </div>
                   </div>
                 )}
                 <div>

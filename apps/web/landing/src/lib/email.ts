@@ -85,6 +85,33 @@ export function generateStoreWelcomeEmail(
   `
 }
 
+export function generateRestaurantWelcomeEmail(
+  restCode: string,
+  restaurantName: string,
+  email: string,
+  password: string
+) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0F172A; color: #F1F5F9; padding: 32px; border-radius: 12px;">
+      <h2 style="color: #F97316; margin: 0 0 16px 0;">მოგესალმებით GeoBiz RestoPOS-ში! 🍽️</h2>
+      <p style="margin: 0 0 12px 0;">გამარჯობა,</p>
+      <p style="margin: 0 0 20px 0;">თქვენი რესტორნის <strong>${restaurantName}</strong> რეგისტრაცია წარმატებით დასრულდა!</p>
+      
+      <div style="background: #1E293B; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.08);">
+        <h3 style="margin: 0 0 10px 0; color: #F97316;">თქვენი შესვლის მონაცემები:</h3>
+        <p style="margin: 5px 0;"><strong>რესტორნის კოდი:</strong> ${restCode}</p>
+        <p style="margin: 5px 0;"><strong>ელ-ფოსტა:</strong> ${email}</p>
+        <p style="margin: 5px 0;"><strong>პაროლი:</strong> ${password}</p>
+        <p style="color: #EF4444; font-size: 12px; margin-top: 10px;">⚠️ უსაფრთხოების მიზნით, გთხოვთ შეცვალოთ პაროლი შესვლის შემდეგ!</p>
+      </div>
+      
+      <p style="margin: 16px 0;">შესვლისთვის გამოიყენეთ: <a href="https://rest.geobiz.app/login" style="color: #F97316;">rest.geobiz.app/login</a></p>
+      
+      <p style="color: #94A3B8; font-size: 14px; margin-top: 24px;">15-დღიანი ტრიალი აქტიურია. გმადლობთ რომ აირჩიეთ GeoBiz Platform!</p>
+    </div>
+  `
+}
+
 export function generateHotelPasswordResetEmail(resetUrl: string, hotelName: string) {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

@@ -140,6 +140,7 @@ exports.Prisma.OrganizationScalarFieldEnum = {
   tenantId: 'tenantId',
   hotelCode: 'hotelCode',
   storeCode: 'storeCode',
+  restCode: 'restCode',
   databaseUrl: 'databaseUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -173,6 +174,86 @@ exports.Prisma.StoreEmployeeScalarFieldEnum = {
   role: 'role',
   pin: 'pin',
   isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RestaurantScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  name: 'name',
+  slug: 'slug',
+  type: 'type',
+  address: 'address',
+  phone: 'phone',
+  email: 'email',
+  taxId: 'taxId',
+  currency: 'currency',
+  timezone: 'timezone',
+  logoUrl: 'logoUrl',
+  isActive: 'isActive',
+  settings: 'settings',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RestaurantEmployeeScalarFieldEnum = {
+  id: 'id',
+  restaurantId: 'restaurantId',
+  userId: 'userId',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  phone: 'phone',
+  email: 'email',
+  role: 'role',
+  pin: 'pin',
+  isActive: 'isActive',
+  photoUrl: 'photoUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RestaurantZoneScalarFieldEnum = {
+  id: 'id',
+  restaurantId: 'restaurantId',
+  name: 'name',
+  color: 'color',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RestaurantTableScalarFieldEnum = {
+  id: 'id',
+  restaurantId: 'restaurantId',
+  zoneId: 'zoneId',
+  number: 'number',
+  label: 'label',
+  seats: 'seats',
+  shape: 'shape',
+  status: 'status',
+  posX: 'posX',
+  posY: 'posY',
+  width: 'width',
+  height: 'height',
+  rotation: 'rotation',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MenuCategoryScalarFieldEnum = {
+  id: 'id',
+  restaurantId: 'restaurantId',
+  name: 'name',
+  nameEn: 'nameEn',
+  icon: 'icon',
+  color: 'color',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  isSeasonal: 'isSeasonal',
+  parentId: 'parentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -471,6 +552,11 @@ exports.Prisma.ModelName = {
   Organization: 'Organization',
   Store: 'Store',
   StoreEmployee: 'StoreEmployee',
+  Restaurant: 'Restaurant',
+  RestaurantEmployee: 'RestaurantEmployee',
+  RestaurantZone: 'RestaurantZone',
+  RestaurantTable: 'RestaurantTable',
+  MenuCategory: 'MenuCategory',
   User: 'User',
   Account: 'Account',
   Session: 'Session',
