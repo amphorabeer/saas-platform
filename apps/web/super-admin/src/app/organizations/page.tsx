@@ -29,6 +29,7 @@ interface Organization {
   hotelCode: string;
   storeCode?: string;
   restCode?: string;
+  tenantCode?: string;
   status: string;
   plan: string;
   users: number;
@@ -213,7 +214,8 @@ export default function OrganizationsPage() {
       org.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (org.hotelCode && org.hotelCode.includes(searchQuery)) ||
       (org.storeCode && org.storeCode.includes(searchQuery)) ||
-      (org.restCode && org.restCode.includes(searchQuery));
+      (org.restCode && org.restCode.includes(searchQuery)) ||
+      (org.tenantCode && org.tenantCode.includes(searchQuery));
     const matchesModule =
       moduleFilter === "all" ||
       org.modules.some((m) => m === moduleFilter);
@@ -334,7 +336,10 @@ export default function OrganizationsPage() {
                           {org.restCode && (
                             <CodeWithCopy label="REST" code={org.restCode} color="text-orange-400" />
                           )}
-                          {!org.hotelCode && !org.storeCode && !org.restCode && (
+                          {org.modules?.includes("BREWERY") && org.tenantCode && (
+                            <CodeWithCopy label="BREW" code={org.tenantCode} color="text-amber-400" />
+                          )}
+                          {!org.hotelCode && !org.storeCode && !org.restCode && !(org.modules?.includes("BREWERY") && org.tenantCode) && (
                             <span className="block text-slate-400 font-mono text-sm">----</span>
                           )}
                         </div>
@@ -409,7 +414,7 @@ export default function OrganizationsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {editingOrg && (editingOrg.hotelCode || editingOrg.storeCode || editingOrg.restCode) && (
+                {editingOrg && (editingOrg.hotelCode || editingOrg.storeCode || editingOrg.restCode || (editingOrg.modules?.includes("BREWERY") && editingOrg.tenantCode)) && (
                   <div className="bg-muted/50 p-3 rounded-lg space-y-1">
                     <label className="block text-sm font-medium mb-1">
                       ორგანიზაციის კოდები
@@ -423,6 +428,9 @@ export default function OrganizationsPage() {
                       )}
                       {editingOrg.restCode && (
                         <CodeWithCopy label="REST" code={editingOrg.restCode} color="text-orange-600" />
+                      )}
+                      {editingOrg.modules?.includes("BREWERY") && editingOrg.tenantCode && (
+                        <CodeWithCopy label="BREW" code={editingOrg.tenantCode} color="text-amber-600" />
                       )}
                     </div>
                   </div>
