@@ -12,6 +12,13 @@ const nextConfig = {
   },
   experimental: {
     instrumentationHook: true,
+    outputFileTracingExcludes: {
+      '**/*': [
+        'node_modules/.pnpm/@prisma+client*/node_modules/.prisma/**',
+        'node_modules/.pnpm/@swc+core*/**',
+        'node_modules/.pnpm/esbuild-*/**',
+      ],
+    },
   },
 };
 
