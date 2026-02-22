@@ -471,11 +471,63 @@ const RoomRatesManager = () => {
     { id: 2, type: 'Deluxe', weekday: 200, weekend: 240, holiday: 300 },
     { id: 3, type: 'Suite', weekday: 350, weekend: 400, holiday: 500 }
   ])
-  useEffect(() => { const saved = localStorage.getItem('roomRates'); if (saved) { try { const p = JSON.parse(saved); if (p.length) setRates(p) } catch {} } }, [])
-  const update = (id: number, field: string, value: number) => {
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    // Load from localStorage first for instant display
+    const saved = localStorage.getItem('roomRates')
+    if (saved) { try { const p = JSON.parse(saved); if (p.length) setRates(p) } catch {} }
+    
+    // Then try API
+    fetch('/api/hotel/room-rates').then(res => res.json()).then(apiRates => {
+      if (Array.isArray(apiRates) && apiRates.length > 0) {
+        const rateMap = new Map<string, any>()
+        for (const rate of apiRates) {
+          const key = rate.roomTypeCode
+          if (!rateMap.has(key)) {
+            rateMap.set(key, { id: key, type: rate.roomTypeCode, weekday: 0, weekend: 0, holiday: 0 })
+          }
+          const entry = rateMap.get(key)!
+          if (rate.dayOfWeek === null || rate.dayOfWeek === undefined) {
+            entry.weekday = Number(rate.basePrice) || 0
+            if (!entry.weekend) entry.weekend = Number(rate.basePrice) || 0
+          } else if (rate.dayOfWeek === 0 || rate.dayOfWeek === 6) {
+            entry.weekend = Number(rate.basePrice) || 0
+          } else {
+            entry.weekday = Number(rate.basePrice) || 0
+          }
+        }
+        const mapped = Array.from(rateMap.values())
+        if (mapped.length > 0) {
+          setRates(mapped)
+          localStorage.setItem('roomRates', JSON.stringify(mapped))
+        }
+      }
+    }).catch(() => {})
+  }, [])
+
+  const update = (id: number | string, field: string, value: number) => {
     const updated = rates.map(r => r.id === id ? { ...r, [field]: value } : r)
     setRates(updated)
     localStorage.setItem('roomRates', JSON.stringify(updated))
+    // Notify same-tab components (RoomCalendar)
+    window.dispatchEvent(new Event('roomRatesUpdated'))
+    
+    // Save to API (debounced per rate)
+    const rate = updated.find(r => r.id === id)
+    if (rate) {
+      const apiRates = []
+      // Save base rate (weekday as default)
+      apiRates.push({ roomTypeCode: rate.type, dayOfWeek: null, basePrice: rate.weekday })
+      // Save weekend rate (Saturday)
+      apiRates.push({ roomTypeCode: rate.type, dayOfWeek: 6, basePrice: rate.weekend })
+      
+      fetch('/api/hotel/room-rates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiRates)
+      }).catch(e => console.error('Error saving rate to API:', e))
+    }
   }
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

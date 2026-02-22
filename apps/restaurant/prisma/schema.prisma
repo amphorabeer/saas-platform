@@ -28,7 +28,7 @@ model Organization {
   directorName String?
   bankSWIFT    String?
   tenantId     String   @unique @default(cuid())
-  hotelCode    String   @unique
+  hotelCode    String?  @unique
   storeCode    String?  @unique
   restCode     String?  @unique
   databaseUrl  String?

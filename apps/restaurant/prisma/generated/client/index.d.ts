@@ -5182,7 +5182,7 @@ export namespace Prisma {
     directorName: string | null
     bankSWIFT: string | null
     tenantId: string
-    hotelCode: string
+    hotelCode: string | null
     storeCode: string | null
     restCode: string | null
     databaseUrl: string | null
@@ -5344,7 +5344,7 @@ export namespace Prisma {
       directorName: string | null
       bankSWIFT: string | null
       tenantId: string
-      hotelCode: string
+      hotelCode: string | null
       storeCode: string | null
       restCode: string | null
       databaseUrl: string | null
@@ -47476,7 +47476,7 @@ export namespace Prisma {
     directorName?: StringNullableFilter<"Organization"> | string | null
     bankSWIFT?: StringNullableFilter<"Organization"> | string | null
     tenantId?: StringFilter<"Organization"> | string
-    hotelCode?: StringFilter<"Organization"> | string
+    hotelCode?: StringNullableFilter<"Organization"> | string | null
     storeCode?: StringNullableFilter<"Organization"> | string | null
     restCode?: StringNullableFilter<"Organization"> | string | null
     databaseUrl?: StringNullableFilter<"Organization"> | string | null
@@ -47503,7 +47503,7 @@ export namespace Prisma {
     directorName?: SortOrderInput | SortOrder
     bankSWIFT?: SortOrderInput | SortOrder
     tenantId?: SortOrder
-    hotelCode?: SortOrder
+    hotelCode?: SortOrderInput | SortOrder
     storeCode?: SortOrderInput | SortOrder
     restCode?: SortOrderInput | SortOrder
     databaseUrl?: SortOrderInput | SortOrder
@@ -47560,7 +47560,7 @@ export namespace Prisma {
     directorName?: SortOrderInput | SortOrder
     bankSWIFT?: SortOrderInput | SortOrder
     tenantId?: SortOrder
-    hotelCode?: SortOrder
+    hotelCode?: SortOrderInput | SortOrder
     storeCode?: SortOrderInput | SortOrder
     restCode?: SortOrderInput | SortOrder
     databaseUrl?: SortOrderInput | SortOrder
@@ -47592,7 +47592,7 @@ export namespace Prisma {
     directorName?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     bankSWIFT?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     tenantId?: StringWithAggregatesFilter<"Organization"> | string
-    hotelCode?: StringWithAggregatesFilter<"Organization"> | string
+    hotelCode?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     storeCode?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     restCode?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     databaseUrl?: StringNullableWithAggregatesFilter<"Organization"> | string | null
@@ -50650,7 +50650,7 @@ export namespace Prisma {
     directorName?: string | null
     bankSWIFT?: string | null
     tenantId?: string
-    hotelCode: string
+    hotelCode?: string | null
     storeCode?: string | null
     restCode?: string | null
     databaseUrl?: string | null
@@ -50677,7 +50677,7 @@ export namespace Prisma {
     directorName?: string | null
     bankSWIFT?: string | null
     tenantId?: string
-    hotelCode: string
+    hotelCode?: string | null
     storeCode?: string | null
     restCode?: string | null
     databaseUrl?: string | null
@@ -50704,7 +50704,7 @@ export namespace Prisma {
     directorName?: NullableStringFieldUpdateOperationsInput | string | null
     bankSWIFT?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
-    hotelCode?: StringFieldUpdateOperationsInput | string
+    hotelCode?: NullableStringFieldUpdateOperationsInput | string | null
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -50731,7 +50731,7 @@ export namespace Prisma {
     directorName?: NullableStringFieldUpdateOperationsInput | string | null
     bankSWIFT?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
-    hotelCode?: StringFieldUpdateOperationsInput | string
+    hotelCode?: NullableStringFieldUpdateOperationsInput | string | null
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -50758,7 +50758,7 @@ export namespace Prisma {
     directorName?: string | null
     bankSWIFT?: string | null
     tenantId?: string
-    hotelCode: string
+    hotelCode?: string | null
     storeCode?: string | null
     restCode?: string | null
     databaseUrl?: string | null
@@ -50784,7 +50784,7 @@ export namespace Prisma {
     directorName?: NullableStringFieldUpdateOperationsInput | string | null
     bankSWIFT?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
-    hotelCode?: StringFieldUpdateOperationsInput | string
+    hotelCode?: NullableStringFieldUpdateOperationsInput | string | null
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -50810,7 +50810,7 @@ export namespace Prisma {
     directorName?: NullableStringFieldUpdateOperationsInput | string | null
     bankSWIFT?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
-    hotelCode?: StringFieldUpdateOperationsInput | string
+    hotelCode?: NullableStringFieldUpdateOperationsInput | string | null
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60723,7 +60723,7 @@ export namespace Prisma {
     directorName?: string | null
     bankSWIFT?: string | null
     tenantId?: string
-    hotelCode: string
+    hotelCode?: string | null
     storeCode?: string | null
     restCode?: string | null
     databaseUrl?: string | null
@@ -60749,7 +60749,7 @@ export namespace Prisma {
     directorName?: string | null
     bankSWIFT?: string | null
     tenantId?: string
-    hotelCode: string
+    hotelCode?: string | null
     storeCode?: string | null
     restCode?: string | null
     databaseUrl?: string | null
@@ -60791,7 +60791,7 @@ export namespace Prisma {
     directorName?: NullableStringFieldUpdateOperationsInput | string | null
     bankSWIFT?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
-    hotelCode?: StringFieldUpdateOperationsInput | string
+    hotelCode?: NullableStringFieldUpdateOperationsInput | string | null
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60817,7 +60817,7 @@ export namespace Prisma {
     directorName?: NullableStringFieldUpdateOperationsInput | string | null
     bankSWIFT?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: StringFieldUpdateOperationsInput | string
-    hotelCode?: StringFieldUpdateOperationsInput | string
+    hotelCode?: NullableStringFieldUpdateOperationsInput | string | null
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null

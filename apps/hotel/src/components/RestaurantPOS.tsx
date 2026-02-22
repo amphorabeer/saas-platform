@@ -131,6 +131,7 @@ export default function RestaurantPOS() {
   // View state
   const [activeView, setActiveView] = useState<'floor' | 'orders' | 'kds' | 'reports' | 'reservations'>('floor')
   const [activeZone, setActiveZone] = useState<'inside' | 'outside' | 'lobby'>('inside')
+  const [isKdsFullscreen, setIsKdsFullscreen] = useState(false)
   
   // Date selection
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'))
@@ -1123,6 +1124,96 @@ export default function RestaurantPOS() {
 
   return (
     <div className="h-full bg-gray-100">
+      {/* Fullscreen KDS Mode */}
+      {isKdsFullscreen && (
+        <div className="fixed inset-0 z-[9999] bg-gray-900 flex flex-col">
+          <div className="bg-gray-800 px-6 py-3 flex items-center justify-between flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">👨‍🍳</span>
+              <div>
+                <h1 className="text-xl font-bold text-white">სამზარეულო</h1>
+                <p className="text-sm text-gray-400">{settings.restaurantName} • {moment().format('HH:mm')}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 text-sm">
+                <span className="bg-yellow-500 text-white px-3 py-1 rounded-full font-medium">
+                  ⏳ {orders.filter(o => o.status === 'pending').length} მოლოდინში
+                </span>
+                <span className="bg-blue-500 text-white px-3 py-1 rounded-full font-medium">
+                  🍳 {orders.filter(o => o.status === 'preparing').length} მზადდება
+                </span>
+              </div>
+              <button
+                onClick={() => setIsKdsFullscreen(false)}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium"
+              >
+                ✕ დახურვა
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {orders.filter(o => o.status === 'pending' || o.status === 'preparing').length === 0 ? (
+                <div className="col-span-full text-center py-24 text-gray-400">
+                  <div className="text-8xl mb-4">👨‍🍳</div>
+                  <p className="text-2xl">შეკვეთები სამზარეულოში არ არის</p>
+                </div>
+              ) : (
+                orders.filter(o => o.status === 'pending' || o.status === 'preparing').map(order => (
+                  <div key={order.id} className="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 overflow-hidden">
+                    <div className={`px-5 py-4 ${order.status === 'pending' ? 'bg-yellow-500' : 'bg-blue-500'} text-white`}>
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-xl">🪑 მაგიდა {order.tableNumber}</span>
+                        <div className="text-right">
+                          <div className="text-sm bg-white bg-opacity-25 px-3 py-1 rounded-full">{moment(order.createdAt).format('HH:mm')}</div>
+                          <div className="text-xs mt-1 opacity-80">{moment(order.createdAt).fromNow()}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-2">
+                      {order.items.filter((i: any) => i.status !== 'served').map((item: any) => (
+                        <div key={item.id} className={`flex items-center justify-between p-3 rounded-xl ${
+                          item.status === 'pending' ? 'bg-yellow-900/30 border border-yellow-700/50' :
+                          item.status === 'preparing' ? 'bg-blue-900/30 border border-blue-700/50' :
+                          'bg-green-900/30 border border-green-700/50'
+                        }`}>
+                          <div>
+                            <div className="font-bold text-white text-lg">{item.quantity}x {item.name}</div>
+                            {item.notes && <div className="text-sm text-gray-400 mt-1">📝 {item.notes}</div>}
+                          </div>
+                          <div className="flex gap-2">
+                            {item.status === 'pending' && (
+                              <button
+                                onClick={() => updateItemStatus(order.id, item.id, 'preparing')}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition"
+                              >
+                                🍳 დაწყება
+                              </button>
+                            )}
+                            {item.status === 'preparing' && (
+                              <button
+                                onClick={() => updateItemStatus(order.id, item.id, 'ready')}
+                                className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition"
+                              >
+                                ✅ მზადაა
+                              </button>
+                            )}
+                            {item.status === 'ready' && (
+                              <span className="px-4 py-2 bg-green-900/50 text-green-400 rounded-lg text-sm font-medium">✅ მზადაა</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b px-4 py-3">
         <div className="flex items-center justify-between">
@@ -1345,6 +1436,15 @@ export default function RestaurantPOS() {
       {/* Kitchen Display System */}
       {activeView === 'kds' && (
         <div className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-gray-700">👨‍🍳 სამზარეულო</h2>
+            <button
+              onClick={() => setIsKdsFullscreen(true)}
+              className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition font-medium flex items-center gap-2"
+            >
+              🖥️ მთელ ეკრანზე
+            </button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {orders.filter(o => o.status === 'pending' || o.status === 'preparing').length === 0 ? (
               <div className="col-span-full text-center py-12 text-gray-500">

@@ -66,7 +66,14 @@ export default function RoomCalendar({
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedRoomType, setSelectedRoomType] = useState<string>('all')
   const [showOccupancy, setShowOccupancy] = useState(false)
+  const [isAnchored, setIsAnchored] = useState(true) // Anchor mode - when off, calendar can be swiped
   const menuRef = useRef<HTMLDivElement>(null)
+  
+  // Swipe/slide refs
+  const swipeStartX = useRef<number | null>(null)
+  const swipeStartY = useRef<number | null>(null)
+  const isSwiping = useRef(false)
+  const swipeThreshold = 50 // minimum px to trigger date change
   
   // Room rates from Settings
   const [roomRates, setRoomRates] = useState<{ id: string; type: string; weekday: number; weekend: number }[]>([])
@@ -242,23 +249,90 @@ export default function RoomCalendar({
     }
   }, [])
   
-  // Load room rates from Settings
+  // Load room rates from API first, fallback to localStorage
   useEffect(() => {
-    const loadRates = () => {
+    const loadRatesFromLocalStorage = () => {
       const saved = localStorage.getItem('roomRates')
       if (saved) {
         try {
-          setRoomRates(JSON.parse(saved))
+          const parsed = JSON.parse(saved)
+          if (parsed.length > 0) {
+            setRoomRates(parsed)
+            return true
+          }
         } catch (e) {
-          console.error('Error loading room rates:', e)
+          console.error('Error loading room rates from localStorage:', e)
         }
       }
+      return false
     }
-    loadRates()
+
+    const loadRatesFromAPI = async () => {
+      try {
+        const response = await fetch('/api/hotel/room-rates')
+        if (response.ok) {
+          const apiRates = await response.json()
+          if (Array.isArray(apiRates) && apiRates.length > 0) {
+            // Group API rates by roomTypeCode and build localStorage-compatible format
+            const rateMap = new Map<string, any>()
+            for (const rate of apiRates) {
+              const key = rate.roomTypeCode
+              if (!rateMap.has(key)) {
+                rateMap.set(key, {
+                  id: key,
+                  type: rate.roomTypeCode,
+                  weekday: 0,
+                  weekend: 0,
+                  holiday: 0
+                })
+              }
+              const entry = rateMap.get(key)!
+              if (rate.dayOfWeek === null || rate.dayOfWeek === undefined) {
+                // Base rate — use as weekday default
+                entry.weekday = Number(rate.basePrice) || 0
+                if (!entry.weekend) entry.weekend = Number(rate.basePrice) || 0
+              } else if (rate.dayOfWeek === 0 || rate.dayOfWeek === 6) {
+                entry.weekend = Number(rate.basePrice) || 0
+              } else {
+                entry.weekday = Number(rate.basePrice) || 0
+              }
+            }
+            const mappedRates = Array.from(rateMap.values())
+            setRoomRates(mappedRates)
+            // Sync to localStorage so other components stay compatible
+            localStorage.setItem('roomRates', JSON.stringify(mappedRates))
+            console.log('[RoomCalendar] Loaded rates from API:', mappedRates.length)
+            return
+          }
+        }
+      } catch (e) {
+        console.error('[RoomCalendar] API rate load failed, using localStorage:', e)
+      }
+      // Fallback to localStorage if API fails or returns empty
+      loadRatesFromLocalStorage()
+    }
+
+    // Try API first, then localStorage
+    loadRatesFromAPI()
     
-    // Listen for storage changes (when Settings updates rates)
-    window.addEventListener('storage', loadRates)
-    return () => window.removeEventListener('storage', loadRates)
+    // Listen for localStorage changes (from Settings in other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'roomRates') {
+        loadRatesFromLocalStorage()
+      }
+    }
+    
+    // Listen for custom event from same-tab Settings updates
+    const handleRatesUpdate = () => {
+      loadRatesFromLocalStorage()
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('roomRatesUpdated', handleRatesUpdate)
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('roomRatesUpdated', handleRatesUpdate)
+    }
   }, [])
   
   // Load pricing data for tooltips
@@ -332,6 +406,154 @@ export default function RoomCalendar({
       window.removeEventListener('folioUpdated', handleFolioUpdate as EventListener)
     }
   }, [loadReservations])
+
+  // Swipe/slide handlers for calendar navigation
+  useEffect(() => {
+    if (isAnchored) return // Don't attach swipe handlers when anchored
+    const el = calendarRef.current
+    if (!el) return
+
+    let lastDragX: number | null = null
+    let accumulatedDx = 0
+    const pxPerDay = 40 // pixels of drag needed to shift 1 day
+
+    const onPointerDown = (e: PointerEvent) => {
+      // Don't start swipe if interacting with a reservation (drag/resize)
+      if (draggedReservationRef.current || isResizingRef.current) return
+      const target = e.target as HTMLElement
+      // Skip if clicking on interactive elements
+      if (target.closest('button') || target.closest('a') || target.closest('input') || target.closest('select')) return
+      // Skip if on a reservation bar
+      if (target.closest('[data-reservation-id]') || target.closest('.reservation-bar')) return
+      
+      swipeStartX.current = e.clientX
+      swipeStartY.current = e.clientY
+      lastDragX = e.clientX
+      accumulatedDx = 0
+      isSwiping.current = false
+    }
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (swipeStartX.current === null || lastDragX === null) return
+      const dx = e.clientX - swipeStartX.current
+      const dy = e.clientY - (swipeStartY.current || 0)
+      
+      // Only count as horizontal swipe if horizontal movement > vertical
+      if (!isSwiping.current && Math.abs(dx) > 15 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        isSwiping.current = true
+      }
+      
+      if (!isSwiping.current) return
+      
+      e.preventDefault()
+      // Reset horizontal scroll to prevent native scrolling from interfering
+      if (el.scrollLeft !== 0) el.scrollLeft = 0
+      
+      // Live sliding: shift date as user drags
+      accumulatedDx += (lastDragX - e.clientX) // positive = dragging left = forward in time
+      lastDragX = e.clientX
+      
+      const daysToShift = Math.trunc(accumulatedDx / pxPerDay)
+      if (daysToShift !== 0) {
+        accumulatedDx -= daysToShift * pxPerDay
+        setCurrentDate(prev => {
+          const newDate = new Date(prev)
+          newDate.setDate(prev.getDate() + daysToShift)
+          return newDate
+        })
+      }
+    }
+
+    const onPointerUp = (e: PointerEvent) => {
+      swipeStartX.current = null
+      swipeStartY.current = null
+      lastDragX = null
+      accumulatedDx = 0
+      isSwiping.current = false
+    }
+
+    // Touch events for mobile
+    let lastTouchX: number | null = null
+    let touchAccDx = 0
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (draggedReservationRef.current || isResizingRef.current) return
+      const target = e.target as HTMLElement
+      if (target.closest('button') || target.closest('[data-reservation-id]') || target.closest('.reservation-bar')) return
+      swipeStartX.current = e.touches[0].clientX
+      swipeStartY.current = e.touches[0].clientY
+      lastTouchX = e.touches[0].clientX
+      touchAccDx = 0
+      isSwiping.current = false
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (swipeStartX.current === null || lastTouchX === null) return
+      const dx = e.touches[0].clientX - swipeStartX.current
+      const dy = e.touches[0].clientY - (swipeStartY.current || 0)
+      if (!isSwiping.current && Math.abs(dx) > 15 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        isSwiping.current = true
+      }
+      if (!isSwiping.current) return
+      e.preventDefault()
+
+      touchAccDx += (lastTouchX - e.touches[0].clientX)
+      lastTouchX = e.touches[0].clientX
+
+      const daysToShift = Math.trunc(touchAccDx / pxPerDay)
+      if (daysToShift !== 0) {
+        touchAccDx -= daysToShift * pxPerDay
+        setCurrentDate(prev => {
+          const newDate = new Date(prev)
+          newDate.setDate(prev.getDate() + daysToShift)
+          return newDate
+        })
+      }
+    }
+
+    const onTouchEnd = () => {
+      swipeStartX.current = null
+      swipeStartY.current = null
+      lastTouchX = null
+      touchAccDx = 0
+      isSwiping.current = false
+    }
+
+    // Wheel event - horizontal scroll changes dates
+    const onWheel = (e: WheelEvent) => {
+      // Use horizontal scroll (deltaX) or shift+scroll (deltaY with shift)
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : (e.shiftKey ? e.deltaY : 0)
+      if (delta === 0) return
+      
+      e.preventDefault()
+      const daysToShift = delta > 0 ? 1 : -1
+      setCurrentDate(prev => {
+        const newDate = new Date(prev)
+        newDate.setDate(prev.getDate() + daysToShift)
+        return newDate
+      })
+    }
+
+    el.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('pointermove', onPointerMove)
+    document.addEventListener('pointerup', onPointerUp)
+    document.addEventListener('pointercancel', onPointerUp)
+    el.addEventListener('wheel', onWheel, { passive: false })
+    el.addEventListener('touchstart', onTouchStart, { passive: false })
+    el.addEventListener('touchmove', onTouchMove, { passive: false })
+    el.addEventListener('touchend', onTouchEnd)
+
+    return () => {
+      el.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('pointermove', onPointerMove)
+      document.removeEventListener('pointerup', onPointerUp)
+      document.removeEventListener('pointercancel', onPointerUp)
+      el.removeEventListener('wheel', onWheel)
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove', onTouchMove)
+      el.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [isAnchored, view])
   
   // Close date picker when clicking outside
   useEffect(() => {
@@ -3553,6 +3775,18 @@ export default function RoomCalendar({
           
           {/* Right - Navigation & View Toggle */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => setIsAnchored(!isAnchored)}
+              className={`p-1.5 border rounded-lg transition shadow-sm ${
+                isAnchored 
+                  ? 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200' 
+                  : 'bg-green-100 border-green-300 text-green-700 hover:bg-green-200 animate-pulse'
+              }`}
+              title={isAnchored ? 'ღუზა ჩართულია — გამორთე სლაიდისთვის' : 'სლაიდი ჩართულია — ჩართე ღუზა ფიქსაციისთვის'}
+            >
+              <span className="text-sm">{isAnchored ? '⚓' : '↔️'}</span>
+            </button>
+            
             <button 
               onClick={() => {
                 const newDate = new Date(currentDate)
@@ -3613,10 +3847,11 @@ export default function RoomCalendar({
       {/* Calendar Grid */}
       <div 
         ref={calendarRef}
-        className="overflow-auto room-calendar-grid" 
+        className={`overflow-auto room-calendar-grid ${!isAnchored ? 'cursor-grab active:cursor-grabbing' : ''}`}
         style={{ 
           maxHeight: 'calc(100vh - 350px)',
-          minHeight: '400px'
+          minHeight: '400px',
+          userSelect: isAnchored ? 'auto' : 'none'
         }}
       >
         <table className="w-full border-collapse">
@@ -4642,19 +4877,147 @@ export default function RoomCalendar({
             setSelectedReservation(null)
           }}
           onSave={async (updates: any) => {
+            console.log('[BUG2-FIX] onSave called with totalAmount:', updates.totalAmount)
+            
             if (!canEditReservation(selectedReservation, 'რედაქტირება')) {
+              console.log('[BUG2-FIX] canEditReservation returned false, aborting')
               setShowEditModal(false)
               setSelectedReservation(null)
               return
             }
             
-            if (onReservationUpdate) {
-              await onReservationUpdate(selectedReservation.id, {
-                ...updates,
-                checkIn: new Date(updates.checkIn).toISOString(),
-                checkOut: new Date(updates.checkOut).toISOString()
-              })
+            try {
+              if (onReservationUpdate) {
+                console.log('[BUG2-FIX] Calling onReservationUpdate...')
+                await onReservationUpdate(selectedReservation.id, {
+                  ...updates,
+                  checkIn: new Date(updates.checkIn).toISOString(),
+                  checkOut: new Date(updates.checkOut).toISOString()
+                })
+                console.log('[BUG2-FIX] onReservationUpdate completed successfully')
+              }
+            } catch (err) {
+              console.error('[BUG2-FIX] onReservationUpdate error:', err)
             }
+            
+            // ==========================================
+            // UPDATE FOLIO AFTER EDIT
+            // ==========================================
+            try {
+              const newTotalAmount = updates.totalAmount
+              console.log('[BUG2-FIX] Starting folio update, newTotalAmount:', newTotalAmount, 'reservationId:', selectedReservation.id)
+              if (newTotalAmount !== undefined) {
+                // Try API-first approach: fetch folio by reservationId directly
+                let folioUpdated = false
+                
+                try {
+                  const folioRes = await fetch(`/api/hotel/folios?reservationId=${selectedReservation.id}`)
+                  if (folioRes.ok) {
+                    const folio = await folioRes.json()
+                    if (folio && folio.id) {
+                      const newNights = moment(updates.checkOut).diff(moment(updates.checkIn), 'days') || 1
+                      
+                      // Update transactions
+                      const transactions = folio.transactions || []
+                      const roomChargeTx = transactions.find((t: any) => 
+                        t.description?.includes('ოთახის ღირებულება') ||
+                        t.description?.includes('Room') ||
+                        t.type === 'ROOM_CHARGE' ||
+                        t.type === 'charge' ||
+                        t.category === 'ROOM'
+                      )
+                      if (roomChargeTx) {
+                        roomChargeTx.amount = newTotalAmount
+                        roomChargeTx.debit = newTotalAmount
+                        roomChargeTx.description = `ოთახის ღირებულება - ღამე ${newNights}`
+                      }
+                      
+                      // Update initialRoomCharge
+                      if (folio.initialRoomCharge) {
+                        folio.initialRoomCharge.nights = newNights
+                        folio.initialRoomCharge.totalAmount = newTotalAmount
+                        folio.initialRoomCharge.rate = newTotalAmount / newNights
+                      }
+                      
+                      // Recalculate balance
+                      const totalPayments = (folio.totalPayments || 0)
+                      folio.balance = newTotalAmount - totalPayments
+                      folio.totalCharges = newTotalAmount
+                      folio.checkIn = updates.checkIn
+                      folio.checkOut = updates.checkOut
+                      folio.transactions = transactions
+                      
+                      // Save via PUT (bypasses POST's comparison logic)
+                      await fetch('/api/hotel/folios', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(folio),
+                      })
+                      folioUpdated = true
+                    }
+                  }
+                } catch (apiErr) {
+                  console.error('[RoomCalendar] API folio update failed:', apiErr)
+                }
+                
+                // Also update localStorage folios for immediate UI consistency
+                const folios = getFolios()
+                const folioIndex = folios.findIndex((f: any) => f.reservationId === selectedReservation.id)
+                if (folioIndex !== -1) {
+                  const folio = folios[folioIndex]
+                  const newNights = moment(updates.checkOut).diff(moment(updates.checkIn), 'days') || 1
+                  
+                  if (folio.initialRoomCharge) {
+                    folio.initialRoomCharge.nights = newNights
+                    folio.initialRoomCharge.totalAmount = newTotalAmount
+                    folio.initialRoomCharge.rate = newTotalAmount / newNights
+                  }
+                  if (folio.transactions && Array.isArray(folio.transactions)) {
+                    const tx = folio.transactions.find((t: any) => 
+                      t.description?.includes('ოთახის ღირებულება') ||
+                      t.description?.includes('Room') ||
+                      t.type === 'ROOM_CHARGE' ||
+                      t.type === 'charge' ||
+                      t.category === 'ROOM'
+                    )
+                    if (tx) {
+                      tx.amount = newTotalAmount
+                      tx.debit = newTotalAmount
+                      tx.description = `ოთახის ღირებულება - ღამე ${newNights}`
+                    }
+                  }
+                  if (folio.charges && Array.isArray(folio.charges)) {
+                    const ci = folio.charges.findIndex((c: any) => 
+                      c.description?.includes('ოთახის ღირებულება') || c.type === 'ROOM'
+                    )
+                    if (ci !== -1) {
+                      folio.charges[ci].amount = newTotalAmount
+                      folio.charges[ci].debit = newTotalAmount
+                      folio.charges[ci].description = `ოთახის ღირებულება - ღამე ${newNights}`
+                    }
+                  }
+                  const totalPayments = (folio.payments || []).reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
+                  folio.balance = (folio.initialRoomCharge?.totalAmount || newTotalAmount) - totalPayments
+                  folio.totalCharges = newTotalAmount
+                  folio.checkIn = updates.checkIn
+                  folio.checkOut = updates.checkOut
+                  
+                  folios[folioIndex] = folio
+                  localStorage.setItem('hotelFolios', JSON.stringify(folios))
+                }
+                
+                // Refresh cache and UI
+                await loadFoliosCache()
+                window.dispatchEvent(new CustomEvent('folioUpdated', { 
+                  detail: { reservationId: selectedReservation.id } 
+                }))
+                setFolioUpdateKey(prev => prev + 1)
+              }
+            } catch (e) {
+              console.error('Error updating folio after reservation edit:', e)
+            }
+            // ==========================================
+            
             setShowEditModal(false)
             setSelectedReservation(null)
             if (loadReservations) {
