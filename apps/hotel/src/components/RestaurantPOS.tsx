@@ -177,9 +177,17 @@ export default function RestaurantPOS() {
   
   // Settings
   const [settings, setSettings] = useState({
-    taxRate: 18,
+    taxRate: 0,
     serviceCharge: 0,
-    restaurantName: 'Brewery House Restaurant'
+    restaurantName: 'Restaurant'
+  })
+  
+  // Hotel info for receipts
+  const [hotelInfo, setHotelInfo] = useState({
+    name: '',
+    address: '',
+    phone: '',
+    email: ''
   })
   
   // Checked-in rooms for hotel guest selection
@@ -440,8 +448,8 @@ export default function RestaurantPOS() {
           if (s) {
             setSettings(prev => ({ 
               ...prev, 
-              taxRate: Number(s.taxRate) || 18, 
-              serviceCharge: Number(s.serviceCharge) || 0, 
+              taxRate: s.taxRate !== undefined && s.taxRate !== null ? Number(s.taxRate) : 0, 
+              serviceCharge: s.serviceCharge !== undefined && s.serviceCharge !== null ? Number(s.serviceCharge) : 0, 
               restaurantName: s.name || 'Restaurant' 
             }))
           }
@@ -566,6 +574,22 @@ export default function RestaurantPOS() {
         }
       } catch (e) {
         console.error('[RestaurantPOS] Error loading orders:', e)
+      }
+
+      // Load hotel info for receipts from localStorage
+      try {
+        const savedHotelInfo = localStorage.getItem('hotelInfo')
+        if (savedHotelInfo) {
+          const h = JSON.parse(savedHotelInfo)
+          setHotelInfo({
+            name: h.name || '',
+            address: h.address || '',
+            phone: h.phone || '',
+            email: h.email || ''
+          })
+        }
+      } catch (e) {
+        console.error('[RestaurantPOS] Error loading hotel info:', e)
       }
     }
     
@@ -1011,8 +1035,8 @@ export default function RestaurantPOS() {
       <body>
         <div class="header">
           <h1>🍺 ${settings.restaurantName}</h1>
-          <p>მისამართი: თბილისი</p>
-          <p>ტელ: +995 XXX XXX XXX</p>
+          <p>${hotelInfo.address || 'მისამართი'}</p>
+          <p>${hotelInfo.phone ? 'ტელ: ' + hotelInfo.phone : ''}</p>
         </div>
         
         <div class="info">
@@ -2144,7 +2168,7 @@ export default function RestaurantPOS() {
             <div className="bg-amber-50 p-4 text-center border-b">
               <div className="text-3xl mb-1">🍺</div>
               <h2 className="text-lg font-bold">{settings.restaurantName}</h2>
-              <p className="text-xs text-gray-500">თბილისი • +995 XXX XXX XXX</p>
+              <p className="text-xs text-gray-500">{hotelInfo.address}{hotelInfo.phone ? ` • ${hotelInfo.phone}` : ''}</p>
             </div>
 
             {/* Receipt Info */}

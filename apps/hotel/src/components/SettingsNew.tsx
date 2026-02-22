@@ -886,7 +886,8 @@ export default function SettingsNew() {
             price: Number(m.price),
             preparationTime: m.preparationTime || 15,
             isAvailable: m.isAvailable ?? true,
-            isActive: m.isActive ?? true
+            isActive: m.isActive ?? true,
+            imageUrl: m.imageUrl || ''
           }))
           setMenuItems(mappedItems)
           console.log('✅ Loaded menu items from API:', mappedItems.length)
