@@ -67,6 +67,7 @@ export default function RoomCalendar({
   const [selectedRoomType, setSelectedRoomType] = useState<string>('all')
   const [showOccupancy, setShowOccupancy] = useState(false)
   const [isAnchored, setIsAnchored] = useState(true) // Anchor mode - when off, calendar can be swiped
+  const [isCalendarFullscreen, setIsCalendarFullscreen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   
   // Swipe/slide refs
@@ -567,6 +568,17 @@ export default function RoomCalendar({
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showDatePicker])
+
+  // ESC key exits calendar fullscreen
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isCalendarFullscreen) {
+        setIsCalendarFullscreen(false)
+      }
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [isCalendarFullscreen])
   
   // Check for pending checkout from departures modal
   useEffect(() => {
@@ -3542,7 +3554,7 @@ export default function RoomCalendar({
         }
       `}} />
       
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className={isCalendarFullscreen ? 'fixed inset-0 z-[9999] bg-white flex flex-col overflow-hidden' : 'bg-white rounded-lg shadow-lg overflow-hidden'}>
       {/* Header with controls */}
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b py-2 px-4">
         <div className="flex justify-between items-center gap-4">
@@ -3786,6 +3798,18 @@ export default function RoomCalendar({
             >
               <span className="text-sm">{isAnchored ? '⚓' : '↔️'}</span>
             </button>
+
+            <button
+              onClick={() => setIsCalendarFullscreen(!isCalendarFullscreen)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 transition ${
+                isCalendarFullscreen
+                  ? 'bg-red-500 text-white hover:bg-red-600'
+                  : 'bg-gray-700 text-white hover:bg-gray-800'
+              }`}
+              title={isCalendarFullscreen ? 'ჩვეულებრივი ზომა' : 'მთელ ეკრანზე'}
+            >
+              {isCalendarFullscreen ? '✕ დახურვა' : '🖥️ მთელ ეკრანზე'}
+            </button>
             
             <button 
               onClick={() => {
@@ -3847,9 +3871,9 @@ export default function RoomCalendar({
       {/* Calendar Grid */}
       <div 
         ref={calendarRef}
-        className={`overflow-auto room-calendar-grid ${!isAnchored ? 'cursor-grab active:cursor-grabbing' : ''}`}
+        className={`overflow-auto room-calendar-grid ${!isAnchored ? 'cursor-grab active:cursor-grabbing' : ''} ${isCalendarFullscreen ? 'flex-1 min-h-0' : ''}`}
         style={{ 
-          maxHeight: 'calc(100vh - 350px)',
+          maxHeight: isCalendarFullscreen ? undefined : 'calc(100vh - 350px)',
           minHeight: '400px',
           userSelect: isAnchored ? 'auto' : 'none'
         }}
