@@ -1,0 +1,566 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("BEAUTY_DATABASE_URL")
+}
+
+// ==================== SALON ====================
+
+model Salon {
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  address         String?
+  phone           String?
+  email           String?
+  logo            String?
+  description     String?
+  
+  // Working hours as JSON: { "monday": { "open": "09:00", "close": "20:00", "isOff": false }, ... }
+  workingHours    Json?     @default("{}")
+  
+  // Settings as JSON
+  settings        Json?     @default("{}")
+  
+  // Subscription
+  plan            Plan      @default(TRIAL)
+  trialEndsAt     DateTime?
+  subscriptionEndsAt DateTime?
+  
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  staff           Staff[]
+  services        Service[]
+  serviceCategories ServiceCategory[]
+  clients         Client[]
+  appointments    Appointment[]
+  products        Product[]
+  sales           Sale[]
+  expenses        Expense[]
+  giftCards       GiftCard[]
+  reviews         Review[]
+  campaigns       Campaign[]
+
+  @@map("salons")
+}
+
+enum Plan {
+  TRIAL
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+// ==================== STAFF ====================
+
+model Staff {
+  id              String    @id @default(cuid())
+  salonId         String
+  salon           Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  
+  name            String
+  email           String?
+  phone           String?
+  avatar          String?
+  role            StaffRole @default(SPECIALIST)
+  specialties     String[]  @default([])
+  bio             String?
+  
+  // Auth
+  pin             String?
+  passwordHash    String?
+  
+  // Commission
+  commissionType  CommissionType @default(PERCENTAGE)
+  commissionRate  Float     @default(0)
+  
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  schedules       StaffSchedule[]
+  exceptions      StaffException[]
+  appointments    Appointment[]
+  staffServices   StaffService[]
+  sales           Sale[]
+  reviews         Review[]
+
+  @@unique([salonId, email])
+  @@index([salonId])
+  @@map("staff")
+}
+
+enum StaffRole {
+  OWNER
+  ADMIN
+  SPECIALIST
+  RECEPTIONIST
+}
+
+enum CommissionType {
+  PERCENTAGE
+  FIXED
+  NONE
+}
+
+model StaffSchedule {
+  id          String   @id @default(cuid())
+  staffId     String
+  staff       Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  dayOfWeek   Int      // 0=Sunday, 1=Monday, ..., 6=Saturday
+  startTime   String   // "09:00"
+  endTime     String   // "18:00"
+  isOff       Boolean  @default(false)
+  
+  @@unique([staffId, dayOfWeek])
+  @@map("staff_schedules")
+}
+
+model StaffException {
+  id          String          @id @default(cuid())
+  staffId     String
+  staff       Staff           @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  date        DateTime        @db.Date
+  type        ExceptionType
+  note        String?
+  
+  @@map("staff_exceptions")
+}
+
+enum ExceptionType {
+  VACATION
+  SICK
+  PERSONAL
+  CUSTOM
+}
+
+model StaffService {
+  id          String   @id @default(cuid())
+  staffId     String
+  staff       Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  // Optional custom price/duration for this staff member
+  customPrice    Float?
+  customDuration Int?
+  
+  @@unique([staffId, serviceId])
+  @@map("staff_services")
+}
+
+// ==================== SERVICES ====================
+
+model ServiceCategory {
+  id          String    @id @default(cuid())
+  salonId     String
+  salon       Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  
+  name        String
+  icon        String?
+  color       String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  
+  services    Service[]
+  
+  @@index([salonId])
+  @@map("service_categories")
+}
+
+model Service {
+  id              String          @id @default(cuid())
+  salonId         String
+  salon           Salon           @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  categoryId      String?
+  category        ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  name            String
+  description     String?
+  duration        Int             // minutes
+  price           Float
+  
+  // Price variants as JSON: [{ "name": "მოკლე თმა", "price": 30, "duration": 30 }, ...]
+  priceVariants   Json?
+  
+  image           String?
+  isActive        Boolean         @default(true)
+  sortOrder       Int             @default(0)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  staffServices      StaffService[]
+  appointmentServices AppointmentService[]
+  saleItems          SaleItem[]
+
+  @@index([salonId])
+  @@index([categoryId])
+  @@map("services")
+}
+
+// ==================== CLIENTS ====================
+
+model Client {
+  id              String    @id @default(cuid())
+  salonId         String
+  salon           Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  
+  name            String
+  phone           String?
+  email           String?
+  birthDate       DateTime? @db.Date
+  gender          Gender?
+  
+  // Notes
+  notes           String?
+  allergies       String?
+  hairType        String?
+  colorFormula    String?   // Last color formula used
+  
+  // Loyalty
+  loyaltyPoints   Int       @default(0)
+  loyaltyTier     LoyaltyTier @default(STANDARD)
+  
+  // Preferences
+  preferredStaffId String?
+  
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  appointments    Appointment[]
+  sales           Sale[]
+  reviews         Review[]
+  giftCards       GiftCard[]
+  loyaltyTransactions LoyaltyTransaction[]
+
+  @@index([salonId])
+  @@index([phone])
+  @@map("clients")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum LoyaltyTier {
+  STANDARD
+  SILVER
+  GOLD
+  VIP
+}
+
+// ==================== APPOINTMENTS ====================
+
+model Appointment {
+  id              String            @id @default(cuid())
+  salonId         String
+  salon           Salon             @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  clientId        String?
+  client          Client?           @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  staffId         String
+  staff           Staff             @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  date            DateTime          @db.Date
+  startTime       String            // "14:00"
+  endTime         String            // "15:30"
+  
+  status          AppointmentStatus @default(SCHEDULED)
+  notes           String?
+  
+  // Walk-in or online booking
+  source          BookingSource     @default(WALK_IN)
+  
+  // Cancellation
+  cancelReason    String?
+  cancelledAt     DateTime?
+  
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  services        AppointmentService[]
+  sale            Sale?
+
+  @@index([salonId, date])
+  @@index([staffId, date])
+  @@index([clientId])
+  @@map("appointments")
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum BookingSource {
+  WALK_IN
+  PHONE
+  ONLINE
+  SOCIAL_MEDIA
+}
+
+model AppointmentService {
+  id              String      @id @default(cuid())
+  appointmentId   String
+  appointment     Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  serviceId       String
+  service         Service     @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  price           Float
+  duration        Int         // minutes
+  
+  @@map("appointment_services")
+}
+
+// ==================== POS / SALES ====================
+
+model Sale {
+  id              String        @id @default(cuid())
+  salonId         String
+  salon           Salon         @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  appointmentId   String?       @unique
+  appointment     Appointment?  @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  clientId        String?
+  client          Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  staffId         String?
+  staff           Staff?        @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  
+  subtotal        Float
+  discount        Float         @default(0)
+  discountType    DiscountType?
+  tax             Float         @default(0)
+  total           Float
+  
+  paymentMethod   PaymentMethod @default(CASH)
+  paymentStatus   PaymentStatus @default(COMPLETED)
+  
+  giftCardId      String?
+  giftCardAmount  Float?
+  
+  notes           String?
+  receiptNumber   String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  items           SaleItem[]
+  loyaltyTransaction LoyaltyTransaction?
+
+  @@index([salonId, createdAt])
+  @@map("sales")
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  GIFT_CARD
+  SPLIT
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  PARTIAL
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+  PROMO_CODE
+}
+
+model SaleItem {
+  id          String    @id @default(cuid())
+  saleId      String
+  sale        Sale      @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  
+  type        SaleItemType
+  serviceId   String?
+  service     Service?  @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  productId   String?
+  product     Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  
+  name        String
+  quantity    Int       @default(1)
+  unitPrice   Float
+  total       Float
+  
+  @@map("sale_items")
+}
+
+enum SaleItemType {
+  SERVICE
+  PRODUCT
+}
+
+// ==================== INVENTORY ====================
+
+model Product {
+  id              String    @id @default(cuid())
+  salonId         String
+  salon           Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  
+  name            String
+  category        String?
+  brand           String?
+  sku             String?
+  barcode         String?
+  
+  price           Float     // Retail price
+  costPrice       Float?    // Purchase price
+  
+  stock           Int       @default(0)
+  minStock        Int       @default(5)
+  
+  image           String?
+  description     String?
+  isActive        Boolean   @default(true)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  saleItems       SaleItem[]
+
+  @@index([salonId])
+  @@map("products")
+}
+
+// ==================== FINANCE ====================
+
+model Expense {
+  id          String        @id @default(cuid())
+  salonId     String
+  salon       Salon         @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  
+  category    ExpenseCategory
+  amount      Float
+  date        DateTime      @db.Date
+  description String?
+  
+  createdAt   DateTime      @default(now())
+
+  @@index([salonId, date])
+  @@map("expenses")
+}
+
+enum ExpenseCategory {
+  RENT
+  UTILITIES
+  SALARY
+  SUPPLIES
+  EQUIPMENT
+  MARKETING
+  OTHER
+}
+
+// ==================== LOYALTY ====================
+
+model GiftCard {
+  id          String    @id @default(cuid())
+  salonId     String
+  salon       Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  
+  code        String    @unique
+  initialBalance Float
+  balance     Float
+  
+  clientId    String?
+  client      Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  
+  @@index([code])
+  @@map("gift_cards")
+}
+
+model LoyaltyTransaction {
+  id          String            @id @default(cuid())
+  clientId    String
+  client      Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  points      Int
+  type        LoyaltyType
+  saleId      String?           @unique
+  sale        Sale?             @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  description String?
+  
+  createdAt   DateTime          @default(now())
+  
+  @@map("loyalty_transactions")
+}
+
+enum LoyaltyType {
+  EARN
+  REDEEM
+  BONUS
+  EXPIRED
+}
+
+// ==================== REVIEWS ====================
+
+model Review {
+  id              String      @id @default(cuid())
+  salonId         String
+  salon           Salon       @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  clientId        String?
+  client          Client?     @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  staffId         String?
+  staff           Staff?      @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  
+  rating          Int         // 1-5
+  comment         String?
+  isPublic        Boolean     @default(true)
+  
+  createdAt       DateTime    @default(now())
+  
+  @@map("reviews")
+}
+
+// ==================== MARKETING ====================
+
+model Campaign {
+  id          String        @id @default(cuid())
+  salonId     String
+  salon       Salon         @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  
+  type        CampaignType
+  name        String
+  subject     String?
+  content     String
+  
+  sentAt      DateTime?
+  recipients  Int           @default(0)
+  
+  createdAt   DateTime      @default(now())
+  
+  @@map("campaigns")
+}
+
+enum CampaignType {
+  SMS
+  EMAIL
+}
