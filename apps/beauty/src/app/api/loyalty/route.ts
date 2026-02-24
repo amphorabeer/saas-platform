@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     // Update points and determine new tier
     const newPoints = Math.max(0, client.loyaltyPoints + pointChange);
-    let newTier = 'STANDARD';
+    let newTier: 'STANDARD' | 'SILVER' | 'GOLD' | 'VIP' = 'STANDARD';
     if (newPoints >= 1000) newTier = 'VIP';
     else if (newPoints >= 500) newTier = 'GOLD';
     else if (newPoints >= 100) newTier = 'SILVER';
