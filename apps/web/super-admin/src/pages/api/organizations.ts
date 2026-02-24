@@ -48,6 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           { tenantCode: { contains: search as string, mode: 'insensitive' } },
           { storeCode: { contains: search as string, mode: 'insensitive' } },
           { restCode: { contains: search as string, mode: 'insensitive' } },
+          { beautyCode: { contains: search as string, mode: 'insensitive' } },
         ]
       }
 
@@ -94,6 +95,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         hotelCode: org.hotelCode ?? '',
         storeCode: org.storeCode ?? '',
         restCode: org.restCode ?? '',
+        beautyCode: (org as any).beautyCode ?? '',
         tenantCode: (org as any).tenantCode || '',
         tenantId: (org as any).tenantId || '',
         // Company info
