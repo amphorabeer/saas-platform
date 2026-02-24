@@ -82,6 +82,7 @@ model Organization {
   hotelCode   String? @unique // 4-digit code (for hotels)
   storeCode   String? @unique // shop code
   restCode    String? @unique // restaurant code
+  beautyCode  String? @unique
   databaseUrl String?
 
   // Relations

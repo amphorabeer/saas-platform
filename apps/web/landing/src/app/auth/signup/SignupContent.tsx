@@ -46,6 +46,17 @@ const moduleConfig: Record<string, { icon: string; title: string; subtitle: stri
     successSubtitle: 'თქვენი RestoPOS სისტემა მზადაა',
     loginUrl: process.env.NEXT_PUBLIC_RESTAURANT_URL || 'https://rest.geobiz.app',
   },
+  beauty: {
+    icon: '💅',
+    title: 'რეგისტრაცია',
+    subtitle: 'შექმენით თქვენი სალონის ანგარიში',
+    bizLabel: 'სალონის სახელი *',
+    bizPlaceholder: 'Beauty House',
+    bizSectionTitle: 'სალონის ინფორმაცია',
+    successTitle: 'რეგისტრაცია წარმატებულია!',
+    successSubtitle: 'თქვენი BeautySalon PRO სისტემა მზადაა',
+    loginUrl: process.env.NEXT_PUBLIC_BEAUTY_URL || 'https://beauty.geobiz.app',
+  },
 }
 
 const defaultConfig = moduleConfig.hotel
@@ -114,7 +125,7 @@ export default function SignupContent() {
       }
     }
     
-    const apiUrl = module === 'shop' ? '/api/store/register' : module === 'restaurant' ? '/api/restaurant/register' : '/api/register'
+    const apiUrl = module === 'shop' ? '/api/store/register' : module === 'restaurant' ? '/api/restaurant/register' : module === 'beauty' ? '/api/beauty/register' : '/api/register'
     
     try {
       const response = await fetch(apiUrl, {
@@ -149,7 +160,7 @@ export default function SignupContent() {
       }
       
       setSuccess({
-        hotelCode: data.hotelCode || data.restCode || data.storeCode,
+        hotelCode: data.hotelCode || data.restCode || data.storeCode || data.beautyCode,
         loginUrl: data.loginUrl,
       })
       
@@ -176,7 +187,7 @@ export default function SignupContent() {
           {success.hotelCode && (
             <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
               <p className="text-sm text-blue-600 mb-2">
-                {module === 'restaurant' ? 'რესტორნის კოდი:' : module === 'shop' ? 'მაღაზიის კოდი:' : 'სასტუმროს კოდი:'}
+                {module === 'restaurant' ? 'რესტორნის კოდი:' : module === 'shop' ? 'მაღაზიის კოდი:' : module === 'beauty' ? 'სალონის კოდი:' : 'სასტუმროს კოდი:'}
               </p>
               <div className="text-5xl font-mono font-bold text-blue-700 tracking-widest">
                 {success.hotelCode}
@@ -272,7 +283,7 @@ export default function SignupContent() {
               )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">კომპანიის სახელი *</label>
-                <input type="text" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder={module === 'shop' ? 'შპს ჩემი მაღაზია' : 'შპს სასტუმრო'} required disabled={loading} />
+                <input type="text" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder={module === 'shop' ? 'შპს ჩემი მაღაზია' : module === 'beauty' ? 'შპს ჩემი სალონი' : 'შპს სასტუმრო'} required disabled={loading} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">საიდენტიფიკაციო კოდი *</label>

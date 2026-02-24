@@ -9,6 +9,7 @@ export const authOptions: NextAuthOptions = {
       id: 'credentials',
       name: 'Credentials',
       credentials: {
+        beautyCode: { label: 'Beauty Code', type: 'text' },
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
@@ -17,14 +18,28 @@ export const authOptions: NextAuthOptions = {
           throw new Error('ელფოსტა და პაროლი სავალდებულოა');
         }
 
+        // Find salon by beautyCode (slug ends with -CODE)
+        let salonId: string | undefined;
+        if (credentials.beautyCode) {
+          const salon = await prisma.salon.findFirst({
+            where: {
+              slug: { endsWith: `-${credentials.beautyCode}` },
+            },
+          });
+          if (!salon) {
+            throw new Error('არასწორი სალონის კოდი');
+          }
+          salonId = salon.id;
+        }
+
+        // Find staff by email (and optionally salonId)
         const staff = await prisma.staff.findFirst({
           where: {
-            email: credentials.email,
+            email: credentials.email.toLowerCase(),
             isActive: true,
+            ...(salonId ? { salonId } : {}),
           },
-          include: {
-            salon: true,
-          },
+          include: { salon: true },
         });
 
         if (!staff || !staff.passwordHash) {
@@ -109,7 +124,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 hours
+    maxAge: 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

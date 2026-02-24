@@ -680,6 +680,9 @@ importers:
       '@saas-platform/utils':
         specifier: workspace:*
         version: link:../../../packages/utils
+      '@types/pg':
+        specifier: ^8.16.0
+        version: 8.16.0
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -701,6 +704,9 @@ importers:
       nodemailer:
         specifier: ^6.10.1
         version: 6.10.1
+      pg:
+        specifier: ^8.18.0
+        version: 8.18.0
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -7915,6 +7921,14 @@ packages:
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
     dependencies:
       '@types/pg': 8.6.1
+    dev: false
+
+  /@types/pg@8.16.0:
+    resolution: {integrity: sha512-RmhMd/wD+CF8Dfo+cVIy3RR5cl8CyfXQ0tGgW6XBL8L4LM/UTEbNXYRbLwU6w+CgrKBNbrQWt4FUtTfaU5jSYQ==}
+    dependencies:
+      '@types/node': 20.19.30
+      pg-protocol: 1.11.0
+      pg-types: 2.2.0
     dev: false
 
   /@types/pg@8.6.1:

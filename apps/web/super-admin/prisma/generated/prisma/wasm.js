@@ -142,6 +142,7 @@ exports.Prisma.OrganizationScalarFieldEnum = {
   hotelCode: 'hotelCode',
   storeCode: 'storeCode',
   restCode: 'restCode',
+  beautyCode: 'beautyCode',
   databaseUrl: 'databaseUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

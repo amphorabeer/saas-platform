@@ -3253,6 +3253,7 @@ export namespace Prisma {
     hotelCode: string | null
     storeCode: string | null
     restCode: string | null
+    beautyCode: string | null
     databaseUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -3277,6 +3278,7 @@ export namespace Prisma {
     hotelCode: string | null
     storeCode: string | null
     restCode: string | null
+    beautyCode: string | null
     databaseUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -3301,6 +3303,7 @@ export namespace Prisma {
     hotelCode: number
     storeCode: number
     restCode: number
+    beautyCode: number
     databaseUrl: number
     createdAt: number
     updatedAt: number
@@ -3327,6 +3330,7 @@ export namespace Prisma {
     hotelCode?: true
     storeCode?: true
     restCode?: true
+    beautyCode?: true
     databaseUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -3351,6 +3355,7 @@ export namespace Prisma {
     hotelCode?: true
     storeCode?: true
     restCode?: true
+    beautyCode?: true
     databaseUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -3375,6 +3380,7 @@ export namespace Prisma {
     hotelCode?: true
     storeCode?: true
     restCode?: true
+    beautyCode?: true
     databaseUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -3472,6 +3478,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode: string | null
     restCode: string | null
+    beautyCode: string | null
     databaseUrl: string | null
     createdAt: Date
     updatedAt: Date
@@ -3513,6 +3520,7 @@ export namespace Prisma {
     hotelCode?: boolean
     storeCode?: boolean
     restCode?: boolean
+    beautyCode?: boolean
     databaseUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3542,6 +3550,7 @@ export namespace Prisma {
     hotelCode?: boolean
     storeCode?: boolean
     restCode?: boolean
+    beautyCode?: boolean
     databaseUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3566,6 +3575,7 @@ export namespace Prisma {
     hotelCode?: boolean
     storeCode?: boolean
     restCode?: boolean
+    beautyCode?: boolean
     databaseUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3607,6 +3617,7 @@ export namespace Prisma {
       hotelCode: string
       storeCode: string | null
       restCode: string | null
+      beautyCode: string | null
       databaseUrl: string | null
       createdAt: Date
       updatedAt: Date
@@ -4025,6 +4036,7 @@ export namespace Prisma {
     readonly hotelCode: FieldRef<"Organization", 'String'>
     readonly storeCode: FieldRef<"Organization", 'String'>
     readonly restCode: FieldRef<"Organization", 'String'>
+    readonly beautyCode: FieldRef<"Organization", 'String'>
     readonly databaseUrl: FieldRef<"Organization", 'String'>
     readonly createdAt: FieldRef<"Organization", 'DateTime'>
     readonly updatedAt: FieldRef<"Organization", 'DateTime'>
@@ -28064,6 +28076,7 @@ export namespace Prisma {
     hotelCode: 'hotelCode',
     storeCode: 'storeCode',
     restCode: 'restCode',
+    beautyCode: 'beautyCode',
     databaseUrl: 'databaseUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -28714,6 +28727,7 @@ export namespace Prisma {
     hotelCode?: StringFilter<"Organization"> | string
     storeCode?: StringNullableFilter<"Organization"> | string | null
     restCode?: StringNullableFilter<"Organization"> | string | null
+    beautyCode?: StringNullableFilter<"Organization"> | string | null
     databaseUrl?: StringNullableFilter<"Organization"> | string | null
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
@@ -28742,6 +28756,7 @@ export namespace Prisma {
     hotelCode?: SortOrder
     storeCode?: SortOrderInput | SortOrder
     restCode?: SortOrderInput | SortOrder
+    beautyCode?: SortOrderInput | SortOrder
     databaseUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -28758,6 +28773,7 @@ export namespace Prisma {
     hotelCode?: string
     storeCode?: string
     restCode?: string
+    beautyCode?: string
     AND?: OrganizationWhereInput | OrganizationWhereInput[]
     OR?: OrganizationWhereInput[]
     NOT?: OrganizationWhereInput | OrganizationWhereInput[]
@@ -28780,7 +28796,7 @@ export namespace Prisma {
     subscription?: XOR<SubscriptionNullableRelationFilter, SubscriptionWhereInput> | null
     tickets?: SupportTicketListRelationFilter
     users?: UserListRelationFilter
-  }, "id" | "slug" | "tenantId" | "hotelCode" | "storeCode" | "restCode">
+  }, "id" | "slug" | "tenantId" | "hotelCode" | "storeCode" | "restCode" | "beautyCode">
 
   export type OrganizationOrderByWithAggregationInput = {
     id?: SortOrder
@@ -28801,6 +28817,7 @@ export namespace Prisma {
     hotelCode?: SortOrder
     storeCode?: SortOrderInput | SortOrder
     restCode?: SortOrderInput | SortOrder
+    beautyCode?: SortOrderInput | SortOrder
     databaseUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -28831,6 +28848,7 @@ export namespace Prisma {
     hotelCode?: StringWithAggregatesFilter<"Organization"> | string
     storeCode?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     restCode?: StringNullableWithAggregatesFilter<"Organization"> | string | null
+    beautyCode?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     databaseUrl?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
@@ -30877,6 +30895,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30905,6 +30924,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30933,6 +30953,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30961,6 +30982,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30989,6 +31011,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -31013,6 +31036,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31037,6 +31061,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33463,6 +33488,7 @@ export namespace Prisma {
     hotelCode?: SortOrder
     storeCode?: SortOrder
     restCode?: SortOrder
+    beautyCode?: SortOrder
     databaseUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -33487,6 +33513,7 @@ export namespace Prisma {
     hotelCode?: SortOrder
     storeCode?: SortOrder
     restCode?: SortOrder
+    beautyCode?: SortOrder
     databaseUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -33511,6 +33538,7 @@ export namespace Prisma {
     hotelCode?: SortOrder
     storeCode?: SortOrder
     restCode?: SortOrder
+    beautyCode?: SortOrder
     databaseUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -38027,6 +38055,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38054,6 +38083,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38186,6 +38216,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38213,6 +38244,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38436,6 +38468,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38463,6 +38496,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38539,6 +38573,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38566,6 +38601,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38593,6 +38629,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38620,6 +38657,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38685,6 +38723,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38712,6 +38751,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -38921,6 +38961,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38948,6 +38989,7 @@ export namespace Prisma {
     hotelCode: string
     storeCode?: string | null
     restCode?: string | null
+    beautyCode?: string | null
     databaseUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -38991,6 +39033,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39018,6 +39061,7 @@ export namespace Prisma {
     hotelCode?: StringFieldUpdateOperationsInput | string
     storeCode?: NullableStringFieldUpdateOperationsInput | string | null
     restCode?: NullableStringFieldUpdateOperationsInput | string | null
+    beautyCode?: NullableStringFieldUpdateOperationsInput | string | null
     databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

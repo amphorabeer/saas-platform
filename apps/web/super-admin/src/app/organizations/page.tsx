@@ -29,6 +29,7 @@ interface Organization {
   hotelCode: string;
   storeCode?: string;
   restCode?: string;
+  beautyCode?: string;
   tenantCode?: string;
   status: string;
   plan: string;
@@ -215,6 +216,7 @@ export default function OrganizationsPage() {
       (org.hotelCode && org.hotelCode.includes(searchQuery)) ||
       (org.storeCode && org.storeCode.includes(searchQuery)) ||
       (org.restCode && org.restCode.includes(searchQuery)) ||
+      (org.beautyCode && org.beautyCode.includes(searchQuery)) ||
       (org.tenantCode && org.tenantCode.includes(searchQuery));
     const matchesModule =
       moduleFilter === "all" ||
@@ -327,7 +329,7 @@ export default function OrganizationsPage() {
                     <tr key={org.id} className="border-b hover:bg-muted/50">
                       <td className="p-4">
                         <div className="space-y-1">
-                          {org.hotelCode && !org.hotelCode.startsWith('REST-') && !org.hotelCode.startsWith('SHOP-') && (
+                          {org.hotelCode && !org.hotelCode.startsWith('REST-') && !org.hotelCode.startsWith('SHOP-') && !org.hotelCode.startsWith('BEAUTY-') && (
                             <CodeWithCopy label="HOTEL" code={org.hotelCode} color="text-blue-400" />
                           )}
                           {org.storeCode && (
@@ -336,10 +338,13 @@ export default function OrganizationsPage() {
                           {org.restCode && (
                             <CodeWithCopy label="REST" code={org.restCode} color="text-orange-400" />
                           )}
+                          {org.beautyCode && (
+                            <CodeWithCopy label="BEAUTY" code={org.beautyCode} color="text-pink-400" />
+                          )}
                           {org.modules?.includes("BREWERY") && org.tenantCode && (
                             <CodeWithCopy label="BREW" code={org.tenantCode} color="text-amber-400" />
                           )}
-                          {!org.hotelCode && !org.storeCode && !org.restCode && !(org.modules?.includes("BREWERY") && org.tenantCode) && (
+                          {!org.hotelCode && !org.storeCode && !org.restCode && !org.beautyCode && !(org.modules?.includes("BREWERY") && org.tenantCode) && (
                             <span className="block text-slate-400 font-mono text-sm">----</span>
                           )}
                         </div>
@@ -414,13 +419,13 @@ export default function OrganizationsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {editingOrg && (editingOrg.hotelCode || editingOrg.storeCode || editingOrg.restCode || (editingOrg.modules?.includes("BREWERY") && editingOrg.tenantCode)) && (
+                {editingOrg && (editingOrg.hotelCode || editingOrg.storeCode || editingOrg.restCode || editingOrg.beautyCode || (editingOrg.modules?.includes("BREWERY") && editingOrg.tenantCode)) && (
                   <div className="bg-muted/50 p-3 rounded-lg space-y-1">
                     <label className="block text-sm font-medium mb-1">
                       ორგანიზაციის კოდები
                     </label>
                     <div className="font-mono text-sm space-y-1">
-                      {editingOrg.hotelCode && !editingOrg.hotelCode.startsWith('REST-') && !editingOrg.hotelCode.startsWith('SHOP-') && (
+                      {editingOrg.hotelCode && !editingOrg.hotelCode.startsWith('REST-') && !editingOrg.hotelCode.startsWith('SHOP-') && !editingOrg.hotelCode.startsWith('BEAUTY-') && (
                         <CodeWithCopy label="HOTEL" code={editingOrg.hotelCode} color="text-blue-600" />
                       )}
                       {editingOrg.storeCode && (
@@ -428,6 +433,9 @@ export default function OrganizationsPage() {
                       )}
                       {editingOrg.restCode && (
                         <CodeWithCopy label="REST" code={editingOrg.restCode} color="text-orange-600" />
+                      )}
+                      {editingOrg.beautyCode && (
+                        <CodeWithCopy label="BEAUTY" code={editingOrg.beautyCode} color="text-pink-600" />
                       )}
                       {editingOrg.modules?.includes("BREWERY") && editingOrg.tenantCode && (
                         <CodeWithCopy label="BREW" code={editingOrg.tenantCode} color="text-amber-600" />
