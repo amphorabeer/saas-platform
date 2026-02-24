@@ -26,7 +26,7 @@ import {
   Menu,
 } from 'lucide-react';
 
-const navigation = [
+const navigation: { name: string; href: string; icon: any; disabled?: boolean }[] = [
   { name: 'დეშბორდი', href: '/dashboard', icon: LayoutDashboard },
   { name: 'ჯავშნები', href: '/appointments', icon: Calendar },
   { name: 'სპეციალისტები', href: '/staff', icon: Users },
