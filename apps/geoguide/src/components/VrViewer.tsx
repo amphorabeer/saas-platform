@@ -47,6 +47,48 @@ export function VrViewer({ tourId, language }: VrViewerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nowPlaying, setNowPlaying] = useState<string | null>(null);
+  const [gyroEnabled, setGyroEnabled] = useState(false);
+  const [gyroSupported, setGyroSupported] = useState(false);
+
+  // Check gyroscope support
+  useEffect(() => {
+    if (typeof window !== "undefined" && "DeviceOrientationEvent" in window) {
+      setGyroSupported(true);
+    }
+  }, []);
+
+  const requestGyro = async () => {
+    try {
+      const DOE = DeviceOrientationEvent as any;
+      if (typeof DOE.requestPermission === "function") {
+        const permission = await DOE.requestPermission();
+        if (permission === "granted") {
+          setGyroEnabled(true);
+          if (pannellumRef.current) {
+            pannellumRef.current.startOrientation();
+          }
+        }
+      } else {
+        setGyroEnabled(true);
+        if (pannellumRef.current) {
+          pannellumRef.current.startOrientation();
+        }
+      }
+    } catch (e) {
+      console.warn("Gyroscope permission denied");
+    }
+  };
+
+  const toggleGyro = () => {
+    if (gyroEnabled) {
+      setGyroEnabled(false);
+      if (pannellumRef.current) {
+        pannellumRef.current.stopOrientation();
+      }
+    } else {
+      requestGyro();
+    }
+  };
 
   // Load pannellum
   useEffect(() => {
@@ -201,7 +243,7 @@ export function VrViewer({ tourId, language }: VrViewerProps) {
       panorama: `/api/proxy-image?url=${encodeURIComponent(scene.panoramaUrl)}`,
       autoLoad: true,
       compass: true,
-      orientationOnByDefault: true,
+      orientationOnByDefault: false,
       hfov: 110,
       yaw: scene.defaultYaw || 0,
       pitch: scene.defaultPitch || 0,
@@ -256,6 +298,18 @@ export function VrViewer({ tourId, language }: VrViewerProps) {
       
 
       <div ref={viewerRef} style={{ width: "100%", height: "70vh" }} />
+
+      {gyroSupported && (
+        <button
+          onClick={toggleGyro}
+          className={`absolute bottom-4 right-4 z-10 w-10 h-10 rounded-full flex items-center justify-center text-lg shadow-lg transition-colors ${
+            gyroEnabled ? "bg-amber-500 text-white" : "bg-white/80 text-gray-600"
+          }`}
+          title={gyroEnabled ? "გიროსკოპი ჩართულია" : "გიროსკოპის ჩართვა"}
+        >
+          📱
+        </button>
+      )}
 
       {scenes.length > 1 && (
         <div className="flex gap-2 overflow-x-auto py-3 px-2">
