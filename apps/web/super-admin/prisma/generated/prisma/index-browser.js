@@ -415,6 +415,11 @@ exports.Prisma.MuseumScalarFieldEnum = {
   isPublished: 'isPublished',
   displayOrder: 'displayOrder',
   category: 'category',
+  show360View: 'show360View',
+  vrTourId: 'vrTourId',
+  vr360Price: 'vr360Price',
+  vr360IsFree: 'vr360IsFree',
+  vr360BundleWithAudio: 'vr360BundleWithAudio',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -440,6 +445,7 @@ exports.Prisma.TourScalarFieldEnum = {
   allowActivationCodes: 'allowActivationCodes',
   allowBankPayment: 'allowBankPayment',
   coverImage: 'coverImage',
+  vrTourId: 'vrTourId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -540,6 +546,7 @@ exports.Prisma.EntitlementScalarFieldEnum = {
   id: 'id',
   deviceId: 'deviceId',
   tourId: 'tourId',
+  type: 'type',
   activationCodeId: 'activationCodeId',
   activatedAt: 'activatedAt',
   expiresAt: 'expiresAt',

@@ -21360,12 +21360,14 @@ export namespace Prisma {
     latitude: number | null
     longitude: number | null
     displayOrder: number | null
+    vr360Price: Decimal | null
   }
 
   export type MuseumSumAggregateOutputType = {
     latitude: number | null
     longitude: number | null
     displayOrder: number | null
+    vr360Price: Decimal | null
   }
 
   export type MuseumMinAggregateOutputType = {
@@ -21412,6 +21414,11 @@ export namespace Prisma {
     isPublished: boolean | null
     displayOrder: number | null
     category: string | null
+    show360View: boolean | null
+    vrTourId: string | null
+    vr360Price: Decimal | null
+    vr360IsFree: boolean | null
+    vr360BundleWithAudio: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -21460,6 +21467,11 @@ export namespace Prisma {
     isPublished: boolean | null
     displayOrder: number | null
     category: string | null
+    show360View: boolean | null
+    vrTourId: string | null
+    vr360Price: Decimal | null
+    vr360IsFree: boolean | null
+    vr360BundleWithAudio: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -21510,6 +21522,11 @@ export namespace Prisma {
     isPublished: number
     displayOrder: number
     category: number
+    show360View: number
+    vrTourId: number
+    vr360Price: number
+    vr360IsFree: number
+    vr360BundleWithAudio: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -21520,12 +21537,14 @@ export namespace Prisma {
     latitude?: true
     longitude?: true
     displayOrder?: true
+    vr360Price?: true
   }
 
   export type MuseumSumAggregateInputType = {
     latitude?: true
     longitude?: true
     displayOrder?: true
+    vr360Price?: true
   }
 
   export type MuseumMinAggregateInputType = {
@@ -21572,6 +21591,11 @@ export namespace Prisma {
     isPublished?: true
     displayOrder?: true
     category?: true
+    show360View?: true
+    vrTourId?: true
+    vr360Price?: true
+    vr360IsFree?: true
+    vr360BundleWithAudio?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -21620,6 +21644,11 @@ export namespace Prisma {
     isPublished?: true
     displayOrder?: true
     category?: true
+    show360View?: true
+    vrTourId?: true
+    vr360Price?: true
+    vr360IsFree?: true
+    vr360BundleWithAudio?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -21670,6 +21699,11 @@ export namespace Prisma {
     isPublished?: true
     displayOrder?: true
     category?: true
+    show360View?: true
+    vrTourId?: true
+    vr360Price?: true
+    vr360IsFree?: true
+    vr360BundleWithAudio?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -21807,6 +21841,11 @@ export namespace Prisma {
     isPublished: boolean
     displayOrder: number
     category: string | null
+    show360View: boolean
+    vrTourId: string | null
+    vr360Price: Decimal | null
+    vr360IsFree: boolean
+    vr360BundleWithAudio: boolean
     createdAt: Date
     updatedAt: Date
     _count: MuseumCountAggregateOutputType | null
@@ -21876,6 +21915,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: boolean
     category?: boolean
+    show360View?: boolean
+    vrTourId?: boolean
+    vr360Price?: boolean
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tours?: boolean | Museum$toursArgs<ExtArgs>
@@ -21929,6 +21973,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: boolean
     category?: boolean
+    show360View?: boolean
+    vrTourId?: boolean
+    vr360Price?: boolean
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["museum"]>
@@ -21979,6 +22028,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: boolean
     category?: boolean
+    show360View?: boolean
+    vrTourId?: boolean
+    vr360Price?: boolean
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -22042,6 +22096,11 @@ export namespace Prisma {
       isPublished: boolean
       displayOrder: number
       category: string | null
+      show360View: boolean
+      vrTourId: string | null
+      vr360Price: Prisma.Decimal | null
+      vr360IsFree: boolean
+      vr360BundleWithAudio: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["museum"]>
@@ -22484,6 +22543,11 @@ export namespace Prisma {
     readonly isPublished: FieldRef<"Museum", 'Boolean'>
     readonly displayOrder: FieldRef<"Museum", 'Int'>
     readonly category: FieldRef<"Museum", 'String'>
+    readonly show360View: FieldRef<"Museum", 'Boolean'>
+    readonly vrTourId: FieldRef<"Museum", 'String'>
+    readonly vr360Price: FieldRef<"Museum", 'Decimal'>
+    readonly vr360IsFree: FieldRef<"Museum", 'Boolean'>
+    readonly vr360BundleWithAudio: FieldRef<"Museum", 'Boolean'>
     readonly createdAt: FieldRef<"Museum", 'DateTime'>
     readonly updatedAt: FieldRef<"Museum", 'DateTime'>
   }
@@ -22901,6 +22965,7 @@ export namespace Prisma {
     allowActivationCodes: boolean | null
     allowBankPayment: boolean | null
     coverImage: string | null
+    vrTourId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -22926,6 +22991,7 @@ export namespace Prisma {
     allowActivationCodes: boolean | null
     allowBankPayment: boolean | null
     coverImage: string | null
+    vrTourId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -22951,6 +23017,7 @@ export namespace Prisma {
     allowActivationCodes: number
     allowBankPayment: number
     coverImage: number
+    vrTourId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -22992,6 +23059,7 @@ export namespace Prisma {
     allowActivationCodes?: true
     allowBankPayment?: true
     coverImage?: true
+    vrTourId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -23017,6 +23085,7 @@ export namespace Prisma {
     allowActivationCodes?: true
     allowBankPayment?: true
     coverImage?: true
+    vrTourId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -23042,6 +23111,7 @@ export namespace Prisma {
     allowActivationCodes?: true
     allowBankPayment?: true
     coverImage?: true
+    vrTourId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -23154,6 +23224,7 @@ export namespace Prisma {
     allowActivationCodes: boolean
     allowBankPayment: boolean
     coverImage: string | null
+    vrTourId: string | null
     createdAt: Date
     updatedAt: Date
     _count: TourCountAggregateOutputType | null
@@ -23198,6 +23269,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: boolean
+    vrTourId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     museum?: boolean | MuseumDefaultArgs<ExtArgs>
@@ -23230,6 +23302,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: boolean
+    vrTourId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     museum?: boolean | MuseumDefaultArgs<ExtArgs>
@@ -23256,6 +23329,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: boolean
+    vrTourId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -23304,6 +23378,7 @@ export namespace Prisma {
       allowActivationCodes: boolean
       allowBankPayment: boolean
       coverImage: string | null
+      vrTourId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["tour"]>
@@ -23725,6 +23800,7 @@ export namespace Prisma {
     readonly allowActivationCodes: FieldRef<"Tour", 'Boolean'>
     readonly allowBankPayment: FieldRef<"Tour", 'Boolean'>
     readonly coverImage: FieldRef<"Tour", 'String'>
+    readonly vrTourId: FieldRef<"Tour", 'String'>
     readonly createdAt: FieldRef<"Tour", 'DateTime'>
     readonly updatedAt: FieldRef<"Tour", 'DateTime'>
   }
@@ -29694,6 +29770,7 @@ export namespace Prisma {
     id: string | null
     deviceId: string | null
     tourId: string | null
+    type: string | null
     activationCodeId: string | null
     activatedAt: Date | null
     expiresAt: Date | null
@@ -29706,6 +29783,7 @@ export namespace Prisma {
     id: string | null
     deviceId: string | null
     tourId: string | null
+    type: string | null
     activationCodeId: string | null
     activatedAt: Date | null
     expiresAt: Date | null
@@ -29718,6 +29796,7 @@ export namespace Prisma {
     id: number
     deviceId: number
     tourId: number
+    type: number
     activationCodeId: number
     activatedAt: number
     expiresAt: number
@@ -29732,6 +29811,7 @@ export namespace Prisma {
     id?: true
     deviceId?: true
     tourId?: true
+    type?: true
     activationCodeId?: true
     activatedAt?: true
     expiresAt?: true
@@ -29744,6 +29824,7 @@ export namespace Prisma {
     id?: true
     deviceId?: true
     tourId?: true
+    type?: true
     activationCodeId?: true
     activatedAt?: true
     expiresAt?: true
@@ -29756,6 +29837,7 @@ export namespace Prisma {
     id?: true
     deviceId?: true
     tourId?: true
+    type?: true
     activationCodeId?: true
     activatedAt?: true
     expiresAt?: true
@@ -29841,6 +29923,7 @@ export namespace Prisma {
     id: string
     deviceId: string
     tourId: string
+    type: string
     activationCodeId: string | null
     activatedAt: Date
     expiresAt: Date
@@ -29870,6 +29953,7 @@ export namespace Prisma {
     id?: boolean
     deviceId?: boolean
     tourId?: boolean
+    type?: boolean
     activationCodeId?: boolean
     activatedAt?: boolean
     expiresAt?: boolean
@@ -29885,6 +29969,7 @@ export namespace Prisma {
     id?: boolean
     deviceId?: boolean
     tourId?: boolean
+    type?: boolean
     activationCodeId?: boolean
     activatedAt?: boolean
     expiresAt?: boolean
@@ -29900,6 +29985,7 @@ export namespace Prisma {
     id?: boolean
     deviceId?: boolean
     tourId?: boolean
+    type?: boolean
     activationCodeId?: boolean
     activatedAt?: boolean
     expiresAt?: boolean
@@ -29930,6 +30016,7 @@ export namespace Prisma {
       id: string
       deviceId: string
       tourId: string
+      type: string
       activationCodeId: string | null
       activatedAt: Date
       expiresAt: Date
@@ -30335,6 +30422,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Entitlement", 'String'>
     readonly deviceId: FieldRef<"Entitlement", 'String'>
     readonly tourId: FieldRef<"Entitlement", 'String'>
+    readonly type: FieldRef<"Entitlement", 'String'>
     readonly activationCodeId: FieldRef<"Entitlement", 'String'>
     readonly activatedAt: FieldRef<"Entitlement", 'DateTime'>
     readonly expiresAt: FieldRef<"Entitlement", 'DateTime'>
@@ -36114,6 +36202,11 @@ export namespace Prisma {
     isPublished: 'isPublished',
     displayOrder: 'displayOrder',
     category: 'category',
+    show360View: 'show360View',
+    vrTourId: 'vrTourId',
+    vr360Price: 'vr360Price',
+    vr360IsFree: 'vr360IsFree',
+    vr360BundleWithAudio: 'vr360BundleWithAudio',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -36142,6 +36235,7 @@ export namespace Prisma {
     allowActivationCodes: 'allowActivationCodes',
     allowBankPayment: 'allowBankPayment',
     coverImage: 'coverImage',
+    vrTourId: 'vrTourId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -36260,6 +36354,7 @@ export namespace Prisma {
     id: 'id',
     deviceId: 'deviceId',
     tourId: 'tourId',
+    type: 'type',
     activationCodeId: 'activationCodeId',
     activatedAt: 'activatedAt',
     expiresAt: 'expiresAt',
@@ -38201,6 +38296,11 @@ export namespace Prisma {
     isPublished?: BoolFilter<"Museum"> | boolean
     displayOrder?: IntFilter<"Museum"> | number
     category?: StringNullableFilter<"Museum"> | string | null
+    show360View?: BoolFilter<"Museum"> | boolean
+    vrTourId?: StringNullableFilter<"Museum"> | string | null
+    vr360Price?: DecimalNullableFilter<"Museum"> | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFilter<"Museum"> | boolean
+    vr360BundleWithAudio?: BoolFilter<"Museum"> | boolean
     createdAt?: DateTimeFilter<"Museum"> | Date | string
     updatedAt?: DateTimeFilter<"Museum"> | Date | string
     tours?: TourListRelationFilter
@@ -38253,6 +38353,11 @@ export namespace Prisma {
     isPublished?: SortOrder
     displayOrder?: SortOrder
     category?: SortOrderInput | SortOrder
+    show360View?: SortOrder
+    vrTourId?: SortOrderInput | SortOrder
+    vr360Price?: SortOrderInput | SortOrder
+    vr360IsFree?: SortOrder
+    vr360BundleWithAudio?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tours?: TourOrderByRelationAggregateInput
@@ -38308,6 +38413,11 @@ export namespace Prisma {
     isPublished?: BoolFilter<"Museum"> | boolean
     displayOrder?: IntFilter<"Museum"> | number
     category?: StringNullableFilter<"Museum"> | string | null
+    show360View?: BoolFilter<"Museum"> | boolean
+    vrTourId?: StringNullableFilter<"Museum"> | string | null
+    vr360Price?: DecimalNullableFilter<"Museum"> | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFilter<"Museum"> | boolean
+    vr360BundleWithAudio?: BoolFilter<"Museum"> | boolean
     createdAt?: DateTimeFilter<"Museum"> | Date | string
     updatedAt?: DateTimeFilter<"Museum"> | Date | string
     tours?: TourListRelationFilter
@@ -38360,6 +38470,11 @@ export namespace Prisma {
     isPublished?: SortOrder
     displayOrder?: SortOrder
     category?: SortOrderInput | SortOrder
+    show360View?: SortOrder
+    vrTourId?: SortOrderInput | SortOrder
+    vr360Price?: SortOrderInput | SortOrder
+    vr360IsFree?: SortOrder
+    vr360BundleWithAudio?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: MuseumCountOrderByAggregateInput
@@ -38418,6 +38533,11 @@ export namespace Prisma {
     isPublished?: BoolWithAggregatesFilter<"Museum"> | boolean
     displayOrder?: IntWithAggregatesFilter<"Museum"> | number
     category?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    show360View?: BoolWithAggregatesFilter<"Museum"> | boolean
+    vrTourId?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    vr360Price?: DecimalNullableWithAggregatesFilter<"Museum"> | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolWithAggregatesFilter<"Museum"> | boolean
+    vr360BundleWithAudio?: BoolWithAggregatesFilter<"Museum"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Museum"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Museum"> | Date | string
   }
@@ -38446,6 +38566,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFilter<"Tour"> | boolean
     allowBankPayment?: BoolFilter<"Tour"> | boolean
     coverImage?: StringNullableFilter<"Tour"> | string | null
+    vrTourId?: StringNullableFilter<"Tour"> | string | null
     createdAt?: DateTimeFilter<"Tour"> | Date | string
     updatedAt?: DateTimeFilter<"Tour"> | Date | string
     museum?: XOR<MuseumRelationFilter, MuseumWhereInput>
@@ -38477,6 +38598,7 @@ export namespace Prisma {
     allowActivationCodes?: SortOrder
     allowBankPayment?: SortOrder
     coverImage?: SortOrderInput | SortOrder
+    vrTourId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     museum?: MuseumOrderByWithRelationInput
@@ -38511,6 +38633,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFilter<"Tour"> | boolean
     allowBankPayment?: BoolFilter<"Tour"> | boolean
     coverImage?: StringNullableFilter<"Tour"> | string | null
+    vrTourId?: StringNullableFilter<"Tour"> | string | null
     createdAt?: DateTimeFilter<"Tour"> | Date | string
     updatedAt?: DateTimeFilter<"Tour"> | Date | string
     museum?: XOR<MuseumRelationFilter, MuseumWhereInput>
@@ -38542,6 +38665,7 @@ export namespace Prisma {
     allowActivationCodes?: SortOrder
     allowBankPayment?: SortOrder
     coverImage?: SortOrderInput | SortOrder
+    vrTourId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TourCountOrderByAggregateInput
@@ -38575,6 +38699,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolWithAggregatesFilter<"Tour"> | boolean
     allowBankPayment?: BoolWithAggregatesFilter<"Tour"> | boolean
     coverImage?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    vrTourId?: StringNullableWithAggregatesFilter<"Tour"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Tour"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Tour"> | Date | string
   }
@@ -39139,6 +39264,7 @@ export namespace Prisma {
     id?: StringFilter<"Entitlement"> | string
     deviceId?: StringFilter<"Entitlement"> | string
     tourId?: StringFilter<"Entitlement"> | string
+    type?: StringFilter<"Entitlement"> | string
     activationCodeId?: StringNullableFilter<"Entitlement"> | string | null
     activatedAt?: DateTimeFilter<"Entitlement"> | Date | string
     expiresAt?: DateTimeFilter<"Entitlement"> | Date | string
@@ -39154,6 +39280,7 @@ export namespace Prisma {
     id?: SortOrder
     deviceId?: SortOrder
     tourId?: SortOrder
+    type?: SortOrder
     activationCodeId?: SortOrderInput | SortOrder
     activatedAt?: SortOrder
     expiresAt?: SortOrder
@@ -39174,6 +39301,7 @@ export namespace Prisma {
     NOT?: EntitlementWhereInput | EntitlementWhereInput[]
     deviceId?: StringFilter<"Entitlement"> | string
     tourId?: StringFilter<"Entitlement"> | string
+    type?: StringFilter<"Entitlement"> | string
     activatedAt?: DateTimeFilter<"Entitlement"> | Date | string
     expiresAt?: DateTimeFilter<"Entitlement"> | Date | string
     isActive?: BoolFilter<"Entitlement"> | boolean
@@ -39188,6 +39316,7 @@ export namespace Prisma {
     id?: SortOrder
     deviceId?: SortOrder
     tourId?: SortOrder
+    type?: SortOrder
     activationCodeId?: SortOrderInput | SortOrder
     activatedAt?: SortOrder
     expiresAt?: SortOrder
@@ -39206,6 +39335,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Entitlement"> | string
     deviceId?: StringWithAggregatesFilter<"Entitlement"> | string
     tourId?: StringWithAggregatesFilter<"Entitlement"> | string
+    type?: StringWithAggregatesFilter<"Entitlement"> | string
     activationCodeId?: StringNullableWithAggregatesFilter<"Entitlement"> | string | null
     activatedAt?: DateTimeWithAggregatesFilter<"Entitlement"> | Date | string
     expiresAt?: DateTimeWithAggregatesFilter<"Entitlement"> | Date | string
@@ -41437,6 +41567,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: number
     category?: string | null
+    show360View?: boolean
+    vrTourId?: string | null
+    vr360Price?: Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourCreateNestedManyWithoutMuseumInput
@@ -41489,6 +41624,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: number
     category?: string | null
+    show360View?: boolean
+    vrTourId?: string | null
+    vr360Price?: Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourUncheckedCreateNestedManyWithoutMuseumInput
@@ -41541,6 +41681,11 @@ export namespace Prisma {
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    show360View?: BoolFieldUpdateOperationsInput | boolean
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
+    vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
+    vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUpdateManyWithoutMuseumNestedInput
@@ -41593,6 +41738,11 @@ export namespace Prisma {
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    show360View?: BoolFieldUpdateOperationsInput | boolean
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
+    vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
+    vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUncheckedUpdateManyWithoutMuseumNestedInput
@@ -41645,6 +41795,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: number
     category?: string | null
+    show360View?: boolean
+    vrTourId?: string | null
+    vr360Price?: Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41695,6 +41850,11 @@ export namespace Prisma {
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    show360View?: BoolFieldUpdateOperationsInput | boolean
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
+    vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
+    vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41745,6 +41905,11 @@ export namespace Prisma {
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    show360View?: BoolFieldUpdateOperationsInput | boolean
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
+    vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
+    vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41769,6 +41934,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
@@ -41800,6 +41966,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     halls?: HallUncheckedCreateNestedManyWithoutTourInput
@@ -41829,6 +41996,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
@@ -41860,6 +42028,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     halls?: HallUncheckedUpdateManyWithoutTourNestedInput
@@ -41890,6 +42059,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41914,6 +42084,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41939,6 +42110,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -42601,6 +42773,7 @@ export namespace Prisma {
 
   export type EntitlementCreateInput = {
     id?: string
+    type?: string
     activatedAt?: Date | string
     expiresAt: Date | string
     isActive?: boolean
@@ -42615,6 +42788,7 @@ export namespace Prisma {
     id?: string
     deviceId: string
     tourId: string
+    type?: string
     activationCodeId?: string | null
     activatedAt?: Date | string
     expiresAt: Date | string
@@ -42625,6 +42799,7 @@ export namespace Prisma {
 
   export type EntitlementUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -42639,6 +42814,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     deviceId?: StringFieldUpdateOperationsInput | string
     tourId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42651,6 +42827,7 @@ export namespace Prisma {
     id?: string
     deviceId: string
     tourId: string
+    type?: string
     activationCodeId?: string | null
     activatedAt?: Date | string
     expiresAt: Date | string
@@ -42661,6 +42838,7 @@ export namespace Prisma {
 
   export type EntitlementUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -42672,6 +42850,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     deviceId?: StringFieldUpdateOperationsInput | string
     tourId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -44634,6 +44813,11 @@ export namespace Prisma {
     isPublished?: SortOrder
     displayOrder?: SortOrder
     category?: SortOrder
+    show360View?: SortOrder
+    vrTourId?: SortOrder
+    vr360Price?: SortOrder
+    vr360IsFree?: SortOrder
+    vr360BundleWithAudio?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44642,6 +44826,7 @@ export namespace Prisma {
     latitude?: SortOrder
     longitude?: SortOrder
     displayOrder?: SortOrder
+    vr360Price?: SortOrder
   }
 
   export type MuseumMaxOrderByAggregateInput = {
@@ -44688,6 +44873,11 @@ export namespace Prisma {
     isPublished?: SortOrder
     displayOrder?: SortOrder
     category?: SortOrder
+    show360View?: SortOrder
+    vrTourId?: SortOrder
+    vr360Price?: SortOrder
+    vr360IsFree?: SortOrder
+    vr360BundleWithAudio?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44736,6 +44926,11 @@ export namespace Prisma {
     isPublished?: SortOrder
     displayOrder?: SortOrder
     category?: SortOrder
+    show360View?: SortOrder
+    vrTourId?: SortOrder
+    vr360Price?: SortOrder
+    vr360IsFree?: SortOrder
+    vr360BundleWithAudio?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44744,6 +44939,7 @@ export namespace Prisma {
     latitude?: SortOrder
     longitude?: SortOrder
     displayOrder?: SortOrder
+    vr360Price?: SortOrder
   }
 
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -44828,6 +45024,7 @@ export namespace Prisma {
     allowActivationCodes?: SortOrder
     allowBankPayment?: SortOrder
     coverImage?: SortOrder
+    vrTourId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44860,6 +45057,7 @@ export namespace Prisma {
     allowActivationCodes?: SortOrder
     allowBankPayment?: SortOrder
     coverImage?: SortOrder
+    vrTourId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44885,6 +45083,7 @@ export namespace Prisma {
     allowActivationCodes?: SortOrder
     allowBankPayment?: SortOrder
     coverImage?: SortOrder
+    vrTourId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -45304,6 +45503,7 @@ export namespace Prisma {
     id?: SortOrder
     deviceId?: SortOrder
     tourId?: SortOrder
+    type?: SortOrder
     activationCodeId?: SortOrder
     activatedAt?: SortOrder
     expiresAt?: SortOrder
@@ -45316,6 +45516,7 @@ export namespace Prisma {
     id?: SortOrder
     deviceId?: SortOrder
     tourId?: SortOrder
+    type?: SortOrder
     activationCodeId?: SortOrder
     activatedAt?: SortOrder
     expiresAt?: SortOrder
@@ -45328,6 +45529,7 @@ export namespace Prisma {
     id?: SortOrder
     deviceId?: SortOrder
     tourId?: SortOrder
+    type?: SortOrder
     activationCodeId?: SortOrder
     activatedAt?: SortOrder
     expiresAt?: SortOrder
@@ -49228,6 +49430,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     halls?: HallCreateNestedManyWithoutTourInput
@@ -49257,6 +49460,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     halls?: HallUncheckedCreateNestedManyWithoutTourInput
@@ -49358,6 +49562,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFilter<"Tour"> | boolean
     allowBankPayment?: BoolFilter<"Tour"> | boolean
     coverImage?: StringNullableFilter<"Tour"> | string | null
+    vrTourId?: StringNullableFilter<"Tour"> | string | null
     createdAt?: DateTimeFilter<"Tour"> | Date | string
     updatedAt?: DateTimeFilter<"Tour"> | Date | string
   }
@@ -49444,6 +49649,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: number
     category?: string | null
+    show360View?: boolean
+    vrTourId?: string | null
+    vr360Price?: Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentCreateNestedManyWithoutMuseumInput
@@ -49495,6 +49705,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: number
     category?: string | null
+    show360View?: boolean
+    vrTourId?: string | null
+    vr360Price?: Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutMuseumInput
@@ -49659,6 +49874,7 @@ export namespace Prisma {
 
   export type EntitlementCreateWithoutTourInput = {
     id?: string
+    type?: string
     activatedAt?: Date | string
     expiresAt: Date | string
     isActive?: boolean
@@ -49671,6 +49887,7 @@ export namespace Prisma {
   export type EntitlementUncheckedCreateWithoutTourInput = {
     id?: string
     deviceId: string
+    type?: string
     activationCodeId?: string | null
     activatedAt?: Date | string
     expiresAt: Date | string
@@ -49788,6 +50005,11 @@ export namespace Prisma {
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    show360View?: BoolFieldUpdateOperationsInput | boolean
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
+    vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
+    vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUpdateManyWithoutMuseumNestedInput
@@ -49839,6 +50061,11 @@ export namespace Prisma {
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    show360View?: BoolFieldUpdateOperationsInput | boolean
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
+    vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
+    vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutMuseumNestedInput
@@ -49987,6 +50214,7 @@ export namespace Prisma {
     id?: StringFilter<"Entitlement"> | string
     deviceId?: StringFilter<"Entitlement"> | string
     tourId?: StringFilter<"Entitlement"> | string
+    type?: StringFilter<"Entitlement"> | string
     activationCodeId?: StringNullableFilter<"Entitlement"> | string | null
     activatedAt?: DateTimeFilter<"Entitlement"> | Date | string
     expiresAt?: DateTimeFilter<"Entitlement"> | Date | string
@@ -50031,6 +50259,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
@@ -50061,6 +50290,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stops?: TourStopUncheckedCreateNestedManyWithoutTourInput
@@ -50173,6 +50403,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
@@ -50203,6 +50434,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stops?: TourStopUncheckedUpdateManyWithoutTourNestedInput
@@ -50247,6 +50479,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
@@ -50277,6 +50510,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     halls?: HallUncheckedCreateNestedManyWithoutTourInput
@@ -50364,6 +50598,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
@@ -50394,6 +50629,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     halls?: HallUncheckedUpdateManyWithoutTourNestedInput
@@ -50471,6 +50707,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
@@ -50501,6 +50738,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     halls?: HallUncheckedCreateNestedManyWithoutTourInput
@@ -50545,6 +50783,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
@@ -50575,6 +50814,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     halls?: HallUncheckedUpdateManyWithoutTourNestedInput
@@ -50585,6 +50825,7 @@ export namespace Prisma {
 
   export type EntitlementCreateWithoutActivationCodeInput = {
     id?: string
+    type?: string
     activatedAt?: Date | string
     expiresAt: Date | string
     isActive?: boolean
@@ -50598,6 +50839,7 @@ export namespace Prisma {
     id?: string
     deviceId: string
     tourId: string
+    type?: string
     activatedAt?: Date | string
     expiresAt: Date | string
     isActive?: boolean
@@ -50665,6 +50907,7 @@ export namespace Prisma {
 
   export type EntitlementUpdateWithoutActivationCodeInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -50678,6 +50921,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     deviceId?: StringFieldUpdateOperationsInput | string
     tourId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -50703,6 +50947,7 @@ export namespace Prisma {
 
   export type EntitlementCreateWithoutDeviceInput = {
     id?: string
+    type?: string
     activatedAt?: Date | string
     expiresAt: Date | string
     isActive?: boolean
@@ -50715,6 +50960,7 @@ export namespace Prisma {
   export type EntitlementUncheckedCreateWithoutDeviceInput = {
     id?: string
     tourId: string
+    type?: string
     activationCodeId?: string | null
     activatedAt?: Date | string
     expiresAt: Date | string
@@ -50798,6 +51044,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
@@ -50828,6 +51075,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     halls?: HallUncheckedCreateNestedManyWithoutTourInput
@@ -50948,6 +51196,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
@@ -50978,6 +51227,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     halls?: HallUncheckedUpdateManyWithoutTourNestedInput
@@ -51053,6 +51303,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     museum: MuseumCreateNestedOneWithoutToursInput
@@ -51083,6 +51334,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     halls?: HallUncheckedCreateNestedManyWithoutTourInput
@@ -51142,6 +51394,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: number
     category?: string | null
+    show360View?: boolean
+    vrTourId?: string | null
+    vr360Price?: Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourCreateNestedManyWithoutMuseumInput
@@ -51193,6 +51450,11 @@ export namespace Prisma {
     isPublished?: boolean
     displayOrder?: number
     category?: string | null
+    show360View?: boolean
+    vrTourId?: string | null
+    vr360Price?: Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: boolean
+    vr360BundleWithAudio?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourUncheckedCreateNestedManyWithoutMuseumInput
@@ -51275,6 +51537,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     museum?: MuseumUpdateOneRequiredWithoutToursNestedInput
@@ -51305,6 +51568,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     halls?: HallUncheckedUpdateManyWithoutTourNestedInput
@@ -51370,6 +51634,11 @@ export namespace Prisma {
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    show360View?: BoolFieldUpdateOperationsInput | boolean
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
+    vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
+    vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUpdateManyWithoutMuseumNestedInput
@@ -51421,6 +51690,11 @@ export namespace Prisma {
     isPublished?: BoolFieldUpdateOperationsInput | boolean
     displayOrder?: IntFieldUpdateOperationsInput | number
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    show360View?: BoolFieldUpdateOperationsInput | boolean
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
+    vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
+    vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUncheckedUpdateManyWithoutMuseumNestedInput
@@ -52054,6 +52328,7 @@ export namespace Prisma {
     allowActivationCodes?: boolean
     allowBankPayment?: boolean
     coverImage?: string | null
+    vrTourId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -52094,6 +52369,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     halls?: HallUpdateManyWithoutTourNestedInput
@@ -52123,6 +52399,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     halls?: HallUncheckedUpdateManyWithoutTourNestedInput
@@ -52152,6 +52429,7 @@ export namespace Prisma {
     allowActivationCodes?: BoolFieldUpdateOperationsInput | boolean
     allowBankPayment?: BoolFieldUpdateOperationsInput | boolean
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    vrTourId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -52267,6 +52545,7 @@ export namespace Prisma {
   export type EntitlementCreateManyTourInput = {
     id?: string
     deviceId: string
+    type?: string
     activationCodeId?: string | null
     activatedAt?: Date | string
     expiresAt: Date | string
@@ -52475,6 +52754,7 @@ export namespace Prisma {
 
   export type EntitlementUpdateWithoutTourInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -52487,6 +52767,7 @@ export namespace Prisma {
   export type EntitlementUncheckedUpdateWithoutTourInput = {
     id?: StringFieldUpdateOperationsInput | string
     deviceId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52498,6 +52779,7 @@ export namespace Prisma {
   export type EntitlementUncheckedUpdateManyWithoutTourInput = {
     id?: StringFieldUpdateOperationsInput | string
     deviceId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52737,6 +53019,7 @@ export namespace Prisma {
   export type EntitlementCreateManyDeviceInput = {
     id?: string
     tourId: string
+    type?: string
     activationCodeId?: string | null
     activatedAt?: Date | string
     expiresAt: Date | string
@@ -52747,6 +53030,7 @@ export namespace Prisma {
 
   export type EntitlementUpdateWithoutDeviceInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -52759,6 +53043,7 @@ export namespace Prisma {
   export type EntitlementUncheckedUpdateWithoutDeviceInput = {
     id?: StringFieldUpdateOperationsInput | string
     tourId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52770,6 +53055,7 @@ export namespace Prisma {
   export type EntitlementUncheckedUpdateManyWithoutDeviceInput = {
     id?: StringFieldUpdateOperationsInput | string
     tourId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     activationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
     activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string

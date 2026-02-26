@@ -74,12 +74,6 @@ interface Museum {
   introAudioUrlDe: string | null;
   introAudioUrlFr: string | null;
   introAudioUrlUk: string | null;
-  // 360 VR
-  show360View: boolean;
-  vrTourId: string | null;
-  vr360Price: number | null;
-  vr360IsFree: boolean;
-  vr360BundleWithAudio: boolean;
 }
 
 export default function EditMuseumPage({ params }: { params: { id: string } }) {
@@ -106,12 +100,6 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
     showMap: false,
     showQrScanner: false,
     isPublished: false,
-    // 360 VR
-    show360View: false,
-    vrTourId: "",
-    vr360Price: "",
-    vr360IsFree: false,
-    vr360BundleWithAudio: false,
   });
 
   useEffect(() => {
@@ -142,12 +130,6 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
           showMap: data.showMap || false,
           showQrScanner: data.showQrScanner || false,
           isPublished: data.isPublished || false,
-          // 360 VR
-          show360View: data.show360View || false,
-          vrTourId: data.vrTourId || "",
-          vr360Price: data.vr360Price?.toString() || "",
-          vr360IsFree: data.vr360IsFree || false,
-          vr360BundleWithAudio: data.vr360BundleWithAudio || false,
         });
 
         // Build translations from existing data
@@ -310,7 +292,6 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
           longitude: formData.longitude
             ? parseFloat(formData.longitude)
             : null,
-          vr360Price: formData.vr360Price ? parseFloat(formData.vr360Price) : null,
           // English
           nameEn: enTrans?.name || null,
           descriptionEn: enTrans?.description || null,
@@ -689,92 +670,6 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* 360° VR Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>🥽 360° ხედი</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="show360View"
-                    name="show360View"
-                    checked={formData.show360View}
-                    onChange={handleChange}
-                    className="h-4 w-4"
-                  />
-                  <Label htmlFor="show360View">360° ხედის ჩვენება</Label>
-                </div>
-
-                {formData.show360View && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="vrTourId">VR Tour ID</Label>
-                      <Input
-                        id="vrTourId"
-                        name="vrTourId"
-                        value={formData.vrTourId}
-                        onChange={handleChange}
-                        placeholder="მაგ: clxx..."
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        GeoGuide VR-დან ტურის ID (vr.geoguide.ge)
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="vr360IsFree"
-                        name="vr360IsFree"
-                        checked={formData.vr360IsFree}
-                        onChange={handleChange}
-                        className="h-4 w-4"
-                      />
-                      <Label htmlFor="vr360IsFree">უფასო 360° ხედი</Label>
-                    </div>
-
-                    {!formData.vr360IsFree && (
-                      <>
-                        <div className="space-y-2">
-                          <Label htmlFor="vr360Price">360° ხედის ფასი (₾)</Label>
-                          <Input
-                            id="vr360Price"
-                            name="vr360Price"
-                            type="number"
-                            step="0.01"
-                            value={formData.vr360Price}
-                            onChange={handleChange}
-                            placeholder="5.00"
-                          />
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            id="vr360BundleWithAudio"
-                            name="vr360BundleWithAudio"
-                            checked={formData.vr360BundleWithAudio}
-                            onChange={handleChange}
-                            className="h-4 w-4"
-                          />
-                          <Label htmlFor="vr360BundleWithAudio">
-                            აუდიო გიდთან ერთად (bundle)
-                          </Label>
-                        </div>
-                        {formData.vr360BundleWithAudio && (
-                          <p className="text-xs text-muted-foreground ml-6">
-                            აუდიო გიდის შეძენისას 360° ხედიც ხელმისაწვდომი იქნება
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
               </CardContent>
             </Card>
 

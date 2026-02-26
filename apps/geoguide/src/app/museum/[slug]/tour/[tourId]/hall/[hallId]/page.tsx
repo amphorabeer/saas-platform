@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/language-context";
 import { LANGUAGES, Language, TourStop } from "@/lib/types";
 import { OfflineImage } from "@/components/OfflineImage";
+import { VrViewer } from "@/components/VrViewer";
 import {
   ChevronLeftIcon,
   PlayIcon,
@@ -37,6 +38,7 @@ interface Tour {
   coverImage: string | null;
   halls: Hall[];
   stops: TourStop[];
+  vrTourId?: string | null;
 }
 
 // UI texts
@@ -68,6 +70,7 @@ export default function HallPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [playedStops, setPlayedStops] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<"audio" | "vr360">("audio");
 
   // Audio player state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -332,18 +335,39 @@ export default function HallPage() {
 
       {/* Toolbar */}
       <div className="sticky top-14 z-40 bg-white border-b px-4 py-2">
-        <div className="flex items-center justify-between">
-          <h2 className="font-medium flex items-center gap-2">🎧 {ui.audioGuide}</h2>
-          <div className="flex items-center gap-1">
-            <button 
-              onClick={() => setShowSearch(!showSearch)} 
-              className={`p-2 rounded-lg hover:bg-gray-100 ${showSearch ? "bg-amber-100 text-amber-600" : ""}`}
+        <div className="flex items-center justify-center">
+          <div className="flex items-center gap-2 flex-1 justify-center">
+            <button
+              onClick={() => setViewMode("audio")}
+              className={`font-medium flex items-center gap-1 px-3 py-1 rounded-lg text-sm transition-colors ${
+                viewMode === "audio" ? "bg-amber-500 text-white" : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
-              <MagnifyingGlassIcon className="w-5 h-5" />
+              🎧 {ui.audioGuide}
             </button>
+            {tour.vrTourId && (
+              <button
+                onClick={() => setViewMode("vr360")}
+                className={`font-medium flex items-center gap-1 px-3 py-1 rounded-lg text-sm transition-colors ${
+                  viewMode === "vr360" ? "bg-amber-500 text-white" : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                🥽 360°
+              </button>
+            )}
           </div>
+          {viewMode === "audio" && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className={`p-2 rounded-lg hover:bg-gray-100 ${showSearch ? "bg-amber-100 text-amber-600" : ""}`}
+              >
+                <MagnifyingGlassIcon className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
-        {showSearch && (
+        {showSearch && viewMode === "audio" && (
           <div className="mt-2 relative">
             <input
               type="text"
@@ -362,14 +386,18 @@ export default function HallPage() {
         )}
       </div>
 
-      {/* Stops List */}
+      {/* Stops List / VR */}
       <div className="flex-1 p-4 pb-20">
-        {filteredStops.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p>{ui.noStops}</p>
-          </div>
+        {viewMode === "vr360" && tour.vrTourId ? (
+          <VrViewer tourId={tour.vrTourId} language={language} />
         ) : (
-          <div className="space-y-3">
+          <>
+            {filteredStops.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <p>{ui.noStops}</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
             {filteredStops
               .sort((a, b) => a.orderIndex - b.orderIndex)
               .map((stop) => {
@@ -496,18 +524,12 @@ export default function HallPage() {
                   </div>
                 );
               })}
-          </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Bottom nav */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t safe-bottom z-30">
-        <div className="flex justify-center py-3">
-          <span className="text-sm text-gray-500 flex items-center gap-2">
-            ☰ {ui.list}
-          </span>
-        </div>
-      </div>
     </div>
   );
 }

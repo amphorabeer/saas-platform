@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/lib/language-context";
 import { Tour, TourStop, Hall, LANGUAGES, Language } from "@/lib/types";
+import { VrViewer } from "@/components/VrViewer";
 import { OfflineImage } from "@/components/OfflineImage";
 import {
   ArrowDownTrayIcon,
@@ -62,7 +63,7 @@ export default function TourPage() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
 
   // View mode: 'halls' or 'stops'
-  const [viewMode, setViewMode] = useState<'halls' | 'stops'>('halls');
+  const [viewMode, setViewMode] = useState<'halls' | 'stops' | 'vr360'>('halls');
 
   // Audio player state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -394,7 +395,7 @@ export default function TourPage() {
         </div>
         
         {/* View Mode Toggle - only if has halls */}
-        {hasHalls && (
+        {(hasHalls || tour.vrTourId) && (
           <div className="flex gap-2 mt-2">
             <button
               onClick={() => setViewMode('halls')}
@@ -417,6 +418,18 @@ export default function TourPage() {
             >
               {ui.allStops}
             </button>
+            {tour.vrTourId && (
+              <button
+                onClick={() => setViewMode('vr360')}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                  viewMode === 'vr360'
+                    ? 'bg-amber-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                🥽 360°
+              </button>
+            )}
           </div>
         )}
 
@@ -603,16 +616,22 @@ export default function TourPage() {
             })}
           </div>
         )}
+
+        {viewMode === 'vr360' && tour.vrTourId && (
+          <div className="py-4">
+            <VrViewer tourId={tour.vrTourId} language={language} />
+          </div>
+        )}
       </div>
 
-      {/* Bottom nav - simplified */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t safe-bottom z-30">
-        <div className="flex justify-center py-3">
+      {/* Bottom nav - only show if map enabled */}
+      {museum?.showMap && (
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t safe-bottom z-30"><div className="flex justify-center py-3">
           <span className="text-sm text-gray-500 flex items-center gap-2">
             ☰ {ui.list}
           </span>
         </div>
-      </div>
+      </div>)}
 
       {/* Download Modal */}
       {showDownloadModal && (

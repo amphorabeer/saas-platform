@@ -133,6 +133,13 @@ export async function PATCH(
         ...(body.introAudioUrlDe !== undefined && { introAudioUrlDe: body.introAudioUrlDe }),
         ...(body.introAudioUrlFr !== undefined && { introAudioUrlFr: body.introAudioUrlFr }),
         ...(body.introAudioUrlUk !== undefined && { introAudioUrlUk: body.introAudioUrlUk }),
+
+        // 360° VR
+        ...(body.show360View !== undefined && { show360View: body.show360View }),
+        ...(body.vrTourId !== undefined && { vrTourId: body.vrTourId || null }),
+        ...(body.vr360Price !== undefined && { vr360Price: body.vr360Price }),
+        ...(body.vr360IsFree !== undefined && { vr360IsFree: body.vr360IsFree }),
+        ...(body.vr360BundleWithAudio !== undefined && { vr360BundleWithAudio: body.vr360BundleWithAudio }),
       },
     });
 

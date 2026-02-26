@@ -555,6 +555,13 @@ model Museum {
   displayOrder  Int     @default(0)
   category      String?
 
+  // 360° VR Settings
+  show360View          Boolean  @default(false)
+  vrTourId             String?
+  vr360Price           Decimal? @db.Decimal(10, 2)
+  vr360IsFree          Boolean  @default(false)
+  vr360BundleWithAudio Boolean  @default(false)
+
   // რელაციები
   tours    Tour[]
   payments Payment[]
@@ -604,6 +611,7 @@ model Tour {
 
   // მედია
   coverImage String?
+  vrTourId   String?
 
   // რელაციები
   halls        Hall[]
@@ -809,6 +817,9 @@ model Entitlement {
 
   tourId String
   tour   Tour   @relation(fields: [tourId], references: [id])
+
+  // ტიპი: AUDIO (აუდიო ტური) ან VR360 (360° ვირტუალური ტური)
+  type String @default("AUDIO") // "AUDIO" | "VR360"
 
   // აქტივაციის კოდი
   activationCodeId String?         @unique

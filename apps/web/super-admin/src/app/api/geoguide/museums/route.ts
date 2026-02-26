@@ -113,6 +113,13 @@ export async function POST(request: NextRequest) {
         introAudioUrlDe: body.introAudioUrlDe || null,
         introAudioUrlFr: body.introAudioUrlFr || null,
         introAudioUrlUk: body.introAudioUrlUk || null,
+
+        // 360° VR
+        show360View: body.show360View ?? false,
+        vrTourId: body.vrTourId || null,
+        vr360Price: body.vr360Price ?? null,
+        vr360IsFree: body.vr360IsFree ?? false,
+        vr360BundleWithAudio: body.vr360BundleWithAudio ?? false,
       },
     });
 

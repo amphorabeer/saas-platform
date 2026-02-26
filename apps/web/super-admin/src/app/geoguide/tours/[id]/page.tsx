@@ -107,6 +107,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     isPublished: false,
     allowActivationCodes: true,
     allowBankPayment: true,
+    vrTourId: "",
   });
 
   // Expanded halls state
@@ -173,6 +174,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
           isPublished: data.isPublished,
           allowActivationCodes: data.allowActivationCodes ?? true,
           allowBankPayment: data.allowBankPayment ?? true,
+          vrTourId: data.vrTourId || "",
         });
 
         // Load existing translations
@@ -766,6 +768,20 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                     currentUrl={formData.coverImage}
                     onUpload={(url) => setFormData({ ...formData, coverImage: url })}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="vrTourId">VR Tour ID (360°)</Label>
+                  <Input
+                    id="vrTourId"
+                    name="vrTourId"
+                    value={formData.vrTourId}
+                    onChange={handleChange}
+                    placeholder="მაგ: cmm0y2t580001y5cbvoq756d6"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    vr.geoguide.ge-დან ტურის ID — 360° ხედისთვის
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2">

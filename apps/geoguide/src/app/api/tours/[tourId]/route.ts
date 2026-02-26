@@ -41,6 +41,7 @@ export async function GET(
       stopsCount: publishedStops.length,
       isFree: tour.isFree,
       coverImage: tour.coverImage,
+      vrTourId: tour.vrTourId || null,
       museum: {
         name: tour.museum?.name,
         nameEn: tour.museum?.nameEn,

@@ -54,6 +54,7 @@ export async function PATCH(
         ...(body.price !== undefined && { price: body.price }),
         ...(body.currency !== undefined && { currency: body.currency }),
         ...(body.coverImage !== undefined && { coverImage: body.coverImage }),
+        ...(body.vrTourId !== undefined && { vrTourId: body.vrTourId || null }),
         ...(body.isPublished !== undefined && { isPublished: body.isPublished }),
         ...(body.allowActivationCodes !== undefined && { allowActivationCodes: body.allowActivationCodes }),
         ...(body.allowBankPayment !== undefined && { allowBankPayment: body.allowBankPayment }),

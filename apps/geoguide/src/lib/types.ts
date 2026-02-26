@@ -24,6 +24,12 @@ export interface Museum {
   coverImage: string | null;
   showMap: boolean;
   tours: Tour[];
+  // 360° VR
+  show360View?: boolean;
+  vrTourId?: string | null;
+  vr360Price?: number | null;
+  vr360IsFree?: boolean;
+  vr360BundleWithAudio?: boolean;
 }
 
 export interface Hall {
@@ -52,6 +58,7 @@ export interface Tour {
   price: number | null;
   currency: string;
   coverImage: string | null;
+  vrTourId?: string | null;
   halls?: Hall[];
   stops: TourStop[];
   allowActivationCodes?: boolean;
