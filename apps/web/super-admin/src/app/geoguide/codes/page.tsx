@@ -309,6 +309,12 @@ function drawTicketContent(
   ctx.font = "22px 'Georgia', serif";
   ctx.fillText("მოუსმინეთ აუდიო გიდს", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 115);
   ctx.textAlign = "left";
+  // www.geoguide.ge link
+  ctx.fillStyle = "#dc2626";
+  ctx.font = "bold 20px 'Georgia', serif";
+  ctx.textAlign = "center";
+  ctx.fillText("www.geoguide.ge", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 140);
+  ctx.textAlign = "left";
 }
 
 export default function ActivationCodesPage() {
