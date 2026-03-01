@@ -75,6 +75,7 @@ export default function ActivationCodesPage() {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusChangeCode, setStatusChangeCode] = useState<ActivationCode | null>(null);
   const [newStatus, setNewStatus] = useState<string>("");
+  const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchCodes();
@@ -262,17 +263,33 @@ export default function ActivationCodesPage() {
     a.click();
   };
 
+  const toggleSelectCode = (id: string) => {
+    setSelectedCodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedCodes.size === filteredCodes.length) {
+      setSelectedCodes(new Set());
+    } else {
+      setSelectedCodes(new Set(filteredCodes.map((c) => c.id)));
+    }
+  };
+
   const exportQrCodes = async () => {
     const JSZip = (await import("jszip")).default;
     const zip = new JSZip();
-    const availableCodes = filteredCodes;
-
-    if (availableCodes.length === 0) {
-      alert("ხელმისაწვდომი კოდები არ არის");
+    const selectedList = filteredCodes.filter((c) => selectedCodes.has(c.id));
+    if (selectedList.length === 0) {
+      alert("აირჩიეთ კოდები ექსპორტისთვის");
       return;
     }
 
-    for (const code of availableCodes) {
+    for (const code of selectedList) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d")!;
       const size = 500;
@@ -488,6 +505,12 @@ export default function ActivationCodesPage() {
               <option value="REVOKED">გაუქმებული</option>
             </select>
             <div className="flex gap-2">
+              {selectedCodes.size > 0 && (
+                <Button onClick={exportQrCodes} className="bg-amber-500 hover:bg-amber-600">
+                  <QrCode className="h-4 w-4 mr-2" />
+                  Export {selectedCodes.size} QR
+                </Button>
+              )}
               <Button variant="outline" onClick={() => exportCodes("csv")}>
                 <Download className="h-4 w-4 mr-2" />
                 CSV
@@ -495,10 +518,6 @@ export default function ActivationCodesPage() {
               <Button variant="outline" onClick={() => exportCodes("txt")}>
                 <Download className="h-4 w-4 mr-2" />
                 TXT
-              </Button>
-              <Button variant="outline" onClick={exportQrCodes}>
-                <QrCode className="h-4 w-4 mr-2" />
-                QR ZIP
               </Button>
             </div>
           </div>
@@ -512,6 +531,14 @@ export default function ActivationCodesPage() {
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
+                  <th className="p-4 w-10">
+                    <input
+                      type="checkbox"
+                      checked={selectedCodes.size === filteredCodes.length && filteredCodes.length > 0}
+                      onChange={toggleSelectAll}
+                      className="rounded"
+                    />
+                  </th>
                   <th className="text-left p-4 font-medium">კოდი</th>
                   <th className="text-left p-4 font-medium">QR</th>
                   <th className="text-left p-4 font-medium">მუზეუმი</th>
@@ -525,13 +552,21 @@ export default function ActivationCodesPage() {
               <tbody className="divide-y">
                 {filteredCodes.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
                       კოდები არ მოიძებნა
                     </td>
                   </tr>
                 ) : (
                   filteredCodes.map((code) => (
-                    <tr key={code.id} className="hover:bg-muted/50">
+                    <tr key={code.id} className={`hover:bg-muted/50 ${selectedCodes.has(code.id) ? "bg-amber-50 dark:bg-amber-950/20" : ""}`}>
+                      <td className="p-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedCodes.has(code.id)}
+                          onChange={() => toggleSelectCode(code.id)}
+                          className="rounded"
+                        />
+                      </td>
                       <td className="p-4 font-mono">
                         <div className="flex items-center gap-2">
                           {code.code}
