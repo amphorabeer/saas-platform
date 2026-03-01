@@ -24,6 +24,12 @@ export const authOptions: NextAuthOptions = {
         try {
           console.log('🔍 Searching for organization with hotelCode:', credentials.hotelCode)
           
+          const dbCheck = await prisma.$queryRaw`SELECT current_database() as db`
+          console.log('🗄️ Connected to DB:', JSON.stringify(dbCheck))
+
+          const allOrgs = await prisma.organization.findMany({ select: { hotelCode: true, name: true } })
+          console.log('📋 All organizations:', JSON.stringify(allOrgs))
+
           // Find organization by hotelCode
           const organization = await prisma.organization.findUnique({
             where: { hotelCode: credentials.hotelCode },
