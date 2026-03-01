@@ -264,7 +264,7 @@ function drawTicketContent(
   ctx.stroke();
 
   // Language flags
-  ctx.font = "48px sans-serif";
+  ctx.font = "64px sans-serif";
   ctx.fillText(flags, 80, 700);
 
   ctx.fillStyle = "rgba(255,255,255,0.25)";
@@ -308,12 +308,12 @@ function drawTicketContent(
   ctx.fillStyle = "rgba(255,255,255,0.35)";
   ctx.font = "22px 'Georgia', serif";
   ctx.fillText("მოუსმინეთ აუდიო გიდს", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 115);
-  ctx.textAlign = "left";
-  // www.geoguide.ge link
+
+  // www.geoguide.ge - big red
   ctx.fillStyle = "#dc2626";
-  ctx.font = "bold 20px 'Georgia', serif";
-  ctx.textAlign = "center";
-  ctx.fillText("www.geoguide.ge", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 140);
+  ctx.font = "bold 36px 'Georgia', serif";
+  ctx.fillText("www.geoguide.ge", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 175);
+
   ctx.textAlign = "left";
 }
 
