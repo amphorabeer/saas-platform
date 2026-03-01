@@ -30,6 +30,11 @@ import {
 interface Museum {
   id: string;
   name: string;
+  nameEn?: string | null;
+  nameRu?: string | null;
+  nameUk?: string | null;
+  nameDe?: string | null;
+  nameFr?: string | null;
   slug: string;
   tours: { id: string; name: string; isPublished: boolean }[];
 }
@@ -47,6 +52,265 @@ interface ActivationCode {
   createdAt: string;
 }
 
+// Language flag mapping
+const LANG_FLAGS: Record<string, string> = {
+  ka: "🇬🇪",
+  en: "🇬🇧",
+  ru: "🇷🇺",
+  uk: "🇺🇦",
+  de: "🇩🇪",
+  fr: "🇫🇷",
+};
+
+function getMuseumLanguages(museum: Museum): string[] {
+  const langs = ["ka"];
+  if (museum.nameEn) langs.push("en");
+  if (museum.nameRu) langs.push("ru");
+  if (museum.nameUk) langs.push("uk");
+  if (museum.nameDe) langs.push("de");
+  if (museum.nameFr) langs.push("fr");
+  return langs;
+}
+
+// Ticket drawing constants
+const TICKET_W = 1748;
+const TICKET_H = 1240;
+const LOGO_URL = "/geoguide-logo.png"; // Place logo in public folder
+
+function roundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawTicketBackground(ctx: CanvasRenderingContext2D) {
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, TICKET_W, TICKET_H);
+  grad.addColorStop(0, "#1a1a2e");
+  grad.addColorStop(0.5, "#16213e");
+  grad.addColorStop(1, "#0f3460");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, TICKET_W, TICKET_H);
+
+  // Dot pattern
+  ctx.globalAlpha = 0.03;
+  for (let i = 0; i < TICKET_W; i += 30) {
+    for (let j = 0; j < TICKET_H; j += 30) {
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(i, j, 1, 1);
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // Gold accent lines
+  const goldGrad = ctx.createLinearGradient(0, 0, TICKET_W, 0);
+  goldGrad.addColorStop(0, "#f59e0b");
+  goldGrad.addColorStop(0.5, "#fbbf24");
+  goldGrad.addColorStop(1, "#f59e0b");
+  ctx.fillStyle = goldGrad;
+  ctx.fillRect(0, 0, TICKET_W, 8);
+  ctx.fillRect(0, TICKET_H - 8, TICKET_W, 8);
+
+  // Decorative corners
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.2)";
+  ctx.lineWidth = 3;
+  [[28, 55, 28, 28, 55, 28], [TICKET_W - 28, 55, TICKET_W - 28, 28, TICKET_W - 55, 28],
+   [28, TICKET_H - 55, 28, TICKET_H - 28, 55, TICKET_H - 28],
+   [TICKET_W - 28, TICKET_H - 55, TICKET_W - 28, TICKET_H - 28, TICKET_W - 55, TICKET_H - 28]
+  ].forEach(([mx, my, lx1, ly1, lx2, ly2]) => {
+    ctx.beginPath();
+    ctx.moveTo(mx, my);
+    ctx.lineTo(lx1, ly1);
+    ctx.lineTo(lx2, ly2);
+    ctx.stroke();
+  });
+
+  // Vertical dashed separator
+  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([12, 12]);
+  ctx.beginPath();
+  ctx.moveTo(1070, 40);
+  ctx.lineTo(1070, TICKET_H - 40);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawTicketContent(
+  ctx: CanvasRenderingContext2D,
+  code: string,
+  museum: Museum,
+  durationDays: number,
+  logoImg: HTMLImageElement | null,
+  qrImg: HTMLImageElement | null
+) {
+  const langs = getMuseumLanguages(museum);
+  const flags = langs.map((l) => LANG_FLAGS[l]).join("  ");
+
+  // === LEFT SECTION ===
+
+  // Logo
+  const logoSize = 80;
+  const logoX = 80;
+  const logoY = 55;
+  if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+    ctx.restore();
+    ctx.strokeStyle = "#fbbf24";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 2, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // GeoGuide text
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = "bold 58px 'Georgia', serif";
+  ctx.textAlign = "left";
+  ctx.fillText("GeoGuide", logoX + logoSize + 24, logoY + 55);
+
+  // Subtitle
+  ctx.fillStyle = "rgba(255,255,255,0.45)";
+  ctx.font = "20px 'Georgia', serif";
+  ctx.fillText("აუდიო გიდი  •  Audio Guide", logoX + logoSize + 26, logoY + 82);
+
+  // Divider
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.25)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(80, 165);
+  ctx.lineTo(1000, 165);
+  ctx.stroke();
+
+  // Museum name - Georgian
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 50px 'Georgia', serif";
+  let nameKa = museum.name;
+  if (ctx.measureText(nameKa).width > 900) {
+    while (ctx.measureText(nameKa + "...").width > 900) nameKa = nameKa.slice(0, -1);
+    nameKa += "...";
+  }
+  ctx.fillText(nameKa, 80, 240);
+
+  // Museum name - English
+  if (museum.nameEn) {
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.font = "italic 32px 'Georgia', serif";
+    let nameEn = museum.nameEn;
+    if (ctx.measureText(nameEn).width > 900) {
+      while (ctx.measureText(nameEn + "...").width > 900) nameEn = nameEn.slice(0, -1);
+      nameEn += "...";
+    }
+    ctx.fillText(nameEn, 80, 286);
+  }
+
+  // Duration badge
+  const badgeText = `${durationDays} დღე / ${durationDays} days`;
+  ctx.font = "bold 26px 'Georgia', serif";
+  const badgeW = ctx.measureText(badgeText).width + 50;
+  ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
+  roundRect(ctx, 80, 320, badgeW, 55, 28);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.25)";
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, 80, 320, badgeW, 55, 28);
+  ctx.stroke();
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = "bold 26px 'Georgia', serif";
+  ctx.fillText(badgeText, 105, 357);
+
+  // Activation code label
+  ctx.fillStyle = "rgba(255,255,255,0.35)";
+  ctx.font = "20px 'Courier New', monospace";
+  ctx.fillText("ACTIVATION CODE / აქტივაციის კოდი", 80, 440);
+
+  // Activation code
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 52px 'Courier New', monospace";
+  ctx.fillText(code, 80, 505);
+
+  // Instructions
+  ctx.fillStyle = "rgba(255,255,255,0.3)";
+  ctx.font = "18px 'Georgia', serif";
+  ctx.fillText("დაასკანერეთ QR კოდი ან შეიყვანეთ კოდი აპლიკაციაში", 80, 560);
+  ctx.fillText("Scan QR code or enter the code in the app", 80, 587);
+
+  // Divider
+  ctx.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(80, 625);
+  ctx.lineTo(1000, 625);
+  ctx.stroke();
+
+  // Language flags
+  ctx.font = "48px sans-serif";
+  ctx.fillText(flags, 80, 700);
+
+  ctx.fillStyle = "rgba(255,255,255,0.25)";
+  ctx.font = "18px 'Georgia', serif";
+  ctx.fillText(`Available in ${langs.length} languages / ხელმისაწვდომია ${langs.length} ენაზე`, 80, 745);
+
+  // Contact
+  ctx.fillStyle = "rgba(255,255,255,0.25)";
+  ctx.font = "17px 'Georgia', serif";
+  ctx.fillText("If you have any technical problems, please contact us", 80, 1080);
+  ctx.fillStyle = "rgba(251, 191, 36, 0.5)";
+  ctx.font = "bold 20px 'Georgia', serif";
+  ctx.fillText("info@geoguide.ge", 80, 1110);
+
+  ctx.fillStyle = "rgba(251, 191, 36, 0.5)";
+  ctx.font = "20px 'Georgia', serif";
+  ctx.fillText("geoguide.ge", 80, 1185);
+
+  // === RIGHT SECTION - QR ===
+  const qrBoxX = 1130;
+  const qrBoxY = 120;
+  const qrBoxSize = 540;
+
+  // White QR background
+  ctx.fillStyle = "#ffffff";
+  roundRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 24);
+  ctx.fill();
+
+  // Draw actual QR code
+  if (qrImg && qrImg.complete && qrImg.naturalWidth > 0) {
+    const padding = 40;
+    ctx.drawImage(qrImg, qrBoxX + padding, qrBoxY + padding, qrBoxSize - padding * 2, qrBoxSize - padding * 2);
+  }
+
+  // Scan to Listen
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = "bold 36px 'Georgia', serif";
+  ctx.textAlign = "center";
+  ctx.fillText("🎧 Scan to Listen", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 75);
+
+  ctx.fillStyle = "rgba(255,255,255,0.35)";
+  ctx.font = "22px 'Georgia', serif";
+  ctx.fillText("მოუსმინეთ აუდიო გიდს", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 115);
+  ctx.textAlign = "left";
+}
+
 export default function ActivationCodesPage() {
   const [codes, setCodes] = useState<ActivationCode[]>([]);
   const [museums, setMuseums] = useState<Museum[]>([]);
@@ -55,6 +319,10 @@ export default function ActivationCodesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [museumFilter, setMuseumFilter] = useState<string>("all");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // Selection
+  const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
+  const [exporting, setExporting] = useState(false);
 
   // Generate Modal
   const [showGenerateModal, setShowGenerateModal] = useState(false);
@@ -75,7 +343,6 @@ export default function ActivationCodesPage() {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusChangeCode, setStatusChangeCode] = useState<ActivationCode | null>(null);
   const [newStatus, setNewStatus] = useState<string>("");
-  const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchCodes();
@@ -110,12 +377,12 @@ export default function ActivationCodesPage() {
 
   const generateCodes = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!generateForm.museumId) {
       alert("აირჩიეთ მუზეუმი");
       return;
     }
-    
+
     setGenerating(true);
 
     try {
@@ -159,9 +426,7 @@ export default function ActivationCodesPage() {
       });
 
       if (res.ok) {
-        setCodes(codes.map(c => 
-          c.id === statusChangeCode.id ? { ...c, status: newStatus as any } : c
-        ));
+        setCodes(codes.map((c) => (c.id === statusChangeCode.id ? { ...c, status: newStatus as any } : c)));
         setShowStatusModal(false);
         setStatusChangeCode(null);
         setNewStatus("");
@@ -183,7 +448,7 @@ export default function ActivationCodesPage() {
         method: "POST",
       });
       if (res.ok) {
-        setCodes(codes.map(c => (c.id === id ? { ...c, status: "REVOKED" } : c)));
+        setCodes(codes.map((c) => (c.id === id ? { ...c, status: "REVOKED" } : c)));
       }
     } catch (error) {
       console.error("Error revoking code:", error);
@@ -209,7 +474,7 @@ export default function ActivationCodesPage() {
 
   const downloadQr = () => {
     if (!selectedCode) return;
-    
+
     const svg = document.getElementById("qr-code-svg");
     if (!svg) return;
 
@@ -217,27 +482,24 @@ export default function ActivationCodesPage() {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    
+
     img.onload = () => {
       canvas.width = 300;
       canvas.height = 350;
       ctx!.fillStyle = "white";
       ctx!.fillRect(0, 0, canvas.width, canvas.height);
       ctx!.drawImage(img, 25, 25, 250, 250);
-      
-      // Add code text
       ctx!.fillStyle = "black";
       ctx!.font = "bold 18px monospace";
       ctx!.textAlign = "center";
       ctx!.fillText(selectedCode.code, 150, 310);
-      
       const pngFile = canvas.toDataURL("image/png");
       const downloadLink = document.createElement("a");
       downloadLink.download = `QR-${selectedCode.code}.png`;
       downloadLink.href = pngFile;
       downloadLink.click();
     };
-    
+
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
 
@@ -247,12 +509,14 @@ export default function ActivationCodesPage() {
 
     if (format === "csv") {
       content = "კოდი,ვადა (დღე),Batch,მუზეუმი,შექმნის თარიღი\n";
-      content += exportData.map(c => {
-        const museumName = museums.find(m => c.museumIds?.includes(m.id))?.name || "";
-        return `${c.code},${c.durationDays},${c.batchName || ""},${museumName},${new Date(c.createdAt).toLocaleDateString("ka-GE")}`;
-      }).join("\n");
+      content += exportData
+        .map((c) => {
+          const museumName = museums.find((m) => c.museumIds?.includes(m.id))?.name || "";
+          return `${c.code},${c.durationDays},${c.batchName || ""},${museumName},${new Date(c.createdAt).toLocaleDateString("ka-GE")}`;
+        })
+        .join("\n");
     } else {
-      content = exportData.map(c => c.code).join("\n");
+      content = exportData.map((c) => c.code).join("\n");
     }
 
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -263,6 +527,7 @@ export default function ActivationCodesPage() {
     a.click();
   };
 
+  // === Selection helpers ===
   const toggleSelectCode = (id: string) => {
     setSelectedCodes((prev) => {
       const next = new Set(prev);
@@ -280,109 +545,123 @@ export default function ActivationCodesPage() {
     }
   };
 
-  const exportQrCodes = async () => {
-    const JSZip = (await import("jszip")).default;
-    const zip = new JSZip();
+  // === QR Ticket Export ===
+  const exportQrTickets = async () => {
     const selectedList = filteredCodes.filter((c) => selectedCodes.has(c.id));
     if (selectedList.length === 0) {
       alert("აირჩიეთ კოდები ექსპორტისთვის");
       return;
     }
 
-    for (const code of selectedList) {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d")!;
-      const size = 500;
-      const padding = 40;
-      const qrSize = size - padding * 2;
-      const textAreaHeight = 100;
+    setExporting(true);
 
-      canvas.width = size;
-      canvas.height = size + textAreaHeight;
+    try {
+      const JSZip = (await import("jszip")).default;
+      const zip = new JSZip();
 
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const tempDiv = document.createElement("div");
-      tempDiv.style.position = "absolute";
-      tempDiv.style.left = "-9999px";
-      document.body.appendChild(tempDiv);
-
-      const { createRoot } = await import("react-dom/client");
-      const React = await import("react");
-      const QRCodeLib = (await import("react-qr-code")).default;
-
-      await new Promise<void>((resolve) => {
-        const root = createRoot(tempDiv);
-        root.render(
-          React.createElement(QRCodeLib, {
-            value: `https://geoguide.ge/activate/${code.code}`,
-            size: qrSize,
-            level: "H",
-          })
-        );
-        setTimeout(() => {
-          const svg = tempDiv.querySelector("svg");
-          if (svg) {
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const img = new Image();
-            img.onload = () => {
-              ctx.drawImage(img, padding, padding, qrSize, qrSize);
-
-              ctx.fillStyle = "black";
-              ctx.font = "bold 28px monospace";
-              ctx.textAlign = "center";
-              ctx.fillText(code.code, size / 2, size + 40);
-
-              const museumName =
-                museums.find((m) => code.museumIds?.includes(m.id))?.name || "—";
-              ctx.font = "20px sans-serif";
-              ctx.fillStyle = "#666";
-              ctx.fillText(museumName, size / 2, size + 75);
-
-              root.unmount();
-              document.body.removeChild(tempDiv);
-              resolve();
-            };
-            img.src =
-              "data:image/svg+xml;base64," +
-              btoa(unescape(encodeURIComponent(svgData)));
-          } else {
-            root.unmount();
-            document.body.removeChild(tempDiv);
-            resolve();
-          }
-        }, 100);
+      // Load logo
+      const logoImg = await new Promise<HTMLImageElement | null>((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = LOGO_URL;
       });
 
-      const dataUrl = canvas.toDataURL("image/png");
-      const base64 = dataUrl.split(",")[1];
-      zip.file(`${code.code}.png`, base64, { base64: true });
-    }
+      for (const code of selectedList) {
+        const museum = museums.find((m) => code.museumIds?.includes(m.id));
+        if (!museum) continue;
 
-    const blob = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `geoguide-qr-codes-${new Date().toISOString().split("T")[0]}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+        // Generate QR as SVG then convert to image
+        const qrImg = await new Promise<HTMLImageElement | null>((resolve) => {
+          const tempDiv = document.createElement("div");
+          tempDiv.style.position = "absolute";
+          tempDiv.style.left = "-9999px";
+          document.body.appendChild(tempDiv);
+
+          import("react-dom/client").then(({ createRoot }) => {
+            import("react").then((React) => {
+              import("react-qr-code").then((QRCodeModule) => {
+                const QRCodeComp = QRCodeModule.default;
+                const root = createRoot(tempDiv);
+                root.render(
+                  React.createElement(QRCodeComp, {
+                    value: `https://geoguide.ge/activate/${code.code}`,
+                    size: 460,
+                    level: "H",
+                  })
+                );
+                setTimeout(() => {
+                  const svg = tempDiv.querySelector("svg");
+                  if (svg) {
+                    const svgData = new XMLSerializer().serializeToString(svg);
+                    const img = new Image();
+                    img.onload = () => {
+                      root.unmount();
+                      document.body.removeChild(tempDiv);
+                      resolve(img);
+                    };
+                    img.onerror = () => {
+                      root.unmount();
+                      document.body.removeChild(tempDiv);
+                      resolve(null);
+                    };
+                    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+                  } else {
+                    root.unmount();
+                    document.body.removeChild(tempDiv);
+                    resolve(null);
+                  }
+                }, 150);
+              });
+            });
+          });
+        });
+
+        // Draw ticket
+        const canvas = document.createElement("canvas");
+        canvas.width = TICKET_W;
+        canvas.height = TICKET_H;
+        const ctx = canvas.getContext("2d")!;
+
+        drawTicketBackground(ctx);
+        drawTicketContent(ctx, code.code, museum, code.durationDays, logoImg, qrImg);
+
+        // Add to ZIP
+        const dataUrl = canvas.toDataURL("image/png");
+        const base64 = dataUrl.split(",")[1];
+        zip.file(`${code.code}.png`, base64, { base64: true });
+      }
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `geoguide-tickets-${new Date().toISOString().split("T")[0]}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error exporting tickets:", error);
+      alert("ექსპორტის შეცდომა");
+    } finally {
+      setExporting(false);
+    }
   };
 
   const getMuseumName = (code: ActivationCode) => {
     if (!code.museumIds || code.museumIds.length === 0) return "ყველა";
-    const museum = museums.find(m => code.museumIds.includes(m.id));
+    const museum = museums.find((m) => code.museumIds.includes(m.id));
     return museum?.name || "—";
   };
 
-  const filteredCodes = codes.filter(c => {
+  const filteredCodes = codes.filter((c) => {
     const matchesSearch = c.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || c.status === statusFilter;
     const matchesMuseum = museumFilter === "all" || (c.museumIds && c.museumIds.includes(museumFilter));
     return matchesSearch && matchesStatus && matchesMuseum;
   });
 
-  const selectedMuseum = museums.find(m => m.id === generateForm.museumId);
+  const selectedMuseum = museums.find((m) => m.id === generateForm.museumId);
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -406,9 +685,9 @@ export default function ActivationCodesPage() {
 
   const stats = {
     total: codes.length,
-    available: codes.filter(c => c.status === "AVAILABLE").length,
-    redeemed: codes.filter(c => c.status === "REDEEMED").length,
-    expired: codes.filter(c => c.status === "EXPIRED").length,
+    available: codes.filter((c) => c.status === "AVAILABLE").length,
+    redeemed: codes.filter((c) => c.status === "REDEEMED").length,
+    expired: codes.filter((c) => c.status === "EXPIRED").length,
   };
 
   if (loading) {
@@ -424,17 +703,10 @@ export default function ActivationCodesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            🔑 აქტივაციის კოდები
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            კოდების გენერაცია და მართვა
-          </p>
+          <h1 className="text-3xl font-bold flex items-center gap-3">🔑 აქტივაციის კოდები</h1>
+          <p className="text-muted-foreground mt-1">კოდების გენერაცია და მართვა</p>
         </div>
-        <Button
-          onClick={() => setShowGenerateModal(true)}
-          className="bg-amber-500 hover:bg-amber-600"
-        >
+        <Button onClick={() => setShowGenerateModal(true)} className="bg-amber-500 hover:bg-amber-600">
           <Plus className="h-4 w-4 mr-2" />
           კოდების გენერაცია
         </Button>
@@ -506,9 +778,22 @@ export default function ActivationCodesPage() {
             </select>
             <div className="flex gap-2">
               {selectedCodes.size > 0 && (
-                <Button onClick={exportQrCodes} className="bg-amber-500 hover:bg-amber-600">
-                  <QrCode className="h-4 w-4 mr-2" />
-                  Export {selectedCodes.size} QR
+                <Button
+                  onClick={exportQrTickets}
+                  disabled={exporting}
+                  className="bg-amber-500 hover:bg-amber-600"
+                >
+                  {exporting ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      {selectedCodes.size} ექსპორტი...
+                    </>
+                  ) : (
+                    <>
+                      <QrCode className="h-4 w-4 mr-2" />
+                      {selectedCodes.size} QR ბილეთი
+                    </>
+                  )}
                 </Button>
               )}
               <Button variant="outline" onClick={() => exportCodes("csv")}>
@@ -536,7 +821,7 @@ export default function ActivationCodesPage() {
                       type="checkbox"
                       checked={selectedCodes.size === filteredCodes.length && filteredCodes.length > 0}
                       onChange={toggleSelectAll}
-                      className="rounded"
+                      className="rounded cursor-pointer"
                     />
                   </th>
                   <th className="text-left p-4 font-medium">კოდი</th>
@@ -558,13 +843,16 @@ export default function ActivationCodesPage() {
                   </tr>
                 ) : (
                   filteredCodes.map((code) => (
-                    <tr key={code.id} className={`hover:bg-muted/50 ${selectedCodes.has(code.id) ? "bg-amber-50 dark:bg-amber-950/20" : ""}`}>
+                    <tr
+                      key={code.id}
+                      className={`hover:bg-muted/50 ${selectedCodes.has(code.id) ? "bg-amber-50 dark:bg-amber-950/20" : ""}`}
+                    >
                       <td className="p-4">
                         <input
                           type="checkbox"
                           checked={selectedCodes.has(code.id)}
                           onChange={() => toggleSelectCode(code.id)}
-                          className="rounded"
+                          className="rounded cursor-pointer"
                         />
                       </td>
                       <td className="p-4 font-mono">
@@ -599,13 +887,9 @@ export default function ActivationCodesPage() {
                       </td>
                       <td className="p-4">{code.durationDays} დღე</td>
                       <td className="p-4">
-                        <button onClick={() => openStatusModal(code)}>
-                          {getStatusBadge(code.status)}
-                        </button>
+                        <button onClick={() => openStatusModal(code)}>{getStatusBadge(code.status)}</button>
                       </td>
-                      <td className="p-4 text-muted-foreground">
-                        {code.batchName || "—"}
-                      </td>
+                      <td className="p-4 text-muted-foreground">{code.batchName || "—"}</td>
                       <td className="p-4 text-muted-foreground">
                         {new Date(code.createdAt).toLocaleDateString("ka-GE")}
                       </td>
@@ -690,7 +974,7 @@ export default function ActivationCodesPage() {
                     <Label>ტურები (არასავალდებულო)</Label>
                     <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
                       {selectedMuseum.tours
-                        .filter(t => t.isPublished)
+                        .filter((t) => t.isPublished)
                         .map((tour) => (
                           <label key={tour.id} className="flex items-center gap-2 cursor-pointer">
                             <input
@@ -705,7 +989,7 @@ export default function ActivationCodesPage() {
                                 } else {
                                   setGenerateForm({
                                     ...generateForm,
-                                    tourIds: generateForm.tourIds.filter(id => id !== tour.id),
+                                    tourIds: generateForm.tourIds.filter((id) => id !== tour.id),
                                   });
                                 }
                               }}
@@ -776,11 +1060,7 @@ export default function ActivationCodesPage() {
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowGenerateModal(false)}
-                  >
+                  <Button type="button" variant="outline" onClick={() => setShowGenerateModal(false)}>
                     გაუქმება
                   </Button>
                   <Button
@@ -813,10 +1093,7 @@ export default function ActivationCodesPage() {
           <Card className="w-full max-w-sm mx-4 bg-white dark:bg-gray-900">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>QR კოდი</CardTitle>
-              <button
-                onClick={() => setShowQrModal(false)}
-                className="p-1 hover:bg-muted rounded"
-              >
+              <button onClick={() => setShowQrModal(false)} className="p-1 hover:bg-muted rounded">
                 <X className="h-5 w-5" />
               </button>
             </CardHeader>
@@ -834,18 +1111,11 @@ export default function ActivationCodesPage() {
                 {getMuseumName(selectedCode)} • {selectedCode.durationDays} დღე
               </p>
               <div className="flex gap-3 w-full">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => copyCode(selectedCode.code)}
-                >
+                <Button variant="outline" className="flex-1" onClick={() => copyCode(selectedCode.code)}>
                   <Copy className="h-4 w-4 mr-2" />
                   კოპირება
                 </Button>
-                <Button
-                  className="flex-1 bg-amber-500 hover:bg-amber-600"
-                  onClick={downloadQr}
-                >
+                <Button className="flex-1 bg-amber-500 hover:bg-amber-600" onClick={downloadQr}>
                   <Download className="h-4 w-4 mr-2" />
                   ჩამოტვირთვა
                 </Button>
@@ -861,16 +1131,13 @@ export default function ActivationCodesPage() {
           <Card className="w-full max-w-sm mx-4 bg-white dark:bg-gray-900">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>სტატუსის შეცვლა</CardTitle>
-              <button
-                onClick={() => setShowStatusModal(false)}
-                className="p-1 hover:bg-muted rounded"
-              >
+              <button onClick={() => setShowStatusModal(false)} className="p-1 hover:bg-muted rounded">
                 <X className="h-5 w-5" />
               </button>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="font-mono text-center">{statusChangeCode.code}</p>
-              
+
               <div className="space-y-2">
                 <Label>ახალი სტატუსი</Label>
                 <select
@@ -886,17 +1153,10 @@ export default function ActivationCodesPage() {
               </div>
 
               <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setShowStatusModal(false)}
-                >
+                <Button variant="outline" className="flex-1" onClick={() => setShowStatusModal(false)}>
                   გაუქმება
                 </Button>
-                <Button
-                  className="flex-1 bg-amber-500 hover:bg-amber-600"
-                  onClick={updateCodeStatus}
-                >
+                <Button className="flex-1 bg-amber-500 hover:bg-amber-600" onClick={updateCodeStatus}>
                   შენახვა
                 </Button>
               </div>
