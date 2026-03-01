@@ -262,6 +262,96 @@ export default function ActivationCodesPage() {
     a.click();
   };
 
+  const exportQrCodes = async () => {
+    const JSZip = (await import("jszip")).default;
+    const zip = new JSZip();
+    const availableCodes = codes.filter((c) => c.status === "AVAILABLE");
+
+    if (availableCodes.length === 0) {
+      alert("ხელმისაწვდომი კოდები არ არის");
+      return;
+    }
+
+    for (const code of availableCodes) {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+      const size = 500;
+      const padding = 40;
+      const qrSize = size - padding * 2;
+      const textAreaHeight = 100;
+
+      canvas.width = size;
+      canvas.height = size + textAreaHeight;
+
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      document.body.appendChild(tempDiv);
+
+      const { createRoot } = await import("react-dom/client");
+      const React = await import("react");
+      const QRCodeLib = (await import("react-qr-code")).default;
+
+      await new Promise<void>((resolve) => {
+        const root = createRoot(tempDiv);
+        root.render(
+          React.createElement(QRCodeLib, {
+            value: `https://geoguide.ge/activate/${code.code}`,
+            size: qrSize,
+            level: "H",
+          })
+        );
+        setTimeout(() => {
+          const svg = tempDiv.querySelector("svg");
+          if (svg) {
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const img = new Image();
+            img.onload = () => {
+              ctx.drawImage(img, padding, padding, qrSize, qrSize);
+
+              ctx.fillStyle = "black";
+              ctx.font = "bold 28px monospace";
+              ctx.textAlign = "center";
+              ctx.fillText(code.code, size / 2, size + 40);
+
+              const museumName =
+                museums.find((m) => code.museumIds?.includes(m.id))?.name || "—";
+              ctx.font = "20px sans-serif";
+              ctx.fillStyle = "#666";
+              ctx.fillText(museumName, size / 2, size + 75);
+
+              root.unmount();
+              document.body.removeChild(tempDiv);
+              resolve();
+            };
+            img.src =
+              "data:image/svg+xml;base64," +
+              btoa(unescape(encodeURIComponent(svgData)));
+          } else {
+            root.unmount();
+            document.body.removeChild(tempDiv);
+            resolve();
+          }
+        }, 100);
+      });
+
+      const dataUrl = canvas.toDataURL("image/png");
+      const base64 = dataUrl.split(",")[1];
+      zip.file(`${code.code}.png`, base64, { base64: true });
+    }
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `geoguide-qr-codes-${new Date().toISOString().split("T")[0]}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const getMuseumName = (code: ActivationCode) => {
     if (!code.museumIds || code.museumIds.length === 0) return "ყველა";
     const museum = museums.find(m => code.museumIds.includes(m.id));
@@ -405,6 +495,10 @@ export default function ActivationCodesPage() {
               <Button variant="outline" onClick={() => exportCodes("txt")}>
                 <Download className="h-4 w-4 mr-2" />
                 TXT
+              </Button>
+              <Button variant="outline" onClick={exportQrCodes}>
+                <QrCode className="h-4 w-4 mr-2" />
+                QR ZIP
               </Button>
             </div>
           </div>
