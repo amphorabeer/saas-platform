@@ -241,17 +241,17 @@ export default function ActivationCodesPage() {
   };
 
   const exportCodes = (format: "csv" | "txt") => {
-    const filteredCodes = codes.filter(c => c.status === "AVAILABLE");
+    const exportData = filteredCodes;
     let content = "";
 
     if (format === "csv") {
       content = "კოდი,ვადა (დღე),Batch,მუზეუმი,შექმნის თარიღი\n";
-      content += filteredCodes.map(c => {
+      content += exportData.map(c => {
         const museumName = museums.find(m => c.museumIds?.includes(m.id))?.name || "";
         return `${c.code},${c.durationDays},${c.batchName || ""},${museumName},${new Date(c.createdAt).toLocaleDateString("ka-GE")}`;
       }).join("\n");
     } else {
-      content = filteredCodes.map(c => c.code).join("\n");
+      content = exportData.map(c => c.code).join("\n");
     }
 
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -265,7 +265,7 @@ export default function ActivationCodesPage() {
   const exportQrCodes = async () => {
     const JSZip = (await import("jszip")).default;
     const zip = new JSZip();
-    const availableCodes = codes.filter((c) => c.status === "AVAILABLE");
+    const availableCodes = filteredCodes;
 
     if (availableCodes.length === 0) {
       alert("ხელმისაწვდომი კოდები არ არის");
@@ -583,7 +583,7 @@ export default function ActivationCodesPage() {
                           >
                             <Edit className="h-4 w-4" />
                           </button>
-                          {code.status === "AVAILABLE" && (
+                          {(code.status === "AVAILABLE" || code.status === "REDEEMED") && (
                             <button
                               onClick={() => revokeCode(code.id)}
                               className="p-2 hover:bg-muted rounded-md text-red-500"
