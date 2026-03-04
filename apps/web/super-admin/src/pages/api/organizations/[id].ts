@@ -75,15 +75,11 @@ export default async function handler(
       const { name, email, slug, plan, status, modules } = body
       console.log('[Organizations API] PUT /api/organizations/' + id, { body, status, plan })
 
-      // Get tenantCode and tenantId for syncing
+      // Get org data for syncing
       const orgForSync = await prisma.organization.findUnique({
         where: { id },
         select: { hotelCode: true, tenantCode: true, tenantId: true }
       })
-      // Extract hotel code from tenantCode (HOTEL-2099 -> 2099)
-      const hotelCodeForSync = orgForSync?.tenantCode?.startsWith('HOTEL-') 
-        ? orgForSync.tenantCode.replace('HOTEL-', '') 
-        : null
 
       let organization: Awaited<ReturnType<typeof prisma.organization.update>> | null = null
       
@@ -155,32 +151,34 @@ export default async function handler(
         }
       })
 
-      // 4. SYNC to Hotel database if this is a hotel organization
-      if (hotelCodeForSync && (validStatus || newPlan)) {
+      // 4. SYNC to Hotel database — use hotelCode directly
+      const hotelCode = orgForSync?.hotelCode
+      if (hotelCode && (validStatus || newPlan || name || email)) {
         const pool = getHotelPool()
         if (pool) {
           try {
-            // Find organization in Hotel DB by hotelCode
-            const orgResult = await pool.query(
-              'SELECT id FROM "Organization" WHERE "hotelCode" = $1',
-              [hotelCodeForSync]
+            // Upsert organization in Hotel DB
+            await pool.query(
+              `INSERT INTO "Organization" (id, name, slug, email, "hotelCode", "tenantId", "createdAt", "updatedAt")
+               VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+               ON CONFLICT (id) DO UPDATE SET 
+                 name = EXCLUDED.name, slug = EXCLUDED.slug, email = EXCLUDED.email,
+                 "hotelCode" = EXCLUDED."hotelCode", "updatedAt" = NOW()`,
+              [id, name || orgForSync?.hotelCode, slug || '', email || '', hotelCode, orgForSync?.tenantId || id]
             )
-            
-            if (orgResult.rows.length > 0) {
-              const hotelOrgId = orgResult.rows[0].id
-              
-              // Check if subscription exists
+
+            // Upsert subscription
+            if (validStatus || newPlan) {
               const subResult = await pool.query(
                 'SELECT id FROM "Subscription" WHERE "organizationId" = $1',
-                [hotelOrgId]
+                [id]
               )
-              
+
               if (subResult.rows.length > 0) {
-                // Update existing subscription
                 const updates: string[] = []
                 const values: any[] = []
                 let paramIndex = 1
-                
+
                 if (newPlan) {
                   updates.push(`"plan" = $${paramIndex++}`)
                   values.push(newPlan)
@@ -189,41 +187,28 @@ export default async function handler(
                   updates.push(`"status" = $${paramIndex++}`)
                   values.push(validStatus)
                 }
-                
+
                 if (updates.length > 0) {
                   values.push(subResult.rows[0].id)
                   await pool.query(
                     `UPDATE "Subscription" SET ${updates.join(', ')}, "updatedAt" = NOW() WHERE id = $${paramIndex}`,
                     values
                   )
-                  console.log(`[Hotel DB Sync] Updated subscription for hotelCode=${hotelCodeForSync}`, { plan: newPlan, status: validStatus })
                 }
               } else {
-                // Create subscription
                 const now = new Date()
                 const trialEnd = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000)
                 await pool.query(
                   `INSERT INTO "Subscription" (id, "organizationId", plan, status, price, "currentPeriodStart", "currentPeriodEnd", "trialStart", "trialEnd", "createdAt", "updatedAt")
                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`,
-                  [
-                    `sub_${Date.now()}`,
-                    hotelOrgId,
-                    newPlan || 'STARTER',
-                    validStatus || 'TRIAL',
-                    getPlanPrice(newPlan || 'STARTER'),
-                    now,
-                    trialEnd,
-                    now,
-                    trialEnd
-                  ]
+                  [`sub_${Date.now()}`, id, newPlan || 'STARTER', validStatus || 'TRIAL',
+                   getPlanPrice(newPlan || 'STARTER'), now, trialEnd, now, trialEnd]
                 )
-                console.log(`[Hotel DB Sync] Created subscription for hotelCode=${hotelCodeForSync}`)
               }
-            } else {
-              console.log(`[Hotel DB Sync] Organization not found for hotelCode=${hotelCodeForSync}`)
+              console.log(`[Hotel DB Sync] ✅ Updated hotelCode=${hotelCode}`, { plan: newPlan, status: validStatus })
             }
           } catch (syncError) {
-            console.error('[Hotel DB Sync] Error:', syncError)
+            console.error('[Hotel DB Sync] ❌ Error:', syncError)
           } finally {
             await pool.end()
           }
@@ -232,21 +217,18 @@ export default async function handler(
 
       // 5. SYNC to Brewery database if this is a brewery organization
       const isBreweryOrg = modules?.includes('BREWERY') || orgForSync?.tenantCode?.startsWith('BREW-')
-      // Use the actual tenantId from database (stored during registration)
       const breweryTenantId = orgForSync?.tenantId || null
       
       if (isBreweryOrg && breweryTenantId && (validStatus || newPlan)) {
         const breweryPool = getBreweryPool()
         if (breweryPool) {
           try {
-            // Find tenant in Brewery DB by id
             const tenantResult = await breweryPool.query(
               'SELECT id FROM "Tenant" WHERE id = $1',
               [breweryTenantId]
             )
             
             if (tenantResult.rows.length > 0) {
-              // Update tenant's plan and isActive status
               const updates: string[] = []
               const values: any[] = []
               let paramIndex = 1
@@ -256,7 +238,6 @@ export default async function handler(
                 values.push(newPlan)
               }
               if (validStatus) {
-                // Convert status to isActive boolean
                 const isActive = validStatus === 'ACTIVE'
                 updates.push(`"isActive" = $${paramIndex++}`)
                 values.push(isActive)
@@ -268,13 +249,11 @@ export default async function handler(
                   `UPDATE "Tenant" SET ${updates.join(', ')}, "updatedAt" = NOW() WHERE id = $${paramIndex}`,
                   values
                 )
-                console.log(`[Brewery DB Sync] Updated tenant for tenantId=${breweryTenantId}`, { plan: newPlan, status: validStatus })
+                console.log(`[Brewery DB Sync] ✅ Updated tenantId=${breweryTenantId}`)
               }
-            } else {
-              console.log(`[Brewery DB Sync] Tenant not found for tenantId=${breweryTenantId}`)
             }
           } catch (syncError) {
-            console.error('[Brewery DB Sync] Error:', syncError)
+            console.error('[Brewery DB Sync] ❌ Error:', syncError)
           } finally {
             await breweryPool.end()
           }

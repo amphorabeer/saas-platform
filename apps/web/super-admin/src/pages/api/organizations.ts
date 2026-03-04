@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '../../lib/prisma'
+import { Pool } from 'pg'
+import bcrypt from 'bcryptjs'
 
 // Generate unique 4-digit code
 async function generateUniqueCode(): Promise<string> {
@@ -15,6 +17,79 @@ async function generateUniqueCode(): Promise<string> {
   }
   
   return code!
+}
+
+// Hotel database pool for syncing
+function getHotelPool() {
+  const hotelDbUrl = process.env.HOTEL_DATABASE_URL
+  if (!hotelDbUrl) return null
+  return new Pool({ connectionString: hotelDbUrl, ssl: { rejectUnauthorized: false } })
+}
+
+// Sync organization + user + subscription to Hotel DB
+async function syncToHotelDb(org: {
+  id: string
+  name: string
+  slug: string
+  email: string
+  hotelCode: string
+  tenantId: string
+  company?: string | null
+  taxId?: string | null
+  phone?: string | null
+  address?: string | null
+  website?: string | null
+  bankName?: string | null
+  bankAccount?: string | null
+}, password: string, plan: string, status: string) {
+  const pool = getHotelPool()
+  if (!pool) {
+    console.log('[Hotel DB Sync] HOTEL_DATABASE_URL not configured, skipping sync')
+    return
+  }
+
+  try {
+    // 1. Upsert Organization
+    await pool.query(
+      `INSERT INTO "Organization" (id, name, slug, email, "hotelCode", "tenantId", company, "taxId", phone, address, website, "bankName", "bankAccount", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+       ON CONFLICT (id) DO UPDATE SET 
+         name = EXCLUDED.name, slug = EXCLUDED.slug, email = EXCLUDED.email,
+         "hotelCode" = EXCLUDED."hotelCode", "updatedAt" = NOW()`,
+      [org.id, org.name, org.slug, org.email, org.hotelCode, org.tenantId,
+       org.company || null, org.taxId || null, org.phone || null, org.address || null,
+       org.website || null, org.bankName || null, org.bankAccount || null]
+    )
+
+    // 2. Upsert User (owner)
+    const hashedPassword = password.startsWith('$2') ? password : await bcrypt.hash(password, 10)
+    const userId = `user_${org.id.slice(-12)}`
+    await pool.query(
+      `INSERT INTO "User" (id, email, password, name, role, "organizationId", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, 'ORGANIZATION_OWNER', $5, NOW(), NOW())
+       ON CONFLICT (id) DO UPDATE SET 
+         email = EXCLUDED.email, password = EXCLUDED.password, "updatedAt" = NOW()`,
+      [userId, org.email, hashedPassword, org.name, org.id]
+    )
+
+    // 3. Upsert Subscription
+    const now = new Date()
+    const trialEnd = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000)
+    const subId = `sub_${org.id.slice(-12)}`
+    await pool.query(
+      `INSERT INTO "Subscription" (id, "organizationId", plan, status, price, "currentPeriodStart", "currentPeriodEnd", "trialStart", "trialEnd", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+       ON CONFLICT ("organizationId") DO UPDATE SET 
+         plan = EXCLUDED.plan, status = EXCLUDED.status, price = EXCLUDED.price, "updatedAt" = NOW()`,
+      [subId, org.id, plan, status.toUpperCase(), getPlanPrice(plan), now, trialEnd, now, trialEnd]
+    )
+
+    console.log(`[Hotel DB Sync] ✅ Synced org=${org.name}, hotelCode=${org.hotelCode}, user=${org.email}`)
+  } catch (syncError) {
+    console.error('[Hotel DB Sync] ❌ Error:', syncError)
+  } finally {
+    await pool.end()
+  }
 }
 
 // Verify internal API key for service-to-service calls
@@ -138,7 +213,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const body = req.body
       const { 
         name, 
-        email, 
+        email,
+        password,
         slug, 
         plan, 
         status, 
@@ -226,6 +302,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             isActive: true
           }
         })
+      }
+
+      // Create User (owner)
+      if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10)
+        await prisma.user.create({
+          data: {
+            email,
+            password: hashedPassword,
+            name,
+            role: 'ORGANIZATION_OWNER',
+            organizationId: organization.id,
+          }
+        })
+      }
+
+      // ========================================
+      // AUTO SYNC to Hotel DB
+      // ========================================
+      const hasHotelModule = moduleList.includes('HOTEL')
+      if (hasHotelModule || !isBreweryRegistration) {
+        await syncToHotelDb(
+          {
+            id: organization.id,
+            name,
+            slug,
+            email,
+            hotelCode: uniqueCode,
+            tenantId: (organization as any).tenantId || organization.id,
+            company, taxId, phone, address, website, bankName, bankAccount,
+          },
+          password || email, // fallback password
+          plan || 'STARTER',
+          status || 'TRIAL'
+        )
       }
 
       console.log(`✅ [Organizations API] Created organization: ${name} (${isBreweryRegistration ? 'brewery' : 'hotel'})`)
