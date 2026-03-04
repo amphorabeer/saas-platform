@@ -72,10 +72,12 @@ function getMuseumLanguages(museum: Museum): string[] {
   return langs;
 }
 
-// Ticket drawing constants - Credit card size 85x55mm @ 300DPI
+// Ticket drawing constants - Credit card 85x55mm @ 300DPI
 const TICKET_W = 1004;
 const TICKET_H = 650;
-const S = 0.574; // Scale factor from A6 (1748) to credit card (1004)
+// Internal drawing at A6 scale, then rendered down
+const DRAW_W = 1748;
+const DRAW_H = 1240;
 const LOGO_URL = "/geoguide-logo.png"; // Place logo in public folder
 
 function roundRect(
@@ -100,37 +102,25 @@ function roundRect(
 }
 
 function drawTicketBackground(ctx: CanvasRenderingContext2D) {
-  const grad = ctx.createLinearGradient(0, 0, TICKET_W, TICKET_H);
-  grad.addColorStop(0, "#1a1a2e");
-  grad.addColorStop(0.5, "#16213e");
-  grad.addColorStop(1, "#0f3460");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, TICKET_W, TICKET_H);
+  // White background
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, DRAW_W, DRAW_H);
 
-  ctx.globalAlpha = 0.03;
-  for (let i = 0; i < TICKET_W; i += 18) {
-    for (let j = 0; j < TICKET_H; j += 18) {
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(i, j, 1, 1);
-    }
-  }
-  ctx.globalAlpha = 1;
-
-  const goldGrad = ctx.createLinearGradient(0, 0, TICKET_W, 0);
-  goldGrad.addColorStop(0, "#f59e0b");
-  goldGrad.addColorStop(0.5, "#fbbf24");
-  goldGrad.addColorStop(1, "#f59e0b");
+  // Gold accent bars
+  const goldGrad = ctx.createLinearGradient(0, 0, DRAW_W, 0);
+  goldGrad.addColorStop(0, "#d97706");
+  goldGrad.addColorStop(0.5, "#f59e0b");
+  goldGrad.addColorStop(1, "#d97706");
   ctx.fillStyle = goldGrad;
-  ctx.fillRect(0, 0, TICKET_W, 5);
-  ctx.fillRect(0, TICKET_H - 5, TICKET_W, 5);
+  ctx.fillRect(0, 0, DRAW_W, 10);
+  ctx.fillRect(0, DRAW_H - 10, DRAW_W, 10);
 
   // Decorative corners
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.2)";
-  ctx.lineWidth = 2;
-  const c = 16, c2 = 32;
-  [[c, c2, c, c, c2, c], [TICKET_W - c, c2, TICKET_W - c, c, TICKET_W - c2, c],
-   [c, TICKET_H - c2, c, TICKET_H - c, c2, TICKET_H - c],
-   [TICKET_W - c, TICKET_H - c2, TICKET_W - c, TICKET_H - c, TICKET_W - c2, TICKET_H - c]
+  ctx.strokeStyle = "rgba(30, 58, 95, 0.2)";
+  ctx.lineWidth = 3;
+  [[28, 55, 28, 28, 55, 28], [DRAW_W - 28, 55, DRAW_W - 28, 28, DRAW_W - 55, 28],
+   [28, DRAW_H - 55, 28, DRAW_H - 28, 55, DRAW_H - 28],
+   [DRAW_W - 28, DRAW_H - 55, DRAW_W - 28, DRAW_H - 28, DRAW_W - 55, DRAW_H - 28]
   ].forEach(([mx, my, lx1, ly1, lx2, ly2]) => {
     ctx.beginPath();
     ctx.moveTo(mx, my);
@@ -140,12 +130,12 @@ function drawTicketBackground(ctx: CanvasRenderingContext2D) {
   });
 
   // Vertical dashed separator
-  ctx.strokeStyle = "rgba(255,255,255,0.08)";
-  ctx.lineWidth = 1;
-  ctx.setLineDash([7, 7]);
+  ctx.strokeStyle = "#d1d5db";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([10, 10]);
   ctx.beginPath();
-  ctx.moveTo(614, 24);
-  ctx.lineTo(614, TICKET_H - 24);
+  ctx.moveTo(1070, 30);
+  ctx.lineTo(1070, DRAW_H - 30);
   ctx.stroke();
   ctx.setLineDash([]);
 }
@@ -164,9 +154,9 @@ function drawTicketContent(
   // === LEFT SECTION ===
 
   // Logo
-  const logoSize = 46;
-  const logoX = 46;
-  const logoY = 32;
+  const logoSize = 90;
+  const logoX = 70;
+  const logoY = 40;
   if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
     ctx.save();
     ctx.beginPath();
@@ -175,143 +165,172 @@ function drawTicketContent(
     ctx.clip();
     ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
     ctx.restore();
-    ctx.strokeStyle = "#fbbf24";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#d97706";
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 1, 0, Math.PI * 2);
+    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 2, 0, Math.PI * 2);
     ctx.stroke();
   }
 
   // GeoGuide text
-  ctx.fillStyle = "#fbbf24";
-  ctx.font = "bold 33px 'Georgia', serif";
+  ctx.fillStyle = "#1e3a5f";
+  ctx.font = "bold 64px 'Georgia', serif";
   ctx.textAlign = "left";
-  ctx.fillText("GeoGuide", logoX + logoSize + 14, logoY + 32);
+  ctx.fillText("GeoGuide", logoX + logoSize + 24, logoY + 58);
 
   // Subtitle
-  ctx.fillStyle = "rgba(255,255,255,0.45)";
-  ctx.font = "11px 'Georgia', serif";
-  ctx.fillText("აუდიო გიდი  •  Audio Guide", logoX + logoSize + 15, logoY + 47);
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "24px 'Georgia', serif";
+  ctx.fillText("აუდიო გიდი  •  Audio Guide", logoX + logoSize + 26, logoY + 88);
 
   // Divider
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.25)";
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#d97706";
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(46, 95);
-  ctx.lineTo(574, 95);
+  ctx.moveTo(70, 165);
+  ctx.lineTo(1020, 165);
   ctx.stroke();
 
-  // Museum name - Georgian
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 29px 'Georgia', serif";
-  let nameKa = museum.name;
-  if (ctx.measureText(nameKa).width > 516) {
-    while (ctx.measureText(nameKa + "...").width > 516) nameKa = nameKa.slice(0, -1);
-    nameKa += "...";
+  // Museum name - Georgian - LARGE with word wrap
+  ctx.fillStyle = "#111827";
+  ctx.font = "bold 62px 'Georgia', serif";
+  const maxNameWidth = 920;
+  let museumNameY = 250;
+
+  if (ctx.measureText(museum.name).width > maxNameWidth) {
+    const words = museum.name.split(" ");
+    let line = "";
+    const lines: string[] = [];
+    for (const word of words) {
+      const testLine = line ? line + " " + word : word;
+      if (ctx.measureText(testLine).width > maxNameWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) lines.push(line);
+
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], 70, museumNameY + i * 72);
+    }
+    museumNameY += (lines.length - 1) * 72;
+  } else {
+    ctx.fillText(museum.name, 70, museumNameY);
   }
-  ctx.fillText(nameKa, 46, 138);
 
   // Museum name - English
+  const engNameY = museumNameY + 52;
   if (museum.nameEn) {
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.font = "italic 18px 'Georgia', serif";
+    ctx.fillStyle = "#6b7280";
+    ctx.font = "italic 38px 'Georgia', serif";
     let nameEn = museum.nameEn;
-    if (ctx.measureText(nameEn).width > 516) {
-      while (ctx.measureText(nameEn + "...").width > 516) nameEn = nameEn.slice(0, -1);
+    if (ctx.measureText(nameEn).width > 920) {
+      while (ctx.measureText(nameEn + "...").width > 920) nameEn = nameEn.slice(0, -1);
       nameEn += "...";
     }
-    ctx.fillText(nameEn, 46, 164);
+    ctx.fillText(nameEn, 70, engNameY);
   }
+
+  // Dynamic Y offset for everything below museum name
+  const offsetY = engNameY + 33;
 
   // Duration badge
   const badgeText = `${durationDays} დღე / ${durationDays} days`;
-  ctx.font = "bold 15px 'Georgia', serif";
-  const badgeW = ctx.measureText(badgeText).width + 28;
-  ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
-  roundRect(ctx, 46, 180, badgeW, 32, 16);
+  ctx.font = "bold 30px 'Georgia', serif";
+  const badgeW = ctx.measureText(badgeText).width + 50;
+  ctx.fillStyle = "#fef3c7";
+  roundRect(ctx, 70, offsetY, badgeW, 58, 29);
   ctx.fill();
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.25)";
-  ctx.lineWidth = 1;
-  roundRect(ctx, 46, 180, badgeW, 32, 16);
+  ctx.strokeStyle = "#d97706";
+  ctx.lineWidth = 2;
+  roundRect(ctx, 70, offsetY, badgeW, 58, 29);
   ctx.stroke();
-  ctx.fillStyle = "#fbbf24";
-  ctx.font = "bold 15px 'Georgia', serif";
-  ctx.fillText(badgeText, 60, 201);
+  ctx.fillStyle = "#92400e";
+  ctx.font = "bold 30px 'Georgia', serif";
+  ctx.fillText(badgeText, 95, offsetY + 39);
 
   // Code label
-  ctx.fillStyle = "rgba(255,255,255,0.35)";
-  ctx.font = "11px 'Courier New', monospace";
-  ctx.fillText("ACTIVATION CODE / აქტივაციის კოდი", 46, 248);
+  ctx.fillStyle = "#9ca3af";
+  ctx.font = "24px 'Courier New', monospace";
+  ctx.fillText("ACTIVATION CODE / აქტივაციის კოდი", 70, offsetY + 115);
 
-  // Code
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 30px 'Courier New', monospace";
-  ctx.fillText(code, 46, 285);
+  // Code - LARGE
+  ctx.fillStyle = "#111827";
+  ctx.font = "bold 60px 'Courier New', monospace";
+  ctx.fillText(code, 70, offsetY + 190);
 
   // Instructions
-  ctx.fillStyle = "rgba(255,255,255,0.3)";
-  ctx.font = "10px 'Georgia', serif";
-  ctx.fillText("დაასკანერეთ QR კოდი ან შეიყვანეთ კოდი აპლიკაციაში", 46, 316);
-  ctx.fillText("Scan QR code or enter the code in the app", 46, 332);
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "22px 'Georgia', serif";
+  ctx.fillText("დაასკანერეთ QR კოდი ან შეიყვანეთ კოდი აპლიკაციაში", 70, offsetY + 242);
+  ctx.fillText("Scan QR code or enter the code in the app", 70, offsetY + 272);
 
   // Divider
-  ctx.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx.strokeStyle = "#e5e7eb";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(46, 350);
-  ctx.lineTo(574, 350);
+  ctx.moveTo(70, offsetY + 305);
+  ctx.lineTo(1020, offsetY + 305);
   ctx.stroke();
 
-  // Language flags
-  ctx.font = "37px sans-serif";
-  ctx.fillText(flags, 46, 395);
+  // Language flags - LARGE
+  ctx.font = "72px sans-serif";
+  ctx.fillText(flags, 70, offsetY + 395);
 
-  ctx.fillStyle = "rgba(255,255,255,0.25)";
-  ctx.font = "10px 'Georgia', serif";
-  ctx.fillText(`Available in ${langs.length} languages / ხელმისაწვდომია ${langs.length} ენაზე`, 46, 420);
+  // Available languages text
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "22px 'Georgia', serif";
+  ctx.fillText(`Available in ${langs.length} languages / ხელმისაწვდომია ${langs.length} ენაზე`, 70, offsetY + 440);
 
   // Contact
-  ctx.fillStyle = "rgba(255,255,255,0.25)";
-  ctx.font = "10px 'Georgia', serif";
-  ctx.fillText("If you have any technical problems, please contact us", 46, 570);
-  ctx.fillStyle = "rgba(251, 191, 36, 0.5)";
-  ctx.font = "bold 11px 'Georgia', serif";
-  ctx.fillText("info@geoguide.ge", 46, 588);
+  ctx.fillStyle = "#9ca3af";
+  ctx.font = "20px 'Georgia', serif";
+  ctx.fillText("If you have any technical problems, please contact us", 70, 1090);
+  ctx.fillStyle = "#1e3a5f";
+  ctx.font = "bold 24px 'Georgia', serif";
+  ctx.fillText("info@geoguide.ge", 70, 1125);
 
-  ctx.fillStyle = "rgba(251, 191, 36, 0.5)";
-  ctx.font = "11px 'Georgia', serif";
-  ctx.fillText("geoguide.ge", 46, 628);
+  ctx.fillStyle = "#1e3a5f";
+  ctx.font = "22px 'Georgia', serif";
+  ctx.fillText("geoguide.ge", 70, 1195);
 
   // === RIGHT SECTION - QR ===
-  const qrBoxX = 648;
-  const qrBoxY = 69;
-  const qrBoxSize = 310;
+  const qrBoxX = 1120;
+  const qrBoxY = 80;
+  const qrBoxSize = 560;
 
-  // White QR background
+  // QR background with border
   ctx.fillStyle = "#ffffff";
-  roundRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 14);
+  roundRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 20);
   ctx.fill();
+  ctx.strokeStyle = "#e5e7eb";
+  ctx.lineWidth = 2;
+  roundRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 20);
+  ctx.stroke();
 
   // Draw actual QR code
   if (qrImg && qrImg.complete && qrImg.naturalWidth > 0) {
-    const padding = 23;
+    const padding = 40;
     ctx.drawImage(qrImg, qrBoxX + padding, qrBoxY + padding, qrBoxSize - padding * 2, qrBoxSize - padding * 2);
   }
 
   // Scan to Listen
-  ctx.fillStyle = "#fbbf24";
-  ctx.font = "bold 21px 'Georgia', serif";
+  ctx.fillStyle = "#d97706";
+  ctx.font = "bold 42px 'Georgia', serif";
   ctx.textAlign = "center";
-  ctx.fillText("🎧 Scan to Listen", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 43);
+  ctx.fillText("🎧 Scan to Listen", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 80);
 
-  ctx.fillStyle = "rgba(255,255,255,0.35)";
-  ctx.font = "13px 'Georgia', serif";
-  ctx.fillText("მოუსმინეთ აუდიო გიდს", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 66);
+  // Georgian subtitle
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "26px 'Georgia', serif";
+  ctx.fillText("მოუსმინეთ აუდიო გიდს", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 120);
 
   // www.geoguide.ge
   ctx.fillStyle = "#dc2626";
-  ctx.font = "bold 21px 'Georgia', serif";
-  ctx.fillText("www.geoguide.ge", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 100);
+  ctx.font = "bold 40px 'Georgia', serif";
+  ctx.fillText("www.geoguide.ge", qrBoxX + qrBoxSize / 2, qrBoxY + qrBoxSize + 185);
 
   ctx.textAlign = "left";
 }
@@ -623,11 +642,14 @@ export default function ActivationCodesPage() {
           });
         });
 
-        // Draw ticket
+        // Draw ticket - render at credit card size with scale
         const canvas = document.createElement("canvas");
         canvas.width = TICKET_W;
         canvas.height = TICKET_H;
         const ctx = canvas.getContext("2d")!;
+        const scaleX = TICKET_W / DRAW_W;
+        const scaleY = TICKET_H / DRAW_H;
+        ctx.scale(scaleX, scaleY);
 
         drawTicketBackground(ctx);
         drawTicketContent(ctx, code.code, museum, code.durationDays, logoImg, qrImg);
