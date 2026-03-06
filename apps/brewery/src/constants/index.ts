@@ -14,7 +14,6 @@ interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'დეშბორდი', icon: '📊', alwaysShow: true },
   { href: '/production', label: 'წარმოება', icon: '🍺', requiredFeature: 'production' },
-  { href: '/recipes', label: 'რეცეპტები', icon: '📋', requiredFeature: 'production' },
   { href: '/calendar', label: 'კალენდარი', icon: '📅', alwaysShow: true },
   { href: '/inventory', label: 'მარაგები', icon: '📦', requiredFeature: 'rawMaterials' },
   { href: '/sales', label: 'გაყიდვები', icon: '💰', requiredFeature: 'finances' },
@@ -61,6 +60,7 @@ export const PRODUCTION_TABS = [
   { key: 'batches', label: 'პარტიები', icon: '📋' },
   { key: 'brewhouse', label: 'სახარში ქვაბი', icon: '🍳' },
   { key: 'tanks', label: 'ავზები', icon: '🛢️' },
+  { key: 'recipes', label: 'რეცეპტები', icon: '📖' },
 ]
 
 // Batch Phase Configuration
