@@ -5,3 +5,4 @@ export { default as InventoryIngredientPicker } from './InventoryIngredientPicke
 
 
 
+export { RecipesContent } from './RecipesContent'

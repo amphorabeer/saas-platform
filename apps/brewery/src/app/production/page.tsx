@@ -6,6 +6,7 @@ import { DashboardLayout } from '@/components/layout'
 import { Card, CardHeader, CardBody, Button, ProgressBar, BatchStatusBadge, BlendBadge } from '@/components/ui'
 import { NewBatchModal } from '@/components/brewery'
 import { TankCard, TankDetailModal } from '@/components/fermentation'
+import { RecipesContent } from '@/components/recipes'
 import { formatDate } from '@/lib/utils'
 import { useBreweryStore } from '@/store'
 import { PRODUCTION_TABS } from '@/constants'
@@ -1073,16 +1074,7 @@ export default function ProductionPage() {
           RECIPES TAB
           ════════════════════════════════════════════════════════════════════ */}
       {activeTab === 'recipes' && (
-        <div className="bg-bg-card border border-border rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">📖 რეცეპტები</h2>
-            <Button variant="primary" onClick={() => router.push('/recipes')}>სრული ვერსია →</Button>
-          </div>
-          <p className="text-text-muted mb-4">რეცეპტების სამართავად გადადით სრულ ვერსიაზე</p>
-          <Button variant="secondary" onClick={() => router.push('/recipes')}>
-            📋 რეცეპტების გვერდი
-          </Button>
-        </div>
+        <RecipesContent onStartBatch={(recipeId) => { setPreSelectedRecipeId(recipeId); setShowNewBatchModal(true); }} />
       )}
 
       {/* Modals */}
