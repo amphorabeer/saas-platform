@@ -123,7 +123,7 @@ export default function ProductionPage() {
   const [mounted, setMounted] = useState(false)
   
   // Tab state
-  const [activeTab, setActiveTab] = useState<'batches' | 'brewhouse' | 'tanks'>('batches')
+  const [activeTab, setActiveTab] = useState<'batches' | 'brewhouse' | 'tanks' | 'recipes'>('batches')
   
   // ✅ LOTS from API (lot-centric!)
   const [lots, setLots] = useState<LotRow[]>([])
@@ -524,7 +524,7 @@ export default function ProductionPage() {
         {PRODUCTION_TABS.map(tab => (
           <button
             key={tab.key}
-            onClick={() => tab.key === 'recipes' ? router.push('/recipes') : setActiveTab(tab.key as 'batches' | 'brewhouse' | 'tanks')}
+            onClick={() => tab.key === 'recipes' ? router.push('/recipes') : setActiveTab(tab.key as 'batches' | 'brewhouse' | 'tanks' | 'recipes')}
             className={`px-6 py-3 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
               activeTab === tab.key
                 ? 'bg-copper text-white'
@@ -1067,6 +1067,22 @@ export default function ProductionPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════
+          RECIPES TAB
+          ════════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'recipes' && (
+        <div className="bg-bg-card border border-border rounded-xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold">📖 რეცეპტები</h2>
+            <Button variant="primary" onClick={() => router.push('/recipes')}>სრული ვერსია →</Button>
+          </div>
+          <p className="text-text-muted mb-4">რეცეპტების სამართავად გადადით სრულ ვერსიაზე</p>
+          <Button variant="secondary" onClick={() => router.push('/recipes')}>
+            📋 რეცეპტების გვერდი
+          </Button>
+        </div>
       )}
 
       {/* Modals */}
