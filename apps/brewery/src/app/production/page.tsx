@@ -524,7 +524,7 @@ export default function ProductionPage() {
         {PRODUCTION_TABS.map(tab => (
           <button
             key={tab.key}
-            onClick={() => tab.key === 'recipes' ? router.push('/recipes') : setActiveTab(tab.key as 'batches' | 'brewhouse' | 'tanks' | 'recipes')}
+            onClick={() => setActiveTab(tab.key as 'batches' | 'brewhouse' | 'tanks' | 'recipes')}
             className={`px-6 py-3 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
               activeTab === tab.key
                 ? 'bg-copper text-white'
