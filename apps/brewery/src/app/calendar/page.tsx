@@ -2175,9 +2175,22 @@ function CalendarContent() {
     const recipeBatchSize = (batch as any)?.recipe?.batchSize ? Number((batch as any).recipe.batchSize) : batchVolume || 1
     const scaleFactor = batchVolume > 0 && recipeBatchSize > 0 ? batchVolume / recipeBatchSize : 1
     
+    // ✅ Helper function to normalize units to base (grams for weight, ml for volume)
+    const normalizeToBase = (amount: number, unit: string): number => {
+      const u = unit?.toLowerCase() || ''
+      if (u === 'kg') return amount * 1000
+      if (u === 'g' || u === 'გრ' || u === 'gram' || u === 'grams') return amount
+      if (u === 'mg') return amount / 1000
+      if (u === 'lb' || u === 'lbs') return amount * 453.592
+      if (u === 'oz') return amount * 28.3495
+      if (u === 'l' || u === 'liter' || u === 'liters' || u === 'ლ') return amount * 1000
+      if (u === 'ml') return amount
+      return amount
+    }
+
     return recipeIngredients.map((ing: any, idx: number) => {
-      // Scale ingredient amount by batch size
       const requiredAmount = Number(ing.amount || 0) * scaleFactor
+      const recipeUnit = ing.unit || 'g'
       
       // Try to find inventory item by inventoryItemId first
       let stockItem = ing.inventoryItemId 
@@ -2199,8 +2212,27 @@ function CalendarContent() {
         )
       }
       
-      // Check all possible field names for stock
-      const stockAmount = stockItem?.balance || stockItem?.cachedBalance || stockItem?.currentStock || stockItem?.quantity || stockItem?.stock || 0
+      const rawStockAmount = stockItem?.balance || stockItem?.cachedBalance || stockItem?.currentStock || stockItem?.quantity || stockItem?.stock || 0
+      const stockUnit = stockItem?.unit || 'kg'
+      
+      // ✅ Convert to base units for comparison
+      const stockInBase = normalizeToBase(rawStockAmount, stockUnit)
+      const requiredInBase = normalizeToBase(requiredAmount, recipeUnit)
+      
+      // ✅ Display in inventory unit (kg) for readability
+      let displayUnit = stockUnit || 'kg'
+      let displayRequiredAmount = requiredAmount
+      
+      if (recipeUnit !== displayUnit) {
+        const displayUnitLower = displayUnit?.toLowerCase() || ''
+        if (displayUnitLower === 'kg') {
+          displayRequiredAmount = requiredInBase / 1000 // grams to kg
+        } else if (displayUnitLower === 'g') {
+          displayRequiredAmount = requiredInBase
+        } else if (displayUnitLower === 'l' || displayUnitLower === 'ლ') {
+          displayRequiredAmount = requiredInBase / 1000 // ml to liters
+        }
+      }
       
       // Map category to type
       let ingredientType = ing.category?.toLowerCase() || 'grain'
@@ -2208,14 +2240,24 @@ function CalendarContent() {
       if (ingredientType === 'hops') ingredientType = 'hop'
       if (ingredientType === 'water_chemistry') ingredientType = 'adjunct'
       
+      // ✅ Stock status using base units
+      let stockStatus: 'ok' | 'low' | 'insufficient'
+      if (stockInBase < requiredInBase) {
+        stockStatus = 'insufficient'
+      } else if (stockInBase < requiredInBase * 1.5) {
+        stockStatus = 'low'
+      } else {
+        stockStatus = 'ok'
+      }
+      
       return {
         id: ing.inventoryItemId || ing.id || `ing-${idx}`,
         name: ing.name,
         type: ingredientType as 'grain' | 'hop' | 'yeast' | 'adjunct',
-        requiredAmount,
-        unit: ing.unit || 'kg',
-        stockAmount,
-        stockStatus: getIngredientStockStatus(requiredAmount, stockAmount),
+        requiredAmount: Math.round(displayRequiredAmount * 1000) / 1000,
+        unit: displayUnit,
+        stockAmount: Math.round(rawStockAmount * 100) / 100,
+        stockStatus,
       }
     })
   }, [

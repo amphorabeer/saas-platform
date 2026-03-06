@@ -53,6 +53,19 @@ interface RecipeStat {
   avgAbv: number
 }
 
+// ლუდის შეჯამება სტატუსის მიხედვით
+interface BeerStatusSummary {
+  recipeName: string
+  recipeStyle: string
+  fermenting: number      // ლიტრი ფერმენტაციაზე
+  conditioning: number    // ლიტრი კონდიცირებაზე
+  ready: number          // ლიტრი მზად
+  total: number          // ჯამი
+  fermentingTanks: string[]
+  conditioningTanks: string[]
+  readyTanks: string[]
+}
+
 const statusLabels: Record<string, string> = {
   PLANNED: 'დაგეგმილი',
   BREWING: 'მზადდება',
@@ -83,6 +96,7 @@ export default function ProductionReportsPage() {
   const [monthlyData, setMonthlyData] = useState<MonthlyProduction[]>([])
   const [ingredientUsage, setIngredientUsage] = useState<IngredientUsage[]>([])
   const [recipeStats, setRecipeStats] = useState<RecipeStat[]>([])
+  const [beerStatusSummary, setBeerStatusSummary] = useState<BeerStatusSummary[]>([])
   
   // Stats
   const [stats, setStats] = useState({
@@ -223,6 +237,58 @@ export default function ProductionReportsPage() {
       
       setIngredientUsage(Object.values(ingredientMap).slice(0, 5))
 
+      // ✅ Calculate beer status summary (ლუდის შეჯამება სტატუსის მიხედვით)
+      const beerSummaryMap = new Map<string, BeerStatusSummary>()
+      
+      batchesData.forEach(batch => {
+        const recipeName = batch.recipe?.name || 'უცნობი'
+        const recipeStyle = batch.recipe?.style || ''
+        const volume = Number(batch.volume) || 0
+        const status = (batch.status || '').toUpperCase()
+        const tankName = (batch as any).tank?.name || (batch as any).fermentationTank?.name || ''
+        
+        if (!beerSummaryMap.has(recipeName)) {
+          beerSummaryMap.set(recipeName, {
+            recipeName,
+            recipeStyle,
+            fermenting: 0,
+            conditioning: 0,
+            ready: 0,
+            total: 0,
+            fermentingTanks: [],
+            conditioningTanks: [],
+            readyTanks: []
+          })
+        }
+        
+        const summary = beerSummaryMap.get(recipeName)!
+        
+        if (status === 'FERMENTING' || status === 'BREWING') {
+          summary.fermenting += volume
+          if (tankName && !summary.fermentingTanks.includes(tankName)) {
+            summary.fermentingTanks.push(tankName)
+          }
+        } else if (status === 'CONDITIONING') {
+          summary.conditioning += volume
+          if (tankName && !summary.conditioningTanks.includes(tankName)) {
+            summary.conditioningTanks.push(tankName)
+          }
+        } else if (status === 'READY' || status === 'COMPLETED' || status === 'PACKAGING') {
+          summary.ready += volume
+          if (tankName && !summary.readyTanks.includes(tankName)) {
+            summary.readyTanks.push(tankName)
+          }
+        }
+        
+        summary.total = summary.fermenting + summary.conditioning + summary.ready
+      })
+      
+      setBeerStatusSummary(
+        Array.from(beerSummaryMap.values())
+          .filter(s => s.total > 0)
+          .sort((a, b) => b.total - a.total)
+      )
+
     } catch (err) {
       console.error('Production reports fetch error:', err)
     } finally {
@@ -330,6 +396,159 @@ export default function ProductionReportsPage() {
               <div className="h-48 flex items-center justify-center text-text-muted">
                 მონაცემები არ არის
               </div>
+            )}
+          </CardBody>
+        </Card>
+
+        {/* ✅ ლუდის შეჯამება სტატუსის მიხედვით */}
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold text-text-primary">🍺 ლუდის მარაგი სტატუსის მიხედვით</h3>
+          </CardHeader>
+          <CardBody>
+            {beerStatusSummary.length === 0 ? (
+              <div className="text-center py-8 text-text-muted">
+                მონაცემები არ მოიძებნა
+              </div>
+            ) : (
+              <>
+                {/* Summary Cards */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="bg-gradient-to-br from-orange-500/20 to-orange-600/10 border border-orange-500/30 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">🔥</span>
+                      <span className="text-orange-400 font-medium">ფერმენტაციაზე</span>
+                    </div>
+                    <p className="text-3xl font-bold text-orange-400">
+                      {beerStatusSummary.reduce((sum, b) => sum + b.fermenting, 0).toLocaleString()} L
+                    </p>
+                    <p className="text-sm text-text-muted mt-1">
+                      {beerStatusSummary.filter(b => b.fermenting > 0).length} სახეობა
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/30 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">❄️</span>
+                      <span className="text-cyan-400 font-medium">კონდიცირებაზე</span>
+                    </div>
+                    <p className="text-3xl font-bold text-cyan-400">
+                      {beerStatusSummary.reduce((sum, b) => sum + b.conditioning, 0).toLocaleString()} L
+                    </p>
+                    <p className="text-sm text-text-muted mt-1">
+                      {beerStatusSummary.filter(b => b.conditioning > 0).length} სახეობა
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">✅</span>
+                      <span className="text-green-400 font-medium">მზად</span>
+                    </div>
+                    <p className="text-3xl font-bold text-green-400">
+                      {beerStatusSummary.reduce((sum, b) => sum + b.ready, 0).toLocaleString()} L
+                    </p>
+                    <p className="text-sm text-text-muted mt-1">
+                      {beerStatusSummary.filter(b => b.ready > 0).length} სახეობა
+                    </p>
+                  </div>
+                </div>
+
+                {/* Detailed Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-text-muted">ლუდის სახეობა</th>
+                        <th className="text-center py-3 px-4 text-xs font-medium text-text-muted">
+                          <span className="flex items-center justify-center gap-1">
+                            🔥 ფერმენტაცია
+                          </span>
+                        </th>
+                        <th className="text-center py-3 px-4 text-xs font-medium text-text-muted">
+                          <span className="flex items-center justify-center gap-1">
+                            ❄️ კონდიცირება
+                          </span>
+                        </th>
+                        <th className="text-center py-3 px-4 text-xs font-medium text-text-muted">
+                          <span className="flex items-center justify-center gap-1">
+                            ✅ მზად
+                          </span>
+                        </th>
+                        <th className="text-right py-3 px-4 text-xs font-medium text-text-muted">ჯამი</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {beerStatusSummary.map((beer, index) => (
+                        <tr key={index} className="border-b border-border/50 hover:bg-bg-tertiary/50">
+                          <td className="py-4 px-4">
+                            <div>
+                              <p className="font-medium text-text-primary">{beer.recipeName}</p>
+                              <p className="text-sm text-text-muted">{beer.recipeStyle}</p>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-center">
+                            {beer.fermenting > 0 ? (
+                              <div>
+                                <p className="font-bold text-orange-400">{beer.fermenting.toLocaleString()} L</p>
+                                {beer.fermentingTanks.length > 0 && (
+                                  <p className="text-xs text-text-muted">{beer.fermentingTanks.join(', ')}</p>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-text-muted">-</span>
+                            )}
+                          </td>
+                          <td className="py-4 px-4 text-center">
+                            {beer.conditioning > 0 ? (
+                              <div>
+                                <p className="font-bold text-cyan-400">{beer.conditioning.toLocaleString()} L</p>
+                                {beer.conditioningTanks.length > 0 && (
+                                  <p className="text-xs text-text-muted">{beer.conditioningTanks.join(', ')}</p>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-text-muted">-</span>
+                            )}
+                          </td>
+                          <td className="py-4 px-4 text-center">
+                            {beer.ready > 0 ? (
+                              <div>
+                                <p className="font-bold text-green-400">{beer.ready.toLocaleString()} L</p>
+                                {beer.readyTanks.length > 0 && (
+                                  <p className="text-xs text-text-muted">{beer.readyTanks.join(', ')}</p>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-text-muted">-</span>
+                            )}
+                          </td>
+                          <td className="py-4 px-4 text-right">
+                            <p className="font-bold text-copper-light">{beer.total.toLocaleString()} L</p>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-bg-tertiary/50">
+                        <td className="py-4 px-4 font-bold text-text-primary">ჯამი</td>
+                        <td className="py-4 px-4 text-center font-bold text-orange-400">
+                          {beerStatusSummary.reduce((sum, b) => sum + b.fermenting, 0).toLocaleString()} L
+                        </td>
+                        <td className="py-4 px-4 text-center font-bold text-cyan-400">
+                          {beerStatusSummary.reduce((sum, b) => sum + b.conditioning, 0).toLocaleString()} L
+                        </td>
+                        <td className="py-4 px-4 text-center font-bold text-green-400">
+                          {beerStatusSummary.reduce((sum, b) => sum + b.ready, 0).toLocaleString()} L
+                        </td>
+                        <td className="py-4 px-4 text-right font-bold text-copper-light">
+                          {beerStatusSummary.reduce((sum, b) => sum + b.total, 0).toLocaleString()} L
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </>
             )}
           </CardBody>
         </Card>
