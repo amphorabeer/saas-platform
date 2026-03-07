@@ -284,6 +284,103 @@ function drawTicketContent(
   ctx.font = "22px 'Georgia', serif";
   ctx.fillText(`Available in ${langs.length} languages / ხელმისაწვდომია ${langs.length} ენაზე`, 70, offsetY + 440);
 
+  // === DOWNLOAD APP SECTION ===
+  ctx.strokeStyle = "rgba(0,0,0,0.08)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(70, offsetY + 470);
+  ctx.lineTo(1020, offsetY + 470);
+  ctx.stroke();
+
+  // "Available on:" label
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "32px 'Georgia', serif";
+  ctx.fillText("Available on:", 70, offsetY + 520);
+
+  // --- Apple logo SVG path ---
+  ctx.save();
+  ctx.translate(70, offsetY + 545);
+  ctx.scale(0.07, 0.07);
+  ctx.fillStyle = "#000000";
+  const applePath = new Path2D("M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-27.1-46.9-42.1-83.7-44.9-35.1-2.7-73.5 20.6-87.5 20.6-14.8 0-49.3-19.5-74.6-19.5C63.1 141.2 0 186.8 0 270.2c0 26.1 4.7 53.1 14.2 81.1 12.6 36.7 58.2 126.9 105.4 125.4 24.4-.6 41.6-17.3 73.6-17.3 31.1 0 47 17.3 74.6 17.3 47.6-.8 88.7-82.4 100.8-119.3-65.1-30.7-64-89.5-63.9-90.7zm-56.4-164.2c27.3-32.4 24.8-62.1 24-72.5-24 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z");
+  ctx.fill(applePath);
+  ctx.restore();
+
+  // "App Store" text
+  ctx.fillStyle = "#1a1a2e";
+  ctx.font = "bold 40px 'Georgia', serif";
+  ctx.fillText("App Store", 110, offsetY + 580);
+
+  // Dot separator
+  ctx.fillStyle = "#d97706";
+  ctx.font = "bold 40px sans-serif";
+  ctx.fillText("•", 370, offsetY + 578);
+
+  // --- Google Play triangle logo ---
+  ctx.save();
+  ctx.translate(410, offsetY + 548);
+  ctx.fillStyle = "#34a853";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(30, 17);
+  ctx.lineTo(0, 34);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // "Google Play" text
+  ctx.fillStyle = "#1a1a2e";
+  ctx.font = "bold 40px 'Georgia', serif";
+  ctx.fillText("Google Play", 450, offsetY + 580);
+
+  // Dot separator
+  ctx.fillStyle = "#d97706";
+  ctx.font = "bold 40px sans-serif";
+  ctx.fillText("•", 740, offsetY + 578);
+
+  // --- Globe icon for Web ---
+  ctx.save();
+  ctx.translate(790, offsetY + 565);
+  ctx.strokeStyle = "#1a1a2e";
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(15, 0, 15, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(15, 0, 8, 15, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(30, 0);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(3, -9);
+  ctx.lineTo(27, -9);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(3, 9);
+  ctx.lineTo(27, 9);
+  ctx.stroke();
+  ctx.restore();
+
+  // "Web" text
+  ctx.fillStyle = "#1a1a2e";
+  ctx.font = "bold 40px 'Georgia', serif";
+  ctx.fillText("Web", 830, offsetY + 580);
+
+  // App name - BIG
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "32px 'Georgia', serif";
+  ctx.fillText("App:", 70, offsetY + 645);
+
+  ctx.fillStyle = "#d97706";
+  ctx.font = "bold 38px 'Georgia', serif";
+  ctx.fillText('"GeoGuide - Audio Guide"', 170, offsetY + 645);
+
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "30px 'Georgia', serif";
+  ctx.fillText("|   www.geoguide.ge", 700, offsetY + 645);
+
   // Contact
   ctx.fillStyle = "#9ca3af";
   ctx.font = "20px 'Georgia', serif";
