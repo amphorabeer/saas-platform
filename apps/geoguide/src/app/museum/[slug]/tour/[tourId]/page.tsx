@@ -378,8 +378,12 @@ export default function TourPage() {
         <div className="flex items-center justify-between">
           <h2 className="font-medium flex items-center gap-2">🎧 {ui.audioGuide}</h2>
           <div className="flex items-center gap-1">
-            <button onClick={() => setShowDownloadModal(true)} className={`p-2 rounded-lg hover:bg-gray-100 ${isDownloaded ? "text-green-600" : ""}`}>
+            <button onClick={() => setShowDownloadModal(true)} className={`p-2 rounded-lg hover:bg-gray-100 flex items-center gap-1 ${isDownloaded ? "text-green-600" : ""}`}>
               {isDownloaded ? <CheckIcon className="w-5 h-5" /> : <ArrowDownTrayIcon className="w-5 h-5" />}
+              <span className="text-xs">{isDownloaded
+                ? (language === "ka" ? "ჩამოტვირთულია" : language === "ru" ? "Загружено" : language === "uk" ? "Завантажено" : "Downloaded")
+                : (language === "ka" ? "ჩამოტვირთვა" : language === "ru" ? "Скачать" : language === "uk" ? "Завантажити" : "Download")
+              }</span>
             </button>
             {viewMode === 'stops' && (
               <button onClick={() => setShowSearch(!showSearch)} className={`p-2 rounded-lg hover:bg-gray-100 ${showSearch ? "bg-amber-100 text-amber-600" : ""}`}>
