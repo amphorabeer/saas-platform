@@ -638,7 +638,9 @@ export default function TourPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl p-6 m-4 max-w-sm w-full">
             <h3 className="text-lg font-semibold mb-4">
-              {isDownloaded ? (language === "ka" ? "ტური ჩამოტვირთულია" : "Tour Downloaded") : (language === "ka" ? "ჩამოტვირთვა" : "Download")}
+              {isDownloaded
+              ? (language === "ka" ? "ტური ჩამოტვირთულია" : language === "ru" ? "Тур загружен" : language === "uk" ? "Тур завантажено" : "Tour Downloaded")
+              : (language === "ka" ? "ჩამოტვირთვა" : language === "ru" ? "Скачать" : language === "uk" ? "Завантажити" : "Download")}
             </h3>
             {downloading ? (
               <div className="space-y-4">
@@ -649,7 +651,7 @@ export default function TourPage() {
               </div>
             ) : isDownloaded ? (
               <div className="space-y-4">
-                <p className="text-gray-600">{language === "ka" ? "ეს ტური უკვე ჩამოტვირთულია." : "This tour is already downloaded."}</p>
+                <p className="text-gray-600">{language === "ka" ? "ეს ტური უკვე ჩამოტვირთულია." : language === "ru" ? "Этот тур уже загружен." : language === "uk" ? "Цей тур вже завантажено." : "This tour is already downloaded."}</p>
                 <div className="flex gap-3">
                   <button onClick={() => setShowDownloadModal(false)} className="flex-1 py-2 border rounded-lg">
                     {language === "ka" ? "დახურვა" : "Close"}
@@ -661,13 +663,13 @@ export default function TourPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <p className="text-gray-600">{language === "ka" ? "ჩამოტვირთეთ ტური ოფლაინ რეჟიმში." : "Download for offline use."}</p>
+                <p className="text-gray-600">{language === "ka" ? "ჩამოტვირთეთ ტური ოფლაინ რეჟიმში." : language === "ru" ? "Скачайте тур для офлайн использования." : language === "uk" ? "Завантажте тур для офлайн використання." : "Download for offline use."}</p>
                 <div className="flex gap-3">
                   <button onClick={() => setShowDownloadModal(false)} className="flex-1 py-2 border rounded-lg">
                     {language === "ka" ? "გაუქმება" : "Cancel"}
                   </button>
                   <button onClick={handleDownload} className="flex-1 py-2 bg-amber-500 text-white rounded-lg">
-                    {language === "ka" ? "ჩამოტვირთვა" : "Download"}
+                    {language === "ka" ? "ჩამოტვირთვა" : language === "ru" ? "Скачать" : language === "uk" ? "Завантажити" : "Download"}
                   </button>
                 </div>
               </div>
