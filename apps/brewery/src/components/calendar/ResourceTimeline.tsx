@@ -121,7 +121,7 @@ export function ResourceTimeline({
                 isToday(day) ? 'bg-copper/10' : ''
               } ${index >= 5 ? 'bg-bg-tertiary/50' : ''}`}
             >
-              <div className="text-xs text-text-muted">{WEEKDAYS[index]}</div>
+              <div className="text-xs text-text-muted">{WEEKDAYS[(day.getDay() + 6) % 7]}</div>
               <div className={`text-sm font-medium ${isToday(day) ? 'text-copper' : 'text-text-primary'}`}>
                 {day.getDate()}
               </div>
