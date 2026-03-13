@@ -18,9 +18,9 @@ export async function POST(
       );
     }
 
-    if (code.status !== "AVAILABLE") {
+    if (code.status === "REVOKED") {
       return NextResponse.json(
-        { error: "მხოლოდ ხელმისაწვდომი კოდის გაუქმება შეიძლება" },
+        { error: "კოდი უკვე გაუქმებულია" },
         { status: 400 }
       );
     }
