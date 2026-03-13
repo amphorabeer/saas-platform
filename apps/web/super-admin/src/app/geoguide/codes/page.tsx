@@ -955,13 +955,14 @@ export default function ActivationCodesPage() {
                   <th className="text-left p-4 font-medium">სტატუსი</th>
                   <th className="text-left p-4 font-medium">Batch</th>
                   <th className="text-left p-4 font-medium">შექმნილი</th>
+                  <th className="text-left p-4 font-medium">გააქტიურდა</th>
                   <th className="text-left p-4 font-medium">მოქმედებები</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {filteredCodes.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                    <td colSpan={10} className="p-8 text-center text-muted-foreground">
                       კოდები არ მოიძებნა
                     </td>
                   </tr>
@@ -1016,6 +1017,9 @@ export default function ActivationCodesPage() {
                       <td className="p-4 text-muted-foreground">{code.batchName || "—"}</td>
                       <td className="p-4 text-muted-foreground">
                         {new Date(code.createdAt).toLocaleDateString("ka-GE")}
+                      </td>
+                      <td className="p-4 text-muted-foreground">
+                        {code.redeemedAt ? new Date(code.redeemedAt).toLocaleDateString("ka-GE") : "—"}
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-1">
