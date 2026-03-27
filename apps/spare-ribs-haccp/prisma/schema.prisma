@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(OPERATOR)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  logs             HaccpLog[]
+  correctiveActions CorrectiveAction[]
+  rawMaterials     RawMaterial[]
+  labTests         LabTest[]
+  audits           HaccpAudit[]
+}
+
+model HaccpLog {
+  id          String   @id @default(cuid())
+  ccpNumber   String   // "CCP-1" | "CCP-2" | "CCP-3" | "CCP-4"
+  batchLot    String
+  weightKg    Float?
+
+  // CCP-1: Sous-Vide
+  svTempStart   Float?
+  svTempMid     Float?
+  svTempEnd     Float?
+  svHours       Float?
+
+  // CCP-2: Blast Chilling
+  bcTempInitial Float?
+  bcTemp30min   Float?
+  bcTemp60min   Float?
+  bcTempFinal   Float?
+  bcDurationMin Int?
+
+  // CCP-3: Storage
+  fridgeTempAm  Float?
+  fridgeTempPm  Float?
+  freezerTempAm Float?
+  freezerTempPm Float?
+
+  // CCP-4: CIP
+  cipEquipment  String?
+  cipNaohPct    Float?
+  cipTempC      Float?
+  cipPaaPpm     Float?
+  cipFinalPh    Float?
+
+  isCompliant   Boolean
+  deviation     String?
+  notes         String?
+  operatorId    String
+  operator      User     @relation(fields: [operatorId], references: [id])
+  loggedAt      DateTime @default(now())
+
+  correctiveAction CorrectiveAction?
+
+  @@index([ccpNumber, loggedAt])
+  @@index([batchLot])
+}
+
+model CorrectiveAction {
+  id           String    @id @default(cuid())
+  reportNum    String    @unique @default(cuid())
+  logId        String?   @unique
+  log          HaccpLog? @relation(fields: [logId], references: [id])
+  batchLot     String?
+  ccpRef       String?
+  deviation    String
+  rootCause    String?
+  action       String
+  preventive   String?
+  isBatchHold  Boolean   @default(false)
+  isDisposed   Boolean   @default(false)
+  disposedKg   Float?
+  deadline     DateTime?
+  responsible  String
+  status       CaStatus  @default(OPEN)
+  closedAt     DateTime?
+  operatorId   String?
+  operator     User?     @relation(fields: [operatorId], references: [id])
+  createdAt    DateTime  @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model RawMaterial {
+  id           String   @id @default(cuid())
+  lotNumber    String   @unique
+  supplier     String
+  weightKg     Float
+  remainingKg  Float?   // დარჩენილი კგ (null = ყველა დარჩა)
+  tempArrival  Float
+  hasCoa       Boolean  @default(false)
+  hasVetCert   Boolean  @default(false)
+  vetCertNum   String?
+  visualOk     Boolean  @default(true)
+  isAccepted   Boolean
+  rejectReason String?
+  notes        String?
+  receivedById String
+  receivedBy   User     @relation(fields: [receivedById], references: [id])
+  receivedAt   DateTime @default(now())
+
+  @@index([receivedAt])
+  @@index([lotNumber])
+}
+
+model LabTest {
+  id             String   @id @default(cuid())
+  labName        String
+  lotNumber      String?
+  tvcResult      Float?
+  ecoliResult    Float?
+  salmonella     Boolean?
+  listeria       Boolean?
+  staphResult    Float?
+  tvcPass        Boolean?
+  ecoliPass      Boolean?
+  salmonellaPass Boolean?
+  listeriaPass   Boolean?
+  overallPass    Boolean
+  notes          String?
+  testedById     String
+  testedBy       User     @relation(fields: [testedById], references: [id])
+  testedAt       DateTime @default(now())
+
+  @@index([testedAt])
+}
+
+model HaccpAudit {
+  id            String      @id @default(cuid())
+  auditNum      String      @unique
+  auditedById   String
+  auditedBy     User        @relation(fields: [auditedById], references: [id])
+  auditDate     DateTime
+  totalScore    Int
+  maxScore      Int
+  percentage    Float
+  rating        AuditRating
+  auditedByName String?
+  findings      String?
+  recommendations String?
+  checklistData Json?
+  nextAuditDate DateTime?
+  createdAt     DateTime    @default(now())
+
+  @@index([auditDate])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  OPERATOR
+}
+
+enum CaStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+enum AuditRating {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+}
