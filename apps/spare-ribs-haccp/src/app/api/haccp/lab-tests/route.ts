@@ -92,3 +92,5 @@ export async function PATCH(req: NextRequest) {
   })
   return NextResponse.json(updated)
 }
+
+export const dynamic = 'force-dynamic'

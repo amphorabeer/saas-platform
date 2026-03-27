@@ -176,3 +176,5 @@ function buildCcpFields(ccp: string, d: any) {
   if (ccp === 'CCP-4') return { cipEquipment: d.cipEquipment, cipNaohPct: d.cipNaohPct, cipTempC: d.cipTempC, cipPaaPpm: d.cipPaaPpm, cipFinalPh: d.cipFinalPh }
   return {}
 }
+
+export const dynamic = 'force-dynamic'
