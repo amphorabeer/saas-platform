@@ -114,15 +114,22 @@ export default function AnalyticsPage() {
     const res = await fetch(`/api/geoguide/analytics/export?${params.toString()}`);
     const { rows } = await res.json();
 
-    const XLSX = await import("xlsx");
-    const wsData = [
-      ["მუზეუმი", "სულ კოდები", "გამოყენებული", "ხელმისაწვდომი", "ვადაგასული", "გაუქმებული", "კონვერსია", "გადახდები", "შემოსავალი"],
-      ...rows.map((r: any) => [r.museum, r.totalCodes, r.redeemed, r.available, r.expired, r.revoked, r.redemptionRate, r.payments, r.revenue]),
+    const headers = ["მუზეუმი", "სულ კოდები", "გამოყენებული", "ხელმისაწვდომი", "ვადაგასული", "გაუქმებული", "კონვერსია", "გადახდები", "შემოსავალი"];
+    const csvRows = [
+      headers.join(","),
+      ...rows.map((r: any) =>
+        [r.museum, r.totalCodes, r.redeemed, r.available, r.expired, r.revoked, r.redemptionRate, r.payments, r.revenue]
+          .map((v) => `"${v}"`)
+          .join(",")
+      ),
     ];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "ანალიტიკა");
-    XLSX.writeFile(wb, `geoguide-analytics-${new Date().toISOString().split("T")[0]}.xlsx`);
+    const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `geoguide-analytics-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const exportToPDF = async () => {
