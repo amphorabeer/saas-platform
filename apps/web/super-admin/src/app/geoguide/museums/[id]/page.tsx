@@ -93,6 +93,12 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
   }>({ hasToken: false, analyticsUrl: null, createdAt: null });
   const [tokenLoading, setTokenLoading] = useState(false);
   const [tokenCopied, setTokenCopied] = useState(false);
+  const [portalUsername, setPortalUsername] = useState("");
+  const [portalPassword, setPortalPassword] = useState("");
+  const [portalHasCredentials, setPortalHasCredentials] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [portalError, setPortalError] = useState("");
+  const [portalSuccess, setPortalSuccess] = useState("");
   const [museum, setMuseum] = useState<Museum | null>(null);
   const [translations, setTranslations] = useState<Translation[]>([]);
   const [showLangPicker, setShowLangPicker] = useState(false);
@@ -124,6 +130,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     fetchMuseum();
     fetchToken();
+    fetchPortalCredentials();
   }, [params.id]);
 
   const fetchMuseum = async () => {
@@ -304,6 +311,70 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
       navigator.clipboard.writeText(tokenData.analyticsUrl);
       setTokenCopied(true);
       setTimeout(() => setTokenCopied(false), 2000);
+    }
+  };
+
+  const fetchPortalCredentials = async () => {
+    try {
+      const res = await fetch(
+        `/api/geoguide/museums/${params.id}/portal-credentials`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setPortalHasCredentials(data.hasCredentials);
+        if (data.username) setPortalUsername(data.username);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const savePortalCredentials = async () => {
+    setPortalLoading(true);
+    setPortalError("");
+    setPortalSuccess("");
+    try {
+      const res = await fetch(
+        `/api/geoguide/museums/${params.id}/portal-credentials`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: portalUsername,
+            password: portalPassword,
+          }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setPortalError(data.error);
+        return;
+      }
+      setPortalHasCredentials(true);
+      setPortalSuccess("credentials შენახულია ✓");
+      setPortalPassword("");
+    } catch {
+      setPortalError("შეცდომა");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
+  const revokePortalCredentials = async () => {
+    if (!confirm("წაიშალოს მუზეუმის წვდომა?")) return;
+    setPortalLoading(true);
+    try {
+      await fetch(
+        `/api/geoguide/museums/${params.id}/portal-credentials`,
+        { method: "DELETE" }
+      );
+      setPortalHasCredentials(false);
+      setPortalUsername("");
+      setPortalSuccess("");
+    } catch {
+      setPortalError("შეცდომა");
+    } finally {
+      setPortalLoading(false);
     }
   };
 
@@ -993,6 +1064,83 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
                     </Button>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Museum Portal */}
+            <Card>
+              <CardHeader>
+                <CardTitle>მუზეუმის პორტალი</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  მუზეუმს შეუძლია შევიდეს საკუთარი username/password-ით და ნახოს ყოველდღიური სტატისტიკა.
+                </p>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="portalUsername">Username</Label>
+                    <Input
+                      id="portalUsername"
+                      type="text"
+                      placeholder="akhaltsikhe-museum"
+                      value={portalUsername}
+                      onChange={(e) => setPortalUsername(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="portalPassword">პაროლი</Label>
+                    <Input
+                      id="portalPassword"
+                      type="password"
+                      placeholder="მინიმუმ 6 სიმბოლო"
+                      value={portalPassword}
+                      onChange={(e) => setPortalPassword(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  {portalError && (
+                    <p className="text-sm text-red-600">{portalError}</p>
+                  )}
+                  {portalSuccess && (
+                    <p className="text-sm text-green-600">{portalSuccess}</p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={savePortalCredentials}
+                      disabled={portalLoading}
+                      className="bg-amber-500 hover:bg-amber-600 text-white"
+                    >
+                      {portalLoading
+                        ? "შენახვა..."
+                        : portalHasCredentials
+                          ? "განახლება"
+                          : "შექმნა"}
+                    </Button>
+                    {portalHasCredentials && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={revokePortalCredentials}
+                        disabled={portalLoading}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        წაშლა
+                      </Button>
+                    )}
+                  </div>
+                  {portalHasCredentials && (
+                    <div className="bg-muted p-3 rounded-lg text-xs text-muted-foreground">
+                      🔗 Login URL:{" "}
+                      <span className="font-mono">
+                        {process.env.NEXT_PUBLIC_APP_URL ||
+                          "https://saas-platform-super-admin.vercel.app"}
+                        /museum-portal/login
+                      </span>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

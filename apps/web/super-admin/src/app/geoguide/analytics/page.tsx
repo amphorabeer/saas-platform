@@ -131,7 +131,7 @@ export default function AnalyticsPage() {
       "",
       "დღეების მიხედვით:",
       headers2.join(","),
-      ...(dailyRows ?? []).map((r: any) =>
+      ...dailyRows.map((r: any) =>
         [r.date, r.activations, r.payments, r.revenue]
           .map((v) => `"${v}"`)
           .join(",")

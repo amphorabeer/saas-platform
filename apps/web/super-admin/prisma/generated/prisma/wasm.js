@@ -422,6 +422,8 @@ exports.Prisma.MuseumScalarFieldEnum = {
   vr360BundleWithAudio: 'vr360BundleWithAudio',
   analyticsToken: 'analyticsToken',
   analyticsTokenCreatedAt: 'analyticsTokenCreatedAt',
+  portalUsername: 'portalUsername',
+  portalPasswordHash: 'portalPasswordHash',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

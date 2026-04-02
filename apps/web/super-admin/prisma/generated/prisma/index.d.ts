@@ -21421,6 +21421,8 @@ export namespace Prisma {
     vr360BundleWithAudio: boolean | null
     analyticsToken: string | null
     analyticsTokenCreatedAt: Date | null
+    portalUsername: string | null
+    portalPasswordHash: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -21476,6 +21478,8 @@ export namespace Prisma {
     vr360BundleWithAudio: boolean | null
     analyticsToken: string | null
     analyticsTokenCreatedAt: Date | null
+    portalUsername: string | null
+    portalPasswordHash: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -21533,6 +21537,8 @@ export namespace Prisma {
     vr360BundleWithAudio: number
     analyticsToken: number
     analyticsTokenCreatedAt: number
+    portalUsername: number
+    portalPasswordHash: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -21604,6 +21610,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: true
     analyticsToken?: true
     analyticsTokenCreatedAt?: true
+    portalUsername?: true
+    portalPasswordHash?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -21659,6 +21667,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: true
     analyticsToken?: true
     analyticsTokenCreatedAt?: true
+    portalUsername?: true
+    portalPasswordHash?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -21716,6 +21726,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: true
     analyticsToken?: true
     analyticsTokenCreatedAt?: true
+    portalUsername?: true
+    portalPasswordHash?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -21860,6 +21872,8 @@ export namespace Prisma {
     vr360BundleWithAudio: boolean
     analyticsToken: string | null
     analyticsTokenCreatedAt: Date | null
+    portalUsername: string | null
+    portalPasswordHash: string | null
     createdAt: Date
     updatedAt: Date
     _count: MuseumCountAggregateOutputType | null
@@ -21936,6 +21950,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: boolean
     analyticsTokenCreatedAt?: boolean
+    portalUsername?: boolean
+    portalPasswordHash?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tours?: boolean | Museum$toursArgs<ExtArgs>
@@ -21996,6 +22012,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: boolean
     analyticsTokenCreatedAt?: boolean
+    portalUsername?: boolean
+    portalPasswordHash?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["museum"]>
@@ -22053,6 +22071,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: boolean
     analyticsTokenCreatedAt?: boolean
+    portalUsername?: boolean
+    portalPasswordHash?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -22123,6 +22143,8 @@ export namespace Prisma {
       vr360BundleWithAudio: boolean
       analyticsToken: string | null
       analyticsTokenCreatedAt: Date | null
+      portalUsername: string | null
+      portalPasswordHash: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["museum"]>
@@ -22572,6 +22594,8 @@ export namespace Prisma {
     readonly vr360BundleWithAudio: FieldRef<"Museum", 'Boolean'>
     readonly analyticsToken: FieldRef<"Museum", 'String'>
     readonly analyticsTokenCreatedAt: FieldRef<"Museum", 'DateTime'>
+    readonly portalUsername: FieldRef<"Museum", 'String'>
+    readonly portalPasswordHash: FieldRef<"Museum", 'String'>
     readonly createdAt: FieldRef<"Museum", 'DateTime'>
     readonly updatedAt: FieldRef<"Museum", 'DateTime'>
   }
@@ -36233,6 +36257,8 @@ export namespace Prisma {
     vr360BundleWithAudio: 'vr360BundleWithAudio',
     analyticsToken: 'analyticsToken',
     analyticsTokenCreatedAt: 'analyticsTokenCreatedAt',
+    portalUsername: 'portalUsername',
+    portalPasswordHash: 'portalPasswordHash',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -38329,6 +38355,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolFilter<"Museum"> | boolean
     analyticsToken?: StringNullableFilter<"Museum"> | string | null
     analyticsTokenCreatedAt?: DateTimeNullableFilter<"Museum"> | Date | string | null
+    portalUsername?: StringNullableFilter<"Museum"> | string | null
+    portalPasswordHash?: StringNullableFilter<"Museum"> | string | null
     createdAt?: DateTimeFilter<"Museum"> | Date | string
     updatedAt?: DateTimeFilter<"Museum"> | Date | string
     tours?: TourListRelationFilter
@@ -38388,6 +38416,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: SortOrder
     analyticsToken?: SortOrderInput | SortOrder
     analyticsTokenCreatedAt?: SortOrderInput | SortOrder
+    portalUsername?: SortOrderInput | SortOrder
+    portalPasswordHash?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tours?: TourOrderByRelationAggregateInput
@@ -38398,6 +38428,7 @@ export namespace Prisma {
     id?: string
     slug?: string
     analyticsToken?: string
+    portalUsername?: string
     AND?: MuseumWhereInput | MuseumWhereInput[]
     OR?: MuseumWhereInput[]
     NOT?: MuseumWhereInput | MuseumWhereInput[]
@@ -38450,11 +38481,12 @@ export namespace Prisma {
     vr360IsFree?: BoolFilter<"Museum"> | boolean
     vr360BundleWithAudio?: BoolFilter<"Museum"> | boolean
     analyticsTokenCreatedAt?: DateTimeNullableFilter<"Museum"> | Date | string | null
+    portalPasswordHash?: StringNullableFilter<"Museum"> | string | null
     createdAt?: DateTimeFilter<"Museum"> | Date | string
     updatedAt?: DateTimeFilter<"Museum"> | Date | string
     tours?: TourListRelationFilter
     payments?: PaymentListRelationFilter
-  }, "id" | "slug" | "analyticsToken">
+  }, "id" | "slug" | "analyticsToken" | "portalUsername">
 
   export type MuseumOrderByWithAggregationInput = {
     id?: SortOrder
@@ -38509,6 +38541,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: SortOrder
     analyticsToken?: SortOrderInput | SortOrder
     analyticsTokenCreatedAt?: SortOrderInput | SortOrder
+    portalUsername?: SortOrderInput | SortOrder
+    portalPasswordHash?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: MuseumCountOrderByAggregateInput
@@ -38574,6 +38608,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolWithAggregatesFilter<"Museum"> | boolean
     analyticsToken?: StringNullableWithAggregatesFilter<"Museum"> | string | null
     analyticsTokenCreatedAt?: DateTimeNullableWithAggregatesFilter<"Museum"> | Date | string | null
+    portalUsername?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    portalPasswordHash?: StringNullableWithAggregatesFilter<"Museum"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Museum"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Museum"> | Date | string
   }
@@ -41610,6 +41646,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: string | null
     analyticsTokenCreatedAt?: Date | string | null
+    portalUsername?: string | null
+    portalPasswordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourCreateNestedManyWithoutMuseumInput
@@ -41669,6 +41707,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: string | null
     analyticsTokenCreatedAt?: Date | string | null
+    portalUsername?: string | null
+    portalPasswordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourUncheckedCreateNestedManyWithoutMuseumInput
@@ -41728,6 +41768,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    portalUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    portalPasswordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUpdateManyWithoutMuseumNestedInput
@@ -41787,6 +41829,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    portalUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    portalPasswordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUncheckedUpdateManyWithoutMuseumNestedInput
@@ -41846,6 +41890,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: string | null
     analyticsTokenCreatedAt?: Date | string | null
+    portalUsername?: string | null
+    portalPasswordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41903,6 +41949,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    portalUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    portalPasswordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41960,6 +42008,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    portalUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    portalPasswordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -44870,6 +44920,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: SortOrder
     analyticsToken?: SortOrder
     analyticsTokenCreatedAt?: SortOrder
+    portalUsername?: SortOrder
+    portalPasswordHash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44932,6 +44984,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: SortOrder
     analyticsToken?: SortOrder
     analyticsTokenCreatedAt?: SortOrder
+    portalUsername?: SortOrder
+    portalPasswordHash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44987,6 +45041,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: SortOrder
     analyticsToken?: SortOrder
     analyticsTokenCreatedAt?: SortOrder
+    portalUsername?: SortOrder
+    portalPasswordHash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -49712,6 +49768,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: string | null
     analyticsTokenCreatedAt?: Date | string | null
+    portalUsername?: string | null
+    portalPasswordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentCreateNestedManyWithoutMuseumInput
@@ -49770,6 +49828,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: string | null
     analyticsTokenCreatedAt?: Date | string | null
+    portalUsername?: string | null
+    portalPasswordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutMuseumInput
@@ -50072,6 +50132,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    portalUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    portalPasswordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUpdateManyWithoutMuseumNestedInput
@@ -50130,6 +50192,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    portalUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    portalPasswordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutMuseumNestedInput
@@ -51465,6 +51529,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: string | null
     analyticsTokenCreatedAt?: Date | string | null
+    portalUsername?: string | null
+    portalPasswordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourCreateNestedManyWithoutMuseumInput
@@ -51523,6 +51589,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: boolean
     analyticsToken?: string | null
     analyticsTokenCreatedAt?: Date | string | null
+    portalUsername?: string | null
+    portalPasswordHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourUncheckedCreateNestedManyWithoutMuseumInput
@@ -51709,6 +51777,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    portalUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    portalPasswordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUpdateManyWithoutMuseumNestedInput
@@ -51767,6 +51837,8 @@ export namespace Prisma {
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
     analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    portalUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    portalPasswordHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUncheckedUpdateManyWithoutMuseumNestedInput

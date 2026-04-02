@@ -570,6 +570,10 @@ model Museum {
   analyticsToken          String?   @unique
   analyticsTokenCreatedAt DateTime?
 
+  // Museum Portal წვდომა
+  portalUsername     String? @unique
+  portalPasswordHash String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -692,7 +696,7 @@ model TourStop {
 
   audioDuration Int? // წამებში
 
-  imageUrl String? // სურათი
+  imageUrl String? // სურათ���
   images   String[] // დამატებითი სურათები
 
   // QR კოდი

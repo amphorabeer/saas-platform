@@ -570,6 +570,10 @@ model Museum {
   analyticsToken          String?   @unique
   analyticsTokenCreatedAt DateTime?
 
+  // Museum Portal წვდომა
+  portalUsername          String?   @unique
+  portalPasswordHash      String?
+
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
