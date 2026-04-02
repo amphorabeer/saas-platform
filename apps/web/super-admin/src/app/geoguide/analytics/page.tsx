@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import {
   Card,
   CardContent,
@@ -115,13 +112,13 @@ export default function AnalyticsPage() {
     if (museumId) params.set("museumId", museumId);
 
     const res = await fetch(`/api/geoguide/analytics/export?${params.toString()}`);
-    const { rows, generatedAt } = await res.json();
+    const { rows } = await res.json();
 
+    const XLSX = await import("xlsx");
     const wsData = [
       ["მუზეუმი", "სულ კოდები", "გამოყენებული", "ხელმისაწვდომი", "ვადაგასული", "გაუქმებული", "კონვერსია", "გადახდები", "შემოსავალი"],
       ...rows.map((r: any) => [r.museum, r.totalCodes, r.redeemed, r.available, r.expired, r.revoked, r.redemptionRate, r.payments, r.revenue]),
     ];
-
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "ანალიტიკა");
@@ -141,6 +138,8 @@ export default function AnalyticsPage() {
     const res = await fetch(`/api/geoguide/analytics/export?${params.toString()}`);
     const { rows, generatedAt } = await res.json();
 
+    const jsPDF = (await import("jspdf")).default;
+    const autoTable = (await import("jspdf-autotable")).default;
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text("GeoGuide Analytics", 14, 15);
