@@ -76,7 +76,77 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ rows, generatedAt: now.toISOString() });
+    // დღეების მიხედვით აქტივაციები
+    const daysCount =
+      dateFrom && dateTo
+        ? Math.ceil(
+            (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) /
+              (1000 * 60 * 60 * 24)
+          ) + 1
+        : period === "7d"
+          ? 7
+          : period === "30d"
+            ? 30
+            : 90;
+
+    const activationsByDateMap = new Map<string, number>();
+    for (let i = daysCount - 1; i >= 0; i--) {
+      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      activationsByDateMap.set(date.toISOString().split("T")[0], 0);
+    }
+
+    const allEntitlements = await prisma.entitlement.findMany({
+      where: {
+        ...(museumId ? { tour: { museumId } } : {}),
+        ...(dateFilter ? { activatedAt: dateFilter } : {}),
+      },
+      select: { activatedAt: true },
+    });
+
+    allEntitlements.forEach((e) => {
+      const d = e.activatedAt.toISOString().split("T")[0];
+      if (activationsByDateMap.has(d)) {
+        activationsByDateMap.set(d, (activationsByDateMap.get(d) || 0) + 1);
+      }
+    });
+
+    const allPayments = await prisma.payment.findMany({
+      where: {
+        status: "COMPLETED",
+        ...(museumId ? { tour: { museumId } } : {}),
+        ...(dateFilter ? { completedAt: dateFilter } : {}),
+      },
+      select: { completedAt: true, amount: true },
+    });
+
+    const paymentsByDate = new Map<string, { count: number; revenue: number }>();
+    allPayments.forEach((p) => {
+      if (p.completedAt) {
+        const d = p.completedAt.toISOString().split("T")[0];
+        const curr = paymentsByDate.get(d) || { count: 0, revenue: 0 };
+        curr.count += 1;
+        curr.revenue += Number(p.amount || 0);
+        paymentsByDate.set(d, curr);
+      }
+    });
+
+    const dailyRows = Array.from(activationsByDateMap.entries()).map(
+      ([date, activations]) => {
+        const pay = paymentsByDate.get(date) || { count: 0, revenue: 0 };
+        return {
+          date,
+          activations,
+          payments: pay.count,
+          revenue: `${pay.revenue.toFixed(2)}`,
+        };
+      }
+    );
+
+    return NextResponse.json({
+      rows,
+      dailyRows,
+      generatedAt: now.toISOString(),
+    });
   } catch (error) {
     console.error("Export error:", error);
     return NextResponse.json({ error: "Failed to export" }, { status: 500 });

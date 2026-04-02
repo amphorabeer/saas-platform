@@ -112,17 +112,33 @@ export default function AnalyticsPage() {
     if (museumId) params.set("museumId", museumId);
 
     const res = await fetch(`/api/geoguide/analytics/export?${params.toString()}`);
-    const { rows } = await res.json();
+    const { rows, dailyRows } = await res.json();
 
-    const headers = ["მუზეუმი", "სულ კოდები", "გამოყენებული", "ხელმისაწვდომი", "ვადაგასული", "გაუქმებული", "კონვერსია", "გადახდები", "შემოსავალი"];
-    const csvRows = [
-      headers.join(","),
+    // Sheet 1 - მუზეუმების შეჯამება
+    const headers1 = ["მუზეუმი", "სულ კოდები", "გამოყენებული", "ხელმისაწვდომი", "ვადაგასული", "გაუქმებული", "კონვერსია", "გადახდები", "შემოსავალი"];
+    const summaryRows = [
+      headers1.join(","),
       ...rows.map((r: any) =>
         [r.museum, r.totalCodes, r.redeemed, r.available, r.expired, r.revoked, r.redemptionRate, r.payments, r.revenue]
           .map((v) => `"${v}"`)
           .join(",")
       ),
     ];
+
+    // Sheet 2 - დღეების მიხედვით (CSV-ში ცალკე section)
+    const headers2 = ["თარიღი", "აქტივაციები (კოდი)", "გადახდები", "შემოსავალი (₾)"];
+    const dailyRowsCsv = [
+      "",
+      "დღეების მიხედვით:",
+      headers2.join(","),
+      ...(dailyRows ?? []).map((r: any) =>
+        [r.date, r.activations, r.payments, r.revenue]
+          .map((v) => `"${v}"`)
+          .join(",")
+      ),
+    ];
+
+    const csvRows = [...summaryRows, ...dailyRowsCsv];
     const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
