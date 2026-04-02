@@ -33,6 +33,9 @@ export default function MuseumPortalDashboard() {
   const [dailyRows, setDailyRows] = useState<DailyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState("30d");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [useCustomRange, setUseCustomRange] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("museum-portal-auth");
@@ -51,7 +54,14 @@ export default function MuseumPortalDashboard() {
     if (!auth) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/geoguide/analytics/export?museumId=${auth.museumId}&period=${period}`);
+      const params = new URLSearchParams({ museumId: auth.museumId });
+      if (useCustomRange && dateFrom && dateTo) {
+        params.set("dateFrom", dateFrom);
+        params.set("dateTo", dateTo);
+      } else {
+        params.set("period", period);
+      }
+      const res = await fetch(`/api/geoguide/analytics/export?${params.toString()}`);
       const data = await res.json();
       const row = data.rows?.[0];
       if (row) setSummary(row);
@@ -61,13 +71,62 @@ export default function MuseumPortalDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [auth, period]);
+  }, [auth, period, dateFrom, dateTo, useCustomRange]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const logout = () => {
     localStorage.removeItem("museum-portal-auth");
     router.push("/museum-portal/login");
+  };
+
+  const exportCSV = () => {
+    if (!dailyRows.length) return;
+    const headers = ["თარიღი", "კოდები", "გადახდები", "შემოსავალი"];
+    const csvRows = [
+      headers.join(","),
+      ...dailyRows.map((r) =>
+        [r.date, r.activations, r.payments, r.revenue].map((v) => `"${v}"`).join(",")
+      ),
+    ];
+    const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${auth?.museumName}-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPDF = async () => {
+    const jsPDF = (await import("jspdf")).default;
+    const autoTable = (await import("jspdf-autotable")).default;
+    const doc = new jsPDF();
+
+    doc.setFontSize(14);
+    doc.text(auth?.museumName || "Museum", 14, 15);
+    doc.setFontSize(9);
+    doc.text(`Generated: ${new Date().toLocaleDateString("en-GB")}`, 14, 22);
+
+    if (summary) {
+      autoTable(doc, {
+        startY: 28,
+        head: [["Total Codes", "Redeemed", "Available", "Conversion", "Payments", "Revenue"]],
+        body: [[summary.totalCodes, summary.redeemed, summary.available, summary.redemptionRate, summary.payments, summary.revenue]],
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [245, 158, 11] },
+      });
+    }
+
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable?.finalY + 10 || 60,
+      head: [["Date", "Codes", "Payments", "Revenue"]],
+      body: [...dailyRows].reverse().map((r) => [r.date, r.activations, r.payments, `GEL ${r.revenue}`]),
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [100, 100, 100] },
+    });
+
+    doc.save(`${auth?.museumName}-${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
   const today = new Date().toLocaleDateString("ka-GE", { day: "numeric", month: "long", year: "numeric" });
@@ -116,21 +175,73 @@ export default function MuseumPortalDashboard() {
           </div>
         </div>
 
-        {/* Period ფილტრი */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">პერიოდი:</span>
-          {["7d", "30d", "90d"].map((p) => (
+        {/* Period ფილტრი + ექსპორტი */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm text-gray-500">პერიოდი:</span>
+            {!useCustomRange && ["7d", "30d", "90d"].map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPeriod(p)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  period === p ? "bg-amber-500 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {p === "7d" ? "7 დღე" : p === "30d" ? "30 დღე" : "90 დღე"}
+              </button>
+            ))}
+            {useCustomRange ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white"
+                />
+                <span className="text-gray-400">—</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setUseCustomRange(false)}
+                  className="text-gray-400 hover:text-gray-600 text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setUseCustomRange(true)}
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white hover:bg-gray-50"
+              >
+                📅 თარიღი
+              </button>
+            )}
+          </div>
+
+          {/* ექსპორტი */}
+          <div className="flex gap-2">
             <button
-              key={p}
               type="button"
-              onClick={() => setPeriod(p)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                period === p ? "bg-amber-500 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
+              onClick={exportCSV}
+              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white hover:bg-gray-50"
             >
-              {p === "7d" ? "7 დღე" : p === "30d" ? "30 დღე" : "90 დღე"}
+              📊 CSV
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={exportPDF}
+              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white hover:bg-gray-50"
+            >
+              📄 PDF
+            </button>
+          </div>
         </div>
 
         {loading ? (
