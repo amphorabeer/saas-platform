@@ -86,6 +86,13 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [tokenData, setTokenData] = useState<{
+    hasToken: boolean;
+    analyticsUrl: string | null;
+    createdAt: string | null;
+  }>({ hasToken: false, analyticsUrl: null, createdAt: null });
+  const [tokenLoading, setTokenLoading] = useState(false);
+  const [tokenCopied, setTokenCopied] = useState(false);
   const [museum, setMuseum] = useState<Museum | null>(null);
   const [translations, setTranslations] = useState<Translation[]>([]);
   const [showLangPicker, setShowLangPicker] = useState(false);
@@ -116,6 +123,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchMuseum();
+    fetchToken();
   }, [params.id]);
 
   const fetchMuseum = async () => {
@@ -241,6 +249,61 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
       console.error("Error fetching museum:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchToken = async () => {
+    try {
+      const res = await fetch(
+        `/api/geoguide/museums/${params.id}/analytics-token`
+      );
+      if (res.ok) setTokenData(await res.json());
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const generateToken = async () => {
+    setTokenLoading(true);
+    try {
+      const res = await fetch(
+        `/api/geoguide/museums/${params.id}/analytics-token`,
+        { method: "POST" }
+      );
+      if (res.ok) setTokenData(await res.json());
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTokenLoading(false);
+    }
+  };
+
+  const revokeToken = async () => {
+    if (
+      !confirm(
+        "დარწმუნებული ხართ? მუზეუმი კარგავს წვდომას ანალიტიკასთან."
+      )
+    )
+      return;
+    setTokenLoading(true);
+    try {
+      await fetch(
+        `/api/geoguide/museums/${params.id}/analytics-token`,
+        { method: "DELETE" }
+      );
+      setTokenData({ hasToken: false, analyticsUrl: null, createdAt: null });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTokenLoading(false);
+    }
+  };
+
+  const copyUrl = () => {
+    if (tokenData.analyticsUrl) {
+      navigator.clipboard.writeText(tokenData.analyticsUrl);
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 2000);
     }
   };
 
@@ -857,6 +920,79 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
                   />
                   <Label htmlFor="isPublished">გამოქვეყნებული</Label>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Analytics Token */}
+            <Card>
+              <CardHeader>
+                <CardTitle>ანალიტიკის წვდომა</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {tokenData.hasToken ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-medium">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block" />
+                        აქტიური ბმული
+                      </span>
+                      {tokenData.createdAt && (
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(tokenData.createdAt).toLocaleDateString(
+                            "ka-GE"
+                          )}
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-xs font-mono break-all text-muted-foreground">
+                        {tokenData.analyticsUrl}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={copyUrl}
+                      >
+                        {tokenCopied ? "✓ კოპირებულია" : "კოპირება"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={generateToken}
+                        disabled={tokenLoading}
+                      >
+                        განახლება
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1 text-red-600 hover:text-red-700"
+                        onClick={revokeToken}
+                        disabled={tokenLoading}
+                      >
+                        გაუქმება
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      მუზეუმს არ აქვს ანალიტიკის წვდომა. გენერირება ახლავე:
+                    </p>
+                    <Button
+                      type="button"
+                      onClick={generateToken}
+                      disabled={tokenLoading}
+                      className="bg-amber-500 hover:bg-amber-600 text-white"
+                    >
+                      {tokenLoading ? "იქმნება..." : "🔗 ბმულის გენერირება"}
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

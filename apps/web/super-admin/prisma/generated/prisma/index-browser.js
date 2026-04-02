@@ -420,6 +420,8 @@ exports.Prisma.MuseumScalarFieldEnum = {
   vr360Price: 'vr360Price',
   vr360IsFree: 'vr360IsFree',
   vr360BundleWithAudio: 'vr360BundleWithAudio',
+  analyticsToken: 'analyticsToken',
+  analyticsTokenCreatedAt: 'analyticsTokenCreatedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

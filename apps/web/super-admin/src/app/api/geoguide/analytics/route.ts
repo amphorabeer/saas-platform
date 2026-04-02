@@ -8,24 +8,38 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const period = searchParams.get("period") || "30d";
+    const museumId = searchParams.get("museumId") || null;
+    const dateFrom = searchParams.get("dateFrom") || null;
+    const dateTo = searchParams.get("dateTo") || null;
 
     // Calculate date range
     let startDate: Date | null = null;
+    let endDate: Date | null = null;
     const now = new Date();
 
-    switch (period) {
-      case "7d":
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case "30d":
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      case "90d":
-        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-        break;
-      default:
-        startDate = null;
+    if (dateFrom && dateTo) {
+      startDate = new Date(dateFrom);
+      endDate = new Date(dateTo);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      switch (period) {
+        case "7d":
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case "30d":
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case "90d":
+          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          break;
+        default:
+          startDate = null;
+      }
     }
+
+    // Museum filter
+    const museumFilter = museumId ? { museumId } : {};
+    const tourMuseumFilter = museumId ? { museum: { id: museumId } } : {};
 
     // Free tour starts (from GeoGuideEvent)
     const freeTourStarts = await prisma.geoGuideEvent.count({
@@ -38,6 +52,14 @@ export async function GET(request: NextRequest) {
     // Codes statistics
     const codesStats = await prisma.activationCode.groupBy({
       by: ["status"],
+      where: museumId
+        ? {
+            OR: [
+              { museumIds: { isEmpty: true } },
+              { museumIds: { has: museumId } },
+            ],
+          }
+        : {},
       _count: { status: true },
     });
 
@@ -168,7 +190,10 @@ export async function GET(request: NextRequest) {
 
     // Get code activations
     const entitlements = await prisma.entitlement.findMany({
-      where: startDate ? { activatedAt: { gte: startDate } } : {},
+      where: {
+        ...(museumId ? { tour: tourMuseumFilter } : {}),
+        ...(startDate ? { activatedAt: { gte: startDate, ...(endDate ? { lte: endDate } : {}) } } : {}),
+      },
       select: { activatedAt: true },
       orderBy: { activatedAt: "asc" },
     });
@@ -213,6 +238,7 @@ export async function GET(request: NextRequest) {
     // Top Museums by activations (codes + payments)
     const topMuseumsData = await prisma.entitlement.groupBy({
       by: ["tourId"],
+      where: museumId ? { tour: tourMuseumFilter } : {},
       _count: { tourId: true },
       orderBy: { _count: { tourId: "desc" } },
       take: 10,
@@ -348,6 +374,11 @@ export async function GET(request: NextRequest) {
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
      .slice(0, 10);
 
+    const allMuseums = await prisma.museum.findMany({
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    });
+
     return NextResponse.json({
       codes,
       payments,
@@ -357,6 +388,7 @@ export async function GET(request: NextRequest) {
       topMuseums,
       topTours,
       recentActivations,
+      allMuseums,
     });
   } catch (error) {
     console.error("Error fetching analytics:", error);

@@ -23,6 +23,11 @@ import {
   Activity,
 } from "lucide-react";
 
+interface Museum {
+  id: string;
+  name: string;
+}
+
 interface AnalyticsData {
   // კოდების სტატისტიკა
   codes: {
@@ -61,21 +66,30 @@ interface AnalyticsData {
     date: string;
     platform: string;
   }[];
+  allMuseums: Museum[];
 }
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<"7d" | "30d" | "90d" | "all">("30d");
-
-  useEffect(() => {
-    fetchAnalytics();
-  }, [period]);
+  const [museumId, setMuseumId] = useState<string>("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [useCustomRange, setUseCustomRange] = useState(false);
 
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/geoguide/analytics?period=${period}`);
+      const params = new URLSearchParams();
+      if (useCustomRange && dateFrom && dateTo) {
+        params.set("dateFrom", dateFrom);
+        params.set("dateTo", dateTo);
+      } else {
+        params.set("period", period);
+      }
+      if (museumId) params.set("museumId", museumId);
+      const res = await fetch(`/api/geoguide/analytics?${params.toString()}`);
       if (res.ok) {
         const result = await res.json();
         setData(result);
@@ -86,6 +100,10 @@ export default function AnalyticsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [period, museumId, dateFrom, dateTo, useCustomRange]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("ka-GE", {
@@ -125,16 +143,69 @@ export default function AnalyticsPage() {
             GeoGuide-ის სტატისტიკა და მეტრიკები
           </p>
         </div>
-        <select
-          value={period}
-          onChange={(e) => setPeriod(e.target.value as any)}
-          className="px-4 py-2 border rounded-lg bg-background"
-        >
-          <option value="7d">ბოლო 7 დღე</option>
-          <option value="30d">ბოლო 30 დღე</option>
-          <option value="90d">ბოლო 90 დღე</option>
-          <option value="all">ყველა დრო</option>
-        </select>
+        <div className="flex items-center gap-3 flex-wrap justify-end">
+          {/* Museum dropdown */}
+          <select
+            value={museumId}
+            onChange={(e) => setMuseumId(e.target.value)}
+            className="px-4 py-2 border rounded-lg bg-background"
+          >
+            <option value="">ყველა მუზეუმი</option>
+            {data?.allMuseums.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Period select */}
+          {!useCustomRange && (
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value as any)}
+              className="px-4 py-2 border rounded-lg bg-background"
+            >
+              <option value="7d">ბოლო 7 დღე</option>
+              <option value="30d">ბოლო 30 დღე</option>
+              <option value="90d">ბოლო 90 დღე</option>
+              <option value="all">ყველა დრო</option>
+            </select>
+          )}
+
+          {/* Date range */}
+          {useCustomRange ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="px-3 py-2 border rounded-lg bg-background text-sm"
+              />
+              <span className="text-muted-foreground">—</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="px-3 py-2 border rounded-lg bg-background text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setUseCustomRange(false)}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setUseCustomRange(true)}
+              className="px-4 py-2 border rounded-lg text-sm hover:bg-muted"
+            >
+              📅 თარიღი
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Stats */}

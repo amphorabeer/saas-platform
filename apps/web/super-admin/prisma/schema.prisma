@@ -566,6 +566,10 @@ model Museum {
   tours           Tour[]
   payments        Payment[]
 
+  // ანალიტიკის წვდომა
+  analyticsToken          String?   @unique
+  analyticsTokenCreatedAt DateTime?
+
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 

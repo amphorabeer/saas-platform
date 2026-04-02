@@ -21419,6 +21419,8 @@ export namespace Prisma {
     vr360Price: Decimal | null
     vr360IsFree: boolean | null
     vr360BundleWithAudio: boolean | null
+    analyticsToken: string | null
+    analyticsTokenCreatedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -21472,6 +21474,8 @@ export namespace Prisma {
     vr360Price: Decimal | null
     vr360IsFree: boolean | null
     vr360BundleWithAudio: boolean | null
+    analyticsToken: string | null
+    analyticsTokenCreatedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -21527,6 +21531,8 @@ export namespace Prisma {
     vr360Price: number
     vr360IsFree: number
     vr360BundleWithAudio: number
+    analyticsToken: number
+    analyticsTokenCreatedAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -21596,6 +21602,8 @@ export namespace Prisma {
     vr360Price?: true
     vr360IsFree?: true
     vr360BundleWithAudio?: true
+    analyticsToken?: true
+    analyticsTokenCreatedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -21649,6 +21657,8 @@ export namespace Prisma {
     vr360Price?: true
     vr360IsFree?: true
     vr360BundleWithAudio?: true
+    analyticsToken?: true
+    analyticsTokenCreatedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -21704,6 +21714,8 @@ export namespace Prisma {
     vr360Price?: true
     vr360IsFree?: true
     vr360BundleWithAudio?: true
+    analyticsToken?: true
+    analyticsTokenCreatedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -21846,6 +21858,8 @@ export namespace Prisma {
     vr360Price: Decimal | null
     vr360IsFree: boolean
     vr360BundleWithAudio: boolean
+    analyticsToken: string | null
+    analyticsTokenCreatedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: MuseumCountAggregateOutputType | null
@@ -21920,6 +21934,8 @@ export namespace Prisma {
     vr360Price?: boolean
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: boolean
+    analyticsTokenCreatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tours?: boolean | Museum$toursArgs<ExtArgs>
@@ -21978,6 +21994,8 @@ export namespace Prisma {
     vr360Price?: boolean
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: boolean
+    analyticsTokenCreatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["museum"]>
@@ -22033,6 +22051,8 @@ export namespace Prisma {
     vr360Price?: boolean
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: boolean
+    analyticsTokenCreatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -22101,6 +22121,8 @@ export namespace Prisma {
       vr360Price: Prisma.Decimal | null
       vr360IsFree: boolean
       vr360BundleWithAudio: boolean
+      analyticsToken: string | null
+      analyticsTokenCreatedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["museum"]>
@@ -22548,6 +22570,8 @@ export namespace Prisma {
     readonly vr360Price: FieldRef<"Museum", 'Decimal'>
     readonly vr360IsFree: FieldRef<"Museum", 'Boolean'>
     readonly vr360BundleWithAudio: FieldRef<"Museum", 'Boolean'>
+    readonly analyticsToken: FieldRef<"Museum", 'String'>
+    readonly analyticsTokenCreatedAt: FieldRef<"Museum", 'DateTime'>
     readonly createdAt: FieldRef<"Museum", 'DateTime'>
     readonly updatedAt: FieldRef<"Museum", 'DateTime'>
   }
@@ -36207,6 +36231,8 @@ export namespace Prisma {
     vr360Price: 'vr360Price',
     vr360IsFree: 'vr360IsFree',
     vr360BundleWithAudio: 'vr360BundleWithAudio',
+    analyticsToken: 'analyticsToken',
+    analyticsTokenCreatedAt: 'analyticsTokenCreatedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -38301,6 +38327,8 @@ export namespace Prisma {
     vr360Price?: DecimalNullableFilter<"Museum"> | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFilter<"Museum"> | boolean
     vr360BundleWithAudio?: BoolFilter<"Museum"> | boolean
+    analyticsToken?: StringNullableFilter<"Museum"> | string | null
+    analyticsTokenCreatedAt?: DateTimeNullableFilter<"Museum"> | Date | string | null
     createdAt?: DateTimeFilter<"Museum"> | Date | string
     updatedAt?: DateTimeFilter<"Museum"> | Date | string
     tours?: TourListRelationFilter
@@ -38358,6 +38386,8 @@ export namespace Prisma {
     vr360Price?: SortOrderInput | SortOrder
     vr360IsFree?: SortOrder
     vr360BundleWithAudio?: SortOrder
+    analyticsToken?: SortOrderInput | SortOrder
+    analyticsTokenCreatedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tours?: TourOrderByRelationAggregateInput
@@ -38367,6 +38397,7 @@ export namespace Prisma {
   export type MuseumWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     slug?: string
+    analyticsToken?: string
     AND?: MuseumWhereInput | MuseumWhereInput[]
     OR?: MuseumWhereInput[]
     NOT?: MuseumWhereInput | MuseumWhereInput[]
@@ -38418,11 +38449,12 @@ export namespace Prisma {
     vr360Price?: DecimalNullableFilter<"Museum"> | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFilter<"Museum"> | boolean
     vr360BundleWithAudio?: BoolFilter<"Museum"> | boolean
+    analyticsTokenCreatedAt?: DateTimeNullableFilter<"Museum"> | Date | string | null
     createdAt?: DateTimeFilter<"Museum"> | Date | string
     updatedAt?: DateTimeFilter<"Museum"> | Date | string
     tours?: TourListRelationFilter
     payments?: PaymentListRelationFilter
-  }, "id" | "slug">
+  }, "id" | "slug" | "analyticsToken">
 
   export type MuseumOrderByWithAggregationInput = {
     id?: SortOrder
@@ -38475,6 +38507,8 @@ export namespace Prisma {
     vr360Price?: SortOrderInput | SortOrder
     vr360IsFree?: SortOrder
     vr360BundleWithAudio?: SortOrder
+    analyticsToken?: SortOrderInput | SortOrder
+    analyticsTokenCreatedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: MuseumCountOrderByAggregateInput
@@ -38538,6 +38572,8 @@ export namespace Prisma {
     vr360Price?: DecimalNullableWithAggregatesFilter<"Museum"> | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolWithAggregatesFilter<"Museum"> | boolean
     vr360BundleWithAudio?: BoolWithAggregatesFilter<"Museum"> | boolean
+    analyticsToken?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    analyticsTokenCreatedAt?: DateTimeNullableWithAggregatesFilter<"Museum"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Museum"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Museum"> | Date | string
   }
@@ -41572,6 +41608,8 @@ export namespace Prisma {
     vr360Price?: Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: string | null
+    analyticsTokenCreatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourCreateNestedManyWithoutMuseumInput
@@ -41629,6 +41667,8 @@ export namespace Prisma {
     vr360Price?: Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: string | null
+    analyticsTokenCreatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourUncheckedCreateNestedManyWithoutMuseumInput
@@ -41686,6 +41726,8 @@ export namespace Prisma {
     vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
+    analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
+    analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUpdateManyWithoutMuseumNestedInput
@@ -41743,6 +41785,8 @@ export namespace Prisma {
     vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
+    analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
+    analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUncheckedUpdateManyWithoutMuseumNestedInput
@@ -41800,6 +41844,8 @@ export namespace Prisma {
     vr360Price?: Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: string | null
+    analyticsTokenCreatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41855,6 +41901,8 @@ export namespace Prisma {
     vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
+    analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
+    analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41910,6 +41958,8 @@ export namespace Prisma {
     vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
+    analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
+    analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -44818,6 +44868,8 @@ export namespace Prisma {
     vr360Price?: SortOrder
     vr360IsFree?: SortOrder
     vr360BundleWithAudio?: SortOrder
+    analyticsToken?: SortOrder
+    analyticsTokenCreatedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44878,6 +44930,8 @@ export namespace Prisma {
     vr360Price?: SortOrder
     vr360IsFree?: SortOrder
     vr360BundleWithAudio?: SortOrder
+    analyticsToken?: SortOrder
+    analyticsTokenCreatedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44931,6 +44985,8 @@ export namespace Prisma {
     vr360Price?: SortOrder
     vr360IsFree?: SortOrder
     vr360BundleWithAudio?: SortOrder
+    analyticsToken?: SortOrder
+    analyticsTokenCreatedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -49654,6 +49710,8 @@ export namespace Prisma {
     vr360Price?: Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: string | null
+    analyticsTokenCreatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentCreateNestedManyWithoutMuseumInput
@@ -49710,6 +49768,8 @@ export namespace Prisma {
     vr360Price?: Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: string | null
+    analyticsTokenCreatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutMuseumInput
@@ -50010,6 +50070,8 @@ export namespace Prisma {
     vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
+    analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
+    analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUpdateManyWithoutMuseumNestedInput
@@ -50066,6 +50128,8 @@ export namespace Prisma {
     vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
+    analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
+    analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutMuseumNestedInput
@@ -51399,6 +51463,8 @@ export namespace Prisma {
     vr360Price?: Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: string | null
+    analyticsTokenCreatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourCreateNestedManyWithoutMuseumInput
@@ -51455,6 +51521,8 @@ export namespace Prisma {
     vr360Price?: Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: boolean
     vr360BundleWithAudio?: boolean
+    analyticsToken?: string | null
+    analyticsTokenCreatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tours?: TourUncheckedCreateNestedManyWithoutMuseumInput
@@ -51639,6 +51707,8 @@ export namespace Prisma {
     vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
+    analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
+    analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUpdateManyWithoutMuseumNestedInput
@@ -51695,6 +51765,8 @@ export namespace Prisma {
     vr360Price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vr360IsFree?: BoolFieldUpdateOperationsInput | boolean
     vr360BundleWithAudio?: BoolFieldUpdateOperationsInput | boolean
+    analyticsToken?: NullableStringFieldUpdateOperationsInput | string | null
+    analyticsTokenCreatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tours?: TourUncheckedUpdateManyWithoutMuseumNestedInput
