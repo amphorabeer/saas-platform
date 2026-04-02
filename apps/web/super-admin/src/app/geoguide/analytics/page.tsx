@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   Card,
   CardContent,
@@ -101,6 +104,60 @@ export default function AnalyticsPage() {
     }
   };
 
+  const exportToExcel = async () => {
+    const params = new URLSearchParams();
+    if (useCustomRange && dateFrom && dateTo) {
+      params.set("dateFrom", dateFrom);
+      params.set("dateTo", dateTo);
+    } else {
+      params.set("period", period);
+    }
+    if (museumId) params.set("museumId", museumId);
+
+    const res = await fetch(`/api/geoguide/analytics/export?${params.toString()}`);
+    const { rows, generatedAt } = await res.json();
+
+    const wsData = [
+      ["მუზეუმი", "სულ კოდები", "გამოყენებული", "ხელმისაწვდომი", "ვადაგასული", "გაუქმებული", "კონვერსია", "გადახდები", "შემოსავალი"],
+      ...rows.map((r: any) => [r.museum, r.totalCodes, r.redeemed, r.available, r.expired, r.revoked, r.redemptionRate, r.payments, r.revenue]),
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "ანალიტიკა");
+    XLSX.writeFile(wb, `geoguide-analytics-${new Date().toISOString().split("T")[0]}.xlsx`);
+  };
+
+  const exportToPDF = async () => {
+    const params = new URLSearchParams();
+    if (useCustomRange && dateFrom && dateTo) {
+      params.set("dateFrom", dateFrom);
+      params.set("dateTo", dateTo);
+    } else {
+      params.set("period", period);
+    }
+    if (museumId) params.set("museumId", museumId);
+
+    const res = await fetch(`/api/geoguide/analytics/export?${params.toString()}`);
+    const { rows, generatedAt } = await res.json();
+
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("GeoGuide Analytics", 14, 15);
+    doc.setFontSize(10);
+    doc.text(`გენერირებულია: ${new Date(generatedAt).toLocaleString("ka-GE")}`, 14, 22);
+
+    autoTable(doc, {
+      startY: 28,
+      head: [["მუზეუმი", "სულ", "გამოყენ.", "ხელმისაწვ.", "კონვერსია", "გადახდები", "შემოსავალი"]],
+      body: rows.map((r: any) => [r.museum, r.totalCodes, r.redeemed, r.available, r.redemptionRate, r.payments, r.revenue]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [245, 158, 11] },
+    });
+
+    doc.save(`geoguide-analytics-${new Date().toISOString().split("T")[0]}.pdf`);
+  };
+
   useEffect(() => {
     fetchAnalytics();
   }, [period, museumId, dateFrom, dateTo, useCustomRange]);
@@ -144,6 +201,20 @@ export default function AnalyticsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 flex-wrap justify-end">
+          <button
+            type="button"
+            onClick={exportToExcel}
+            className="px-4 py-2 border rounded-lg text-sm hover:bg-muted flex items-center gap-2"
+          >
+            📊 Excel
+          </button>
+          <button
+            type="button"
+            onClick={exportToPDF}
+            className="px-4 py-2 border rounded-lg text-sm hover:bg-muted flex items-center gap-2"
+          >
+            📄 PDF
+          </button>
           {/* Museum dropdown */}
           <select
             value={museumId}

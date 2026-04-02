@@ -53,18 +53,27 @@ export async function GET(
     // კოდების სტატისტიკა
     const codesStats = await prisma.activationCode.groupBy({
       by: ["status"],
-      where: { museumId },
+      where: { museumIds: { has: museumId } },
       _count: { status: true },
     });
 
     const codes = { total: 0, available: 0, redeemed: 0, expired: 0, revoked: 0, redemptionRate: 0 };
     codesStats.forEach((stat) => {
-      codes.total += stat._count.status;
+      const count = (stat._count as { status: number }).status;
+      codes.total += count;
       switch (stat.status) {
-        case "AVAILABLE": codes.available = stat._count.status; break;
-        case "REDEEMED": codes.redeemed = stat._count.status; break;
-        case "EXPIRED": codes.expired = stat._count.status; break;
-        case "REVOKED": codes.revoked = stat._count.status; break;
+        case "AVAILABLE":
+          codes.available = count;
+          break;
+        case "REDEEMED":
+          codes.redeemed = count;
+          break;
+        case "EXPIRED":
+          codes.expired = count;
+          break;
+        case "REVOKED":
+          codes.revoked = count;
+          break;
       }
     });
     codes.redemptionRate = codes.total > 0 ? (codes.redeemed / codes.total) * 100 : 0;
