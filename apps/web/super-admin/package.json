@@ -11,6 +11,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "@aws-sdk/client-s3": "^3.978.0",
     "@aws-sdk/s3-request-presigner": "^3.978.0",
     "@prisma/client": "5.22.0",
@@ -20,8 +22,6 @@
     "@saas-platform/types": "workspace:*",
     "@saas-platform/ui": "workspace:*",
     "@saas-platform/utils": "workspace:*",
-    "jspdf": "^2.5.2",
-    "jspdf-autotable": "^3.8.4",
     "jszip": "^3.10.1",
     "lucide-react": "^0.303.0",
     "next": "^14.0.4",
