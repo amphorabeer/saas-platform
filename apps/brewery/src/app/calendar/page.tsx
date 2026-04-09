@@ -658,18 +658,58 @@ function CalendarContent() {
           }
           
           const startDate = toLocalDate(condAssignment.plannedStart) || toLocalDate(batch.conditioningStartedAt) || new Date()
-          
-          // ✅ FIX: Only use actualEnd for COMPLETED assignments, ACTIVE use plannedEnd
+
+          // Same completion rules as split lots: if lot is still ACTIVE in this phase, do not treat assignment as completed
+          // (avoids using actualEnd = conditioning start → bar collapsing to a single day)
+          const isAssignmentCompleted = condAssignment.status === 'COMPLETED'
+          const isLotStillInSamePhase =
+            conditioningLot.status === 'ACTIVE' &&
+            conditioningLot.phase?.toUpperCase() === condAssignment.phase?.toUpperCase()
+          const isCompleted = isAssignmentCompleted && !isLotStillInSamePhase
+
+          let blendEstimatedEnd: Date | null = null
+          for (const item of blendItems) {
+            const d = toLocalDate(item.batch.estimatedEndDate)
+            if (d && (!blendEstimatedEnd || d.getTime() > blendEstimatedEnd.getTime())) {
+              blendEstimatedEnd = d
+            }
+          }
+
+          // Match split-batch assignment path: plannedEnd → endTime → estimatedEndDate → default duration
           let endDate: Date
-          const isCompleted = condAssignment.status === 'COMPLETED'
-          console.log(`[Calendar] BLEND endDate: status=${condAssignment.status}, actualEnd=${condAssignment.actualEnd}, completedAt=${batch.completedAt}, plannedEnd=${condAssignment.plannedEnd}`)
-          if (isCompleted && condAssignment.actualEnd) {
-            endDate = toLocalDate(condAssignment.actualEnd) || new Date()
-          } else if (isCompleted && batch.completedAt) {
-            endDate = toLocalDate(batch.completedAt) || new Date()
+          console.log(
+            `[Calendar] BLEND endDate: status=${condAssignment.status}, lotStatus=${conditioningLot.status}, isCompleted=${isCompleted}, actualEnd=${condAssignment.actualEnd}, completedAt=${batch.completedAt}, plannedEnd=${condAssignment.plannedEnd}, estimatedEnd=${blendEstimatedEnd?.toISOString?.()}`,
+          )
+          if (isCompleted) {
+            if (condAssignment.actualEnd) {
+              endDate = toLocalDate(condAssignment.actualEnd) || new Date()
+            } else if (condAssignment.endTime) {
+              endDate = toLocalDate(condAssignment.endTime) || new Date(condAssignment.endTime)
+            } else if (batch.completedAt) {
+              endDate = toLocalDate(batch.completedAt) || new Date()
+            } else {
+              const today = new Date()
+              today.setHours(12, 0, 0, 0)
+              endDate = today
+            }
           } else {
-            // ACTIVE assignments: always use plannedEnd
-            endDate = toLocalDate(condAssignment.plannedEnd) || new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+            if (condAssignment.plannedEnd) {
+              endDate = toLocalDate(condAssignment.plannedEnd) || new Date(condAssignment.plannedEnd)
+            } else if (condAssignment.endTime) {
+              endDate = toLocalDate(condAssignment.endTime) || new Date(condAssignment.endTime)
+            } else if (blendEstimatedEnd) {
+              endDate = blendEstimatedEnd
+            } else {
+              endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+            }
+          }
+
+          if (status !== 'COMPLETED' && !isCompleted) {
+            const today = new Date()
+            today.setHours(12, 0, 0, 0)
+            if (endDate.getTime() < today.getTime()) {
+              endDate = today
+            }
           }
           
           // Use actual phase from lot (CONDITIONING, BRIGHT, READY, etc.)
@@ -680,7 +720,7 @@ function CalendarContent() {
           // ✅ FIX: Check if batch is COMPLETED - use batch status, not lot phase
           const batchIsCompleted = status === 'COMPLETED'
           const displayStatus = batchIsCompleted ? 'COMPLETED' : modalPhase
-          const isHistorical = batchIsCompleted || condAssignment.status === 'COMPLETED'
+          const isHistorical = batchIsCompleted || isCompleted
           
           console.log(`[Calendar] BLEND ${actualPhase}: ${combinedName} → ${condAssignment.tankName || 'tank'}, batchStatus=${status}, displayStatus=${displayStatus}`)
           
