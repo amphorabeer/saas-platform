@@ -232,5 +232,79 @@ body {
   animation-delay: 1s;
 }
 
+@media print {
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+  }
 
+  /* Layout: avoid 100vh / min-h-screen forcing a blank print page */
+  .sidebar,
+  [class*='sidebar'],
+  [class*='Sidebar'] {
+    display: none !important;
+  }
+
+  .min-h-screen,
+  [class*='min-h-screen'] {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .h-screen {
+    height: auto !important;
+  }
+
+  .flex.h-screen,
+  .flex.min-h-screen {
+    height: auto !important;
+    min-height: 0 !important;
+    display: block !important;
+  }
+
+  .lg\:flex.lg\:w-64 {
+    display: none !important;
+  }
+
+  .no-print,
+  .print\:hidden {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    line-height: 0 !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .haccp-print-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .haccp-print-table th,
+  .haccp-print-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .signature-img {
+    display: block !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-break {
+    page-break-after: always;
+  }
+}
 

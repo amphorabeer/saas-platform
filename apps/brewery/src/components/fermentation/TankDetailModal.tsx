@@ -315,6 +315,9 @@ export function TankDetailModal({ tank, onClose, onEquipmentUpdate }: TankDetail
           result: resultMap[cipData.result] || 'PASS',
           notes: cipData.notes || null,
           usedSupplies: cipData.usedSupplies || [],
+          date: cipData.date,
+          phLevel: cipData.phLevel ?? null,
+          visualCheck: typeof cipData.visualCheck === 'boolean' ? cipData.visualCheck : true,
         }),
       })
 

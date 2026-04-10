@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui'
 
 interface CIPLogModalProps {
@@ -54,11 +55,14 @@ const SUPPLY_ICONS: Record<string, string> = {
 }
 
 export function CIPLogModal({ isOpen, onClose, onSave, equipmentId, equipmentName }: CIPLogModalProps) {
+  const { data: session } = useSession()
   const [cipType, setCipType] = useState<'full' | 'caustic_only' | 'sanitizer_only' | 'rinse'>('full')
   const [dateTime, setDateTime] = useState<string>(new Date().toISOString().slice(0, 16))
   const [duration, setDuration] = useState<string>('')
   const [temperature, setTemperature] = useState<string>('')
   const [causticConcentration, setCausticConcentration] = useState<string>('')
+  const [phLevel, setPhLevel] = useState<number | null>(null)
+  const [visualCheck, setVisualCheck] = useState(true)
   const [performedBy, setPerformedBy] = useState<string>('')
   const [result, setResult] = useState<'success' | 'needs_repeat' | 'problem'>('success')
   const [notes, setNotes] = useState<string>('')
@@ -94,6 +98,13 @@ export function CIPLogModal({ isOpen, onClose, onSave, equipmentId, equipmentNam
       fetchUsers()
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen || users.length === 0) return
+    const sid = (session?.user as { id?: string } | undefined)?.id
+    if (!sid || !users.some((u) => u.id === sid)) return
+    setPerformedBy((prev) => (prev === '' ? sid : prev))
+  }, [isOpen, users, session?.user])
 
   // Fetch cleaning supplies from API
   useEffect(() => {
@@ -175,6 +186,8 @@ export function CIPLogModal({ isOpen, onClose, onSave, equipmentId, equipmentNam
       duration: parseInt(duration),
       temperature: temperature ? parseFloat(temperature) : undefined,
       causticConcentration: causticConcentration ? parseFloat(causticConcentration) : undefined,
+      phLevel: phLevel !== null && !Number.isNaN(phLevel) ? phLevel : null,
+      visualCheck,
       performedBy,
       result,
       notes: notes || undefined,
@@ -187,6 +200,8 @@ export function CIPLogModal({ isOpen, onClose, onSave, equipmentId, equipmentNam
     setDuration('')
     setTemperature('')
     setCausticConcentration('')
+    setPhLevel(null)
+    setVisualCheck(true)
     setPerformedBy('')
     setResult('success')
     setNotes('')
@@ -306,6 +321,41 @@ export function CIPLogModal({ isOpen, onClose, onSave, equipmentId, equipmentNam
             </div>
           )}
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">ფაქშის დონე (pH)</label>
+              <input
+                type="number"
+                step="0.1"
+                min={0}
+                max={14}
+                value={phLevel ?? ''}
+                onChange={(e) => {
+                  const raw = e.target.value
+                  if (raw === '') {
+                    setPhLevel(null)
+                    return
+                  }
+                  const n = parseFloat(raw)
+                  setPhLevel(Number.isNaN(n) ? null : n)
+                }}
+                placeholder="7.0"
+                className="w-full px-4 py-2 bg-bg-card border border-border rounded-lg text-sm"
+              />
+            </div>
+            <div className="flex items-end pb-2">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  checked={visualCheck}
+                  onChange={(e) => setVisualCheck(e.target.checked)}
+                  className="rounded border-border"
+                />
+                ვიზუალური შემოწმება
+              </label>
+            </div>
+          </div>
+
           {/* ========== CLEANING SUPPLIES SECTION ========== */}
           <div className="border-t border-border pt-4">
             <div className="flex justify-between items-center mb-3">
@@ -414,11 +464,21 @@ export function CIPLogModal({ isOpen, onClose, onSave, equipmentId, equipmentNam
               required
             >
               <option value="">აირჩიეთ შემსრულებელი</option>
-              {users.filter(user => user.name && user.isActive !== false).map(user => (
-                <option key={user.id} value={user.name}>
-                  {user.name}{user.role ? ` – ${user.role}` : ''}
-                </option>
-              ))}
+              {users.map((user) => {
+                const label =
+                  user.name?.trim() ||
+                  user.email ||
+                  user.id
+                const role = user.role ? ` – ${user.role}` : ''
+                const inactive = user.isActive === false ? ' (არააქტიური)' : ''
+                return (
+                  <option key={user.id} value={user.id}>
+                    {label}
+                    {role}
+                    {inactive}
+                  </option>
+                )
+              })}
             </select>
           </div>
 

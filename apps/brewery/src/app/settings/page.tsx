@@ -5,7 +5,13 @@ import { signOut } from 'next-auth/react'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui'
-import { SettingsSidebar, UserModal, IntegrationModal, ConfirmationModal } from '@/components/settings'
+import {
+  SettingsSidebar,
+  UserModal,
+  IntegrationModal,
+  ConfirmationModal,
+  UserSignatureCell,
+} from '@/components/settings'
 import {
   mockUsers,
   mockCompanySettings,
@@ -444,13 +450,14 @@ export default function SettingsPage() {
                         <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">როლი</th>
                         <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">სტატუსი</th>
                         <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">ბოლო აქტივობა</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">ხელმოწერა</th>
                         <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">მოქმედება</th>
                       </tr>
                     </thead>
                     <tbody>
                       {usersLoading ? (
                         <tr>
-                          <td colSpan={7} className="py-8 text-center text-text-muted">
+                          <td colSpan={8} className="py-8 text-center text-text-muted">
                             <div className="flex items-center justify-center gap-2">
                               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-copper"></div>
                               <span>იტვირთება...</span>
@@ -482,6 +489,17 @@ export default function SettingsPage() {
                             </td>
                             <td className="py-3 px-4 text-text-muted text-sm">
                               {getRelativeTime(user.lastActivity || (user as any).updatedAt)}
+                            </td>
+                            <td className="py-3 px-4 align-top">
+                              {users.length > 0 ? (
+                                <UserSignatureCell
+                                  userId={user.id}
+                                  signatureUrl={(user as User & { signatureUrl?: string | null }).signatureUrl}
+                                  onUpdated={fetchUsers}
+                                />
+                              ) : (
+                                <span className="text-xs text-text-muted">—</span>
+                              )}
                             </td>
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-2">

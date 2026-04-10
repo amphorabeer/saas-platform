@@ -68,6 +68,8 @@ export interface User {
   position?: string
   status: UserStatus
   avatarUrl?: string
+  /** From API — public URL under /signatures/ */
+  signatureUrl?: string | null
   lastActivity?: Date
   createdAt: Date
   twoFactorEnabled: boolean

@@ -3,6 +3,9 @@ import { prisma } from '@saas-platform/database'
 import { withTenant, RouteContext } from '@/lib/api-middleware'
 import { randomUUID } from 'crypto'
 
+/** CIP on these equipment types syncs a CCP-2 (vessel sanitation) log in HACCP. */
+const CCP2_SYNC_EQUIPMENT_TYPES = new Set(['FERMENTER', 'UNITANK', 'BRITE', 'QVEVRI'])
+
 interface UsedSupply {
   supplyId: string
   name: string
@@ -42,6 +45,14 @@ export const POST = withTenant(async (
     }
     
     const body = await req.json()
+
+    console.log('[CIP] POST body fields:', {
+      keys: Object.keys(body),
+      phLevel: body.phLevel,
+      ph: body.ph,
+      visualCheck: body.visualCheck,
+      visual: body.visual,
+    })
     
     if (!body.performedBy) {
       return NextResponse.json(
@@ -49,9 +60,40 @@ export const POST = withTenant(async (
         { status: 400 }
       )
     }
-    
+
+    const performerUserId = String(body.performedBy)
+    const performer = await prisma.user.findFirst({
+      where: { id: performerUserId, tenantId: ctx.tenantId },
+      select: { id: true },
+    })
+    const resolvedPerformerId = performer?.id ?? ctx.userId
+
     const now = new Date()
-    const cipDate = new Date(now.getTime())
+    let cipDate = new Date(now.getTime())
+    if (body.date != null) {
+      const parsed = new Date(body.date)
+      if (!Number.isNaN(parsed.getTime())) {
+        cipDate = parsed
+      }
+    }
+
+    const phRaw = body.phLevel ?? body.ph
+    const phLevelForCcp =
+      phRaw === undefined || phRaw === null || phRaw === ''
+        ? null
+        : Number(phRaw)
+    const phLevelNormalized =
+      phLevelForCcp != null && Number.isFinite(phLevelForCcp) ? phLevelForCcp : null
+
+    const visRaw = body.visualCheck ?? body.visual
+    let visualCheckForCcp: boolean | null = null
+    if (typeof visRaw === 'boolean') {
+      visualCheckForCcp = visRaw
+    } else if (typeof visRaw === 'string') {
+      const s = visRaw.trim().toLowerCase()
+      if (['true', '1', 'yes', 'on'].includes(s)) visualCheckForCcp = true
+      else if (['false', '0', 'no', 'off'].includes(s)) visualCheckForCcp = false
+    }
     
     const cipIntervalDays = equipment.cipIntervalDays || 14
     const nextCIPDate = new Date(now.getTime())
@@ -73,11 +115,40 @@ export const POST = withTenant(async (
         duration: parseInt(String(body.duration)) || 60,
         temperature: body.temperature ? parseFloat(String(body.temperature)) : null,
         causticConcentration: body.causticConcentration ? parseFloat(String(body.causticConcentration)) : null,
-        performedBy: String(body.performedBy),
+        performedBy: resolvedPerformerId,
         result: body.result || 'PASS',
         notes: body.notes ? String(body.notes) : null,
       },
     })
+
+    const equipmentTypeUpper = (equipment.type || '').toUpperCase()
+    if (CCP2_SYNC_EQUIPMENT_TYPES.has(equipmentTypeUpper)) {
+      try {
+        const recorder = await prisma.user.findFirst({
+          where: { id: resolvedPerformerId, tenantId: ctx.tenantId },
+          select: { id: true },
+        })
+        if (recorder) {
+          await prisma.ccpLog.create({
+            data: {
+              tenantId: ctx.tenantId,
+              ccpType: 'VESSEL_SANITATION',
+              batchId: null,
+              phLevel: phLevelNormalized,
+              visualCheck: visualCheckForCcp,
+              result: 'PASS',
+              recordedBy: recorder.id,
+              recordedAt: cipDate,
+              correctiveAction: `ავტომატურად CIP-იდან გენერირებული | CIP ID: ${cipLog.id} | ავზი: ${equipment.name}`,
+            },
+          })
+        } else {
+          console.warn('[CIP] Skipped HACCP CCP-2 sync: performer not found in tenant', resolvedPerformerId)
+        }
+      } catch (ccpSyncError) {
+        console.error('[CIP] HACCP CCP-2 sync failed (CIP log was saved):', ccpSyncError)
+      }
+    }
     
     // Update equipment status (set to AVAILABLE after CIP)
     const updatedEquipment = await prisma.equipment.update({
@@ -151,7 +222,7 @@ export const POST = withTenant(async (
                 type: 'ADJUSTMENT',
                 quantity: -supply.amount,
                 notes: `CIP - ${equipment.name} - CIP ჩანაწერი: ${cipLog.id}`,
-                createdBy: body.performedBy,
+                createdBy: resolvedPerformerId,
               },
             })
             

@@ -12,7 +12,7 @@ export function Header({ title, breadcrumb, onNewBatch }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
-    <header className="px-8 py-5 flex justify-between items-center border-b border-border bg-bg-secondary sticky top-0 z-50">
+    <header className="px-8 py-5 flex justify-between items-center border-b border-border bg-bg-secondary sticky top-0 z-50 print:hidden">
       <div>
         <h2 className="font-display text-2xl font-semibold">{title}</h2>
         <p className="text-xs text-text-muted mt-1">{breadcrumb}</p>

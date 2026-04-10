@@ -1,6 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withPermission, RouteContext } from '@/lib/api-middleware'
 import { prisma } from '@saas-platform/database'
+import type { Prisma } from '@prisma/client'
+
+function boilParamsFromRecipe(recipe: {
+  boilTime: number | null
+  process: Prisma.JsonValue
+}): { boilTemp: number; boilTime: number } {
+  const boilTime =
+    recipe.boilTime != null && recipe.boilTime > 0 ? recipe.boilTime : 60
+  let boilTemp = 100
+  const proc = recipe.process
+  if (proc && typeof proc === 'object' && !Array.isArray(proc)) {
+    const o = proc as Record<string, unknown>
+    const t = o.boilTemperature ?? o.boilTemp
+    if (t != null) {
+      const n = Number(t)
+      if (!Number.isNaN(n) && n > 0) {
+        boilTemp = n
+      }
+    }
+  }
+  return { boilTemp, boilTime }
+}
 
 // GET /api/batches - List batches (requires Batch:read)
 export const GET = withPermission('batch:read', async (req: NextRequest, ctx: RouteContext) => {
@@ -354,6 +376,33 @@ export const POST = withPermission('batch:create', async (req: NextRequest, ctx:
     })
 
     console.log('[POST /api/batches] ✅ Created Batch:', batch.batchNumber)
+
+    try {
+      const haccpUser = await prisma.user.findFirst({
+        where: { id: ctx.userId, tenantId: ctx.tenantId },
+        select: { id: true },
+      })
+      if (haccpUser) {
+        const { boilTemp, boilTime } = boilParamsFromRecipe(recipe)
+        await prisma.ccpLog.create({
+          data: {
+            tenantId: ctx.tenantId,
+            ccpType: 'BOILING',
+            batchId: batch.id,
+            temperature: boilTemp,
+            duration: boilTime,
+            result: 'PASS',
+            recordedBy: ctx.userId,
+            recordedAt: new Date(),
+            correctiveAction: `ავტომატურად გენერირებული | პარტია: ${batch.batchNumber} | რეცეპტი: ${recipe.name} | გეგმიული: ${boilTemp}°C, ${boilTime} წთ`,
+          },
+        })
+      } else {
+        console.warn('[POST /api/batches] Skipped HACCP CCP-1 sync: user not found in tenant', ctx.userId)
+      }
+    } catch (ccpSyncError) {
+      console.error('[POST /api/batches] HACCP CCP-1 sync failed (batch was created):', ccpSyncError)
+    }
 
     return NextResponse.json(batch, { status: 201 })
 

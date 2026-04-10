@@ -31,6 +31,7 @@
     "next": "14.0.4",
     "next-auth": "^4.24.5",
     "nodemailer": "^6.10.1",
+    "puppeteer": "^22.0.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",

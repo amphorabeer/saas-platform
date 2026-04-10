@@ -61,10 +61,15 @@ interface BatchReportModalProps {
   }>
   packagingRecords?: Array<{
     id: string
-    date: Date
+    /** Modal display date */
+    date?: Date
+    /** API batch detail uses performedAt instead of date */
+    performedAt?: Date
     packageType: string
     quantity: number
-    volumeL: number
+    volumeL?: number
+    /** API packaging runs use volumeTotal */
+    volumeTotal?: number
     performedBy: string
     notes?: string
   }>
@@ -81,6 +86,19 @@ interface BatchReportModalProps {
     performedBy?: string
     notes?: string
   }>
+}
+
+function packagingVolumeLiters(record: {
+  volumeL?: number
+  volumeTotal?: number
+}): number {
+  const v = record.volumeL ?? record.volumeTotal
+  const n = v != null ? Number(v) : 0
+  return Number.isFinite(n) ? n : 0
+}
+
+function packagingRecordDate(record: { date?: Date; performedAt?: Date }): Date | undefined {
+  return record.date ?? record.performedAt
 }
 
 const getPackageTypeName = (type: string): string => {
@@ -431,21 +449,24 @@ export function BatchReportModal({ isOpen, onClose, batch, gravityReadings = [],
                       </tr>
                     </thead>
                     <tbody>
-                      {packagingRecords.map(record => (
+                      {packagingRecords.map(record => {
+                        const vol = packagingVolumeLiters(record)
+                        return (
                         <tr key={record.id} className="border-b border-border/50">
-                          <td className="px-4 py-3 text-sm">{formatDate(record.date)}</td>
-                          <td className="px-4 py-3 text-sm">{getPackageTypeName(record.packageType)}</td>
+                          <td className="px-4 py-3 text-sm">{formatDate(packagingRecordDate(record))}</td>
+                          <td className="px-4 py-3 text-sm">{getPackageTypeName(String(record.packageType || '').toLowerCase())}</td>
                           <td className="px-4 py-3 text-sm text-right font-mono">{record.quantity}</td>
-                          <td className="px-4 py-3 text-sm text-right font-mono">{record.volumeL.toFixed(1)}L</td>
+                          <td className="px-4 py-3 text-sm text-right font-mono">{vol.toFixed(1)}L</td>
                           <td className="px-4 py-3 text-sm text-text-muted">{record.performedBy}</td>
                         </tr>
-                      ))}
+                        )
+                      })}
                     </tbody>
                     <tfoot>
                       <tr className="font-bold border-t border-border">
                         <td colSpan={3} className="px-4 py-3">სულ დაფასოვებული:</td>
                         <td className="px-4 py-3 text-right text-green-400 font-mono">
-                          {packagingRecords.reduce((sum, r) => sum + r.volumeL, 0).toFixed(1)}L
+                          {packagingRecords.reduce((sum, r) => sum + packagingVolumeLiters(r), 0).toFixed(1)}L
                         </td>
                         <td></td>
                       </tr>

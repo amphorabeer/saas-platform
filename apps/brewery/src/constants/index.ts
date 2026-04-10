@@ -1,15 +1,19 @@
-import { PlanFeatures } from '@/lib/plan-features';
+import { createElement, type ReactNode } from 'react'
+import { ShieldCheck } from 'lucide-react'
+import { PlanFeatures } from '@/lib/plan-features'
 
 // Feature type for type safety
-type FeatureKey = keyof PlanFeatures['features'];
+type FeatureKey = keyof PlanFeatures['features']
 
 interface NavItem {
-  href: string;
-  label: string;
-  icon: string;
-  requiredFeature?: FeatureKey; // რომელი feature უნდა ჰქონდეს
-  alwaysShow?: boolean; // ყოველთვის აჩვენოს (დეშბორდი, პარამეტრები)
+  href: string
+  label: string
+  icon: ReactNode
+  requiredFeature?: FeatureKey // რომელი feature უნდა ჰქონდეს
+  alwaysShow?: boolean // ყოველთვის აჩვენოს (დეშბორდი, პარამეტრები)
 }
+
+const haccpNavIcon = createElement(ShieldCheck, { className: 'w-5 h-5 shrink-0 opacity-90' })
 
 export const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'დეშბორდი', icon: '📊', alwaysShow: true },
@@ -20,6 +24,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/quality', label: 'ხარისხი', icon: '✅', alwaysShow: true },
   { href: '/equipment', label: 'აღჭურვილობა', icon: '⚙️', alwaysShow: true },
   { href: '/reports', label: 'რეპორტები', icon: '📈', requiredFeature: 'analytics' },
+  { href: '/haccp', label: 'HACCP', icon: haccpNavIcon, alwaysShow: true },
   { href: '/finances', label: 'ფინანსები', icon: '💵', requiredFeature: 'finances' },
   { href: '/settings', label: 'პარამეტრები', icon: '🔧', alwaysShow: true },
 ]
@@ -61,6 +66,7 @@ export const PRODUCTION_TABS = [
   { key: 'brewhouse', label: 'სახარში ქვაბი', icon: '🍳' },
   { key: 'tanks', label: 'ავზები', icon: '🛢️' },
   { key: 'recipes', label: 'რეცეპტები', icon: '📖' },
+  { key: 'report', label: 'ანგარიში', icon: '📈' },
 ]
 
 // Batch Phase Configuration

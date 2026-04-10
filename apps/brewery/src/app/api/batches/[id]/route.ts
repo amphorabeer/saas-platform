@@ -67,7 +67,7 @@ export const GET = withPermission('batch:read', async (
         tank: true,
         ingredients: true,
         gravityReadings: { orderBy: { recordedAt: 'desc' } },
-        QCTest: { orderBy: { scheduledDate: 'desc' } },  // ✅ FIX: was qcTests
+        QCTest: { orderBy: { scheduledDate: 'desc' } },
         timeline: { orderBy: { createdAt: 'desc' }, take: 50 },
         packagingRuns: { orderBy: { performedAt: 'desc' } },
         LotBatch: {

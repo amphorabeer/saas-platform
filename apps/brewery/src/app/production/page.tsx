@@ -7,6 +7,7 @@ import { Card, CardHeader, CardBody, Button, ProgressBar, BatchStatusBadge, Blen
 import { NewBatchModal } from '@/components/brewery'
 import { TankCard, TankDetailModal } from '@/components/fermentation'
 import { RecipesContent } from '@/components/recipes'
+import { ProductionReport } from '@/components/production'
 import { formatDate } from '@/lib/utils'
 import { useBreweryStore } from '@/store'
 import { PRODUCTION_TABS } from '@/constants'
@@ -124,7 +125,7 @@ export default function ProductionPage() {
   const [mounted, setMounted] = useState(false)
   
   // Tab state
-  const [activeTab, setActiveTab] = useState<'batches' | 'brewhouse' | 'tanks' | 'recipes'>('batches')
+  const [activeTab, setActiveTab] = useState<'batches' | 'brewhouse' | 'tanks' | 'recipes' | 'report'>('batches')
   
   // ✅ LOTS from API (lot-centric!)
   const [lots, setLots] = useState<LotRow[]>([])
@@ -171,6 +172,9 @@ export default function ProductionPage() {
     const tab = searchParams.get('tab')
     if (tab === 'tanks') {
       setActiveTab('tanks')
+    }
+    if (tab === 'report') {
+      setActiveTab('report')
     }
     
     const newBatch = searchParams.get('newBatch')
@@ -525,7 +529,7 @@ export default function ProductionPage() {
         {PRODUCTION_TABS.map(tab => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key as 'batches' | 'brewhouse' | 'tanks' | 'recipes')}
+            onClick={() => setActiveTab(tab.key as 'batches' | 'brewhouse' | 'tanks' | 'recipes' | 'report')}
             className={`px-6 py-3 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
               activeTab === tab.key
                 ? 'bg-copper text-white'
@@ -1075,6 +1079,10 @@ export default function ProductionPage() {
           ════════════════════════════════════════════════════════════════════ */}
       {activeTab === 'recipes' && (
         <RecipesContent onStartBatch={(recipeId) => { setPreSelectedRecipeId(recipeId); setShowNewBatchModal(true); }} />
+      )}
+
+      {activeTab === 'report' && (
+        <ProductionReport showBackLink={false} />
       )}
 
       {/* Modals */}
