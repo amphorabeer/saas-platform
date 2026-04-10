@@ -241,12 +241,31 @@ function buildCcpPdfHtml(params: {
 </html>`
 }
 
+/** Sparticuz pack matching @sparticuz/chromium-min in package.json; override with CHROMIUM_PACK_TAR_URL if needed. */
+const CHROMIUM_PACK_TAR_URL =
+  process.env.CHROMIUM_PACK_TAR_URL ??
+  'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar'
+
 async function renderHtmlToPdf(html: string): Promise<Buffer> {
-  const puppeteer = await import('puppeteer')
-  const browser = await puppeteer.default.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-  })
+  const puppeteer = (await import('puppeteer-core')).default
+  const chromium = (await import('@sparticuz/chromium-min')).default
+
+  const localChrome =
+    process.env.CHROMIUM_EXECUTABLE_PATH || process.env.PUPPETEER_EXECUTABLE_PATH
+
+  const browser = localChrome
+    ? await puppeteer.launch({
+        headless: true,
+        executablePath: localChrome,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      })
+    : await puppeteer.launch({
+        args: [...chromium.args, '--disable-dev-shm-usage'],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(CHROMIUM_PACK_TAR_URL),
+        headless: chromium.headless,
+      })
+
   try {
     const page = await browser.newPage()
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 90_000 })
