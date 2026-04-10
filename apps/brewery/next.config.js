@@ -13,6 +13,16 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        'puppeteer-core': false,
+        '@sparticuz/chromium-min': false,
+      }
+    }
+    return config
+  },
 }
 
 module.exports = nextConfig

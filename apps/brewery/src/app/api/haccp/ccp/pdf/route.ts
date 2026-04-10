@@ -247,8 +247,10 @@ const CHROMIUM_PACK_TAR_URL =
   'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar'
 
 async function renderHtmlToPdf(html: string): Promise<Buffer> {
-  const puppeteer = (await import('puppeteer-core')).default
-  const chromium = (await import('@sparticuz/chromium-min')).default
+  const puppeteerMod = await import('puppeteer-core')
+  const chromiumMod = await import('@sparticuz/chromium-min')
+  const puppeteer = puppeteerMod.default
+  const chromium = chromiumMod.default
 
   const localChrome =
     process.env.CHROMIUM_EXECUTABLE_PATH || process.env.PUPPETEER_EXECUTABLE_PATH
