@@ -41,6 +41,10 @@ model Tenant {
   transactions Transaction[]
   users        User[]
   stores       Store[]
+  HaccpJournal HaccpJournal[]
+  CcpLog       CcpLog[]
+  SopCompletion SopCompletion[]
+  HaccpSupplier HaccpSupplier[]
 
   @@index([slug])
   @@index([code])
@@ -58,7 +62,11 @@ model User {
   password        String?
   resetToken      String?
   resetTokenExpiry DateTime?
+  signatureUrl    String? // URL to uploaded signature image
   tenant          Tenant    @relation(fields: [tenantId], references: [id])
+  HaccpJournal    HaccpJournal[]
+  CcpLog          CcpLog[]
+  SopCompletion   SopCompletion[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -208,6 +216,7 @@ model Batch {
   LotBatch              LotBatch[]
   packagingRuns         PackagingRun[]
   QCTest                QCTest[]
+  CcpLog                CcpLog[]
 
   @@unique([tenantId, batchNumber])
   @@index([tenantId, status])
@@ -1868,4 +1877,115 @@ enum StoreIntegrationType {
   BANK_TBC
   BANK_BOG
   BANK_LIBERTY
+}
+
+// HACCP Module
+
+enum HaccpJournalType {
+  SANITATION // სანიტაცია
+  INCOMING_CONTROL // შემავალი კონტროლი
+  PEST_CONTROL // მავნებლები
+  WASTE_MANAGEMENT // ნარჩენები
+  TEMPERATURE // ტემპერატურა
+  SUPPLIER // მომწოდებლები
+}
+
+enum CcpType {
+  BOILING // CCP-1: ხარშვა
+  VESSEL_SANITATION // CCP-2: ქვევრის სანიტარია
+}
+
+enum CcpResult {
+  PASS
+  FAIL
+  CORRECTIVE_ACTION
+}
+
+enum SopType {
+  CLEANING // SOP-01
+  CALIBRATION // SOP-02
+  PERSONNEL_HYGIENE // SOP-03
+  HAND_WASHING // SOP-04
+  WASTE // SOP-05
+  PEST // SOP-06
+  CHEMICALS // SOP-07
+}
+
+model HaccpJournal {
+  id         String           @id @default(cuid())
+  tenantId   String
+  type       HaccpJournalType
+  data       Json
+  recordedBy String
+  recordedAt DateTime         @default(now())
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [recordedBy], references: [id])
+
+  @@index([tenantId])
+  @@index([type])
+  @@index([recordedAt])
+}
+
+model CcpLog {
+  id               String    @id @default(cuid())
+  tenantId         String
+  ccpType          CcpType
+  batchId          String?
+  temperature      Float?
+  duration         Int? // minutes
+  phLevel          Float?
+  visualCheck      Boolean?
+  result           CcpResult
+  correctiveAction String?
+  recordedBy       String
+  recordedAt       DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [recordedBy], references: [id])
+  batch  Batch? @relation(fields: [batchId], references: [id])
+
+  @@index([tenantId])
+  @@index([batchId])
+  @@index([recordedAt])
+}
+
+model SopCompletion {
+  id          String   @id @default(cuid())
+  tenantId    String
+  sopType     SopType
+  completedBy String
+  completedAt DateTime @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [completedBy], references: [id])
+
+  @@index([tenantId])
+  @@index([sopType])
+  @@index([completedAt])
+}
+
+model HaccpSupplier {
+  id            String   @id @default(cuid())
+  tenantId      String
+  name          String
+  contactPerson String?
+  phone         String?
+  email         String?
+  address       String?
+  products      String[]
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }

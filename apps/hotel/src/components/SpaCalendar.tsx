@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
+import { spaBookingsHeader, spaSidebarMenuItem } from '../lib/constants'
 import { RestaurantSpaChargeService, ChargeRequest, ChargeItem } from '../services/RestaurantSpaChargeService'
 
 interface SpaBath {
@@ -44,7 +45,7 @@ interface SpaSettings {
 export default function SpaCalendar() {
   const [settings, setSettings] = useState<SpaSettings>({
     enabled: false,
-    name: 'Beer Spa',
+    name: spaSidebarMenuItem.label,
     openTime: '10:00',
     closeTime: '21:00',
     slotDuration: 60,
@@ -224,7 +225,7 @@ export default function SpaCalendar() {
           if (data) {
             setSettings({
               enabled: data.enabled ?? false,
-              name: data.name || 'Beer Spa',
+              name: data.name || spaSidebarMenuItem.label,
               openTime: data.openTime || '10:00',
               closeTime: data.closeTime || '21:00',
               slotDuration: data.slotDuration || 60,
@@ -449,8 +450,8 @@ export default function SpaCalendar() {
     return (
       <div className="p-8 text-center">
         <div className="text-6xl mb-4">🍺</div>
-        <h2 className="text-2xl font-bold text-gray-700 mb-2">ლუდის სპა გამორთულია</h2>
-        <p className="text-gray-500">ჩართეთ პარამეტრებში: ⚙️ პარამეტრები → 🍺 ლუდის სპა</p>
+        <h2 className="text-2xl font-bold text-gray-700 mb-2">{spaSidebarMenuItem.label} გამორთულია</h2>
+        <p className="text-gray-500">ჩართეთ პარამეტრებში: ⚙️ პარამეტრები → {spaSidebarMenuItem.icon} {spaSidebarMenuItem.label}</p>
       </div>
     )
   }
@@ -472,7 +473,7 @@ export default function SpaCalendar() {
         <div className="flex items-center gap-3">
           <span className="text-3xl">🍺</span>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">{settings.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-800">{spaBookingsHeader}</h1>
             <p className="text-sm text-gray-500">ჯავშნების კალენდარი</p>
           </div>
         </div>

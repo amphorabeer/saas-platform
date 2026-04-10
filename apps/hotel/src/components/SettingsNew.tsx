@@ -8,6 +8,7 @@ import RestaurantSettingsSection, { DEFAULT_RESTAURANT_SETTINGS, RestaurantSetti
 import BeerSpaSettingsSection, { DEFAULT_SPA_SETTINGS, SpaSettings, SpaBath, SpaService } from './BeerSpaSettingsSection'
 import TourCompaniesSettings from './TourCompaniesSettings'
 import BookingSettingsSection from './settings/BookingSettingsSection'
+import { spaSidebarMenuItem } from '../lib/constants'
 
 // ==================== TYPES ====================
 interface HotelInfo {
@@ -1441,7 +1442,7 @@ export default function SettingsNew() {
     { id: 'cashier', label: 'სალარო', icon: '💰', description: 'სალაროს პარამეტრები' },
     { id: 'channels', label: 'არხები', icon: '🔗', description: 'Booking.com, Airbnb' },
     { id: 'restaurant', label: 'რესტორანი', icon: '🍽️', description: 'მენიუ და შეკვეთები' },
-    { id: 'beerspa', label: 'ლუდის სპა', icon: '🍺', description: 'აბაზანები და ჯავშნები' },
+    { id: 'beerspa', label: spaSidebarMenuItem.label, icon: spaSidebarMenuItem.icon, description: 'აბაზანები და ჯავშნები' },
     { id: 'tourcompanies', label: 'ტურ. კომპანიები', icon: '🚌', description: 'კომპანიები და ინვოისები' },
     { id: 'bookings', label: 'ჯავშნები', icon: '📅', description: 'ავტო-დადასტურება' },
     { id: 'facebook', label: 'Facebook Bot', icon: '📘', description: 'Messenger ჯავშნები' },

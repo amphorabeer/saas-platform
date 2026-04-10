@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { spaSettingsHeader, spaSidebarMenuItem } from '../lib/constants'
 
 // ==================== TYPES ====================
 export interface SpaBath {
@@ -42,7 +43,7 @@ export interface SpaSettings {
 
 export const DEFAULT_SPA_SETTINGS: SpaSettings = {
   enabled: false,
-  name: 'Brewery House Beer Spa',
+  name: spaSidebarMenuItem.label,
   openTime: '10:00',
   closeTime: '21:00',
   slotDuration: 60,
@@ -129,7 +130,7 @@ export default function BeerSpaSettingsSection({ settings, setSettings, baths, s
           <div className="flex items-center gap-3">
             <span className="text-3xl">🍺</span>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">ლუდის სპა</h2>
+              <h2 className="text-xl font-bold text-gray-800">{spaSettingsHeader}</h2>
               <p className="text-sm text-gray-500">აბაზანები, ჯავშნები და განრიგი</p>
             </div>
           </div>

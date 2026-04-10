@@ -31,6 +31,7 @@ import { SystemLockService } from '../lib/systemLockService'
 import { ActivityLogger } from '../lib/activityLogger'
 import { FolioService } from '../services/FolioService'
 import { RESERVATION_STATUS, ROOM_STATUS } from '../constants/statusConstants'
+import { spaSidebarMenuItem } from '../lib/constants'
 import { hasDisplayableLogo, sanitizeLogo } from '@/lib/logo'
 import { usePlan } from '@/lib/usePlan'
 import { UpgradeModal } from '@/components/UpgradeModal'
@@ -387,7 +388,7 @@ export default function HotelDashboard() {
       case 'financial': return '💰 ფინანსური დეშბორდი'
       case 'settings-new': return '⚙️ პარამეტრები'
       case 'restaurant': return '🍽️ რესტორანი'
-      case 'beerspa': return '🍺 ლუდის სპა'
+      case 'beerspa': return `${spaSidebarMenuItem.icon} ${spaSidebarMenuItem.label}`
       default: return ''
     }
   }
@@ -1193,7 +1194,7 @@ export default function HotelDashboard() {
                         onClick={() => addTabFromMenu('beerspa')}
                         className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-2"
                       >
-                        🍺 ლუდის სპა
+                        {spaSidebarMenuItem.icon} {spaSidebarMenuItem.label}
                       </button>
                     </div>
                   )}
@@ -1388,7 +1389,7 @@ export default function HotelDashboard() {
                 className="bg-purple-500 text-white p-6 rounded-lg hover:bg-purple-600 transition-all transform hover:scale-105 shadow-lg text-left"
               >
                 <div className="text-4xl mb-2">🍺</div>
-                <div className="text-xl font-bold">ლუდის სპა</div>
+                <div className="text-xl font-bold">{spaSidebarMenuItem.label}</div>
                 <div className="text-sm opacity-75">სპა ჯავშნები და სერვისები</div>
               </button>
               
