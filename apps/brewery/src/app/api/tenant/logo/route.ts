@@ -1,37 +1,17 @@
-import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@saas-platform/database'
+import { withPermission, type RouteContext } from '@/lib/api-middleware'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 const MAX_BYTES = 2 * 1024 * 1024
 const ALLOWED = new Set(['image/png', 'image/jpeg'])
 
-function sessionTenantId(session: { user?: unknown }): string | null {
-  const u = session.user as { tenantId?: string } | undefined
-  return u?.tenantId ?? null
-}
-
-function sessionRole(session: { user?: unknown }): string | null {
-  const u = session.user as { role?: string } | undefined
-  return u?.role ?? null
-}
-
 // POST /api/tenant/logo — multipart field "logo"
-export async function POST(req: Request) {
+export const POST = withPermission('settings:update', async (req: NextRequest, ctx: RouteContext) => {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const tenantId = sessionTenantId(session)
-    const role = sessionRole(session)
-    if (!tenantId) {
-      return NextResponse.json({ error: 'No tenant found' }, { status: 404 })
-    }
-    if (!['OWNER', 'ADMIN'].includes(role || '')) {
-      return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
-    }
+    console.log('[POST /api/tenant/logo]', { tenantId: ctx.tenantId })
 
     const formData = await req.formData()
     const file = formData.get('logo')
@@ -56,7 +36,7 @@ export async function POST(req: Request) {
     const dataUrl = `data:${mime};base64,${base64}`
 
     await prisma.tenant.update({
-      where: { id: tenantId },
+      where: { id: ctx.tenantId },
       data: { logoUrl: dataUrl },
     })
 
@@ -65,27 +45,15 @@ export async function POST(req: Request) {
     console.error('[POST /api/tenant/logo]', error)
     return NextResponse.json({ error: 'Failed to upload logo' }, { status: 500 })
   }
-}
+})
 
 // DELETE /api/tenant/logo
-export async function DELETE() {
+export const DELETE = withPermission('settings:update', async (_req: NextRequest, ctx: RouteContext) => {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const tenantId = sessionTenantId(session)
-    const role = sessionRole(session)
-    if (!tenantId) {
-      return NextResponse.json({ error: 'No tenant found' }, { status: 404 })
-    }
-    if (!['OWNER', 'ADMIN'].includes(role || '')) {
-      return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
-    }
+    console.log('[DELETE /api/tenant/logo]', { tenantId: ctx.tenantId })
 
     await prisma.tenant.update({
-      where: { id: tenantId },
+      where: { id: ctx.tenantId },
       data: { logoUrl: null },
     })
 
@@ -94,4 +62,4 @@ export async function DELETE() {
     console.error('[DELETE /api/tenant/logo]', error)
     return NextResponse.json({ error: 'Failed to remove logo' }, { status: 500 })
   }
-}
+})

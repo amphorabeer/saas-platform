@@ -212,22 +212,26 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      // შეინახე Tenant მონაცემები DB-ში
+      // Tenant Prisma fields only (matches /api/tenant PUT whitelist). Logo uses POST /api/tenant/logo.
+      const tenantPutBody = {
+        name: companySettings.name,
+        legalName: companySettings.legalName,
+        taxId: companySettings.taxId,
+        address: companySettings.address,
+        phone: companySettings.phone,
+        email: companySettings.email,
+        website: companySettings.website,
+        bankName: companySettings.bankName,
+        bankAccount: companySettings.bankAccount,
+        bankSwift: companySettings.bankSwift,
+      }
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[settings] PUT /api/tenant', tenantPutBody)
+      }
       const res = await fetch('/api/tenant', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: companySettings.name,
-          legalName: companySettings.legalName,
-          taxId: companySettings.taxId,
-          address: companySettings.address,
-          phone: companySettings.phone,
-          email: companySettings.email,
-          website: companySettings.website,
-          bankName: companySettings.bankName,
-          bankAccount: companySettings.bankAccount,
-          bankSwift: companySettings.bankSwift,
-        }),
+        body: JSON.stringify(tenantPutBody),
       })
 
       if (res.ok) {

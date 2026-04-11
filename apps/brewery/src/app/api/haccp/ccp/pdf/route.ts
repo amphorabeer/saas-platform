@@ -1,4 +1,8 @@
+import fs from 'fs'
+import path from 'path'
 import { NextRequest, NextResponse } from 'next/server'
+import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import { prisma } from '@saas-platform/database'
 import { withTenantAuth, type RouteContext } from '../../withTenantAuth'
 import { formatDateTime } from '@/lib/utils'
@@ -7,19 +11,13 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 120
 
+const FONT_VFS = 'NotoSans-Regular.ttf'
+const FONT_FAMILY = 'NotoSans'
+
 function parseYmd(s: string): { y: number; m: number; d: number } | null {
   const p = s.split('-').map(Number)
   if (p.length !== 3 || p.some((n) => Number.isNaN(n))) return null
   return { y: p[0], m: p[1], d: p[2] }
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
 }
 
 function isBatchSourcedCcp1(correctiveAction: string | null): boolean {
@@ -68,201 +66,205 @@ type LogWithRelations = {
   batch: { batchNumber: string } | null
 }
 
-function buildCcpPdfHtml(params: {
+/** Registers Noto Sans once per document; returns family name for autoTable. */
+function registerNotoSansOnce(doc: jsPDF): string {
+  try {
+    const b64Path = path.join(process.cwd(), 'src/lib/NotoSans-Regular-base64.txt')
+    const b64 = fs.readFileSync(b64Path, 'utf8').replace(/\s/g, '')
+    const binary = Buffer.from(b64, 'base64').toString('binary')
+    doc.addFileToVFS(FONT_VFS, binary)
+    doc.addFont(FONT_VFS, FONT_FAMILY, 'normal')
+    doc.setFont(FONT_FAMILY, 'normal')
+    return FONT_FAMILY
+  } catch (e) {
+    console.warn('[HACCP PDF] NotoSans not loaded, falling back to helvetica:', e)
+    doc.setFont('helvetica', 'normal')
+    return 'helvetica'
+  }
+}
+
+function parseDataUrlImage(s: string): { data: string; fmt: 'PNG' | 'JPEG' } | null {
+  const m = s.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/i)
+  if (!m) return null
+  const fmt = m[1].toLowerCase() === 'png' ? 'PNG' : 'JPEG'
+  return { data: m[2], fmt }
+}
+
+function lastAutoTableFinalY(doc: jsPDF, fallback: number): number {
+  const y = (doc as unknown as { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY
+  return typeof y === 'number' ? y : fallback
+}
+
+function buildCcpPdfBuffer(params: {
   tenantName: string
   tenantLogo: string | null
   period: string
   section: 'ALL' | 'CCP1' | 'CCP2'
   ccp1Logs: LogWithRelations[]
   ccp2Logs: LogWithRelations[]
-}): string {
+}): Buffer {
   const { tenantName, tenantLogo, period, section, ccp1Logs, ccp2Logs } = params
-  const company = escapeHtml(tenantName || '—')
-  const periodEsc = escapeHtml(period)
-  const printed = escapeHtml(new Date().toLocaleString('ka-GE'))
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+  const fontFamily = registerNotoSansOnce(doc)
 
-  const rowCcp1 = (log: LogWithRelations) => {
-    const batch =
-      log.batch?.batchNumber ?? batchNumberFromBoilingNote(log.correctiveAction) ?? '—'
-    const source = isBatchSourcedCcp1(log.correctiveAction) ? 'პარტიიდან' : 'ხელით'
-    const sig = log.user.signatureUrl
-    const operatorCell = `${escapeHtml(log.user.name || log.user.email || '—')}${
-      sig
-        ? `<br><img src="${sig}" alt="" style="height:24px;max-width:100px;object-fit:contain;" />`
-        : ''
-    }`
-    return `<tr>
-      <td>${escapeHtml(formatDateTime(log.recordedAt))}</td>
-      <td>${escapeHtml(batch)}</td>
-      <td>${log.temperature != null ? escapeHtml(String(log.temperature)) : '—'}</td>
-      <td>${log.duration != null ? escapeHtml(String(log.duration)) : '—'}</td>
-      <td>${escapeHtml(String(log.result))}</td>
-      <td>${operatorCell}</td>
-      <td>${escapeHtml(source)}</td>
-    </tr>`
-  }
+  const pageW = doc.internal.pageSize.getWidth()
+  const pageH = doc.internal.pageSize.getHeight()
+  const tableFont = () => ({ font: fontFamily, fontStyle: 'normal' as const })
 
-  const rowCcp2 = (log: LogWithRelations) => {
-    const fromCip = isCipSourcedCcp2(log.correctiveAction)
-    const vesselOrBatch = fromCip
-      ? equipmentNameFromCipNote(log.correctiveAction) ?? '—'
-      : log.batch?.batchNumber ?? '—'
-    const visual = log.visualCheck === true ? 'კი' : log.visualCheck === false ? 'არა' : '—'
-    const source = fromCip ? 'CIP-იდან' : 'ხელით'
-    const sig = log.user.signatureUrl
-    const operatorCell = `${escapeHtml(log.user.name || log.user.email || '—')}${
-      sig
-        ? `<br><img src="${sig}" alt="" style="height:24px;max-width:100px;object-fit:contain;" />`
-        : ''
-    }`
-    return `<tr>
-      <td>${escapeHtml(formatDateTime(log.recordedAt))}</td>
-      <td>${escapeHtml(vesselOrBatch)}</td>
-      <td>${log.phLevel != null ? escapeHtml(String(log.phLevel)) : '—'}</td>
-      <td>${escapeHtml(visual)}</td>
-      <td>${escapeHtml(String(log.result))}</td>
-      <td>${operatorCell}</td>
-      <td>${escapeHtml(source)}</td>
-    </tr>`
-  }
-
-  const show1 = section !== 'CCP2'
-  const show2 = section !== 'CCP1'
-
-  return `<!DOCTYPE html>
-<html lang="ka">
-<head>
-  <meta charset="UTF-8" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;600&display=swap" rel="stylesheet" />
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Noto Sans Georgian', system-ui, sans-serif;
-      font-size: 11px;
-      margin: 0;
-      color: #111;
+  let y = 10
+  if (tenantLogo?.startsWith('data:image')) {
+    const img = parseDataUrlImage(tenantLogo)
+    if (img) {
+      const imgH = 14
+      const imgW = 42
+      try {
+        doc.addImage(img.data, img.fmt, pageW / 2 - imgW / 2, y, imgW, imgH)
+        y += imgH + 3
+      } catch {
+        // skip broken logo
+      }
     }
-    h1 { text-align: center; font-size: 16px; margin: 0; font-weight: 600; }
-    h2 { text-align: center; font-size: 13px; margin: 6px 0 4px; font-weight: 600; }
-    .meta { text-align: center; font-size: 10px; color: #555; margin-bottom: 14px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 18px; table-layout: fixed; }
-    th {
-      background: #2980b9;
-      color: #fff;
-      padding: 6px 4px;
-      text-align: left;
-      font-size: 9px;
-      font-weight: 600;
-      word-break: break-word;
-    }
-    td {
-      border: 1px solid #ddd;
-      padding: 5px 4px;
-      font-size: 9px;
-      vertical-align: top;
-      word-break: break-word;
-    }
-    tr:nth-child(even) td { background: #f7f7f7; }
-    .section-title { font-weight: 600; font-size: 12px; margin: 14px 0 6px; }
-    .footer { margin-top: 16px; font-size: 9px; color: #888; display: flex; justify-content: space-between; }
-  </style>
-</head>
-<body>
-  ${
-    tenantLogo
-      ? `<div style="text-align:center;margin-bottom:10px;"><img src="${tenantLogo}" alt="" style="max-height:52px;max-width:140px;object-fit:contain;" /></div>`
-      : ''
-  }
-  <h1>${company}</h1>
-  <h2>HACCP — CCP მონიტორინგი</h2>
-  <div class="meta">პერიოდი: ${periodEsc}<br />დაბეჭდილია: ${printed}</div>
-
-  ${
-    show1
-      ? `<div class="section-title">CCP-1 (ხარშვა)</div>
-  <table>
-    <thead><tr>
-      <th>თარიღი</th><th>პარტია</th><th>ტემპ. (°C)</th><th>ხანგრძლივობა (წთ)</th>
-      <th>შედეგი</th><th>შემსრულებელი</th><th>წყარო</th>
-    </tr></thead>
-    <tbody>${ccp1Logs.map(rowCcp1).join('')}</tbody>
-  </table>`
-      : ''
   }
 
-  ${
-    show2
-      ? `<div class="section-title">CCP-2 (ქვევრი/ავზის სანიტარია)</div>
-  <table>
-    <thead><tr>
-      <th>თარიღი</th><th>ავზი/ქვევრი</th><th>pH</th><th>ვიზუალური</th>
-      <th>შედეგი</th><th>შემსრულებელი</th><th>წყარო</th>
-    </tr></thead>
-    <tbody>${ccp2Logs.map(rowCcp2).join('')}</tbody>
-  </table>`
-      : ''
-  }
+  doc.setFontSize(16)
+  doc.text(tenantName || '—', pageW / 2, y, { align: 'center' })
+  y += 7
+  doc.setFontSize(12)
+  doc.text('HACCP — CCP მონიტორინგი', pageW / 2, y, { align: 'center' })
+  y += 6
+  doc.setFontSize(9)
+  doc.text(`პერიოდი: ${period}`, pageW / 2, y, { align: 'center' })
+  y += 5
+  doc.text(`დაბეჭდილია: ${new Date().toLocaleString('ka-GE')}`, pageW / 2, y, { align: 'center' })
+  y += 8
 
-  <div class="signatures" style="margin-top: 40px; display: flex; justify-content: space-between;">
-    <div style="text-align: center; width: 200px;">
-      <div style="border-top: 1px solid #000; margin-bottom: 4px;"></div>
-      <div style="font-size: 9px;">პასუხისმგებელი პირის ხელმოწერა</div>
-    </div>
-    <div style="text-align: center; width: 200px;">
-      <div style="border-top: 1px solid #000; margin-bottom: 4px;"></div>
-      <div style="font-size: 9px;">მენეჯერი</div>
-    </div>
-    <div style="text-align: center; width: 200px;">
-      <div style="border-top: 1px solid #000; margin-bottom: 4px;"></div>
-      <div style="font-size: 9px;">თარიღი</div>
-    </div>
-  </div>
-  <div class="footer"><span>${company}</span><span>${printed}</span></div>
-</body>
-</html>`
-}
+  const operatorColIndex = 5
 
-/** Sparticuz pack matching @sparticuz/chromium-min in package.json; override with CHROMIUM_PACK_TAR_URL if needed. */
-const CHROMIUM_PACK_TAR_URL =
-  process.env.CHROMIUM_PACK_TAR_URL ??
-  'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar'
+  if (section !== 'CCP2') {
+    doc.setFontSize(11)
+    doc.text('CCP-1 (ხარშვა)', 14, y)
+    y += 5
 
-async function renderHtmlToPdf(html: string): Promise<Buffer> {
-  const puppeteerMod = await import('puppeteer-core')
-  const chromiumMod = await import('@sparticuz/chromium-min')
-  const puppeteer = puppeteerMod.default
-  const chromium = chromiumMod.default
-
-  const localChrome =
-    process.env.CHROMIUM_EXECUTABLE_PATH || process.env.PUPPETEER_EXECUTABLE_PATH
-
-  const browser = localChrome
-    ? await puppeteer.launch({
-        headless: true,
-        executablePath: localChrome,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-      })
-    : await puppeteer.launch({
-        args: [...chromium.args, '--disable-dev-shm-usage'],
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(CHROMIUM_PACK_TAR_URL),
-        headless: chromium.headless,
-      })
-
-  try {
-    const page = await browser.newPage()
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 90_000 })
-    const pdf = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: { top: '14mm', right: '10mm', bottom: '14mm', left: '10mm' },
+    autoTable(doc, {
+      startY: y,
+      theme: 'plain',
+      styles: { ...tableFont(), fontSize: 8, cellPadding: 1.5, textColor: 20 },
+      headStyles: { ...tableFont(), fillColor: [41, 128, 185], textColor: 255, fontSize: 8 },
+      alternateRowStyles: { fillColor: [247, 247, 247] },
+      columnStyles: { [operatorColIndex]: { minCellHeight: 14 } },
+      head: [
+        ['თარიღი', 'პარტია', 'ტემპ. (°C)', 'ხანგრძლივობა (წთ)', 'შედეგი', 'შემსრულებელი', 'წყარო'],
+      ],
+      body: ccp1Logs.map((log) => {
+        const batch =
+          log.batch?.batchNumber ?? batchNumberFromBoilingNote(log.correctiveAction) ?? '—'
+        const source = isBatchSourcedCcp1(log.correctiveAction) ? 'პარტიიდან' : 'ხელით'
+        return [
+          formatDateTime(log.recordedAt),
+          batch,
+          log.temperature != null ? String(log.temperature) : '—',
+          log.duration != null ? String(log.duration) : '—',
+          String(log.result),
+          log.user.name || log.user.email || '—',
+          source,
+        ]
+      }),
+      didDrawCell: (data) => {
+        if (data.section !== 'body' || data.column.index !== operatorColIndex) return
+        const log = ccp1Logs[data.row.index]
+        const url = log?.user?.signatureUrl
+        if (!url?.startsWith('data:image')) return
+        const img = parseDataUrlImage(url)
+        if (!img) return
+        const { x, y: cy, width, height } = data.cell
+        try {
+          const ih = Math.min(8, height - 4)
+          const iw = Math.min(24, width * 0.42)
+          doc.addImage(img.data, img.fmt, x + width - iw - 1, cy + (height - ih) / 2, iw, ih)
+        } catch {
+          /* ignore */
+        }
+      },
     })
-    return Buffer.from(pdf)
-  } finally {
-    await browser.close()
+    y = lastAutoTableFinalY(doc, y) + 10
   }
+
+  if (section !== 'CCP1') {
+    if (y > pageH - 60) {
+      doc.addPage()
+      doc.setFont(fontFamily, 'normal')
+      y = 14
+    }
+    doc.setFontSize(11)
+    doc.text('CCP-2 (ქვევრი/ავზის სანიტარია)', 14, y)
+    y += 5
+
+    autoTable(doc, {
+      startY: y,
+      theme: 'plain',
+      styles: { ...tableFont(), fontSize: 8, cellPadding: 1.5, textColor: 20 },
+      headStyles: { ...tableFont(), fillColor: [39, 174, 96], textColor: 255, fontSize: 8 },
+      alternateRowStyles: { fillColor: [247, 247, 247] },
+      columnStyles: { [operatorColIndex]: { minCellHeight: 14 } },
+      head: [['თარიღი', 'ავზი/ქვევრი', 'pH', 'ვიზუალური', 'შედეგი', 'შემსრულებელი', 'წყარო']],
+      body: ccp2Logs.map((log) => {
+        const fromCip = isCipSourcedCcp2(log.correctiveAction)
+        const vesselOrBatch = fromCip
+          ? equipmentNameFromCipNote(log.correctiveAction) ?? '—'
+          : log.batch?.batchNumber ?? '—'
+        const visual = log.visualCheck === true ? 'კი' : log.visualCheck === false ? 'არა' : '—'
+        const source = fromCip ? 'CIP-იდან' : 'ხელით'
+        return [
+          formatDateTime(log.recordedAt),
+          vesselOrBatch,
+          log.phLevel != null ? String(log.phLevel) : '—',
+          visual,
+          String(log.result),
+          log.user.name || log.user.email || '—',
+          source,
+        ]
+      }),
+      didDrawCell: (data) => {
+        if (data.section !== 'body' || data.column.index !== operatorColIndex) return
+        const log = ccp2Logs[data.row.index]
+        const url = log?.user?.signatureUrl
+        if (!url?.startsWith('data:image')) return
+        const img = parseDataUrlImage(url)
+        if (!img) return
+        const { x, y: cy, width, height } = data.cell
+        try {
+          const ih = Math.min(8, height - 4)
+          const iw = Math.min(24, width * 0.42)
+          doc.addImage(img.data, img.fmt, x + width - iw - 1, cy + (height - ih) / 2, iw, ih)
+        } catch {
+          /* ignore */
+        }
+      },
+    })
+    y = lastAutoTableFinalY(doc, y) + 14
+  }
+
+  if (y > pageH - 35) {
+    doc.addPage()
+    doc.setFont(fontFamily, 'normal')
+    y = 20
+  }
+
+  doc.setFontSize(9)
+  const sigY = y + 8
+  doc.line(14, sigY, 70, sigY)
+  doc.text('პასუხისმგებელი პირის ხელმოწერა', 14, sigY + 5)
+  doc.line(100, sigY, 156, sigY)
+  doc.text('მენეჯერი', 100, sigY + 5)
+  const dateX = Math.min(186, pageW - 70)
+  doc.line(dateX, sigY, Math.min(dateX + 56, pageW - 14), sigY)
+  doc.text('თარიღი', dateX, sigY + 5)
+
+  doc.setFontSize(8)
+  doc.text(tenantName || '—', 14, pageH - 8)
+  doc.text(new Date().toLocaleDateString('ka-GE'), pageW - 14, pageH - 8, { align: 'right' })
+
+  return Buffer.from(doc.output('arraybuffer'))
 }
 
 export const GET = withTenantAuth(async (req: NextRequest, ctx: RouteContext) => {
@@ -320,9 +322,9 @@ export const GET = withTenantAuth(async (req: NextRequest, ctx: RouteContext) =>
 
     const logs1 = ccp1Logs as LogWithRelations[]
     const logs2 = ccp2Logs as LogWithRelations[]
-
     const tenantName = (tenant?.name || tenant?.legalName || '').trim() || '—'
-    const html = buildCcpPdfHtml({
+
+    const pdfBuffer = buildCcpPdfBuffer({
       tenantName,
       tenantLogo: tenant?.logoUrl ?? null,
       period: periodLabel(dateFrom, dateTo),
@@ -331,7 +333,6 @@ export const GET = withTenantAuth(async (req: NextRequest, ctx: RouteContext) =>
       ccp2Logs: logs2,
     })
 
-    const pdfBuffer = await renderHtmlToPdf(html)
     const fname = new Date().toISOString().split('T')[0]
 
     return new NextResponse(new Uint8Array(pdfBuffer), {
@@ -348,10 +349,7 @@ export const GET = withTenantAuth(async (req: NextRequest, ctx: RouteContext) =>
       {
         error: {
           code: 'PDF_GENERATION_FAILED',
-          message:
-            error instanceof Error
-              ? error.message
-              : 'Failed to generate PDF. Ensure Chromium is available (Puppeteer) on the server.',
+          message: error instanceof Error ? error.message : 'Failed to generate PDF.',
         },
       },
       { status: 500 }
