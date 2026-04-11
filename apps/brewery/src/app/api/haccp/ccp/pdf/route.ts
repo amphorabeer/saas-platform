@@ -1,5 +1,3 @@
-import fs from 'fs'
-import path from 'path'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@saas-platform/database'
 import { withTenantAuth, type RouteContext } from '../../withTenantAuth'
@@ -22,26 +20,6 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
-}
-
-async function getSignatureBase64(signatureUrl: string | null): Promise<string | null> {
-  if (!signatureUrl) return null
-
-  try {
-    const relative = signatureUrl.trim().replace(/^\/+/, '')
-    const filePath = path.join(process.cwd(), 'public', relative)
-
-    if (fs.existsSync(filePath)) {
-      const fileBuffer = fs.readFileSync(filePath)
-      const base64 = fileBuffer.toString('base64')
-      const ext = path.extname(filePath).slice(1).toLowerCase()
-      const mimeType = ext === 'png' ? 'image/png' : 'image/jpeg'
-      return `data:${mimeType};base64,${base64}`
-    }
-  } catch (e) {
-    console.error('Failed to load signature:', e)
-  }
-  return null
 }
 
 function isBatchSourcedCcp1(correctiveAction: string | null): boolean {
@@ -92,13 +70,13 @@ type LogWithRelations = {
 
 function buildCcpPdfHtml(params: {
   tenantName: string
+  tenantLogo: string | null
   period: string
   section: 'ALL' | 'CCP1' | 'CCP2'
   ccp1Logs: LogWithRelations[]
   ccp2Logs: LogWithRelations[]
-  signatureMap: Record<string, string>
 }): string {
-  const { tenantName, period, section, ccp1Logs, ccp2Logs, signatureMap } = params
+  const { tenantName, tenantLogo, period, section, ccp1Logs, ccp2Logs } = params
   const company = escapeHtml(tenantName || '—')
   const periodEsc = escapeHtml(period)
   const printed = escapeHtml(new Date().toLocaleString('ka-GE'))
@@ -107,10 +85,10 @@ function buildCcpPdfHtml(params: {
     const batch =
       log.batch?.batchNumber ?? batchNumberFromBoilingNote(log.correctiveAction) ?? '—'
     const source = isBatchSourcedCcp1(log.correctiveAction) ? 'პარტიიდან' : 'ხელით'
-    const sigData = signatureMap[log.user.id]
+    const sig = log.user.signatureUrl
     const operatorCell = `${escapeHtml(log.user.name || log.user.email || '—')}${
-      sigData
-        ? `<br><img src="${sigData}" alt="" style="height:24px;max-width:100px;object-fit:contain;" />`
+      sig
+        ? `<br><img src="${sig}" alt="" style="height:24px;max-width:100px;object-fit:contain;" />`
         : ''
     }`
     return `<tr>
@@ -131,10 +109,10 @@ function buildCcpPdfHtml(params: {
       : log.batch?.batchNumber ?? '—'
     const visual = log.visualCheck === true ? 'კი' : log.visualCheck === false ? 'არა' : '—'
     const source = fromCip ? 'CIP-იდან' : 'ხელით'
-    const sigData = signatureMap[log.user.id]
+    const sig = log.user.signatureUrl
     const operatorCell = `${escapeHtml(log.user.name || log.user.email || '—')}${
-      sigData
-        ? `<br><img src="${sigData}" alt="" style="height:24px;max-width:100px;object-fit:contain;" />`
+      sig
+        ? `<br><img src="${sig}" alt="" style="height:24px;max-width:100px;object-fit:contain;" />`
         : ''
     }`
     return `<tr>
@@ -192,6 +170,11 @@ function buildCcpPdfHtml(params: {
   </style>
 </head>
 <body>
+  ${
+    tenantLogo
+      ? `<div style="text-align:center;margin-bottom:10px;"><img src="${tenantLogo}" alt="" style="max-height:52px;max-width:140px;object-fit:contain;" /></div>`
+      : ''
+  }
   <h1>${company}</h1>
   <h2>HACCP — CCP მონიტორინგი</h2>
   <div class="meta">პერიოდი: ${periodEsc}<br />დაბეჭდილია: ${printed}</div>
@@ -331,38 +314,21 @@ export const GET = withTenantAuth(async (req: NextRequest, ctx: RouteContext) =>
         : Promise.resolve([] as LogWithRelations[]),
       prisma.tenant.findUnique({
         where: { id: ctx.tenantId },
-        select: { name: true, legalName: true },
+        select: { name: true, legalName: true, logoUrl: true },
       }),
     ])
 
     const logs1 = ccp1Logs as LogWithRelations[]
     const logs2 = ccp2Logs as LogWithRelations[]
-    const userById = new Map<string, { id: string; signatureUrl: string | null }>()
-    for (const log of logs1) {
-      const u = log.user
-      if (u?.id) userById.set(u.id, { id: u.id, signatureUrl: u.signatureUrl })
-    }
-    for (const log of logs2) {
-      const u = log.user
-      if (u?.id) userById.set(u.id, { id: u.id, signatureUrl: u.signatureUrl })
-    }
-
-    const signatureMap: Record<string, string> = {}
-    for (const user of userById.values()) {
-      if (user.signatureUrl) {
-        const base64 = await getSignatureBase64(user.signatureUrl)
-        if (base64) signatureMap[user.id] = base64
-      }
-    }
 
     const tenantName = (tenant?.name || tenant?.legalName || '').trim() || '—'
     const html = buildCcpPdfHtml({
       tenantName,
+      tenantLogo: tenant?.logoUrl ?? null,
       period: periodLabel(dateFrom, dateTo),
       section,
       ccp1Logs: logs1,
       ccp2Logs: logs2,
-      signatureMap,
     })
 
     const pdfBuffer = await renderHtmlToPdf(html)

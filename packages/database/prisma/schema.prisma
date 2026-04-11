@@ -25,6 +25,7 @@ model Tenant {
   bankName     String?
   bankAccount  String?
   bankSwift    String?
+  logoUrl      String? // data URL or remote URL for company logo (Vercel-safe; avoid filesystem)
   batches      Batch[]
   budgets      Budget[]
   customers    Customer[]

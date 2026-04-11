@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mkdir, unlink, writeFile } from 'fs/promises'
-import path from 'path'
 import { prisma } from '@saas-platform/database'
 import { withPermission, RouteContext } from '@/lib/api-middleware'
 
@@ -12,16 +10,6 @@ function userIdFromSignatureRoute(url: string): string | null {
   const i = parts.indexOf('users')
   if (i < 0 || !parts[i + 1] || parts[i + 2] !== 'signature') return null
   return parts[i + 1]
-}
-
-async function removeSignatureFiles(userId: string, baseDir: string) {
-  for (const ext of ['png', 'jpg', 'jpeg']) {
-    try {
-      await unlink(path.join(baseDir, `${userId}.${ext}`))
-    } catch {
-      // ignore missing
-    }
-  }
 }
 
 // POST /api/users/[id]/signature — multipart field "signature"
@@ -59,23 +47,18 @@ export const POST = withPermission('settings:update', async (req: NextRequest, c
       return NextResponse.json({ error: 'File too large (max 2MB)' }, { status: 400 })
     }
 
-    const ext = mime === 'image/png' ? 'png' : 'jpg'
-    const signaturesDir = path.join(process.cwd(), 'public', 'signatures')
-    await mkdir(signaturesDir, { recursive: true })
+    const base64 = buf.toString('base64')
+    const dataUrl = `data:${mime};base64,${base64}`
 
-    await removeSignatureFiles(userId, signaturesDir)
-
-    const filename = `${userId}.${ext}`
-    const absolutePath = path.join(signaturesDir, filename)
-    await writeFile(absolutePath, buf)
-
-    const signatureUrl = `/signatures/${filename}`
-    await prisma.user.update({
-      where: { id: userId },
-      data: { signatureUrl },
+    const updated = await prisma.user.updateMany({
+      where: { id: userId, tenantId: ctx.tenantId },
+      data: { signatureUrl: dataUrl },
     })
+    if (updated.count === 0) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
 
-    return NextResponse.json({ signatureUrl })
+    return NextResponse.json({ signatureUrl: dataUrl })
   } catch (error) {
     console.error('[POST /api/users/[id]/signature]', error)
     return NextResponse.json({ error: 'Failed to upload signature' }, { status: 500 })
@@ -98,13 +81,13 @@ export const DELETE = withPermission('settings:update', async (req: NextRequest,
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    const signaturesDir = path.join(process.cwd(), 'public', 'signatures')
-    await removeSignatureFiles(userId, signaturesDir)
-
-    await prisma.user.update({
-      where: { id: userId },
+    const updated = await prisma.user.updateMany({
+      where: { id: userId, tenantId: ctx.tenantId },
       data: { signatureUrl: null },
     })
+    if (updated.count === 0) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

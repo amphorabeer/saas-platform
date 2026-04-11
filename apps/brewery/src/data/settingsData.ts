@@ -68,7 +68,7 @@ export interface User {
   position?: string
   status: UserStatus
   avatarUrl?: string
-  /** From API — public URL under /signatures/ */
+  /** From API — data URL (image/png or image/jpeg) */
   signatureUrl?: string | null
   lastActivity?: Date
   createdAt: Date

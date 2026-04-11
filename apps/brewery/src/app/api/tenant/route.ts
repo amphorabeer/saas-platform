@@ -37,6 +37,7 @@ export async function GET() {
         bankName: true,
         bankAccount: true,
         bankSwift: true,
+        logoUrl: true,
         createdAt: true,
       },
     })
@@ -87,6 +88,9 @@ export async function PUT(req: Request) {
         bankName: body.bankName,
         bankAccount: body.bankAccount,
         bankSwift: body.bankSwift,
+        ...(typeof body.logoUrl === 'string' || body.logoUrl === null
+          ? { logoUrl: body.logoUrl === null ? null : body.logoUrl }
+          : {}),
       },
     })
 

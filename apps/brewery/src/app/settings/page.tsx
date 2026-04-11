@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { signOut } from 'next-auth/react'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
@@ -67,6 +67,8 @@ export default function SettingsPage() {
   const [isHydrated, setIsHydrated] = useState(false)
   const [tenantLoading, setTenantLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const logoInputRef = useRef<HTMLInputElement>(null)
+  const [logoUploading, setLogoUploading] = useState(false)
 
   // State for each tab
   const [companySettings, setCompanySettings] = useState(mockCompanySettings)
@@ -125,6 +127,7 @@ export default function SettingsPage() {
             bankName: tenant.bankName || prev.bankName,
             bankAccount: tenant.bankAccount || prev.bankAccount,
             bankSwift: tenant.bankSwift || prev.bankSwift,
+            logoUrl: typeof tenant.logoUrl === 'string' ? tenant.logoUrl : prev.logoUrl,
           }))
         }
       } catch (err) {
@@ -152,6 +155,7 @@ export default function SettingsPage() {
         bankName: storedCompanySettings.bankName || prev.bankName,
         bankAccount: storedCompanySettings.bankAccount || prev.bankAccount,
         bankSwift: storedCompanySettings.bankSwift || prev.bankSwift,
+        logoUrl: storedCompanySettings.logoUrl ?? prev.logoUrl,
       }))
     }
     
@@ -239,6 +243,7 @@ export default function SettingsPage() {
           bankName: companySettings.bankName,
           bankAccount: companySettings.bankAccount,
           bankSwift: companySettings.bankSwift,
+          logoUrl: companySettings.logoUrl,
         })
         
         // შეინახე გარეგნობის პარამეტრები store-ში
@@ -286,6 +291,57 @@ export default function SettingsPage() {
     setIsConfirmationModalOpen(true)
   }
 
+  const handleLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setLogoUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('logo', file)
+      const res = await fetch('/api/tenant/logo', {
+        method: 'POST',
+        body: fd,
+        credentials: 'include',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        alert(data.error || 'ლოგოს ატვირთვა ვერ მოხერხდა')
+        return
+      }
+      const logoUrl = typeof data.logoUrl === 'string' ? data.logoUrl : undefined
+      if (logoUrl) {
+        setCompanySettings((prev) => ({ ...prev, logoUrl }))
+        saveCompanySettings({ logoUrl })
+      }
+    } catch (err) {
+      console.error(err)
+      alert('ლოგოს ატვირთვა ვერ მოხერხდა')
+    } finally {
+      setLogoUploading(false)
+    }
+  }
+
+  const handleLogoRemove = async () => {
+    if (!confirm('ლოგო წაიშალოს?')) return
+    setLogoUploading(true)
+    try {
+      const res = await fetch('/api/tenant/logo', { method: 'DELETE', credentials: 'include' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        alert(data.error || 'წაშლა ვერ მოხერხდა')
+        return
+      }
+      setCompanySettings((prev) => ({ ...prev, logoUrl: undefined }))
+      saveCompanySettings({ logoUrl: undefined })
+    } catch (err) {
+      console.error(err)
+      alert('წაშლა ვერ მოხერხდა')
+    } finally {
+      setLogoUploading(false)
+    }
+  }
+
   const handleDeleteData = () => {
     setConfirmationAction(() => () => {
       console.log('Delete all data')
@@ -305,13 +361,46 @@ export default function SettingsPage() {
               <CardBody className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-2">ლოგო</label>
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg"
+                    className="hidden"
+                    onChange={handleLogoFile}
+                  />
                   <div className="flex items-center gap-4">
-                    <div className="w-24 h-24 rounded-lg bg-bg-tertiary flex items-center justify-center text-4xl border border-border">
-                      🍺
+                    <div className="w-24 h-24 rounded-lg bg-bg-tertiary flex items-center justify-center text-4xl border border-border overflow-hidden shrink-0">
+                      {companySettings.logoUrl ? (
+                        <img
+                          src={companySettings.logoUrl}
+                          alt="ლოგო"
+                          className="max-w-full max-h-full w-auto h-auto object-contain"
+                        />
+                      ) : (
+                        <span aria-hidden>🍺</span>
+                      )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="secondary" size="sm">ატვირთვა</Button>
-                      <Button variant="secondary" size="sm">წაშლა</Button>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        disabled={logoUploading}
+                        onClick={() => logoInputRef.current?.click()}
+                      >
+                        {logoUploading ? '...' : 'ატვირთვა'}
+                      </Button>
+                      {companySettings.logoUrl ? (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          disabled={logoUploading}
+                          onClick={handleLogoRemove}
+                        >
+                          წაშლა
+                        </Button>
+                      ) : null}
                     </div>
                   </div>
                 </div>
