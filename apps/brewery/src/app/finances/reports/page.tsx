@@ -6,6 +6,8 @@ import { DashboardLayout } from '@/components/layout'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui'
 import { formatCurrency } from '@/lib/utils'
+import type { TenantBrand } from '@/lib/tenant-brand'
+import { escHtml, tenantFooterLine, tenantBrandFromApiJson } from '@/lib/tenant-brand'
 
 interface MonthlyStats {
   month: string
@@ -63,6 +65,7 @@ export default function FinancialReportsPage() {
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null)
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(0)
   const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month')
+  const [tenantCompany, setTenantCompany] = useState<TenantBrand | null>(null)
 
   const fetchData = useCallback(async () => {
     try {
@@ -102,6 +105,15 @@ export default function FinancialReportsPage() {
     } finally {
       setLoading(false)
     }
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/tenant')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.tenant) setTenantCompany(tenantBrandFromApiJson(data.tenant))
+      })
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -185,7 +197,10 @@ export default function FinancialReportsPage() {
 
   const generateReportHTML = () => {
     if (!currentMonth) return ''
-    
+    const co = tenantCompany
+    const companyTitle = co ? escHtml(co.displayName) : '—'
+    const footerLine = co ? escHtml(tenantFooterLine(co)) : '—'
+
     return `
       <!DOCTYPE html>
       <html>
@@ -206,7 +221,7 @@ export default function FinancialReportsPage() {
         </style>
       </head>
       <body>
-        <h1>🍺 BrewMaster PRO</h1>
+        <h1>${companyTitle}</h1>
         <h2>📊 ფინანსური ანგარიში - ${currentMonth.month} ${currentMonth.year}</h2>
         
         <h3>შემოსავლები</h3>
@@ -245,7 +260,7 @@ export default function FinancialReportsPage() {
         </p>
 
         <p style="color: #999; font-size: 12px; margin-top: 40px;">
-          გენერირებული: ${new Date().toLocaleDateString('ka-GE')} • BrewMaster PRO
+          გენერირებული: ${new Date().toLocaleDateString('ka-GE')} • ${footerLine}
         </p>
       </body>
       </html>

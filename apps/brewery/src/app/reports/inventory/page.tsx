@@ -82,7 +82,8 @@ export default function InventoryReportsPage() {
   const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>([])
   const [topItems, setTopItems] = useState<TopItem[]>([])
   const [ingredientTypeData, setIngredientTypeData] = useState<CategoryData[]>([])
-  
+  const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null)
+
   // Stats
   const [stats, setStats] = useState({
     totalItems: 0,
@@ -285,12 +286,45 @@ export default function InventoryReportsPage() {
     fetchData()
   }, [fetchData])
 
+  const downloadInventoryExport = async (kind: 'pdf' | 'excel') => {
+    const ext = kind === 'pdf' ? 'pdf' : 'xlsx'
+    const mime =
+      kind === 'pdf'
+        ? 'application/pdf'
+        : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    const url = `/api/reports/inventory/${kind}`
+    try {
+      setExporting(kind)
+      const res = await fetch(url)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        const msg =
+          typeof err.error === 'string' ? err.error : err.error?.message || `HTTP ${res.status}`
+        throw new Error(msg)
+      }
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      const objectUrl = URL.createObjectURL(new Blob([blob], { type: mime }))
+      a.href = objectUrl
+      a.download = `inventory-report.${ext}`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(objectUrl)
+    } catch (e) {
+      console.error('Inventory export error:', e)
+      alert(e instanceof Error ? e.message : 'ექსპორტი ვერ მოხერხდა')
+    } finally {
+      setExporting(null)
+    }
+  }
+
   const handleExportPDF = () => {
-    console.log('Exporting Inventory Report to PDF...')
+    void downloadInventoryExport('pdf')
   }
 
   const handleExportExcel = () => {
-    console.log('Exporting Inventory Report to Excel...')
+    void downloadInventoryExport('excel')
   }
 
   if (loading) {
@@ -325,11 +359,21 @@ export default function InventoryReportsPage() {
               <option value="30">ბოლო 30 დღე</option>
               <option value="90">ბოლო 3 თვე</option>
             </select>
-            <Button onClick={handleExportPDF} variant="secondary" size="sm">
-              📄 PDF
+            <Button
+              onClick={handleExportPDF}
+              variant="secondary"
+              size="sm"
+              disabled={!!exporting}
+            >
+              {exporting === 'pdf' ? '…' : '📄 PDF'}
             </Button>
-            <Button onClick={handleExportExcel} variant="secondary" size="sm">
-              📊 Excel
+            <Button
+              onClick={handleExportExcel}
+              variant="secondary"
+              size="sm"
+              disabled={!!exporting}
+            >
+              {exporting === 'excel' ? '…' : '📊 Excel'}
             </Button>
           </div>
         </div>

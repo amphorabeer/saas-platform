@@ -8,6 +8,8 @@ import { Card, CardHeader, CardBody, Button } from '@/components/ui'
 import { OrderPaymentModal, PaymentFormData } from '@/components/finances/OrderPaymentModal'
 import { InvoiceModal } from '@/components/finances/InvoiceModal'
 import { formatDate, formatCurrency } from '@/lib/utils'
+import type { TenantBrand } from '@/lib/tenant-brand'
+import { escHtml, escAttr, tenantFooterLine, tenantBrandFromApiJson } from '@/lib/tenant-brand'
 
 interface OrderItem {
   id: string
@@ -125,6 +127,7 @@ export default function OrderDetailPage() {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false)
   const [customers, setCustomers] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
+  const [tenantCompany, setTenantCompany] = useState<TenantBrand | null>(null)
 
   // Fetch order
   const fetchOrder = async () => {
@@ -168,6 +171,12 @@ export default function OrderDetailPage() {
         }
       }
       fetchCustomersAndSuppliers()
+      fetch('/api/tenant')
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data?.tenant) setTenantCompany(tenantBrandFromApiJson(data.tenant))
+        })
+        .catch(() => {})
     }
   }, [params.id])
 
@@ -300,6 +309,15 @@ export default function OrderDetailPage() {
 
   // Generate invoice HTML for print/download
   const generateInvoiceHTML = (invoice: Invoice, order: OrderDetail) => {
+    const co = tenantCompany
+    const logoBlock =
+      co?.logoUrl && (co.logoUrl.startsWith('data:') || co.logoUrl.startsWith('http'))
+        ? `<img src="${escAttr(co.logoUrl)}" style="max-height:48px;margin-bottom:8px;object-fit:contain" alt="" />`
+        : ''
+    const bankLine =
+      co && (co.bankName || co.bankAccount)
+        ? `<p>ბანკი: ${co.bankName ? escHtml(co.bankName) : ''}${co.bankAccount ? ` — IBAN: <span class="iban">${escHtml(co.bankAccount)}</span>` : ''}${co.bankSwift ? ` — SWIFT: ${escHtml(co.bankSwift)}` : ''}</p>`
+        : ''
     return `
       <!DOCTYPE html>
       <html>
@@ -340,13 +358,15 @@ export default function OrderDetailPage() {
       <body>
         <div class="header">
           <div class="company">
-            <h1>🍺 BrewMaster PRO</h1>
-            <p><strong>შპს ბრიუმასტერი</strong></p>
-            <p>თბილისი, ვაჟა-ფშაველას გამზ. 71</p>
-            <p>საიდ. კოდი: 404123456</p>
-            <p>ტელ: +995 555 123 456</p>
-            <p>ბანკი: თიბისი ბანკი</p>
-            <p>IBAN: <span class="iban">GE00TB0000000000000000</span></p>
+            ${logoBlock}
+            <h1>${co ? escHtml(co.displayName) : '—'}</h1>
+            ${co?.legalName && co.legalName !== co.displayName ? `<p><strong>${escHtml(co.legalName)}</strong></p>` : ''}
+            ${co?.address ? `<p>${escHtml(co.address)}</p>` : ''}
+            ${co?.taxId ? `<p>საიდ. კოდი: ${escHtml(co.taxId)}</p>` : ''}
+            ${co?.phone ? `<p>ტელ: ${escHtml(co.phone)}</p>` : ''}
+            ${co?.email ? `<p>✉️ ${escHtml(co.email)}</p>` : ''}
+            ${co?.website ? `<p>${escHtml(co.website)}</p>` : ''}
+            ${bankLine}
           </div>
           <div class="invoice-title">
             <h2>ინვოისი</h2>
@@ -400,7 +420,7 @@ export default function OrderDetailPage() {
         <div class="footer">
           <p><strong>დანიშნულება გადარიცხვისას:</strong> ${invoice.invoiceNumber}</p>
           <p style="margin-top: 15px;">გმადლობთ თანამშრომლობისთვის!</p>
-          <p>BrewMaster PRO • www.brewmaster.ge • info@brewmaster.ge</p>
+          <p>${co ? escHtml(tenantFooterLine(co)) : '—'}</p>
         </div>
       </body>
       </html>

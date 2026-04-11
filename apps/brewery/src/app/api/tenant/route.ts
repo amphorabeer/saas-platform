@@ -56,26 +56,40 @@ export async function GET() {
   }
 }
 
-/** Whitelist PUT body → Prisma `Tenant` scalar fields only (no unknown keys). */
+const TENANT_PUT_ALLOWED = [
+  'name',
+  'legalName',
+  'taxId',
+  'phone',
+  'email',
+  'address',
+  'website',
+  'bankName',
+  'bankAccount',
+  'bankSwift',
+  'logoUrl',
+] as const
+
+/** Only updatable Tenant scalars; never `code`, `slug`, `plan`, etc. */
 function buildTenantUpdateData(body: Record<string, unknown>): Prisma.TenantUpdateInput {
   const validData: Prisma.TenantUpdateInput = {}
 
-  if (body.name !== undefined) validData.name = body.name as string
-  if (body.legalName !== undefined) validData.legalName = body.legalName as string | null
-  if (body.taxId !== undefined) validData.taxId = body.taxId as string | null
-  if (body.phone !== undefined) validData.phone = body.phone as string | null
-  if (body.email !== undefined) validData.email = body.email as string | null
-  if (body.address !== undefined) validData.address = body.address as string | null
-  if (body.website !== undefined) validData.website = body.website as string | null
-  if (body.bankName !== undefined) validData.bankName = body.bankName as string | null
-  if (body.bankAccount !== undefined) validData.bankAccount = body.bankAccount as string | null
-  if (body.bankSwift !== undefined) validData.bankSwift = body.bankSwift as string | null
-  if (body.logoUrl !== undefined) {
-    if (body.logoUrl === null || body.logoUrl === '') {
-      validData.logoUrl = null
-    } else if (typeof body.logoUrl === 'string') {
-      validData.logoUrl = body.logoUrl
+  for (const key of TENANT_PUT_ALLOWED) {
+    if (body[key] === undefined) continue
+
+    if (key === 'name') {
+      const v = String(body.name ?? '').trim()
+      if (v) validData.name = v
+      continue
     }
+
+    if (key === 'logoUrl') {
+      if (body.logoUrl === null || body.logoUrl === '') validData.logoUrl = null
+      else if (typeof body.logoUrl === 'string') validData.logoUrl = body.logoUrl
+      continue
+    }
+
+    ;(validData as Record<string, unknown>)[key] = body[key]
   }
 
   return validData
@@ -102,6 +116,7 @@ export async function PUT(req: Request) {
     }
 
     const body = (await req.json()) as Record<string, unknown>
+    console.log('[Tenant PUT] body:', JSON.stringify(body))
     const validData = buildTenantUpdateData(body)
 
     if (Object.keys(validData).length === 0) {

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 import { NAV_ITEMS } from '@/constants'
 import { usePlan } from '@/lib/usePlan'
 import { PLAN_NAMES, getRequiredPlanForFeature, PlanFeatures } from '@/lib/plan-features'
@@ -22,6 +23,24 @@ export function Sidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const { plan, hasFeature, loading: planLoading } = usePlan()
+  const [tenantBrand, setTenantBrand] = useState<{ name?: string; logoUrl?: string | null }>({})
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/tenant')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.tenant) return
+        setTenantBrand({
+          name: data.tenant.name,
+          logoUrl: data.tenant.logoUrl ?? null,
+        })
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // Get user info from session
   const user = session?.user
@@ -53,10 +72,22 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 h-screen w-[260px] bg-bg-secondary border-r border-border flex flex-col z-40 print:hidden">
       {/* Logo */}
       <div className="p-6 border-b border-border">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="text-3xl">🍺</span>
-          <div>
-            <h1 className="font-display text-xl font-bold text-copper-light">BrewMaster</h1>
+        <Link href="/" className="flex items-center gap-3 min-w-0">
+          {tenantBrand.logoUrl ? (
+            <img
+              src={tenantBrand.logoUrl}
+              alt={tenantBrand.name || ''}
+              className="h-8 w-auto max-w-[140px] object-contain shrink-0"
+            />
+          ) : (
+            <span className="text-3xl shrink-0" aria-hidden>
+              🍺
+            </span>
+          )}
+          <div className="min-w-0">
+            <h1 className="font-display text-xl font-bold text-copper-light truncate">
+              {tenantBrand.name || 'BrewMaster'}
+            </h1>
             <p className="text-[10px] text-text-muted uppercase tracking-wider">PRO Edition</p>
           </div>
         </Link>

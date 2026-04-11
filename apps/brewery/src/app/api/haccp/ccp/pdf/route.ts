@@ -1,18 +1,14 @@
-import fs from 'fs'
-import path from 'path'
 import { NextRequest, NextResponse } from 'next/server'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { prisma } from '@saas-platform/database'
 import { withTenantAuth, type RouteContext } from '../../withTenantAuth'
 import { formatDateTime } from '@/lib/utils'
+import { registerNotoSansOnce } from '@/lib/jspdf-noto'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 120
-
-const FONT_VFS = 'NotoSans-Regular.ttf'
-const FONT_FAMILY = 'NotoSans'
 
 function parseYmd(s: string): { y: number; m: number; d: number } | null {
   const p = s.split('-').map(Number)
@@ -66,23 +62,6 @@ type LogWithRelations = {
   batch: { batchNumber: string } | null
 }
 
-/** Registers Noto Sans once per document; returns family name for autoTable. */
-function registerNotoSansOnce(doc: jsPDF): string {
-  try {
-    const b64Path = path.join(process.cwd(), 'src/lib/NotoSans-Regular-base64.txt')
-    const b64 = fs.readFileSync(b64Path, 'utf8').replace(/\s/g, '')
-    const binary = Buffer.from(b64, 'base64').toString('binary')
-    doc.addFileToVFS(FONT_VFS, binary)
-    doc.addFont(FONT_VFS, FONT_FAMILY, 'normal')
-    doc.setFont(FONT_FAMILY, 'normal')
-    return FONT_FAMILY
-  } catch (e) {
-    console.warn('[HACCP PDF] NotoSans not loaded, falling back to helvetica:', e)
-    doc.setFont('helvetica', 'normal')
-    return 'helvetica'
-  }
-}
-
 function parseDataUrlImage(s: string): { data: string; fmt: 'PNG' | 'JPEG' } | null {
   const m = s.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/i)
   if (!m) return null
@@ -105,7 +84,7 @@ function buildCcpPdfBuffer(params: {
 }): Buffer {
   const { tenantName, tenantLogo, period, section, ccp1Logs, ccp2Logs } = params
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
-  const fontFamily = registerNotoSansOnce(doc)
+  const fontFamily = registerNotoSansOnce(doc, 'HACCP PDF')
 
   const pageW = doc.internal.pageSize.getWidth()
   const pageH = doc.internal.pageSize.getHeight()
@@ -322,7 +301,8 @@ export const GET = withTenantAuth(async (req: NextRequest, ctx: RouteContext) =>
 
     const logs1 = ccp1Logs as LogWithRelations[]
     const logs2 = ccp2Logs as LogWithRelations[]
-    const tenantName = (tenant?.name || tenant?.legalName || '').trim() || '—'
+    console.log('[PDF] tenant:', tenant)
+    const tenantName = (tenant?.legalName || tenant?.name || '').trim() || '—'
 
     const pdfBuffer = buildCcpPdfBuffer({
       tenantName,

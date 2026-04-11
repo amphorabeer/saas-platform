@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui'
 import { formatDate, formatCurrency } from '@/lib/utils'
+import type { TenantBrand } from '@/lib/tenant-brand'
+import { escHtml, escAttr, tenantFooterLine, tenantBrandFromApiJson } from '@/lib/tenant-brand'
 
 interface InvoiceItem {
   id?: string
@@ -118,6 +120,22 @@ export function InvoiceModal({
   const [newItemUnit, setNewItemUnit] = useState('ცალი')
   const [newItemPrice, setNewItemPrice] = useState('')
   const [isPrinting, setIsPrinting] = useState(false)
+  const [tenantCompany, setTenantCompany] = useState<TenantBrand | null>(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+    let cancelled = false
+    fetch('/api/tenant')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.tenant) return
+        setTenantCompany(tenantBrandFromApiJson(data.tenant))
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [isOpen])
 
   // Reset form when invoice changes
   useEffect(() => {
@@ -177,6 +195,15 @@ export function InvoiceModal({
 
   // Generate invoice HTML for print/download
   const generateInvoiceHTML = (inv: Invoice) => {
+    const co = tenantCompany
+    const logoBlock =
+      co?.logoUrl && (co.logoUrl.startsWith('data:') || co.logoUrl.startsWith('http'))
+        ? `<img src="${escAttr(co.logoUrl)}" style="max-height:48px;margin-bottom:8px;object-fit:contain" alt="" />`
+        : ''
+    const bankLine =
+      co && (co.bankName || co.bankAccount)
+        ? `<p>ბანკი: ${co.bankName ? escHtml(co.bankName) : ''}${co.bankAccount ? ` — IBAN: <span class="iban">${escHtml(co.bankAccount)}</span>` : ''}${co.bankSwift ? ` — SWIFT: ${escHtml(co.bankSwift)}` : ''}</p>`
+        : ''
     return `
       <!DOCTYPE html>
       <html>
@@ -217,13 +244,15 @@ export function InvoiceModal({
       <body>
         <div class="header">
           <div class="company">
-            <h1>🍺 BrewMaster PRO</h1>
-            <p><strong>შპს ბრიუმასტერი</strong></p>
-            <p>თბილისი, ვაჟა-ფშაველას გამზ. 71</p>
-            <p>საიდ. კოდი: 404123456</p>
-            <p>ტელ: +995 555 123 456</p>
-            <p>ბანკი: თიბისი ბანკი</p>
-            <p>IBAN: <span class="iban">GE00TB0000000000000000</span></p>
+            ${logoBlock}
+            <h1>${co ? escHtml(co.displayName) : '—'}</h1>
+            ${co?.legalName && co.legalName !== co.displayName ? `<p><strong>${escHtml(co.legalName)}</strong></p>` : ''}
+            ${co?.address ? `<p>${escHtml(co.address)}</p>` : ''}
+            ${co?.taxId ? `<p>საიდ. კოდი: ${escHtml(co.taxId)}</p>` : ''}
+            ${co?.phone ? `<p>ტელ: ${escHtml(co.phone)}</p>` : ''}
+            ${co?.email ? `<p>✉️ ${escHtml(co.email)}</p>` : ''}
+            ${co?.website ? `<p>${escHtml(co.website)}</p>` : ''}
+            ${bankLine}
           </div>
           <div class="invoice-title">
             <h2>ინვოისი</h2>
@@ -277,7 +306,7 @@ export function InvoiceModal({
         <div class="footer">
           <p><strong>დანიშნულება გადარიცხვისას:</strong> ${inv.invoiceNumber}</p>
           <p style="margin-top: 15px;">გმადლობთ თანამშრომლობისთვის!</p>
-          <p>BrewMaster PRO • www.brewmaster.ge • info@brewmaster.ge</p>
+          <p>${co ? escHtml(tenantFooterLine(co)) : '—'}</p>
         </div>
       </body>
       </html>
