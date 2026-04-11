@@ -39,6 +39,12 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
             taxId: true,
           },
         },
+        invoice: {
+          include: {
+            items: true,
+            payments: { orderBy: { date: 'desc' } },
+          },
+        },
       },
     })
 
@@ -84,7 +90,51 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
           city: order.customer.city || undefined,
           taxId: order.customer.taxId || undefined,
         },
-        invoice: null, // invoice relation doesn't exist on SalesOrder
+        invoice: order.invoice
+          ? {
+              id: order.invoice.id,
+              invoiceNumber: order.invoice.invoiceNumber,
+              type: order.invoice.type.toLowerCase(),
+              status: order.invoice.status.toLowerCase(),
+              statusName: getInvoiceStatusName(order.invoice.status),
+              issueDate: order.invoice.issueDate.toISOString(),
+              dueDate: order.invoice.dueDate?.toISOString() ?? null,
+              customerId: order.invoice.customerId,
+              customerName: order.customer.name,
+              customerPhone: order.customer.phone,
+              customerEmail: order.customer.email,
+              customerAddress: order.customer.address
+                ? `${order.customer.address}${order.customer.city ? `, ${order.customer.city}` : ''}`
+                : null,
+              customerTaxId: order.customer.taxId,
+              supplierId: order.invoice.supplierId,
+              supplierName: null,
+              subtotal: Number(order.invoice.subtotal),
+              discount: Number(order.invoice.discount),
+              tax: Number(order.invoice.tax),
+              total: Number(order.invoice.total),
+              paidAmount: Number(order.invoice.paidAmount),
+              remaining: Number(order.invoice.total) - Number(order.invoice.paidAmount),
+              items: order.invoice.items.map((item) => ({
+                id: item.id,
+                description: item.description,
+                quantity: Number(item.quantity),
+                unit: item.unit ?? 'ცალი',
+                unitPrice: Number(item.unitPrice),
+                total: Number(item.total),
+                productName: item.productName ?? undefined,
+                packageType: item.packageType ?? undefined,
+              })),
+              payments: order.invoice.payments.map((p) => ({
+                id: p.id,
+                amount: Number(p.amount),
+                method: p.method.toLowerCase(),
+                date: p.date.toISOString(),
+                reference: p.reference,
+              })),
+              notes: order.invoice.notes,
+            }
+          : null,
       },
     })
   } catch (error) {

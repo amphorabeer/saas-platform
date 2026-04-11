@@ -242,14 +242,34 @@ export default function OrderDetailPage() {
           })),
         }),
       })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate invoice')
+
+      if (response.status === 409) {
+        const errorData = await response.json().catch(() => ({}))
+        const msg =
+          (typeof errorData.error === 'object' && errorData.error?.message) ||
+          (typeof errorData.error === 'string' ? errorData.error : null) ||
+          'ამ შეკვეთისთვის ინვოისი უკვე არსებობს'
+        alert(msg)
+        await fetchOrder()
+        return
       }
-      
-      fetchOrder() // Refresh order to show new invoice
-      alert('✅ ინვოისი წარმატებით შეიქმნა!')
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const errMsg =
+          (typeof errorData.error === 'object' && errorData.error?.message) ||
+          (typeof errorData.error === 'string' ? errorData.error : null) ||
+          'Failed to generate invoice'
+        throw new Error(errMsg)
+      }
+
+      const payload = await response.json()
+      await fetchOrder()
+      if (payload.alreadyExisted) {
+        alert('ℹ️ ამ შეკვეთისთვის ინვოისი უკვე იყო — ნაჩვენებია არსებული.')
+      } else {
+        alert('✅ ინვოისი წარმატებით შეიქმნა!')
+      }
     } catch (err: any) {
       console.error('Invoice generation error:', err)
       alert(err.message || 'ინვოისის გენერაცია ვერ მოხერხდა')

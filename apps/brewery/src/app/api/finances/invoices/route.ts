@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@saas-platform/database'
 import { withTenant, RouteContext } from '@/lib/api-middleware'
 
@@ -106,13 +107,13 @@ export const GET = withTenant(async (req: NextRequest, ctx: RouteContext) => {
 
 // POST /api/finances/invoices
 export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
+  let orderId: string | undefined
   try {
     const data = await req.json()
     const {
       type,
       customerId,
       supplierId,
-      orderId,
       issueDate,
       dueDate,
       items,
@@ -121,12 +122,26 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       notes,
       terms,
     } = data
+    orderId = data.orderId
 
     if (!type || !items?.length) {
       return NextResponse.json(
         { error: 'ტიპი და პროდუქტები სავალდებულოა' },
         { status: 400 }
       )
+    }
+
+    if (orderId) {
+      const existing = await (prisma as any).invoice.findFirst({
+        where: { orderId, tenantId: ctx.tenantId },
+      })
+      if (existing) {
+        return NextResponse.json({
+          success: true,
+          invoice: { id: existing.id, invoiceNumber: existing.invoiceNumber },
+          alreadyExisted: true,
+        })
+      }
     }
 
     // Generate invoice number
@@ -181,6 +196,28 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       invoice: { id: invoice.id, invoiceNumber },
     })
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002' &&
+      typeof orderId === 'string' &&
+      orderId
+    ) {
+      const target = error.meta?.target
+      const isOrderIdConflict =
+        Array.isArray(target) && target.includes('orderId')
+      if (isOrderIdConflict) {
+        const existing = await (prisma as any).invoice.findFirst({
+          where: { orderId, tenantId: ctx.tenantId },
+        })
+        if (existing) {
+          return NextResponse.json({
+            success: true,
+            invoice: { id: existing.id, invoiceNumber: existing.invoiceNumber },
+            alreadyExisted: true,
+          })
+        }
+      }
+    }
     console.error('[INVOICES API] POST Error:', error)
     return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 })
   }
