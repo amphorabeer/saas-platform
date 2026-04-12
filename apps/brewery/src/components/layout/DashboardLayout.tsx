@@ -1,3 +1,4 @@
+import { BrewMasterAIButton } from '@/components/ai/BrewMasterAIButton'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 
@@ -18,6 +19,7 @@ export function DashboardLayout({ children, title, breadcrumb, onNewBatch }: Das
           {children}
         </div>
       </main>
+      <BrewMasterAIButton />
     </div>
   )
 }

@@ -30,6 +30,8 @@ export default function HaccpSettingsPage() {
   const [activeCcps, setActiveCcps] = useState<string[]>([])
   const [activeSops, setActiveSops] = useState<string[]>([])
   const [journalFrequency, setJournalFrequency] = useState<JournalFrequency>('DAILY')
+  const [users, setUsers] = useState<{ id: string; name: string | null; email: string | null }[]>([])
+  const [team, setTeam] = useState<{ userId: string; role: string; customRole?: string }[]>([])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -46,6 +48,7 @@ export default function HaccpSettingsPage() {
         if (c.journalFrequency === 'DAILY' || c.journalFrequency === 'PER_SHIFT' || c.journalFrequency === 'PER_BATCH') {
           setJournalFrequency(c.journalFrequency)
         }
+        setTeam(Array.isArray(c.team) ? c.team : [])
       }
     } finally {
       setLoading(false)
@@ -55,6 +58,15 @@ export default function HaccpSettingsPage() {
   useEffect(() => {
     load()
   }, [load])
+
+  useEffect(() => {
+    fetch('/api/users')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.users) setUsers(data.users)
+      })
+      .catch(() => {})
+  }, [])
 
   const toggle = (arr: string[], id: string, set: (v: string[]) => void) => {
     if (arr.includes(id)) set(arr.filter((x) => x !== id))
@@ -73,6 +85,7 @@ export default function HaccpSettingsPage() {
             activeCcps,
             activeSops,
             journalFrequency,
+            team,
           },
         }),
       })
@@ -184,6 +197,97 @@ export default function HaccpSettingsPage() {
                   {opt.label}
                 </label>
               ))}
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-sm font-semibold text-text-secondary mb-3">HACCP გუნდი (სუჯ)</h3>
+            <p className="text-xs text-text-muted mb-3">დაამატეთ გუნდის წევრები და მათი როლები</p>
+
+            {/* Team members list */}
+            <div className="space-y-2 mb-3">
+              {team.map((member, idx) => {
+                const user = users.find((u) => u.id === member.userId)
+                return (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 p-3 bg-bg-tertiary rounded-lg border border-border"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user?.name || user?.email || member.userId}</p>
+                      <p className="text-xs text-copper-light">{member.role}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-xs text-red-400 hover:text-red-300 shrink-0"
+                      onClick={() => setTeam(team.filter((_, i) => i !== idx))}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )
+              })}
+              {team.length === 0 && (
+                <p className="text-xs text-text-muted py-2">გუნდის წევრები არ არის</p>
+              )}
+            </div>
+
+            {/* Add member form */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-3 bg-bg-tertiary/50 rounded-lg border border-border">
+              <div>
+                <label className="block text-xs text-text-muted mb-1">მომხმარებელი</label>
+                <select
+                  id="team-user-select"
+                  className="w-full px-3 py-2 bg-bg-card border border-border rounded-lg text-sm text-text-primary"
+                  defaultValue=""
+                >
+                  <option value="">— აირჩიეთ —</option>
+                  {users
+                    .filter((u) => !team.find((m) => m.userId === u.id))
+                    .map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name || u.email}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-text-muted mb-1">როლი</label>
+                <select
+                  id="team-role-select"
+                  className="w-full px-3 py-2 bg-bg-card border border-border rounded-lg text-sm text-text-primary"
+                  defaultValue=""
+                >
+                  <option value="">— აირჩიეთ —</option>
+                  <option value="საბჭოს თავმჯდომარე">საბჭოს თავმჯდომარე</option>
+                  <option value="HACCP ლიდერი">HACCP ლიდერი</option>
+                  <option value="მიწოდების ჯაჭვის მენეჯერი">მიწ. ჯაჭვის მენეჯ.</option>
+                  <option value="ლუდსახარშის უფროსი">ლუდსახარშის უფროსი</option>
+                  <option value="ტექნიკური მენეჯერი">ტექნიკური მენეჯერი</option>
+                  <option value="უსაფრთხოების მენეჯერი">უსაფრ. მენეჯერი</option>
+                  <option value="სან-ჰიგიენისტი">სან-ჰიგიენისტი</option>
+                  <option value="სხვა">სხვა</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  className="w-full px-3 py-2 bg-copper/20 text-copper-light border border-copper/30 rounded-lg text-sm hover:bg-copper/30 transition-colors"
+                  onClick={() => {
+                    const userSel = document.getElementById('team-user-select') as HTMLSelectElement
+                    const roleSel = document.getElementById('team-role-select') as HTMLSelectElement
+                    const userId = userSel?.value
+                    const role = roleSel?.value
+                    if (!userId || !role) return
+                    if (team.find((m) => m.userId === userId)) return
+                    setTeam([...team, { userId, role }])
+                    userSel.value = ''
+                    roleSel.value = ''
+                  }}
+                >
+                  + დამატება
+                </button>
+              </div>
             </div>
           </section>
 

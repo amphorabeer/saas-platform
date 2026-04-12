@@ -125,6 +125,43 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       }
     })
 
+    // HACCP INCOMING_CONTROL ავტომატური სინქრონი
+    try {
+      const supplierName = supplierId
+        ? await prisma.supplier
+            .findUnique({
+              where: { id: supplierId },
+              select: { name: true },
+            })
+            .then((s) => s?.name || null)
+        : null
+
+      await prisma.haccpJournal.create({
+        data: {
+          tenantId: ctx.tenantId,
+          type: 'INCOMING_CONTROL',
+          data: {
+            source: 'auto',
+            product: result.item.name,
+            quantity: String(quantity),
+            unit: result.item.unit,
+            supplier: supplierName || null,
+            supplierId: supplierId || null,
+            temperature: null,
+            vehicleHygiene: null,
+            documents: invoiceNumber ? true : null,
+            invoiceNumber: invoiceNumber || null,
+            notes: notes || null,
+            autoTag: `მარაგებიდან | ${result.item.name} × ${quantity} ${result.item.unit}`,
+          },
+          recordedBy: ctx.userId || 'system',
+          recordedAt: date ? new Date(date) : new Date(),
+        },
+      })
+    } catch (syncErr) {
+      console.error('[Purchase] HACCP sync error:', syncErr)
+    }
+
     return NextResponse.json({
       success: true,
       message: 'შესყიდვა წარმატებით დაფიქსირდა',

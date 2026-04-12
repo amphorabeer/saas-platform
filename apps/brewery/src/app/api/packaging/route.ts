@@ -206,6 +206,34 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       },
     })
 
+    // HACCP FILLING ჟურნალი ავტომატურად
+    try {
+      await prisma.haccpJournal.create({
+        data: {
+          tenantId: ctx.tenantId,
+          type: 'FILLING',
+          data: {
+            source: 'auto',
+            packagingRunId: packagingRun.id,
+            batchId: packagingRun.batchId,
+            batchNumber: primaryBatch.batchNumber,
+            packageType: packagingRun.packageType,
+            quantity: packagingRun.quantity,
+            volumeTotal: packagingRun.volumeTotal.toString(),
+            lotNumber: packagingRun.lotNumber || null,
+            performedBy: packagingRun.performedBy,
+            performedAt: packagingRun.performedAt.toISOString(),
+            notes: packagingRun.notes || null,
+            autoTag: `შეფუთვიდან | პარტია: ${primaryBatch.batchNumber} | ${packagingRun.packageType} × ${packagingRun.quantity}`,
+          },
+          recordedBy: ctx.userId,
+        },
+      })
+    } catch (syncErr) {
+      // sync failure არ უნდა შეაჩეროს შეფუთვას
+      console.error('[Packaging] HACCP FILLING sync error:', syncErr)
+    }
+
     // Update batch statuses to PACKAGING
     await prisma.batch.updateMany({
       where: { 

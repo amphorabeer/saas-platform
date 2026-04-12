@@ -142,9 +142,18 @@ export default function HaccpSuppliersPage() {
       <Card>
         <CardHeader
           action={
-            <Button type="button" size="sm" onClick={openAdd}>
-              + მომწოდებელი
-            </Button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => window.open('/api/haccp/suppliers/pdf', '_blank')}
+                className="text-sm font-medium text-copper hover:text-copper-light"
+              >
+                📄 PDF
+              </button>
+              <Button type="button" size="sm" onClick={openAdd}>
+                + მომწოდებელი
+              </Button>
+            </div>
           }
         >
           <h2 className="font-semibold">მომწოდებლების სია</h2>

@@ -21,10 +21,10 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/calendar', label: 'კალენდარი', icon: '📅', alwaysShow: true },
   { href: '/inventory', label: 'მარაგები', icon: '📦', requiredFeature: 'rawMaterials' },
   { href: '/sales', label: 'გაყიდვები', icon: '💰', requiredFeature: 'finances' },
-  { href: '/quality', label: 'ხარისხი', icon: '✅', alwaysShow: true },
   { href: '/equipment', label: 'აღჭურვილობა', icon: '⚙️', alwaysShow: true },
   { href: '/reports', label: 'რეპორტები', icon: '📈', requiredFeature: 'analytics' },
   { href: '/haccp', label: 'HACCP', icon: haccpNavIcon, alwaysShow: true },
+  { href: '/quality', label: 'ხარისხი', icon: '✅', alwaysShow: true },
   { href: '/finances', label: 'ფინანსები', icon: '💵', requiredFeature: 'finances' },
   { href: '/settings', label: 'პარამეტრები', icon: '🔧', alwaysShow: true },
 ]

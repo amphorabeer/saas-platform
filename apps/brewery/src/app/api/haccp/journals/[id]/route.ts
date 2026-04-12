@@ -11,6 +11,20 @@ const VALID_TYPES: HaccpJournalType[] = [
   'WASTE_MANAGEMENT',
   'TEMPERATURE',
   'SUPPLIER',
+  'KEG_WASHING',
+  'FILLING',
+  'INCIDENT',
+  'HEALTH_CHECK',
+  'THERMOMETER_CALIBRATION',
+  'TRAINING',
+  'HYGIENE_VIOLATION',
+  'CHEMICAL_LOG',
+  'STORAGE_CONTROL',
+  'JOURNAL_VERIFICATION',
+  'MANAGEMENT_REVIEW',
+  'AUDIT',
+  'CORRECTIVE_ACTION',
+  'RODENT_TRAP',
 ]
 
 function isJournalType(v: unknown): v is HaccpJournalType {

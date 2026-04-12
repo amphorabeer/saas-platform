@@ -3,11 +3,18 @@ import { withTenantAuth, type RouteContext } from '../withTenantAuth'
 import { prisma } from '@saas-platform/database'
 import type { Prisma } from '@prisma/client'
 
+export type HaccpTeamMember = {
+  userId: string
+  role: string
+  customRole?: string
+}
+
 export type HaccpConfigJson = {
   fermentationVessel: 'QVEVRI' | 'TANK' | 'BOTH'
   activeCcps: string[]
   activeSops: string[]
   journalFrequency: 'DAILY' | 'PER_SHIFT' | 'PER_BATCH'
+  team: HaccpTeamMember[]
 }
 
 const DEFAULT_CONFIG: HaccpConfigJson = {
@@ -15,6 +22,7 @@ const DEFAULT_CONFIG: HaccpConfigJson = {
   activeCcps: [],
   activeSops: [],
   journalFrequency: 'DAILY',
+  team: [],
 }
 
 function configKey(tenantId: string): string {
@@ -39,6 +47,16 @@ function parseConfig(value: unknown): HaccpConfigJson {
       freq === 'DAILY' || freq === 'PER_SHIFT' || freq === 'PER_BATCH'
         ? freq
         : DEFAULT_CONFIG.journalFrequency,
+    team: Array.isArray(v.team)
+      ? v.team.map((m: unknown) => {
+          const t = m as Record<string, unknown>
+          return {
+            userId: String(t.userId || ''),
+            role: String(t.role || ''),
+            customRole: t.customRole ? String(t.customRole) : undefined,
+          }
+        })
+      : [],
   }
 }
 
@@ -75,6 +93,9 @@ export const PUT = withTenantAuth(async (req: NextRequest, ctx: RouteContext) =>
     const merged: HaccpConfigJson = {
       ...DEFAULT_CONFIG,
       ...parseConfig(incoming),
+      team: Array.isArray((incoming as Record<string, unknown>).team)
+        ? (incoming as Record<string, unknown>).team as HaccpTeamMember[]
+        : parseConfig(incoming).team,
     }
 
     const value = merged as unknown as Prisma.InputJsonValue

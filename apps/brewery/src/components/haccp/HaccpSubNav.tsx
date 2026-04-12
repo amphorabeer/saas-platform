@@ -8,7 +8,6 @@ const links = [
   { href: '/haccp/ccp', label: 'CCP' },
   { href: '/haccp/journals', label: 'ჟურნალები' },
   { href: '/haccp/sop', label: 'SOP' },
-  { href: '/haccp/suppliers', label: 'მომწოდებლები' },
   { href: '/haccp/settings', label: 'კონფიგურაცია' },
 ] as const
 

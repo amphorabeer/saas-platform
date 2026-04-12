@@ -52,6 +52,31 @@ export const POST = withPermission('inventory:update', async (
       })
     }
     
+    // HACCP INCOMING_CONTROL ავტომატური სინქრონი
+    try {
+      await prisma.haccpJournal.create({
+        data: {
+          tenantId: ctx.tenantId,
+          type: 'INCOMING_CONTROL',
+          data: {
+            source: 'auto',
+            product: item.name,
+            quantity: String(input.quantity),
+            unit: item.unit,
+            supplier: input.supplier || item.supplier || null,
+            lotNumber: input.lotNumber || null,
+            temperature: null,
+            notes: input.notes || null,
+            autoTag: `მარაგებიდან | ${item.name} × ${input.quantity} ${item.unit}`,
+          },
+          recordedBy: ctx.userId,
+          recordedAt: new Date(),
+        },
+      })
+    } catch (syncErr) {
+      console.error('[Purchase/id] HACCP sync error:', syncErr)
+    }
+
     // Fetch updated item
     const updatedItem = await prisma.inventoryItem.findUnique({
       where: { id }

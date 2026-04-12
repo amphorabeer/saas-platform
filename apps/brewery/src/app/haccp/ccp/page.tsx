@@ -137,9 +137,11 @@ function plannedBoilFromNote(correctiveAction: string | null): { temp: number; m
 function BoilingCcpTableRow({
   row,
   onUpdated,
+  onDelete,
 }: {
   row: CcpLogRow
   onUpdated: () => Promise<void>
+  onDelete: () => void
 }) {
   const fromBatch = isBatchSourcedCcp1(row.correctiveAction)
   const planned = plannedBoilFromNote(row.correctiveAction)
@@ -311,6 +313,15 @@ function BoilingCcpTableRow({
           )}
         </div>
       </td>
+      <td className="p-3">
+        <button
+          type="button"
+          className="text-xs text-red-400 hover:text-red-300"
+          onClick={onDelete}
+        >
+          🗑️ წაშლა
+        </button>
+      </td>
     </tr>
   )
 }
@@ -318,9 +329,11 @@ function BoilingCcpTableRow({
 function VesselCcpTableRow({
   row,
   onUpdated,
+  onDelete,
 }: {
   row: CcpLogRow
   onUpdated: () => Promise<void>
+  onDelete: () => void
 }) {
   const fromCip = isCipSourcedCcp2(row.correctiveAction)
   const vesselOrBatchLabel = fromCip
@@ -472,6 +485,15 @@ function VesselCcpTableRow({
           )}
         </div>
       </td>
+      <td className="p-3">
+        <button
+          type="button"
+          className="text-xs text-red-400 hover:text-red-300"
+          onClick={onDelete}
+        >
+          🗑️ წაშლა
+        </button>
+      </td>
     </tr>
   )
 }
@@ -521,6 +543,20 @@ export default function HaccpCcpPage() {
     }
   }, [])
 
+  const deleteCcp = async (id: string) => {
+    if (!confirm('წაიშალოს ეს CCP ჩანაწერი?')) return
+    try {
+      const res = await fetch(`/api/haccp/ccp/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        alert('წაშლა ვერ მოხერხდა')
+        return
+      }
+      await loadLogs()
+    } catch {
+      alert('წაშლა ვერ მოხერხდა')
+    }
+  }
+
   useEffect(() => {
     ;(async () => {
       setLoading(true)
@@ -548,30 +584,7 @@ export default function HaccpCcpPage() {
     const params = new URLSearchParams({ section: printSection })
     if (dateFrom) params.set('dateFrom', dateFrom)
     if (dateTo) params.set('dateTo', dateTo)
-    try {
-      const res = await fetch(`/api/haccp/ccp/pdf?${params.toString()}`, {
-        credentials: 'include',
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        console.error(err)
-        alert(err?.error?.message || 'PDF ფაილის შექმნა ვერ მოხერხდა')
-        return
-      }
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `HACCP-CCP-${new Date().toISOString().split('T')[0]}.pdf`
-      a.rel = 'noopener'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
-    } catch (e) {
-      console.error(e)
-      alert('PDF ფაილის შექმნა ვერ მოხერხდა')
-    }
+    window.open(`/api/haccp/ccp/pdf?${params.toString()}`, '_blank')
   }
 
   const submitBoiling = async (e: React.FormEvent) => {
@@ -833,11 +846,17 @@ export default function HaccpCcpPage() {
                     <th className="p-3">შედეგი</th>
                     <th className="p-3">შემსრულებელი</th>
                     <th className="p-3">წყარო</th>
+                    <th className="p-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {boilingLogs.map((row) => (
-                    <BoilingCcpTableRow key={row.id} row={row} onUpdated={loadLogs} />
+                    <BoilingCcpTableRow
+                      key={row.id}
+                      row={row}
+                      onUpdated={loadLogs}
+                      onDelete={() => deleteCcp(row.id)}
+                    />
                   ))}
                 </tbody>
               </table>
@@ -937,11 +956,17 @@ export default function HaccpCcpPage() {
                     <th className="p-3">შედეგი</th>
                     <th className="p-3">შემსრულებელი</th>
                     <th className="p-3">წყარო</th>
+                    <th className="p-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {vesselLogs.map((row) => (
-                    <VesselCcpTableRow key={row.id} row={row} onUpdated={loadLogs} />
+                    <VesselCcpTableRow
+                      key={row.id}
+                      row={row}
+                      onUpdated={loadLogs}
+                      onDelete={() => deleteCcp(row.id)}
+                    />
                   ))}
                 </tbody>
               </table>

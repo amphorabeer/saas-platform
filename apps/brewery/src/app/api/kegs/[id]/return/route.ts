@@ -81,9 +81,38 @@ export const POST = withTenant(async (
       },
     })
 
-    // თუ CLEANING-ზე გადავიდა, დავამატოთ შესაბამისი movement
+    // თუ CLEANING-ზე გადავიდა — HACCP KEG_WASHING ჟურნალი ავტომატურად
     if (newStatus === 'CLEANING') {
-      // Could trigger automatic cleaning workflow here
+      try {
+        await prisma.haccpJournal.create({
+          data: {
+            tenantId: ctx.tenantId,
+            type: 'KEG_WASHING',
+            data: {
+              source: 'auto',
+              kegId: currentKeg.id,
+              kegNumber: currentKeg.kegNumber,
+              size: currentKeg.size,
+              condition: condition || 'NEEDS_CLEANING',
+              conditionLabel:
+                condition === 'NEEDS_CLEANING' ? 'გასარეცხი'
+                : condition === 'DAMAGED' ? 'დაზიანებული'
+                : 'კარგი',
+              productName: currentKeg.productName || null,
+              batchId: currentKeg.batchId || null,
+              customerId: currentKeg.customerId || null,
+              customerName: currentKeg.Customer?.name || null,
+              returnedAt: new Date().toISOString(),
+              notes: notes || null,
+              autoTag: `კეგის დაბრუნებიდან | კეგი: ${currentKeg.kegNumber}`,
+            },
+            recordedBy: ctx.userId,
+          },
+        })
+      } catch (syncErr) {
+        // sync failure არ უნდა შეაჩეროს კეგის დაბრუნება
+        console.error('[Keg Return] HACCP KEG_WASHING sync error:', syncErr)
+      }
     }
 
     return NextResponse.json({ 

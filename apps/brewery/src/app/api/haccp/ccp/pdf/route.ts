@@ -1,338 +1,222 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import { prisma } from '@saas-platform/database'
 import { withTenantAuth, type RouteContext } from '../../withTenantAuth'
-import { formatDateTime } from '@/lib/utils'
-import { registerNotoSansOnce } from '@/lib/jspdf-noto'
+import { resolveSignatureUrl } from '@/lib/resolve-signature'
 
-export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-export const maxDuration = 120
 
-function parseYmd(s: string): { y: number; m: number; d: number } | null {
+function esc(s: unknown): string {
+  if (s === null || s === undefined || s === '') return '—'
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+function fmtD(d: Date): string {
+  return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`
+}
+function fmtT(d: Date): string {
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+}
+function parseYmd(s: string) {
   const p = s.split('-').map(Number)
-  if (p.length !== 3 || p.some((n) => Number.isNaN(n))) return null
+  if (p.length !== 3 || p.some(n => Number.isNaN(n))) return null
   return { y: p[0], m: p[1], d: p[2] }
 }
-
-function isBatchSourcedCcp1(correctiveAction: string | null): boolean {
-  return Boolean(correctiveAction?.includes('ავტომატურად გენერირებული'))
-}
-
-function batchNumberFromBoilingNote(correctiveAction: string | null): string | null {
-  if (!correctiveAction) return null
-  const m = correctiveAction.match(/\|\s*პარტია:\s*([^|]+)/)
-  return m ? m[1].trim() : null
-}
-
-function isCipSourcedCcp2(correctiveAction: string | null): boolean {
-  return Boolean(
-    correctiveAction?.includes('ავტომატურად CIP-იდან') && correctiveAction.includes('CIP ID:')
-  )
-}
-
-function equipmentNameFromCipNote(correctiveAction: string | null): string | null {
-  if (!correctiveAction) return null
-  const m = correctiveAction.match(/\|\s*ავზი:\s*(.+)$/)
-  return m ? m[1].trim() : null
-}
-
-function periodLabel(dateFrom: string | null, dateTo: string | null): string {
-  const fmt = (ymd: string) => {
-    const p = parseYmd(ymd)
-    if (!p) return ''
-    return new Date(p.y, p.m - 1, p.d).toLocaleDateString('ka-GE')
+function sigCell(url: string | null, name: string | null, email: string | null): string {
+  const resolved = resolveSignatureUrl(url)
+  const label = esc(name || email)
+  if (resolved) {
+    return `<td class="sig"><img src="${resolved}" style="height:30px;max-width:80px;object-fit:contain"><br><span style="font-size:9px;color:#666">${label}</span></td>`
   }
-  if (dateFrom && dateTo) return `${fmt(dateFrom)} — ${fmt(dateTo)}`
-  if (dateFrom) return `${fmt(dateFrom)} — …`
-  if (dateTo) return `… — ${fmt(dateTo)}`
-  return 'ყველა პერიოდი'
+  return `<td class="sig">${label}</td>`
 }
 
-type LogWithRelations = {
+type CcpLog = {
   recordedAt: Date
-  temperature: number | null
-  duration: number | null
-  phLevel: number | null
-  visualCheck: boolean | null
+  temperature?: number | null
+  duration?: number | null
+  phLevel?: number | null
+  visualCheck?: boolean | null
   result: string
-  correctiveAction: string | null
-  user: { id: string; name: string | null; email: string | null; signatureUrl: string | null }
-  batch: { batchNumber: string } | null
+  correctiveAction?: string | null
+  batch?: { batchNumber: string } | null
+  user: { name: string | null; email: string | null; signatureUrl: string | null }
 }
 
-function parseDataUrlImage(s: string): { data: string; fmt: 'PNG' | 'JPEG' } | null {
-  const m = s.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/i)
-  if (!m) return null
-  const fmt = m[1].toLowerCase() === 'png' ? 'PNG' : 'JPEG'
-  return { data: m[2], fmt }
-}
-
-function lastAutoTableFinalY(doc: jsPDF, fallback: number): number {
-  const y = (doc as unknown as { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY
-  return typeof y === 'number' ? y : fallback
-}
-
-function buildCcpPdfBuffer(params: {
+function buildHtml(params: {
   tenantName: string
   tenantLogo: string | null
   period: string
-  section: 'ALL' | 'CCP1' | 'CCP2'
-  ccp1Logs: LogWithRelations[]
-  ccp2Logs: LogWithRelations[]
-}): Buffer {
-  const { tenantName, tenantLogo, period, section, ccp1Logs, ccp2Logs } = params
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
-  const fontFamily = registerNotoSansOnce(doc, 'HACCP PDF')
+  ccp1Logs: CcpLog[]
+  ccp2Logs: CcpLog[]
+}): string {
+  const { tenantName, tenantLogo, period, ccp1Logs, ccp2Logs } = params
+  const now = new Date()
 
-  const pageW = doc.internal.pageSize.getWidth()
-  const pageH = doc.internal.pageSize.getHeight()
-  const tableFont = () => ({ font: fontFamily, fontStyle: 'normal' as const })
+  const logoHtml = tenantLogo?.startsWith('data:image')
+    ? `<img src="${tenantLogo}" style="height:48px;object-fit:contain;display:block;margin:0 auto 8px">`
+    : ''
 
-  let y = 10
-  if (tenantLogo?.startsWith('data:image')) {
-    const img = parseDataUrlImage(tenantLogo)
-    if (img) {
-      const imgH = 14
-      const imgW = 42
-      try {
-        doc.addImage(img.data, img.fmt, pageW / 2 - imgW / 2, y, imgW, imgH)
-        y += imgH + 3
-      } catch {
-        // skip broken logo
-      }
-    }
-  }
+  const empty7 = `<tr class="empty"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`
 
-  doc.setFontSize(16)
-  doc.text(tenantName || '—', pageW / 2, y, { align: 'center' })
-  y += 7
-  doc.setFontSize(12)
-  doc.text('HACCP — CCP მონიტორინგი', pageW / 2, y, { align: 'center' })
-  y += 6
-  doc.setFontSize(9)
-  doc.text(`პერიოდი: ${period}`, pageW / 2, y, { align: 'center' })
-  y += 5
-  doc.text(`დაბეჭდილია: ${new Date().toLocaleString('ka-GE')}`, pageW / 2, y, { align: 'center' })
-  y += 8
+  const ccp1Rows = ccp1Logs.map(log => {
+    const batch = log.batch?.batchNumber
+      ?? (log.correctiveAction?.match(/\|\s*პარტია:\s*([^|]+)/)?.[1]?.trim())
+      ?? '—'
+    const source = log.correctiveAction?.includes('ავტომატურად გენერირებული') ? 'პარტიიდან' : 'ხელით'
+    return `<tr>
+      <td>${fmtD(log.recordedAt)} ${fmtT(log.recordedAt)}</td>
+      <td>${esc(batch)}</td>
+      <td>${log.temperature != null ? log.temperature : '—'}</td>
+      <td>${log.duration != null ? log.duration : '—'}</td>
+      <td>${esc(log.result)}</td>
+      ${sigCell(log.user.signatureUrl, log.user.name, log.user.email)}
+      <td>${esc(source)}</td>
+    </tr>`
+  }).join('') + Array(5).fill(empty7).join('')
 
-  const operatorColIndex = 5
+  const ccp2Rows = ccp2Logs.map(log => {
+    const fromCip = log.correctiveAction?.includes('ავტომატურად CIP-იდან')
+    const vessel = fromCip
+      ? (log.correctiveAction?.match(/\|\s*ავზი:\s*(.+)$/)?.[1]?.trim() ?? '—')
+      : '—'
+    const visual = log.visualCheck === true ? 'კი' : log.visualCheck === false ? 'არა' : '—'
+    const source = fromCip ? 'CIP-იდან' : 'ხელით'
+    return `<tr>
+      <td>${fmtD(log.recordedAt)} ${fmtT(log.recordedAt)}</td>
+      <td>${esc(vessel)}</td>
+      <td>${log.phLevel != null ? log.phLevel : '—'}</td>
+      <td>${esc(visual)}</td>
+      <td>${esc(log.result)}</td>
+      ${sigCell(log.user.signatureUrl, log.user.name, log.user.email)}
+      <td>${esc(source)}</td>
+    </tr>`
+  }).join('') + Array(5).fill(empty7).join('')
 
-  if (section !== 'CCP2') {
-    doc.setFontSize(11)
-    doc.text('CCP-1 (ხარშვა)', 14, y)
-    y += 5
+  return `<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<title>HACCP CCP მონიტორინგი</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:16px}
+.header{text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #111}
+.tenant{font-size:15px;font-weight:700;margin-bottom:6px}
+.doc-title{font-size:13px;font-weight:600}
+.meta{display:flex;justify-content:space-between;background:#f5f5f5;padding:5px 10px;border-radius:3px;margin:10px 0;font-size:10px;color:#555}
+h2{font-size:12px;font-weight:700;background:#111;color:#fff;padding:5px 10px;margin-bottom:0}
+table{width:100%;border-collapse:collapse;margin-bottom:16px}
+th{background:#333;color:#fff;padding:6px 8px;text-align:left;font-size:10px}
+td{padding:6px 8px;border:1px solid #ddd;vertical-align:middle}
+tr:nth-child(even):not(.empty){background:#f9f9f9}
+tr.empty td{height:32px;border-color:#eee}
+.sig{text-align:center;min-width:90px}
+.sigs{display:flex;gap:30px;margin-top:20px}
+.sig-slot .sig-line{border-bottom:1px solid #333;height:32px;margin-bottom:3px}
+.sig-slot .sig-label{font-size:9px;color:#666}
+.sig-slot{flex:1}
+.footer{display:flex;justify-content:space-between;margin-top:10px;font-size:9px;color:#999;border-top:1px solid #eee;padding-top:6px}
+@media print{body{padding:8px} @page{size:A4 landscape;margin:8mm}}
+</style>
+</head>
+<body>
+<div class="header">
+  ${logoHtml}
+  <div class="tenant">${esc(tenantName)}</div>
+  <div class="doc-title">HACCP — CCP მონიტორინგი</div>
+</div>
+<div class="meta">
+  <span>პერიოდი: ${esc(period)}</span>
+  <span>დაბეჭდვა: ${fmtD(now)} ${fmtT(now)}</span>
+</div>
 
-    autoTable(doc, {
-      startY: y,
-      theme: 'plain',
-      styles: { ...tableFont(), fontSize: 8, cellPadding: 1.5, textColor: 20 },
-      headStyles: { ...tableFont(), fillColor: [41, 128, 185], textColor: 255, fontSize: 8 },
-      alternateRowStyles: { fillColor: [247, 247, 247] },
-      columnStyles: { [operatorColIndex]: { minCellHeight: 14 } },
-      head: [
-        ['თარიღი', 'პარტია', 'ტემპ. (°C)', 'ხანგრძლივობა (წთ)', 'შედეგი', 'შემსრულებელი', 'წყარო'],
-      ],
-      body: ccp1Logs.map((log) => {
-        const batch =
-          log.batch?.batchNumber ?? batchNumberFromBoilingNote(log.correctiveAction) ?? '—'
-        const source = isBatchSourcedCcp1(log.correctiveAction) ? 'პარტიიდან' : 'ხელით'
-        return [
-          formatDateTime(log.recordedAt),
-          batch,
-          log.temperature != null ? String(log.temperature) : '—',
-          log.duration != null ? String(log.duration) : '—',
-          String(log.result),
-          log.user.name || log.user.email || '—',
-          source,
-        ]
-      }),
-      didDrawCell: (data) => {
-        if (data.section !== 'body' || data.column.index !== operatorColIndex) return
-        const log = ccp1Logs[data.row.index]
-        const url = log?.user?.signatureUrl
-        if (!url?.startsWith('data:image')) return
-        const img = parseDataUrlImage(url)
-        if (!img) return
-        const { x, y: cy, width, height } = data.cell
-        try {
-          const ih = Math.min(8, height - 4)
-          const iw = Math.min(24, width * 0.42)
-          doc.addImage(img.data, img.fmt, x + width - iw - 1, cy + (height - ih) / 2, iw, ih)
-        } catch {
-          /* ignore */
-        }
-      },
-    })
-    y = lastAutoTableFinalY(doc, y) + 10
-  }
+<h2>CCP-1 — ხარშვა</h2>
+<table>
+  <thead><tr>
+    <th>თარიღი/დრო</th><th>პარტია</th><th>ტემპ. (°C)</th>
+    <th>ხანგრძ. (წთ)</th><th>შედეგი</th>
+    <th>შემსრულებელი / ხელმოწერა</th><th>წყარო</th>
+  </tr></thead>
+  <tbody>${ccp1Rows}</tbody>
+</table>
 
-  if (section !== 'CCP1') {
-    if (y > pageH - 60) {
-      doc.addPage()
-      doc.setFont(fontFamily, 'normal')
-      y = 14
-    }
-    doc.setFontSize(11)
-    doc.text('CCP-2 (ქვევრი/ავზის სანიტარია)', 14, y)
-    y += 5
+<h2>CCP-2 — ქვევრი/ავზის სანიტარია</h2>
+<table>
+  <thead><tr>
+    <th>თარიღი/დრო</th><th>ავზი/ქვევრი</th><th>pH</th>
+    <th>ვიზუალური</th><th>შედეგი</th>
+    <th>შემსრულებელი / ხელმოწერა</th><th>წყარო</th>
+  </tr></thead>
+  <tbody>${ccp2Rows}</tbody>
+</table>
 
-    autoTable(doc, {
-      startY: y,
-      theme: 'plain',
-      styles: { ...tableFont(), fontSize: 8, cellPadding: 1.5, textColor: 20 },
-      headStyles: { ...tableFont(), fillColor: [39, 174, 96], textColor: 255, fontSize: 8 },
-      alternateRowStyles: { fillColor: [247, 247, 247] },
-      columnStyles: { [operatorColIndex]: { minCellHeight: 14 } },
-      head: [['თარიღი', 'ავზი/ქვევრი', 'pH', 'ვიზუალური', 'შედეგი', 'შემსრულებელი', 'წყარო']],
-      body: ccp2Logs.map((log) => {
-        const fromCip = isCipSourcedCcp2(log.correctiveAction)
-        const vesselOrBatch = fromCip
-          ? equipmentNameFromCipNote(log.correctiveAction) ?? '—'
-          : log.batch?.batchNumber ?? '—'
-        const visual = log.visualCheck === true ? 'კი' : log.visualCheck === false ? 'არა' : '—'
-        const source = fromCip ? 'CIP-იდან' : 'ხელით'
-        return [
-          formatDateTime(log.recordedAt),
-          vesselOrBatch,
-          log.phLevel != null ? String(log.phLevel) : '—',
-          visual,
-          String(log.result),
-          log.user.name || log.user.email || '—',
-          source,
-        ]
-      }),
-      didDrawCell: (data) => {
-        if (data.section !== 'body' || data.column.index !== operatorColIndex) return
-        const log = ccp2Logs[data.row.index]
-        const url = log?.user?.signatureUrl
-        if (!url?.startsWith('data:image')) return
-        const img = parseDataUrlImage(url)
-        if (!img) return
-        const { x, y: cy, width, height } = data.cell
-        try {
-          const ih = Math.min(8, height - 4)
-          const iw = Math.min(24, width * 0.42)
-          doc.addImage(img.data, img.fmt, x + width - iw - 1, cy + (height - ih) / 2, iw, ih)
-        } catch {
-          /* ignore */
-        }
-      },
-    })
-    y = lastAutoTableFinalY(doc, y) + 14
-  }
-
-  if (y > pageH - 35) {
-    doc.addPage()
-    doc.setFont(fontFamily, 'normal')
-    y = 20
-  }
-
-  doc.setFontSize(9)
-  const sigY = y + 8
-  doc.line(14, sigY, 70, sigY)
-  doc.text('პასუხისმგებელი პირის ხელმოწერა', 14, sigY + 5)
-  doc.line(100, sigY, 156, sigY)
-  doc.text('მენეჯერი', 100, sigY + 5)
-  const dateX = Math.min(186, pageW - 70)
-  doc.line(dateX, sigY, Math.min(dateX + 56, pageW - 14), sigY)
-  doc.text('თარიღი', dateX, sigY + 5)
-
-  doc.setFontSize(8)
-  doc.text(tenantName || '—', 14, pageH - 8)
-  doc.text(new Date().toLocaleDateString('ka-GE'), pageW - 14, pageH - 8, { align: 'right' })
-
-  return Buffer.from(doc.output('arraybuffer'))
+<div class="sigs">
+  <div class="sig-slot"><div class="sig-line"></div><div class="sig-label">პასუხისმგებელი პირი:</div></div>
+  <div class="sig-slot"><div class="sig-line"></div><div class="sig-label">მენეჯერი:</div></div>
+  <div class="sig-slot"><div class="sig-line"></div><div class="sig-label">თარიღი:</div></div>
+</div>
+<div class="footer">
+  <span>${esc(tenantName)} · HACCP CCP მონიტორინგი</span>
+  <span>${fmtD(now)}</span>
+</div>
+<script>window.onload=()=>window.print()</script>
+</body>
+</html>`
 }
 
 export const GET = withTenantAuth(async (req: NextRequest, ctx: RouteContext) => {
   try {
     const { searchParams } = new URL(req.url)
-    const rawSection = (searchParams.get('section') || 'ALL').toUpperCase()
-    const section: 'ALL' | 'CCP1' | 'CCP2' =
-      rawSection === 'CCP1' ? 'CCP1' : rawSection === 'CCP2' ? 'CCP2' : 'ALL'
     const dateFrom = searchParams.get('dateFrom')
     const dateTo = searchParams.get('dateTo')
 
     const recordedAt: { gte?: Date; lte?: Date } = {}
-    if (dateFrom) {
-      const p = parseYmd(dateFrom)
-      if (p) recordedAt.gte = new Date(p.y, p.m - 1, p.d, 0, 0, 0, 0)
-    }
-    if (dateTo) {
-      const p = parseYmd(dateTo)
-      if (p) recordedAt.lte = new Date(p.y, p.m - 1, p.d, 23, 59, 59, 999)
-    }
+    if (dateFrom) { const p = parseYmd(dateFrom); if (p) recordedAt.gte = new Date(p.y, p.m-1, p.d, 0,0,0,0) }
+    if (dateTo) { const p = parseYmd(dateTo); if (p) recordedAt.lte = new Date(p.y, p.m-1, p.d, 23,59,59,999) }
 
-    const whereBase = {
+    const where = {
       tenantId: ctx.tenantId,
       ...(Object.keys(recordedAt).length ? { recordedAt } : {}),
     }
 
     const [ccp1Logs, ccp2Logs, tenant] = await Promise.all([
-      section !== 'CCP2'
-        ? prisma.ccpLog.findMany({
-            where: { ...whereBase, ccpType: 'BOILING' },
-            include: {
-              user: { select: { id: true, name: true, email: true, signatureUrl: true } },
-              batch: true,
-            },
-            orderBy: { recordedAt: 'desc' },
-            take: 500,
-          })
-        : Promise.resolve([] as LogWithRelations[]),
-      section !== 'CCP1'
-        ? prisma.ccpLog.findMany({
-            where: { ...whereBase, ccpType: 'VESSEL_SANITATION' },
-            include: {
-              user: { select: { id: true, name: true, email: true, signatureUrl: true } },
-              batch: true,
-            },
-            orderBy: { recordedAt: 'desc' },
-            take: 500,
-          })
-        : Promise.resolve([] as LogWithRelations[]),
+      prisma.ccpLog.findMany({
+        where: { ...where, ccpType: 'BOILING' },
+        include: { user: { select: { name: true, email: true, signatureUrl: true } }, batch: true },
+        orderBy: { recordedAt: 'desc' },
+        take: 500,
+      }),
+      prisma.ccpLog.findMany({
+        where: { ...where, ccpType: 'VESSEL_SANITATION' },
+        include: { user: { select: { name: true, email: true, signatureUrl: true } }, batch: true },
+        orderBy: { recordedAt: 'desc' },
+        take: 500,
+      }),
       prisma.tenant.findUnique({
         where: { id: ctx.tenantId },
         select: { name: true, legalName: true, logoUrl: true },
       }),
     ])
 
-    const logs1 = ccp1Logs as LogWithRelations[]
-    const logs2 = ccp2Logs as LogWithRelations[]
-    console.log('[PDF] tenant:', tenant)
     const tenantName = (tenant?.legalName || tenant?.name || '').trim() || '—'
+    const period = [dateFrom, dateTo].filter(Boolean).join(' — ') || 'ყველა პერიოდი'
 
-    const pdfBuffer = buildCcpPdfBuffer({
+    const html = buildHtml({
       tenantName,
       tenantLogo: tenant?.logoUrl ?? null,
-      period: periodLabel(dateFrom, dateTo),
-      section,
-      ccp1Logs: logs1,
-      ccp2Logs: logs2,
+      period,
+      ccp1Logs: ccp1Logs as CcpLog[],
+      ccp2Logs: ccp2Logs as CcpLog[],
     })
 
-    const fname = new Date().toISOString().split('T')[0]
-
-    return new NextResponse(new Uint8Array(pdfBuffer), {
+    return new NextResponse(html, {
       status: 200,
       headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="HACCP-CCP-${fname}.pdf"`,
+        'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'no-store',
       },
     })
   } catch (error) {
     console.error('[GET /api/haccp/ccp/pdf]', error)
-    return NextResponse.json(
-      {
-        error: {
-          code: 'PDF_GENERATION_FAILED',
-          message: error instanceof Error ? error.message : 'Failed to generate PDF.',
-        },
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed' }, { status: 500 })
   }
 })

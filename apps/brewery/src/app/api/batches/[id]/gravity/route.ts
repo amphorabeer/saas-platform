@@ -54,6 +54,71 @@ export const POST = withTenant(async (
       },
     })
     
+    // HACCP TEMPERATURE auto-sync
+    if (temperature) {
+      try {
+        const batchWithTank = await prisma.batch.findUnique({
+          where: { id: batchId },
+          select: {
+            batchNumber: true,
+            tankId: true,
+            tank: { select: { id: true, name: true } },
+          },
+        })
+        let tankName = batchWithTank?.tank?.name || null
+        let resolvedTankId = batchWithTank?.tankId || null
+
+        if (!resolvedTankId) {
+          try {
+            const lotBatch = await (prisma as any).lotBatch.findFirst({
+              where: { batchId },
+              include: {
+                Lot: {
+                  include: {
+                    TankAssignment: {
+                      where: { status: { in: ['ACTIVE', 'COMPLETED'] } },
+                      include: { Tank: { select: { id: true, name: true } } },
+                      orderBy: { actualStart: 'desc' },
+                      take: 1,
+                    },
+                  },
+                },
+              },
+            })
+            const tank = lotBatch?.Lot?.TankAssignment?.[0]?.Tank
+            if (tank) {
+              resolvedTankId = tank.id
+              tankName = tank.name
+            }
+          } catch {
+            /* skip */
+          }
+        }
+        await prisma.haccpJournal.create({
+          data: {
+            tenantId: ctx.tenantId,
+            type: 'TEMPERATURE',
+            data: {
+              source: 'auto',
+              area: tankName ? `ავზი ${tankName}` : `BRW: ${batchWithTank?.batchNumber || batchId}`,
+              tankId: resolvedTankId,
+              tankName: tankName,
+              batchId,
+              batchNumber: batchWithTank?.batchNumber || null,
+              temperature: parseFloat(temperature),
+              humidity: null,
+              gravity: parseFloat(gravity),
+              autoTag: `სიმკვრივიდან | ${batchWithTank?.batchNumber} | ${temperature}°C`,
+            },
+            recordedBy: ctx.userId || 'system',
+            recordedAt: new Date(),
+          },
+        })
+      } catch (syncErr) {
+        console.error('[Gravity] HACCP TEMPERATURE sync error:', syncErr)
+      }
+    }
+
     // Update batch with current gravity (and OG if it's the original reading)
     const updateData: any = {
       currentGravity: gravity,
