@@ -77,6 +77,42 @@ async function main() {
       orderBy: { recordedAt: 'asc' },
     })
 
+    // Fix existing TEMPERATURE backfill entries without tankName
+    const wrongTemps = await prisma.haccpJournal.findMany({
+      where: {
+        tenantId: tid,
+        type: 'TEMPERATURE',
+        data: { path: ['source'], equals: 'backfill' },
+      },
+      select: { id: true, data: true },
+    })
+
+    for (const entry of wrongTemps) {
+      const d = entry.data as Record<string, unknown>
+      if (d.tankName) continue // already has tankName
+      if (!d.batchId) continue
+
+      // Get tank name from batch
+      const batch = await prisma.batch.findUnique({
+        where: { id: String(d.batchId) },
+        select: { tank: { select: { name: true } }, tankId: true },
+      })
+      const tName = batch?.tank?.name || null
+      if (!tName) continue
+
+      await prisma.haccpJournal.update({
+        where: { id: entry.id },
+        data: {
+          data: {
+            ...d,
+            tankName: tName,
+            area: `ავზი ${tName}`,
+          },
+        },
+      })
+      console.log(`  🔧 TEMPERATURE fix: ავზი ${tName}`)
+    }
+
     const existingTemp = await prisma.haccpJournal.findMany({
       where: { tenantId: tid, type: 'TEMPERATURE' },
       select: { data: true },
@@ -96,11 +132,11 @@ async function main() {
           type: 'TEMPERATURE',
           data: {
             area: tankName ? `ავზი ${tankName}` : `პარტია ${r.batch.batchNumber}`,
+            tankName: tankName || null,
             temperature: Number(r.temperature),
             batchId: r.batchId,
             batchNumber: r.batch.batchNumber,
             tankId: r.batch.tankId || null,
-            tankName,
             gravity: Number(r.gravity),
             gravityReadingId: r.id,
             source: 'backfill',

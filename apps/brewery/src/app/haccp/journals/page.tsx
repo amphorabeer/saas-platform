@@ -2364,7 +2364,7 @@ export default function HaccpJournalsPage() {
                     {rows
                       .filter((r) => {
                         const d = r.data as Record<string, unknown>
-                        return d.source === 'auto' && d.batchId
+                        return (d.source === 'auto' || d.source === 'backfill') && d.batchId
                       })
                       .map((r) => {
                         const d = r.data as Record<string, unknown>
@@ -2403,7 +2403,7 @@ export default function HaccpJournalsPage() {
                       })}
                     {rows.filter((r) => {
                       const d = r.data as Record<string, unknown>
-                      return d.source === 'auto' && d.batchId
+                      return (d.source === 'auto' || d.source === 'backfill') && d.batchId
                     }).length === 0 && (
                       <tr>
                         <td colSpan={7} className="p-4 text-text-muted text-sm text-center">
