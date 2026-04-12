@@ -173,19 +173,24 @@ export const GET = withTenantAuth(async (_req: NextRequest, ctx: RouteContext) =
       }
     } catch (e) { console.error('[alerts] HEALTH_CHECK error:', e) }
 
-    // 7. INCOMING_CONTROL — weekly
+    // 7. INCOMING_CONTROL — only alert if purchase happened without journal
     try {
-      const count = await prisma.haccpJournal.count({
-        where: { tenantId: tid, type: 'INCOMING_CONTROL', recordedAt: { gte: daysAgo(7) } },
+      const recentPurchases = await prisma.inventoryLedger.count({
+        where: { tenantId: tid, type: 'PURCHASE', createdAt: { gte: daysAgo(7) } },
       })
-      if (count === 0) {
-        alerts.push({
-          level: 'info',
-          type: 'INCOMING_CONTROL',
-          message: 'ბოლო 7 დღეში შემავალი კონტროლი არ ჩატარებულა',
-          lastDate: null,
-          daysSince: null,
+      if (recentPurchases > 0) {
+        const recentJournals = await prisma.haccpJournal.count({
+          where: { tenantId: tid, type: 'INCOMING_CONTROL', recordedAt: { gte: daysAgo(7) } },
         })
+        if (recentJournals === 0) {
+          alerts.push({
+            level: 'warning',
+            type: 'INCOMING_CONTROL',
+            message: `ბოლო 7 დღეში ${recentPurchases} შეყიდვა მოხდა — შემავალი კონტროლი არ ჩატარებულა`,
+            lastDate: null,
+            daysSince: null,
+          })
+        }
       }
     } catch (e) { console.error('[alerts] INCOMING_CONTROL error:', e) }
 
