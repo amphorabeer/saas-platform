@@ -2374,7 +2374,13 @@ export default function HaccpJournalsPage() {
                             <td className="p-3 whitespace-nowrap">
                               {mounted ? new Date(r.recordedAt).toLocaleString('ka-GE') : ''}
                             </td>
-                            <td className="p-3 font-medium">{String(d.tankName || d.area || '—')}</td>
+                            <td className="p-3 font-medium">
+                              {d.tankName
+                                ? String(d.tankName)
+                                : d.area && !String(d.area).startsWith('პარტია')
+                                  ? String(d.area)
+                                  : '—'}
+                            </td>
                             <td className="p-3">
                               <span
                                 className={
