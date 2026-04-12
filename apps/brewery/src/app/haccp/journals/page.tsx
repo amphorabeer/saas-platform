@@ -2257,7 +2257,10 @@ export default function HaccpJournalsPage() {
                   </thead>
                   <tbody>
                     {rows
-                      .filter((r) => (r.data as Record<string, unknown>).source !== 'auto')
+                      .filter((r) => {
+                        const src = (r.data as Record<string, unknown>).source
+                        return src !== 'auto' && src !== 'backfill'
+                      })
                       .map((r) => {
                       const d = r.data as Record<string, unknown>
                       const temp = d.temperature != null ? Number(d.temperature) : null
@@ -2331,94 +2334,12 @@ export default function HaccpJournalsPage() {
                     })}
                   </tbody>
                 </table>
-                {rows.filter((r) => (r.data as Record<string, unknown>).source !== 'auto')
-                  .length === 0 && (
+                {rows.filter((r) => {
+                  const src = (r.data as Record<string, unknown>).source
+                  return src !== 'auto' && src !== 'backfill'
+                }).length === 0 && (
                   <p className="p-4 text-text-muted text-sm">ჩანაწერები არ არის</p>
                 )}
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div>
-                <p className="text-xs text-copper-light font-semibold">ავტომატური</p>
-                <h3 className="font-semibold text-sm">ავზების ტემპ. (სიმკვრივის გაზომვიდან)</h3>
-              </div>
-            </CardHeader>
-            <CardBody>
-              <div className="overflow-x-auto border border-border rounded-xl">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border bg-bg-tertiary/50 text-left text-text-muted">
-                      <th className="p-3">თარიღი/დრო</th>
-                      <th className="p-3">ავზი</th>
-                      <th className="p-3">ტემპ. °C</th>
-                      <th className="p-3">სიმკვრ. SG</th>
-                      <th className="p-3">პარტია</th>
-                      <th className="p-3">შემსრ.</th>
-                      <th className="p-3 w-16"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows
-                      .filter((r) => {
-                        const d = r.data as Record<string, unknown>
-                        return (d.source === 'auto' || d.source === 'backfill') && d.batchId
-                      })
-                      .map((r) => {
-                        const d = r.data as Record<string, unknown>
-                        const temp = d.temperature != null ? Number(d.temperature) : null
-                        return (
-                          <tr key={r.id} className="border-b border-border/60">
-                            <td className="p-3 whitespace-nowrap">
-                              {mounted ? new Date(r.recordedAt).toLocaleString('ka-GE') : ''}
-                            </td>
-                            <td className="p-3 font-medium">
-                              {d.tankName
-                                ? String(d.tankName)
-                                : d.area && !String(d.area).startsWith('პარტია')
-                                  ? String(d.area)
-                                  : '—'}
-                            </td>
-                            <td className="p-3">
-                              <span
-                                className={
-                                  temp !== null && temp > 25
-                                    ? 'text-red-400 font-medium'
-                                    : 'text-emerald-400 font-medium'
-                                }
-                              >
-                                {temp !== null ? `${temp}°C` : '—'}
-                              </span>
-                            </td>
-                            <td className="p-3">{d.gravity ? String(d.gravity) : '—'}</td>
-                            <td className="p-3">{String(d.batchNumber || '—')}</td>
-                            <td className="p-3">{r.user?.name || r.user?.email || '—'}</td>
-                            <td className="p-3">
-                              <button
-                                type="button"
-                                className="text-xs text-red-400 hover:text-red-300"
-                                onClick={() => deleteJournal(r.id)}
-                              >
-                                🗑️
-                              </button>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    {rows.filter((r) => {
-                      const d = r.data as Record<string, unknown>
-                      return (d.source === 'auto' || d.source === 'backfill') && d.batchId
-                    }).length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="p-4 text-text-muted text-sm text-center">
-                          ავზების ჩანაწერები არ არის — სიმკვრივის გაზომვისას ავტომატ. დაემატება
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
               </div>
             </CardBody>
           </Card>

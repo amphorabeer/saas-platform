@@ -23,6 +23,29 @@ async function main() {
     const systemUserId = firstUser.id
     console.log(`  👤 მომხმარებელი: ${firstUser.name || firstUser.id}`)
 
+    // Cleanup wrong TEMPERATURE backfill entries (batch-linked, not zones)
+    const wrongTemperatures = await prisma.haccpJournal.findMany({
+      where: {
+        tenantId: tid,
+        type: 'TEMPERATURE',
+        data: { path: ['source'], equals: 'backfill' },
+      },
+      select: { id: true, data: true },
+    })
+
+    let deletedTemp = 0
+    for (const entry of wrongTemperatures) {
+      const d = entry.data as Record<string, unknown>
+      // Delete if it's batch-linked (not a zone entry)
+      if (d.batchId || d.batchNumber || d.gravityReadingId) {
+        await prisma.haccpJournal.delete({ where: { id: entry.id } })
+        deletedTemp++
+      }
+    }
+    if (deletedTemp > 0) {
+      console.log(`  🗑️ წაიშალა ${deletedTemp} არასწ. TEMPERATURE ჩანაწერი`)
+    }
+
     // 1. Inventory purchases → INCOMING_CONTROL
     const purchases = await prisma.inventoryLedger.findMany({
       where: { tenantId: tid, type: 'PURCHASE' },
