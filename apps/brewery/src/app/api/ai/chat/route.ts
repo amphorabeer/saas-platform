@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@saas-platform/database'
 import { withTenant, type RouteContext } from '@/lib/api-middleware'
 
 export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
@@ -12,6 +13,59 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'messages required' }, { status: 400 })
+    }
+
+    // Fetch current production data for context
+    let productionContext = ''
+    try {
+      const [activeBatches, readyBatches] = await Promise.all([
+        prisma.batch.findMany({
+          where: {
+            tenantId: ctx.tenantId,
+            status: { in: ['BREWING', 'FERMENTING', 'CONDITIONING'] },
+          },
+          select: {
+            batchNumber: true, status: true,
+            recipe: { select: { name: true, style: true } },
+            tank: { select: { name: true } },
+            volume: true,
+          },
+          orderBy: { plannedDate: 'desc' },
+          take: 10,
+        }),
+        prisma.batch.findMany({
+          where: { tenantId: ctx.tenantId, status: 'READY' },
+          select: {
+            batchNumber: true,
+            recipe: { select: { name: true } },
+            volume: true,
+          },
+          take: 5,
+        }),
+      ])
+
+      const STATUS_MAP: Record<string, string> = {
+        BREWING: 'ხარშვა',
+        FERMENTING: 'ფერმენტაცია',
+        CONDITIONING: 'კონდიციონირება',
+        READY: 'მზადაა',
+      }
+
+      if (activeBatches.length > 0) {
+        productionContext += '\n\nმიმდინარე პარტიები:\n'
+        for (const b of activeBatches) {
+          productionContext += `- ${b.batchNumber}: ${b.recipe?.name} (${b.recipe?.style ?? '—'}) — ${STATUS_MAP[b.status] || b.status} | ავზი: ${b.tank?.name || '—'} | ${Number(b.volume)}L\n`
+        }
+      }
+
+      if (readyBatches.length > 0) {
+        productionContext += '\nმზადა ჩამოსასხმელად:\n'
+        for (const b of readyBatches) {
+          productionContext += `- ${b.batchNumber}: ${b.recipe?.name} — ${Number(b.volume)}L\n`
+        }
+      }
+    } catch (e) {
+      console.error('[AI Chat] production context error:', e)
     }
 
     const systemPrompt = `შენ ხარ BrewMaster AI — შპს "ლუდსახარში ასპინძა"-ს HACCP და წარმოების ასისტენტი.
@@ -96,6 +150,8 @@ ISO/TS 22002-1-ის მიხედვით:
 - ხელები: ყოველ შეხებამდე, სველი ოპ-ის შემდეგ
 - ავადმყოფი — სამუშ. შეზღუდვა ან შვებ.
 - ვიზიტ. — ჰიგ.ინსტრ. გაცნობა სავალდ.
+
+## მიმდინარე წარმოება${productionContext || '\nმონაცემები არ არის'}
 
 ## მიმდინარე გაფრთხილებები
 ${alerts && alerts.length > 0
