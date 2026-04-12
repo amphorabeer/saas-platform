@@ -68,6 +68,148 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
       console.error('[AI Chat] production context error:', e)
     }
 
+    let salesContext = ''
+    try {
+      const recentOrders = await prisma.salesOrder.findMany({
+        where: { tenantId: ctx.tenantId },
+        orderBy: { orderedAt: 'desc' },
+        take: 8,
+        select: {
+          orderNumber: true,
+          status: true,
+          totalAmount: true,
+          orderedAt: true,
+          customer: { select: { name: true } },
+        },
+      })
+      if (recentOrders.length > 0) {
+        salesContext += '\n\nბოლო შეკვეთები:\n'
+        for (const o of recentOrders) {
+          salesContext += `- ${o.orderNumber}: ${o.customer?.name || '—'} — ${o.status} — ${Number(o.totalAmount)}₾\n`
+        }
+      }
+    } catch (e) {
+      console.error('[AI Chat] sales context error:', e)
+    }
+
+    // Fetch inventory context
+    let inventoryContext = ''
+    try {
+      const lowStock = await prisma.inventoryItem.findMany({
+        where: {
+          tenantId: ctx.tenantId,
+          isActive: true,
+          cachedBalance: { gt: 0 },
+        },
+        select: {
+          name: true,
+          cachedBalance: true,
+          unit: true,
+          reorderPoint: true,
+          category: true,
+        },
+        orderBy: { cachedBalance: 'asc' },
+        take: 20,
+      })
+
+      const critical = lowStock.filter(
+        i => i.reorderPoint != null && Number(i.cachedBalance) <= Number(i.reorderPoint)
+      )
+      const low = lowStock.filter(
+        i =>
+          i.reorderPoint != null &&
+          Number(i.cachedBalance) <= Number(i.reorderPoint) * 1.5 &&
+          Number(i.cachedBalance) > Number(i.reorderPoint)
+      )
+
+      if (critical.length > 0) {
+        inventoryContext += '\n\nკრიტიკული მარაგი:\n'
+        for (const i of critical) {
+          inventoryContext += `- ⚠️ ${i.name}: ${Number(i.cachedBalance)} ${i.unit} (min: ${Number(i.reorderPoint)} ${i.unit})\n`
+        }
+      }
+      if (low.length > 0) {
+        inventoryContext += '\nდაბალი მარაგი:\n'
+        for (const i of low) {
+          inventoryContext += `- ${i.name}: ${Number(i.cachedBalance)} ${i.unit}\n`
+        }
+      }
+      if (critical.length === 0 && low.length === 0) {
+        inventoryContext += '\n\nმარაგები: ნორმალურია'
+      }
+    } catch (e) {
+      console.error('[AI Chat] inventory context error:', e)
+    }
+
+    // Fetch kegs context
+    let kegsContext = ''
+    try {
+      const kegStats = await prisma.keg.groupBy({
+        by: ['status'],
+        where: { tenantId: ctx.tenantId },
+        _count: { _all: true },
+      })
+
+      if (kegStats.length > 0) {
+        const KEG_STATUS_MAP: Record<string, string> = {
+          AVAILABLE: 'თავისუფალი',
+          FILLED: 'შევსებული',
+          WITH_CUSTOMER: 'დამკვეთთან',
+          IN_TRANSIT: 'გზაში',
+          CLEANING: 'სარეცხი',
+          DAMAGED: 'დაზიანებული',
+          LOST: 'დაკარგული',
+        }
+        kegsContext += '\n\nკეგების სტატუსი:\n'
+        for (const k of kegStats) {
+          kegsContext += `- ${KEG_STATUS_MAP[k.status] || k.status}: ${k._count._all}\n`
+        }
+      }
+    } catch (e) {
+      console.error('[AI Chat] kegs context error:', e)
+    }
+
+    // Fetch tanks context
+    let tanksContext = ''
+    try {
+      const tanks = await prisma.tank.findMany({
+        where: { tenantId: ctx.tenantId },
+        select: {
+          name: true,
+          status: true,
+          capacity: true,
+          currentBatchId: true,
+        },
+      })
+      const batchIds = [...new Set(tanks.map(t => t.currentBatchId).filter(Boolean))] as string[]
+      const currentBatches =
+        batchIds.length === 0
+          ? []
+          : await prisma.batch.findMany({
+              where: { id: { in: batchIds }, tenantId: ctx.tenantId },
+              select: {
+                id: true,
+                batchNumber: true,
+                status: true,
+                recipe: { select: { name: true } },
+              },
+            })
+      const batchById = new Map(currentBatches.map(b => [b.id, b]))
+
+      if (tanks.length > 0) {
+        tanksContext += '\n\nავზების სტატუსი:\n'
+        for (const t of tanks) {
+          const batch = t.currentBatchId ? batchById.get(t.currentBatchId) : undefined
+          tanksContext += `- ${t.name} (${Number(t.capacity)}L): `
+          tanksContext += batch
+            ? `${batch.batchNumber} — ${batch.recipe?.name}\n`
+            : `თავისუფალი\n`
+        }
+      }
+    } catch (e) {
+      console.error('[AI Chat] tanks context error:', e)
+    }
+
     const systemPrompt = `შენ ხარ BrewMaster AI — შპს "ლუდსახარში ასპინძა"-ს HACCP და წარმოების ასისტენტი.
 
 ═══════════════════════════════════
@@ -152,6 +294,14 @@ ISO/TS 22002-1-ის მიხედვით:
 - ვიზიტ. — ჰიგ.ინსტრ. გაცნობა სავალდ.
 
 ## მიმდინარე წარმოება${productionContext || '\nმონაცემები არ არის'}
+
+## გაყიდვები${salesContext || '\nმონაცემები არ არის'}
+
+## მარაგები${inventoryContext || '\nმონაცემები არ არის'}
+
+## კეგები${kegsContext || '\nმონაცემები არ არის'}
+
+## ავზები${tanksContext || '\nმონაცემები არ არის'}
 
 ## მიმდინარე გაფრთხილებები
 ${alerts && alerts.length > 0
