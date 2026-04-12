@@ -497,6 +497,77 @@ export default function HaccpDashboardPage() {
         </div>
       </div>
 
+      {/* Hazard Analysis Section */}
+      <div className="mb-6">
+        <h2 className="text-sm font-semibold text-text-secondary mb-3">
+          🔬 საფრთხეების ანალიზი
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              icon: '🦠',
+              title: 'ბიოლოგიური',
+              color: 'red',
+              risks: [
+                { stage: 'ნედლეული', risk: 'მიკრობიოლ. დაბინძ.', level: 'HIGH', control: 'შემავ. კონტ.' },
+                { stage: 'ფერმენტაცია', risk: 'გარეული საფუვარი', level: 'HIGH', control: 'CCP-2, CIP' },
+                { stage: 'ჩამოსხმა', risk: 'პათოგენები', level: 'MED', control: 'სანიტ., CCP-2' },
+              ],
+            },
+            {
+              icon: '⚗️',
+              title: 'ქიმიური',
+              color: 'amber',
+              risks: [
+                { stage: 'ნედლეული', risk: 'პესტიციდები', level: 'MED', control: 'სერტ. მომწოდ.' },
+                { stage: 'CIP', risk: 'საწმ. ქიმიკ. ნარჩ.', level: 'HIGH', control: 'CCP-2, pH კონტ.' },
+                { stage: 'მოვლა', risk: 'საპოხი მასალა', level: 'LOW', control: 'FG საპოხი' },
+              ],
+            },
+            {
+              icon: '🔩',
+              title: 'ფიზიკური',
+              color: 'blue',
+              risks: [
+                { stage: 'ხარშვა', risk: 'უცხო სხეული', level: 'MED', control: 'ფილტრაცია' },
+                { stage: 'ჩამოსხმა', risk: 'მინის ნამსხვრ.', level: 'HIGH', control: 'ვიზ. კონტ.' },
+                { stage: 'საფუთ.', risk: 'ლითონის ნაწ.', level: 'MED', control: 'მაგნ. სეპ.' },
+              ],
+            },
+          ].map((category) => (
+            <div key={category.title}
+              className={`bg-bg-card border border-border rounded-2xl overflow-hidden`}>
+              <div className={`px-4 py-3 border-b border-border flex items-center gap-2 ${
+                category.color === 'red' ? 'bg-red-500/10' :
+                category.color === 'amber' ? 'bg-amber-500/10' : 'bg-blue-500/10'
+              }`}>
+                <span className="text-xl">{category.icon}</span>
+                <h3 className={`font-semibold text-sm ${
+                  category.color === 'red' ? 'text-red-400' :
+                  category.color === 'amber' ? 'text-amber-400' : 'text-blue-400'
+                }`}>{category.title} საფრთხეები</h3>
+              </div>
+              <div className="divide-y divide-border">
+                {category.risks.map((risk, i) => (
+                  <div key={i} className="px-4 py-2.5">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-text-primary">{risk.stage}</span>
+                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                        risk.level === 'HIGH' ? 'bg-red-500/20 text-red-400' :
+                        risk.level === 'MED' ? 'bg-amber-500/20 text-amber-400' :
+                        'bg-emerald-500/20 text-emerald-400'
+                      }`}>{risk.level === 'HIGH' ? 'მაღ.' : risk.level === 'MED' ? 'საშ.' : 'დაბ.'}</span>
+                    </div>
+                    <p className="text-xs text-text-muted">{risk.risk}</p>
+                    <p className="text-xs text-copper-light mt-0.5">🛡️ {risk.control}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <Card>
         <CardHeader>
           <h3 className="font-semibold">სწრაფი მოქმედებები</h3>
