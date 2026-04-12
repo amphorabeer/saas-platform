@@ -133,6 +133,127 @@ const CONFIGS: Record<string, { title: string; cols: ColDef[] }> = {
       { label: 'შემსრულებელი / ხელმოწერა', value: j => fv(j.user.name || j.user.email), isSig: true },
     ],
   },
+  STORAGE_CONTROL: {
+    title: 'საწყობის კონტროლი (RS-15.1)',
+    cols: [
+      { label: 'საწყობი/ზონა', value: j => fv(j.data.storage) },
+      { label: 'ტემპ. °C', value: j => fv(j.data.temperature) },
+      { label: 'ტენიანობა %', value: j => fv(j.data.humidity) },
+      { label: 'შენიშვნა', value: j => fv(j.data.notes) },
+      { label: 'შემსრ.', value: j => fv(j.user.name || j.user.email), isSig: true },
+      { label: 'თარიღი', value: j => `${fmtDate(j.recordedAt)} ${fmtTime(j.recordedAt)}` },
+    ],
+  },
+  HEALTH_CHECK: {
+    title: 'პერსონალის ჯანმრთელობა (RS-11.1)',
+    cols: [
+      { label: 'სახელი', value: j => fv(j.data.name) },
+      { label: 'სტატუსი', value: j => fv(j.data.status) },
+      { label: 'შენიშვნა', value: j => fv(j.data.notes) },
+      { label: 'შემსრ.', value: j => fv(j.user.name || j.user.email), isSig: true },
+      { label: 'თარიღი', value: j => `${fmtDate(j.recordedAt)} ${fmtTime(j.recordedAt)}` },
+    ],
+  },
+  THERMOMETER_CALIBRATION: {
+    title: 'თერმომეტრის კალიბრაცია (RS-04.1)',
+    cols: [
+      { label: 'თერმომეტრი', value: j => fv(j.data.thermometer) },
+      { label: 'გაზომილი °C', value: j => fv(j.data.measured) },
+      { label: 'რეალური °C', value: j => fv(j.data.actual) },
+      { label: 'სხვაობა', value: j => fv(j.data.difference) },
+      { label: 'შედეგი', value: j => fv(j.data.result) },
+      { label: 'შემსრ.', value: j => fv(j.user.name || j.user.email), isSig: true },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
+  TRAINING: {
+    title: 'ტრენინგის ჟურნალი (RS-06.1)',
+    cols: [
+      { label: 'თემა', value: j => fv(j.data.topic) },
+      { label: 'ტრენერი', value: j => fv(j.data.trainer) },
+      { label: 'მსმენელი', value: j => fv(j.data.trainee) },
+      { label: 'შენიშვნა', value: j => fv(j.data.notes) },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
+  JOURNAL_VERIFICATION: {
+    title: 'ჟურნალების გადამოწმება (RS-18.01)',
+    cols: [
+      { label: 'ჯგ. ლიდერი', value: j => fv(j.data.leader) },
+      { label: 'შენიშვნა', value: j => fv(j.data.notes) },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
+  AUDIT: {
+    title: 'HACCP შიდა აუდიტი (F-09.3)',
+    cols: [
+      { label: 'აუდიტორი', value: j => fv(j.data.auditor) },
+      { label: 'შენიშვნა/დასკვნა', value: j => fv(j.data.notes) },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
+  RODENT_TRAP: {
+    title: 'სათაგურების შემოწმება (F-24)',
+    cols: [
+      { label: 'კვირა', value: j => (j.data.week != null && j.data.week !== '' ? `${fv(j.data.week)} კვირა` : '—') },
+      { label: 'შემოწმდა', value: j => (j.data.checkedCount != null ? `${fv(j.data.checkedCount)}/10` : '—') },
+      { label: 'შენიშვნა', value: j => fv(j.data.notes) },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
+  MANAGEMENT_REVIEW: {
+    title: 'მენეჯმენტის განხილვა (F-08)',
+    cols: [
+      { label: 'თავმჯდ.', value: j => fv(j.data.leader) },
+      { label: 'მონაწილეები', value: j => fv(j.data.participants) },
+      { label: 'დღ. წ.', value: j => fv(j.data.agenda) },
+      { label: 'გადაწყვ.', value: j => fv(j.data.decisions) },
+      { label: 'შემდ. თარ.', value: j => fv(j.data.nextDate) },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
+  CORRECTIVE_ACTION: {
+    title: 'მაკორექტირებელი ქმედება (F-10.2)',
+    cols: [
+      { label: 'პრობლემა', value: j => fv(j.data.description) },
+      { label: 'მიზეზი', value: j => fv(j.data.cause) },
+      { label: 'ქმედება', value: j => fv(j.data.action) },
+      { label: 'პასუხისმგ.', value: j => fv(j.data.responsible) },
+      { label: 'ვადა', value: j => fv(j.data.deadline) },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
+  HYGIENE_VIOLATION: {
+    title: 'ჰიგიენის დარღვევა (RS-09.1)',
+    cols: [
+      { label: 'დარღვევა', value: j => fv(j.data.violation) },
+      { label: 'პასუხისმგ.', value: j => fv(j.data.responsible) },
+      { label: 'ქმედება', value: j => fv(j.data.action) },
+      { label: 'შემსრ.', value: j => fv(j.user.name || j.user.email), isSig: true },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
+  INCIDENT: {
+    title: 'ინციდენტის რეგისტრაცია (RS-07.1)',
+    cols: [
+      { label: 'ინციდენტი', value: j => fv(j.data.incident ?? j.data.description) },
+      { label: 'ადგილი', value: j => fv(j.data.location) },
+      { label: 'ქმედება', value: j => fv(j.data.action) },
+      { label: 'შემსრ.', value: j => fv(j.user.name || j.user.email), isSig: true },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
+  CHEMICAL_LOG: {
+    title: 'ქიმიკატების აღრიცხვა (RS-03.1)',
+    cols: [
+      { label: 'ქიმიკატი', value: j => fv(j.data.chemical ?? j.data.name) },
+      { label: 'რაოდ.', value: j => fv(j.data.quantity) },
+      { label: 'ერთ.', value: j => fv(j.data.unit) },
+      { label: 'მიზანი', value: j => fv(j.data.purpose) },
+      { label: 'შემსრ.', value: j => fv(j.user.name || j.user.email), isSig: true },
+      { label: 'თარიღი', value: j => fmtDate(j.recordedAt) },
+    ],
+  },
 }
 
 function buildHtml(params: {
