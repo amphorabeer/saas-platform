@@ -2258,8 +2258,12 @@ export default function HaccpJournalsPage() {
                   <tbody>
                     {rows
                       .filter((r) => {
-                        const src = (r.data as Record<string, unknown>).source
-                        return src !== 'auto' && src !== 'backfill'
+                        const d = r.data as Record<string, unknown>
+                        const src = String(d.source || '')
+                        // Show manual entries + backfill zone entries (no batchId)
+                        if (src === 'auto') return false
+                        if (src === 'backfill' && d.batchId) return false
+                        return true
                       })
                       .map((r) => {
                       const d = r.data as Record<string, unknown>
@@ -2335,8 +2339,12 @@ export default function HaccpJournalsPage() {
                   </tbody>
                 </table>
                 {rows.filter((r) => {
-                  const src = (r.data as Record<string, unknown>).source
-                  return src !== 'auto' && src !== 'backfill'
+                  const d = r.data as Record<string, unknown>
+                  const src = String(d.source || '')
+                  // Show manual entries + backfill zone entries (no batchId)
+                  if (src === 'auto') return false
+                  if (src === 'backfill' && d.batchId) return false
+                  return true
                 }).length === 0 && (
                   <p className="p-4 text-text-muted text-sm">ჩანაწერები არ არის</p>
                 )}

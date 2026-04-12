@@ -288,6 +288,34 @@ async function main() {
       return count > 0
     }
 
+    // TEMPERATURE zones — daily, all rooms
+    const tempZones = [
+      { area: 'სამლუდეო სახელოსნო', temperature: 20, humidity: 50 },
+      { area: 'საფერმენტაციო ოთახი', temperature: 20, humidity: 55 },
+      { area: 'კონდიციონირების ოთახი', temperature: 2, humidity: 60 },
+      { area: 'საწყობი (მშრალი)', temperature: 15, humidity: 45 },
+      { area: 'საწყობი (გამაცივებელი)', temperature: 4, humidity: 60 },
+      { area: 'შეფუთვის ზონა', temperature: 18, humidity: 50 },
+      { area: 'ლაბორატორია', temperature: 20, humidity: 50 },
+    ]
+    for (const date of dailyDates(startDate)) {
+      const exists = await journalExists('TEMPERATURE', date)
+      if (exists) continue
+      for (const zone of tempZones) {
+        await prisma.haccpJournal.create({
+          data: {
+            tenantId: tid,
+            type: 'TEMPERATURE',
+            data: { ...zone, source: 'backfill' },
+            recordedBy: systemUserId,
+            recordedAt: date,
+          },
+        })
+        created++
+      }
+      console.log(`  ✅ TEMPERATURE zones: ${date.toISOString().split('T')[0]}`)
+    }
+
     // SANITATION — daily, all zones
     const sanitationZones = [
       'თაროები', 'სავენტილაციო არხები', 'ნათურები', 'იატაკი',
