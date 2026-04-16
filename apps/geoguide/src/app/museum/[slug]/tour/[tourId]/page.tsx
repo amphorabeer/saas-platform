@@ -37,24 +37,83 @@ const uiTexts: Record<string, {
   halls: string;
   stops: string;
   allStops: string;
+  download: string;
+  downloaded: string;
+  tourDownloaded: string;
+  alreadyDownloaded: string;
+  downloadOffline: string;
+  close: string;
+  deleteText: string;
+  cancel: string;
 }> = {
-  ka: { audioGuide: "აუდიო გიდი", stop: "გაჩერება", search: "ძებნა ნომრით ან სახელით...", tourNotFound: "ტური ვერ მოიძებნა", list: "ჩამონათვალი", halls: "დარბაზები", stops: "გაჩერება", allStops: "ყველა გაჩერება" },
-  en: { audioGuide: "Audio Guide", stop: "Stop", search: "Search by number or name...", tourNotFound: "Tour not found", list: "List", halls: "Halls", stops: "stops", allStops: "All Stops" },
-  ru: { audioGuide: "Аудиогид", stop: "Остановка", search: "Поиск по номеру или названию...", tourNotFound: "Тур не найден", list: "Список", halls: "Залы", stops: "остановок", allStops: "Все остановки" },
-  de: { audioGuide: "Audioguide", stop: "Haltestelle", search: "Nach Nummer oder Name suchen...", tourNotFound: "Tour nicht gefunden", list: "Liste", halls: "Säle", stops: "Haltestellen", allStops: "Alle Haltestellen" },
-  fr: { audioGuide: "Audioguide", stop: "Arrêt", search: "Rechercher par numéro ou nom...", tourNotFound: "Visite non trouvée", list: "Liste", halls: "Salles", stops: "arrêts", allStops: "Tous les arrêts" },
-  uk: { audioGuide: "Аудіогід", stop: "Зупинка", search: "Пошук за номером або назвою...", tourNotFound: "Тур не знайдено", list: "Список", halls: "Зали", stops: "зупинок", allStops: "Всі зупинки" },
-  es: { audioGuide: "Audioguía", stop: "Parada", search: "Buscar por número o nombre...", tourNotFound: "Tour no encontrado", list: "Lista", halls: "Salas", stops: "paradas", allStops: "Todas las paradas" },
-  it: { audioGuide: "Audioguida", stop: "Fermata", search: "Cerca per numero o nome...", tourNotFound: "Tour non trovato", list: "Elenco", halls: "Sale", stops: "fermate", allStops: "Tutte le fermate" },
-  pl: { audioGuide: "Audioprzewodnik", stop: "Przystanek", search: "Szukaj po numerze lub nazwie...", tourNotFound: "Wycieczka nie znaleziona", list: "Lista", halls: "Sale", stops: "przystanków", allStops: "Wszystkie przystanki" },
-  tr: { audioGuide: "Sesli Rehber", stop: "Durak", search: "Numara veya isme göre ara...", tourNotFound: "Tur bulunamadı", list: "Liste", halls: "Salonlar", stops: "durak", allStops: "Tüm duraklar" },
-  az: { audioGuide: "Audio Bələdçi", stop: "Dayanacaq", search: "Nömrə və ya ada görə axtar...", tourNotFound: "Tur tapılmadı", list: "Siyahı", halls: "Zallar", stops: "dayanacaq", allStops: "Bütün dayanacaqlar" },
-  hy: { audioGuide: "Delays", stop: "Delays", search: "Delays...", tourNotFound: "Delays", list: "Delays", halls: "Delays", stops: "delays", allStops: "Delays" },
-  he: { audioGuide: "מדריך שמע", stop: "תחנה", search: "חפש לפי מספר או שם...", tourNotFound: "סיור לא נמצא", list: "רשימה", halls: "אולמות", stops: "תחנות", allStops: "כל התחנות" },
-  ar: { audioGuide: "الدليل الصوتي", stop: "محطة", search: "البحث بالرقم أو الاسم...", tourNotFound: "الجولة غير موجودة", list: "قائمة", halls: "قاعات", stops: "محطات", allStops: "جميع المحطات" },
-  ko: { audioGuide: "오디오 가이드", stop: "정류장", search: "번호 또는 이름으로 검색...", tourNotFound: "투어를 찾을 수 없습니다", list: "목록", halls: "홀", stops: "정류장", allStops: "모든 정류장" },
-  ja: { audioGuide: "オーディオガイド", stop: "停留所", search: "番号または名前で検索...", tourNotFound: "ツアーが見つかりません", list: "リスト", halls: "ホール", stops: "停留所", allStops: "すべての停留所" },
-  zh: { audioGuide: "语音导览", stop: "站点", search: "按编号或名称搜索...", tourNotFound: "未找到旅游", list: "列表", halls: "大厅", stops: "站点", allStops: "所有站点" },
+  ka: {
+    audioGuide: "აუდიო გიდი", stop: "გაჩერება", search: "ძებნა ნომრით ან სახელით...", tourNotFound: "ტური ვერ მოიძებნა", list: "ჩამონათვალი", halls: "დარბაზები", stops: "გაჩერება", allStops: "ყველა გაჩერება",
+    download: "ჩამოტვირთვა", downloaded: "ჩამოტვირთულია", tourDownloaded: "ტური ჩამოტვირთულია", alreadyDownloaded: "ეს ტური უკვე ჩამოტვირთულია.", downloadOffline: "ჩამოტვირთეთ ტური ოფლაინ რეჟიმში.", close: "დახურვა", deleteText: "წაშლა", cancel: "გაუქმება",
+  },
+  en: {
+    audioGuide: "Audio Guide", stop: "Stop", search: "Search by number or name...", tourNotFound: "Tour not found", list: "List", halls: "Halls", stops: "stops", allStops: "All Stops",
+    download: "Download", downloaded: "Downloaded", tourDownloaded: "Tour Downloaded", alreadyDownloaded: "This tour is already downloaded.", downloadOffline: "Download for offline use.", close: "Close", deleteText: "Delete", cancel: "Cancel",
+  },
+  ru: {
+    audioGuide: "Аудиогид", stop: "Остановка", search: "Поиск по номеру или названию...", tourNotFound: "Тур не найден", list: "Список", halls: "Залы", stops: "остановок", allStops: "Все остановки",
+    download: "Скачать", downloaded: "Загружено", tourDownloaded: "Тур загружен", alreadyDownloaded: "Этот тур уже загружен.", downloadOffline: "Скачайте тур для офлайн использования.", close: "Закрыть", deleteText: "Удалить", cancel: "Отмена",
+  },
+  de: {
+    audioGuide: "Audioguide", stop: "Haltestelle", search: "Nach Nummer oder Name suchen...", tourNotFound: "Tour nicht gefunden", list: "Liste", halls: "Säle", stops: "Haltestellen", allStops: "Alle Haltestellen",
+    download: "Herunterladen", downloaded: "Heruntergeladen", tourDownloaded: "Tour heruntergeladen", alreadyDownloaded: "Diese Tour wurde bereits heruntergeladen.", downloadOffline: "Für Offline-Nutzung herunterladen.", close: "Schließen", deleteText: "Löschen", cancel: "Abbrechen",
+  },
+  fr: {
+    audioGuide: "Audioguide", stop: "Arrêt", search: "Rechercher par numéro ou nom...", tourNotFound: "Visite non trouvée", list: "Liste", halls: "Salles", stops: "arrêts", allStops: "Tous les arrêts",
+    download: "Télécharger", downloaded: "Téléchargé", tourDownloaded: "Visite téléchargée", alreadyDownloaded: "Cette visite est déjà téléchargée.", downloadOffline: "Télécharger pour une utilisation hors ligne.", close: "Fermer", deleteText: "Supprimer", cancel: "Annuler",
+  },
+  uk: {
+    audioGuide: "Аудіогід", stop: "Зупинка", search: "Пошук за номером або назвою...", tourNotFound: "Тур не знайдено", list: "Список", halls: "Зали", stops: "зупинок", allStops: "Всі зупинки",
+    download: "Завантажити", downloaded: "Завантажено", tourDownloaded: "Тур завантажено", alreadyDownloaded: "Цей тур вже завантажено.", downloadOffline: "Завантажте тур для офлайн використання.", close: "Закрити", deleteText: "Видалити", cancel: "Скасувати",
+  },
+  es: {
+    audioGuide: "Audioguía", stop: "Parada", search: "Buscar por número o nombre...", tourNotFound: "Tour no encontrado", list: "Lista", halls: "Salas", stops: "paradas", allStops: "Todas las paradas",
+    download: "Descargar", downloaded: "Descargado", tourDownloaded: "Tour descargado", alreadyDownloaded: "Este tour ya está descargado.", downloadOffline: "Descargar para uso sin conexión.", close: "Cerrar", deleteText: "Eliminar", cancel: "Cancelar",
+  },
+  it: {
+    audioGuide: "Audioguida", stop: "Fermata", search: "Cerca per numero o nome...", tourNotFound: "Tour non trovato", list: "Elenco", halls: "Sale", stops: "fermate", allStops: "Tutte le fermate",
+    download: "Scarica", downloaded: "Scaricato", tourDownloaded: "Tour scaricato", alreadyDownloaded: "Questo tour è già stato scaricato.", downloadOffline: "Scarica per l'uso offline.", close: "Chiudi", deleteText: "Elimina", cancel: "Annulla",
+  },
+  pl: {
+    audioGuide: "Audioprzewodnik", stop: "Przystanek", search: "Szukaj po numerze lub nazwie...", tourNotFound: "Wycieczka nie znaleziona", list: "Lista", halls: "Sale", stops: "przystanków", allStops: "Wszystkie przystanki",
+    download: "Pobierz", downloaded: "Pobrano", tourDownloaded: "Wycieczka pobrana", alreadyDownloaded: "Ta wycieczka została już pobrana.", downloadOffline: "Pobierz do użytku offline.", close: "Zamknij", deleteText: "Usuń", cancel: "Anuluj",
+  },
+  tr: {
+    audioGuide: "Sesli Rehber", stop: "Durak", search: "Numara veya isme göre ara...", tourNotFound: "Tur bulunamadı", list: "Liste", halls: "Salonlar", stops: "durak", allStops: "Tüm duraklar",
+    download: "İndir", downloaded: "İndirildi", tourDownloaded: "Tur indirildi", alreadyDownloaded: "Bu tur zaten indirilmiş.", downloadOffline: "Çevrimdışı kullanım için indirin.", close: "Kapat", deleteText: "Sil", cancel: "İptal",
+  },
+  az: {
+    audioGuide: "Audio Bələdçi", stop: "Dayanacaq", search: "Nömrə və ya ada görə axtar...", tourNotFound: "Tur tapılmadı", list: "Siyahı", halls: "Zallar", stops: "dayanacaq", allStops: "Bütün dayanacaqlar",
+    download: "Yüklə", downloaded: "Yükləndi", tourDownloaded: "Tur yükləndi", alreadyDownloaded: "Bu tur artıq yüklənib.", downloadOffline: "Oflayn istifadə üçün yükləyin.", close: "Bağla", deleteText: "Sil", cancel: "Ləğv et",
+  },
+  hy: {
+    audioGuide: "Աուդիո ուղեցույց", stop: "Կանգառ", search: "Որոնել համարով կամ անունով...", tourNotFound: "Էքսկուրսիան չի գտնվել", list: "Ցուցակ", halls: "Սրահներ", stops: "Կանգառներ", allStops: "Բոլոր կանգառները",
+    download: "Ներբեռնել", downloaded: "Ներբեռնված է", tourDownloaded: "Տուրը ներբեռնված է", alreadyDownloaded: "Այս տուրը արդեն ներբեռնված է։", downloadOffline: "Ներբեռնել օֆլայն օգտագործման համար։", close: "Փակել", deleteText: "Ջնջել", cancel: "Չեղարկել",
+  },
+  he: {
+    audioGuide: "מדריך שמע", stop: "תחנה", search: "חפש לפי מספר או שם...", tourNotFound: "סיור לא נמצא", list: "רשימה", halls: "אולמות", stops: "תחנות", allStops: "כל התחנות",
+    download: "הורד", downloaded: "הורד", tourDownloaded: "הסיור הורד", alreadyDownloaded: "סיור זה כבר הורד.", downloadOffline: "הורד לשימוש לא מקוון.", close: "סגור", deleteText: "מחק", cancel: "ביטול",
+  },
+  ar: {
+    audioGuide: "الدليل الصوتي", stop: "محطة", search: "البحث بالرقم أو الاسم...", tourNotFound: "الجولة غير موجودة", list: "قائمة", halls: "قاعات", stops: "محطات", allStops: "جميع المحطات",
+    download: "تحميل", downloaded: "تم التحميل", tourDownloaded: "تم تحميل الجولة", alreadyDownloaded: "تم تحميل هذه الجولة بالفعل.", downloadOffline: "تحميل للاستخدام دون اتصال.", close: "إغلاق", deleteText: "حذف", cancel: "إلغاء",
+  },
+  ko: {
+    audioGuide: "오디오 가이드", stop: "정류장", search: "번호 또는 이름으로 검색...", tourNotFound: "투어를 찾을 수 없습니다", list: "목록", halls: "홀", stops: "정류장", allStops: "모든 정류장",
+    download: "다운로드", downloaded: "다운로드됨", tourDownloaded: "투어 다운로드됨", alreadyDownloaded: "이 투어는 이미 다운로드되었습니다.", downloadOffline: "오프라인 사용을 위해 다운로드하세요.", close: "닫기", deleteText: "삭제", cancel: "취소",
+  },
+  ja: {
+    audioGuide: "オーディオガイド", stop: "停留所", search: "番号または名前で検索...", tourNotFound: "ツアーが見つかりません", list: "リスト", halls: "ホール", stops: "停留所", allStops: "すべての停留所",
+    download: "ダウンロード", downloaded: "ダウンロード済み", tourDownloaded: "ツアーがダウンロードされました", alreadyDownloaded: "このツアーは既にダウンロードされています。", downloadOffline: "オフライン使用のためにダウンロードしてください。", close: "閉じる", deleteText: "削除", cancel: "キャンセル",
+  },
+  zh: {
+    audioGuide: "语音导览", stop: "站点", search: "按编号或名称搜索...", tourNotFound: "未找到旅游", list: "列表", halls: "大厅", stops: "站点", allStops: "所有站点",
+    download: "下载", downloaded: "已下载", tourDownloaded: "旅游已下载", alreadyDownloaded: "此旅游已下载。", downloadOffline: "下载以供离线使用。", close: "关闭", deleteText: "删除", cancel: "取消",
+  },
 };
 
 export default function TourPage() {
@@ -398,10 +457,7 @@ export default function TourPage() {
           <div className="flex items-center gap-1">
             <button onClick={() => setShowDownloadModal(true)} className={`p-2 rounded-lg hover:bg-gray-100 flex items-center gap-1 ${isDownloaded ? "text-green-600" : ""}`}>
               {isDownloaded ? <CheckIcon className="w-5 h-5" /> : <ArrowDownTrayIcon className="w-5 h-5" />}
-              <span className="text-xs">{isDownloaded
-                ? (language === "ka" ? "ჩამოტვირთულია" : language === "ru" ? "Загружено" : language === "uk" ? "Завантажено" : "Downloaded")
-                : (language === "ka" ? "ჩამოტვირთვა" : language === "ru" ? "Скачать" : language === "uk" ? "Завантажити" : "Download")
-              }</span>
+              <span className="text-xs">{isDownloaded ? ui.downloaded : ui.download}</span>
             </button>
             {viewMode === 'stops' && (
               <button onClick={() => setShowSearch(!showSearch)} className={`p-2 rounded-lg hover:bg-gray-100 ${showSearch ? "bg-amber-100 text-amber-600" : ""}`}>
@@ -660,9 +716,7 @@ export default function TourPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl p-6 m-4 max-w-sm w-full">
             <h3 className="text-lg font-semibold mb-4">
-              {isDownloaded
-              ? (language === "ka" ? "ტური ჩამოტვირთულია" : language === "ru" ? "Тур загружен" : language === "uk" ? "Тур завантажено" : "Tour Downloaded")
-              : (language === "ka" ? "ჩამოტვირთვა" : language === "ru" ? "Скачать" : language === "uk" ? "Завантажити" : "Download")}
+              {isDownloaded ? ui.tourDownloaded : ui.download}
             </h3>
             {downloading ? (
               <div className="space-y-4">
@@ -673,25 +727,25 @@ export default function TourPage() {
               </div>
             ) : isDownloaded ? (
               <div className="space-y-4">
-                <p className="text-gray-600">{language === "ka" ? "ეს ტური უკვე ჩამოტვირთულია." : language === "ru" ? "Этот тур уже загружен." : language === "uk" ? "Цей тур вже завантажено." : "This tour is already downloaded."}</p>
+                <p className="text-gray-600">{ui.alreadyDownloaded}</p>
                 <div className="flex gap-3">
                   <button onClick={() => setShowDownloadModal(false)} className="flex-1 py-2 border rounded-lg">
-                    {language === "ka" ? "დახურვა" : "Close"}
+                    {ui.close}
                   </button>
                   <button onClick={handleDeleteOffline} className="flex-1 py-2 bg-red-500 text-white rounded-lg">
-                    {language === "ka" ? "წაშლა" : "Delete"}
+                    {ui.deleteText}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                <p className="text-gray-600">{language === "ka" ? "ჩამოტვირთეთ ტური ოფლაინ რეჟიმში." : language === "ru" ? "Скачайте тур для офлайн использования." : language === "uk" ? "Завантажте тур для офлайн використання." : "Download for offline use."}</p>
+                <p className="text-gray-600">{ui.downloadOffline}</p>
                 <div className="flex gap-3">
                   <button onClick={() => setShowDownloadModal(false)} className="flex-1 py-2 border rounded-lg">
-                    {language === "ka" ? "გაუქმება" : "Cancel"}
+                    {ui.cancel}
                   </button>
                   <button onClick={handleDownload} className="flex-1 py-2 bg-amber-500 text-white rounded-lg">
-                    {language === "ka" ? "ჩამოტვირთვა" : language === "ru" ? "Скачать" : language === "uk" ? "Завантажити" : "Download"}
+                    {ui.download}
                   </button>
                 </div>
               </div>
