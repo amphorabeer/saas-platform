@@ -14,20 +14,10 @@ import {
 } from "@saas-platform/ui";
 import { ArrowLeft, Save, Loader2, QrCode, Plus, X } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
-
-const AVAILABLE_LANGUAGES = [
-  { code: "en", name: "ინგლისური", nameEn: "English" },
-  { code: "ru", name: "რუსული", nameEn: "Russian" },
-  { code: "de", name: "გერმანული", nameEn: "German" },
-  { code: "fr", name: "ფრანგული", nameEn: "French" },
-  { code: "es", name: "ესპანური", nameEn: "Spanish" },
-  { code: "it", name: "იტალიური", nameEn: "Italian" },
-  { code: "tr", name: "თურქული", nameEn: "Turkish" },
-  { code: "zh", name: "ჩინური", nameEn: "Chinese" },
-  { code: "uk", name: "უკრაინული", nameEn: "Ukrainian" },
-  { code: "ja", name: "იაპონური", nameEn: "Japanese" },
-  { code: "ar", name: "არაბული", nameEn: "Arabic" },
-];
+import {
+  SUPPORTED_TRANSLATION_LANGUAGES,
+  getFieldSuffix,
+} from "@/lib/constants/languages";
 
 interface Translation {
   langCode: string;
@@ -53,6 +43,7 @@ interface TourStop {
   qrCode: string | null;
   orderIndex: number;
   isPublished: boolean;
+  [key: string]: unknown;
 }
 
 export default function EditStopPage({
@@ -97,34 +88,23 @@ export default function EditStopPage({
           isPublished: data.isPublished || false,
         });
 
-        // Load existing translations
+        const row = data as Record<string, string | null | undefined>;
         const existingTranslations: Translation[] = [];
-        if (data.titleEn || data.descriptionEn || data.audioUrlEn || data.transcriptEn) {
-          existingTranslations.push({
-            langCode: "en",
-            title: data.titleEn || "",
-            description: data.descriptionEn || "",
-            transcript: data.transcriptEn || "",
-            audioUrl: data.audioUrlEn || "",
-          });
-        }
-        if (data.titleRu || data.descriptionRu || data.audioUrlRu || data.transcriptRu) {
-          existingTranslations.push({
-            langCode: "ru",
-            title: data.titleRu || "",
-            description: data.descriptionRu || "",
-            transcript: data.transcriptRu || "",
-            audioUrl: data.audioUrlRu || "",
-          });
-        }
-        if (data.titleUk || data.descriptionUk || data.audioUrlUk || data.transcriptUk) {
-          existingTranslations.push({
-            langCode: "uk",
-            title: data.titleUk || "",
-            description: data.descriptionUk || "",
-            transcript: data.transcriptUk || "",
-            audioUrl: data.audioUrlUk || "",
-          });
+        for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+          const s = getFieldSuffix(code);
+          const title = row[`title${s}`];
+          const description = row[`description${s}`];
+          const transcript = row[`transcript${s}`];
+          const audioUrl = row[`audioUrl${s}`];
+          if (title || description || transcript || audioUrl) {
+            existingTranslations.push({
+              langCode: code,
+              title: title || "",
+              description: description || "",
+              transcript: transcript || "",
+              audioUrl: audioUrl || "",
+            });
+          }
         }
         setTranslations(existingTranslations);
       } else {
@@ -167,10 +147,13 @@ export default function EditStopPage({
   };
 
   const getLanguageName = (code: string) => {
-    return AVAILABLE_LANGUAGES.find((l) => l.code === code)?.name || code;
+    return (
+      SUPPORTED_TRANSLATION_LANGUAGES.find((l) => l.code === code)?.labelKa ||
+      code
+    );
   };
 
-  const availableToAdd = AVAILABLE_LANGUAGES.filter(
+  const availableToAdd = SUPPORTED_TRANSLATION_LANGUAGES.filter(
     (l) => !translations.find((t) => t.langCode === l.code)
   );
 
@@ -179,6 +162,16 @@ export default function EditStopPage({
     setSaving(true);
 
     try {
+      const localePayload: Record<string, string | null> = {};
+      for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+        const s = getFieldSuffix(code);
+        const t = translations.find((tr) => tr.langCode === code);
+        localePayload[`title${s}`] = t?.title || null;
+        localePayload[`description${s}`] = t?.description || null;
+        localePayload[`transcript${s}`] = t?.transcript || null;
+        localePayload[`audioUrl${s}`] = t?.audioUrl || null;
+      }
+
       const res = await fetch(
         `/api/geoguide/tours/${params.id}/stops/${params.stopId}`,
         {
@@ -186,18 +179,7 @@ export default function EditStopPage({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...formData,
-            titleEn: translations.find((t) => t.langCode === "en")?.title || null,
-            titleRu: translations.find((t) => t.langCode === "ru")?.title || null,
-            titleUk: translations.find((t) => t.langCode === "uk")?.title || null,
-            descriptionEn: translations.find((t) => t.langCode === "en")?.description || null,
-            transcriptEn: translations.find((t) => t.langCode === "en")?.transcript || null,
-            audioUrlEn: translations.find((t) => t.langCode === "en")?.audioUrl || null,
-            descriptionRu: translations.find((t) => t.langCode === "ru")?.description || null,
-            transcriptRu: translations.find((t) => t.langCode === "ru")?.transcript || null,
-            audioUrlRu: translations.find((t) => t.langCode === "ru")?.audioUrl || null,
-            descriptionUk: translations.find((t) => t.langCode === "uk")?.description || null,
-            transcriptUk: translations.find((t) => t.langCode === "uk")?.transcript || null,
-            audioUrlUk: translations.find((t) => t.langCode === "uk")?.audioUrl || null,
+            ...localePayload,
           }),
         }
       );
@@ -340,7 +322,7 @@ export default function EditStopPage({
                           onClick={() => addTranslation(lang.code)}
                           className="w-full px-4 py-2 text-left hover:bg-muted text-sm"
                         >
-                          {lang.name} ({lang.nameEn})
+                          {lang.labelKa} ({lang.labelEn})
                         </button>
                       ))}
                     </div>

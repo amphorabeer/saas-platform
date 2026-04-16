@@ -14,20 +14,10 @@ import {
 } from "@saas-platform/ui";
 import { ArrowLeft, Save, Loader2, Plus, X } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
-
-const AVAILABLE_LANGUAGES = [
-  { code: "en", name: "ინგლისური", nameEn: "English" },
-  { code: "ru", name: "რუსული", nameEn: "Russian" },
-  { code: "de", name: "გერმანული", nameEn: "German" },
-  { code: "fr", name: "ფრანგული", nameEn: "French" },
-  { code: "es", name: "ესპანური", nameEn: "Spanish" },
-  { code: "it", name: "იტალიური", nameEn: "Italian" },
-  { code: "uk", name: "უკრაინული", nameEn: "Ukrainian" },
-  { code: "tr", name: "თურქული", nameEn: "Turkish" },
-  { code: "zh", name: "ჩინური", nameEn: "Chinese" },
-  { code: "ja", name: "იაპონური", nameEn: "Japanese" },
-  { code: "ar", name: "არაბული", nameEn: "Arabic" },
-];
+import {
+  SUPPORTED_TRANSLATION_LANGUAGES,
+  getFieldSuffix,
+} from "@/lib/constants/languages";
 
 interface Museum {
   id: string;
@@ -111,10 +101,13 @@ export default function NewTourPage() {
   };
 
   const getLanguageName = (code: string) => {
-    return AVAILABLE_LANGUAGES.find((l) => l.code === code)?.name || code;
+    return (
+      SUPPORTED_TRANSLATION_LANGUAGES.find((l) => l.code === code)?.labelKa ||
+      code
+    );
   };
 
-  const availableToAdd = AVAILABLE_LANGUAGES.filter(
+  const availableToAdd = SUPPORTED_TRANSLATION_LANGUAGES.filter(
     (l) => !translations.find((t) => t.langCode === l.code)
   );
 
@@ -123,6 +116,14 @@ export default function NewTourPage() {
     setLoading(true);
 
     try {
+      const localePayload: Record<string, string | null> = {};
+      for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+        const s = getFieldSuffix(code);
+        const t = translations.find((tr) => tr.langCode === code);
+        localePayload[`name${s}`] = t?.name || null;
+        localePayload[`description${s}`] = t?.description || null;
+      }
+
       const res = await fetch("/api/geoguide/tours", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -130,12 +131,7 @@ export default function NewTourPage() {
           ...formData,
           duration: formData.duration ? parseInt(formData.duration) : null,
           price: formData.price ? parseFloat(formData.price) : null,
-          nameEn: translations.find((t) => t.langCode === "en")?.name || null,
-          nameRu: translations.find((t) => t.langCode === "ru")?.name || null,
-          nameUk: translations.find((t) => t.langCode === "uk")?.name || null,
-          descriptionEn: translations.find((t) => t.langCode === "en")?.description || null,
-          descriptionRu: translations.find((t) => t.langCode === "ru")?.description || null,
-          descriptionUk: translations.find((t) => t.langCode === "uk")?.description || null,
+          ...localePayload,
         }),
       });
 
@@ -281,7 +277,7 @@ export default function NewTourPage() {
                             onClick={() => addTranslation(lang.code)}
                             className="w-full px-4 py-2 text-left hover:bg-muted text-sm"
                           >
-                            {lang.name} ({lang.nameEn})
+                            {lang.labelKa} ({lang.labelEn})
                           </button>
                         ))}
                       </div>

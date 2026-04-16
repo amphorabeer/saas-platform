@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -76,6 +77,7 @@ interface Device {
 }
 
 export default function DevicesPage() {
+  const router = useRouter();
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -88,7 +90,9 @@ export default function DevicesPage() {
   const fetchDevices = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/geoguide/devices");
+      const res = await fetch("/api/geoguide/devices", {
+        cache: "no-store",
+      });
       if (res.ok) {
         const data = await res.json();
         setDevices(data);
@@ -206,7 +210,13 @@ export default function DevicesPage() {
             რეგისტრირებული მოწყობილობები და მათი აქტივაციები
           </p>
         </div>
-        <Button variant="outline" onClick={fetchDevices}>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            await fetchDevices();
+            router.refresh();
+          }}
+        >
           <RefreshCw className="h-4 w-4 mr-2" />
           განახლება
         </Button>

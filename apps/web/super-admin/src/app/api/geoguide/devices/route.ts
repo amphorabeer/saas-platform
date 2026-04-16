@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 // GET /api/geoguide/devices - ყველა მოწყობილობის სია
 export async function GET() {
@@ -74,7 +77,11 @@ export async function GET() {
       payments: paymentsByDevice.get(device.deviceId) || [],
     }));
 
-    return NextResponse.json(devicesWithPayments);
+    return NextResponse.json(devicesWithPayments, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+      },
+    });
   } catch (error) {
     console.error("Error fetching devices:", error);
     return NextResponse.json(

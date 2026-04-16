@@ -14,14 +14,10 @@ import {
 } from "@saas-platform/ui";
 import { ArrowLeft, Save, Loader2, Trash2, Plus, X } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
-
-const AVAILABLE_LANGUAGES = [
-  { code: "en", name: "ინგლისური", nameEn: "English" },
-  { code: "ru", name: "რუსული", nameEn: "Russian" },
-  { code: "de", name: "გერმანული", nameEn: "German" },
-  { code: "fr", name: "ფრანგული", nameEn: "French" },
-  { code: "uk", name: "უკრაინული", nameEn: "Ukrainian" },
-];
+import {
+  SUPPORTED_TRANSLATION_LANGUAGES,
+  getFieldSuffix,
+} from "@/lib/constants/languages";
 
 interface Translation {
   langCode: string;
@@ -38,26 +34,6 @@ interface Museum {
   description: string | null;
   city: string | null;
   address: string | null;
-  nameEn: string | null;
-  descriptionEn: string | null;
-  cityEn: string | null;
-  addressEn: string | null;
-  nameRu: string | null;
-  descriptionRu: string | null;
-  cityRu: string | null;
-  addressRu: string | null;
-  nameDe: string | null;
-  descriptionDe: string | null;
-  cityDe: string | null;
-  addressDe: string | null;
-  nameFr: string | null;
-  descriptionFr: string | null;
-  cityFr: string | null;
-  addressFr: string | null;
-  nameUk: string | null;
-  descriptionUk: string | null;
-  cityUk: string | null;
-  addressUk: string | null;
   slug: string;
   coverImage: string | null;
   latitude: number | null;
@@ -69,17 +45,12 @@ interface Museum {
   showQrScanner: boolean;
   isPublished: boolean;
   introAudioUrl: string | null;
-  introAudioUrlEn: string | null;
-  introAudioUrlRu: string | null;
-  introAudioUrlDe: string | null;
-  introAudioUrlFr: string | null;
-  introAudioUrlUk: string | null;
-  // 360 VR
   show360View: boolean;
   vrTourId: string | null;
   vr360Price: number | null;
   vr360IsFree: boolean;
   vr360BundleWithAudio: boolean;
+  [key: string]: unknown;
 }
 
 export default function EditMuseumPage({ params }: { params: { id: string } }) {
@@ -165,87 +136,25 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
           vr360BundleWithAudio: data.vr360BundleWithAudio || false,
         });
 
-        // Build translations from existing data
+        const row = data as Record<string, string | null | undefined>;
         const trans: Translation[] = [];
-        if (
-          data.nameEn ||
-          data.descriptionEn ||
-          data.cityEn ||
-          data.addressEn ||
-          data.introAudioUrlEn
-        ) {
-          trans.push({
-            langCode: "en",
-            name: data.nameEn || "",
-            description: data.descriptionEn || "",
-            city: data.cityEn || "",
-            address: data.addressEn || "",
-            audioUrl: data.introAudioUrlEn || "",
-          });
-        }
-        if (
-          data.nameRu ||
-          data.descriptionRu ||
-          data.cityRu ||
-          data.addressRu ||
-          data.introAudioUrlRu
-        ) {
-          trans.push({
-            langCode: "ru",
-            name: data.nameRu || "",
-            description: data.descriptionRu || "",
-            city: data.cityRu || "",
-            address: data.addressRu || "",
-            audioUrl: data.introAudioUrlRu || "",
-          });
-        }
-        if (
-          data.nameDe ||
-          data.descriptionDe ||
-          data.cityDe ||
-          data.addressDe ||
-          data.introAudioUrlDe
-        ) {
-          trans.push({
-            langCode: "de",
-            name: data.nameDe || "",
-            description: data.descriptionDe || "",
-            city: data.cityDe || "",
-            address: data.addressDe || "",
-            audioUrl: data.introAudioUrlDe || "",
-          });
-        }
-        if (
-          data.nameFr ||
-          data.descriptionFr ||
-          data.cityFr ||
-          data.addressFr ||
-          data.introAudioUrlFr
-        ) {
-          trans.push({
-            langCode: "fr",
-            name: data.nameFr || "",
-            description: data.descriptionFr || "",
-            city: data.cityFr || "",
-            address: data.addressFr || "",
-            audioUrl: data.introAudioUrlFr || "",
-          });
-        }
-        if (
-          data.nameUk ||
-          data.descriptionUk ||
-          data.cityUk ||
-          data.addressUk ||
-          data.introAudioUrlUk
-        ) {
-          trans.push({
-            langCode: "uk",
-            name: data.nameUk || "",
-            description: data.descriptionUk || "",
-            city: data.cityUk || "",
-            address: data.addressUk || "",
-            audioUrl: data.introAudioUrlUk || "",
-          });
+        for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+          const s = getFieldSuffix(code);
+          const name = row[`name${s}`];
+          const description = row[`description${s}`];
+          const city = row[`city${s}`];
+          const address = row[`address${s}`];
+          const audioUrl = row[`introAudioUrl${s}`];
+          if (name || description || city || address || audioUrl) {
+            trans.push({
+              langCode: code,
+              name: name || "",
+              description: description || "",
+              city: city || "",
+              address: address || "",
+              audioUrl: audioUrl || "",
+            });
+          }
         }
         setTranslations(trans);
       } else {
@@ -417,10 +326,13 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
   };
 
   const getLanguageName = (code: string) => {
-    return AVAILABLE_LANGUAGES.find((l) => l.code === code)?.name || code;
+    return (
+      SUPPORTED_TRANSLATION_LANGUAGES.find((l) => l.code === code)?.labelKa ||
+      code
+    );
   };
 
-  const availableToAdd = AVAILABLE_LANGUAGES.filter(
+  const availableToAdd = SUPPORTED_TRANSLATION_LANGUAGES.filter(
     (l) => !translations.find((t) => t.langCode === l.code)
   );
 
@@ -429,11 +341,16 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
     setSaving(true);
 
     try {
-      const enTrans = translations.find((t) => t.langCode === "en");
-      const ruTrans = translations.find((t) => t.langCode === "ru");
-      const deTrans = translations.find((t) => t.langCode === "de");
-      const frTrans = translations.find((t) => t.langCode === "fr");
-      const ukTrans = translations.find((t) => t.langCode === "uk");
+      const localePayload: Record<string, string | null> = {};
+      for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+        const s = getFieldSuffix(code);
+        const t = translations.find((tr) => tr.langCode === code);
+        localePayload[`name${s}`] = t?.name || null;
+        localePayload[`description${s}`] = t?.description || null;
+        localePayload[`city${s}`] = t?.city || null;
+        localePayload[`address${s}`] = t?.address || null;
+        localePayload[`introAudioUrl${s}`] = t?.audioUrl || null;
+      }
 
       const res = await fetch(`/api/geoguide/museums/${params.id}`, {
         method: "PATCH",
@@ -445,36 +362,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
             ? parseFloat(formData.longitude)
             : null,
           vr360Price: formData.vr360Price ? parseFloat(formData.vr360Price) : null,
-          // English
-          nameEn: enTrans?.name || null,
-          descriptionEn: enTrans?.description || null,
-          cityEn: enTrans?.city || null,
-          addressEn: enTrans?.address || null,
-          introAudioUrlEn: enTrans?.audioUrl || null,
-          // Russian
-          nameRu: ruTrans?.name || null,
-          descriptionRu: ruTrans?.description || null,
-          cityRu: ruTrans?.city || null,
-          addressRu: ruTrans?.address || null,
-          introAudioUrlRu: ruTrans?.audioUrl || null,
-          // German
-          nameDe: deTrans?.name || null,
-          descriptionDe: deTrans?.description || null,
-          cityDe: deTrans?.city || null,
-          addressDe: deTrans?.address || null,
-          introAudioUrlDe: deTrans?.audioUrl || null,
-          // French
-          nameFr: frTrans?.name || null,
-          descriptionFr: frTrans?.description || null,
-          cityFr: frTrans?.city || null,
-          addressFr: frTrans?.address || null,
-          introAudioUrlFr: frTrans?.audioUrl || null,
-          // Ukrainian
-          nameUk: ukTrans?.name || null,
-          descriptionUk: ukTrans?.description || null,
-          cityUk: ukTrans?.city || null,
-          addressUk: ukTrans?.address || null,
-          introAudioUrlUk: ukTrans?.audioUrl || null,
+          ...localePayload,
         }),
       });
 
@@ -658,7 +546,7 @@ export default function EditMuseumPage({ params }: { params: { id: string } }) {
                           className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
                           onClick={() => addTranslation(lang.code)}
                         >
-                          {lang.name}
+                          {lang.labelKa}
                         </button>
                       ))}
                     </div>

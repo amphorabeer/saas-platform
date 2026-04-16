@@ -14,14 +14,10 @@ import {
 } from "@saas-platform/ui";
 import { ArrowLeft, Save, Loader2, Plus, X } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
-
-const AVAILABLE_LANGUAGES = [
-  { code: "en", name: "ინგლისური", nameEn: "English" },
-  { code: "ru", name: "რუსული", nameEn: "Russian" },
-  { code: "de", name: "გერმანული", nameEn: "German" },
-  { code: "fr", name: "ფრანგული", nameEn: "French" },
-  { code: "uk", name: "უკრაინული", nameEn: "Ukrainian" },
-];
+import {
+  SUPPORTED_TRANSLATION_LANGUAGES,
+  getFieldSuffix,
+} from "@/lib/constants/languages";
 
 interface Translation {
   langCode: string;
@@ -104,10 +100,13 @@ export default function NewMuseumPage() {
   };
 
   const getLanguageName = (code: string) => {
-    return AVAILABLE_LANGUAGES.find((l) => l.code === code)?.name || code;
+    return (
+      SUPPORTED_TRANSLATION_LANGUAGES.find((l) => l.code === code)?.labelKa ||
+      code
+    );
   };
 
-  const availableToAdd = AVAILABLE_LANGUAGES.filter(
+  const availableToAdd = SUPPORTED_TRANSLATION_LANGUAGES.filter(
     (l) => !translations.find((t) => t.langCode === l.code)
   );
 
@@ -116,11 +115,16 @@ export default function NewMuseumPage() {
     setLoading(true);
 
     try {
-      const enTrans = translations.find((t) => t.langCode === "en");
-      const ruTrans = translations.find((t) => t.langCode === "ru");
-      const deTrans = translations.find((t) => t.langCode === "de");
-      const frTrans = translations.find((t) => t.langCode === "fr");
-      const ukTrans = translations.find((t) => t.langCode === "uk");
+      const localePayload: Record<string, string | null> = {};
+      for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+        const s = getFieldSuffix(code);
+        const t = translations.find((tr) => tr.langCode === code);
+        localePayload[`name${s}`] = t?.name || null;
+        localePayload[`description${s}`] = t?.description || null;
+        localePayload[`city${s}`] = t?.city || null;
+        localePayload[`address${s}`] = t?.address || null;
+        localePayload[`introAudioUrl${s}`] = t?.audioUrl || null;
+      }
 
       const res = await fetch("/api/geoguide/museums", {
         method: "POST",
@@ -131,36 +135,7 @@ export default function NewMuseumPage() {
           longitude: formData.longitude
             ? parseFloat(formData.longitude)
             : null,
-          // English
-          nameEn: enTrans?.name || null,
-          descriptionEn: enTrans?.description || null,
-          cityEn: enTrans?.city || null,
-          addressEn: enTrans?.address || null,
-          introAudioUrlEn: enTrans?.audioUrl || null,
-          // Russian
-          nameRu: ruTrans?.name || null,
-          descriptionRu: ruTrans?.description || null,
-          cityRu: ruTrans?.city || null,
-          addressRu: ruTrans?.address || null,
-          introAudioUrlRu: ruTrans?.audioUrl || null,
-          // German
-          nameDe: deTrans?.name || null,
-          descriptionDe: deTrans?.description || null,
-          cityDe: deTrans?.city || null,
-          addressDe: deTrans?.address || null,
-          introAudioUrlDe: deTrans?.audioUrl || null,
-          // French
-          nameFr: frTrans?.name || null,
-          descriptionFr: frTrans?.description || null,
-          cityFr: frTrans?.city || null,
-          addressFr: frTrans?.address || null,
-          introAudioUrlFr: frTrans?.audioUrl || null,
-          // Ukrainian
-          nameUk: ukTrans?.name || null,
-          descriptionUk: ukTrans?.description || null,
-          cityUk: ukTrans?.city || null,
-          addressUk: ukTrans?.address || null,
-          introAudioUrlUk: ukTrans?.audioUrl || null,
+          ...localePayload,
         }),
       });
 
@@ -289,7 +264,7 @@ export default function NewMuseumPage() {
                           className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
                           onClick={() => addTranslation(lang.code)}
                         >
-                          {lang.name}
+                          {lang.labelKa}
                         </button>
                       ))}
                     </div>

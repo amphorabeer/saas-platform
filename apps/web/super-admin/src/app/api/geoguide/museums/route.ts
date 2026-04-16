@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { museumTranslationFieldsForCreate } from "@/lib/geoguide/translation-api-fields";
 
 // GET /api/geoguide/museums
 export async function GET() {
@@ -61,35 +62,7 @@ export async function POST(request: NextRequest) {
         city: body.city || null,
         address: body.address || null,
 
-        // English
-        nameEn: body.nameEn || null,
-        descriptionEn: body.descriptionEn || null,
-        cityEn: body.cityEn || null,
-        addressEn: body.addressEn || null,
-
-        // Russian
-        nameRu: body.nameRu || null,
-        descriptionRu: body.descriptionRu || null,
-        cityRu: body.cityRu || null,
-        addressRu: body.addressRu || null,
-
-        // German
-        nameDe: body.nameDe || null,
-        descriptionDe: body.descriptionDe || null,
-        cityDe: body.cityDe || null,
-        addressDe: body.addressDe || null,
-
-        // French
-        nameFr: body.nameFr || null,
-        descriptionFr: body.descriptionFr || null,
-        cityFr: body.cityFr || null,
-        addressFr: body.addressFr || null,
-
-        // Ukrainian
-        nameUk: body.nameUk || null,
-        descriptionUk: body.descriptionUk || null,
-        cityUk: body.cityUk || null,
-        addressUk: body.addressUk || null,
+        ...museumTranslationFieldsForCreate(body as Record<string, unknown>),
 
         // Common
         slug: body.slug,
@@ -106,13 +79,8 @@ export async function POST(request: NextRequest) {
         isPublished: body.isPublished ?? false,
         displayOrder: nextOrder,
 
-        // Audio URLs
+        // Audio URLs (Georgian base; locale intros via spread above)
         introAudioUrl: body.introAudioUrl || null,
-        introAudioUrlEn: body.introAudioUrlEn || null,
-        introAudioUrlRu: body.introAudioUrlRu || null,
-        introAudioUrlDe: body.introAudioUrlDe || null,
-        introAudioUrlFr: body.introAudioUrlFr || null,
-        introAudioUrlUk: body.introAudioUrlUk || null,
 
         // 360° VR
         show360View: body.show360View ?? false,

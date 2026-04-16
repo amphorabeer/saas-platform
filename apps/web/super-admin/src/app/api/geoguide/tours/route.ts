@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { tourTranslationFieldsForCreate } from "@/lib/geoguide/translation-api-fields";
 
 // GET /api/geoguide/tours - ყველა ტურის სია
 export async function GET() {
@@ -58,13 +59,8 @@ export async function POST(request: NextRequest) {
       data: {
         museumId: body.museumId,
         name: body.name,
-        nameEn: body.nameEn || null,
-        nameRu: body.nameRu || null,
         description: body.description || null,
-        descriptionEn: body.descriptionEn || null,
-        descriptionRu: body.descriptionRu || null,
-        nameUk: body.nameUk || null,
-        descriptionUk: body.descriptionUk || null,
+        ...tourTranslationFieldsForCreate(body as Record<string, unknown>),
         duration: body.duration || null,
         isFree: body.isFree ?? false,
         price: body.price || null,

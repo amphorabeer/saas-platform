@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { pickTourStopTranslationFields } from "@/lib/geoguide/translation-api-fields";
 
 // GET /api/geoguide/tours/[id]/stops/[stopId]
 export async function GET(
@@ -51,21 +52,10 @@ export async function PATCH(
       where: { id: params.stopId },
       data: {
         ...(body.title !== undefined && { title: body.title }),
-        ...(body.titleEn !== undefined && { titleEn: body.titleEn }),
-        ...(body.titleRu !== undefined && { titleRu: body.titleRu }),
-        ...(body.titleUk !== undefined && { titleUk: body.titleUk }),
+        ...pickTourStopTranslationFields(body as Record<string, unknown>),
         ...(body.description !== undefined && { description: body.description }),
-        ...(body.descriptionEn !== undefined && { descriptionEn: body.descriptionEn }),
-        ...(body.descriptionRu !== undefined && { descriptionRu: body.descriptionRu }),
-        ...(body.descriptionUk !== undefined && { descriptionUk: body.descriptionUk }),
         ...(body.transcript !== undefined && { transcript: body.transcript }),
-        ...(body.transcriptEn !== undefined && { transcriptEn: body.transcriptEn }),
-        ...(body.transcriptRu !== undefined && { transcriptRu: body.transcriptRu }),
-        ...(body.transcriptUk !== undefined && { transcriptUk: body.transcriptUk }),
         ...(body.audioUrl !== undefined && { audioUrl: body.audioUrl }),
-        ...(body.audioUrlEn !== undefined && { audioUrlEn: body.audioUrlEn }),
-        ...(body.audioUrlRu !== undefined && { audioUrlRu: body.audioUrlRu }),
-        ...(body.audioUrlUk !== undefined && { audioUrlUk: body.audioUrlUk }),
         ...(body.audioDuration !== undefined && { audioDuration: body.audioDuration }),
         ...(body.imageUrl !== undefined && { imageUrl: body.imageUrl }),
         ...(body.orderIndex !== undefined && { orderIndex: body.orderIndex }),

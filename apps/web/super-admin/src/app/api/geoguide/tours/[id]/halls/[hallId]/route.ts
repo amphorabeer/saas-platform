@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { pickHallTranslationFields } from "@/lib/geoguide/translation-api-fields";
 
 // GET /api/geoguide/tours/[id]/halls/[hallId]
 export async function GET(
@@ -59,13 +60,8 @@ export async function PATCH(
       where: { id: params.hallId },
       data: {
         ...(body.name !== undefined && { name: body.name }),
-        ...(body.nameEn !== undefined && { nameEn: body.nameEn }),
-        ...(body.nameRu !== undefined && { nameRu: body.nameRu }),
-        ...(body.nameUk !== undefined && { nameUk: body.nameUk }),
+        ...pickHallTranslationFields(body as Record<string, unknown>),
         ...(body.description !== undefined && { description: body.description }),
-        ...(body.descriptionEn !== undefined && { descriptionEn: body.descriptionEn }),
-        ...(body.descriptionRu !== undefined && { descriptionRu: body.descriptionRu }),
-        ...(body.descriptionUk !== undefined && { descriptionUk: body.descriptionUk }),
         ...(body.floorNumber !== undefined && { floorNumber: body.floorNumber }),
         ...(body.imageUrl !== undefined && { imageUrl: body.imageUrl }),
         ...(body.orderIndex !== undefined && { orderIndex: body.orderIndex }),

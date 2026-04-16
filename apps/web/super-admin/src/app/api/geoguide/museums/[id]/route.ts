@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { pickMuseumTranslationFields } from "@/lib/geoguide/translation-api-fields";
 
 // GET /api/geoguide/museums/[id]
 export async function GET(
@@ -67,43 +68,7 @@ export async function PATCH(
         ...(body.city !== undefined && { city: body.city }),
         ...(body.address !== undefined && { address: body.address }),
 
-        // English
-        ...(body.nameEn !== undefined && { nameEn: body.nameEn }),
-        ...(body.descriptionEn !== undefined && {
-          descriptionEn: body.descriptionEn,
-        }),
-        ...(body.cityEn !== undefined && { cityEn: body.cityEn }),
-        ...(body.addressEn !== undefined && { addressEn: body.addressEn }),
-
-        // Russian
-        ...(body.nameRu !== undefined && { nameRu: body.nameRu }),
-        ...(body.descriptionRu !== undefined && {
-          descriptionRu: body.descriptionRu,
-        }),
-        ...(body.cityRu !== undefined && { cityRu: body.cityRu }),
-        ...(body.addressRu !== undefined && { addressRu: body.addressRu }),
-
-        // German
-        ...(body.nameDe !== undefined && { nameDe: body.nameDe }),
-        ...(body.descriptionDe !== undefined && {
-          descriptionDe: body.descriptionDe,
-        }),
-        ...(body.cityDe !== undefined && { cityDe: body.cityDe }),
-        ...(body.addressDe !== undefined && { addressDe: body.addressDe }),
-
-        // French
-        ...(body.nameFr !== undefined && { nameFr: body.nameFr }),
-        ...(body.descriptionFr !== undefined && {
-          descriptionFr: body.descriptionFr,
-        }),
-        ...(body.cityFr !== undefined && { cityFr: body.cityFr }),
-        ...(body.addressFr !== undefined && { addressFr: body.addressFr }),
-
-        // Ukrainian
-        ...(body.nameUk !== undefined && { nameUk: body.nameUk }),
-        ...(body.descriptionUk !== undefined && { descriptionUk: body.descriptionUk }),
-        ...(body.cityUk !== undefined && { cityUk: body.cityUk }),
-        ...(body.addressUk !== undefined && { addressUk: body.addressUk }),
+        ...pickMuseumTranslationFields(body as Record<string, unknown>),
 
         // Common
         ...(body.slug !== undefined && { slug: body.slug }),
@@ -126,13 +91,8 @@ export async function PATCH(
         ...(body.isPublished !== undefined && { isPublished: body.isPublished }),
         ...(body.displayOrder !== undefined && { displayOrder: body.displayOrder }),
 
-        // Audio URLs
+        // Audio URLs (Georgian base)
         ...(body.introAudioUrl !== undefined && { introAudioUrl: body.introAudioUrl }),
-        ...(body.introAudioUrlEn !== undefined && { introAudioUrlEn: body.introAudioUrlEn }),
-        ...(body.introAudioUrlRu !== undefined && { introAudioUrlRu: body.introAudioUrlRu }),
-        ...(body.introAudioUrlDe !== undefined && { introAudioUrlDe: body.introAudioUrlDe }),
-        ...(body.introAudioUrlFr !== undefined && { introAudioUrlFr: body.introAudioUrlFr }),
-        ...(body.introAudioUrlUk !== undefined && { introAudioUrlUk: body.introAudioUrlUk }),
 
         // 360° VR
         ...(body.show360View !== undefined && { show360View: body.show360View }),

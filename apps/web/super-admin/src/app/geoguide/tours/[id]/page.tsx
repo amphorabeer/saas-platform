@@ -14,20 +14,10 @@ import {
 } from "@saas-platform/ui";
 import { ArrowLeft, Save, Loader2, Trash2, Plus, GripVertical, X, Building2, ChevronDown, ChevronRight, Image as ImageIcon, Pencil } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
-
-const AVAILABLE_LANGUAGES = [
-  { code: "en", name: "ინგლისური", nameEn: "English" },
-  { code: "ru", name: "რუსული", nameEn: "Russian" },
-  { code: "de", name: "გერმანული", nameEn: "German" },
-  { code: "fr", name: "ფრანგული", nameEn: "French" },
-  { code: "es", name: "ესპანური", nameEn: "Spanish" },
-  { code: "it", name: "იტალიური", nameEn: "Italian" },
-  { code: "uk", name: "უკრაინული", nameEn: "Ukrainian" },
-  { code: "tr", name: "თურქული", nameEn: "Turkish" },
-  { code: "zh", name: "ჩინური", nameEn: "Chinese" },
-  { code: "ja", name: "იაპონური", nameEn: "Japanese" },
-  { code: "ar", name: "არაბული", nameEn: "Arabic" },
-];
+import {
+  SUPPORTED_TRANSLATION_LANGUAGES,
+  getFieldSuffix,
+} from "@/lib/constants/languages";
 
 interface Translation {
   langCode: string;
@@ -51,6 +41,17 @@ interface Hall {
   orderIndex: number;
   isPublished: boolean;
   _count?: { stops: number };
+  [key: string]: unknown;
+}
+
+function firstHallTranslatedName(hall: Hall): string | null {
+  const r = hall as Record<string, unknown>;
+  for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+    const s = getFieldSuffix(code);
+    const v = r[`name${s}`];
+    if (typeof v === "string" && v.trim()) return v;
+  }
+  return null;
 }
 
 interface TourStop {
@@ -86,6 +87,7 @@ interface Tour {
   };
   stops: TourStop[];
   halls: Hall[];
+  [key: string]: unknown;
 }
 
 export default function EditTourPage({ params }: { params: { id: string } }) {
@@ -144,13 +146,17 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
   const [editingHallId, setEditingHallId] = useState<string | null>(null);
   const [editHallData, setEditHallData] = useState<{
     name: string;
-    nameEn: string;
-    nameRu: string;
-    nameUk: string;
+    nameByLang: Record<string, string>;
     imageUrl: string;
     orderIndex: number;
     isPublished: boolean;
-  }>({ name: "", nameEn: "", nameRu: "", nameUk: "", imageUrl: "", orderIndex: 0, isPublished: true });
+  }>({
+    name: "",
+    nameByLang: {},
+    imageUrl: "",
+    orderIndex: 0,
+    isPublished: true,
+  });
   const [savingHall, setSavingHall] = useState(false);
 
   useEffect(() => {
@@ -177,28 +183,19 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
           vrTourId: data.vrTourId || "",
         });
 
-        // Load existing translations
+        const row = data as Record<string, string | null | undefined>;
         const existingTranslations: Translation[] = [];
-        if (data.nameEn || data.descriptionEn) {
-          existingTranslations.push({
-            langCode: "en",
-            name: data.nameEn || "",
-            description: data.descriptionEn || "",
-          });
-        }
-        if (data.nameRu || data.descriptionRu) {
-          existingTranslations.push({
-            langCode: "ru",
-            name: data.nameRu || "",
-            description: data.descriptionRu || "",
-          });
-        }
-        if (data.nameUk || data.descriptionUk) {
-          existingTranslations.push({
-            langCode: "uk",
-            name: data.nameUk || "",
-            description: data.descriptionUk || "",
-          });
+        for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+          const s = getFieldSuffix(code);
+          const name = row[`name${s}`];
+          const description = row[`description${s}`];
+          if (name || description) {
+            existingTranslations.push({
+              langCode: code,
+              name: name || "",
+              description: description || "",
+            });
+          }
         }
         setTranslations(existingTranslations);
       } else {
@@ -269,10 +266,13 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
   };
 
   const getLanguageName = (code: string) => {
-    return AVAILABLE_LANGUAGES.find((l) => l.code === code)?.name || code;
+    return (
+      SUPPORTED_TRANSLATION_LANGUAGES.find((l) => l.code === code)?.labelKa ||
+      code
+    );
   };
 
-  const availableToAdd = AVAILABLE_LANGUAGES.filter(
+  const availableToAdd = SUPPORTED_TRANSLATION_LANGUAGES.filter(
     (l) => !translations.find((t) => t.langCode === l.code)
   );
 
@@ -293,6 +293,14 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     setSaving(true);
 
     try {
+      const localePayload: Record<string, string | null> = {};
+      for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+        const s = getFieldSuffix(code);
+        const t = translations.find((tr) => tr.langCode === code);
+        localePayload[`name${s}`] = t?.name || null;
+        localePayload[`description${s}`] = t?.description || null;
+      }
+
       const res = await fetch(`/api/geoguide/tours/${params.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -300,12 +308,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
           ...formData,
           duration: formData.duration ? parseInt(formData.duration) : null,
           price: formData.price ? parseFloat(formData.price) : null,
-          nameEn: translations.find((t) => t.langCode === "en")?.name || null,
-          nameRu: translations.find((t) => t.langCode === "ru")?.name || null,
-          nameUk: translations.find((t) => t.langCode === "uk")?.name || null,
-          descriptionEn: translations.find((t) => t.langCode === "en")?.description || null,
-          descriptionRu: translations.find((t) => t.langCode === "ru")?.description || null,
-          descriptionUk: translations.find((t) => t.langCode === "uk")?.description || null,
+          ...localePayload,
         }),
       });
 
@@ -345,18 +348,19 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     setAddingHall(true);
 
     try {
-      const enTrans = newHallTranslations.find((t) => t.langCode === "en");
-      const ruTrans = newHallTranslations.find((t) => t.langCode === "ru");
-      const ukTrans = newHallTranslations.find((t) => t.langCode === "uk");
+      const localePayload: Record<string, string | null> = {};
+      for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+        const s = getFieldSuffix(code);
+        const t = newHallTranslations.find((tr) => tr.langCode === code);
+        localePayload[`name${s}`] = t?.name || null;
+      }
 
       const res = await fetch(`/api/geoguide/tours/${params.id}/halls`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newHallData.name,
-          nameEn: enTrans?.name || null,
-          nameRu: ruTrans?.name || null,
-          nameUk: ukTrans?.name || null,
+          ...localePayload,
           imageUrl: newHallData.imageUrl || null,
         }),
       });
@@ -398,11 +402,15 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
   const openEditHall = (hall: Hall) => {
     setExpandedHalls((prev) => new Set(prev).add(hall.id));
     setEditingHallId(hall.id);
+    const nameByLang: Record<string, string> = {};
+    for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+      const s = getFieldSuffix(code);
+      const v = (hall as Record<string, unknown>)[`name${s}`];
+      nameByLang[code] = typeof v === "string" ? v : "";
+    }
     setEditHallData({
       name: hall.name,
-      nameEn: hall.nameEn || "",
-      nameRu: hall.nameRu || "",
-      nameUk: hall.nameUk || "",
+      nameByLang,
       imageUrl: hall.imageUrl || "",
       orderIndex: hall.orderIndex,
       isPublished: hall.isPublished,
@@ -414,14 +422,19 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     if (!editingHallId) return;
     setSavingHall(true);
     try {
+      const localePayload: Record<string, string | null> = {};
+      for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+        const s = getFieldSuffix(code);
+        localePayload[`name${s}`] =
+          editHallData.nameByLang[code]?.trim() || null;
+      }
+
       const res = await fetch(`/api/geoguide/tours/${params.id}/halls/${editingHallId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editHallData.name,
-          nameEn: editHallData.nameEn || null,
-          nameRu: editHallData.nameRu || null,
-          nameUk: editHallData.nameUk || null,
+          ...localePayload,
           imageUrl: editHallData.imageUrl || null,
           orderIndex: editHallData.orderIndex,
           isPublished: editHallData.isPublished,
@@ -461,24 +474,23 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
     setAddingStop(true);
 
     try {
-      const enTrans = newStopTranslations.find((t) => t.langCode === "en");
-      const ruTrans = newStopTranslations.find((t) => t.langCode === "ru");
-      const ukTrans = newStopTranslations.find((t) => t.langCode === "uk");
-
       const hallId = activeHallIdForNewStop || newStopData.hallId || null;
+
+      const localePayload: Record<string, string | null> = {};
+      for (const { code } of SUPPORTED_TRANSLATION_LANGUAGES) {
+        const s = getFieldSuffix(code);
+        const t = newStopTranslations.find((tr) => tr.langCode === code);
+        localePayload[`title${s}`] = t?.title || null;
+        localePayload[`audioUrl${s}`] = t?.audioUrl || null;
+      }
 
       const res = await fetch(`/api/geoguide/tours/${params.id}/stops`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newStopData.title,
-          titleEn: enTrans?.title || null,
-          titleRu: ruTrans?.title || null,
-          titleUk: ukTrans?.title || null,
           audioUrl: newStopData.audioUrl || null,
-          audioUrlEn: enTrans?.audioUrl || null,
-          audioUrlRu: ruTrans?.audioUrl || null,
-          audioUrlUk: ukTrans?.audioUrl || null,
+          ...localePayload,
           imageUrl: newStopData.imageUrl || null,
           hallId: hallId,
           orderIndex: tour?.stops.length || 0,
@@ -628,7 +640,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                               className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
                               onClick={() => addTranslation(lang.code)}
                             >
-                              {lang.name}
+                              {lang.labelKa}
                             </button>
                           ))}
                         </div>
@@ -906,7 +918,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                       </Button>
                       {showNewHallLangPicker && (
                         <div className="absolute left-0 top-full mt-1 bg-white border rounded-md shadow-lg z-10 min-w-[150px]">
-                          {AVAILABLE_LANGUAGES.filter(
+                          {SUPPORTED_TRANSLATION_LANGUAGES.filter(
                             (l) => !newHallTranslations.find((t) => t.langCode === l.code)
                           ).map((lang) => (
                             <button
@@ -918,7 +930,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                                 setShowNewHallLangPicker(false);
                               }}
                             >
-                              {lang.name}
+                              {lang.labelKa}
                             </button>
                           ))}
                         </div>
@@ -953,7 +965,8 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                     .map((hall, index) => {
                       const isExpanded = expandedHalls.has(hall.id);
                       const hallStops = getStopsForHall(hall.id);
-                      
+                      const hallTranslatedName = firstHallTranslatedName(hall);
+
                       return (
                         <div key={hall.id} className="border rounded-lg overflow-hidden">
                           {/* Hall Header - Card Style */}
@@ -981,8 +994,10 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                             
                             <div className="flex-1">
                               <div className="font-semibold text-gray-900">{hall.name}</div>
-                              {hall.nameEn && (
-                                <div className="text-sm text-muted-foreground">{hall.nameEn}</div>
+                              {hallTranslatedName && (
+                                <div className="text-sm text-muted-foreground">
+                                  {hallTranslatedName}
+                                </div>
                               )}
                               <div className="text-xs text-blue-600 mt-1">
                                 {hallStops.length} გაჩერება
@@ -1031,26 +1046,26 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                                         required
                                       />
                                     </div>
-                                    <div className="space-y-2">
-                                      <Label>სახელი (EN)</Label>
-                                      <Input
-                                        value={editHallData.nameEn}
-                                        onChange={(e) => setEditHallData({ ...editHallData, nameEn: e.target.value })}
-                                      />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>სახელი (RU)</Label>
-                                      <Input
-                                        value={editHallData.nameRu}
-                                        onChange={(e) => setEditHallData({ ...editHallData, nameRu: e.target.value })}
-                                      />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>სახელი (UK)</Label>
-                                      <Input
-                                        value={editHallData.nameUk}
-                                        onChange={(e) => setEditHallData({ ...editHallData, nameUk: e.target.value })}
-                                      />
+                                    <div className="sm:col-span-2 max-h-48 overflow-y-auto space-y-2 pr-1">
+                                      {SUPPORTED_TRANSLATION_LANGUAGES.map(({ code }) => (
+                                        <div key={code} className="space-y-1">
+                                          <Label className="text-xs">
+                                            სახელი ({getLanguageName(code)})
+                                          </Label>
+                                          <Input
+                                            value={editHallData.nameByLang[code] ?? ""}
+                                            onChange={(e) =>
+                                              setEditHallData({
+                                                ...editHallData,
+                                                nameByLang: {
+                                                  ...editHallData.nameByLang,
+                                                  [code]: e.target.value,
+                                                },
+                                              })
+                                            }
+                                          />
+                                        </div>
+                                      ))}
                                     </div>
                                     <div className="space-y-2 sm:col-span-2">
                                       <Label>სურათი</Label>
@@ -1351,7 +1366,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                       </Button>
                       {showNewStopLangPicker && (
                         <div className="absolute left-0 top-full mt-1 bg-white border rounded-md shadow-lg z-10 min-w-[150px]">
-                          {AVAILABLE_LANGUAGES.filter(
+                          {SUPPORTED_TRANSLATION_LANGUAGES.filter(
                             (l) => !newStopTranslations.find((t) => t.langCode === l.code)
                           ).map((lang) => (
                             <button
@@ -1363,7 +1378,7 @@ export default function EditTourPage({ params }: { params: { id: string } }) {
                                 setShowNewStopLangPicker(false);
                               }}
                             >
-                              {lang.name}
+                              {lang.labelKa}
                             </button>
                           ))}
                         </div>

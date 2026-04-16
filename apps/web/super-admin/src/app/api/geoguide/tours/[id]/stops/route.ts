@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
+import { tourStopTranslationFieldsForCreate } from "@/lib/geoguide/translation-api-fields";
 
 // GET /api/geoguide/tours/[id]/stops
 export async function GET(
@@ -59,17 +60,9 @@ export async function POST(
         tourId: params.id,
         hallId: body.hallId || null,
         title: body.title,
-        titleEn: body.titleEn || null,
-        titleRu: body.titleRu || null,
-        titleUk: body.titleUk || null,
         description: body.description || null,
-        descriptionEn: body.descriptionEn || null,
-        descriptionRu: body.descriptionRu || null,
-        descriptionUk: body.descriptionUk || null,
         audioUrl: body.audioUrl || null,
-        audioUrlEn: body.audioUrlEn || null,
-        audioUrlRu: body.audioUrlRu || null,
-        audioUrlUk: body.audioUrlUk || null,
+        ...tourStopTranslationFieldsForCreate(body as Record<string, unknown>),
         imageUrl: body.imageUrl || null,
         qrCode,
         orderIndex: body.orderIndex ?? newOrderIndex,
