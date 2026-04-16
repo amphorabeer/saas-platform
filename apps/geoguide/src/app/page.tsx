@@ -8,21 +8,21 @@ import {
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 
+// Helper to get field suffix from language code
+const getFieldSuffix = (code: string) => code.charAt(0).toUpperCase() + code.slice(1);
+
 export default function HomePage() {
   const [museums, setMuseums] = useState<Museum[]>([]);
   const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState<Language>("ka");
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [availableLanguages, setAvailableLanguages] = useState<Language[]>([
-    "ka",
-  ]);
+  const [availableLanguages, setAvailableLanguages] = useState<Language[]>(["ka"]);
 
   useEffect(() => {
     fetchMuseums();
   }, []);
 
   useEffect(() => {
-    // Load saved language only if it's available
     const saved = localStorage.getItem("geoguide-language") as Language;
     if (saved && availableLanguages.includes(saved)) {
       setLanguage(saved);
@@ -38,14 +38,16 @@ export default function HomePage() {
         const data = await res.json();
         setMuseums(data);
 
-        // Detect available languages from all museums
+        // Dynamically detect available languages from all museums
         const langs = new Set<Language>(["ka"]);
         data.forEach((museum: Museum) => {
-          if (museum.nameEn) langs.add("en");
-          if (museum.nameRu) langs.add("ru");
-          if (museum.nameDe) langs.add("de");
-          if (museum.nameFr) langs.add("fr");
-          if (museum.nameUk) langs.add("uk");
+          LANGUAGES.forEach((lang) => {
+            if (lang.code === "ka") return;
+            const fieldName = `name${getFieldSuffix(lang.code)}` as keyof Museum;
+            if (museum[fieldName]) {
+              langs.add(lang.code);
+            }
+          });
         });
         setAvailableLanguages(Array.from(langs));
       }
@@ -62,183 +64,175 @@ export default function HomePage() {
     setShowLangMenu(false);
   };
 
-  // Helper to get localized text
-  const getLocalizedField = (
-    museum: Museum,
-    field: "name" | "city"
-  ): string => {
+  const getLocalizedField = (museum: Museum, field: "name" | "city"): string => {
     if (language === "ka") {
       return (museum[field] as string) || "";
     }
-
-    const langFieldMap: Record<Language, Record<string, keyof Museum>> = {
-      ka: { name: "name", city: "city" },
-      en: { name: "nameEn", city: "cityEn" },
-      ru: { name: "nameRu", city: "cityRu" },
-      de: { name: "nameDe", city: "cityDe" },
-      fr: { name: "nameFr", city: "cityFr" },
-      uk: { name: "nameUk", city: "cityUk" },
-    };
-
-    const langField = langFieldMap[language]?.[field];
-    if (langField) {
-      return (museum[langField] as string) || (museum[field] as string) || "";
-    }
-    return (museum[field] as string) || "";
+    const suffix = getFieldSuffix(language);
+    const langField = `${field}${suffix}` as keyof Museum;
+    return (museum[langField] as string) || (museum[field] as string) || "";
   };
 
-  // Check if museum has content in selected language
   const hasLanguage = (museum: Museum): boolean => {
     if (language === "ka") return true;
-
-    const nameFieldMap: Record<Language, keyof Museum | null> = {
-      ka: null,
-      en: "nameEn",
-      ru: "nameRu",
-      de: "nameDe",
-      fr: "nameFr",
-      uk: "nameUk",
-    };
-
-    const nameField = nameFieldMap[language];
-    if (nameField) {
-      return !!museum[nameField];
-    }
-    return true;
+    const suffix = getFieldSuffix(language);
+    const fieldName = `name${suffix}` as keyof Museum;
+    return !!museum[fieldName];
   };
-
-  // Filter museums that have content in selected language
-  const filteredMuseums = museums.filter(hasLanguage);
 
   const currentLang = LANGUAGES.find((l) => l.code === language);
-  const displayLanguages = LANGUAGES.filter((l) =>
-    availableLanguages.includes(l.code as Language)
-  );
+  const displayLanguages = LANGUAGES.filter((l) => availableLanguages.includes(l.code));
 
-  // Localized UI texts
-  const uiTexts: Record<
-    Language,
-    { selectMuseum: string; noMuseums: string }
-  > = {
-    ka: { selectMuseum: "აირჩიეთ მუზეუმი", noMuseums: "მუზეუმები ვერ მოიძებნა" },
-    en: { selectMuseum: "Select Museum", noMuseums: "No museums found" },
-    ru: { selectMuseum: "Выберите музей", noMuseums: "Музеи не найдены" },
-    de: {
-      selectMuseum: "Museum auswählen",
-      noMuseums: "Keine Museen gefunden",
-    },
-    fr: {
-      selectMuseum: "Choisir un musée",
-      noMuseums: "Aucun musée trouvé",
-    },
-    uk: {
-      selectMuseum: "Оберіть музей",
-      noMuseums: "Музеї не знайдено",
-    },
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-amber-50 to-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-amber-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b safe-top">
-        <div className="flex items-center justify-between px-4 h-14">
-          <div className="w-12" />
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-amber-100 safe-top">
+        <div className="max-w-lg mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
+              <BuildingLibraryIcon className="w-6 h-6 text-white" />
+            </div>
+            <span className="font-bold text-xl text-gray-800">GeoGuide</span>
+          </div>
 
-          <h1 className="text-xl font-bold text-amber-600">🎧 GeoGuide</h1>
-
-          {/* Language Selector - only show if more than 1 language available */}
-          {displayLanguages.length > 1 ? (
+          {displayLanguages.length > 1 && (
             <div className="relative">
               <button
                 onClick={() => setShowLangMenu(!showLangMenu)}
-                className="flex items-center gap-1 px-2 py-1 text-sm rounded-lg hover:bg-gray-100"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-amber-50 transition-colors"
               >
-                <span>{currentLang?.flag}</span>
-                <span className="uppercase">{language}</span>
-                <ChevronDownIcon className="w-4 h-4" />
+                <span className="text-lg">{currentLang?.flag}</span>
+                <span className="text-sm font-medium text-gray-700">{currentLang?.name}</span>
+                <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-transform ${showLangMenu ? "rotate-180" : ""}`} />
               </button>
 
               {showLangMenu && (
                 <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setShowLangMenu(false)}
-                  />
-                  <div className="absolute right-0 top-full mt-1 bg-white border rounded-lg shadow-lg z-50 py-1 min-w-[150px]">
+                  <div className="fixed inset-0 z-40" onClick={() => setShowLangMenu(false)} />
+                  <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[160px] z-50">
                     {displayLanguages.map((lang) => (
                       <button
                         key={lang.code}
-                        onClick={() =>
-                          handleLanguageChange(lang.code as Language)
-                        }
-                        className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-100 ${
-                          language === lang.code
-                            ? "bg-amber-50 text-amber-600"
-                            : ""
-                        }`}
+                        onClick={() => handleLanguageChange(lang.code)}
+                        className={`w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-amber-50 transition-colors ${language === lang.code ? "bg-amber-50 text-amber-600" : "text-gray-700"}`}
                       >
-                        <span>{lang.flag}</span>
-                        <span>{lang.name}</span>
+                        <span className="text-lg">{lang.flag}</span>
+                        <span className="font-medium">{lang.name}</span>
                       </button>
                     ))}
                   </div>
                 </>
               )}
             </div>
-          ) : (
-            <div className="w-12" />
           )}
         </div>
       </header>
 
-      <div className="flex-1 p-4">
-        <h2 className="text-xl font-semibold mb-4">
-          {uiTexts[language]?.selectMuseum || uiTexts.ka.selectMuseum}
-        </h2>
+      <main className="max-w-lg mx-auto px-4 py-6 safe-bottom">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">
+            {language === "ka" ? "აირჩიეთ მუზეუმი" : 
+             language === "en" ? "Select a Museum" :
+             language === "ru" ? "Выберите музей" :
+             language === "de" ? "Wählen Sie ein Museum" :
+             language === "fr" ? "Choisissez un musée" :
+             language === "uk" ? "Оберіть музей" :
+             language === "es" ? "Seleccione un museo" :
+             language === "it" ? "Seleziona un museo" :
+             language === "pl" ? "Wybierz muzeum" :
+             language === "tr" ? "Bir müze seçin" :
+             language === "az" ? "Muzey seçin" :
+             language === "hy" ? "Ընdelays delays" :
+             language === "he" ? "בחר מוזיאון" :
+             language === "ar" ? "اختر متحفًا" :
+             language === "ko" ? "박물관 선택" :
+             language === "ja" ? "博物館を選択" :
+             language === "zh" ? "选择博物馆" :
+             "აირჩიეთ მუზეუმი"}
+          </h1>
+          <p className="text-gray-500 mt-1">
+            {language === "ka" ? "აუდიო გიდი საქართველოს მუზეუმებისთვის" :
+             language === "en" ? "Audio guide for Georgian museums" :
+             language === "ru" ? "Аудиогид по музеям Грузии" :
+             language === "de" ? "Audioführer für georgische Museen" :
+             language === "fr" ? "Guide audio pour les musées géorgiens" :
+             language === "uk" ? "Аудіогід музеями Грузії" :
+             language === "es" ? "Guía de audio para museos georgianos" :
+             language === "it" ? "Audioguida per i musei georgiani" :
+             language === "pl" ? "Audioprzewodnik po gruzińskich muzeach" :
+             language === "tr" ? "Gürcü müzeleri için sesli rehber" :
+             language === "az" ? "Gürcüstan muzeyləri üçün audio bələdçi" :
+             language === "hy" ? "delays delays" :
+             language === "he" ? "מדריך שמע למוזיאונים גאורגיים" :
+             language === "ar" ? "دليل صوتي للمتاحف الجورجية" :
+             language === "ko" ? "조지아 박물관 오디오 가이드" :
+             language === "ja" ? "ジョージアの博物館オーディオガイド" :
+             language === "zh" ? "格鲁吉亚博物馆语音导览" :
+             "აუდიო გიდი საქართველოს მუზეუმებისთვის"}
+          </p>
+        </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500" />
-          </div>
-        ) : filteredMuseums.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <BuildingLibraryIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>{uiTexts[language]?.noMuseums || uiTexts.ka.noMuseums}</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredMuseums.map((museum) => (
+        <div className="space-y-4">
+          {museums
+            .filter((m) => m.tours && m.tours.length > 0)
+            .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+            .map((museum) => (
               <Link
                 key={museum.id}
                 href={`/museum/${museum.slug}`}
-                className="block bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                className="block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
               >
-                {museum.coverImage ? (
-                  <img
-                    src={museum.coverImage}
-                    alt={getLocalizedField(museum, "name")}
-                    className="w-full h-40 object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-40 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
-                    <BuildingLibraryIcon className="w-16 h-16 text-amber-400" />
+                {museum.coverImage && (
+                  <div className="aspect-[2/1] relative">
+                    <img
+                      src={museum.coverImage}
+                      alt={getLocalizedField(museum, "name")}
+                      className="w-full h-full object-cover"
+                    />
+                    {!hasLanguage(museum) && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span className="text-white text-sm px-3 py-1 bg-black/50 rounded-full">
+                          {language === "ka" ? "მალე" : "Coming soon"}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="p-4">
-                  <h3 className="font-semibold text-lg">
+                  <h2 className="font-semibold text-lg text-gray-800">
                     {getLocalizedField(museum, "name")}
-                  </h3>
+                  </h2>
                   {getLocalizedField(museum, "city") && (
                     <p className="text-gray-500 text-sm mt-1">
                       📍 {getLocalizedField(museum, "city")}
                     </p>
                   )}
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
+                      {museum.tours?.length || 0} {language === "ka" ? "ტური" : language === "en" ? "tours" : language === "ru" ? "тур" : language === "ko" ? "투어" : language === "pl" ? "wycieczek" : "tours"}
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}
+        </div>
+
+        {museums.filter((m) => m.tours && m.tours.length > 0).length === 0 && (
+          <div className="text-center py-12">
+            <BuildingLibraryIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500">
+              {language === "ka" ? "მუზეუმები მალე დაემატება" : "Museums coming soon"}
+            </p>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
