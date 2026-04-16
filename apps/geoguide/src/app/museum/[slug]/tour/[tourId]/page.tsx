@@ -24,6 +24,9 @@ import {
 } from "@heroicons/react/24/outline";
 import { PlayIcon as PlayIconSolid, PauseIcon as PauseIconSolid } from "@heroicons/react/24/solid";
 
+// Helper to get field suffix from language code
+const getFieldSuffix = (code: string) => code.charAt(0).toUpperCase() + code.slice(1);
+
 // UI texts for all languages
 const uiTexts: Record<string, {
   audioGuide: string;
@@ -41,6 +44,17 @@ const uiTexts: Record<string, {
   de: { audioGuide: "Audioguide", stop: "Haltestelle", search: "Nach Nummer oder Name suchen...", tourNotFound: "Tour nicht gefunden", list: "Liste", halls: "Säle", stops: "Haltestellen", allStops: "Alle Haltestellen" },
   fr: { audioGuide: "Audioguide", stop: "Arrêt", search: "Rechercher par numéro ou nom...", tourNotFound: "Visite non trouvée", list: "Liste", halls: "Salles", stops: "arrêts", allStops: "Tous les arrêts" },
   uk: { audioGuide: "Аудіогід", stop: "Зупинка", search: "Пошук за номером або назвою...", tourNotFound: "Тур не знайдено", list: "Список", halls: "Зали", stops: "зупинок", allStops: "Всі зупинки" },
+  es: { audioGuide: "Audioguía", stop: "Parada", search: "Buscar por número o nombre...", tourNotFound: "Tour no encontrado", list: "Lista", halls: "Salas", stops: "paradas", allStops: "Todas las paradas" },
+  it: { audioGuide: "Audioguida", stop: "Fermata", search: "Cerca per numero o nome...", tourNotFound: "Tour non trovato", list: "Elenco", halls: "Sale", stops: "fermate", allStops: "Tutte le fermate" },
+  pl: { audioGuide: "Audioprzewodnik", stop: "Przystanek", search: "Szukaj po numerze lub nazwie...", tourNotFound: "Wycieczka nie znaleziona", list: "Lista", halls: "Sale", stops: "przystanków", allStops: "Wszystkie przystanki" },
+  tr: { audioGuide: "Sesli Rehber", stop: "Durak", search: "Numara veya isme göre ara...", tourNotFound: "Tur bulunamadı", list: "Liste", halls: "Salonlar", stops: "durak", allStops: "Tüm duraklar" },
+  az: { audioGuide: "Audio Bələdçi", stop: "Dayanacaq", search: "Nömrə və ya ada görə axtar...", tourNotFound: "Tur tapılmadı", list: "Siyahı", halls: "Zallar", stops: "dayanacaq", allStops: "Bütün dayanacaqlar" },
+  hy: { audioGuide: "Delays", stop: "Delays", search: "Delays...", tourNotFound: "Delays", list: "Delays", halls: "Delays", stops: "delays", allStops: "Delays" },
+  he: { audioGuide: "מדריך שמע", stop: "תחנה", search: "חפש לפי מספר או שם...", tourNotFound: "סיור לא נמצא", list: "רשימה", halls: "אולמות", stops: "תחנות", allStops: "כל התחנות" },
+  ar: { audioGuide: "الدليل الصوتي", stop: "محطة", search: "البحث بالرقم أو الاسم...", tourNotFound: "الجولة غير موجودة", list: "قائمة", halls: "قاعات", stops: "محطات", allStops: "جميع المحطات" },
+  ko: { audioGuide: "오디오 가이드", stop: "정류장", search: "번호 또는 이름으로 검색...", tourNotFound: "투어를 찾을 수 없습니다", list: "목록", halls: "홀", stops: "정류장", allStops: "모든 정류장" },
+  ja: { audioGuide: "オーディオガイド", stop: "停留所", search: "番号または名前で検索...", tourNotFound: "ツアーが見つかりません", list: "リスト", halls: "ホール", stops: "停留所", allStops: "すべての停留所" },
+  zh: { audioGuide: "语音导览", stop: "站点", search: "按编号或名称搜索...", tourNotFound: "未找到旅游", list: "列表", halls: "大厅", stops: "站点", allStops: "所有站点" },
 };
 
 export default function TourPage() {
@@ -97,19 +111,23 @@ export default function TourPage() {
           setViewMode('stops');
         }
 
+        // Dynamically detect available languages
         const langs = new Set<Language>(["ka"]);
-        if (data.nameEn) langs.add("en");
-        if (data.nameRu) langs.add("ru");
-        if (data.nameUk) langs.add("uk");
-        data.stops?.forEach((stop: TourStop) => {
-          if (stop.titleEn || stop.audioUrlEn) langs.add("en");
-          if (stop.titleRu || stop.audioUrlRu) langs.add("ru");
-          if (stop.titleUk || stop.audioUrlUk) langs.add("uk");
-        });
-        data.halls?.forEach((hall: Hall) => {
-          if (hall.nameEn) langs.add("en");
-          if (hall.nameRu) langs.add("ru");
-          if (hall.nameUk) langs.add("uk");
+        LANGUAGES.forEach((lang) => {
+          if (lang.code === "ka") return;
+          const suffix = getFieldSuffix(lang.code);
+          // Check tour name
+          if (data[`name${suffix}`]) langs.add(lang.code);
+          // Check stops
+          data.stops?.forEach((stop: TourStop) => {
+            if ((stop as any)[`title${suffix}`] || (stop as any)[`audioUrl${suffix}`]) {
+              langs.add(lang.code);
+            }
+          });
+          // Check halls
+          data.halls?.forEach((hall: Hall) => {
+            if ((hall as any)[`name${suffix}`]) langs.add(lang.code);
+          });
         });
         setAvailableLanguages(Array.from(langs));
       }
@@ -191,31 +209,31 @@ export default function TourPage() {
 
   const getTourName = (): string => {
     if (!tour) return "";
-    const fieldMap: Record<Language, keyof Tour> = { ka: "name", en: "nameEn", ru: "nameRu", de: "name", fr: "name", uk: "nameUk" };
-    const field = fieldMap[language];
-    if (field && tour[field]) return tour[field] as string;
-    return tour.name;
+    if (language === "ka") return tour.name;
+    const suffix = getFieldSuffix(language);
+    const field = `name${suffix}` as keyof Tour;
+    return (tour[field] as string) || tour.name;
   };
 
   const getHallName = (hall: Hall): string => {
-    const fieldMap: Record<Language, keyof Hall> = { ka: "name", en: "nameEn", ru: "nameRu", de: "name", fr: "name", uk: "nameUk" };
-    const field = fieldMap[language];
-    if (field && hall[field]) return hall[field] as string;
-    return hall.name;
+    if (language === "ka") return hall.name;
+    const suffix = getFieldSuffix(language);
+    const field = `name${suffix}` as keyof Hall;
+    return (hall[field] as string) || hall.name;
   };
 
   const getLocalizedAudio = (stop: TourStop): string | null => {
-    const audioFieldMap: Record<Language, keyof TourStop | null> = { ka: "audioUrl", en: "audioUrlEn", ru: "audioUrlRu", de: null, fr: null, uk: "audioUrlUk" };
-    const field = audioFieldMap[language];
-    if (field && stop[field]) return stop[field] as string;
-    return stop.audioUrl;
+    if (language === "ka") return stop.audioUrl;
+    const suffix = getFieldSuffix(language);
+    const field = `audioUrl${suffix}` as keyof TourStop;
+    return (stop[field] as string) || stop.audioUrl;
   };
 
   const getLocalizedTitle = (stop: TourStop): string => {
-    const titleFieldMap: Record<Language, keyof TourStop> = { ka: "title", en: "titleEn", ru: "titleRu", de: "title", fr: "title", uk: "titleUk" };
-    const field = titleFieldMap[language];
-    if (field && stop[field]) return stop[field] as string;
-    return stop.title;
+    if (language === "ka") return stop.title;
+    const suffix = getFieldSuffix(language);
+    const field = `title${suffix}` as keyof TourStop;
+    return (stop[field] as string) || stop.title;
   };
 
   const handleStopClick = (stop: TourStop) => {
