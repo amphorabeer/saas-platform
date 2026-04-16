@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE = process.env.SUPER_ADMIN_API_URL || "http://localhost:3001";
 
+// All supported language suffixes
+const LANG_SUFFIXES = ['En', 'Ru', 'Uk', 'De', 'Fr', 'Es', 'It', 'Pl', 'Tr', 'Az', 'Hy', 'He', 'Ar', 'Ko', 'Ja', 'Zh'];
+
+// Helper to pick localized fields dynamically
+const pickLocalizedFields = (obj: any, baseFields: string[]) => {
+  const result: any = {};
+  baseFields.forEach(field => {
+    result[field] = obj[field];
+    LANG_SUFFIXES.forEach(suffix => {
+      const key = `${field}${suffix}`;
+      if (obj[key] !== undefined) {
+        result[key] = obj[key];
+      }
+    });
+  });
+  return result;
+};
+
 // GET /api/tours/[tourId] - ტურის ინფორმაცია
 export async function GET(
   request: NextRequest,
@@ -27,14 +45,7 @@ export async function GET(
 
     return NextResponse.json({
       id: tour.id,
-      name: tour.name,
-      nameEn: tour.nameEn,
-      nameRu: tour.nameRu,
-      nameUk: tour.nameUk,
-      description: tour.description,
-      descriptionEn: tour.descriptionEn,
-      descriptionRu: tour.descriptionRu,
-      descriptionUk: tour.descriptionUk,
+      ...pickLocalizedFields(tour, ['name', 'description']),
       price: parseFloat(tour.price) || 0,
       currency: tour.currency || "GEL",
       duration: tour.duration,
@@ -43,36 +54,19 @@ export async function GET(
       coverImage: tour.coverImage,
       vrTourId: tour.vrTourId || null,
       museum: {
-        name: tour.museum?.name,
-        nameEn: tour.museum?.nameEn,
-        nameRu: tour.museum?.nameRu,
-        nameUk: tour.museum?.nameUk,
+        ...pickLocalizedFields(tour.museum || {}, ['name']),
         coverImage: tour.museum?.coverImage,
       },
       halls: publishedHalls.map((hall: any) => ({
         id: hall.id,
-        name: hall.name,
-        nameEn: hall.nameEn,
-        nameRu: hall.nameRu,
-        nameUk: hall.nameUk,
+        ...pickLocalizedFields(hall, ['name', 'description']),
         imageUrl: hall.imageUrl,
         orderIndex: hall.orderIndex,
         stopsCount: publishedStops.filter((s: any) => s.hallId === hall.id).length,
       })),
       stops: publishedStops.map((stop: any) => ({
         id: stop.id,
-        title: stop.title,
-        titleEn: stop.titleEn,
-        titleRu: stop.titleRu,
-        titleUk: stop.titleUk,
-        description: stop.description,
-        descriptionEn: stop.descriptionEn,
-        descriptionRu: stop.descriptionRu,
-        descriptionUk: stop.descriptionUk,
-        audioUrl: stop.audioUrl,
-        audioUrlEn: stop.audioUrlEn,
-        audioUrlRu: stop.audioUrlRu,
-        audioUrlUk: stop.audioUrlUk,
+        ...pickLocalizedFields(stop, ['title', 'description', 'audioUrl', 'transcript']),
         imageUrl: stop.imageUrl,
         orderIndex: stop.orderIndex,
         hallId: stop.hallId,
