@@ -23,6 +23,9 @@ function getDeviceId(): string {
   return id;
 }
 
+// Helper to get field suffix from language code
+const getFieldSuffix = (code: string) => code.charAt(0).toUpperCase() + code.slice(1);
+
 export default function MuseumPage() {
   const params = useParams();
   const router = useRouter();
@@ -40,6 +43,17 @@ export default function MuseumPage() {
     de: { start: "Starten", enterCode: "Code eingeben", buy: "Kaufen", minutes: "Min", stops: "Haltestellen", noTours: "Noch keine Touren" },
     fr: { start: "Commencer", enterCode: "Entrer le code", buy: "Acheter", minutes: "min", stops: "arrêts", noTours: "Pas encore de visites" },
     uk: { start: "Почати", enterCode: "Введіть код", buy: "Купити", minutes: "хв", stops: "зупинок", noTours: "Турів поки немає" },
+    es: { start: "Empezar", enterCode: "Introducir código", buy: "Comprar", minutes: "min", stops: "paradas", noTours: "No hay tours disponibles" },
+    it: { start: "Inizia", enterCode: "Inserisci codice", buy: "Acquista", minutes: "min", stops: "fermate", noTours: "Nessun tour disponibile" },
+    pl: { start: "Rozpocznij", enterCode: "Wprowadź kod", buy: "Kup", minutes: "min", stops: "przystanków", noTours: "Brak dostępnych wycieczek" },
+    tr: { start: "Başla", enterCode: "Kodu girin", buy: "Satın al", minutes: "dk", stops: "durak", noTours: "Henüz tur yok" },
+    az: { start: "Başla", enterCode: "Kodu daxil edin", buy: "Al", minutes: "dəq", stops: "dayanacaq", noTours: "Turlar hələ yoxdur" },
+    hy: { start: "Սկսել", enterCode: "Մուdelays կdelays", buy: "Գdelays delays", minutes: " delays", stops: "ร์ delays", noTours: "delays delays delays" },
+    he: { start: "התחל", enterCode: "הכנס קוד", buy: "קנה", minutes: "דקות", stops: "תחנות", noTours: "אין סיורים זמינים" },
+    ar: { start: "ابدأ", enterCode: "أدخل الرمز", buy: "اشترِ", minutes: "دقيقة", stops: "محطات", noTours: "لا توجد جولات متاحة" },
+    ko: { start: "시작", enterCode: "코드 입력", buy: "구매", minutes: "분", stops: "정류장", noTours: "투어가 없습니다" },
+    ja: { start: "開始", enterCode: "コードを入力", buy: "購入", minutes: "分", stops: "停留所", noTours: "ツアーはありません" },
+    zh: { start: "开始", enterCode: "输入代码", buy: "购买", minutes: "分钟", stops: "站点", noTours: "暂无旅游" },
   };
 
   useEffect(() => {
@@ -53,12 +67,16 @@ export default function MuseumPage() {
       if (res.ok) {
         const data = await res.json();
         setMuseum(data);
+        
+        // Dynamically check all languages from LANGUAGES array
         const langs = new Set<Language>(["ka"]);
-        if (data.nameEn) langs.add("en");
-        if (data.nameRu) langs.add("ru");
-        if (data.nameDe) langs.add("de");
-        if (data.nameFr) langs.add("fr");
-        if (data.nameUk) langs.add("uk");
+        LANGUAGES.forEach((lang) => {
+          if (lang.code === "ka") return;
+          const fieldName = `name${getFieldSuffix(lang.code)}` as keyof typeof data;
+          if (data[fieldName]) {
+            langs.add(lang.code);
+          }
+        });
         setAvailableLanguages(Array.from(langs));
       }
     } catch (error) {
@@ -80,18 +98,16 @@ export default function MuseumPage() {
 
   const getMuseumField = (field: "name" | "description" | "city" | "address"): string => {
     if (!museum) return "";
-    const fieldMap: Record<Language, Record<string, keyof Museum>> = {
-      ka: { name: "name", description: "description", city: "city", address: "address" },
-      en: { name: "nameEn", description: "descriptionEn", city: "cityEn", address: "addressEn" },
-      ru: { name: "nameRu", description: "descriptionRu", city: "cityRu", address: "addressRu" },
-      de: { name: "nameDe", description: "descriptionDe", city: "cityDe", address: "addressDe" },
-      fr: { name: "nameFr", description: "descriptionFr", city: "cityFr", address: "addressFr" },
-      uk: { name: "nameUk", description: "descriptionUk", city: "cityUk", address: "addressUk" },
-    };
-    const langField = fieldMap[language]?.[field];
-    if (langField && museum[langField]) return museum[langField] as string;
-    const kaField = fieldMap.ka[field];
-    return (museum[kaField] as string) || "";
+    
+    // Try current language
+    if (language !== "ka") {
+      const suffix = getFieldSuffix(language);
+      const langField = `${field}${suffix}` as keyof Museum;
+      if (museum[langField]) return museum[langField] as string;
+    }
+    
+    // Fallback to Georgian
+    return (museum[field as keyof Museum] as string) || "";
   };
 
   const currentLang = LANGUAGES.find((l) => l.code === language);
@@ -178,12 +194,11 @@ function TourCard({
   hasAccess: boolean;
 }) {
   const getField = (field: "name" | "description"): string => {
-    const fieldMap: Record<string, Record<string, string>> = {
-      name: { ka: "name", en: "nameEn", ru: "nameRu", de: "nameDe", fr: "nameFr", uk: "nameUk" },
-      description: { ka: "description", en: "descriptionEn", ru: "descriptionRu", de: "descriptionDe", fr: "descriptionFr", uk: "descriptionUk" },
-    };
-    const langField = fieldMap[field]?.[language];
-    if (langField && (tour as any)[langField]) return (tour as any)[langField];
+    if (language !== "ka") {
+      const suffix = getFieldSuffix(language);
+      const langField = `${field}${suffix}`;
+      if ((tour as any)[langField]) return (tour as any)[langField];
+    }
     return (tour as any)[field] || "";
   };
 
