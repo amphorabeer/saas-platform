@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { LanguageProvider } from "@/lib/language-context";
 import ChatWidget from "@/components/chat/ChatWidget";
 import Footer from "@/components/Footer";
@@ -67,6 +68,9 @@ export default function RootLayout({
           </div>
           <ChatWidget />
         </LanguageProvider>
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+        )}
       </body>
     </html>
   );
