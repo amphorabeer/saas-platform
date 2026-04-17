@@ -238,20 +238,26 @@ export default function ActivatePage() {
   };
 
   const formatCode = (value: string) => {
-    const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    
-    let formatted = "";
-    if (cleaned.length > 0) {
-      formatted = cleaned.slice(0, 4);
+    const cleaned = value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
+
+    // If it starts with GEOG, format as GEOG-XXXX-XXXX
+    if (cleaned.replace(/-/g, "").startsWith("GEOG")) {
+      const chars = cleaned.replace(/-/g, "");
+      let formatted = "";
+      if (chars.length > 0) {
+        formatted = chars.slice(0, 4);
+      }
+      if (chars.length > 4) {
+        formatted += "-" + chars.slice(4, 8);
+      }
+      if (chars.length > 8) {
+        formatted += "-" + chars.slice(8, 12);
+      }
+      return formatted;
     }
-    if (cleaned.length > 4) {
-      formatted += "-" + cleaned.slice(4, 8);
-    }
-    if (cleaned.length > 8) {
-      formatted += "-" + cleaned.slice(8, 12);
-    }
-    
-    return formatted;
+
+    // For other codes (like GOOGLETEST26), allow up to 20 characters without formatting
+    return cleaned.replace(/-/g, "").slice(0, 20);
   };
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -262,8 +268,10 @@ export default function ActivatePage() {
 
   const handleActivate = async (codeToActivate?: string) => {
     const activationCode = codeToActivate || code;
-    
-    if (activationCode.length < 14) {
+
+    // GEOG codes are 14 chars, others minimum 4
+    const minLength = activationCode.startsWith("GEOG") ? 14 : 4;
+    if (activationCode.length < minLength) {
       setError(ui.errorInvalid);
       return;
     }
@@ -446,7 +454,7 @@ export default function ActivatePage() {
                   className={`w-full px-4 py-4 text-center text-xl font-mono tracking-wider border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                     error ? "border-red-300 bg-red-50" : "border-gray-200"
                   }`}
-                  maxLength={14}
+                  maxLength={20}
                   autoComplete="off"
                   autoCapitalize="characters"
                 />
@@ -460,9 +468,9 @@ export default function ActivatePage() {
 
                 <button
                   onClick={() => handleActivate()}
-                  disabled={loading || code.length < 14}
+                  disabled={loading || code.length < 4}
                   className={`w-full py-4 rounded-xl font-medium text-white transition-colors ${
-                    loading || code.length < 14
+                    loading || code.length < 4
                       ? "bg-gray-300 cursor-not-allowed"
                       : "bg-amber-500 hover:bg-amber-600"
                   }`}
