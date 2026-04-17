@@ -55,7 +55,7 @@ export async function generateMetadata({
   }
 
   const m = MESSAGES[lang as InfoLang];
-  const baseUrl = "https://geoguide.ge";
+  const baseUrl = "https://www.geoguide.ge";
 
   return {
     title: m.meta.title,
