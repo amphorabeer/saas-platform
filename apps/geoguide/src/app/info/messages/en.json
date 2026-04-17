@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "title": "GeoGuide — Audio Guide for Georgia's Museums",
+    "description": "Professional audio guides for Vardzia, Uplistsikhe, Akhaltsikhe, Svetitskhoveli and more. 10-15 GEL per museum. Available in multiple languages."
+  },
+  "header": {
+    "nav_info": "About",
+    "nav_museums": "Museums"
+  },
+  "hero": {
+    "h1": "Explore Georgia at your own pace",
+    "subtitle": "Professional audio guides for Georgia's most iconic landmarks. Available in {count} languages, at your price.",
+    "cta_primary": "Browse Museums",
+    "cta_secondary": "How it works"
+  },
+  "what_is": {
+    "title": "What is GeoGuide?",
+    "p1": "GeoGuide is an audio guide app for Georgia's most popular museums and historical landmarks. Listen to professionally narrated stories about each exhibit at your own pace, in your own language.",
+    "p2": "We cover Georgia's most visited sites — Vardzia cave monastery, Rabati Fortress, Uplistsikhe ancient city, Svetitskhoveli Cathedral, Enguri Dam and the main museums of Tbilisi."
+  },
+  "how_it_works": {
+    "title": "How it works",
+    "steps": [
+      { "title": "Open the app", "description": "Download from App Store, or use our web app directly in your browser — no install needed." },
+      { "title": "Buy a code", "description": "Pay online here, or buy an activation code at the museum ticket booth. 10-15 GEL." },
+      { "title": "Listen & explore", "description": "Activate the code, choose your language, and walk at your own pace. Works offline." }
+    ]
+  },
+  "museums": {
+    "title": "Museums available in English",
+    "title_with_count": "Museums available in English ({count})",
+    "empty": "No museums available in this language yet. Check back soon!",
+    "view_museum": "View museum →",
+    "languages_label": "Audio available in:"
+  },
+  "callout": {
+    "title": "Why audio guide instead of a tour guide?",
+    "text": "A private guide in Georgia costs 100-150 GEL. GeoGuide costs 10-15 GEL. Same professional quality, your own language, your own pace. Pause when you want, rewind when you missed something."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "items": [
+      { "q": "Do I need internet to use GeoGuide?", "a": "You need internet to download the app and the tour content. Once the tour is downloaded, it works completely offline. Important: download the tour at your hotel or home before visiting — mobile signal can be weak at Vardzia, Uplistsikhe and other remote sites." },
+      { "q": "What languages are available?", "a": "It depends on the museum. Vardzia has 8 languages. Rabati Fortress has 4. Most Tbilisi museums have 3. Check each museum card above for details." },
+      { "q": "Can I buy the code in advance?", "a": "Yes. Purchase online with any credit card, or buy at the museum ticket booth on arrival." },
+      { "q": "Do I need to install an app?", "a": "Two options: download GeoGuide from the App Store (iOS, Android coming soon), or use our web app (PWA) directly in your browser — no install." },
+      { "q": "Is there a rental audio device at the museum?", "a": "Yes, at Vardzia, Akhaltsikhe, Uplistsikhe, Georgian National Museum and Art Museum you can rent a physical audio device at the ticket desk. A photo ID is required as a deposit (passport, ID card or driving license)." },
+      { "q": "How long does the tour take?", "a": "45-90 minutes per museum, depending on the size. You can pause, rewind, or skip at any time." }
+    ]
+  },
+  "final_cta": {
+    "title": "Ready to explore?",
+    "description": "Choose a museum and start your journey.",
+    "cta": "Browse Museums"
+  },
+  "footer": {
+    "tagline": "Audio guides for Georgia's museums",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "help": "Help",
+    "contact": "Contact",
+    "copyright": "© 2026 GeoGuide. All rights reserved."
+  }
+}

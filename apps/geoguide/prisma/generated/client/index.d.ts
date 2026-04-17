@@ -21360,6 +21360,61 @@ export namespace Prisma {
     descriptionUk: string | null
     cityUk: string | null
     addressUk: string | null
+    nameEs: string | null
+    descriptionEs: string | null
+    cityEs: string | null
+    addressEs: string | null
+    introAudioUrlEs: string | null
+    nameIt: string | null
+    descriptionIt: string | null
+    cityIt: string | null
+    addressIt: string | null
+    introAudioUrlIt: string | null
+    namePl: string | null
+    descriptionPl: string | null
+    cityPl: string | null
+    addressPl: string | null
+    introAudioUrlPl: string | null
+    nameTr: string | null
+    descriptionTr: string | null
+    cityTr: string | null
+    addressTr: string | null
+    introAudioUrlTr: string | null
+    nameAz: string | null
+    descriptionAz: string | null
+    cityAz: string | null
+    addressAz: string | null
+    introAudioUrlAz: string | null
+    nameHy: string | null
+    descriptionHy: string | null
+    cityHy: string | null
+    addressHy: string | null
+    introAudioUrlHy: string | null
+    nameHe: string | null
+    descriptionHe: string | null
+    cityHe: string | null
+    addressHe: string | null
+    introAudioUrlHe: string | null
+    nameAr: string | null
+    descriptionAr: string | null
+    cityAr: string | null
+    addressAr: string | null
+    introAudioUrlAr: string | null
+    nameKo: string | null
+    descriptionKo: string | null
+    cityKo: string | null
+    addressKo: string | null
+    introAudioUrlKo: string | null
+    nameJa: string | null
+    descriptionJa: string | null
+    cityJa: string | null
+    addressJa: string | null
+    introAudioUrlJa: string | null
+    nameZh: string | null
+    descriptionZh: string | null
+    cityZh: string | null
+    addressZh: string | null
+    introAudioUrlZh: string | null
     slug: string | null
     coverImage: string | null
     introAudioUrl: string | null
@@ -21413,6 +21468,61 @@ export namespace Prisma {
     descriptionUk: string | null
     cityUk: string | null
     addressUk: string | null
+    nameEs: string | null
+    descriptionEs: string | null
+    cityEs: string | null
+    addressEs: string | null
+    introAudioUrlEs: string | null
+    nameIt: string | null
+    descriptionIt: string | null
+    cityIt: string | null
+    addressIt: string | null
+    introAudioUrlIt: string | null
+    namePl: string | null
+    descriptionPl: string | null
+    cityPl: string | null
+    addressPl: string | null
+    introAudioUrlPl: string | null
+    nameTr: string | null
+    descriptionTr: string | null
+    cityTr: string | null
+    addressTr: string | null
+    introAudioUrlTr: string | null
+    nameAz: string | null
+    descriptionAz: string | null
+    cityAz: string | null
+    addressAz: string | null
+    introAudioUrlAz: string | null
+    nameHy: string | null
+    descriptionHy: string | null
+    cityHy: string | null
+    addressHy: string | null
+    introAudioUrlHy: string | null
+    nameHe: string | null
+    descriptionHe: string | null
+    cityHe: string | null
+    addressHe: string | null
+    introAudioUrlHe: string | null
+    nameAr: string | null
+    descriptionAr: string | null
+    cityAr: string | null
+    addressAr: string | null
+    introAudioUrlAr: string | null
+    nameKo: string | null
+    descriptionKo: string | null
+    cityKo: string | null
+    addressKo: string | null
+    introAudioUrlKo: string | null
+    nameJa: string | null
+    descriptionJa: string | null
+    cityJa: string | null
+    addressJa: string | null
+    introAudioUrlJa: string | null
+    nameZh: string | null
+    descriptionZh: string | null
+    cityZh: string | null
+    addressZh: string | null
+    introAudioUrlZh: string | null
     slug: string | null
     coverImage: string | null
     introAudioUrl: string | null
@@ -21466,6 +21576,61 @@ export namespace Prisma {
     descriptionUk: number
     cityUk: number
     addressUk: number
+    nameEs: number
+    descriptionEs: number
+    cityEs: number
+    addressEs: number
+    introAudioUrlEs: number
+    nameIt: number
+    descriptionIt: number
+    cityIt: number
+    addressIt: number
+    introAudioUrlIt: number
+    namePl: number
+    descriptionPl: number
+    cityPl: number
+    addressPl: number
+    introAudioUrlPl: number
+    nameTr: number
+    descriptionTr: number
+    cityTr: number
+    addressTr: number
+    introAudioUrlTr: number
+    nameAz: number
+    descriptionAz: number
+    cityAz: number
+    addressAz: number
+    introAudioUrlAz: number
+    nameHy: number
+    descriptionHy: number
+    cityHy: number
+    addressHy: number
+    introAudioUrlHy: number
+    nameHe: number
+    descriptionHe: number
+    cityHe: number
+    addressHe: number
+    introAudioUrlHe: number
+    nameAr: number
+    descriptionAr: number
+    cityAr: number
+    addressAr: number
+    introAudioUrlAr: number
+    nameKo: number
+    descriptionKo: number
+    cityKo: number
+    addressKo: number
+    introAudioUrlKo: number
+    nameJa: number
+    descriptionJa: number
+    cityJa: number
+    addressJa: number
+    introAudioUrlJa: number
+    nameZh: number
+    descriptionZh: number
+    cityZh: number
+    addressZh: number
+    introAudioUrlZh: number
     slug: number
     coverImage: number
     introAudioUrl: number
@@ -21537,6 +21702,61 @@ export namespace Prisma {
     descriptionUk?: true
     cityUk?: true
     addressUk?: true
+    nameEs?: true
+    descriptionEs?: true
+    cityEs?: true
+    addressEs?: true
+    introAudioUrlEs?: true
+    nameIt?: true
+    descriptionIt?: true
+    cityIt?: true
+    addressIt?: true
+    introAudioUrlIt?: true
+    namePl?: true
+    descriptionPl?: true
+    cityPl?: true
+    addressPl?: true
+    introAudioUrlPl?: true
+    nameTr?: true
+    descriptionTr?: true
+    cityTr?: true
+    addressTr?: true
+    introAudioUrlTr?: true
+    nameAz?: true
+    descriptionAz?: true
+    cityAz?: true
+    addressAz?: true
+    introAudioUrlAz?: true
+    nameHy?: true
+    descriptionHy?: true
+    cityHy?: true
+    addressHy?: true
+    introAudioUrlHy?: true
+    nameHe?: true
+    descriptionHe?: true
+    cityHe?: true
+    addressHe?: true
+    introAudioUrlHe?: true
+    nameAr?: true
+    descriptionAr?: true
+    cityAr?: true
+    addressAr?: true
+    introAudioUrlAr?: true
+    nameKo?: true
+    descriptionKo?: true
+    cityKo?: true
+    addressKo?: true
+    introAudioUrlKo?: true
+    nameJa?: true
+    descriptionJa?: true
+    cityJa?: true
+    addressJa?: true
+    introAudioUrlJa?: true
+    nameZh?: true
+    descriptionZh?: true
+    cityZh?: true
+    addressZh?: true
+    introAudioUrlZh?: true
     slug?: true
     coverImage?: true
     introAudioUrl?: true
@@ -21590,6 +21810,61 @@ export namespace Prisma {
     descriptionUk?: true
     cityUk?: true
     addressUk?: true
+    nameEs?: true
+    descriptionEs?: true
+    cityEs?: true
+    addressEs?: true
+    introAudioUrlEs?: true
+    nameIt?: true
+    descriptionIt?: true
+    cityIt?: true
+    addressIt?: true
+    introAudioUrlIt?: true
+    namePl?: true
+    descriptionPl?: true
+    cityPl?: true
+    addressPl?: true
+    introAudioUrlPl?: true
+    nameTr?: true
+    descriptionTr?: true
+    cityTr?: true
+    addressTr?: true
+    introAudioUrlTr?: true
+    nameAz?: true
+    descriptionAz?: true
+    cityAz?: true
+    addressAz?: true
+    introAudioUrlAz?: true
+    nameHy?: true
+    descriptionHy?: true
+    cityHy?: true
+    addressHy?: true
+    introAudioUrlHy?: true
+    nameHe?: true
+    descriptionHe?: true
+    cityHe?: true
+    addressHe?: true
+    introAudioUrlHe?: true
+    nameAr?: true
+    descriptionAr?: true
+    cityAr?: true
+    addressAr?: true
+    introAudioUrlAr?: true
+    nameKo?: true
+    descriptionKo?: true
+    cityKo?: true
+    addressKo?: true
+    introAudioUrlKo?: true
+    nameJa?: true
+    descriptionJa?: true
+    cityJa?: true
+    addressJa?: true
+    introAudioUrlJa?: true
+    nameZh?: true
+    descriptionZh?: true
+    cityZh?: true
+    addressZh?: true
+    introAudioUrlZh?: true
     slug?: true
     coverImage?: true
     introAudioUrl?: true
@@ -21643,6 +21918,61 @@ export namespace Prisma {
     descriptionUk?: true
     cityUk?: true
     addressUk?: true
+    nameEs?: true
+    descriptionEs?: true
+    cityEs?: true
+    addressEs?: true
+    introAudioUrlEs?: true
+    nameIt?: true
+    descriptionIt?: true
+    cityIt?: true
+    addressIt?: true
+    introAudioUrlIt?: true
+    namePl?: true
+    descriptionPl?: true
+    cityPl?: true
+    addressPl?: true
+    introAudioUrlPl?: true
+    nameTr?: true
+    descriptionTr?: true
+    cityTr?: true
+    addressTr?: true
+    introAudioUrlTr?: true
+    nameAz?: true
+    descriptionAz?: true
+    cityAz?: true
+    addressAz?: true
+    introAudioUrlAz?: true
+    nameHy?: true
+    descriptionHy?: true
+    cityHy?: true
+    addressHy?: true
+    introAudioUrlHy?: true
+    nameHe?: true
+    descriptionHe?: true
+    cityHe?: true
+    addressHe?: true
+    introAudioUrlHe?: true
+    nameAr?: true
+    descriptionAr?: true
+    cityAr?: true
+    addressAr?: true
+    introAudioUrlAr?: true
+    nameKo?: true
+    descriptionKo?: true
+    cityKo?: true
+    addressKo?: true
+    introAudioUrlKo?: true
+    nameJa?: true
+    descriptionJa?: true
+    cityJa?: true
+    addressJa?: true
+    introAudioUrlJa?: true
+    nameZh?: true
+    descriptionZh?: true
+    cityZh?: true
+    addressZh?: true
+    introAudioUrlZh?: true
     slug?: true
     coverImage?: true
     introAudioUrl?: true
@@ -21785,6 +22115,61 @@ export namespace Prisma {
     descriptionUk: string | null
     cityUk: string | null
     addressUk: string | null
+    nameEs: string | null
+    descriptionEs: string | null
+    cityEs: string | null
+    addressEs: string | null
+    introAudioUrlEs: string | null
+    nameIt: string | null
+    descriptionIt: string | null
+    cityIt: string | null
+    addressIt: string | null
+    introAudioUrlIt: string | null
+    namePl: string | null
+    descriptionPl: string | null
+    cityPl: string | null
+    addressPl: string | null
+    introAudioUrlPl: string | null
+    nameTr: string | null
+    descriptionTr: string | null
+    cityTr: string | null
+    addressTr: string | null
+    introAudioUrlTr: string | null
+    nameAz: string | null
+    descriptionAz: string | null
+    cityAz: string | null
+    addressAz: string | null
+    introAudioUrlAz: string | null
+    nameHy: string | null
+    descriptionHy: string | null
+    cityHy: string | null
+    addressHy: string | null
+    introAudioUrlHy: string | null
+    nameHe: string | null
+    descriptionHe: string | null
+    cityHe: string | null
+    addressHe: string | null
+    introAudioUrlHe: string | null
+    nameAr: string | null
+    descriptionAr: string | null
+    cityAr: string | null
+    addressAr: string | null
+    introAudioUrlAr: string | null
+    nameKo: string | null
+    descriptionKo: string | null
+    cityKo: string | null
+    addressKo: string | null
+    introAudioUrlKo: string | null
+    nameJa: string | null
+    descriptionJa: string | null
+    cityJa: string | null
+    addressJa: string | null
+    introAudioUrlJa: string | null
+    nameZh: string | null
+    descriptionZh: string | null
+    cityZh: string | null
+    addressZh: string | null
+    introAudioUrlZh: string | null
     slug: string
     coverImage: string | null
     introAudioUrl: string | null
@@ -21859,6 +22244,61 @@ export namespace Prisma {
     descriptionUk?: boolean
     cityUk?: boolean
     addressUk?: boolean
+    nameEs?: boolean
+    descriptionEs?: boolean
+    cityEs?: boolean
+    addressEs?: boolean
+    introAudioUrlEs?: boolean
+    nameIt?: boolean
+    descriptionIt?: boolean
+    cityIt?: boolean
+    addressIt?: boolean
+    introAudioUrlIt?: boolean
+    namePl?: boolean
+    descriptionPl?: boolean
+    cityPl?: boolean
+    addressPl?: boolean
+    introAudioUrlPl?: boolean
+    nameTr?: boolean
+    descriptionTr?: boolean
+    cityTr?: boolean
+    addressTr?: boolean
+    introAudioUrlTr?: boolean
+    nameAz?: boolean
+    descriptionAz?: boolean
+    cityAz?: boolean
+    addressAz?: boolean
+    introAudioUrlAz?: boolean
+    nameHy?: boolean
+    descriptionHy?: boolean
+    cityHy?: boolean
+    addressHy?: boolean
+    introAudioUrlHy?: boolean
+    nameHe?: boolean
+    descriptionHe?: boolean
+    cityHe?: boolean
+    addressHe?: boolean
+    introAudioUrlHe?: boolean
+    nameAr?: boolean
+    descriptionAr?: boolean
+    cityAr?: boolean
+    addressAr?: boolean
+    introAudioUrlAr?: boolean
+    nameKo?: boolean
+    descriptionKo?: boolean
+    cityKo?: boolean
+    addressKo?: boolean
+    introAudioUrlKo?: boolean
+    nameJa?: boolean
+    descriptionJa?: boolean
+    cityJa?: boolean
+    addressJa?: boolean
+    introAudioUrlJa?: boolean
+    nameZh?: boolean
+    descriptionZh?: boolean
+    cityZh?: boolean
+    addressZh?: boolean
+    introAudioUrlZh?: boolean
     slug?: boolean
     coverImage?: boolean
     introAudioUrl?: boolean
@@ -21917,6 +22357,61 @@ export namespace Prisma {
     descriptionUk?: boolean
     cityUk?: boolean
     addressUk?: boolean
+    nameEs?: boolean
+    descriptionEs?: boolean
+    cityEs?: boolean
+    addressEs?: boolean
+    introAudioUrlEs?: boolean
+    nameIt?: boolean
+    descriptionIt?: boolean
+    cityIt?: boolean
+    addressIt?: boolean
+    introAudioUrlIt?: boolean
+    namePl?: boolean
+    descriptionPl?: boolean
+    cityPl?: boolean
+    addressPl?: boolean
+    introAudioUrlPl?: boolean
+    nameTr?: boolean
+    descriptionTr?: boolean
+    cityTr?: boolean
+    addressTr?: boolean
+    introAudioUrlTr?: boolean
+    nameAz?: boolean
+    descriptionAz?: boolean
+    cityAz?: boolean
+    addressAz?: boolean
+    introAudioUrlAz?: boolean
+    nameHy?: boolean
+    descriptionHy?: boolean
+    cityHy?: boolean
+    addressHy?: boolean
+    introAudioUrlHy?: boolean
+    nameHe?: boolean
+    descriptionHe?: boolean
+    cityHe?: boolean
+    addressHe?: boolean
+    introAudioUrlHe?: boolean
+    nameAr?: boolean
+    descriptionAr?: boolean
+    cityAr?: boolean
+    addressAr?: boolean
+    introAudioUrlAr?: boolean
+    nameKo?: boolean
+    descriptionKo?: boolean
+    cityKo?: boolean
+    addressKo?: boolean
+    introAudioUrlKo?: boolean
+    nameJa?: boolean
+    descriptionJa?: boolean
+    cityJa?: boolean
+    addressJa?: boolean
+    introAudioUrlJa?: boolean
+    nameZh?: boolean
+    descriptionZh?: boolean
+    cityZh?: boolean
+    addressZh?: boolean
+    introAudioUrlZh?: boolean
     slug?: boolean
     coverImage?: boolean
     introAudioUrl?: boolean
@@ -21972,6 +22467,61 @@ export namespace Prisma {
     descriptionUk?: boolean
     cityUk?: boolean
     addressUk?: boolean
+    nameEs?: boolean
+    descriptionEs?: boolean
+    cityEs?: boolean
+    addressEs?: boolean
+    introAudioUrlEs?: boolean
+    nameIt?: boolean
+    descriptionIt?: boolean
+    cityIt?: boolean
+    addressIt?: boolean
+    introAudioUrlIt?: boolean
+    namePl?: boolean
+    descriptionPl?: boolean
+    cityPl?: boolean
+    addressPl?: boolean
+    introAudioUrlPl?: boolean
+    nameTr?: boolean
+    descriptionTr?: boolean
+    cityTr?: boolean
+    addressTr?: boolean
+    introAudioUrlTr?: boolean
+    nameAz?: boolean
+    descriptionAz?: boolean
+    cityAz?: boolean
+    addressAz?: boolean
+    introAudioUrlAz?: boolean
+    nameHy?: boolean
+    descriptionHy?: boolean
+    cityHy?: boolean
+    addressHy?: boolean
+    introAudioUrlHy?: boolean
+    nameHe?: boolean
+    descriptionHe?: boolean
+    cityHe?: boolean
+    addressHe?: boolean
+    introAudioUrlHe?: boolean
+    nameAr?: boolean
+    descriptionAr?: boolean
+    cityAr?: boolean
+    addressAr?: boolean
+    introAudioUrlAr?: boolean
+    nameKo?: boolean
+    descriptionKo?: boolean
+    cityKo?: boolean
+    addressKo?: boolean
+    introAudioUrlKo?: boolean
+    nameJa?: boolean
+    descriptionJa?: boolean
+    cityJa?: boolean
+    addressJa?: boolean
+    introAudioUrlJa?: boolean
+    nameZh?: boolean
+    descriptionZh?: boolean
+    cityZh?: boolean
+    addressZh?: boolean
+    introAudioUrlZh?: boolean
     slug?: boolean
     coverImage?: boolean
     introAudioUrl?: boolean
@@ -22040,6 +22590,61 @@ export namespace Prisma {
       descriptionUk: string | null
       cityUk: string | null
       addressUk: string | null
+      nameEs: string | null
+      descriptionEs: string | null
+      cityEs: string | null
+      addressEs: string | null
+      introAudioUrlEs: string | null
+      nameIt: string | null
+      descriptionIt: string | null
+      cityIt: string | null
+      addressIt: string | null
+      introAudioUrlIt: string | null
+      namePl: string | null
+      descriptionPl: string | null
+      cityPl: string | null
+      addressPl: string | null
+      introAudioUrlPl: string | null
+      nameTr: string | null
+      descriptionTr: string | null
+      cityTr: string | null
+      addressTr: string | null
+      introAudioUrlTr: string | null
+      nameAz: string | null
+      descriptionAz: string | null
+      cityAz: string | null
+      addressAz: string | null
+      introAudioUrlAz: string | null
+      nameHy: string | null
+      descriptionHy: string | null
+      cityHy: string | null
+      addressHy: string | null
+      introAudioUrlHy: string | null
+      nameHe: string | null
+      descriptionHe: string | null
+      cityHe: string | null
+      addressHe: string | null
+      introAudioUrlHe: string | null
+      nameAr: string | null
+      descriptionAr: string | null
+      cityAr: string | null
+      addressAr: string | null
+      introAudioUrlAr: string | null
+      nameKo: string | null
+      descriptionKo: string | null
+      cityKo: string | null
+      addressKo: string | null
+      introAudioUrlKo: string | null
+      nameJa: string | null
+      descriptionJa: string | null
+      cityJa: string | null
+      addressJa: string | null
+      introAudioUrlJa: string | null
+      nameZh: string | null
+      descriptionZh: string | null
+      cityZh: string | null
+      addressZh: string | null
+      introAudioUrlZh: string | null
       slug: string
       coverImage: string | null
       introAudioUrl: string | null
@@ -22487,6 +23092,61 @@ export namespace Prisma {
     readonly descriptionUk: FieldRef<"Museum", 'String'>
     readonly cityUk: FieldRef<"Museum", 'String'>
     readonly addressUk: FieldRef<"Museum", 'String'>
+    readonly nameEs: FieldRef<"Museum", 'String'>
+    readonly descriptionEs: FieldRef<"Museum", 'String'>
+    readonly cityEs: FieldRef<"Museum", 'String'>
+    readonly addressEs: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlEs: FieldRef<"Museum", 'String'>
+    readonly nameIt: FieldRef<"Museum", 'String'>
+    readonly descriptionIt: FieldRef<"Museum", 'String'>
+    readonly cityIt: FieldRef<"Museum", 'String'>
+    readonly addressIt: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlIt: FieldRef<"Museum", 'String'>
+    readonly namePl: FieldRef<"Museum", 'String'>
+    readonly descriptionPl: FieldRef<"Museum", 'String'>
+    readonly cityPl: FieldRef<"Museum", 'String'>
+    readonly addressPl: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlPl: FieldRef<"Museum", 'String'>
+    readonly nameTr: FieldRef<"Museum", 'String'>
+    readonly descriptionTr: FieldRef<"Museum", 'String'>
+    readonly cityTr: FieldRef<"Museum", 'String'>
+    readonly addressTr: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlTr: FieldRef<"Museum", 'String'>
+    readonly nameAz: FieldRef<"Museum", 'String'>
+    readonly descriptionAz: FieldRef<"Museum", 'String'>
+    readonly cityAz: FieldRef<"Museum", 'String'>
+    readonly addressAz: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlAz: FieldRef<"Museum", 'String'>
+    readonly nameHy: FieldRef<"Museum", 'String'>
+    readonly descriptionHy: FieldRef<"Museum", 'String'>
+    readonly cityHy: FieldRef<"Museum", 'String'>
+    readonly addressHy: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlHy: FieldRef<"Museum", 'String'>
+    readonly nameHe: FieldRef<"Museum", 'String'>
+    readonly descriptionHe: FieldRef<"Museum", 'String'>
+    readonly cityHe: FieldRef<"Museum", 'String'>
+    readonly addressHe: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlHe: FieldRef<"Museum", 'String'>
+    readonly nameAr: FieldRef<"Museum", 'String'>
+    readonly descriptionAr: FieldRef<"Museum", 'String'>
+    readonly cityAr: FieldRef<"Museum", 'String'>
+    readonly addressAr: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlAr: FieldRef<"Museum", 'String'>
+    readonly nameKo: FieldRef<"Museum", 'String'>
+    readonly descriptionKo: FieldRef<"Museum", 'String'>
+    readonly cityKo: FieldRef<"Museum", 'String'>
+    readonly addressKo: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlKo: FieldRef<"Museum", 'String'>
+    readonly nameJa: FieldRef<"Museum", 'String'>
+    readonly descriptionJa: FieldRef<"Museum", 'String'>
+    readonly cityJa: FieldRef<"Museum", 'String'>
+    readonly addressJa: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlJa: FieldRef<"Museum", 'String'>
+    readonly nameZh: FieldRef<"Museum", 'String'>
+    readonly descriptionZh: FieldRef<"Museum", 'String'>
+    readonly cityZh: FieldRef<"Museum", 'String'>
+    readonly addressZh: FieldRef<"Museum", 'String'>
+    readonly introAudioUrlZh: FieldRef<"Museum", 'String'>
     readonly slug: FieldRef<"Museum", 'String'>
     readonly coverImage: FieldRef<"Museum", 'String'>
     readonly introAudioUrl: FieldRef<"Museum", 'String'>
@@ -22919,6 +23579,32 @@ export namespace Prisma {
     descriptionEn: string | null
     descriptionRu: string | null
     descriptionUk: string | null
+    nameDe: string | null
+    nameFr: string | null
+    nameEs: string | null
+    nameIt: string | null
+    namePl: string | null
+    nameTr: string | null
+    nameAz: string | null
+    nameHy: string | null
+    nameHe: string | null
+    nameAr: string | null
+    nameKo: string | null
+    nameJa: string | null
+    nameZh: string | null
+    descriptionDe: string | null
+    descriptionFr: string | null
+    descriptionEs: string | null
+    descriptionIt: string | null
+    descriptionPl: string | null
+    descriptionTr: string | null
+    descriptionAz: string | null
+    descriptionHy: string | null
+    descriptionHe: string | null
+    descriptionAr: string | null
+    descriptionKo: string | null
+    descriptionJa: string | null
+    descriptionZh: string | null
     duration: number | null
     stopsCount: number | null
     isFree: boolean | null
@@ -22945,6 +23631,32 @@ export namespace Prisma {
     descriptionEn: string | null
     descriptionRu: string | null
     descriptionUk: string | null
+    nameDe: string | null
+    nameFr: string | null
+    nameEs: string | null
+    nameIt: string | null
+    namePl: string | null
+    nameTr: string | null
+    nameAz: string | null
+    nameHy: string | null
+    nameHe: string | null
+    nameAr: string | null
+    nameKo: string | null
+    nameJa: string | null
+    nameZh: string | null
+    descriptionDe: string | null
+    descriptionFr: string | null
+    descriptionEs: string | null
+    descriptionIt: string | null
+    descriptionPl: string | null
+    descriptionTr: string | null
+    descriptionAz: string | null
+    descriptionHy: string | null
+    descriptionHe: string | null
+    descriptionAr: string | null
+    descriptionKo: string | null
+    descriptionJa: string | null
+    descriptionZh: string | null
     duration: number | null
     stopsCount: number | null
     isFree: boolean | null
@@ -22971,6 +23683,32 @@ export namespace Prisma {
     descriptionEn: number
     descriptionRu: number
     descriptionUk: number
+    nameDe: number
+    nameFr: number
+    nameEs: number
+    nameIt: number
+    namePl: number
+    nameTr: number
+    nameAz: number
+    nameHy: number
+    nameHe: number
+    nameAr: number
+    nameKo: number
+    nameJa: number
+    nameZh: number
+    descriptionDe: number
+    descriptionFr: number
+    descriptionEs: number
+    descriptionIt: number
+    descriptionPl: number
+    descriptionTr: number
+    descriptionAz: number
+    descriptionHy: number
+    descriptionHe: number
+    descriptionAr: number
+    descriptionKo: number
+    descriptionJa: number
+    descriptionZh: number
     duration: number
     stopsCount: number
     isFree: number
@@ -23013,6 +23751,32 @@ export namespace Prisma {
     descriptionEn?: true
     descriptionRu?: true
     descriptionUk?: true
+    nameDe?: true
+    nameFr?: true
+    nameEs?: true
+    nameIt?: true
+    namePl?: true
+    nameTr?: true
+    nameAz?: true
+    nameHy?: true
+    nameHe?: true
+    nameAr?: true
+    nameKo?: true
+    nameJa?: true
+    nameZh?: true
+    descriptionDe?: true
+    descriptionFr?: true
+    descriptionEs?: true
+    descriptionIt?: true
+    descriptionPl?: true
+    descriptionTr?: true
+    descriptionAz?: true
+    descriptionHy?: true
+    descriptionHe?: true
+    descriptionAr?: true
+    descriptionKo?: true
+    descriptionJa?: true
+    descriptionZh?: true
     duration?: true
     stopsCount?: true
     isFree?: true
@@ -23039,6 +23803,32 @@ export namespace Prisma {
     descriptionEn?: true
     descriptionRu?: true
     descriptionUk?: true
+    nameDe?: true
+    nameFr?: true
+    nameEs?: true
+    nameIt?: true
+    namePl?: true
+    nameTr?: true
+    nameAz?: true
+    nameHy?: true
+    nameHe?: true
+    nameAr?: true
+    nameKo?: true
+    nameJa?: true
+    nameZh?: true
+    descriptionDe?: true
+    descriptionFr?: true
+    descriptionEs?: true
+    descriptionIt?: true
+    descriptionPl?: true
+    descriptionTr?: true
+    descriptionAz?: true
+    descriptionHy?: true
+    descriptionHe?: true
+    descriptionAr?: true
+    descriptionKo?: true
+    descriptionJa?: true
+    descriptionZh?: true
     duration?: true
     stopsCount?: true
     isFree?: true
@@ -23065,6 +23855,32 @@ export namespace Prisma {
     descriptionEn?: true
     descriptionRu?: true
     descriptionUk?: true
+    nameDe?: true
+    nameFr?: true
+    nameEs?: true
+    nameIt?: true
+    namePl?: true
+    nameTr?: true
+    nameAz?: true
+    nameHy?: true
+    nameHe?: true
+    nameAr?: true
+    nameKo?: true
+    nameJa?: true
+    nameZh?: true
+    descriptionDe?: true
+    descriptionFr?: true
+    descriptionEs?: true
+    descriptionIt?: true
+    descriptionPl?: true
+    descriptionTr?: true
+    descriptionAz?: true
+    descriptionHy?: true
+    descriptionHe?: true
+    descriptionAr?: true
+    descriptionKo?: true
+    descriptionJa?: true
+    descriptionZh?: true
     duration?: true
     stopsCount?: true
     isFree?: true
@@ -23178,6 +23994,32 @@ export namespace Prisma {
     descriptionEn: string | null
     descriptionRu: string | null
     descriptionUk: string | null
+    nameDe: string | null
+    nameFr: string | null
+    nameEs: string | null
+    nameIt: string | null
+    namePl: string | null
+    nameTr: string | null
+    nameAz: string | null
+    nameHy: string | null
+    nameHe: string | null
+    nameAr: string | null
+    nameKo: string | null
+    nameJa: string | null
+    nameZh: string | null
+    descriptionDe: string | null
+    descriptionFr: string | null
+    descriptionEs: string | null
+    descriptionIt: string | null
+    descriptionPl: string | null
+    descriptionTr: string | null
+    descriptionAz: string | null
+    descriptionHy: string | null
+    descriptionHe: string | null
+    descriptionAr: string | null
+    descriptionKo: string | null
+    descriptionJa: string | null
+    descriptionZh: string | null
     duration: number | null
     stopsCount: number
     isFree: boolean
@@ -23223,6 +24065,32 @@ export namespace Prisma {
     descriptionEn?: boolean
     descriptionRu?: boolean
     descriptionUk?: boolean
+    nameDe?: boolean
+    nameFr?: boolean
+    nameEs?: boolean
+    nameIt?: boolean
+    namePl?: boolean
+    nameTr?: boolean
+    nameAz?: boolean
+    nameHy?: boolean
+    nameHe?: boolean
+    nameAr?: boolean
+    nameKo?: boolean
+    nameJa?: boolean
+    nameZh?: boolean
+    descriptionDe?: boolean
+    descriptionFr?: boolean
+    descriptionEs?: boolean
+    descriptionIt?: boolean
+    descriptionPl?: boolean
+    descriptionTr?: boolean
+    descriptionAz?: boolean
+    descriptionHy?: boolean
+    descriptionHe?: boolean
+    descriptionAr?: boolean
+    descriptionKo?: boolean
+    descriptionJa?: boolean
+    descriptionZh?: boolean
     duration?: boolean
     stopsCount?: boolean
     isFree?: boolean
@@ -23256,6 +24124,32 @@ export namespace Prisma {
     descriptionEn?: boolean
     descriptionRu?: boolean
     descriptionUk?: boolean
+    nameDe?: boolean
+    nameFr?: boolean
+    nameEs?: boolean
+    nameIt?: boolean
+    namePl?: boolean
+    nameTr?: boolean
+    nameAz?: boolean
+    nameHy?: boolean
+    nameHe?: boolean
+    nameAr?: boolean
+    nameKo?: boolean
+    nameJa?: boolean
+    nameZh?: boolean
+    descriptionDe?: boolean
+    descriptionFr?: boolean
+    descriptionEs?: boolean
+    descriptionIt?: boolean
+    descriptionPl?: boolean
+    descriptionTr?: boolean
+    descriptionAz?: boolean
+    descriptionHy?: boolean
+    descriptionHe?: boolean
+    descriptionAr?: boolean
+    descriptionKo?: boolean
+    descriptionJa?: boolean
+    descriptionZh?: boolean
     duration?: boolean
     stopsCount?: boolean
     isFree?: boolean
@@ -23283,6 +24177,32 @@ export namespace Prisma {
     descriptionEn?: boolean
     descriptionRu?: boolean
     descriptionUk?: boolean
+    nameDe?: boolean
+    nameFr?: boolean
+    nameEs?: boolean
+    nameIt?: boolean
+    namePl?: boolean
+    nameTr?: boolean
+    nameAz?: boolean
+    nameHy?: boolean
+    nameHe?: boolean
+    nameAr?: boolean
+    nameKo?: boolean
+    nameJa?: boolean
+    nameZh?: boolean
+    descriptionDe?: boolean
+    descriptionFr?: boolean
+    descriptionEs?: boolean
+    descriptionIt?: boolean
+    descriptionPl?: boolean
+    descriptionTr?: boolean
+    descriptionAz?: boolean
+    descriptionHy?: boolean
+    descriptionHe?: boolean
+    descriptionAr?: boolean
+    descriptionKo?: boolean
+    descriptionJa?: boolean
+    descriptionZh?: boolean
     duration?: boolean
     stopsCount?: boolean
     isFree?: boolean
@@ -23332,6 +24252,32 @@ export namespace Prisma {
       descriptionEn: string | null
       descriptionRu: string | null
       descriptionUk: string | null
+      nameDe: string | null
+      nameFr: string | null
+      nameEs: string | null
+      nameIt: string | null
+      namePl: string | null
+      nameTr: string | null
+      nameAz: string | null
+      nameHy: string | null
+      nameHe: string | null
+      nameAr: string | null
+      nameKo: string | null
+      nameJa: string | null
+      nameZh: string | null
+      descriptionDe: string | null
+      descriptionFr: string | null
+      descriptionEs: string | null
+      descriptionIt: string | null
+      descriptionPl: string | null
+      descriptionTr: string | null
+      descriptionAz: string | null
+      descriptionHy: string | null
+      descriptionHe: string | null
+      descriptionAr: string | null
+      descriptionKo: string | null
+      descriptionJa: string | null
+      descriptionZh: string | null
       duration: number | null
       stopsCount: number
       isFree: boolean
@@ -23754,6 +24700,32 @@ export namespace Prisma {
     readonly descriptionEn: FieldRef<"Tour", 'String'>
     readonly descriptionRu: FieldRef<"Tour", 'String'>
     readonly descriptionUk: FieldRef<"Tour", 'String'>
+    readonly nameDe: FieldRef<"Tour", 'String'>
+    readonly nameFr: FieldRef<"Tour", 'String'>
+    readonly nameEs: FieldRef<"Tour", 'String'>
+    readonly nameIt: FieldRef<"Tour", 'String'>
+    readonly namePl: FieldRef<"Tour", 'String'>
+    readonly nameTr: FieldRef<"Tour", 'String'>
+    readonly nameAz: FieldRef<"Tour", 'String'>
+    readonly nameHy: FieldRef<"Tour", 'String'>
+    readonly nameHe: FieldRef<"Tour", 'String'>
+    readonly nameAr: FieldRef<"Tour", 'String'>
+    readonly nameKo: FieldRef<"Tour", 'String'>
+    readonly nameJa: FieldRef<"Tour", 'String'>
+    readonly nameZh: FieldRef<"Tour", 'String'>
+    readonly descriptionDe: FieldRef<"Tour", 'String'>
+    readonly descriptionFr: FieldRef<"Tour", 'String'>
+    readonly descriptionEs: FieldRef<"Tour", 'String'>
+    readonly descriptionIt: FieldRef<"Tour", 'String'>
+    readonly descriptionPl: FieldRef<"Tour", 'String'>
+    readonly descriptionTr: FieldRef<"Tour", 'String'>
+    readonly descriptionAz: FieldRef<"Tour", 'String'>
+    readonly descriptionHy: FieldRef<"Tour", 'String'>
+    readonly descriptionHe: FieldRef<"Tour", 'String'>
+    readonly descriptionAr: FieldRef<"Tour", 'String'>
+    readonly descriptionKo: FieldRef<"Tour", 'String'>
+    readonly descriptionJa: FieldRef<"Tour", 'String'>
+    readonly descriptionZh: FieldRef<"Tour", 'String'>
     readonly duration: FieldRef<"Tour", 'Int'>
     readonly stopsCount: FieldRef<"Tour", 'Int'>
     readonly isFree: FieldRef<"Tour", 'Boolean'>
@@ -24232,6 +25204,32 @@ export namespace Prisma {
     descriptionEn: string | null
     descriptionRu: string | null
     descriptionUk: string | null
+    nameDe: string | null
+    nameFr: string | null
+    nameEs: string | null
+    nameIt: string | null
+    namePl: string | null
+    nameTr: string | null
+    nameAz: string | null
+    nameHy: string | null
+    nameHe: string | null
+    nameAr: string | null
+    nameKo: string | null
+    nameJa: string | null
+    nameZh: string | null
+    descriptionDe: string | null
+    descriptionFr: string | null
+    descriptionEs: string | null
+    descriptionIt: string | null
+    descriptionPl: string | null
+    descriptionTr: string | null
+    descriptionAz: string | null
+    descriptionHy: string | null
+    descriptionHe: string | null
+    descriptionAr: string | null
+    descriptionKo: string | null
+    descriptionJa: string | null
+    descriptionZh: string | null
     floorNumber: number | null
     imageUrl: string | null
     orderIndex: number | null
@@ -24251,6 +25249,32 @@ export namespace Prisma {
     descriptionEn: string | null
     descriptionRu: string | null
     descriptionUk: string | null
+    nameDe: string | null
+    nameFr: string | null
+    nameEs: string | null
+    nameIt: string | null
+    namePl: string | null
+    nameTr: string | null
+    nameAz: string | null
+    nameHy: string | null
+    nameHe: string | null
+    nameAr: string | null
+    nameKo: string | null
+    nameJa: string | null
+    nameZh: string | null
+    descriptionDe: string | null
+    descriptionFr: string | null
+    descriptionEs: string | null
+    descriptionIt: string | null
+    descriptionPl: string | null
+    descriptionTr: string | null
+    descriptionAz: string | null
+    descriptionHy: string | null
+    descriptionHe: string | null
+    descriptionAr: string | null
+    descriptionKo: string | null
+    descriptionJa: string | null
+    descriptionZh: string | null
     floorNumber: number | null
     imageUrl: string | null
     orderIndex: number | null
@@ -24270,6 +25294,32 @@ export namespace Prisma {
     descriptionEn: number
     descriptionRu: number
     descriptionUk: number
+    nameDe: number
+    nameFr: number
+    nameEs: number
+    nameIt: number
+    namePl: number
+    nameTr: number
+    nameAz: number
+    nameHy: number
+    nameHe: number
+    nameAr: number
+    nameKo: number
+    nameJa: number
+    nameZh: number
+    descriptionDe: number
+    descriptionFr: number
+    descriptionEs: number
+    descriptionIt: number
+    descriptionPl: number
+    descriptionTr: number
+    descriptionAz: number
+    descriptionHy: number
+    descriptionHe: number
+    descriptionAr: number
+    descriptionKo: number
+    descriptionJa: number
+    descriptionZh: number
     floorNumber: number
     imageUrl: number
     orderIndex: number
@@ -24301,6 +25351,32 @@ export namespace Prisma {
     descriptionEn?: true
     descriptionRu?: true
     descriptionUk?: true
+    nameDe?: true
+    nameFr?: true
+    nameEs?: true
+    nameIt?: true
+    namePl?: true
+    nameTr?: true
+    nameAz?: true
+    nameHy?: true
+    nameHe?: true
+    nameAr?: true
+    nameKo?: true
+    nameJa?: true
+    nameZh?: true
+    descriptionDe?: true
+    descriptionFr?: true
+    descriptionEs?: true
+    descriptionIt?: true
+    descriptionPl?: true
+    descriptionTr?: true
+    descriptionAz?: true
+    descriptionHy?: true
+    descriptionHe?: true
+    descriptionAr?: true
+    descriptionKo?: true
+    descriptionJa?: true
+    descriptionZh?: true
     floorNumber?: true
     imageUrl?: true
     orderIndex?: true
@@ -24320,6 +25396,32 @@ export namespace Prisma {
     descriptionEn?: true
     descriptionRu?: true
     descriptionUk?: true
+    nameDe?: true
+    nameFr?: true
+    nameEs?: true
+    nameIt?: true
+    namePl?: true
+    nameTr?: true
+    nameAz?: true
+    nameHy?: true
+    nameHe?: true
+    nameAr?: true
+    nameKo?: true
+    nameJa?: true
+    nameZh?: true
+    descriptionDe?: true
+    descriptionFr?: true
+    descriptionEs?: true
+    descriptionIt?: true
+    descriptionPl?: true
+    descriptionTr?: true
+    descriptionAz?: true
+    descriptionHy?: true
+    descriptionHe?: true
+    descriptionAr?: true
+    descriptionKo?: true
+    descriptionJa?: true
+    descriptionZh?: true
     floorNumber?: true
     imageUrl?: true
     orderIndex?: true
@@ -24339,6 +25441,32 @@ export namespace Prisma {
     descriptionEn?: true
     descriptionRu?: true
     descriptionUk?: true
+    nameDe?: true
+    nameFr?: true
+    nameEs?: true
+    nameIt?: true
+    namePl?: true
+    nameTr?: true
+    nameAz?: true
+    nameHy?: true
+    nameHe?: true
+    nameAr?: true
+    nameKo?: true
+    nameJa?: true
+    nameZh?: true
+    descriptionDe?: true
+    descriptionFr?: true
+    descriptionEs?: true
+    descriptionIt?: true
+    descriptionPl?: true
+    descriptionTr?: true
+    descriptionAz?: true
+    descriptionHy?: true
+    descriptionHe?: true
+    descriptionAr?: true
+    descriptionKo?: true
+    descriptionJa?: true
+    descriptionZh?: true
     floorNumber?: true
     imageUrl?: true
     orderIndex?: true
@@ -24445,6 +25573,32 @@ export namespace Prisma {
     descriptionEn: string | null
     descriptionRu: string | null
     descriptionUk: string | null
+    nameDe: string | null
+    nameFr: string | null
+    nameEs: string | null
+    nameIt: string | null
+    namePl: string | null
+    nameTr: string | null
+    nameAz: string | null
+    nameHy: string | null
+    nameHe: string | null
+    nameAr: string | null
+    nameKo: string | null
+    nameJa: string | null
+    nameZh: string | null
+    descriptionDe: string | null
+    descriptionFr: string | null
+    descriptionEs: string | null
+    descriptionIt: string | null
+    descriptionPl: string | null
+    descriptionTr: string | null
+    descriptionAz: string | null
+    descriptionHy: string | null
+    descriptionHe: string | null
+    descriptionAr: string | null
+    descriptionKo: string | null
+    descriptionJa: string | null
+    descriptionZh: string | null
     floorNumber: number | null
     imageUrl: string | null
     orderIndex: number
@@ -24483,6 +25637,32 @@ export namespace Prisma {
     descriptionEn?: boolean
     descriptionRu?: boolean
     descriptionUk?: boolean
+    nameDe?: boolean
+    nameFr?: boolean
+    nameEs?: boolean
+    nameIt?: boolean
+    namePl?: boolean
+    nameTr?: boolean
+    nameAz?: boolean
+    nameHy?: boolean
+    nameHe?: boolean
+    nameAr?: boolean
+    nameKo?: boolean
+    nameJa?: boolean
+    nameZh?: boolean
+    descriptionDe?: boolean
+    descriptionFr?: boolean
+    descriptionEs?: boolean
+    descriptionIt?: boolean
+    descriptionPl?: boolean
+    descriptionTr?: boolean
+    descriptionAz?: boolean
+    descriptionHy?: boolean
+    descriptionHe?: boolean
+    descriptionAr?: boolean
+    descriptionKo?: boolean
+    descriptionJa?: boolean
+    descriptionZh?: boolean
     floorNumber?: boolean
     imageUrl?: boolean
     orderIndex?: boolean
@@ -24505,6 +25685,32 @@ export namespace Prisma {
     descriptionEn?: boolean
     descriptionRu?: boolean
     descriptionUk?: boolean
+    nameDe?: boolean
+    nameFr?: boolean
+    nameEs?: boolean
+    nameIt?: boolean
+    namePl?: boolean
+    nameTr?: boolean
+    nameAz?: boolean
+    nameHy?: boolean
+    nameHe?: boolean
+    nameAr?: boolean
+    nameKo?: boolean
+    nameJa?: boolean
+    nameZh?: boolean
+    descriptionDe?: boolean
+    descriptionFr?: boolean
+    descriptionEs?: boolean
+    descriptionIt?: boolean
+    descriptionPl?: boolean
+    descriptionTr?: boolean
+    descriptionAz?: boolean
+    descriptionHy?: boolean
+    descriptionHe?: boolean
+    descriptionAr?: boolean
+    descriptionKo?: boolean
+    descriptionJa?: boolean
+    descriptionZh?: boolean
     floorNumber?: boolean
     imageUrl?: boolean
     orderIndex?: boolean
@@ -24525,6 +25731,32 @@ export namespace Prisma {
     descriptionEn?: boolean
     descriptionRu?: boolean
     descriptionUk?: boolean
+    nameDe?: boolean
+    nameFr?: boolean
+    nameEs?: boolean
+    nameIt?: boolean
+    namePl?: boolean
+    nameTr?: boolean
+    nameAz?: boolean
+    nameHy?: boolean
+    nameHe?: boolean
+    nameAr?: boolean
+    nameKo?: boolean
+    nameJa?: boolean
+    nameZh?: boolean
+    descriptionDe?: boolean
+    descriptionFr?: boolean
+    descriptionEs?: boolean
+    descriptionIt?: boolean
+    descriptionPl?: boolean
+    descriptionTr?: boolean
+    descriptionAz?: boolean
+    descriptionHy?: boolean
+    descriptionHe?: boolean
+    descriptionAr?: boolean
+    descriptionKo?: boolean
+    descriptionJa?: boolean
+    descriptionZh?: boolean
     floorNumber?: boolean
     imageUrl?: boolean
     orderIndex?: boolean
@@ -24559,6 +25791,32 @@ export namespace Prisma {
       descriptionEn: string | null
       descriptionRu: string | null
       descriptionUk: string | null
+      nameDe: string | null
+      nameFr: string | null
+      nameEs: string | null
+      nameIt: string | null
+      namePl: string | null
+      nameTr: string | null
+      nameAz: string | null
+      nameHy: string | null
+      nameHe: string | null
+      nameAr: string | null
+      nameKo: string | null
+      nameJa: string | null
+      nameZh: string | null
+      descriptionDe: string | null
+      descriptionFr: string | null
+      descriptionEs: string | null
+      descriptionIt: string | null
+      descriptionPl: string | null
+      descriptionTr: string | null
+      descriptionAz: string | null
+      descriptionHy: string | null
+      descriptionHe: string | null
+      descriptionAr: string | null
+      descriptionKo: string | null
+      descriptionJa: string | null
+      descriptionZh: string | null
       floorNumber: number | null
       imageUrl: string | null
       orderIndex: number
@@ -24970,6 +26228,32 @@ export namespace Prisma {
     readonly descriptionEn: FieldRef<"Hall", 'String'>
     readonly descriptionRu: FieldRef<"Hall", 'String'>
     readonly descriptionUk: FieldRef<"Hall", 'String'>
+    readonly nameDe: FieldRef<"Hall", 'String'>
+    readonly nameFr: FieldRef<"Hall", 'String'>
+    readonly nameEs: FieldRef<"Hall", 'String'>
+    readonly nameIt: FieldRef<"Hall", 'String'>
+    readonly namePl: FieldRef<"Hall", 'String'>
+    readonly nameTr: FieldRef<"Hall", 'String'>
+    readonly nameAz: FieldRef<"Hall", 'String'>
+    readonly nameHy: FieldRef<"Hall", 'String'>
+    readonly nameHe: FieldRef<"Hall", 'String'>
+    readonly nameAr: FieldRef<"Hall", 'String'>
+    readonly nameKo: FieldRef<"Hall", 'String'>
+    readonly nameJa: FieldRef<"Hall", 'String'>
+    readonly nameZh: FieldRef<"Hall", 'String'>
+    readonly descriptionDe: FieldRef<"Hall", 'String'>
+    readonly descriptionFr: FieldRef<"Hall", 'String'>
+    readonly descriptionEs: FieldRef<"Hall", 'String'>
+    readonly descriptionIt: FieldRef<"Hall", 'String'>
+    readonly descriptionPl: FieldRef<"Hall", 'String'>
+    readonly descriptionTr: FieldRef<"Hall", 'String'>
+    readonly descriptionAz: FieldRef<"Hall", 'String'>
+    readonly descriptionHy: FieldRef<"Hall", 'String'>
+    readonly descriptionHe: FieldRef<"Hall", 'String'>
+    readonly descriptionAr: FieldRef<"Hall", 'String'>
+    readonly descriptionKo: FieldRef<"Hall", 'String'>
+    readonly descriptionJa: FieldRef<"Hall", 'String'>
+    readonly descriptionZh: FieldRef<"Hall", 'String'>
     readonly floorNumber: FieldRef<"Hall", 'Int'>
     readonly imageUrl: FieldRef<"Hall", 'String'>
     readonly orderIndex: FieldRef<"Hall", 'Int'>
@@ -25370,6 +26654,58 @@ export namespace Prisma {
     audioUrlEn: string | null
     audioUrlRu: string | null
     audioUrlUk: string | null
+    titleDe: string | null
+    titleFr: string | null
+    titleEs: string | null
+    titleIt: string | null
+    titlePl: string | null
+    titleTr: string | null
+    titleAz: string | null
+    titleHy: string | null
+    titleHe: string | null
+    titleAr: string | null
+    titleKo: string | null
+    titleJa: string | null
+    titleZh: string | null
+    descriptionDe: string | null
+    descriptionFr: string | null
+    descriptionEs: string | null
+    descriptionIt: string | null
+    descriptionPl: string | null
+    descriptionTr: string | null
+    descriptionAz: string | null
+    descriptionHy: string | null
+    descriptionHe: string | null
+    descriptionAr: string | null
+    descriptionKo: string | null
+    descriptionJa: string | null
+    descriptionZh: string | null
+    transcriptDe: string | null
+    transcriptFr: string | null
+    transcriptEs: string | null
+    transcriptIt: string | null
+    transcriptPl: string | null
+    transcriptTr: string | null
+    transcriptAz: string | null
+    transcriptHy: string | null
+    transcriptHe: string | null
+    transcriptAr: string | null
+    transcriptKo: string | null
+    transcriptJa: string | null
+    transcriptZh: string | null
+    audioUrlDe: string | null
+    audioUrlFr: string | null
+    audioUrlEs: string | null
+    audioUrlIt: string | null
+    audioUrlPl: string | null
+    audioUrlTr: string | null
+    audioUrlAz: string | null
+    audioUrlHy: string | null
+    audioUrlHe: string | null
+    audioUrlAr: string | null
+    audioUrlKo: string | null
+    audioUrlJa: string | null
+    audioUrlZh: string | null
     audioDuration: number | null
     imageUrl: string | null
     qrCode: string | null
@@ -25399,6 +26735,58 @@ export namespace Prisma {
     audioUrlEn: string | null
     audioUrlRu: string | null
     audioUrlUk: string | null
+    titleDe: string | null
+    titleFr: string | null
+    titleEs: string | null
+    titleIt: string | null
+    titlePl: string | null
+    titleTr: string | null
+    titleAz: string | null
+    titleHy: string | null
+    titleHe: string | null
+    titleAr: string | null
+    titleKo: string | null
+    titleJa: string | null
+    titleZh: string | null
+    descriptionDe: string | null
+    descriptionFr: string | null
+    descriptionEs: string | null
+    descriptionIt: string | null
+    descriptionPl: string | null
+    descriptionTr: string | null
+    descriptionAz: string | null
+    descriptionHy: string | null
+    descriptionHe: string | null
+    descriptionAr: string | null
+    descriptionKo: string | null
+    descriptionJa: string | null
+    descriptionZh: string | null
+    transcriptDe: string | null
+    transcriptFr: string | null
+    transcriptEs: string | null
+    transcriptIt: string | null
+    transcriptPl: string | null
+    transcriptTr: string | null
+    transcriptAz: string | null
+    transcriptHy: string | null
+    transcriptHe: string | null
+    transcriptAr: string | null
+    transcriptKo: string | null
+    transcriptJa: string | null
+    transcriptZh: string | null
+    audioUrlDe: string | null
+    audioUrlFr: string | null
+    audioUrlEs: string | null
+    audioUrlIt: string | null
+    audioUrlPl: string | null
+    audioUrlTr: string | null
+    audioUrlAz: string | null
+    audioUrlHy: string | null
+    audioUrlHe: string | null
+    audioUrlAr: string | null
+    audioUrlKo: string | null
+    audioUrlJa: string | null
+    audioUrlZh: string | null
     audioDuration: number | null
     imageUrl: string | null
     qrCode: string | null
@@ -25428,6 +26816,58 @@ export namespace Prisma {
     audioUrlEn: number
     audioUrlRu: number
     audioUrlUk: number
+    titleDe: number
+    titleFr: number
+    titleEs: number
+    titleIt: number
+    titlePl: number
+    titleTr: number
+    titleAz: number
+    titleHy: number
+    titleHe: number
+    titleAr: number
+    titleKo: number
+    titleJa: number
+    titleZh: number
+    descriptionDe: number
+    descriptionFr: number
+    descriptionEs: number
+    descriptionIt: number
+    descriptionPl: number
+    descriptionTr: number
+    descriptionAz: number
+    descriptionHy: number
+    descriptionHe: number
+    descriptionAr: number
+    descriptionKo: number
+    descriptionJa: number
+    descriptionZh: number
+    transcriptDe: number
+    transcriptFr: number
+    transcriptEs: number
+    transcriptIt: number
+    transcriptPl: number
+    transcriptTr: number
+    transcriptAz: number
+    transcriptHy: number
+    transcriptHe: number
+    transcriptAr: number
+    transcriptKo: number
+    transcriptJa: number
+    transcriptZh: number
+    audioUrlDe: number
+    audioUrlFr: number
+    audioUrlEs: number
+    audioUrlIt: number
+    audioUrlPl: number
+    audioUrlTr: number
+    audioUrlAz: number
+    audioUrlHy: number
+    audioUrlHe: number
+    audioUrlAr: number
+    audioUrlKo: number
+    audioUrlJa: number
+    audioUrlZh: number
     audioDuration: number
     imageUrl: number
     images: number
@@ -25470,6 +26910,58 @@ export namespace Prisma {
     audioUrlEn?: true
     audioUrlRu?: true
     audioUrlUk?: true
+    titleDe?: true
+    titleFr?: true
+    titleEs?: true
+    titleIt?: true
+    titlePl?: true
+    titleTr?: true
+    titleAz?: true
+    titleHy?: true
+    titleHe?: true
+    titleAr?: true
+    titleKo?: true
+    titleJa?: true
+    titleZh?: true
+    descriptionDe?: true
+    descriptionFr?: true
+    descriptionEs?: true
+    descriptionIt?: true
+    descriptionPl?: true
+    descriptionTr?: true
+    descriptionAz?: true
+    descriptionHy?: true
+    descriptionHe?: true
+    descriptionAr?: true
+    descriptionKo?: true
+    descriptionJa?: true
+    descriptionZh?: true
+    transcriptDe?: true
+    transcriptFr?: true
+    transcriptEs?: true
+    transcriptIt?: true
+    transcriptPl?: true
+    transcriptTr?: true
+    transcriptAz?: true
+    transcriptHy?: true
+    transcriptHe?: true
+    transcriptAr?: true
+    transcriptKo?: true
+    transcriptJa?: true
+    transcriptZh?: true
+    audioUrlDe?: true
+    audioUrlFr?: true
+    audioUrlEs?: true
+    audioUrlIt?: true
+    audioUrlPl?: true
+    audioUrlTr?: true
+    audioUrlAz?: true
+    audioUrlHy?: true
+    audioUrlHe?: true
+    audioUrlAr?: true
+    audioUrlKo?: true
+    audioUrlJa?: true
+    audioUrlZh?: true
     audioDuration?: true
     imageUrl?: true
     qrCode?: true
@@ -25499,6 +26991,58 @@ export namespace Prisma {
     audioUrlEn?: true
     audioUrlRu?: true
     audioUrlUk?: true
+    titleDe?: true
+    titleFr?: true
+    titleEs?: true
+    titleIt?: true
+    titlePl?: true
+    titleTr?: true
+    titleAz?: true
+    titleHy?: true
+    titleHe?: true
+    titleAr?: true
+    titleKo?: true
+    titleJa?: true
+    titleZh?: true
+    descriptionDe?: true
+    descriptionFr?: true
+    descriptionEs?: true
+    descriptionIt?: true
+    descriptionPl?: true
+    descriptionTr?: true
+    descriptionAz?: true
+    descriptionHy?: true
+    descriptionHe?: true
+    descriptionAr?: true
+    descriptionKo?: true
+    descriptionJa?: true
+    descriptionZh?: true
+    transcriptDe?: true
+    transcriptFr?: true
+    transcriptEs?: true
+    transcriptIt?: true
+    transcriptPl?: true
+    transcriptTr?: true
+    transcriptAz?: true
+    transcriptHy?: true
+    transcriptHe?: true
+    transcriptAr?: true
+    transcriptKo?: true
+    transcriptJa?: true
+    transcriptZh?: true
+    audioUrlDe?: true
+    audioUrlFr?: true
+    audioUrlEs?: true
+    audioUrlIt?: true
+    audioUrlPl?: true
+    audioUrlTr?: true
+    audioUrlAz?: true
+    audioUrlHy?: true
+    audioUrlHe?: true
+    audioUrlAr?: true
+    audioUrlKo?: true
+    audioUrlJa?: true
+    audioUrlZh?: true
     audioDuration?: true
     imageUrl?: true
     qrCode?: true
@@ -25528,6 +27072,58 @@ export namespace Prisma {
     audioUrlEn?: true
     audioUrlRu?: true
     audioUrlUk?: true
+    titleDe?: true
+    titleFr?: true
+    titleEs?: true
+    titleIt?: true
+    titlePl?: true
+    titleTr?: true
+    titleAz?: true
+    titleHy?: true
+    titleHe?: true
+    titleAr?: true
+    titleKo?: true
+    titleJa?: true
+    titleZh?: true
+    descriptionDe?: true
+    descriptionFr?: true
+    descriptionEs?: true
+    descriptionIt?: true
+    descriptionPl?: true
+    descriptionTr?: true
+    descriptionAz?: true
+    descriptionHy?: true
+    descriptionHe?: true
+    descriptionAr?: true
+    descriptionKo?: true
+    descriptionJa?: true
+    descriptionZh?: true
+    transcriptDe?: true
+    transcriptFr?: true
+    transcriptEs?: true
+    transcriptIt?: true
+    transcriptPl?: true
+    transcriptTr?: true
+    transcriptAz?: true
+    transcriptHy?: true
+    transcriptHe?: true
+    transcriptAr?: true
+    transcriptKo?: true
+    transcriptJa?: true
+    transcriptZh?: true
+    audioUrlDe?: true
+    audioUrlFr?: true
+    audioUrlEs?: true
+    audioUrlIt?: true
+    audioUrlPl?: true
+    audioUrlTr?: true
+    audioUrlAz?: true
+    audioUrlHy?: true
+    audioUrlHe?: true
+    audioUrlAr?: true
+    audioUrlKo?: true
+    audioUrlJa?: true
+    audioUrlZh?: true
     audioDuration?: true
     imageUrl?: true
     images?: true
@@ -25645,6 +27241,58 @@ export namespace Prisma {
     audioUrlEn: string | null
     audioUrlRu: string | null
     audioUrlUk: string | null
+    titleDe: string | null
+    titleFr: string | null
+    titleEs: string | null
+    titleIt: string | null
+    titlePl: string | null
+    titleTr: string | null
+    titleAz: string | null
+    titleHy: string | null
+    titleHe: string | null
+    titleAr: string | null
+    titleKo: string | null
+    titleJa: string | null
+    titleZh: string | null
+    descriptionDe: string | null
+    descriptionFr: string | null
+    descriptionEs: string | null
+    descriptionIt: string | null
+    descriptionPl: string | null
+    descriptionTr: string | null
+    descriptionAz: string | null
+    descriptionHy: string | null
+    descriptionHe: string | null
+    descriptionAr: string | null
+    descriptionKo: string | null
+    descriptionJa: string | null
+    descriptionZh: string | null
+    transcriptDe: string | null
+    transcriptFr: string | null
+    transcriptEs: string | null
+    transcriptIt: string | null
+    transcriptPl: string | null
+    transcriptTr: string | null
+    transcriptAz: string | null
+    transcriptHy: string | null
+    transcriptHe: string | null
+    transcriptAr: string | null
+    transcriptKo: string | null
+    transcriptJa: string | null
+    transcriptZh: string | null
+    audioUrlDe: string | null
+    audioUrlFr: string | null
+    audioUrlEs: string | null
+    audioUrlIt: string | null
+    audioUrlPl: string | null
+    audioUrlTr: string | null
+    audioUrlAz: string | null
+    audioUrlHy: string | null
+    audioUrlHe: string | null
+    audioUrlAr: string | null
+    audioUrlKo: string | null
+    audioUrlJa: string | null
+    audioUrlZh: string | null
     audioDuration: number | null
     imageUrl: string | null
     images: string[]
@@ -25694,6 +27342,58 @@ export namespace Prisma {
     audioUrlEn?: boolean
     audioUrlRu?: boolean
     audioUrlUk?: boolean
+    titleDe?: boolean
+    titleFr?: boolean
+    titleEs?: boolean
+    titleIt?: boolean
+    titlePl?: boolean
+    titleTr?: boolean
+    titleAz?: boolean
+    titleHy?: boolean
+    titleHe?: boolean
+    titleAr?: boolean
+    titleKo?: boolean
+    titleJa?: boolean
+    titleZh?: boolean
+    descriptionDe?: boolean
+    descriptionFr?: boolean
+    descriptionEs?: boolean
+    descriptionIt?: boolean
+    descriptionPl?: boolean
+    descriptionTr?: boolean
+    descriptionAz?: boolean
+    descriptionHy?: boolean
+    descriptionHe?: boolean
+    descriptionAr?: boolean
+    descriptionKo?: boolean
+    descriptionJa?: boolean
+    descriptionZh?: boolean
+    transcriptDe?: boolean
+    transcriptFr?: boolean
+    transcriptEs?: boolean
+    transcriptIt?: boolean
+    transcriptPl?: boolean
+    transcriptTr?: boolean
+    transcriptAz?: boolean
+    transcriptHy?: boolean
+    transcriptHe?: boolean
+    transcriptAr?: boolean
+    transcriptKo?: boolean
+    transcriptJa?: boolean
+    transcriptZh?: boolean
+    audioUrlDe?: boolean
+    audioUrlFr?: boolean
+    audioUrlEs?: boolean
+    audioUrlIt?: boolean
+    audioUrlPl?: boolean
+    audioUrlTr?: boolean
+    audioUrlAz?: boolean
+    audioUrlHy?: boolean
+    audioUrlHe?: boolean
+    audioUrlAr?: boolean
+    audioUrlKo?: boolean
+    audioUrlJa?: boolean
+    audioUrlZh?: boolean
     audioDuration?: boolean
     imageUrl?: boolean
     images?: boolean
@@ -25726,6 +27426,58 @@ export namespace Prisma {
     audioUrlEn?: boolean
     audioUrlRu?: boolean
     audioUrlUk?: boolean
+    titleDe?: boolean
+    titleFr?: boolean
+    titleEs?: boolean
+    titleIt?: boolean
+    titlePl?: boolean
+    titleTr?: boolean
+    titleAz?: boolean
+    titleHy?: boolean
+    titleHe?: boolean
+    titleAr?: boolean
+    titleKo?: boolean
+    titleJa?: boolean
+    titleZh?: boolean
+    descriptionDe?: boolean
+    descriptionFr?: boolean
+    descriptionEs?: boolean
+    descriptionIt?: boolean
+    descriptionPl?: boolean
+    descriptionTr?: boolean
+    descriptionAz?: boolean
+    descriptionHy?: boolean
+    descriptionHe?: boolean
+    descriptionAr?: boolean
+    descriptionKo?: boolean
+    descriptionJa?: boolean
+    descriptionZh?: boolean
+    transcriptDe?: boolean
+    transcriptFr?: boolean
+    transcriptEs?: boolean
+    transcriptIt?: boolean
+    transcriptPl?: boolean
+    transcriptTr?: boolean
+    transcriptAz?: boolean
+    transcriptHy?: boolean
+    transcriptHe?: boolean
+    transcriptAr?: boolean
+    transcriptKo?: boolean
+    transcriptJa?: boolean
+    transcriptZh?: boolean
+    audioUrlDe?: boolean
+    audioUrlFr?: boolean
+    audioUrlEs?: boolean
+    audioUrlIt?: boolean
+    audioUrlPl?: boolean
+    audioUrlTr?: boolean
+    audioUrlAz?: boolean
+    audioUrlHy?: boolean
+    audioUrlHe?: boolean
+    audioUrlAr?: boolean
+    audioUrlKo?: boolean
+    audioUrlJa?: boolean
+    audioUrlZh?: boolean
     audioDuration?: boolean
     imageUrl?: boolean
     images?: boolean
@@ -25758,6 +27510,58 @@ export namespace Prisma {
     audioUrlEn?: boolean
     audioUrlRu?: boolean
     audioUrlUk?: boolean
+    titleDe?: boolean
+    titleFr?: boolean
+    titleEs?: boolean
+    titleIt?: boolean
+    titlePl?: boolean
+    titleTr?: boolean
+    titleAz?: boolean
+    titleHy?: boolean
+    titleHe?: boolean
+    titleAr?: boolean
+    titleKo?: boolean
+    titleJa?: boolean
+    titleZh?: boolean
+    descriptionDe?: boolean
+    descriptionFr?: boolean
+    descriptionEs?: boolean
+    descriptionIt?: boolean
+    descriptionPl?: boolean
+    descriptionTr?: boolean
+    descriptionAz?: boolean
+    descriptionHy?: boolean
+    descriptionHe?: boolean
+    descriptionAr?: boolean
+    descriptionKo?: boolean
+    descriptionJa?: boolean
+    descriptionZh?: boolean
+    transcriptDe?: boolean
+    transcriptFr?: boolean
+    transcriptEs?: boolean
+    transcriptIt?: boolean
+    transcriptPl?: boolean
+    transcriptTr?: boolean
+    transcriptAz?: boolean
+    transcriptHy?: boolean
+    transcriptHe?: boolean
+    transcriptAr?: boolean
+    transcriptKo?: boolean
+    transcriptJa?: boolean
+    transcriptZh?: boolean
+    audioUrlDe?: boolean
+    audioUrlFr?: boolean
+    audioUrlEs?: boolean
+    audioUrlIt?: boolean
+    audioUrlPl?: boolean
+    audioUrlTr?: boolean
+    audioUrlAz?: boolean
+    audioUrlHy?: boolean
+    audioUrlHe?: boolean
+    audioUrlAr?: boolean
+    audioUrlKo?: boolean
+    audioUrlJa?: boolean
+    audioUrlZh?: boolean
     audioDuration?: boolean
     imageUrl?: boolean
     images?: boolean
@@ -25803,6 +27607,58 @@ export namespace Prisma {
       audioUrlEn: string | null
       audioUrlRu: string | null
       audioUrlUk: string | null
+      titleDe: string | null
+      titleFr: string | null
+      titleEs: string | null
+      titleIt: string | null
+      titlePl: string | null
+      titleTr: string | null
+      titleAz: string | null
+      titleHy: string | null
+      titleHe: string | null
+      titleAr: string | null
+      titleKo: string | null
+      titleJa: string | null
+      titleZh: string | null
+      descriptionDe: string | null
+      descriptionFr: string | null
+      descriptionEs: string | null
+      descriptionIt: string | null
+      descriptionPl: string | null
+      descriptionTr: string | null
+      descriptionAz: string | null
+      descriptionHy: string | null
+      descriptionHe: string | null
+      descriptionAr: string | null
+      descriptionKo: string | null
+      descriptionJa: string | null
+      descriptionZh: string | null
+      transcriptDe: string | null
+      transcriptFr: string | null
+      transcriptEs: string | null
+      transcriptIt: string | null
+      transcriptPl: string | null
+      transcriptTr: string | null
+      transcriptAz: string | null
+      transcriptHy: string | null
+      transcriptHe: string | null
+      transcriptAr: string | null
+      transcriptKo: string | null
+      transcriptJa: string | null
+      transcriptZh: string | null
+      audioUrlDe: string | null
+      audioUrlFr: string | null
+      audioUrlEs: string | null
+      audioUrlIt: string | null
+      audioUrlPl: string | null
+      audioUrlTr: string | null
+      audioUrlAz: string | null
+      audioUrlHy: string | null
+      audioUrlHe: string | null
+      audioUrlAr: string | null
+      audioUrlKo: string | null
+      audioUrlJa: string | null
+      audioUrlZh: string | null
       audioDuration: number | null
       imageUrl: string | null
       images: string[]
@@ -26225,6 +28081,58 @@ export namespace Prisma {
     readonly audioUrlEn: FieldRef<"TourStop", 'String'>
     readonly audioUrlRu: FieldRef<"TourStop", 'String'>
     readonly audioUrlUk: FieldRef<"TourStop", 'String'>
+    readonly titleDe: FieldRef<"TourStop", 'String'>
+    readonly titleFr: FieldRef<"TourStop", 'String'>
+    readonly titleEs: FieldRef<"TourStop", 'String'>
+    readonly titleIt: FieldRef<"TourStop", 'String'>
+    readonly titlePl: FieldRef<"TourStop", 'String'>
+    readonly titleTr: FieldRef<"TourStop", 'String'>
+    readonly titleAz: FieldRef<"TourStop", 'String'>
+    readonly titleHy: FieldRef<"TourStop", 'String'>
+    readonly titleHe: FieldRef<"TourStop", 'String'>
+    readonly titleAr: FieldRef<"TourStop", 'String'>
+    readonly titleKo: FieldRef<"TourStop", 'String'>
+    readonly titleJa: FieldRef<"TourStop", 'String'>
+    readonly titleZh: FieldRef<"TourStop", 'String'>
+    readonly descriptionDe: FieldRef<"TourStop", 'String'>
+    readonly descriptionFr: FieldRef<"TourStop", 'String'>
+    readonly descriptionEs: FieldRef<"TourStop", 'String'>
+    readonly descriptionIt: FieldRef<"TourStop", 'String'>
+    readonly descriptionPl: FieldRef<"TourStop", 'String'>
+    readonly descriptionTr: FieldRef<"TourStop", 'String'>
+    readonly descriptionAz: FieldRef<"TourStop", 'String'>
+    readonly descriptionHy: FieldRef<"TourStop", 'String'>
+    readonly descriptionHe: FieldRef<"TourStop", 'String'>
+    readonly descriptionAr: FieldRef<"TourStop", 'String'>
+    readonly descriptionKo: FieldRef<"TourStop", 'String'>
+    readonly descriptionJa: FieldRef<"TourStop", 'String'>
+    readonly descriptionZh: FieldRef<"TourStop", 'String'>
+    readonly transcriptDe: FieldRef<"TourStop", 'String'>
+    readonly transcriptFr: FieldRef<"TourStop", 'String'>
+    readonly transcriptEs: FieldRef<"TourStop", 'String'>
+    readonly transcriptIt: FieldRef<"TourStop", 'String'>
+    readonly transcriptPl: FieldRef<"TourStop", 'String'>
+    readonly transcriptTr: FieldRef<"TourStop", 'String'>
+    readonly transcriptAz: FieldRef<"TourStop", 'String'>
+    readonly transcriptHy: FieldRef<"TourStop", 'String'>
+    readonly transcriptHe: FieldRef<"TourStop", 'String'>
+    readonly transcriptAr: FieldRef<"TourStop", 'String'>
+    readonly transcriptKo: FieldRef<"TourStop", 'String'>
+    readonly transcriptJa: FieldRef<"TourStop", 'String'>
+    readonly transcriptZh: FieldRef<"TourStop", 'String'>
+    readonly audioUrlDe: FieldRef<"TourStop", 'String'>
+    readonly audioUrlFr: FieldRef<"TourStop", 'String'>
+    readonly audioUrlEs: FieldRef<"TourStop", 'String'>
+    readonly audioUrlIt: FieldRef<"TourStop", 'String'>
+    readonly audioUrlPl: FieldRef<"TourStop", 'String'>
+    readonly audioUrlTr: FieldRef<"TourStop", 'String'>
+    readonly audioUrlAz: FieldRef<"TourStop", 'String'>
+    readonly audioUrlHy: FieldRef<"TourStop", 'String'>
+    readonly audioUrlHe: FieldRef<"TourStop", 'String'>
+    readonly audioUrlAr: FieldRef<"TourStop", 'String'>
+    readonly audioUrlKo: FieldRef<"TourStop", 'String'>
+    readonly audioUrlJa: FieldRef<"TourStop", 'String'>
+    readonly audioUrlZh: FieldRef<"TourStop", 'String'>
     readonly audioDuration: FieldRef<"TourStop", 'Int'>
     readonly imageUrl: FieldRef<"TourStop", 'String'>
     readonly images: FieldRef<"TourStop", 'String[]'>
@@ -36143,6 +38051,61 @@ export namespace Prisma {
     descriptionUk: 'descriptionUk',
     cityUk: 'cityUk',
     addressUk: 'addressUk',
+    nameEs: 'nameEs',
+    descriptionEs: 'descriptionEs',
+    cityEs: 'cityEs',
+    addressEs: 'addressEs',
+    introAudioUrlEs: 'introAudioUrlEs',
+    nameIt: 'nameIt',
+    descriptionIt: 'descriptionIt',
+    cityIt: 'cityIt',
+    addressIt: 'addressIt',
+    introAudioUrlIt: 'introAudioUrlIt',
+    namePl: 'namePl',
+    descriptionPl: 'descriptionPl',
+    cityPl: 'cityPl',
+    addressPl: 'addressPl',
+    introAudioUrlPl: 'introAudioUrlPl',
+    nameTr: 'nameTr',
+    descriptionTr: 'descriptionTr',
+    cityTr: 'cityTr',
+    addressTr: 'addressTr',
+    introAudioUrlTr: 'introAudioUrlTr',
+    nameAz: 'nameAz',
+    descriptionAz: 'descriptionAz',
+    cityAz: 'cityAz',
+    addressAz: 'addressAz',
+    introAudioUrlAz: 'introAudioUrlAz',
+    nameHy: 'nameHy',
+    descriptionHy: 'descriptionHy',
+    cityHy: 'cityHy',
+    addressHy: 'addressHy',
+    introAudioUrlHy: 'introAudioUrlHy',
+    nameHe: 'nameHe',
+    descriptionHe: 'descriptionHe',
+    cityHe: 'cityHe',
+    addressHe: 'addressHe',
+    introAudioUrlHe: 'introAudioUrlHe',
+    nameAr: 'nameAr',
+    descriptionAr: 'descriptionAr',
+    cityAr: 'cityAr',
+    addressAr: 'addressAr',
+    introAudioUrlAr: 'introAudioUrlAr',
+    nameKo: 'nameKo',
+    descriptionKo: 'descriptionKo',
+    cityKo: 'cityKo',
+    addressKo: 'addressKo',
+    introAudioUrlKo: 'introAudioUrlKo',
+    nameJa: 'nameJa',
+    descriptionJa: 'descriptionJa',
+    cityJa: 'cityJa',
+    addressJa: 'addressJa',
+    introAudioUrlJa: 'introAudioUrlJa',
+    nameZh: 'nameZh',
+    descriptionZh: 'descriptionZh',
+    cityZh: 'cityZh',
+    addressZh: 'addressZh',
+    introAudioUrlZh: 'introAudioUrlZh',
     slug: 'slug',
     coverImage: 'coverImage',
     introAudioUrl: 'introAudioUrl',
@@ -36186,6 +38149,32 @@ export namespace Prisma {
     descriptionEn: 'descriptionEn',
     descriptionRu: 'descriptionRu',
     descriptionUk: 'descriptionUk',
+    nameDe: 'nameDe',
+    nameFr: 'nameFr',
+    nameEs: 'nameEs',
+    nameIt: 'nameIt',
+    namePl: 'namePl',
+    nameTr: 'nameTr',
+    nameAz: 'nameAz',
+    nameHy: 'nameHy',
+    nameHe: 'nameHe',
+    nameAr: 'nameAr',
+    nameKo: 'nameKo',
+    nameJa: 'nameJa',
+    nameZh: 'nameZh',
+    descriptionDe: 'descriptionDe',
+    descriptionFr: 'descriptionFr',
+    descriptionEs: 'descriptionEs',
+    descriptionIt: 'descriptionIt',
+    descriptionPl: 'descriptionPl',
+    descriptionTr: 'descriptionTr',
+    descriptionAz: 'descriptionAz',
+    descriptionHy: 'descriptionHy',
+    descriptionHe: 'descriptionHe',
+    descriptionAr: 'descriptionAr',
+    descriptionKo: 'descriptionKo',
+    descriptionJa: 'descriptionJa',
+    descriptionZh: 'descriptionZh',
     duration: 'duration',
     stopsCount: 'stopsCount',
     isFree: 'isFree',
@@ -36215,6 +38204,32 @@ export namespace Prisma {
     descriptionEn: 'descriptionEn',
     descriptionRu: 'descriptionRu',
     descriptionUk: 'descriptionUk',
+    nameDe: 'nameDe',
+    nameFr: 'nameFr',
+    nameEs: 'nameEs',
+    nameIt: 'nameIt',
+    namePl: 'namePl',
+    nameTr: 'nameTr',
+    nameAz: 'nameAz',
+    nameHy: 'nameHy',
+    nameHe: 'nameHe',
+    nameAr: 'nameAr',
+    nameKo: 'nameKo',
+    nameJa: 'nameJa',
+    nameZh: 'nameZh',
+    descriptionDe: 'descriptionDe',
+    descriptionFr: 'descriptionFr',
+    descriptionEs: 'descriptionEs',
+    descriptionIt: 'descriptionIt',
+    descriptionPl: 'descriptionPl',
+    descriptionTr: 'descriptionTr',
+    descriptionAz: 'descriptionAz',
+    descriptionHy: 'descriptionHy',
+    descriptionHe: 'descriptionHe',
+    descriptionAr: 'descriptionAr',
+    descriptionKo: 'descriptionKo',
+    descriptionJa: 'descriptionJa',
+    descriptionZh: 'descriptionZh',
     floorNumber: 'floorNumber',
     imageUrl: 'imageUrl',
     orderIndex: 'orderIndex',
@@ -36246,6 +38261,58 @@ export namespace Prisma {
     audioUrlEn: 'audioUrlEn',
     audioUrlRu: 'audioUrlRu',
     audioUrlUk: 'audioUrlUk',
+    titleDe: 'titleDe',
+    titleFr: 'titleFr',
+    titleEs: 'titleEs',
+    titleIt: 'titleIt',
+    titlePl: 'titlePl',
+    titleTr: 'titleTr',
+    titleAz: 'titleAz',
+    titleHy: 'titleHy',
+    titleHe: 'titleHe',
+    titleAr: 'titleAr',
+    titleKo: 'titleKo',
+    titleJa: 'titleJa',
+    titleZh: 'titleZh',
+    descriptionDe: 'descriptionDe',
+    descriptionFr: 'descriptionFr',
+    descriptionEs: 'descriptionEs',
+    descriptionIt: 'descriptionIt',
+    descriptionPl: 'descriptionPl',
+    descriptionTr: 'descriptionTr',
+    descriptionAz: 'descriptionAz',
+    descriptionHy: 'descriptionHy',
+    descriptionHe: 'descriptionHe',
+    descriptionAr: 'descriptionAr',
+    descriptionKo: 'descriptionKo',
+    descriptionJa: 'descriptionJa',
+    descriptionZh: 'descriptionZh',
+    transcriptDe: 'transcriptDe',
+    transcriptFr: 'transcriptFr',
+    transcriptEs: 'transcriptEs',
+    transcriptIt: 'transcriptIt',
+    transcriptPl: 'transcriptPl',
+    transcriptTr: 'transcriptTr',
+    transcriptAz: 'transcriptAz',
+    transcriptHy: 'transcriptHy',
+    transcriptHe: 'transcriptHe',
+    transcriptAr: 'transcriptAr',
+    transcriptKo: 'transcriptKo',
+    transcriptJa: 'transcriptJa',
+    transcriptZh: 'transcriptZh',
+    audioUrlDe: 'audioUrlDe',
+    audioUrlFr: 'audioUrlFr',
+    audioUrlEs: 'audioUrlEs',
+    audioUrlIt: 'audioUrlIt',
+    audioUrlPl: 'audioUrlPl',
+    audioUrlTr: 'audioUrlTr',
+    audioUrlAz: 'audioUrlAz',
+    audioUrlHy: 'audioUrlHy',
+    audioUrlHe: 'audioUrlHe',
+    audioUrlAr: 'audioUrlAr',
+    audioUrlKo: 'audioUrlKo',
+    audioUrlJa: 'audioUrlJa',
+    audioUrlZh: 'audioUrlZh',
     audioDuration: 'audioDuration',
     imageUrl: 'imageUrl',
     images: 'images',
@@ -38222,6 +40289,61 @@ export namespace Prisma {
     descriptionUk?: StringNullableFilter<"Museum"> | string | null
     cityUk?: StringNullableFilter<"Museum"> | string | null
     addressUk?: StringNullableFilter<"Museum"> | string | null
+    nameEs?: StringNullableFilter<"Museum"> | string | null
+    descriptionEs?: StringNullableFilter<"Museum"> | string | null
+    cityEs?: StringNullableFilter<"Museum"> | string | null
+    addressEs?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlEs?: StringNullableFilter<"Museum"> | string | null
+    nameIt?: StringNullableFilter<"Museum"> | string | null
+    descriptionIt?: StringNullableFilter<"Museum"> | string | null
+    cityIt?: StringNullableFilter<"Museum"> | string | null
+    addressIt?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlIt?: StringNullableFilter<"Museum"> | string | null
+    namePl?: StringNullableFilter<"Museum"> | string | null
+    descriptionPl?: StringNullableFilter<"Museum"> | string | null
+    cityPl?: StringNullableFilter<"Museum"> | string | null
+    addressPl?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlPl?: StringNullableFilter<"Museum"> | string | null
+    nameTr?: StringNullableFilter<"Museum"> | string | null
+    descriptionTr?: StringNullableFilter<"Museum"> | string | null
+    cityTr?: StringNullableFilter<"Museum"> | string | null
+    addressTr?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlTr?: StringNullableFilter<"Museum"> | string | null
+    nameAz?: StringNullableFilter<"Museum"> | string | null
+    descriptionAz?: StringNullableFilter<"Museum"> | string | null
+    cityAz?: StringNullableFilter<"Museum"> | string | null
+    addressAz?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlAz?: StringNullableFilter<"Museum"> | string | null
+    nameHy?: StringNullableFilter<"Museum"> | string | null
+    descriptionHy?: StringNullableFilter<"Museum"> | string | null
+    cityHy?: StringNullableFilter<"Museum"> | string | null
+    addressHy?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlHy?: StringNullableFilter<"Museum"> | string | null
+    nameHe?: StringNullableFilter<"Museum"> | string | null
+    descriptionHe?: StringNullableFilter<"Museum"> | string | null
+    cityHe?: StringNullableFilter<"Museum"> | string | null
+    addressHe?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlHe?: StringNullableFilter<"Museum"> | string | null
+    nameAr?: StringNullableFilter<"Museum"> | string | null
+    descriptionAr?: StringNullableFilter<"Museum"> | string | null
+    cityAr?: StringNullableFilter<"Museum"> | string | null
+    addressAr?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlAr?: StringNullableFilter<"Museum"> | string | null
+    nameKo?: StringNullableFilter<"Museum"> | string | null
+    descriptionKo?: StringNullableFilter<"Museum"> | string | null
+    cityKo?: StringNullableFilter<"Museum"> | string | null
+    addressKo?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlKo?: StringNullableFilter<"Museum"> | string | null
+    nameJa?: StringNullableFilter<"Museum"> | string | null
+    descriptionJa?: StringNullableFilter<"Museum"> | string | null
+    cityJa?: StringNullableFilter<"Museum"> | string | null
+    addressJa?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlJa?: StringNullableFilter<"Museum"> | string | null
+    nameZh?: StringNullableFilter<"Museum"> | string | null
+    descriptionZh?: StringNullableFilter<"Museum"> | string | null
+    cityZh?: StringNullableFilter<"Museum"> | string | null
+    addressZh?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlZh?: StringNullableFilter<"Museum"> | string | null
     slug?: StringFilter<"Museum"> | string
     coverImage?: StringNullableFilter<"Museum"> | string | null
     introAudioUrl?: StringNullableFilter<"Museum"> | string | null
@@ -38279,6 +40401,61 @@ export namespace Prisma {
     descriptionUk?: SortOrderInput | SortOrder
     cityUk?: SortOrderInput | SortOrder
     addressUk?: SortOrderInput | SortOrder
+    nameEs?: SortOrderInput | SortOrder
+    descriptionEs?: SortOrderInput | SortOrder
+    cityEs?: SortOrderInput | SortOrder
+    addressEs?: SortOrderInput | SortOrder
+    introAudioUrlEs?: SortOrderInput | SortOrder
+    nameIt?: SortOrderInput | SortOrder
+    descriptionIt?: SortOrderInput | SortOrder
+    cityIt?: SortOrderInput | SortOrder
+    addressIt?: SortOrderInput | SortOrder
+    introAudioUrlIt?: SortOrderInput | SortOrder
+    namePl?: SortOrderInput | SortOrder
+    descriptionPl?: SortOrderInput | SortOrder
+    cityPl?: SortOrderInput | SortOrder
+    addressPl?: SortOrderInput | SortOrder
+    introAudioUrlPl?: SortOrderInput | SortOrder
+    nameTr?: SortOrderInput | SortOrder
+    descriptionTr?: SortOrderInput | SortOrder
+    cityTr?: SortOrderInput | SortOrder
+    addressTr?: SortOrderInput | SortOrder
+    introAudioUrlTr?: SortOrderInput | SortOrder
+    nameAz?: SortOrderInput | SortOrder
+    descriptionAz?: SortOrderInput | SortOrder
+    cityAz?: SortOrderInput | SortOrder
+    addressAz?: SortOrderInput | SortOrder
+    introAudioUrlAz?: SortOrderInput | SortOrder
+    nameHy?: SortOrderInput | SortOrder
+    descriptionHy?: SortOrderInput | SortOrder
+    cityHy?: SortOrderInput | SortOrder
+    addressHy?: SortOrderInput | SortOrder
+    introAudioUrlHy?: SortOrderInput | SortOrder
+    nameHe?: SortOrderInput | SortOrder
+    descriptionHe?: SortOrderInput | SortOrder
+    cityHe?: SortOrderInput | SortOrder
+    addressHe?: SortOrderInput | SortOrder
+    introAudioUrlHe?: SortOrderInput | SortOrder
+    nameAr?: SortOrderInput | SortOrder
+    descriptionAr?: SortOrderInput | SortOrder
+    cityAr?: SortOrderInput | SortOrder
+    addressAr?: SortOrderInput | SortOrder
+    introAudioUrlAr?: SortOrderInput | SortOrder
+    nameKo?: SortOrderInput | SortOrder
+    descriptionKo?: SortOrderInput | SortOrder
+    cityKo?: SortOrderInput | SortOrder
+    addressKo?: SortOrderInput | SortOrder
+    introAudioUrlKo?: SortOrderInput | SortOrder
+    nameJa?: SortOrderInput | SortOrder
+    descriptionJa?: SortOrderInput | SortOrder
+    cityJa?: SortOrderInput | SortOrder
+    addressJa?: SortOrderInput | SortOrder
+    introAudioUrlJa?: SortOrderInput | SortOrder
+    nameZh?: SortOrderInput | SortOrder
+    descriptionZh?: SortOrderInput | SortOrder
+    cityZh?: SortOrderInput | SortOrder
+    addressZh?: SortOrderInput | SortOrder
+    introAudioUrlZh?: SortOrderInput | SortOrder
     slug?: SortOrder
     coverImage?: SortOrderInput | SortOrder
     introAudioUrl?: SortOrderInput | SortOrder
@@ -38340,6 +40517,61 @@ export namespace Prisma {
     descriptionUk?: StringNullableFilter<"Museum"> | string | null
     cityUk?: StringNullableFilter<"Museum"> | string | null
     addressUk?: StringNullableFilter<"Museum"> | string | null
+    nameEs?: StringNullableFilter<"Museum"> | string | null
+    descriptionEs?: StringNullableFilter<"Museum"> | string | null
+    cityEs?: StringNullableFilter<"Museum"> | string | null
+    addressEs?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlEs?: StringNullableFilter<"Museum"> | string | null
+    nameIt?: StringNullableFilter<"Museum"> | string | null
+    descriptionIt?: StringNullableFilter<"Museum"> | string | null
+    cityIt?: StringNullableFilter<"Museum"> | string | null
+    addressIt?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlIt?: StringNullableFilter<"Museum"> | string | null
+    namePl?: StringNullableFilter<"Museum"> | string | null
+    descriptionPl?: StringNullableFilter<"Museum"> | string | null
+    cityPl?: StringNullableFilter<"Museum"> | string | null
+    addressPl?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlPl?: StringNullableFilter<"Museum"> | string | null
+    nameTr?: StringNullableFilter<"Museum"> | string | null
+    descriptionTr?: StringNullableFilter<"Museum"> | string | null
+    cityTr?: StringNullableFilter<"Museum"> | string | null
+    addressTr?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlTr?: StringNullableFilter<"Museum"> | string | null
+    nameAz?: StringNullableFilter<"Museum"> | string | null
+    descriptionAz?: StringNullableFilter<"Museum"> | string | null
+    cityAz?: StringNullableFilter<"Museum"> | string | null
+    addressAz?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlAz?: StringNullableFilter<"Museum"> | string | null
+    nameHy?: StringNullableFilter<"Museum"> | string | null
+    descriptionHy?: StringNullableFilter<"Museum"> | string | null
+    cityHy?: StringNullableFilter<"Museum"> | string | null
+    addressHy?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlHy?: StringNullableFilter<"Museum"> | string | null
+    nameHe?: StringNullableFilter<"Museum"> | string | null
+    descriptionHe?: StringNullableFilter<"Museum"> | string | null
+    cityHe?: StringNullableFilter<"Museum"> | string | null
+    addressHe?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlHe?: StringNullableFilter<"Museum"> | string | null
+    nameAr?: StringNullableFilter<"Museum"> | string | null
+    descriptionAr?: StringNullableFilter<"Museum"> | string | null
+    cityAr?: StringNullableFilter<"Museum"> | string | null
+    addressAr?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlAr?: StringNullableFilter<"Museum"> | string | null
+    nameKo?: StringNullableFilter<"Museum"> | string | null
+    descriptionKo?: StringNullableFilter<"Museum"> | string | null
+    cityKo?: StringNullableFilter<"Museum"> | string | null
+    addressKo?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlKo?: StringNullableFilter<"Museum"> | string | null
+    nameJa?: StringNullableFilter<"Museum"> | string | null
+    descriptionJa?: StringNullableFilter<"Museum"> | string | null
+    cityJa?: StringNullableFilter<"Museum"> | string | null
+    addressJa?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlJa?: StringNullableFilter<"Museum"> | string | null
+    nameZh?: StringNullableFilter<"Museum"> | string | null
+    descriptionZh?: StringNullableFilter<"Museum"> | string | null
+    cityZh?: StringNullableFilter<"Museum"> | string | null
+    addressZh?: StringNullableFilter<"Museum"> | string | null
+    introAudioUrlZh?: StringNullableFilter<"Museum"> | string | null
     coverImage?: StringNullableFilter<"Museum"> | string | null
     introAudioUrl?: StringNullableFilter<"Museum"> | string | null
     introAudioUrlEn?: StringNullableFilter<"Museum"> | string | null
@@ -38396,6 +40628,61 @@ export namespace Prisma {
     descriptionUk?: SortOrderInput | SortOrder
     cityUk?: SortOrderInput | SortOrder
     addressUk?: SortOrderInput | SortOrder
+    nameEs?: SortOrderInput | SortOrder
+    descriptionEs?: SortOrderInput | SortOrder
+    cityEs?: SortOrderInput | SortOrder
+    addressEs?: SortOrderInput | SortOrder
+    introAudioUrlEs?: SortOrderInput | SortOrder
+    nameIt?: SortOrderInput | SortOrder
+    descriptionIt?: SortOrderInput | SortOrder
+    cityIt?: SortOrderInput | SortOrder
+    addressIt?: SortOrderInput | SortOrder
+    introAudioUrlIt?: SortOrderInput | SortOrder
+    namePl?: SortOrderInput | SortOrder
+    descriptionPl?: SortOrderInput | SortOrder
+    cityPl?: SortOrderInput | SortOrder
+    addressPl?: SortOrderInput | SortOrder
+    introAudioUrlPl?: SortOrderInput | SortOrder
+    nameTr?: SortOrderInput | SortOrder
+    descriptionTr?: SortOrderInput | SortOrder
+    cityTr?: SortOrderInput | SortOrder
+    addressTr?: SortOrderInput | SortOrder
+    introAudioUrlTr?: SortOrderInput | SortOrder
+    nameAz?: SortOrderInput | SortOrder
+    descriptionAz?: SortOrderInput | SortOrder
+    cityAz?: SortOrderInput | SortOrder
+    addressAz?: SortOrderInput | SortOrder
+    introAudioUrlAz?: SortOrderInput | SortOrder
+    nameHy?: SortOrderInput | SortOrder
+    descriptionHy?: SortOrderInput | SortOrder
+    cityHy?: SortOrderInput | SortOrder
+    addressHy?: SortOrderInput | SortOrder
+    introAudioUrlHy?: SortOrderInput | SortOrder
+    nameHe?: SortOrderInput | SortOrder
+    descriptionHe?: SortOrderInput | SortOrder
+    cityHe?: SortOrderInput | SortOrder
+    addressHe?: SortOrderInput | SortOrder
+    introAudioUrlHe?: SortOrderInput | SortOrder
+    nameAr?: SortOrderInput | SortOrder
+    descriptionAr?: SortOrderInput | SortOrder
+    cityAr?: SortOrderInput | SortOrder
+    addressAr?: SortOrderInput | SortOrder
+    introAudioUrlAr?: SortOrderInput | SortOrder
+    nameKo?: SortOrderInput | SortOrder
+    descriptionKo?: SortOrderInput | SortOrder
+    cityKo?: SortOrderInput | SortOrder
+    addressKo?: SortOrderInput | SortOrder
+    introAudioUrlKo?: SortOrderInput | SortOrder
+    nameJa?: SortOrderInput | SortOrder
+    descriptionJa?: SortOrderInput | SortOrder
+    cityJa?: SortOrderInput | SortOrder
+    addressJa?: SortOrderInput | SortOrder
+    introAudioUrlJa?: SortOrderInput | SortOrder
+    nameZh?: SortOrderInput | SortOrder
+    descriptionZh?: SortOrderInput | SortOrder
+    cityZh?: SortOrderInput | SortOrder
+    addressZh?: SortOrderInput | SortOrder
+    introAudioUrlZh?: SortOrderInput | SortOrder
     slug?: SortOrder
     coverImage?: SortOrderInput | SortOrder
     introAudioUrl?: SortOrderInput | SortOrder
@@ -38459,6 +40746,61 @@ export namespace Prisma {
     descriptionUk?: StringNullableWithAggregatesFilter<"Museum"> | string | null
     cityUk?: StringNullableWithAggregatesFilter<"Museum"> | string | null
     addressUk?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameEs?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionEs?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityEs?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressEs?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlEs?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameIt?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionIt?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityIt?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressIt?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlIt?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    namePl?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionPl?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityPl?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressPl?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlPl?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameTr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionTr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityTr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressTr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlTr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameAz?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionAz?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityAz?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressAz?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlAz?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameHy?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionHy?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityHy?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressHy?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlHy?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameHe?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionHe?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityHe?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressHe?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlHe?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameAr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionAr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityAr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressAr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlAr?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameKo?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionKo?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityKo?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressKo?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlKo?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameJa?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionJa?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityJa?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressJa?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlJa?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    nameZh?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    descriptionZh?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    cityZh?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    addressZh?: StringNullableWithAggregatesFilter<"Museum"> | string | null
+    introAudioUrlZh?: StringNullableWithAggregatesFilter<"Museum"> | string | null
     slug?: StringWithAggregatesFilter<"Museum"> | string
     coverImage?: StringNullableWithAggregatesFilter<"Museum"> | string | null
     introAudioUrl?: StringNullableWithAggregatesFilter<"Museum"> | string | null
@@ -38502,6 +40844,32 @@ export namespace Prisma {
     descriptionEn?: StringNullableFilter<"Tour"> | string | null
     descriptionRu?: StringNullableFilter<"Tour"> | string | null
     descriptionUk?: StringNullableFilter<"Tour"> | string | null
+    nameDe?: StringNullableFilter<"Tour"> | string | null
+    nameFr?: StringNullableFilter<"Tour"> | string | null
+    nameEs?: StringNullableFilter<"Tour"> | string | null
+    nameIt?: StringNullableFilter<"Tour"> | string | null
+    namePl?: StringNullableFilter<"Tour"> | string | null
+    nameTr?: StringNullableFilter<"Tour"> | string | null
+    nameAz?: StringNullableFilter<"Tour"> | string | null
+    nameHy?: StringNullableFilter<"Tour"> | string | null
+    nameHe?: StringNullableFilter<"Tour"> | string | null
+    nameAr?: StringNullableFilter<"Tour"> | string | null
+    nameKo?: StringNullableFilter<"Tour"> | string | null
+    nameJa?: StringNullableFilter<"Tour"> | string | null
+    nameZh?: StringNullableFilter<"Tour"> | string | null
+    descriptionDe?: StringNullableFilter<"Tour"> | string | null
+    descriptionFr?: StringNullableFilter<"Tour"> | string | null
+    descriptionEs?: StringNullableFilter<"Tour"> | string | null
+    descriptionIt?: StringNullableFilter<"Tour"> | string | null
+    descriptionPl?: StringNullableFilter<"Tour"> | string | null
+    descriptionTr?: StringNullableFilter<"Tour"> | string | null
+    descriptionAz?: StringNullableFilter<"Tour"> | string | null
+    descriptionHy?: StringNullableFilter<"Tour"> | string | null
+    descriptionHe?: StringNullableFilter<"Tour"> | string | null
+    descriptionAr?: StringNullableFilter<"Tour"> | string | null
+    descriptionKo?: StringNullableFilter<"Tour"> | string | null
+    descriptionJa?: StringNullableFilter<"Tour"> | string | null
+    descriptionZh?: StringNullableFilter<"Tour"> | string | null
     duration?: IntNullableFilter<"Tour"> | number | null
     stopsCount?: IntFilter<"Tour"> | number
     isFree?: BoolFilter<"Tour"> | boolean
@@ -38534,6 +40902,32 @@ export namespace Prisma {
     descriptionEn?: SortOrderInput | SortOrder
     descriptionRu?: SortOrderInput | SortOrder
     descriptionUk?: SortOrderInput | SortOrder
+    nameDe?: SortOrderInput | SortOrder
+    nameFr?: SortOrderInput | SortOrder
+    nameEs?: SortOrderInput | SortOrder
+    nameIt?: SortOrderInput | SortOrder
+    namePl?: SortOrderInput | SortOrder
+    nameTr?: SortOrderInput | SortOrder
+    nameAz?: SortOrderInput | SortOrder
+    nameHy?: SortOrderInput | SortOrder
+    nameHe?: SortOrderInput | SortOrder
+    nameAr?: SortOrderInput | SortOrder
+    nameKo?: SortOrderInput | SortOrder
+    nameJa?: SortOrderInput | SortOrder
+    nameZh?: SortOrderInput | SortOrder
+    descriptionDe?: SortOrderInput | SortOrder
+    descriptionFr?: SortOrderInput | SortOrder
+    descriptionEs?: SortOrderInput | SortOrder
+    descriptionIt?: SortOrderInput | SortOrder
+    descriptionPl?: SortOrderInput | SortOrder
+    descriptionTr?: SortOrderInput | SortOrder
+    descriptionAz?: SortOrderInput | SortOrder
+    descriptionHy?: SortOrderInput | SortOrder
+    descriptionHe?: SortOrderInput | SortOrder
+    descriptionAr?: SortOrderInput | SortOrder
+    descriptionKo?: SortOrderInput | SortOrder
+    descriptionJa?: SortOrderInput | SortOrder
+    descriptionZh?: SortOrderInput | SortOrder
     duration?: SortOrderInput | SortOrder
     stopsCount?: SortOrder
     isFree?: SortOrder
@@ -38569,6 +40963,32 @@ export namespace Prisma {
     descriptionEn?: StringNullableFilter<"Tour"> | string | null
     descriptionRu?: StringNullableFilter<"Tour"> | string | null
     descriptionUk?: StringNullableFilter<"Tour"> | string | null
+    nameDe?: StringNullableFilter<"Tour"> | string | null
+    nameFr?: StringNullableFilter<"Tour"> | string | null
+    nameEs?: StringNullableFilter<"Tour"> | string | null
+    nameIt?: StringNullableFilter<"Tour"> | string | null
+    namePl?: StringNullableFilter<"Tour"> | string | null
+    nameTr?: StringNullableFilter<"Tour"> | string | null
+    nameAz?: StringNullableFilter<"Tour"> | string | null
+    nameHy?: StringNullableFilter<"Tour"> | string | null
+    nameHe?: StringNullableFilter<"Tour"> | string | null
+    nameAr?: StringNullableFilter<"Tour"> | string | null
+    nameKo?: StringNullableFilter<"Tour"> | string | null
+    nameJa?: StringNullableFilter<"Tour"> | string | null
+    nameZh?: StringNullableFilter<"Tour"> | string | null
+    descriptionDe?: StringNullableFilter<"Tour"> | string | null
+    descriptionFr?: StringNullableFilter<"Tour"> | string | null
+    descriptionEs?: StringNullableFilter<"Tour"> | string | null
+    descriptionIt?: StringNullableFilter<"Tour"> | string | null
+    descriptionPl?: StringNullableFilter<"Tour"> | string | null
+    descriptionTr?: StringNullableFilter<"Tour"> | string | null
+    descriptionAz?: StringNullableFilter<"Tour"> | string | null
+    descriptionHy?: StringNullableFilter<"Tour"> | string | null
+    descriptionHe?: StringNullableFilter<"Tour"> | string | null
+    descriptionAr?: StringNullableFilter<"Tour"> | string | null
+    descriptionKo?: StringNullableFilter<"Tour"> | string | null
+    descriptionJa?: StringNullableFilter<"Tour"> | string | null
+    descriptionZh?: StringNullableFilter<"Tour"> | string | null
     duration?: IntNullableFilter<"Tour"> | number | null
     stopsCount?: IntFilter<"Tour"> | number
     isFree?: BoolFilter<"Tour"> | boolean
@@ -38601,6 +41021,32 @@ export namespace Prisma {
     descriptionEn?: SortOrderInput | SortOrder
     descriptionRu?: SortOrderInput | SortOrder
     descriptionUk?: SortOrderInput | SortOrder
+    nameDe?: SortOrderInput | SortOrder
+    nameFr?: SortOrderInput | SortOrder
+    nameEs?: SortOrderInput | SortOrder
+    nameIt?: SortOrderInput | SortOrder
+    namePl?: SortOrderInput | SortOrder
+    nameTr?: SortOrderInput | SortOrder
+    nameAz?: SortOrderInput | SortOrder
+    nameHy?: SortOrderInput | SortOrder
+    nameHe?: SortOrderInput | SortOrder
+    nameAr?: SortOrderInput | SortOrder
+    nameKo?: SortOrderInput | SortOrder
+    nameJa?: SortOrderInput | SortOrder
+    nameZh?: SortOrderInput | SortOrder
+    descriptionDe?: SortOrderInput | SortOrder
+    descriptionFr?: SortOrderInput | SortOrder
+    descriptionEs?: SortOrderInput | SortOrder
+    descriptionIt?: SortOrderInput | SortOrder
+    descriptionPl?: SortOrderInput | SortOrder
+    descriptionTr?: SortOrderInput | SortOrder
+    descriptionAz?: SortOrderInput | SortOrder
+    descriptionHy?: SortOrderInput | SortOrder
+    descriptionHe?: SortOrderInput | SortOrder
+    descriptionAr?: SortOrderInput | SortOrder
+    descriptionKo?: SortOrderInput | SortOrder
+    descriptionJa?: SortOrderInput | SortOrder
+    descriptionZh?: SortOrderInput | SortOrder
     duration?: SortOrderInput | SortOrder
     stopsCount?: SortOrder
     isFree?: SortOrder
@@ -38635,6 +41081,32 @@ export namespace Prisma {
     descriptionEn?: StringNullableWithAggregatesFilter<"Tour"> | string | null
     descriptionRu?: StringNullableWithAggregatesFilter<"Tour"> | string | null
     descriptionUk?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameDe?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameFr?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameEs?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameIt?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    namePl?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameTr?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameAz?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameHy?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameHe?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameAr?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameKo?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameJa?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    nameZh?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionDe?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionFr?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionEs?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionIt?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionPl?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionTr?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionAz?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionHy?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionHe?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionAr?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionKo?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionJa?: StringNullableWithAggregatesFilter<"Tour"> | string | null
+    descriptionZh?: StringNullableWithAggregatesFilter<"Tour"> | string | null
     duration?: IntNullableWithAggregatesFilter<"Tour"> | number | null
     stopsCount?: IntWithAggregatesFilter<"Tour"> | number
     isFree?: BoolWithAggregatesFilter<"Tour"> | boolean
@@ -38664,6 +41136,32 @@ export namespace Prisma {
     descriptionEn?: StringNullableFilter<"Hall"> | string | null
     descriptionRu?: StringNullableFilter<"Hall"> | string | null
     descriptionUk?: StringNullableFilter<"Hall"> | string | null
+    nameDe?: StringNullableFilter<"Hall"> | string | null
+    nameFr?: StringNullableFilter<"Hall"> | string | null
+    nameEs?: StringNullableFilter<"Hall"> | string | null
+    nameIt?: StringNullableFilter<"Hall"> | string | null
+    namePl?: StringNullableFilter<"Hall"> | string | null
+    nameTr?: StringNullableFilter<"Hall"> | string | null
+    nameAz?: StringNullableFilter<"Hall"> | string | null
+    nameHy?: StringNullableFilter<"Hall"> | string | null
+    nameHe?: StringNullableFilter<"Hall"> | string | null
+    nameAr?: StringNullableFilter<"Hall"> | string | null
+    nameKo?: StringNullableFilter<"Hall"> | string | null
+    nameJa?: StringNullableFilter<"Hall"> | string | null
+    nameZh?: StringNullableFilter<"Hall"> | string | null
+    descriptionDe?: StringNullableFilter<"Hall"> | string | null
+    descriptionFr?: StringNullableFilter<"Hall"> | string | null
+    descriptionEs?: StringNullableFilter<"Hall"> | string | null
+    descriptionIt?: StringNullableFilter<"Hall"> | string | null
+    descriptionPl?: StringNullableFilter<"Hall"> | string | null
+    descriptionTr?: StringNullableFilter<"Hall"> | string | null
+    descriptionAz?: StringNullableFilter<"Hall"> | string | null
+    descriptionHy?: StringNullableFilter<"Hall"> | string | null
+    descriptionHe?: StringNullableFilter<"Hall"> | string | null
+    descriptionAr?: StringNullableFilter<"Hall"> | string | null
+    descriptionKo?: StringNullableFilter<"Hall"> | string | null
+    descriptionJa?: StringNullableFilter<"Hall"> | string | null
+    descriptionZh?: StringNullableFilter<"Hall"> | string | null
     floorNumber?: IntNullableFilter<"Hall"> | number | null
     imageUrl?: StringNullableFilter<"Hall"> | string | null
     orderIndex?: IntFilter<"Hall"> | number
@@ -38685,6 +41183,32 @@ export namespace Prisma {
     descriptionEn?: SortOrderInput | SortOrder
     descriptionRu?: SortOrderInput | SortOrder
     descriptionUk?: SortOrderInput | SortOrder
+    nameDe?: SortOrderInput | SortOrder
+    nameFr?: SortOrderInput | SortOrder
+    nameEs?: SortOrderInput | SortOrder
+    nameIt?: SortOrderInput | SortOrder
+    namePl?: SortOrderInput | SortOrder
+    nameTr?: SortOrderInput | SortOrder
+    nameAz?: SortOrderInput | SortOrder
+    nameHy?: SortOrderInput | SortOrder
+    nameHe?: SortOrderInput | SortOrder
+    nameAr?: SortOrderInput | SortOrder
+    nameKo?: SortOrderInput | SortOrder
+    nameJa?: SortOrderInput | SortOrder
+    nameZh?: SortOrderInput | SortOrder
+    descriptionDe?: SortOrderInput | SortOrder
+    descriptionFr?: SortOrderInput | SortOrder
+    descriptionEs?: SortOrderInput | SortOrder
+    descriptionIt?: SortOrderInput | SortOrder
+    descriptionPl?: SortOrderInput | SortOrder
+    descriptionTr?: SortOrderInput | SortOrder
+    descriptionAz?: SortOrderInput | SortOrder
+    descriptionHy?: SortOrderInput | SortOrder
+    descriptionHe?: SortOrderInput | SortOrder
+    descriptionAr?: SortOrderInput | SortOrder
+    descriptionKo?: SortOrderInput | SortOrder
+    descriptionJa?: SortOrderInput | SortOrder
+    descriptionZh?: SortOrderInput | SortOrder
     floorNumber?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     orderIndex?: SortOrder
@@ -38709,6 +41233,32 @@ export namespace Prisma {
     descriptionEn?: StringNullableFilter<"Hall"> | string | null
     descriptionRu?: StringNullableFilter<"Hall"> | string | null
     descriptionUk?: StringNullableFilter<"Hall"> | string | null
+    nameDe?: StringNullableFilter<"Hall"> | string | null
+    nameFr?: StringNullableFilter<"Hall"> | string | null
+    nameEs?: StringNullableFilter<"Hall"> | string | null
+    nameIt?: StringNullableFilter<"Hall"> | string | null
+    namePl?: StringNullableFilter<"Hall"> | string | null
+    nameTr?: StringNullableFilter<"Hall"> | string | null
+    nameAz?: StringNullableFilter<"Hall"> | string | null
+    nameHy?: StringNullableFilter<"Hall"> | string | null
+    nameHe?: StringNullableFilter<"Hall"> | string | null
+    nameAr?: StringNullableFilter<"Hall"> | string | null
+    nameKo?: StringNullableFilter<"Hall"> | string | null
+    nameJa?: StringNullableFilter<"Hall"> | string | null
+    nameZh?: StringNullableFilter<"Hall"> | string | null
+    descriptionDe?: StringNullableFilter<"Hall"> | string | null
+    descriptionFr?: StringNullableFilter<"Hall"> | string | null
+    descriptionEs?: StringNullableFilter<"Hall"> | string | null
+    descriptionIt?: StringNullableFilter<"Hall"> | string | null
+    descriptionPl?: StringNullableFilter<"Hall"> | string | null
+    descriptionTr?: StringNullableFilter<"Hall"> | string | null
+    descriptionAz?: StringNullableFilter<"Hall"> | string | null
+    descriptionHy?: StringNullableFilter<"Hall"> | string | null
+    descriptionHe?: StringNullableFilter<"Hall"> | string | null
+    descriptionAr?: StringNullableFilter<"Hall"> | string | null
+    descriptionKo?: StringNullableFilter<"Hall"> | string | null
+    descriptionJa?: StringNullableFilter<"Hall"> | string | null
+    descriptionZh?: StringNullableFilter<"Hall"> | string | null
     floorNumber?: IntNullableFilter<"Hall"> | number | null
     imageUrl?: StringNullableFilter<"Hall"> | string | null
     orderIndex?: IntFilter<"Hall"> | number
@@ -38730,6 +41280,32 @@ export namespace Prisma {
     descriptionEn?: SortOrderInput | SortOrder
     descriptionRu?: SortOrderInput | SortOrder
     descriptionUk?: SortOrderInput | SortOrder
+    nameDe?: SortOrderInput | SortOrder
+    nameFr?: SortOrderInput | SortOrder
+    nameEs?: SortOrderInput | SortOrder
+    nameIt?: SortOrderInput | SortOrder
+    namePl?: SortOrderInput | SortOrder
+    nameTr?: SortOrderInput | SortOrder
+    nameAz?: SortOrderInput | SortOrder
+    nameHy?: SortOrderInput | SortOrder
+    nameHe?: SortOrderInput | SortOrder
+    nameAr?: SortOrderInput | SortOrder
+    nameKo?: SortOrderInput | SortOrder
+    nameJa?: SortOrderInput | SortOrder
+    nameZh?: SortOrderInput | SortOrder
+    descriptionDe?: SortOrderInput | SortOrder
+    descriptionFr?: SortOrderInput | SortOrder
+    descriptionEs?: SortOrderInput | SortOrder
+    descriptionIt?: SortOrderInput | SortOrder
+    descriptionPl?: SortOrderInput | SortOrder
+    descriptionTr?: SortOrderInput | SortOrder
+    descriptionAz?: SortOrderInput | SortOrder
+    descriptionHy?: SortOrderInput | SortOrder
+    descriptionHe?: SortOrderInput | SortOrder
+    descriptionAr?: SortOrderInput | SortOrder
+    descriptionKo?: SortOrderInput | SortOrder
+    descriptionJa?: SortOrderInput | SortOrder
+    descriptionZh?: SortOrderInput | SortOrder
     floorNumber?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     orderIndex?: SortOrder
@@ -38757,6 +41333,32 @@ export namespace Prisma {
     descriptionEn?: StringNullableWithAggregatesFilter<"Hall"> | string | null
     descriptionRu?: StringNullableWithAggregatesFilter<"Hall"> | string | null
     descriptionUk?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameDe?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameFr?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameEs?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameIt?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    namePl?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameTr?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameAz?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameHy?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameHe?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameAr?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameKo?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameJa?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    nameZh?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionDe?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionFr?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionEs?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionIt?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionPl?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionTr?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionAz?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionHy?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionHe?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionAr?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionKo?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionJa?: StringNullableWithAggregatesFilter<"Hall"> | string | null
+    descriptionZh?: StringNullableWithAggregatesFilter<"Hall"> | string | null
     floorNumber?: IntNullableWithAggregatesFilter<"Hall"> | number | null
     imageUrl?: StringNullableWithAggregatesFilter<"Hall"> | string | null
     orderIndex?: IntWithAggregatesFilter<"Hall"> | number
@@ -38788,6 +41390,58 @@ export namespace Prisma {
     audioUrlEn?: StringNullableFilter<"TourStop"> | string | null
     audioUrlRu?: StringNullableFilter<"TourStop"> | string | null
     audioUrlUk?: StringNullableFilter<"TourStop"> | string | null
+    titleDe?: StringNullableFilter<"TourStop"> | string | null
+    titleFr?: StringNullableFilter<"TourStop"> | string | null
+    titleEs?: StringNullableFilter<"TourStop"> | string | null
+    titleIt?: StringNullableFilter<"TourStop"> | string | null
+    titlePl?: StringNullableFilter<"TourStop"> | string | null
+    titleTr?: StringNullableFilter<"TourStop"> | string | null
+    titleAz?: StringNullableFilter<"TourStop"> | string | null
+    titleHy?: StringNullableFilter<"TourStop"> | string | null
+    titleHe?: StringNullableFilter<"TourStop"> | string | null
+    titleAr?: StringNullableFilter<"TourStop"> | string | null
+    titleKo?: StringNullableFilter<"TourStop"> | string | null
+    titleJa?: StringNullableFilter<"TourStop"> | string | null
+    titleZh?: StringNullableFilter<"TourStop"> | string | null
+    descriptionDe?: StringNullableFilter<"TourStop"> | string | null
+    descriptionFr?: StringNullableFilter<"TourStop"> | string | null
+    descriptionEs?: StringNullableFilter<"TourStop"> | string | null
+    descriptionIt?: StringNullableFilter<"TourStop"> | string | null
+    descriptionPl?: StringNullableFilter<"TourStop"> | string | null
+    descriptionTr?: StringNullableFilter<"TourStop"> | string | null
+    descriptionAz?: StringNullableFilter<"TourStop"> | string | null
+    descriptionHy?: StringNullableFilter<"TourStop"> | string | null
+    descriptionHe?: StringNullableFilter<"TourStop"> | string | null
+    descriptionAr?: StringNullableFilter<"TourStop"> | string | null
+    descriptionKo?: StringNullableFilter<"TourStop"> | string | null
+    descriptionJa?: StringNullableFilter<"TourStop"> | string | null
+    descriptionZh?: StringNullableFilter<"TourStop"> | string | null
+    transcriptDe?: StringNullableFilter<"TourStop"> | string | null
+    transcriptFr?: StringNullableFilter<"TourStop"> | string | null
+    transcriptEs?: StringNullableFilter<"TourStop"> | string | null
+    transcriptIt?: StringNullableFilter<"TourStop"> | string | null
+    transcriptPl?: StringNullableFilter<"TourStop"> | string | null
+    transcriptTr?: StringNullableFilter<"TourStop"> | string | null
+    transcriptAz?: StringNullableFilter<"TourStop"> | string | null
+    transcriptHy?: StringNullableFilter<"TourStop"> | string | null
+    transcriptHe?: StringNullableFilter<"TourStop"> | string | null
+    transcriptAr?: StringNullableFilter<"TourStop"> | string | null
+    transcriptKo?: StringNullableFilter<"TourStop"> | string | null
+    transcriptJa?: StringNullableFilter<"TourStop"> | string | null
+    transcriptZh?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlDe?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlFr?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlEs?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlIt?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlPl?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlTr?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlAz?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlHy?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlHe?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlAr?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlKo?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlJa?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlZh?: StringNullableFilter<"TourStop"> | string | null
     audioDuration?: IntNullableFilter<"TourStop"> | number | null
     imageUrl?: StringNullableFilter<"TourStop"> | string | null
     images?: StringNullableListFilter<"TourStop">
@@ -38820,6 +41474,58 @@ export namespace Prisma {
     audioUrlEn?: SortOrderInput | SortOrder
     audioUrlRu?: SortOrderInput | SortOrder
     audioUrlUk?: SortOrderInput | SortOrder
+    titleDe?: SortOrderInput | SortOrder
+    titleFr?: SortOrderInput | SortOrder
+    titleEs?: SortOrderInput | SortOrder
+    titleIt?: SortOrderInput | SortOrder
+    titlePl?: SortOrderInput | SortOrder
+    titleTr?: SortOrderInput | SortOrder
+    titleAz?: SortOrderInput | SortOrder
+    titleHy?: SortOrderInput | SortOrder
+    titleHe?: SortOrderInput | SortOrder
+    titleAr?: SortOrderInput | SortOrder
+    titleKo?: SortOrderInput | SortOrder
+    titleJa?: SortOrderInput | SortOrder
+    titleZh?: SortOrderInput | SortOrder
+    descriptionDe?: SortOrderInput | SortOrder
+    descriptionFr?: SortOrderInput | SortOrder
+    descriptionEs?: SortOrderInput | SortOrder
+    descriptionIt?: SortOrderInput | SortOrder
+    descriptionPl?: SortOrderInput | SortOrder
+    descriptionTr?: SortOrderInput | SortOrder
+    descriptionAz?: SortOrderInput | SortOrder
+    descriptionHy?: SortOrderInput | SortOrder
+    descriptionHe?: SortOrderInput | SortOrder
+    descriptionAr?: SortOrderInput | SortOrder
+    descriptionKo?: SortOrderInput | SortOrder
+    descriptionJa?: SortOrderInput | SortOrder
+    descriptionZh?: SortOrderInput | SortOrder
+    transcriptDe?: SortOrderInput | SortOrder
+    transcriptFr?: SortOrderInput | SortOrder
+    transcriptEs?: SortOrderInput | SortOrder
+    transcriptIt?: SortOrderInput | SortOrder
+    transcriptPl?: SortOrderInput | SortOrder
+    transcriptTr?: SortOrderInput | SortOrder
+    transcriptAz?: SortOrderInput | SortOrder
+    transcriptHy?: SortOrderInput | SortOrder
+    transcriptHe?: SortOrderInput | SortOrder
+    transcriptAr?: SortOrderInput | SortOrder
+    transcriptKo?: SortOrderInput | SortOrder
+    transcriptJa?: SortOrderInput | SortOrder
+    transcriptZh?: SortOrderInput | SortOrder
+    audioUrlDe?: SortOrderInput | SortOrder
+    audioUrlFr?: SortOrderInput | SortOrder
+    audioUrlEs?: SortOrderInput | SortOrder
+    audioUrlIt?: SortOrderInput | SortOrder
+    audioUrlPl?: SortOrderInput | SortOrder
+    audioUrlTr?: SortOrderInput | SortOrder
+    audioUrlAz?: SortOrderInput | SortOrder
+    audioUrlHy?: SortOrderInput | SortOrder
+    audioUrlHe?: SortOrderInput | SortOrder
+    audioUrlAr?: SortOrderInput | SortOrder
+    audioUrlKo?: SortOrderInput | SortOrder
+    audioUrlJa?: SortOrderInput | SortOrder
+    audioUrlZh?: SortOrderInput | SortOrder
     audioDuration?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     images?: SortOrder
@@ -38856,6 +41562,58 @@ export namespace Prisma {
     audioUrlEn?: StringNullableFilter<"TourStop"> | string | null
     audioUrlRu?: StringNullableFilter<"TourStop"> | string | null
     audioUrlUk?: StringNullableFilter<"TourStop"> | string | null
+    titleDe?: StringNullableFilter<"TourStop"> | string | null
+    titleFr?: StringNullableFilter<"TourStop"> | string | null
+    titleEs?: StringNullableFilter<"TourStop"> | string | null
+    titleIt?: StringNullableFilter<"TourStop"> | string | null
+    titlePl?: StringNullableFilter<"TourStop"> | string | null
+    titleTr?: StringNullableFilter<"TourStop"> | string | null
+    titleAz?: StringNullableFilter<"TourStop"> | string | null
+    titleHy?: StringNullableFilter<"TourStop"> | string | null
+    titleHe?: StringNullableFilter<"TourStop"> | string | null
+    titleAr?: StringNullableFilter<"TourStop"> | string | null
+    titleKo?: StringNullableFilter<"TourStop"> | string | null
+    titleJa?: StringNullableFilter<"TourStop"> | string | null
+    titleZh?: StringNullableFilter<"TourStop"> | string | null
+    descriptionDe?: StringNullableFilter<"TourStop"> | string | null
+    descriptionFr?: StringNullableFilter<"TourStop"> | string | null
+    descriptionEs?: StringNullableFilter<"TourStop"> | string | null
+    descriptionIt?: StringNullableFilter<"TourStop"> | string | null
+    descriptionPl?: StringNullableFilter<"TourStop"> | string | null
+    descriptionTr?: StringNullableFilter<"TourStop"> | string | null
+    descriptionAz?: StringNullableFilter<"TourStop"> | string | null
+    descriptionHy?: StringNullableFilter<"TourStop"> | string | null
+    descriptionHe?: StringNullableFilter<"TourStop"> | string | null
+    descriptionAr?: StringNullableFilter<"TourStop"> | string | null
+    descriptionKo?: StringNullableFilter<"TourStop"> | string | null
+    descriptionJa?: StringNullableFilter<"TourStop"> | string | null
+    descriptionZh?: StringNullableFilter<"TourStop"> | string | null
+    transcriptDe?: StringNullableFilter<"TourStop"> | string | null
+    transcriptFr?: StringNullableFilter<"TourStop"> | string | null
+    transcriptEs?: StringNullableFilter<"TourStop"> | string | null
+    transcriptIt?: StringNullableFilter<"TourStop"> | string | null
+    transcriptPl?: StringNullableFilter<"TourStop"> | string | null
+    transcriptTr?: StringNullableFilter<"TourStop"> | string | null
+    transcriptAz?: StringNullableFilter<"TourStop"> | string | null
+    transcriptHy?: StringNullableFilter<"TourStop"> | string | null
+    transcriptHe?: StringNullableFilter<"TourStop"> | string | null
+    transcriptAr?: StringNullableFilter<"TourStop"> | string | null
+    transcriptKo?: StringNullableFilter<"TourStop"> | string | null
+    transcriptJa?: StringNullableFilter<"TourStop"> | string | null
+    transcriptZh?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlDe?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlFr?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlEs?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlIt?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlPl?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlTr?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlAz?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlHy?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlHe?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlAr?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlKo?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlJa?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlZh?: StringNullableFilter<"TourStop"> | string | null
     audioDuration?: IntNullableFilter<"TourStop"> | number | null
     imageUrl?: StringNullableFilter<"TourStop"> | string | null
     images?: StringNullableListFilter<"TourStop">
@@ -38887,6 +41645,58 @@ export namespace Prisma {
     audioUrlEn?: SortOrderInput | SortOrder
     audioUrlRu?: SortOrderInput | SortOrder
     audioUrlUk?: SortOrderInput | SortOrder
+    titleDe?: SortOrderInput | SortOrder
+    titleFr?: SortOrderInput | SortOrder
+    titleEs?: SortOrderInput | SortOrder
+    titleIt?: SortOrderInput | SortOrder
+    titlePl?: SortOrderInput | SortOrder
+    titleTr?: SortOrderInput | SortOrder
+    titleAz?: SortOrderInput | SortOrder
+    titleHy?: SortOrderInput | SortOrder
+    titleHe?: SortOrderInput | SortOrder
+    titleAr?: SortOrderInput | SortOrder
+    titleKo?: SortOrderInput | SortOrder
+    titleJa?: SortOrderInput | SortOrder
+    titleZh?: SortOrderInput | SortOrder
+    descriptionDe?: SortOrderInput | SortOrder
+    descriptionFr?: SortOrderInput | SortOrder
+    descriptionEs?: SortOrderInput | SortOrder
+    descriptionIt?: SortOrderInput | SortOrder
+    descriptionPl?: SortOrderInput | SortOrder
+    descriptionTr?: SortOrderInput | SortOrder
+    descriptionAz?: SortOrderInput | SortOrder
+    descriptionHy?: SortOrderInput | SortOrder
+    descriptionHe?: SortOrderInput | SortOrder
+    descriptionAr?: SortOrderInput | SortOrder
+    descriptionKo?: SortOrderInput | SortOrder
+    descriptionJa?: SortOrderInput | SortOrder
+    descriptionZh?: SortOrderInput | SortOrder
+    transcriptDe?: SortOrderInput | SortOrder
+    transcriptFr?: SortOrderInput | SortOrder
+    transcriptEs?: SortOrderInput | SortOrder
+    transcriptIt?: SortOrderInput | SortOrder
+    transcriptPl?: SortOrderInput | SortOrder
+    transcriptTr?: SortOrderInput | SortOrder
+    transcriptAz?: SortOrderInput | SortOrder
+    transcriptHy?: SortOrderInput | SortOrder
+    transcriptHe?: SortOrderInput | SortOrder
+    transcriptAr?: SortOrderInput | SortOrder
+    transcriptKo?: SortOrderInput | SortOrder
+    transcriptJa?: SortOrderInput | SortOrder
+    transcriptZh?: SortOrderInput | SortOrder
+    audioUrlDe?: SortOrderInput | SortOrder
+    audioUrlFr?: SortOrderInput | SortOrder
+    audioUrlEs?: SortOrderInput | SortOrder
+    audioUrlIt?: SortOrderInput | SortOrder
+    audioUrlPl?: SortOrderInput | SortOrder
+    audioUrlTr?: SortOrderInput | SortOrder
+    audioUrlAz?: SortOrderInput | SortOrder
+    audioUrlHy?: SortOrderInput | SortOrder
+    audioUrlHe?: SortOrderInput | SortOrder
+    audioUrlAr?: SortOrderInput | SortOrder
+    audioUrlKo?: SortOrderInput | SortOrder
+    audioUrlJa?: SortOrderInput | SortOrder
+    audioUrlZh?: SortOrderInput | SortOrder
     audioDuration?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     images?: SortOrder
@@ -38925,6 +41735,58 @@ export namespace Prisma {
     audioUrlEn?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
     audioUrlRu?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
     audioUrlUk?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleDe?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleFr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleEs?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleIt?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titlePl?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleTr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleAz?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleHy?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleHe?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleAr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleKo?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleJa?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    titleZh?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionDe?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionFr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionEs?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionIt?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionPl?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionTr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionAz?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionHy?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionHe?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionAr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionKo?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionJa?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    descriptionZh?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptDe?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptFr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptEs?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptIt?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptPl?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptTr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptAz?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptHy?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptHe?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptAr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptKo?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptJa?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    transcriptZh?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlDe?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlFr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlEs?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlIt?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlPl?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlTr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlAz?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlHy?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlHe?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlAr?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlKo?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlJa?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
+    audioUrlZh?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
     audioDuration?: IntNullableWithAggregatesFilter<"TourStop"> | number | null
     imageUrl?: StringNullableWithAggregatesFilter<"TourStop"> | string | null
     images?: StringNullableListFilter<"TourStop">
@@ -41472,6 +44334,61 @@ export namespace Prisma {
     descriptionUk?: string | null
     cityUk?: string | null
     addressUk?: string | null
+    nameEs?: string | null
+    descriptionEs?: string | null
+    cityEs?: string | null
+    addressEs?: string | null
+    introAudioUrlEs?: string | null
+    nameIt?: string | null
+    descriptionIt?: string | null
+    cityIt?: string | null
+    addressIt?: string | null
+    introAudioUrlIt?: string | null
+    namePl?: string | null
+    descriptionPl?: string | null
+    cityPl?: string | null
+    addressPl?: string | null
+    introAudioUrlPl?: string | null
+    nameTr?: string | null
+    descriptionTr?: string | null
+    cityTr?: string | null
+    addressTr?: string | null
+    introAudioUrlTr?: string | null
+    nameAz?: string | null
+    descriptionAz?: string | null
+    cityAz?: string | null
+    addressAz?: string | null
+    introAudioUrlAz?: string | null
+    nameHy?: string | null
+    descriptionHy?: string | null
+    cityHy?: string | null
+    addressHy?: string | null
+    introAudioUrlHy?: string | null
+    nameHe?: string | null
+    descriptionHe?: string | null
+    cityHe?: string | null
+    addressHe?: string | null
+    introAudioUrlHe?: string | null
+    nameAr?: string | null
+    descriptionAr?: string | null
+    cityAr?: string | null
+    addressAr?: string | null
+    introAudioUrlAr?: string | null
+    nameKo?: string | null
+    descriptionKo?: string | null
+    cityKo?: string | null
+    addressKo?: string | null
+    introAudioUrlKo?: string | null
+    nameJa?: string | null
+    descriptionJa?: string | null
+    cityJa?: string | null
+    addressJa?: string | null
+    introAudioUrlJa?: string | null
+    nameZh?: string | null
+    descriptionZh?: string | null
+    cityZh?: string | null
+    addressZh?: string | null
+    introAudioUrlZh?: string | null
     slug: string
     coverImage?: string | null
     introAudioUrl?: string | null
@@ -41529,6 +44446,61 @@ export namespace Prisma {
     descriptionUk?: string | null
     cityUk?: string | null
     addressUk?: string | null
+    nameEs?: string | null
+    descriptionEs?: string | null
+    cityEs?: string | null
+    addressEs?: string | null
+    introAudioUrlEs?: string | null
+    nameIt?: string | null
+    descriptionIt?: string | null
+    cityIt?: string | null
+    addressIt?: string | null
+    introAudioUrlIt?: string | null
+    namePl?: string | null
+    descriptionPl?: string | null
+    cityPl?: string | null
+    addressPl?: string | null
+    introAudioUrlPl?: string | null
+    nameTr?: string | null
+    descriptionTr?: string | null
+    cityTr?: string | null
+    addressTr?: string | null
+    introAudioUrlTr?: string | null
+    nameAz?: string | null
+    descriptionAz?: string | null
+    cityAz?: string | null
+    addressAz?: string | null
+    introAudioUrlAz?: string | null
+    nameHy?: string | null
+    descriptionHy?: string | null
+    cityHy?: string | null
+    addressHy?: string | null
+    introAudioUrlHy?: string | null
+    nameHe?: string | null
+    descriptionHe?: string | null
+    cityHe?: string | null
+    addressHe?: string | null
+    introAudioUrlHe?: string | null
+    nameAr?: string | null
+    descriptionAr?: string | null
+    cityAr?: string | null
+    addressAr?: string | null
+    introAudioUrlAr?: string | null
+    nameKo?: string | null
+    descriptionKo?: string | null
+    cityKo?: string | null
+    addressKo?: string | null
+    introAudioUrlKo?: string | null
+    nameJa?: string | null
+    descriptionJa?: string | null
+    cityJa?: string | null
+    addressJa?: string | null
+    introAudioUrlJa?: string | null
+    nameZh?: string | null
+    descriptionZh?: string | null
+    cityZh?: string | null
+    addressZh?: string | null
+    introAudioUrlZh?: string | null
     slug: string
     coverImage?: string | null
     introAudioUrl?: string | null
@@ -41586,6 +44558,61 @@ export namespace Prisma {
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     cityUk?: NullableStringFieldUpdateOperationsInput | string | null
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    cityEs?: NullableStringFieldUpdateOperationsInput | string | null
+    addressEs?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    cityIt?: NullableStringFieldUpdateOperationsInput | string | null
+    addressIt?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    cityPl?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPl?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityTr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressTr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAz?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAz?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHy?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHy?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHe?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHe?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    cityKo?: NullableStringFieldUpdateOperationsInput | string | null
+    addressKo?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    cityJa?: NullableStringFieldUpdateOperationsInput | string | null
+    addressJa?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    cityZh?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZh?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41643,6 +44670,61 @@ export namespace Prisma {
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     cityUk?: NullableStringFieldUpdateOperationsInput | string | null
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    cityEs?: NullableStringFieldUpdateOperationsInput | string | null
+    addressEs?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    cityIt?: NullableStringFieldUpdateOperationsInput | string | null
+    addressIt?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    cityPl?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPl?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityTr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressTr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAz?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAz?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHy?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHy?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHe?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHe?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    cityKo?: NullableStringFieldUpdateOperationsInput | string | null
+    addressKo?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    cityJa?: NullableStringFieldUpdateOperationsInput | string | null
+    addressJa?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    cityZh?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZh?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41700,6 +44782,61 @@ export namespace Prisma {
     descriptionUk?: string | null
     cityUk?: string | null
     addressUk?: string | null
+    nameEs?: string | null
+    descriptionEs?: string | null
+    cityEs?: string | null
+    addressEs?: string | null
+    introAudioUrlEs?: string | null
+    nameIt?: string | null
+    descriptionIt?: string | null
+    cityIt?: string | null
+    addressIt?: string | null
+    introAudioUrlIt?: string | null
+    namePl?: string | null
+    descriptionPl?: string | null
+    cityPl?: string | null
+    addressPl?: string | null
+    introAudioUrlPl?: string | null
+    nameTr?: string | null
+    descriptionTr?: string | null
+    cityTr?: string | null
+    addressTr?: string | null
+    introAudioUrlTr?: string | null
+    nameAz?: string | null
+    descriptionAz?: string | null
+    cityAz?: string | null
+    addressAz?: string | null
+    introAudioUrlAz?: string | null
+    nameHy?: string | null
+    descriptionHy?: string | null
+    cityHy?: string | null
+    addressHy?: string | null
+    introAudioUrlHy?: string | null
+    nameHe?: string | null
+    descriptionHe?: string | null
+    cityHe?: string | null
+    addressHe?: string | null
+    introAudioUrlHe?: string | null
+    nameAr?: string | null
+    descriptionAr?: string | null
+    cityAr?: string | null
+    addressAr?: string | null
+    introAudioUrlAr?: string | null
+    nameKo?: string | null
+    descriptionKo?: string | null
+    cityKo?: string | null
+    addressKo?: string | null
+    introAudioUrlKo?: string | null
+    nameJa?: string | null
+    descriptionJa?: string | null
+    cityJa?: string | null
+    addressJa?: string | null
+    introAudioUrlJa?: string | null
+    nameZh?: string | null
+    descriptionZh?: string | null
+    cityZh?: string | null
+    addressZh?: string | null
+    introAudioUrlZh?: string | null
     slug: string
     coverImage?: string | null
     introAudioUrl?: string | null
@@ -41755,6 +44892,61 @@ export namespace Prisma {
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     cityUk?: NullableStringFieldUpdateOperationsInput | string | null
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    cityEs?: NullableStringFieldUpdateOperationsInput | string | null
+    addressEs?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    cityIt?: NullableStringFieldUpdateOperationsInput | string | null
+    addressIt?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    cityPl?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPl?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityTr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressTr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAz?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAz?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHy?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHy?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHe?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHe?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    cityKo?: NullableStringFieldUpdateOperationsInput | string | null
+    addressKo?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    cityJa?: NullableStringFieldUpdateOperationsInput | string | null
+    addressJa?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    cityZh?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZh?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41810,6 +45002,61 @@ export namespace Prisma {
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     cityUk?: NullableStringFieldUpdateOperationsInput | string | null
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    cityEs?: NullableStringFieldUpdateOperationsInput | string | null
+    addressEs?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    cityIt?: NullableStringFieldUpdateOperationsInput | string | null
+    addressIt?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    cityPl?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPl?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityTr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressTr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAz?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAz?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHy?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHy?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHe?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHe?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    cityKo?: NullableStringFieldUpdateOperationsInput | string | null
+    addressKo?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    cityJa?: NullableStringFieldUpdateOperationsInput | string | null
+    addressJa?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    cityZh?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZh?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41849,6 +45096,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -41881,6 +45154,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -41911,6 +45210,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -41943,6 +45268,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -41974,6 +45325,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -41999,6 +45376,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -42025,6 +45428,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -42050,6 +45479,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     floorNumber?: number | null
     imageUrl?: string | null
     orderIndex?: number
@@ -42071,6 +45526,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     floorNumber?: number | null
     imageUrl?: string | null
     orderIndex?: number
@@ -42090,6 +45571,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orderIndex?: IntFieldUpdateOperationsInput | number
@@ -42111,6 +45618,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orderIndex?: IntFieldUpdateOperationsInput | number
@@ -42131,6 +45664,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     floorNumber?: number | null
     imageUrl?: string | null
     orderIndex?: number
@@ -42149,6 +45708,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orderIndex?: IntFieldUpdateOperationsInput | number
@@ -42168,6 +45753,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orderIndex?: IntFieldUpdateOperationsInput | number
@@ -42194,6 +45805,58 @@ export namespace Prisma {
     audioUrlEn?: string | null
     audioUrlRu?: string | null
     audioUrlUk?: string | null
+    titleDe?: string | null
+    titleFr?: string | null
+    titleEs?: string | null
+    titleIt?: string | null
+    titlePl?: string | null
+    titleTr?: string | null
+    titleAz?: string | null
+    titleHy?: string | null
+    titleHe?: string | null
+    titleAr?: string | null
+    titleKo?: string | null
+    titleJa?: string | null
+    titleZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
+    transcriptDe?: string | null
+    transcriptFr?: string | null
+    transcriptEs?: string | null
+    transcriptIt?: string | null
+    transcriptPl?: string | null
+    transcriptTr?: string | null
+    transcriptAz?: string | null
+    transcriptHy?: string | null
+    transcriptHe?: string | null
+    transcriptAr?: string | null
+    transcriptKo?: string | null
+    transcriptJa?: string | null
+    transcriptZh?: string | null
+    audioUrlDe?: string | null
+    audioUrlFr?: string | null
+    audioUrlEs?: string | null
+    audioUrlIt?: string | null
+    audioUrlPl?: string | null
+    audioUrlTr?: string | null
+    audioUrlAz?: string | null
+    audioUrlHy?: string | null
+    audioUrlHe?: string | null
+    audioUrlAr?: string | null
+    audioUrlKo?: string | null
+    audioUrlJa?: string | null
+    audioUrlZh?: string | null
     audioDuration?: number | null
     imageUrl?: string | null
     images?: TourStopCreateimagesInput | string[]
@@ -42226,6 +45889,58 @@ export namespace Prisma {
     audioUrlEn?: string | null
     audioUrlRu?: string | null
     audioUrlUk?: string | null
+    titleDe?: string | null
+    titleFr?: string | null
+    titleEs?: string | null
+    titleIt?: string | null
+    titlePl?: string | null
+    titleTr?: string | null
+    titleAz?: string | null
+    titleHy?: string | null
+    titleHe?: string | null
+    titleAr?: string | null
+    titleKo?: string | null
+    titleJa?: string | null
+    titleZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
+    transcriptDe?: string | null
+    transcriptFr?: string | null
+    transcriptEs?: string | null
+    transcriptIt?: string | null
+    transcriptPl?: string | null
+    transcriptTr?: string | null
+    transcriptAz?: string | null
+    transcriptHy?: string | null
+    transcriptHe?: string | null
+    transcriptAr?: string | null
+    transcriptKo?: string | null
+    transcriptJa?: string | null
+    transcriptZh?: string | null
+    audioUrlDe?: string | null
+    audioUrlFr?: string | null
+    audioUrlEs?: string | null
+    audioUrlIt?: string | null
+    audioUrlPl?: string | null
+    audioUrlTr?: string | null
+    audioUrlAz?: string | null
+    audioUrlHy?: string | null
+    audioUrlHe?: string | null
+    audioUrlAr?: string | null
+    audioUrlKo?: string | null
+    audioUrlJa?: string | null
+    audioUrlZh?: string | null
     audioDuration?: number | null
     imageUrl?: string | null
     images?: TourStopCreateimagesInput | string[]
@@ -42254,6 +45969,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]
@@ -42286,6 +46053,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]
@@ -42316,6 +46135,58 @@ export namespace Prisma {
     audioUrlEn?: string | null
     audioUrlRu?: string | null
     audioUrlUk?: string | null
+    titleDe?: string | null
+    titleFr?: string | null
+    titleEs?: string | null
+    titleIt?: string | null
+    titlePl?: string | null
+    titleTr?: string | null
+    titleAz?: string | null
+    titleHy?: string | null
+    titleHe?: string | null
+    titleAr?: string | null
+    titleKo?: string | null
+    titleJa?: string | null
+    titleZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
+    transcriptDe?: string | null
+    transcriptFr?: string | null
+    transcriptEs?: string | null
+    transcriptIt?: string | null
+    transcriptPl?: string | null
+    transcriptTr?: string | null
+    transcriptAz?: string | null
+    transcriptHy?: string | null
+    transcriptHe?: string | null
+    transcriptAr?: string | null
+    transcriptKo?: string | null
+    transcriptJa?: string | null
+    transcriptZh?: string | null
+    audioUrlDe?: string | null
+    audioUrlFr?: string | null
+    audioUrlEs?: string | null
+    audioUrlIt?: string | null
+    audioUrlPl?: string | null
+    audioUrlTr?: string | null
+    audioUrlAz?: string | null
+    audioUrlHy?: string | null
+    audioUrlHe?: string | null
+    audioUrlAr?: string | null
+    audioUrlKo?: string | null
+    audioUrlJa?: string | null
+    audioUrlZh?: string | null
     audioDuration?: number | null
     imageUrl?: string | null
     images?: TourStopCreateimagesInput | string[]
@@ -42344,6 +46215,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]
@@ -42374,6 +46297,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]
@@ -44709,6 +48684,61 @@ export namespace Prisma {
     descriptionUk?: SortOrder
     cityUk?: SortOrder
     addressUk?: SortOrder
+    nameEs?: SortOrder
+    descriptionEs?: SortOrder
+    cityEs?: SortOrder
+    addressEs?: SortOrder
+    introAudioUrlEs?: SortOrder
+    nameIt?: SortOrder
+    descriptionIt?: SortOrder
+    cityIt?: SortOrder
+    addressIt?: SortOrder
+    introAudioUrlIt?: SortOrder
+    namePl?: SortOrder
+    descriptionPl?: SortOrder
+    cityPl?: SortOrder
+    addressPl?: SortOrder
+    introAudioUrlPl?: SortOrder
+    nameTr?: SortOrder
+    descriptionTr?: SortOrder
+    cityTr?: SortOrder
+    addressTr?: SortOrder
+    introAudioUrlTr?: SortOrder
+    nameAz?: SortOrder
+    descriptionAz?: SortOrder
+    cityAz?: SortOrder
+    addressAz?: SortOrder
+    introAudioUrlAz?: SortOrder
+    nameHy?: SortOrder
+    descriptionHy?: SortOrder
+    cityHy?: SortOrder
+    addressHy?: SortOrder
+    introAudioUrlHy?: SortOrder
+    nameHe?: SortOrder
+    descriptionHe?: SortOrder
+    cityHe?: SortOrder
+    addressHe?: SortOrder
+    introAudioUrlHe?: SortOrder
+    nameAr?: SortOrder
+    descriptionAr?: SortOrder
+    cityAr?: SortOrder
+    addressAr?: SortOrder
+    introAudioUrlAr?: SortOrder
+    nameKo?: SortOrder
+    descriptionKo?: SortOrder
+    cityKo?: SortOrder
+    addressKo?: SortOrder
+    introAudioUrlKo?: SortOrder
+    nameJa?: SortOrder
+    descriptionJa?: SortOrder
+    cityJa?: SortOrder
+    addressJa?: SortOrder
+    introAudioUrlJa?: SortOrder
+    nameZh?: SortOrder
+    descriptionZh?: SortOrder
+    cityZh?: SortOrder
+    addressZh?: SortOrder
+    introAudioUrlZh?: SortOrder
     slug?: SortOrder
     coverImage?: SortOrder
     introAudioUrl?: SortOrder
@@ -44771,6 +48801,61 @@ export namespace Prisma {
     descriptionUk?: SortOrder
     cityUk?: SortOrder
     addressUk?: SortOrder
+    nameEs?: SortOrder
+    descriptionEs?: SortOrder
+    cityEs?: SortOrder
+    addressEs?: SortOrder
+    introAudioUrlEs?: SortOrder
+    nameIt?: SortOrder
+    descriptionIt?: SortOrder
+    cityIt?: SortOrder
+    addressIt?: SortOrder
+    introAudioUrlIt?: SortOrder
+    namePl?: SortOrder
+    descriptionPl?: SortOrder
+    cityPl?: SortOrder
+    addressPl?: SortOrder
+    introAudioUrlPl?: SortOrder
+    nameTr?: SortOrder
+    descriptionTr?: SortOrder
+    cityTr?: SortOrder
+    addressTr?: SortOrder
+    introAudioUrlTr?: SortOrder
+    nameAz?: SortOrder
+    descriptionAz?: SortOrder
+    cityAz?: SortOrder
+    addressAz?: SortOrder
+    introAudioUrlAz?: SortOrder
+    nameHy?: SortOrder
+    descriptionHy?: SortOrder
+    cityHy?: SortOrder
+    addressHy?: SortOrder
+    introAudioUrlHy?: SortOrder
+    nameHe?: SortOrder
+    descriptionHe?: SortOrder
+    cityHe?: SortOrder
+    addressHe?: SortOrder
+    introAudioUrlHe?: SortOrder
+    nameAr?: SortOrder
+    descriptionAr?: SortOrder
+    cityAr?: SortOrder
+    addressAr?: SortOrder
+    introAudioUrlAr?: SortOrder
+    nameKo?: SortOrder
+    descriptionKo?: SortOrder
+    cityKo?: SortOrder
+    addressKo?: SortOrder
+    introAudioUrlKo?: SortOrder
+    nameJa?: SortOrder
+    descriptionJa?: SortOrder
+    cityJa?: SortOrder
+    addressJa?: SortOrder
+    introAudioUrlJa?: SortOrder
+    nameZh?: SortOrder
+    descriptionZh?: SortOrder
+    cityZh?: SortOrder
+    addressZh?: SortOrder
+    introAudioUrlZh?: SortOrder
     slug?: SortOrder
     coverImage?: SortOrder
     introAudioUrl?: SortOrder
@@ -44824,6 +48909,61 @@ export namespace Prisma {
     descriptionUk?: SortOrder
     cityUk?: SortOrder
     addressUk?: SortOrder
+    nameEs?: SortOrder
+    descriptionEs?: SortOrder
+    cityEs?: SortOrder
+    addressEs?: SortOrder
+    introAudioUrlEs?: SortOrder
+    nameIt?: SortOrder
+    descriptionIt?: SortOrder
+    cityIt?: SortOrder
+    addressIt?: SortOrder
+    introAudioUrlIt?: SortOrder
+    namePl?: SortOrder
+    descriptionPl?: SortOrder
+    cityPl?: SortOrder
+    addressPl?: SortOrder
+    introAudioUrlPl?: SortOrder
+    nameTr?: SortOrder
+    descriptionTr?: SortOrder
+    cityTr?: SortOrder
+    addressTr?: SortOrder
+    introAudioUrlTr?: SortOrder
+    nameAz?: SortOrder
+    descriptionAz?: SortOrder
+    cityAz?: SortOrder
+    addressAz?: SortOrder
+    introAudioUrlAz?: SortOrder
+    nameHy?: SortOrder
+    descriptionHy?: SortOrder
+    cityHy?: SortOrder
+    addressHy?: SortOrder
+    introAudioUrlHy?: SortOrder
+    nameHe?: SortOrder
+    descriptionHe?: SortOrder
+    cityHe?: SortOrder
+    addressHe?: SortOrder
+    introAudioUrlHe?: SortOrder
+    nameAr?: SortOrder
+    descriptionAr?: SortOrder
+    cityAr?: SortOrder
+    addressAr?: SortOrder
+    introAudioUrlAr?: SortOrder
+    nameKo?: SortOrder
+    descriptionKo?: SortOrder
+    cityKo?: SortOrder
+    addressKo?: SortOrder
+    introAudioUrlKo?: SortOrder
+    nameJa?: SortOrder
+    descriptionJa?: SortOrder
+    cityJa?: SortOrder
+    addressJa?: SortOrder
+    introAudioUrlJa?: SortOrder
+    nameZh?: SortOrder
+    descriptionZh?: SortOrder
+    cityZh?: SortOrder
+    addressZh?: SortOrder
+    introAudioUrlZh?: SortOrder
     slug?: SortOrder
     coverImage?: SortOrder
     introAudioUrl?: SortOrder
@@ -44930,6 +49070,32 @@ export namespace Prisma {
     descriptionEn?: SortOrder
     descriptionRu?: SortOrder
     descriptionUk?: SortOrder
+    nameDe?: SortOrder
+    nameFr?: SortOrder
+    nameEs?: SortOrder
+    nameIt?: SortOrder
+    namePl?: SortOrder
+    nameTr?: SortOrder
+    nameAz?: SortOrder
+    nameHy?: SortOrder
+    nameHe?: SortOrder
+    nameAr?: SortOrder
+    nameKo?: SortOrder
+    nameJa?: SortOrder
+    nameZh?: SortOrder
+    descriptionDe?: SortOrder
+    descriptionFr?: SortOrder
+    descriptionEs?: SortOrder
+    descriptionIt?: SortOrder
+    descriptionPl?: SortOrder
+    descriptionTr?: SortOrder
+    descriptionAz?: SortOrder
+    descriptionHy?: SortOrder
+    descriptionHe?: SortOrder
+    descriptionAr?: SortOrder
+    descriptionKo?: SortOrder
+    descriptionJa?: SortOrder
+    descriptionZh?: SortOrder
     duration?: SortOrder
     stopsCount?: SortOrder
     isFree?: SortOrder
@@ -44963,6 +49129,32 @@ export namespace Prisma {
     descriptionEn?: SortOrder
     descriptionRu?: SortOrder
     descriptionUk?: SortOrder
+    nameDe?: SortOrder
+    nameFr?: SortOrder
+    nameEs?: SortOrder
+    nameIt?: SortOrder
+    namePl?: SortOrder
+    nameTr?: SortOrder
+    nameAz?: SortOrder
+    nameHy?: SortOrder
+    nameHe?: SortOrder
+    nameAr?: SortOrder
+    nameKo?: SortOrder
+    nameJa?: SortOrder
+    nameZh?: SortOrder
+    descriptionDe?: SortOrder
+    descriptionFr?: SortOrder
+    descriptionEs?: SortOrder
+    descriptionIt?: SortOrder
+    descriptionPl?: SortOrder
+    descriptionTr?: SortOrder
+    descriptionAz?: SortOrder
+    descriptionHy?: SortOrder
+    descriptionHe?: SortOrder
+    descriptionAr?: SortOrder
+    descriptionKo?: SortOrder
+    descriptionJa?: SortOrder
+    descriptionZh?: SortOrder
     duration?: SortOrder
     stopsCount?: SortOrder
     isFree?: SortOrder
@@ -44989,6 +49181,32 @@ export namespace Prisma {
     descriptionEn?: SortOrder
     descriptionRu?: SortOrder
     descriptionUk?: SortOrder
+    nameDe?: SortOrder
+    nameFr?: SortOrder
+    nameEs?: SortOrder
+    nameIt?: SortOrder
+    namePl?: SortOrder
+    nameTr?: SortOrder
+    nameAz?: SortOrder
+    nameHy?: SortOrder
+    nameHe?: SortOrder
+    nameAr?: SortOrder
+    nameKo?: SortOrder
+    nameJa?: SortOrder
+    nameZh?: SortOrder
+    descriptionDe?: SortOrder
+    descriptionFr?: SortOrder
+    descriptionEs?: SortOrder
+    descriptionIt?: SortOrder
+    descriptionPl?: SortOrder
+    descriptionTr?: SortOrder
+    descriptionAz?: SortOrder
+    descriptionHy?: SortOrder
+    descriptionHe?: SortOrder
+    descriptionAr?: SortOrder
+    descriptionKo?: SortOrder
+    descriptionJa?: SortOrder
+    descriptionZh?: SortOrder
     duration?: SortOrder
     stopsCount?: SortOrder
     isFree?: SortOrder
@@ -45027,6 +49245,32 @@ export namespace Prisma {
     descriptionEn?: SortOrder
     descriptionRu?: SortOrder
     descriptionUk?: SortOrder
+    nameDe?: SortOrder
+    nameFr?: SortOrder
+    nameEs?: SortOrder
+    nameIt?: SortOrder
+    namePl?: SortOrder
+    nameTr?: SortOrder
+    nameAz?: SortOrder
+    nameHy?: SortOrder
+    nameHe?: SortOrder
+    nameAr?: SortOrder
+    nameKo?: SortOrder
+    nameJa?: SortOrder
+    nameZh?: SortOrder
+    descriptionDe?: SortOrder
+    descriptionFr?: SortOrder
+    descriptionEs?: SortOrder
+    descriptionIt?: SortOrder
+    descriptionPl?: SortOrder
+    descriptionTr?: SortOrder
+    descriptionAz?: SortOrder
+    descriptionHy?: SortOrder
+    descriptionHe?: SortOrder
+    descriptionAr?: SortOrder
+    descriptionKo?: SortOrder
+    descriptionJa?: SortOrder
+    descriptionZh?: SortOrder
     floorNumber?: SortOrder
     imageUrl?: SortOrder
     orderIndex?: SortOrder
@@ -45051,6 +49295,32 @@ export namespace Prisma {
     descriptionEn?: SortOrder
     descriptionRu?: SortOrder
     descriptionUk?: SortOrder
+    nameDe?: SortOrder
+    nameFr?: SortOrder
+    nameEs?: SortOrder
+    nameIt?: SortOrder
+    namePl?: SortOrder
+    nameTr?: SortOrder
+    nameAz?: SortOrder
+    nameHy?: SortOrder
+    nameHe?: SortOrder
+    nameAr?: SortOrder
+    nameKo?: SortOrder
+    nameJa?: SortOrder
+    nameZh?: SortOrder
+    descriptionDe?: SortOrder
+    descriptionFr?: SortOrder
+    descriptionEs?: SortOrder
+    descriptionIt?: SortOrder
+    descriptionPl?: SortOrder
+    descriptionTr?: SortOrder
+    descriptionAz?: SortOrder
+    descriptionHy?: SortOrder
+    descriptionHe?: SortOrder
+    descriptionAr?: SortOrder
+    descriptionKo?: SortOrder
+    descriptionJa?: SortOrder
+    descriptionZh?: SortOrder
     floorNumber?: SortOrder
     imageUrl?: SortOrder
     orderIndex?: SortOrder
@@ -45070,6 +49340,32 @@ export namespace Prisma {
     descriptionEn?: SortOrder
     descriptionRu?: SortOrder
     descriptionUk?: SortOrder
+    nameDe?: SortOrder
+    nameFr?: SortOrder
+    nameEs?: SortOrder
+    nameIt?: SortOrder
+    namePl?: SortOrder
+    nameTr?: SortOrder
+    nameAz?: SortOrder
+    nameHy?: SortOrder
+    nameHe?: SortOrder
+    nameAr?: SortOrder
+    nameKo?: SortOrder
+    nameJa?: SortOrder
+    nameZh?: SortOrder
+    descriptionDe?: SortOrder
+    descriptionFr?: SortOrder
+    descriptionEs?: SortOrder
+    descriptionIt?: SortOrder
+    descriptionPl?: SortOrder
+    descriptionTr?: SortOrder
+    descriptionAz?: SortOrder
+    descriptionHy?: SortOrder
+    descriptionHe?: SortOrder
+    descriptionAr?: SortOrder
+    descriptionKo?: SortOrder
+    descriptionJa?: SortOrder
+    descriptionZh?: SortOrder
     floorNumber?: SortOrder
     imageUrl?: SortOrder
     orderIndex?: SortOrder
@@ -45108,6 +49404,58 @@ export namespace Prisma {
     audioUrlEn?: SortOrder
     audioUrlRu?: SortOrder
     audioUrlUk?: SortOrder
+    titleDe?: SortOrder
+    titleFr?: SortOrder
+    titleEs?: SortOrder
+    titleIt?: SortOrder
+    titlePl?: SortOrder
+    titleTr?: SortOrder
+    titleAz?: SortOrder
+    titleHy?: SortOrder
+    titleHe?: SortOrder
+    titleAr?: SortOrder
+    titleKo?: SortOrder
+    titleJa?: SortOrder
+    titleZh?: SortOrder
+    descriptionDe?: SortOrder
+    descriptionFr?: SortOrder
+    descriptionEs?: SortOrder
+    descriptionIt?: SortOrder
+    descriptionPl?: SortOrder
+    descriptionTr?: SortOrder
+    descriptionAz?: SortOrder
+    descriptionHy?: SortOrder
+    descriptionHe?: SortOrder
+    descriptionAr?: SortOrder
+    descriptionKo?: SortOrder
+    descriptionJa?: SortOrder
+    descriptionZh?: SortOrder
+    transcriptDe?: SortOrder
+    transcriptFr?: SortOrder
+    transcriptEs?: SortOrder
+    transcriptIt?: SortOrder
+    transcriptPl?: SortOrder
+    transcriptTr?: SortOrder
+    transcriptAz?: SortOrder
+    transcriptHy?: SortOrder
+    transcriptHe?: SortOrder
+    transcriptAr?: SortOrder
+    transcriptKo?: SortOrder
+    transcriptJa?: SortOrder
+    transcriptZh?: SortOrder
+    audioUrlDe?: SortOrder
+    audioUrlFr?: SortOrder
+    audioUrlEs?: SortOrder
+    audioUrlIt?: SortOrder
+    audioUrlPl?: SortOrder
+    audioUrlTr?: SortOrder
+    audioUrlAz?: SortOrder
+    audioUrlHy?: SortOrder
+    audioUrlHe?: SortOrder
+    audioUrlAr?: SortOrder
+    audioUrlKo?: SortOrder
+    audioUrlJa?: SortOrder
+    audioUrlZh?: SortOrder
     audioDuration?: SortOrder
     imageUrl?: SortOrder
     images?: SortOrder
@@ -45143,6 +49491,58 @@ export namespace Prisma {
     audioUrlEn?: SortOrder
     audioUrlRu?: SortOrder
     audioUrlUk?: SortOrder
+    titleDe?: SortOrder
+    titleFr?: SortOrder
+    titleEs?: SortOrder
+    titleIt?: SortOrder
+    titlePl?: SortOrder
+    titleTr?: SortOrder
+    titleAz?: SortOrder
+    titleHy?: SortOrder
+    titleHe?: SortOrder
+    titleAr?: SortOrder
+    titleKo?: SortOrder
+    titleJa?: SortOrder
+    titleZh?: SortOrder
+    descriptionDe?: SortOrder
+    descriptionFr?: SortOrder
+    descriptionEs?: SortOrder
+    descriptionIt?: SortOrder
+    descriptionPl?: SortOrder
+    descriptionTr?: SortOrder
+    descriptionAz?: SortOrder
+    descriptionHy?: SortOrder
+    descriptionHe?: SortOrder
+    descriptionAr?: SortOrder
+    descriptionKo?: SortOrder
+    descriptionJa?: SortOrder
+    descriptionZh?: SortOrder
+    transcriptDe?: SortOrder
+    transcriptFr?: SortOrder
+    transcriptEs?: SortOrder
+    transcriptIt?: SortOrder
+    transcriptPl?: SortOrder
+    transcriptTr?: SortOrder
+    transcriptAz?: SortOrder
+    transcriptHy?: SortOrder
+    transcriptHe?: SortOrder
+    transcriptAr?: SortOrder
+    transcriptKo?: SortOrder
+    transcriptJa?: SortOrder
+    transcriptZh?: SortOrder
+    audioUrlDe?: SortOrder
+    audioUrlFr?: SortOrder
+    audioUrlEs?: SortOrder
+    audioUrlIt?: SortOrder
+    audioUrlPl?: SortOrder
+    audioUrlTr?: SortOrder
+    audioUrlAz?: SortOrder
+    audioUrlHy?: SortOrder
+    audioUrlHe?: SortOrder
+    audioUrlAr?: SortOrder
+    audioUrlKo?: SortOrder
+    audioUrlJa?: SortOrder
+    audioUrlZh?: SortOrder
     audioDuration?: SortOrder
     imageUrl?: SortOrder
     qrCode?: SortOrder
@@ -45172,6 +49572,58 @@ export namespace Prisma {
     audioUrlEn?: SortOrder
     audioUrlRu?: SortOrder
     audioUrlUk?: SortOrder
+    titleDe?: SortOrder
+    titleFr?: SortOrder
+    titleEs?: SortOrder
+    titleIt?: SortOrder
+    titlePl?: SortOrder
+    titleTr?: SortOrder
+    titleAz?: SortOrder
+    titleHy?: SortOrder
+    titleHe?: SortOrder
+    titleAr?: SortOrder
+    titleKo?: SortOrder
+    titleJa?: SortOrder
+    titleZh?: SortOrder
+    descriptionDe?: SortOrder
+    descriptionFr?: SortOrder
+    descriptionEs?: SortOrder
+    descriptionIt?: SortOrder
+    descriptionPl?: SortOrder
+    descriptionTr?: SortOrder
+    descriptionAz?: SortOrder
+    descriptionHy?: SortOrder
+    descriptionHe?: SortOrder
+    descriptionAr?: SortOrder
+    descriptionKo?: SortOrder
+    descriptionJa?: SortOrder
+    descriptionZh?: SortOrder
+    transcriptDe?: SortOrder
+    transcriptFr?: SortOrder
+    transcriptEs?: SortOrder
+    transcriptIt?: SortOrder
+    transcriptPl?: SortOrder
+    transcriptTr?: SortOrder
+    transcriptAz?: SortOrder
+    transcriptHy?: SortOrder
+    transcriptHe?: SortOrder
+    transcriptAr?: SortOrder
+    transcriptKo?: SortOrder
+    transcriptJa?: SortOrder
+    transcriptZh?: SortOrder
+    audioUrlDe?: SortOrder
+    audioUrlFr?: SortOrder
+    audioUrlEs?: SortOrder
+    audioUrlIt?: SortOrder
+    audioUrlPl?: SortOrder
+    audioUrlTr?: SortOrder
+    audioUrlAz?: SortOrder
+    audioUrlHy?: SortOrder
+    audioUrlHe?: SortOrder
+    audioUrlAr?: SortOrder
+    audioUrlKo?: SortOrder
+    audioUrlJa?: SortOrder
+    audioUrlZh?: SortOrder
     audioDuration?: SortOrder
     imageUrl?: SortOrder
     qrCode?: SortOrder
@@ -49288,6 +53740,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -49318,6 +53796,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -49420,6 +53924,32 @@ export namespace Prisma {
     descriptionEn?: StringNullableFilter<"Tour"> | string | null
     descriptionRu?: StringNullableFilter<"Tour"> | string | null
     descriptionUk?: StringNullableFilter<"Tour"> | string | null
+    nameDe?: StringNullableFilter<"Tour"> | string | null
+    nameFr?: StringNullableFilter<"Tour"> | string | null
+    nameEs?: StringNullableFilter<"Tour"> | string | null
+    nameIt?: StringNullableFilter<"Tour"> | string | null
+    namePl?: StringNullableFilter<"Tour"> | string | null
+    nameTr?: StringNullableFilter<"Tour"> | string | null
+    nameAz?: StringNullableFilter<"Tour"> | string | null
+    nameHy?: StringNullableFilter<"Tour"> | string | null
+    nameHe?: StringNullableFilter<"Tour"> | string | null
+    nameAr?: StringNullableFilter<"Tour"> | string | null
+    nameKo?: StringNullableFilter<"Tour"> | string | null
+    nameJa?: StringNullableFilter<"Tour"> | string | null
+    nameZh?: StringNullableFilter<"Tour"> | string | null
+    descriptionDe?: StringNullableFilter<"Tour"> | string | null
+    descriptionFr?: StringNullableFilter<"Tour"> | string | null
+    descriptionEs?: StringNullableFilter<"Tour"> | string | null
+    descriptionIt?: StringNullableFilter<"Tour"> | string | null
+    descriptionPl?: StringNullableFilter<"Tour"> | string | null
+    descriptionTr?: StringNullableFilter<"Tour"> | string | null
+    descriptionAz?: StringNullableFilter<"Tour"> | string | null
+    descriptionHy?: StringNullableFilter<"Tour"> | string | null
+    descriptionHe?: StringNullableFilter<"Tour"> | string | null
+    descriptionAr?: StringNullableFilter<"Tour"> | string | null
+    descriptionKo?: StringNullableFilter<"Tour"> | string | null
+    descriptionJa?: StringNullableFilter<"Tour"> | string | null
+    descriptionZh?: StringNullableFilter<"Tour"> | string | null
     duration?: IntNullableFilter<"Tour"> | number | null
     stopsCount?: IntFilter<"Tour"> | number
     isFree?: BoolFilter<"Tour"> | boolean
@@ -49497,6 +54027,61 @@ export namespace Prisma {
     descriptionUk?: string | null
     cityUk?: string | null
     addressUk?: string | null
+    nameEs?: string | null
+    descriptionEs?: string | null
+    cityEs?: string | null
+    addressEs?: string | null
+    introAudioUrlEs?: string | null
+    nameIt?: string | null
+    descriptionIt?: string | null
+    cityIt?: string | null
+    addressIt?: string | null
+    introAudioUrlIt?: string | null
+    namePl?: string | null
+    descriptionPl?: string | null
+    cityPl?: string | null
+    addressPl?: string | null
+    introAudioUrlPl?: string | null
+    nameTr?: string | null
+    descriptionTr?: string | null
+    cityTr?: string | null
+    addressTr?: string | null
+    introAudioUrlTr?: string | null
+    nameAz?: string | null
+    descriptionAz?: string | null
+    cityAz?: string | null
+    addressAz?: string | null
+    introAudioUrlAz?: string | null
+    nameHy?: string | null
+    descriptionHy?: string | null
+    cityHy?: string | null
+    addressHy?: string | null
+    introAudioUrlHy?: string | null
+    nameHe?: string | null
+    descriptionHe?: string | null
+    cityHe?: string | null
+    addressHe?: string | null
+    introAudioUrlHe?: string | null
+    nameAr?: string | null
+    descriptionAr?: string | null
+    cityAr?: string | null
+    addressAr?: string | null
+    introAudioUrlAr?: string | null
+    nameKo?: string | null
+    descriptionKo?: string | null
+    cityKo?: string | null
+    addressKo?: string | null
+    introAudioUrlKo?: string | null
+    nameJa?: string | null
+    descriptionJa?: string | null
+    cityJa?: string | null
+    addressJa?: string | null
+    introAudioUrlJa?: string | null
+    nameZh?: string | null
+    descriptionZh?: string | null
+    cityZh?: string | null
+    addressZh?: string | null
+    introAudioUrlZh?: string | null
     slug: string
     coverImage?: string | null
     introAudioUrl?: string | null
@@ -49553,6 +54138,61 @@ export namespace Prisma {
     descriptionUk?: string | null
     cityUk?: string | null
     addressUk?: string | null
+    nameEs?: string | null
+    descriptionEs?: string | null
+    cityEs?: string | null
+    addressEs?: string | null
+    introAudioUrlEs?: string | null
+    nameIt?: string | null
+    descriptionIt?: string | null
+    cityIt?: string | null
+    addressIt?: string | null
+    introAudioUrlIt?: string | null
+    namePl?: string | null
+    descriptionPl?: string | null
+    cityPl?: string | null
+    addressPl?: string | null
+    introAudioUrlPl?: string | null
+    nameTr?: string | null
+    descriptionTr?: string | null
+    cityTr?: string | null
+    addressTr?: string | null
+    introAudioUrlTr?: string | null
+    nameAz?: string | null
+    descriptionAz?: string | null
+    cityAz?: string | null
+    addressAz?: string | null
+    introAudioUrlAz?: string | null
+    nameHy?: string | null
+    descriptionHy?: string | null
+    cityHy?: string | null
+    addressHy?: string | null
+    introAudioUrlHy?: string | null
+    nameHe?: string | null
+    descriptionHe?: string | null
+    cityHe?: string | null
+    addressHe?: string | null
+    introAudioUrlHe?: string | null
+    nameAr?: string | null
+    descriptionAr?: string | null
+    cityAr?: string | null
+    addressAr?: string | null
+    introAudioUrlAr?: string | null
+    nameKo?: string | null
+    descriptionKo?: string | null
+    cityKo?: string | null
+    addressKo?: string | null
+    introAudioUrlKo?: string | null
+    nameJa?: string | null
+    descriptionJa?: string | null
+    cityJa?: string | null
+    addressJa?: string | null
+    introAudioUrlJa?: string | null
+    nameZh?: string | null
+    descriptionZh?: string | null
+    cityZh?: string | null
+    addressZh?: string | null
+    introAudioUrlZh?: string | null
     slug: string
     coverImage?: string | null
     introAudioUrl?: string | null
@@ -49598,6 +54238,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     floorNumber?: number | null
     imageUrl?: string | null
     orderIndex?: number
@@ -49617,6 +54283,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     floorNumber?: number | null
     imageUrl?: string | null
     orderIndex?: number
@@ -49654,6 +54346,58 @@ export namespace Prisma {
     audioUrlEn?: string | null
     audioUrlRu?: string | null
     audioUrlUk?: string | null
+    titleDe?: string | null
+    titleFr?: string | null
+    titleEs?: string | null
+    titleIt?: string | null
+    titlePl?: string | null
+    titleTr?: string | null
+    titleAz?: string | null
+    titleHy?: string | null
+    titleHe?: string | null
+    titleAr?: string | null
+    titleKo?: string | null
+    titleJa?: string | null
+    titleZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
+    transcriptDe?: string | null
+    transcriptFr?: string | null
+    transcriptEs?: string | null
+    transcriptIt?: string | null
+    transcriptPl?: string | null
+    transcriptTr?: string | null
+    transcriptAz?: string | null
+    transcriptHy?: string | null
+    transcriptHe?: string | null
+    transcriptAr?: string | null
+    transcriptKo?: string | null
+    transcriptJa?: string | null
+    transcriptZh?: string | null
+    audioUrlDe?: string | null
+    audioUrlFr?: string | null
+    audioUrlEs?: string | null
+    audioUrlIt?: string | null
+    audioUrlPl?: string | null
+    audioUrlTr?: string | null
+    audioUrlAz?: string | null
+    audioUrlHy?: string | null
+    audioUrlHe?: string | null
+    audioUrlAr?: string | null
+    audioUrlKo?: string | null
+    audioUrlJa?: string | null
+    audioUrlZh?: string | null
     audioDuration?: number | null
     imageUrl?: string | null
     images?: TourStopCreateimagesInput | string[]
@@ -49684,6 +54428,58 @@ export namespace Prisma {
     audioUrlEn?: string | null
     audioUrlRu?: string | null
     audioUrlUk?: string | null
+    titleDe?: string | null
+    titleFr?: string | null
+    titleEs?: string | null
+    titleIt?: string | null
+    titlePl?: string | null
+    titleTr?: string | null
+    titleAz?: string | null
+    titleHy?: string | null
+    titleHe?: string | null
+    titleAr?: string | null
+    titleKo?: string | null
+    titleJa?: string | null
+    titleZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
+    transcriptDe?: string | null
+    transcriptFr?: string | null
+    transcriptEs?: string | null
+    transcriptIt?: string | null
+    transcriptPl?: string | null
+    transcriptTr?: string | null
+    transcriptAz?: string | null
+    transcriptHy?: string | null
+    transcriptHe?: string | null
+    transcriptAr?: string | null
+    transcriptKo?: string | null
+    transcriptJa?: string | null
+    transcriptZh?: string | null
+    audioUrlDe?: string | null
+    audioUrlFr?: string | null
+    audioUrlEs?: string | null
+    audioUrlIt?: string | null
+    audioUrlPl?: string | null
+    audioUrlTr?: string | null
+    audioUrlAz?: string | null
+    audioUrlHy?: string | null
+    audioUrlHe?: string | null
+    audioUrlAr?: string | null
+    audioUrlKo?: string | null
+    audioUrlJa?: string | null
+    audioUrlZh?: string | null
     audioDuration?: number | null
     imageUrl?: string | null
     images?: TourStopCreateimagesInput | string[]
@@ -49853,6 +54649,61 @@ export namespace Prisma {
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     cityUk?: NullableStringFieldUpdateOperationsInput | string | null
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    cityEs?: NullableStringFieldUpdateOperationsInput | string | null
+    addressEs?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    cityIt?: NullableStringFieldUpdateOperationsInput | string | null
+    addressIt?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    cityPl?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPl?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityTr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressTr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAz?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAz?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHy?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHy?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHe?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHe?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    cityKo?: NullableStringFieldUpdateOperationsInput | string | null
+    addressKo?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    cityJa?: NullableStringFieldUpdateOperationsInput | string | null
+    addressJa?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    cityZh?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZh?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -49909,6 +54760,61 @@ export namespace Prisma {
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     cityUk?: NullableStringFieldUpdateOperationsInput | string | null
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    cityEs?: NullableStringFieldUpdateOperationsInput | string | null
+    addressEs?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    cityIt?: NullableStringFieldUpdateOperationsInput | string | null
+    addressIt?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    cityPl?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPl?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityTr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressTr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAz?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAz?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHy?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHy?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHe?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHe?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    cityKo?: NullableStringFieldUpdateOperationsInput | string | null
+    addressKo?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    cityJa?: NullableStringFieldUpdateOperationsInput | string | null
+    addressJa?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    cityZh?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZh?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -49969,6 +54875,32 @@ export namespace Prisma {
     descriptionEn?: StringNullableFilter<"Hall"> | string | null
     descriptionRu?: StringNullableFilter<"Hall"> | string | null
     descriptionUk?: StringNullableFilter<"Hall"> | string | null
+    nameDe?: StringNullableFilter<"Hall"> | string | null
+    nameFr?: StringNullableFilter<"Hall"> | string | null
+    nameEs?: StringNullableFilter<"Hall"> | string | null
+    nameIt?: StringNullableFilter<"Hall"> | string | null
+    namePl?: StringNullableFilter<"Hall"> | string | null
+    nameTr?: StringNullableFilter<"Hall"> | string | null
+    nameAz?: StringNullableFilter<"Hall"> | string | null
+    nameHy?: StringNullableFilter<"Hall"> | string | null
+    nameHe?: StringNullableFilter<"Hall"> | string | null
+    nameAr?: StringNullableFilter<"Hall"> | string | null
+    nameKo?: StringNullableFilter<"Hall"> | string | null
+    nameJa?: StringNullableFilter<"Hall"> | string | null
+    nameZh?: StringNullableFilter<"Hall"> | string | null
+    descriptionDe?: StringNullableFilter<"Hall"> | string | null
+    descriptionFr?: StringNullableFilter<"Hall"> | string | null
+    descriptionEs?: StringNullableFilter<"Hall"> | string | null
+    descriptionIt?: StringNullableFilter<"Hall"> | string | null
+    descriptionPl?: StringNullableFilter<"Hall"> | string | null
+    descriptionTr?: StringNullableFilter<"Hall"> | string | null
+    descriptionAz?: StringNullableFilter<"Hall"> | string | null
+    descriptionHy?: StringNullableFilter<"Hall"> | string | null
+    descriptionHe?: StringNullableFilter<"Hall"> | string | null
+    descriptionAr?: StringNullableFilter<"Hall"> | string | null
+    descriptionKo?: StringNullableFilter<"Hall"> | string | null
+    descriptionJa?: StringNullableFilter<"Hall"> | string | null
+    descriptionZh?: StringNullableFilter<"Hall"> | string | null
     floorNumber?: IntNullableFilter<"Hall"> | number | null
     imageUrl?: StringNullableFilter<"Hall"> | string | null
     orderIndex?: IntFilter<"Hall"> | number
@@ -50016,6 +54948,58 @@ export namespace Prisma {
     audioUrlEn?: StringNullableFilter<"TourStop"> | string | null
     audioUrlRu?: StringNullableFilter<"TourStop"> | string | null
     audioUrlUk?: StringNullableFilter<"TourStop"> | string | null
+    titleDe?: StringNullableFilter<"TourStop"> | string | null
+    titleFr?: StringNullableFilter<"TourStop"> | string | null
+    titleEs?: StringNullableFilter<"TourStop"> | string | null
+    titleIt?: StringNullableFilter<"TourStop"> | string | null
+    titlePl?: StringNullableFilter<"TourStop"> | string | null
+    titleTr?: StringNullableFilter<"TourStop"> | string | null
+    titleAz?: StringNullableFilter<"TourStop"> | string | null
+    titleHy?: StringNullableFilter<"TourStop"> | string | null
+    titleHe?: StringNullableFilter<"TourStop"> | string | null
+    titleAr?: StringNullableFilter<"TourStop"> | string | null
+    titleKo?: StringNullableFilter<"TourStop"> | string | null
+    titleJa?: StringNullableFilter<"TourStop"> | string | null
+    titleZh?: StringNullableFilter<"TourStop"> | string | null
+    descriptionDe?: StringNullableFilter<"TourStop"> | string | null
+    descriptionFr?: StringNullableFilter<"TourStop"> | string | null
+    descriptionEs?: StringNullableFilter<"TourStop"> | string | null
+    descriptionIt?: StringNullableFilter<"TourStop"> | string | null
+    descriptionPl?: StringNullableFilter<"TourStop"> | string | null
+    descriptionTr?: StringNullableFilter<"TourStop"> | string | null
+    descriptionAz?: StringNullableFilter<"TourStop"> | string | null
+    descriptionHy?: StringNullableFilter<"TourStop"> | string | null
+    descriptionHe?: StringNullableFilter<"TourStop"> | string | null
+    descriptionAr?: StringNullableFilter<"TourStop"> | string | null
+    descriptionKo?: StringNullableFilter<"TourStop"> | string | null
+    descriptionJa?: StringNullableFilter<"TourStop"> | string | null
+    descriptionZh?: StringNullableFilter<"TourStop"> | string | null
+    transcriptDe?: StringNullableFilter<"TourStop"> | string | null
+    transcriptFr?: StringNullableFilter<"TourStop"> | string | null
+    transcriptEs?: StringNullableFilter<"TourStop"> | string | null
+    transcriptIt?: StringNullableFilter<"TourStop"> | string | null
+    transcriptPl?: StringNullableFilter<"TourStop"> | string | null
+    transcriptTr?: StringNullableFilter<"TourStop"> | string | null
+    transcriptAz?: StringNullableFilter<"TourStop"> | string | null
+    transcriptHy?: StringNullableFilter<"TourStop"> | string | null
+    transcriptHe?: StringNullableFilter<"TourStop"> | string | null
+    transcriptAr?: StringNullableFilter<"TourStop"> | string | null
+    transcriptKo?: StringNullableFilter<"TourStop"> | string | null
+    transcriptJa?: StringNullableFilter<"TourStop"> | string | null
+    transcriptZh?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlDe?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlFr?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlEs?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlIt?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlPl?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlTr?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlAz?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlHy?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlHe?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlAr?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlKo?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlJa?: StringNullableFilter<"TourStop"> | string | null
+    audioUrlZh?: StringNullableFilter<"TourStop"> | string | null
     audioDuration?: IntNullableFilter<"TourStop"> | number | null
     imageUrl?: StringNullableFilter<"TourStop"> | string | null
     images?: StringNullableListFilter<"TourStop">
@@ -50117,6 +55101,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -50148,6 +55158,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -50190,6 +55226,58 @@ export namespace Prisma {
     audioUrlEn?: string | null
     audioUrlRu?: string | null
     audioUrlUk?: string | null
+    titleDe?: string | null
+    titleFr?: string | null
+    titleEs?: string | null
+    titleIt?: string | null
+    titlePl?: string | null
+    titleTr?: string | null
+    titleAz?: string | null
+    titleHy?: string | null
+    titleHe?: string | null
+    titleAr?: string | null
+    titleKo?: string | null
+    titleJa?: string | null
+    titleZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
+    transcriptDe?: string | null
+    transcriptFr?: string | null
+    transcriptEs?: string | null
+    transcriptIt?: string | null
+    transcriptPl?: string | null
+    transcriptTr?: string | null
+    transcriptAz?: string | null
+    transcriptHy?: string | null
+    transcriptHe?: string | null
+    transcriptAr?: string | null
+    transcriptKo?: string | null
+    transcriptJa?: string | null
+    transcriptZh?: string | null
+    audioUrlDe?: string | null
+    audioUrlFr?: string | null
+    audioUrlEs?: string | null
+    audioUrlIt?: string | null
+    audioUrlPl?: string | null
+    audioUrlTr?: string | null
+    audioUrlAz?: string | null
+    audioUrlHy?: string | null
+    audioUrlHe?: string | null
+    audioUrlAr?: string | null
+    audioUrlKo?: string | null
+    audioUrlJa?: string | null
+    audioUrlZh?: string | null
     audioDuration?: number | null
     imageUrl?: string | null
     images?: TourStopCreateimagesInput | string[]
@@ -50220,6 +55308,58 @@ export namespace Prisma {
     audioUrlEn?: string | null
     audioUrlRu?: string | null
     audioUrlUk?: string | null
+    titleDe?: string | null
+    titleFr?: string | null
+    titleEs?: string | null
+    titleIt?: string | null
+    titlePl?: string | null
+    titleTr?: string | null
+    titleAz?: string | null
+    titleHy?: string | null
+    titleHe?: string | null
+    titleAr?: string | null
+    titleKo?: string | null
+    titleJa?: string | null
+    titleZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
+    transcriptDe?: string | null
+    transcriptFr?: string | null
+    transcriptEs?: string | null
+    transcriptIt?: string | null
+    transcriptPl?: string | null
+    transcriptTr?: string | null
+    transcriptAz?: string | null
+    transcriptHy?: string | null
+    transcriptHe?: string | null
+    transcriptAr?: string | null
+    transcriptKo?: string | null
+    transcriptJa?: string | null
+    transcriptZh?: string | null
+    audioUrlDe?: string | null
+    audioUrlFr?: string | null
+    audioUrlEs?: string | null
+    audioUrlIt?: string | null
+    audioUrlPl?: string | null
+    audioUrlTr?: string | null
+    audioUrlAz?: string | null
+    audioUrlHy?: string | null
+    audioUrlHe?: string | null
+    audioUrlAr?: string | null
+    audioUrlKo?: string | null
+    audioUrlJa?: string | null
+    audioUrlZh?: string | null
     audioDuration?: number | null
     imageUrl?: string | null
     images?: TourStopCreateimagesInput | string[]
@@ -50261,6 +55401,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -50292,6 +55458,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -50337,6 +55529,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -50368,6 +55586,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -50402,6 +55646,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     floorNumber?: number | null
     imageUrl?: string | null
     orderIndex?: number
@@ -50422,6 +55692,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     floorNumber?: number | null
     imageUrl?: string | null
     orderIndex?: number
@@ -50456,6 +55752,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -50487,6 +55809,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -50527,6 +55875,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orderIndex?: IntFieldUpdateOperationsInput | number
@@ -50547,6 +55921,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orderIndex?: IntFieldUpdateOperationsInput | number
@@ -50565,6 +55965,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -50596,6 +56022,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -50641,6 +56093,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -50672,6 +56150,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -50902,6 +56406,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -50933,6 +56463,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -51054,6 +56610,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -51085,6 +56667,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -51161,6 +56769,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -51192,6 +56826,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -51242,6 +56902,61 @@ export namespace Prisma {
     descriptionUk?: string | null
     cityUk?: string | null
     addressUk?: string | null
+    nameEs?: string | null
+    descriptionEs?: string | null
+    cityEs?: string | null
+    addressEs?: string | null
+    introAudioUrlEs?: string | null
+    nameIt?: string | null
+    descriptionIt?: string | null
+    cityIt?: string | null
+    addressIt?: string | null
+    introAudioUrlIt?: string | null
+    namePl?: string | null
+    descriptionPl?: string | null
+    cityPl?: string | null
+    addressPl?: string | null
+    introAudioUrlPl?: string | null
+    nameTr?: string | null
+    descriptionTr?: string | null
+    cityTr?: string | null
+    addressTr?: string | null
+    introAudioUrlTr?: string | null
+    nameAz?: string | null
+    descriptionAz?: string | null
+    cityAz?: string | null
+    addressAz?: string | null
+    introAudioUrlAz?: string | null
+    nameHy?: string | null
+    descriptionHy?: string | null
+    cityHy?: string | null
+    addressHy?: string | null
+    introAudioUrlHy?: string | null
+    nameHe?: string | null
+    descriptionHe?: string | null
+    cityHe?: string | null
+    addressHe?: string | null
+    introAudioUrlHe?: string | null
+    nameAr?: string | null
+    descriptionAr?: string | null
+    cityAr?: string | null
+    addressAr?: string | null
+    introAudioUrlAr?: string | null
+    nameKo?: string | null
+    descriptionKo?: string | null
+    cityKo?: string | null
+    addressKo?: string | null
+    introAudioUrlKo?: string | null
+    nameJa?: string | null
+    descriptionJa?: string | null
+    cityJa?: string | null
+    addressJa?: string | null
+    introAudioUrlJa?: string | null
+    nameZh?: string | null
+    descriptionZh?: string | null
+    cityZh?: string | null
+    addressZh?: string | null
+    introAudioUrlZh?: string | null
     slug: string
     coverImage?: string | null
     introAudioUrl?: string | null
@@ -51298,6 +57013,61 @@ export namespace Prisma {
     descriptionUk?: string | null
     cityUk?: string | null
     addressUk?: string | null
+    nameEs?: string | null
+    descriptionEs?: string | null
+    cityEs?: string | null
+    addressEs?: string | null
+    introAudioUrlEs?: string | null
+    nameIt?: string | null
+    descriptionIt?: string | null
+    cityIt?: string | null
+    addressIt?: string | null
+    introAudioUrlIt?: string | null
+    namePl?: string | null
+    descriptionPl?: string | null
+    cityPl?: string | null
+    addressPl?: string | null
+    introAudioUrlPl?: string | null
+    nameTr?: string | null
+    descriptionTr?: string | null
+    cityTr?: string | null
+    addressTr?: string | null
+    introAudioUrlTr?: string | null
+    nameAz?: string | null
+    descriptionAz?: string | null
+    cityAz?: string | null
+    addressAz?: string | null
+    introAudioUrlAz?: string | null
+    nameHy?: string | null
+    descriptionHy?: string | null
+    cityHy?: string | null
+    addressHy?: string | null
+    introAudioUrlHy?: string | null
+    nameHe?: string | null
+    descriptionHe?: string | null
+    cityHe?: string | null
+    addressHe?: string | null
+    introAudioUrlHe?: string | null
+    nameAr?: string | null
+    descriptionAr?: string | null
+    cityAr?: string | null
+    addressAr?: string | null
+    introAudioUrlAr?: string | null
+    nameKo?: string | null
+    descriptionKo?: string | null
+    cityKo?: string | null
+    addressKo?: string | null
+    introAudioUrlKo?: string | null
+    nameJa?: string | null
+    descriptionJa?: string | null
+    cityJa?: string | null
+    addressJa?: string | null
+    introAudioUrlJa?: string | null
+    nameZh?: string | null
+    descriptionZh?: string | null
+    cityZh?: string | null
+    addressZh?: string | null
+    introAudioUrlZh?: string | null
     slug: string
     coverImage?: string | null
     introAudioUrl?: string | null
@@ -51395,6 +57165,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -51426,6 +57222,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -51482,6 +57304,61 @@ export namespace Prisma {
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     cityUk?: NullableStringFieldUpdateOperationsInput | string | null
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    cityEs?: NullableStringFieldUpdateOperationsInput | string | null
+    addressEs?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    cityIt?: NullableStringFieldUpdateOperationsInput | string | null
+    addressIt?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    cityPl?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPl?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityTr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressTr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAz?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAz?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHy?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHy?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHe?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHe?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    cityKo?: NullableStringFieldUpdateOperationsInput | string | null
+    addressKo?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    cityJa?: NullableStringFieldUpdateOperationsInput | string | null
+    addressJa?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    cityZh?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZh?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -51538,6 +57415,61 @@ export namespace Prisma {
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     cityUk?: NullableStringFieldUpdateOperationsInput | string | null
     addressUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    cityEs?: NullableStringFieldUpdateOperationsInput | string | null
+    addressEs?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    cityIt?: NullableStringFieldUpdateOperationsInput | string | null
+    addressIt?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    cityPl?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPl?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityTr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressTr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAz?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAz?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHy?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHy?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    cityHe?: NullableStringFieldUpdateOperationsInput | string | null
+    addressHe?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    cityAr?: NullableStringFieldUpdateOperationsInput | string | null
+    addressAr?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    cityKo?: NullableStringFieldUpdateOperationsInput | string | null
+    addressKo?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    cityJa?: NullableStringFieldUpdateOperationsInput | string | null
+    addressJa?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    cityZh?: NullableStringFieldUpdateOperationsInput | string | null
+    addressZh?: NullableStringFieldUpdateOperationsInput | string | null
+    introAudioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     coverImage?: NullableStringFieldUpdateOperationsInput | string | null
     introAudioUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52186,6 +58118,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     duration?: number | null
     stopsCount?: number
     isFree?: boolean
@@ -52227,6 +58185,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -52257,6 +58241,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -52287,6 +58297,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
     stopsCount?: IntFieldUpdateOperationsInput | number
     isFree?: BoolFieldUpdateOperationsInput | boolean
@@ -52360,6 +58396,32 @@ export namespace Prisma {
     descriptionEn?: string | null
     descriptionRu?: string | null
     descriptionUk?: string | null
+    nameDe?: string | null
+    nameFr?: string | null
+    nameEs?: string | null
+    nameIt?: string | null
+    namePl?: string | null
+    nameTr?: string | null
+    nameAz?: string | null
+    nameHy?: string | null
+    nameHe?: string | null
+    nameAr?: string | null
+    nameKo?: string | null
+    nameJa?: string | null
+    nameZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
     floorNumber?: number | null
     imageUrl?: string | null
     orderIndex?: number
@@ -52387,6 +58449,58 @@ export namespace Prisma {
     audioUrlEn?: string | null
     audioUrlRu?: string | null
     audioUrlUk?: string | null
+    titleDe?: string | null
+    titleFr?: string | null
+    titleEs?: string | null
+    titleIt?: string | null
+    titlePl?: string | null
+    titleTr?: string | null
+    titleAz?: string | null
+    titleHy?: string | null
+    titleHe?: string | null
+    titleAr?: string | null
+    titleKo?: string | null
+    titleJa?: string | null
+    titleZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
+    transcriptDe?: string | null
+    transcriptFr?: string | null
+    transcriptEs?: string | null
+    transcriptIt?: string | null
+    transcriptPl?: string | null
+    transcriptTr?: string | null
+    transcriptAz?: string | null
+    transcriptHy?: string | null
+    transcriptHe?: string | null
+    transcriptAr?: string | null
+    transcriptKo?: string | null
+    transcriptJa?: string | null
+    transcriptZh?: string | null
+    audioUrlDe?: string | null
+    audioUrlFr?: string | null
+    audioUrlEs?: string | null
+    audioUrlIt?: string | null
+    audioUrlPl?: string | null
+    audioUrlTr?: string | null
+    audioUrlAz?: string | null
+    audioUrlHy?: string | null
+    audioUrlHe?: string | null
+    audioUrlAr?: string | null
+    audioUrlKo?: string | null
+    audioUrlJa?: string | null
+    audioUrlZh?: string | null
     audioDuration?: number | null
     imageUrl?: string | null
     images?: TourStopCreateimagesInput | string[]
@@ -52448,6 +58562,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orderIndex?: IntFieldUpdateOperationsInput | number
@@ -52467,6 +58607,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orderIndex?: IntFieldUpdateOperationsInput | number
@@ -52486,6 +58652,32 @@ export namespace Prisma {
     descriptionEn?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionRu?: NullableStringFieldUpdateOperationsInput | string | null
     descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
+    nameDe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameFr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameEs?: NullableStringFieldUpdateOperationsInput | string | null
+    nameIt?: NullableStringFieldUpdateOperationsInput | string | null
+    namePl?: NullableStringFieldUpdateOperationsInput | string | null
+    nameTr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAz?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHy?: NullableStringFieldUpdateOperationsInput | string | null
+    nameHe?: NullableStringFieldUpdateOperationsInput | string | null
+    nameAr?: NullableStringFieldUpdateOperationsInput | string | null
+    nameKo?: NullableStringFieldUpdateOperationsInput | string | null
+    nameJa?: NullableStringFieldUpdateOperationsInput | string | null
+    nameZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
     floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     orderIndex?: IntFieldUpdateOperationsInput | number
@@ -52512,6 +58704,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]
@@ -52542,6 +58786,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]
@@ -52571,6 +58867,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]
@@ -52723,6 +59071,58 @@ export namespace Prisma {
     audioUrlEn?: string | null
     audioUrlRu?: string | null
     audioUrlUk?: string | null
+    titleDe?: string | null
+    titleFr?: string | null
+    titleEs?: string | null
+    titleIt?: string | null
+    titlePl?: string | null
+    titleTr?: string | null
+    titleAz?: string | null
+    titleHy?: string | null
+    titleHe?: string | null
+    titleAr?: string | null
+    titleKo?: string | null
+    titleJa?: string | null
+    titleZh?: string | null
+    descriptionDe?: string | null
+    descriptionFr?: string | null
+    descriptionEs?: string | null
+    descriptionIt?: string | null
+    descriptionPl?: string | null
+    descriptionTr?: string | null
+    descriptionAz?: string | null
+    descriptionHy?: string | null
+    descriptionHe?: string | null
+    descriptionAr?: string | null
+    descriptionKo?: string | null
+    descriptionJa?: string | null
+    descriptionZh?: string | null
+    transcriptDe?: string | null
+    transcriptFr?: string | null
+    transcriptEs?: string | null
+    transcriptIt?: string | null
+    transcriptPl?: string | null
+    transcriptTr?: string | null
+    transcriptAz?: string | null
+    transcriptHy?: string | null
+    transcriptHe?: string | null
+    transcriptAr?: string | null
+    transcriptKo?: string | null
+    transcriptJa?: string | null
+    transcriptZh?: string | null
+    audioUrlDe?: string | null
+    audioUrlFr?: string | null
+    audioUrlEs?: string | null
+    audioUrlIt?: string | null
+    audioUrlPl?: string | null
+    audioUrlTr?: string | null
+    audioUrlAz?: string | null
+    audioUrlHy?: string | null
+    audioUrlHe?: string | null
+    audioUrlAr?: string | null
+    audioUrlKo?: string | null
+    audioUrlJa?: string | null
+    audioUrlZh?: string | null
     audioDuration?: number | null
     imageUrl?: string | null
     images?: TourStopCreateimagesInput | string[]
@@ -52751,6 +59151,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]
@@ -52781,6 +59233,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]
@@ -52810,6 +59314,58 @@ export namespace Prisma {
     audioUrlEn?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlRu?: NullableStringFieldUpdateOperationsInput | string | null
     audioUrlUk?: NullableStringFieldUpdateOperationsInput | string | null
+    titleDe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleFr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleEs?: NullableStringFieldUpdateOperationsInput | string | null
+    titleIt?: NullableStringFieldUpdateOperationsInput | string | null
+    titlePl?: NullableStringFieldUpdateOperationsInput | string | null
+    titleTr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAz?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHy?: NullableStringFieldUpdateOperationsInput | string | null
+    titleHe?: NullableStringFieldUpdateOperationsInput | string | null
+    titleAr?: NullableStringFieldUpdateOperationsInput | string | null
+    titleKo?: NullableStringFieldUpdateOperationsInput | string | null
+    titleJa?: NullableStringFieldUpdateOperationsInput | string | null
+    titleZh?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionDe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionFr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionEs?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionIt?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionPl?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionTr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAz?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHy?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionHe?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionAr?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionKo?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionJa?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionZh?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptDe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptFr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptEs?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptIt?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptPl?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptTr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAz?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHy?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptHe?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptAr?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptKo?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptJa?: NullableStringFieldUpdateOperationsInput | string | null
+    transcriptZh?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlDe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlFr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlEs?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlIt?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlPl?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlTr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAz?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHy?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlHe?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlAr?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlKo?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlJa?: NullableStringFieldUpdateOperationsInput | string | null
+    audioUrlZh?: NullableStringFieldUpdateOperationsInput | string | null
     audioDuration?: NullableIntFieldUpdateOperationsInput | number | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     images?: TourStopUpdateimagesInput | string[]

@@ -522,6 +522,83 @@ model Museum {
   cityUk        String?
   addressUk     String?
 
+  // ესპანური
+  nameEs          String?
+  descriptionEs   String? @db.Text
+  cityEs          String?
+  addressEs       String?
+  introAudioUrlEs String?
+
+  // იტალიური
+  nameIt          String?
+  descriptionIt   String? @db.Text
+  cityIt          String?
+  addressIt       String?
+  introAudioUrlIt String?
+
+  // პოლონური
+  namePl          String?
+  descriptionPl   String? @db.Text
+  cityPl          String?
+  addressPl       String?
+  introAudioUrlPl String?
+
+  // თურქული
+  nameTr          String?
+  descriptionTr   String? @db.Text
+  cityTr          String?
+  addressTr       String?
+  introAudioUrlTr String?
+
+  // აზერბაიჯანული
+  nameAz          String?
+  descriptionAz   String? @db.Text
+  cityAz          String?
+  addressAz       String?
+  introAudioUrlAz String?
+
+  // სომხური
+  nameHy          String?
+  descriptionHy   String? @db.Text
+  cityHy          String?
+  addressHy       String?
+  introAudioUrlHy String?
+
+  // ებრაული
+  nameHe          String?
+  descriptionHe   String? @db.Text
+  cityHe          String?
+  addressHe       String?
+  introAudioUrlHe String?
+
+  // არაბული
+  nameAr          String?
+  descriptionAr   String? @db.Text
+  cityAr          String?
+  addressAr       String?
+  introAudioUrlAr String?
+
+  // კორეული
+  nameKo          String?
+  descriptionKo   String? @db.Text
+  cityKo          String?
+  addressKo       String?
+  introAudioUrlKo String?
+
+  // იაპონური
+  nameJa          String?
+  descriptionJa   String? @db.Text
+  cityJa          String?
+  addressJa       String?
+  introAudioUrlJa String?
+
+  // ჩინური
+  nameZh          String?
+  descriptionZh   String? @db.Text
+  cityZh          String?
+  addressZh       String?
+  introAudioUrlZh String?
+
   // URL და მედია
   slug            String   @unique
   coverImage      String?
@@ -589,6 +666,34 @@ model Tour {
   descriptionRu String? @db.Text
   descriptionUk String? @db.Text
 
+  nameDe String?
+  nameFr String?
+  nameEs String?
+  nameIt String?
+  namePl String?
+  nameTr String?
+  nameAz String?
+  nameHy String?
+  nameHe String?
+  nameAr String?
+  nameKo String?
+  nameJa String?
+  nameZh String?
+
+  descriptionDe String? @db.Text
+  descriptionFr String? @db.Text
+  descriptionEs String? @db.Text
+  descriptionIt String? @db.Text
+  descriptionPl String? @db.Text
+  descriptionTr String? @db.Text
+  descriptionAz String? @db.Text
+  descriptionHy String? @db.Text
+  descriptionHe String? @db.Text
+  descriptionAr String? @db.Text
+  descriptionKo String? @db.Text
+  descriptionJa String? @db.Text
+  descriptionZh String? @db.Text
+
   // პარამეტრები
   duration   Int? // წუთებში
   stopsCount Int  @default(0)
@@ -639,6 +744,34 @@ model Hall {
   descriptionRu String?
   descriptionUk String?
 
+  nameDe String?
+  nameFr String?
+  nameEs String?
+  nameIt String?
+  namePl String?
+  nameTr String?
+  nameAz String?
+  nameHy String?
+  nameHe String?
+  nameAr String?
+  nameKo String?
+  nameJa String?
+  nameZh String?
+
+  descriptionDe String?
+  descriptionFr String?
+  descriptionEs String?
+  descriptionIt String?
+  descriptionPl String?
+  descriptionTr String?
+  descriptionAz String?
+  descriptionHy String?
+  descriptionHe String?
+  descriptionAr String?
+  descriptionKo String?
+  descriptionJa String?
+  descriptionZh String?
+
   floorNumber Int?
   imageUrl    String?
   orderIndex  Int     @default(0)
@@ -682,6 +815,62 @@ model TourStop {
   audioUrlEn String?
   audioUrlRu String?
   audioUrlUk String?
+
+  titleDe String?
+  titleFr String?
+  titleEs String?
+  titleIt String?
+  titlePl String?
+  titleTr String?
+  titleAz String?
+  titleHy String?
+  titleHe String?
+  titleAr String?
+  titleKo String?
+  titleJa String?
+  titleZh String?
+
+  descriptionDe String? @db.Text
+  descriptionFr String? @db.Text
+  descriptionEs String? @db.Text
+  descriptionIt String? @db.Text
+  descriptionPl String? @db.Text
+  descriptionTr String? @db.Text
+  descriptionAz String? @db.Text
+  descriptionHy String? @db.Text
+  descriptionHe String? @db.Text
+  descriptionAr String? @db.Text
+  descriptionKo String? @db.Text
+  descriptionJa String? @db.Text
+  descriptionZh String? @db.Text
+
+  transcriptDe String? @db.Text
+  transcriptFr String? @db.Text
+  transcriptEs String? @db.Text
+  transcriptIt String? @db.Text
+  transcriptPl String? @db.Text
+  transcriptTr String? @db.Text
+  transcriptAz String? @db.Text
+  transcriptHy String? @db.Text
+  transcriptHe String? @db.Text
+  transcriptAr String? @db.Text
+  transcriptKo String? @db.Text
+  transcriptJa String? @db.Text
+  transcriptZh String? @db.Text
+
+  audioUrlDe String?
+  audioUrlFr String?
+  audioUrlEs String?
+  audioUrlIt String?
+  audioUrlPl String?
+  audioUrlTr String?
+  audioUrlAz String?
+  audioUrlHy String?
+  audioUrlHe String?
+  audioUrlAr String?
+  audioUrlKo String?
+  audioUrlJa String?
+  audioUrlZh String?
 
   audioDuration Int? // წამებში
 

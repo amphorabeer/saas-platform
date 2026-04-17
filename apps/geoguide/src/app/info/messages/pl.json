@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "title": "GeoGuide — Audioprzewodnik po muzeach Gruzji",
+    "description": "Profesjonalne audioprzewodniki po Wardzi, Uplisciche, Achalciche, Swetichoweli i innych. 10-15 lari za muzeum. Dostępne w wielu językach."
+  },
+  "header": {
+    "nav_info": "O nas",
+    "nav_museums": "Muzea"
+  },
+  "hero": {
+    "h1": "Zwiedzaj Gruzję we własnym tempie",
+    "subtitle": "Profesjonalne audioprzewodniki po najbardziej znanych miejscach Gruzji. W {count} językach, w twojej cenie.",
+    "cta_primary": "Zobacz muzea",
+    "cta_secondary": "Jak to działa"
+  },
+  "what_is": {
+    "title": "Czym jest GeoGuide?",
+    "p1": "GeoGuide to aplikacja z audioprzewodnikami po najpopularniejszych muzeach i zabytkach Gruzji. Posłuchaj profesjonalnej narracji o każdym eksponacie w swoim języku i we własnym tempie.",
+    "p2": "Obsługujemy najczęściej odwiedzane miejsca w Gruzji: Wardzia (miasto jaskiniowe), Twierdza Rabati, Uplisciche (starożytne miasto), Katedra Swetichoweli, Zapora Enguri i główne muzea Tbilisi."
+  },
+  "how_it_works": {
+    "title": "Jak to działa",
+    "steps": [
+      { "title": "Otwórz aplikację", "description": "Pobierz z App Store lub korzystaj z aplikacji internetowej (PWA) bezpośrednio w przeglądarce." },
+      { "title": "Kup kod", "description": "Online tutaj lub w kasie muzeum. 10-15 lari." },
+      { "title": "Słuchaj i zwiedzaj", "description": "Aktywuj kod, wybierz język i zwiedzaj w swoim tempie. Działa offline." }
+    ]
+  },
+  "museums": {
+    "title": "Muzea dostępne po polsku",
+    "title_with_count": "Muzea dostępne po polsku ({count})",
+    "empty": "W tym języku nie ma jeszcze dostępnych muzeów. Zajrzyj wkrótce!",
+    "view_museum": "Zobacz muzeum →",
+    "languages_label": "Audio w językach:"
+  },
+  "callout": {
+    "title": "Dlaczego audioprzewodnik zamiast żywego przewodnika?",
+    "text": "Prywatny przewodnik w Gruzji kosztuje 100-150 lari. GeoGuide — 10-15 lari. Ta sama profesjonalna jakość, twój język, twoje tempo. Zatrzymaj kiedy chcesz, cofnij jeśli coś przegapiłeś."
+  },
+  "faq": {
+    "title": "Często zadawane pytania",
+    "items": [
+      { "q": "Czy potrzebuję internetu do GeoGuide?", "a": "Internet jest potrzebny do pobrania aplikacji i zawartości wycieczki. Po pobraniu wycieczka działa całkowicie offline. Ważne: pobierz wycieczkę w hotelu lub w domu przed wizytą — w Wardzi, Uplisciche i innych odległych miejscach zasięg może być słaby." },
+      { "q": "W jakich językach dostępny jest przewodnik?", "a": "Zależy od muzeum. Wardzia — 8 języków. Rabati — 4. Muzea Tbilisi — 3. Sprawdź karty muzeów powyżej." },
+      { "q": "Mogę kupić kod wcześniej?", "a": "Tak. Online kartą kredytową lub w kasie muzeum po przybyciu." },
+      { "q": "Czy muszę instalować aplikację?", "a": "Dwie opcje: pobierz GeoGuide z App Store (iOS, Android wkrótce), lub użyj aplikacji internetowej (PWA) bezpośrednio w przeglądarce — bez instalacji." },
+      { "q": "Czy w muzeum można wypożyczyć fizyczny odtwarzacz?", "a": "Tak, w Wardzi, Achalciche, Uplisciche, Muzeum Narodowym Gruzji i Muzeum Sztuki można wypożyczyć urządzenie audio w kasie. Wymagany jest dokument ze zdjęciem jako zastaw (paszport, dowód osobisty lub prawo jazdy)." },
+      { "q": "Ile trwa zwiedzanie?", "a": "45-90 minut na muzeum. Możesz w każdej chwili zatrzymać, cofnąć lub pominąć." }
+    ]
+  },
+  "final_cta": {
+    "title": "Gotowy do zwiedzania?",
+    "description": "Wybierz muzeum i zacznij podróż.",
+    "cta": "Zobacz muzea"
+  },
+  "footer": {
+    "tagline": "Audioprzewodniki po muzeach Gruzji",
+    "terms": "Warunki usługi",
+    "privacy": "Prywatność",
+    "help": "Pomoc",
+    "contact": "Kontakt",
+    "copyright": "© 2026 GeoGuide. Wszelkie prawa zastrzeżone."
+  }
+}
