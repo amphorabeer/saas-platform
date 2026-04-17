@@ -968,8 +968,8 @@ model ActivationCode {
   notes String?
 
   // რელაცია
-  entitlement Entitlement?
-  payments    Payment[]
+  entitlements Entitlement[]
+  payments     Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1020,7 +1020,7 @@ model Entitlement {
   type String @default("AUDIO") // "AUDIO" | "VR360"
 
   // აქტივაციის კოდი
-  activationCodeId String?         @unique
+  activationCodeId String?
   activationCode   ActivationCode? @relation(fields: [activationCodeId], references: [id])
 
   // ვადა

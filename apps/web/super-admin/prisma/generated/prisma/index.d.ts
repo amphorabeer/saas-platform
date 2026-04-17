@@ -3800,10 +3800,12 @@ export namespace Prisma {
    */
 
   export type ActivationCodeCountOutputType = {
+    entitlements: number
     payments: number
   }
 
   export type ActivationCodeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    entitlements?: boolean | ActivationCodeCountOutputTypeCountEntitlementsArgs
     payments?: boolean | ActivationCodeCountOutputTypeCountPaymentsArgs
   }
 
@@ -3816,6 +3818,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the ActivationCodeCountOutputType
      */
     select?: ActivationCodeCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ActivationCodeCountOutputType without action
+   */
+  export type ActivationCodeCountOutputTypeCountEntitlementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EntitlementWhereInput
   }
 
   /**
@@ -29877,7 +29886,7 @@ export namespace Prisma {
     notes?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    entitlement?: boolean | ActivationCode$entitlementArgs<ExtArgs>
+    entitlements?: boolean | ActivationCode$entitlementsArgs<ExtArgs>
     payments?: boolean | ActivationCode$paymentsArgs<ExtArgs>
     _count?: boolean | ActivationCodeCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["activationCode"]>
@@ -29917,7 +29926,7 @@ export namespace Prisma {
   }
 
   export type ActivationCodeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    entitlement?: boolean | ActivationCode$entitlementArgs<ExtArgs>
+    entitlements?: boolean | ActivationCode$entitlementsArgs<ExtArgs>
     payments?: boolean | ActivationCode$paymentsArgs<ExtArgs>
     _count?: boolean | ActivationCodeCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -29926,7 +29935,7 @@ export namespace Prisma {
   export type $ActivationCodePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ActivationCode"
     objects: {
-      entitlement: Prisma.$EntitlementPayload<ExtArgs> | null
+      entitlements: Prisma.$EntitlementPayload<ExtArgs>[]
       payments: Prisma.$PaymentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -30308,7 +30317,7 @@ export namespace Prisma {
    */
   export interface Prisma__ActivationCodeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    entitlement<T extends ActivationCode$entitlementArgs<ExtArgs> = {}>(args?: Subset<T, ActivationCode$entitlementArgs<ExtArgs>>): Prisma__EntitlementClient<$Result.GetResult<Prisma.$EntitlementPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    entitlements<T extends ActivationCode$entitlementsArgs<ExtArgs> = {}>(args?: Subset<T, ActivationCode$entitlementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EntitlementPayload<ExtArgs>, T, "findMany"> | Null>
     payments<T extends ActivationCode$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, ActivationCode$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -30667,9 +30676,9 @@ export namespace Prisma {
   }
 
   /**
-   * ActivationCode.entitlement
+   * ActivationCode.entitlements
    */
-  export type ActivationCode$entitlementArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type ActivationCode$entitlementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Entitlement
      */
@@ -30679,6 +30688,11 @@ export namespace Prisma {
      */
     include?: EntitlementInclude<ExtArgs> | null
     where?: EntitlementWhereInput
+    orderBy?: EntitlementOrderByWithRelationInput | EntitlementOrderByWithRelationInput[]
+    cursor?: EntitlementWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: EntitlementScalarFieldEnum | EntitlementScalarFieldEnum[]
   }
 
   /**
@@ -42029,7 +42043,7 @@ export namespace Prisma {
     notes?: StringNullableFilter<"ActivationCode"> | string | null
     createdAt?: DateTimeFilter<"ActivationCode"> | Date | string
     updatedAt?: DateTimeFilter<"ActivationCode"> | Date | string
-    entitlement?: XOR<EntitlementNullableRelationFilter, EntitlementWhereInput> | null
+    entitlements?: EntitlementListRelationFilter
     payments?: PaymentListRelationFilter
   }
 
@@ -42048,7 +42062,7 @@ export namespace Prisma {
     notes?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    entitlement?: EntitlementOrderByWithRelationInput
+    entitlements?: EntitlementOrderByRelationAggregateInput
     payments?: PaymentOrderByRelationAggregateInput
   }
 
@@ -42070,7 +42084,7 @@ export namespace Prisma {
     notes?: StringNullableFilter<"ActivationCode"> | string | null
     createdAt?: DateTimeFilter<"ActivationCode"> | Date | string
     updatedAt?: DateTimeFilter<"ActivationCode"> | Date | string
-    entitlement?: XOR<EntitlementNullableRelationFilter, EntitlementWhereInput> | null
+    entitlements?: EntitlementListRelationFilter
     payments?: PaymentListRelationFilter
   }, "id" | "code" | "codeHash">
 
@@ -42228,7 +42242,6 @@ export namespace Prisma {
 
   export type EntitlementWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    activationCodeId?: string
     deviceId_tourId?: EntitlementDeviceIdTourIdCompoundUniqueInput
     AND?: EntitlementWhereInput | EntitlementWhereInput[]
     OR?: EntitlementWhereInput[]
@@ -42236,6 +42249,7 @@ export namespace Prisma {
     deviceId?: StringFilter<"Entitlement"> | string
     tourId?: StringFilter<"Entitlement"> | string
     type?: StringFilter<"Entitlement"> | string
+    activationCodeId?: StringNullableFilter<"Entitlement"> | string | null
     activatedAt?: DateTimeFilter<"Entitlement"> | Date | string
     expiresAt?: DateTimeFilter<"Entitlement"> | Date | string
     isActive?: BoolFilter<"Entitlement"> | boolean
@@ -42244,7 +42258,7 @@ export namespace Prisma {
     device?: XOR<DeviceRelationFilter, DeviceWhereInput>
     tour?: XOR<TourRelationFilter, TourWhereInput>
     activationCode?: XOR<ActivationCodeNullableRelationFilter, ActivationCodeWhereInput> | null
-  }, "id" | "activationCodeId" | "deviceId_tourId">
+  }, "id" | "deviceId_tourId">
 
   export type EntitlementOrderByWithAggregationInput = {
     id?: SortOrder
@@ -46646,7 +46660,7 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    entitlement?: EntitlementCreateNestedOneWithoutActivationCodeInput
+    entitlements?: EntitlementCreateNestedManyWithoutActivationCodeInput
     payments?: PaymentCreateNestedManyWithoutActivationCodeInput
   }
 
@@ -46665,7 +46679,7 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    entitlement?: EntitlementUncheckedCreateNestedOneWithoutActivationCodeInput
+    entitlements?: EntitlementUncheckedCreateNestedManyWithoutActivationCodeInput
     payments?: PaymentUncheckedCreateNestedManyWithoutActivationCodeInput
   }
 
@@ -46684,7 +46698,7 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    entitlement?: EntitlementUpdateOneWithoutActivationCodeNestedInput
+    entitlements?: EntitlementUpdateManyWithoutActivationCodeNestedInput
     payments?: PaymentUpdateManyWithoutActivationCodeNestedInput
   }
 
@@ -46703,7 +46717,7 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    entitlement?: EntitlementUncheckedUpdateOneWithoutActivationCodeNestedInput
+    entitlements?: EntitlementUncheckedUpdateManyWithoutActivationCodeNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutActivationCodeNestedInput
   }
 
@@ -46856,7 +46870,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     device: DeviceCreateNestedOneWithoutEntitlementsInput
     tour: TourCreateNestedOneWithoutEntitlementsInput
-    activationCode?: ActivationCodeCreateNestedOneWithoutEntitlementInput
+    activationCode?: ActivationCodeCreateNestedOneWithoutEntitlementsInput
   }
 
   export type EntitlementUncheckedCreateInput = {
@@ -46882,7 +46896,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     device?: DeviceUpdateOneRequiredWithoutEntitlementsNestedInput
     tour?: TourUpdateOneRequiredWithoutEntitlementsNestedInput
-    activationCode?: ActivationCodeUpdateOneWithoutEntitlementNestedInput
+    activationCode?: ActivationCodeUpdateOneWithoutEntitlementsNestedInput
   }
 
   export type EntitlementUncheckedUpdateInput = {
@@ -49942,11 +49956,6 @@ export namespace Prisma {
     not?: NestedEnumActivationCodeStatusFilter<$PrismaModel> | $Enums.ActivationCodeStatus
   }
 
-  export type EntitlementNullableRelationFilter = {
-    is?: EntitlementWhereInput | null
-    isNot?: EntitlementWhereInput | null
-  }
-
   export type ActivationCodeCountOrderByAggregateInput = {
     id?: SortOrder
     code?: SortOrder
@@ -51488,10 +51497,11 @@ export namespace Prisma {
     set: string[]
   }
 
-  export type EntitlementCreateNestedOneWithoutActivationCodeInput = {
-    create?: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput>
-    connectOrCreate?: EntitlementCreateOrConnectWithoutActivationCodeInput
-    connect?: EntitlementWhereUniqueInput
+  export type EntitlementCreateNestedManyWithoutActivationCodeInput = {
+    create?: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput> | EntitlementCreateWithoutActivationCodeInput[] | EntitlementUncheckedCreateWithoutActivationCodeInput[]
+    connectOrCreate?: EntitlementCreateOrConnectWithoutActivationCodeInput | EntitlementCreateOrConnectWithoutActivationCodeInput[]
+    createMany?: EntitlementCreateManyActivationCodeInputEnvelope
+    connect?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
   }
 
   export type PaymentCreateNestedManyWithoutActivationCodeInput = {
@@ -51501,10 +51511,11 @@ export namespace Prisma {
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
   }
 
-  export type EntitlementUncheckedCreateNestedOneWithoutActivationCodeInput = {
-    create?: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput>
-    connectOrCreate?: EntitlementCreateOrConnectWithoutActivationCodeInput
-    connect?: EntitlementWhereUniqueInput
+  export type EntitlementUncheckedCreateNestedManyWithoutActivationCodeInput = {
+    create?: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput> | EntitlementCreateWithoutActivationCodeInput[] | EntitlementUncheckedCreateWithoutActivationCodeInput[]
+    connectOrCreate?: EntitlementCreateOrConnectWithoutActivationCodeInput | EntitlementCreateOrConnectWithoutActivationCodeInput[]
+    createMany?: EntitlementCreateManyActivationCodeInputEnvelope
+    connect?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
   }
 
   export type PaymentUncheckedCreateNestedManyWithoutActivationCodeInput = {
@@ -51528,14 +51539,18 @@ export namespace Prisma {
     push?: string | string[]
   }
 
-  export type EntitlementUpdateOneWithoutActivationCodeNestedInput = {
-    create?: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput>
-    connectOrCreate?: EntitlementCreateOrConnectWithoutActivationCodeInput
-    upsert?: EntitlementUpsertWithoutActivationCodeInput
-    disconnect?: EntitlementWhereInput | boolean
-    delete?: EntitlementWhereInput | boolean
-    connect?: EntitlementWhereUniqueInput
-    update?: XOR<XOR<EntitlementUpdateToOneWithWhereWithoutActivationCodeInput, EntitlementUpdateWithoutActivationCodeInput>, EntitlementUncheckedUpdateWithoutActivationCodeInput>
+  export type EntitlementUpdateManyWithoutActivationCodeNestedInput = {
+    create?: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput> | EntitlementCreateWithoutActivationCodeInput[] | EntitlementUncheckedCreateWithoutActivationCodeInput[]
+    connectOrCreate?: EntitlementCreateOrConnectWithoutActivationCodeInput | EntitlementCreateOrConnectWithoutActivationCodeInput[]
+    upsert?: EntitlementUpsertWithWhereUniqueWithoutActivationCodeInput | EntitlementUpsertWithWhereUniqueWithoutActivationCodeInput[]
+    createMany?: EntitlementCreateManyActivationCodeInputEnvelope
+    set?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
+    disconnect?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
+    delete?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
+    connect?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
+    update?: EntitlementUpdateWithWhereUniqueWithoutActivationCodeInput | EntitlementUpdateWithWhereUniqueWithoutActivationCodeInput[]
+    updateMany?: EntitlementUpdateManyWithWhereWithoutActivationCodeInput | EntitlementUpdateManyWithWhereWithoutActivationCodeInput[]
+    deleteMany?: EntitlementScalarWhereInput | EntitlementScalarWhereInput[]
   }
 
   export type PaymentUpdateManyWithoutActivationCodeNestedInput = {
@@ -51552,14 +51567,18 @@ export namespace Prisma {
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
   }
 
-  export type EntitlementUncheckedUpdateOneWithoutActivationCodeNestedInput = {
-    create?: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput>
-    connectOrCreate?: EntitlementCreateOrConnectWithoutActivationCodeInput
-    upsert?: EntitlementUpsertWithoutActivationCodeInput
-    disconnect?: EntitlementWhereInput | boolean
-    delete?: EntitlementWhereInput | boolean
-    connect?: EntitlementWhereUniqueInput
-    update?: XOR<XOR<EntitlementUpdateToOneWithWhereWithoutActivationCodeInput, EntitlementUpdateWithoutActivationCodeInput>, EntitlementUncheckedUpdateWithoutActivationCodeInput>
+  export type EntitlementUncheckedUpdateManyWithoutActivationCodeNestedInput = {
+    create?: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput> | EntitlementCreateWithoutActivationCodeInput[] | EntitlementUncheckedCreateWithoutActivationCodeInput[]
+    connectOrCreate?: EntitlementCreateOrConnectWithoutActivationCodeInput | EntitlementCreateOrConnectWithoutActivationCodeInput[]
+    upsert?: EntitlementUpsertWithWhereUniqueWithoutActivationCodeInput | EntitlementUpsertWithWhereUniqueWithoutActivationCodeInput[]
+    createMany?: EntitlementCreateManyActivationCodeInputEnvelope
+    set?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
+    disconnect?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
+    delete?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
+    connect?: EntitlementWhereUniqueInput | EntitlementWhereUniqueInput[]
+    update?: EntitlementUpdateWithWhereUniqueWithoutActivationCodeInput | EntitlementUpdateWithWhereUniqueWithoutActivationCodeInput[]
+    updateMany?: EntitlementUpdateManyWithWhereWithoutActivationCodeInput | EntitlementUpdateManyWithWhereWithoutActivationCodeInput[]
+    deleteMany?: EntitlementScalarWhereInput | EntitlementScalarWhereInput[]
   }
 
   export type PaymentUncheckedUpdateManyWithoutActivationCodeNestedInput = {
@@ -51630,9 +51649,9 @@ export namespace Prisma {
     connect?: TourWhereUniqueInput
   }
 
-  export type ActivationCodeCreateNestedOneWithoutEntitlementInput = {
-    create?: XOR<ActivationCodeCreateWithoutEntitlementInput, ActivationCodeUncheckedCreateWithoutEntitlementInput>
-    connectOrCreate?: ActivationCodeCreateOrConnectWithoutEntitlementInput
+  export type ActivationCodeCreateNestedOneWithoutEntitlementsInput = {
+    create?: XOR<ActivationCodeCreateWithoutEntitlementsInput, ActivationCodeUncheckedCreateWithoutEntitlementsInput>
+    connectOrCreate?: ActivationCodeCreateOrConnectWithoutEntitlementsInput
     connect?: ActivationCodeWhereUniqueInput
   }
 
@@ -51652,14 +51671,14 @@ export namespace Prisma {
     update?: XOR<XOR<TourUpdateToOneWithWhereWithoutEntitlementsInput, TourUpdateWithoutEntitlementsInput>, TourUncheckedUpdateWithoutEntitlementsInput>
   }
 
-  export type ActivationCodeUpdateOneWithoutEntitlementNestedInput = {
-    create?: XOR<ActivationCodeCreateWithoutEntitlementInput, ActivationCodeUncheckedCreateWithoutEntitlementInput>
-    connectOrCreate?: ActivationCodeCreateOrConnectWithoutEntitlementInput
-    upsert?: ActivationCodeUpsertWithoutEntitlementInput
+  export type ActivationCodeUpdateOneWithoutEntitlementsNestedInput = {
+    create?: XOR<ActivationCodeCreateWithoutEntitlementsInput, ActivationCodeUncheckedCreateWithoutEntitlementsInput>
+    connectOrCreate?: ActivationCodeCreateOrConnectWithoutEntitlementsInput
+    upsert?: ActivationCodeUpsertWithoutEntitlementsInput
     disconnect?: ActivationCodeWhereInput | boolean
     delete?: ActivationCodeWhereInput | boolean
     connect?: ActivationCodeWhereUniqueInput
-    update?: XOR<XOR<ActivationCodeUpdateToOneWithWhereWithoutEntitlementInput, ActivationCodeUpdateWithoutEntitlementInput>, ActivationCodeUncheckedUpdateWithoutEntitlementInput>
+    update?: XOR<XOR<ActivationCodeUpdateToOneWithWhereWithoutEntitlementsInput, ActivationCodeUpdateWithoutEntitlementsInput>, ActivationCodeUncheckedUpdateWithoutEntitlementsInput>
   }
 
   export type TourCreateNestedOneWithoutPaymentsInput = {
@@ -54797,7 +54816,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     device: DeviceCreateNestedOneWithoutEntitlementsInput
-    activationCode?: ActivationCodeCreateNestedOneWithoutEntitlementInput
+    activationCode?: ActivationCodeCreateNestedOneWithoutEntitlementsInput
   }
 
   export type EntitlementUncheckedCreateWithoutTourInput = {
@@ -56484,6 +56503,11 @@ export namespace Prisma {
     create: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput>
   }
 
+  export type EntitlementCreateManyActivationCodeInputEnvelope = {
+    data: EntitlementCreateManyActivationCodeInput | EntitlementCreateManyActivationCodeInput[]
+    skipDuplicates?: boolean
+  }
+
   export type PaymentCreateWithoutActivationCodeInput = {
     id?: string
     orderId: string
@@ -56526,39 +56550,20 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type EntitlementUpsertWithoutActivationCodeInput = {
+  export type EntitlementUpsertWithWhereUniqueWithoutActivationCodeInput = {
+    where: EntitlementWhereUniqueInput
     update: XOR<EntitlementUpdateWithoutActivationCodeInput, EntitlementUncheckedUpdateWithoutActivationCodeInput>
     create: XOR<EntitlementCreateWithoutActivationCodeInput, EntitlementUncheckedCreateWithoutActivationCodeInput>
-    where?: EntitlementWhereInput
   }
 
-  export type EntitlementUpdateToOneWithWhereWithoutActivationCodeInput = {
-    where?: EntitlementWhereInput
+  export type EntitlementUpdateWithWhereUniqueWithoutActivationCodeInput = {
+    where: EntitlementWhereUniqueInput
     data: XOR<EntitlementUpdateWithoutActivationCodeInput, EntitlementUncheckedUpdateWithoutActivationCodeInput>
   }
 
-  export type EntitlementUpdateWithoutActivationCodeInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    device?: DeviceUpdateOneRequiredWithoutEntitlementsNestedInput
-    tour?: TourUpdateOneRequiredWithoutEntitlementsNestedInput
-  }
-
-  export type EntitlementUncheckedUpdateWithoutActivationCodeInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    deviceId?: StringFieldUpdateOperationsInput | string
-    tourId?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  export type EntitlementUpdateManyWithWhereWithoutActivationCodeInput = {
+    where: EntitlementScalarWhereInput
+    data: XOR<EntitlementUpdateManyMutationInput, EntitlementUncheckedUpdateManyWithoutActivationCodeInput>
   }
 
   export type PaymentUpsertWithWhereUniqueWithoutActivationCodeInput = {
@@ -56586,7 +56591,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     tour: TourCreateNestedOneWithoutEntitlementsInput
-    activationCode?: ActivationCodeCreateNestedOneWithoutEntitlementInput
+    activationCode?: ActivationCodeCreateNestedOneWithoutEntitlementsInput
   }
 
   export type EntitlementUncheckedCreateWithoutDeviceInput = {
@@ -56773,7 +56778,7 @@ export namespace Prisma {
     create: XOR<TourCreateWithoutEntitlementsInput, TourUncheckedCreateWithoutEntitlementsInput>
   }
 
-  export type ActivationCodeCreateWithoutEntitlementInput = {
+  export type ActivationCodeCreateWithoutEntitlementsInput = {
     id?: string
     code: string
     codeHash: string
@@ -56791,7 +56796,7 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutActivationCodeInput
   }
 
-  export type ActivationCodeUncheckedCreateWithoutEntitlementInput = {
+  export type ActivationCodeUncheckedCreateWithoutEntitlementsInput = {
     id?: string
     code: string
     codeHash: string
@@ -56809,9 +56814,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutActivationCodeInput
   }
 
-  export type ActivationCodeCreateOrConnectWithoutEntitlementInput = {
+  export type ActivationCodeCreateOrConnectWithoutEntitlementsInput = {
     where: ActivationCodeWhereUniqueInput
-    create: XOR<ActivationCodeCreateWithoutEntitlementInput, ActivationCodeUncheckedCreateWithoutEntitlementInput>
+    create: XOR<ActivationCodeCreateWithoutEntitlementsInput, ActivationCodeUncheckedCreateWithoutEntitlementsInput>
   }
 
   export type DeviceUpsertWithoutEntitlementsInput = {
@@ -56972,18 +56977,18 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutTourNestedInput
   }
 
-  export type ActivationCodeUpsertWithoutEntitlementInput = {
-    update: XOR<ActivationCodeUpdateWithoutEntitlementInput, ActivationCodeUncheckedUpdateWithoutEntitlementInput>
-    create: XOR<ActivationCodeCreateWithoutEntitlementInput, ActivationCodeUncheckedCreateWithoutEntitlementInput>
+  export type ActivationCodeUpsertWithoutEntitlementsInput = {
+    update: XOR<ActivationCodeUpdateWithoutEntitlementsInput, ActivationCodeUncheckedUpdateWithoutEntitlementsInput>
+    create: XOR<ActivationCodeCreateWithoutEntitlementsInput, ActivationCodeUncheckedCreateWithoutEntitlementsInput>
     where?: ActivationCodeWhereInput
   }
 
-  export type ActivationCodeUpdateToOneWithWhereWithoutEntitlementInput = {
+  export type ActivationCodeUpdateToOneWithWhereWithoutEntitlementsInput = {
     where?: ActivationCodeWhereInput
-    data: XOR<ActivationCodeUpdateWithoutEntitlementInput, ActivationCodeUncheckedUpdateWithoutEntitlementInput>
+    data: XOR<ActivationCodeUpdateWithoutEntitlementsInput, ActivationCodeUncheckedUpdateWithoutEntitlementsInput>
   }
 
-  export type ActivationCodeUpdateWithoutEntitlementInput = {
+  export type ActivationCodeUpdateWithoutEntitlementsInput = {
     id?: StringFieldUpdateOperationsInput | string
     code?: StringFieldUpdateOperationsInput | string
     codeHash?: StringFieldUpdateOperationsInput | string
@@ -57001,7 +57006,7 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutActivationCodeNestedInput
   }
 
-  export type ActivationCodeUncheckedUpdateWithoutEntitlementInput = {
+  export type ActivationCodeUncheckedUpdateWithoutEntitlementsInput = {
     id?: StringFieldUpdateOperationsInput | string
     code?: StringFieldUpdateOperationsInput | string
     codeHash?: StringFieldUpdateOperationsInput | string
@@ -57386,7 +57391,7 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    entitlement?: EntitlementCreateNestedOneWithoutActivationCodeInput
+    entitlements?: EntitlementCreateNestedManyWithoutActivationCodeInput
   }
 
   export type ActivationCodeUncheckedCreateWithoutPaymentsInput = {
@@ -57404,7 +57409,7 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    entitlement?: EntitlementUncheckedCreateNestedOneWithoutActivationCodeInput
+    entitlements?: EntitlementUncheckedCreateNestedManyWithoutActivationCodeInput
   }
 
   export type ActivationCodeCreateOrConnectWithoutPaymentsInput = {
@@ -57802,7 +57807,7 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    entitlement?: EntitlementUpdateOneWithoutActivationCodeNestedInput
+    entitlements?: EntitlementUpdateManyWithoutActivationCodeNestedInput
   }
 
   export type ActivationCodeUncheckedUpdateWithoutPaymentsInput = {
@@ -57820,7 +57825,7 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    entitlement?: EntitlementUncheckedUpdateOneWithoutActivationCodeNestedInput
+    entitlements?: EntitlementUncheckedUpdateManyWithoutActivationCodeNestedInput
   }
 
   export type GeoGuideChatMessageCreateWithoutSessionInput = {
@@ -59253,7 +59258,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     device?: DeviceUpdateOneRequiredWithoutEntitlementsNestedInput
-    activationCode?: ActivationCodeUpdateOneWithoutEntitlementNestedInput
+    activationCode?: ActivationCodeUpdateOneWithoutEntitlementsNestedInput
   }
 
   export type EntitlementUncheckedUpdateWithoutTourInput = {
@@ -59652,6 +59657,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type EntitlementCreateManyActivationCodeInput = {
+    id?: string
+    deviceId: string
+    tourId: string
+    type?: string
+    activatedAt?: Date | string
+    expiresAt: Date | string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type PaymentCreateManyActivationCodeInput = {
     id?: string
     orderId: string
@@ -59666,6 +59683,42 @@ export namespace Prisma {
     completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type EntitlementUpdateWithoutActivationCodeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    device?: DeviceUpdateOneRequiredWithoutEntitlementsNestedInput
+    tour?: TourUpdateOneRequiredWithoutEntitlementsNestedInput
+  }
+
+  export type EntitlementUncheckedUpdateWithoutActivationCodeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    deviceId?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EntitlementUncheckedUpdateManyWithoutActivationCodeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    deviceId?: StringFieldUpdateOperationsInput | string
+    tourId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    activatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PaymentUpdateWithoutActivationCodeInput = {
@@ -59737,7 +59790,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tour?: TourUpdateOneRequiredWithoutEntitlementsNestedInput
-    activationCode?: ActivationCodeUpdateOneWithoutEntitlementNestedInput
+    activationCode?: ActivationCodeUpdateOneWithoutEntitlementsNestedInput
   }
 
   export type EntitlementUncheckedUpdateWithoutDeviceInput = {
