@@ -27,6 +27,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if this is a multi-use code
+    const isMultiUse = activationCode.notes?.startsWith("MULTI_USE:");
+
     // Check status
     if (activationCode.status === "REVOKED") {
       return NextResponse.json(
@@ -42,8 +45,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If already redeemed, check if same device
-    if (activationCode.status === "REDEEMED") {
+    // If already redeemed and NOT multi-use, check if same device
+    if (activationCode.status === "REDEEMED" && !isMultiUse) {
       if (activationCode.redeemedBy === deviceId) {
         // Same device - allow access (return existing entitlement)
         const existingEntitlement = await prisma.entitlement.findFirst({
@@ -142,6 +145,32 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + activationCode.durationDays);
 
+    // For multi-use codes, create entitlements for ALL tours in the code
+    if (isMultiUse && activationCode.tourIds && activationCode.tourIds.length > 0) {
+      for (const tid of activationCode.tourIds) {
+        const tourExpiresAt = new Date();
+        tourExpiresAt.setDate(tourExpiresAt.getDate() + activationCode.durationDays);
+
+        await prisma.entitlement.upsert({
+          where: {
+            deviceId_tourId: { deviceId: device.id, tourId: tid },
+          },
+          update: {
+            expiresAt: tourExpiresAt,
+            isActive: true,
+            activationCodeId: activationCode.id,
+          },
+          create: {
+            deviceId: device.id,
+            tourId: tid,
+            activationCodeId: activationCode.id,
+            expiresAt: tourExpiresAt,
+            isActive: true,
+          },
+        });
+      }
+    }
+
     // Upsert entitlement (deviceId + tourId unique - update if already exists)
     const entitlement = await prisma.entitlement.upsert({
       where: {
@@ -161,15 +190,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Update activation code
-    await prisma.activationCode.update({
-      where: { id: activationCode.id },
-      data: {
-        status: "REDEEMED",
-        redeemedAt: new Date(),
-        redeemedBy: deviceId,
-      },
-    });
+    // Update activation code (skip for multi-use codes)
+    if (!isMultiUse) {
+      await prisma.activationCode.update({
+        where: { id: activationCode.id },
+        data: {
+          status: "REDEEMED",
+          redeemedAt: new Date(),
+          redeemedBy: deviceId,
+        },
+      });
+    }
 
     // Get museum slug for redirect
     let museumSlug = "";
