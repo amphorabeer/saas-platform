@@ -1,22 +1,19 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   INFO_LANGS,
-  INFO_LANG_FLAGS,
   LANG_FLAGS,
   type InfoLang,
   type MuseumLang,
   type MuseumForInfo,
-  getMuseumLanguages,
-  getMuseumName,
-  getMuseumCity,
-  getPriceRange,
-  formatPrice,
 } from "../types";
+import { MuseumCard } from "./MuseumCard";
+import { TrackedHeader } from "./TrackedHeader";
+import { TrackedCTA } from "./TrackedCTA";
+import { TrackedFAQ } from "./TrackedFAQ";
 
 import enMessages from "../messages/en.json";
 import ruMessages from "../messages/ru.json";
@@ -321,29 +318,7 @@ export default async function InfoPage({ params }: { params: { lang: string } })
     <div className="min-h-screen bg-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 text-[#E67E22] font-bold text-xl">
-            <span className="text-2xl">🎧</span>
-            <span>GeoGuide</span>
-          </Link>
-          <nav className="flex items-center gap-2 flex-wrap justify-end">
-            {INFO_LANGS.map((l) => (
-              <Link
-                key={l}
-                href={`/info/${l}`}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                  l === lang
-                    ? "bg-[#E67E22] text-white border-[#E67E22]"
-                    : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-orange-50 hover:border-[#E67E22]"
-                }`}
-              >
-                {INFO_LANG_FLAGS[l]} {l.toUpperCase()}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </header>
+      <TrackedHeader currentLang={lang} />
 
       <section className="relative overflow-hidden bg-gradient-to-br from-[#FDF4E8] to-white py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -352,18 +327,24 @@ export default async function InfoPage({ params }: { params: { lang: string } })
             {m.hero.subtitle.replace("{count}", String(availableLangs.length))}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link
+            <TrackedCTA
               href="#museums"
-              className="inline-block bg-[#E67E22] hover:bg-[#D35400] text-white font-semibold px-8 py-3.5 rounded-full text-base shadow-lg shadow-orange-200 transition-all hover:-translate-y-0.5"
+              label={m.hero.cta_primary}
+              lang={lang}
+              section="hero"
+              variant="primary"
             >
               {m.hero.cta_primary} →
-            </Link>
-            <Link
+            </TrackedCTA>
+            <TrackedCTA
               href="#how"
-              className="inline-block bg-white hover:bg-gray-50 text-gray-800 font-medium px-8 py-3.5 rounded-full text-base border border-gray-200 transition-colors"
+              label={m.hero.cta_secondary}
+              lang={lang}
+              section="hero"
+              variant="secondary"
             >
               {m.hero.cta_secondary}
-            </Link>
+            </TrackedCTA>
           </div>
           <div className="mt-10 flex flex-wrap justify-center gap-2 text-2xl md:text-3xl opacity-80">
             {availableLangs.map((l) => (
@@ -412,58 +393,14 @@ export default async function InfoPage({ params }: { params: { lang: string } })
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-10 text-center text-gray-500">{m.museums.empty}</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {museums.map((museum) => {
-              const langs = getMuseumLanguages(museum);
-              const priceRange = getPriceRange(museum);
-
-              return (
-                <Link
-                  key={museum.id}
-                  href={`/museum/${museum.slug}`}
-                  className="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all hover:border-[#E67E22] hover:-translate-y-1 hover:shadow-xl"
-                >
-                  {museum.coverImage && (
-                    <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
-                      <Image
-                        src={museum.coverImage}
-                        alt={getMuseumName(museum, lang)}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover transition-transform group-hover:scale-105"
-                      />
-                    </div>
-                  )}
-                  <div className="p-5">
-                    <h3 className="font-semibold text-gray-900 mb-1.5 group-hover:text-[#E67E22] transition-colors">
-                      {getMuseumName(museum, lang)}
-                    </h3>
-                    {getMuseumCity(museum, lang) && (
-                      <p className="text-xs text-gray-500 mb-3 flex items-center gap-1">
-                        <span>📍</span>
-                        <span>{getMuseumCity(museum, lang)}</span>
-                      </p>
-                    )}
-                    {priceRange && (
-                      <div className="inline-block bg-[#FDF4E8] text-[#D35400] px-2.5 py-1 rounded-md text-xs font-semibold mb-3">
-                        {formatPrice(priceRange, lang)}
-                      </div>
-                    )}
-                    {langs.length > 0 && (
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1.5">{m.museums.languages_label}</div>
-                        <div className="flex flex-wrap gap-1 text-base">
-                          {langs.map((l) => (
-                            <span key={l} title={l}>
-                              {LANG_FLAGS[l]}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
+            {museums.map((museum) => (
+              <MuseumCard
+                key={museum.id}
+                museum={museum}
+                lang={lang}
+                languagesLabel={m.museums.languages_label}
+              />
+            ))}
           </div>
         )}
       </section>
@@ -479,28 +416,21 @@ export default async function InfoPage({ params }: { params: { lang: string } })
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 border-b-[3px] border-[#E67E22] inline-block pb-2">
           {m.faq.title}
         </h2>
-        <div className="space-y-2">
-          {m.faq.items.map((item, i) => (
-            <details key={i} className="group bg-white border border-gray-200 rounded-lg">
-              <summary className="cursor-pointer font-semibold text-gray-900 p-4 flex items-center justify-between list-none">
-                <span>{item.q}</span>
-                <span className="text-[#E67E22] text-xl transition-transform group-open:rotate-45">+</span>
-              </summary>
-              <div className="px-4 pb-4 text-gray-600 text-sm leading-relaxed">{item.a}</div>
-            </details>
-          ))}
-        </div>
+        <TrackedFAQ items={m.faq.items} lang={lang} />
       </section>
 
       <section className="max-w-3xl mx-auto px-4 py-14 text-center">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{m.final_cta.title}</h2>
         <p className="text-gray-600 mb-6">{m.final_cta.description}</p>
-        <Link
+        <TrackedCTA
           href="#museums"
-          className="inline-block bg-[#E67E22] hover:bg-[#D35400] text-white font-semibold px-8 py-3.5 rounded-full text-base shadow-lg shadow-orange-200 transition-all"
+          label={m.final_cta.cta}
+          lang={lang}
+          section="final_cta"
+          variant="primary"
         >
           {m.final_cta.cta}
-        </Link>
+        </TrackedCTA>
       </section>
 
       <footer className="bg-gray-900 text-gray-300 py-10 px-4 mt-10">
