@@ -63,5 +63,420 @@
   },
   "Footer": {
     "copyright": "© 2024 GeoBiz. All rights reserved."
+  },
+  "Common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "or": "or"
+  },
+  "Auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Enter your account credentials",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "googleSignIn": "Sign in with Google",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Sign Up"
+    },
+    "signup": {
+      "loading": "Loading...",
+      "selectedPlan": "Selected plan:",
+      "changePlan": "Change",
+      "personalInfo": "👤 Personal Information",
+      "fullName": "Full Name *",
+      "fullNamePlaceholder": "John Doe",
+      "email": "Email *",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password *",
+      "passwordPlaceholder": "minimum 6 characters",
+      "confirmPassword": "Confirm Password *",
+      "confirmPasswordPlaceholder": "Confirm password",
+      "companyName": "Company Name *",
+      "taxId": "Tax ID *",
+      "phone": "Phone *",
+      "phonePlaceholder": "+995 XXX XXX XXX",
+      "address": "Address *",
+      "addressPlaceholder": "Street, Number",
+      "city": "City *",
+      "cityPlaceholder": "Tbilisi",
+      "country": "Country",
+      "website": "Website",
+      "bankInfo": "🏦 Banking Information",
+      "bankName": "Bank Name",
+      "bankNamePlaceholder": "Bank of Georgia",
+      "bankAccount": "Bank Account",
+      "bankAccountPlaceholder": "GE00TB0000000000000000",
+      "submit": "Sign Up",
+      "alreadyHaveAccount": "Already have an account?",
+      "loginLink": "Sign In",
+      "restaurantType": "Restaurant Type *",
+      "saveCode": "Save this code",
+      "loginToSystem": "Login to system",
+      "errors": {
+        "passwordsMismatch": "Passwords do not match",
+        "passwordTooShort": "Password must be at least 6 characters",
+        "fillAllRequired": "Please fill all required fields",
+        "registrationError": "Registration error",
+        "systemError": "System error. Please try again."
+      },
+      "modules": {
+        "hotel": {
+          "title": "Sign Up",
+          "subtitle": "Create your hotel account",
+          "bizLabel": "Hotel Name *",
+          "bizPlaceholder": "Hotel Tbilisi",
+          "bizSectionTitle": "Hotel Information",
+          "companyPlaceholder": "Hotel LLC",
+          "successTitle": "Registration successful!",
+          "successSubtitle": "Your hotel system is ready",
+          "codeLabel": "Hotel Code:"
+        },
+        "shop": {
+          "title": "Sign Up",
+          "subtitle": "Create your shop account",
+          "bizLabel": "Shop Name *",
+          "bizPlaceholder": "My Shop",
+          "bizSectionTitle": "Shop Information",
+          "companyPlaceholder": "My Shop LLC",
+          "successTitle": "Registration successful!",
+          "successSubtitle": "Your POS system is ready",
+          "codeLabel": "Shop Code:"
+        },
+        "restaurant": {
+          "title": "Sign Up",
+          "subtitle": "Create your restaurant account",
+          "bizLabel": "Restaurant Name *",
+          "bizPlaceholder": "My Restaurant",
+          "bizSectionTitle": "Restaurant Information",
+          "companyPlaceholder": "Restaurant LLC",
+          "successTitle": "Registration successful!",
+          "successSubtitle": "Your RestoPOS system is ready",
+          "codeLabel": "Restaurant Code:"
+        },
+        "beauty": {
+          "title": "Sign Up",
+          "subtitle": "Create your salon account",
+          "bizLabel": "Salon Name *",
+          "bizPlaceholder": "Beauty House",
+          "bizSectionTitle": "Salon Information",
+          "companyPlaceholder": "Salon LLC",
+          "successTitle": "Registration successful!",
+          "successSubtitle": "Your BeautySalon PRO system is ready",
+          "codeLabel": "Salon Code:"
+        }
+      },
+      "restaurantTypes": {
+        "restaurant": "Restaurant",
+        "cafe": "Cafe",
+        "bar": "Bar",
+        "pub": "Pub",
+        "bistro": "Bistro",
+        "fastfood": "Fast Food"
+      },
+      "countries": {
+        "Georgia": "Georgia",
+        "Azerbaijan": "Azerbaijan",
+        "Armenia": "Armenia"
+      },
+      "plans": {
+        "STARTER": "Starter (Trial)",
+        "PROFESSIONAL": "Professional",
+        "ENTERPRISE": "Enterprise"
+      }
+    }
+  },
+  "Pricing": {
+    "back": "Back",
+    "pricesTitle": "Pricing",
+    "pricesSubtitle": "Choose the plan that fits you",
+    "starterFor": "For getting started",
+    "professionalFor": "For professional businesses",
+    "enterpriseFor": "For large businesses",
+    "mostPopular": "Most popular",
+    "free": "Free",
+    "perMonth": "/month",
+    "ctaStart": "Get started",
+    "ctaSelect": "Select",
+    "faqTitle": "Frequently asked questions",
+    "contactTitle": "Contact us",
+    "contactSubtitle": "Send us your contact details and we will get back to you",
+    "contactName": "Name",
+    "contactNamePlaceholder": "Your name",
+    "contactEmail": "Email",
+    "contactEmailPlaceholder": "your@email.com",
+    "contactPhone": "Phone",
+    "contactPhonePlaceholder": "+995 555 123 456",
+    "contactMessage": "Message",
+    "contactMessagePlaceholder": "Your message...",
+    "contactSubmit": "Send",
+    "contactSending": "Sending...",
+    "contactSuccess": "Thank you!",
+    "contactSuccessText": "Your message was sent successfully. We will contact you soon.",
+    "contactNewMessage": "New message",
+    "contactError": "Error sending. Please try again.",
+    "hotelFeaturesTitle": "🚀 New features",
+    "hotelFeaturesSubtitle": "Boost your hotel efficiency with our latest integrations",
+    "channelManager": {
+      "title": "Channel Manager",
+      "subtitle": "Booking.com & Airbnb integration",
+      "description": "Connect your hotel to Booking.com and Airbnb. Reservations sync automatically — no more manual updates.",
+      "feature1": "Automatic calendar synchronization",
+      "feature2": "Double-booking prevention",
+      "feature3": "iCal import/export",
+      "feature4": "Real-time updates"
+    },
+    "messengerBot": {
+      "title": "Facebook Messenger Bot",
+      "subtitle": "24/7 automated booking",
+      "description": "Guests can book rooms directly from Facebook Messenger. The bot responds automatically and creates reservations in your calendar.",
+      "feature1": "24/7 automated replies",
+      "feature2": "Show availability and rates",
+      "feature3": "Online booking from Messenger",
+      "feature4": "Automatic reservation in your PMS"
+    },
+    "shopFeaturesTitle": "🚀 Core features",
+    "shopFeaturesSubtitle": "Modern POS with fiscal integration and point-of-sale hardware",
+    "fiscal": {
+      "title": "Fiscal integration",
+      "subtitle": "Kasa.ge & Daisy Expert",
+      "description": "Every sale is printed on a fiscal receipt automatically. Kasa.ge and Daisy Expert fiscal devices are supported."
+    },
+    "hardware": {
+      "title": "Hardware compatibility",
+      "subtitle": "Epson, Bixolon, Star, Honeywell, ACLAS, Rongta, Xprinter",
+      "description": "Receipt printers, barcode scanners, and fiscal devices — major manufacturers are supported."
+    },
+    "rsge": {
+      "title": "RS.ge integration",
+      "subtitle": "Automatic reporting",
+      "description": "Automatically send sales data to RS.ge for regulatory compliance."
+    }
+  },
+  "Modules2": {
+    "hotel": {
+      "name": "Hotel Management",
+      "description": "Complete solution for hotel management",
+      "starterDuration": "15-day trial",
+      "starterFeatures": [
+        "Up to 10 rooms",
+        "Calendar & Reservations",
+        "Check-in / Check-out",
+        "Night Audit",
+        "1 user"
+      ],
+      "professionalFeatures": [
+        "11-30 rooms",
+        "All Starter features",
+        "Finance & Reports",
+        "Housekeeping management",
+        "🔗 Channel Manager (Booking.com, Airbnb)",
+        "🤖 Facebook Messenger Bot",
+        "5 users"
+      ],
+      "enterpriseFeatures": [
+        "31+ rooms (unlimited)",
+        "All features",
+        "Analytics & Statistics",
+        "🔗 Channel Manager (all channels)",
+        "🤖 Facebook Messenger Bot",
+        "Multiple locations",
+        "User roles",
+        "Unlimited users"
+      ],
+      "faq": [
+        {"q": "How does the reservation system work?", "a": "The system lets you easily manage room reservations and check-in/check-out with a visual calendar interface."},
+        {"q": "What is Night Audit?", "a": "Night Audit is the closing of daily financial operations and the generation of reports."},
+        {"q": "Can I manage multiple branches?", "a": "The Enterprise package includes multi-location management from a single panel."},
+        {"q": "What is Channel Manager?", "a": "Channel Manager automatically syncs your calendar with Booking.com and Airbnb. Reservations update in real time, preventing double-bookings."},
+        {"q": "How does the Facebook Messenger Bot work?", "a": "The bot answers your guests on Facebook Messenger 24/7. It shows prices, checks availability, and automatically creates reservations in your calendar."}
+      ]
+    },
+    "restaurant": {
+      "name": "Restaurant Management System",
+      "description": "POS terminal, KDS kitchen, table management, reservations, food cost, analytics",
+      "starterDuration": "15 days",
+      "starterFeatures": [
+        "Menu management (categories, dishes, modifiers, combo sets)",
+        "Table floor plan + zones",
+        "POS terminal (Dine In, Take Away, Delivery)",
+        "KDS kitchen (real-time)",
+        "Waiter management + PIN authorization",
+        "Inventory / Recipes / Food Cost",
+        "Reports (Z-report, analytics)",
+        "Reservations",
+        "AI assistant",
+        "Customer database"
+      ],
+      "professionalFeatures": [
+        "All Starter features",
+        "Multi-branch management",
+        "Advanced analytics & dashboards",
+        "Glovo / Wolt integration",
+        "SMS notifications (reservations)",
+        "RS.ge fiscal cash register",
+        "Priority support",
+        "Up to 20 users"
+      ],
+      "enterpriseFeatures": [
+        "All Professional features",
+        "Unlimited branches",
+        "Custom integrations (API)",
+        "Priority support 24/7",
+        "SLA guarantee",
+        "Staff training",
+        "Data export & analytics",
+        "Unlimited users"
+      ],
+      "faq": [
+        {"q": "How does table reservation work?", "a": "The system lets you easily manage table reservations with a calendar, overlap checks, and automatic status changes."},
+        {"q": "What is the KDS kitchen?", "a": "Kitchen Display System — orders appear in real time on screens in the kitchen, organized by stations (HOT, COLD, BAR, PIZZA, GRILL, PASTRY)."},
+        {"q": "How does Food Cost work?", "a": "Each dish is linked to a recipe with ingredients. When an order is placed, inventory is automatically deducted and Food Cost is calculated."},
+        {"q": "What is the Z-report?", "a": "At the end of the day a Z-report is generated — a complete financial report: sales, payment methods, average check, top dishes."},
+        {"q": "Can I receive delivery orders?", "a": "Yes, the POS terminal supports Dine In, Take Away, and Delivery orders with customer addresses."}
+      ]
+    },
+    "beauty": {
+      "name": "Beauty Salon Management",
+      "description": "Bookings, clients, POS, inventory, finance, loyalty, online booking, AI assistant",
+      "starterDuration": "15 days",
+      "starterFeatures": [
+        "Up to 3 specialists",
+        "Booking calendar",
+        "Client database (500)",
+        "POS — services + products",
+        "Inventory management",
+        "Reports & finance",
+        "Online booking (public page)",
+        "1 user"
+      ],
+      "professionalFeatures": [
+        "Up to 10 specialists",
+        "All Starter features",
+        "Loyalty program (points, tiers, gift cards)",
+        "Client reviews",
+        "AI assistant (Claude)",
+        "Commission management",
+        "CSV export",
+        "5 users"
+      ],
+      "enterpriseFeatures": [
+        "Unlimited specialists",
+        "All features",
+        "Multiple locations",
+        "SMS notifications",
+        "User roles",
+        "Unlimited users",
+        "Priority support"
+      ],
+      "faq": [
+        {"q": "How does online booking work?", "a": "The client opens your link, selects a service, specialist, date/time, and books. You confirm from the admin panel."},
+        {"q": "How does the loyalty system work?", "a": "Clients earn 1 point for every 10₾ spent. There are 4 tiers: Standard, Silver (100+), Gold (500+), VIP (1000+). You can also create gift cards."},
+        {"q": "What is the AI assistant?", "a": "A Claude-based chatbot that knows your salon's data — revenue, bookings, inventory — and gives you business recommendations."},
+        {"q": "How does the POS work?", "a": "With the POS you sell services and products with discounts and various payment methods. Inventory is deducted automatically."},
+        {"q": "Can I track specialist commissions?", "a": "Yes, the finance module shows each specialist's revenue, sales, and commission — percentage or fixed."}
+      ]
+    },
+    "shop": {
+      "name": "Shop Management System",
+      "description": "Modern POS system — POS terminal, inventory management, fiscal integration, RS.ge",
+      "starterDuration": "month",
+      "starterFeatures": [
+        "1 cashier",
+        "500 products",
+        "POS terminal",
+        "Inventory management",
+        "Receipt printing"
+      ],
+      "professionalFeatures": [
+        "5 cashiers",
+        "Unlimited products",
+        "All features",
+        "Barcode scanner",
+        "Fiscal device (Kasa.ge / Daisy)",
+        "RS.ge integration",
+        "User management"
+      ],
+      "enterpriseFeatures": [
+        "Unlimited cashiers",
+        "Multiple locations",
+        "Online store (WooCommerce / Shopify)",
+        "Bank terminal ECR integration",
+        "API access",
+        "Priority support"
+      ],
+      "faq": [
+        {"q": "How does fiscal device integration work?", "a": "The system supports Kasa.ge and Daisy Expert fiscal devices. Every sale is automatically printed on a fiscal receipt."},
+        {"q": "Which barcode scanners work?", "a": "USB and Bluetooth barcode scanners are supported — Epson, Bixolon, Star, Honeywell, ACLAS, Rongta, Xprinter."},
+        {"q": "Can I import data from my old system?", "a": "Yes. You can import products, categories, suppliers, and customers in CSV/Excel format."},
+        {"q": "What is RS.ge integration?", "a": "RS.ge integration lets you automatically send sales data to the RS.ge system for legal compliance."},
+        {"q": "How does online store integration work?", "a": "The Enterprise plan includes WooCommerce and Shopify integration — inventory and turnover sync with the online store."},
+        {"q": "What hardware works with the system?", "a": "Receipt printers (Epson, Bixolon, Star, Xprinter), barcode scanners, and Kasa.ge / Daisy fiscal devices are supported."}
+      ]
+    },
+    "brewery": {
+      "name": "Brewery Management",
+      "description": "Production, inventory, and sales management",
+      "starterDuration": "15-day trial",
+      "starterFeatures": [
+        "Up to 5 tanks",
+        "Basic production cycle",
+        "Up to 10 recipes",
+        "Raw materials management",
+        "CIP / tank cleaning",
+        "1 user"
+      ],
+      "professionalFeatures": [
+        "6-14 tanks",
+        "Full production + SPLIT/BLEND",
+        "Unlimited recipes",
+        "Full inventory + kegs",
+        "CIP / tank cleaning",
+        "Finance management",
+        "3 users"
+      ],
+      "enterpriseFeatures": [
+        "15+ tanks (unlimited)",
+        "All features",
+        "CIP / tank cleaning",
+        "Advanced analytics",
+        "User roles",
+        "Unlimited users",
+        "Priority support"
+      ],
+      "faq": [
+        {"q": "How does recipe management work?", "a": "The system lets you create and manage beer recipes, ingredients, and production processes."},
+        {"q": "What is SPLIT/BLEND?", "a": "SPLIT lets you divide one batch into multiple parts, BLEND lets you mix multiple batches together."},
+        {"q": "What is CIP?", "a": "Clean-In-Place — an automatic tank cleaning system to ensure hygiene."}
+      ]
+    },
+    "winery": {
+      "name": "Winery Management",
+      "description": "Vineyard, production, and barrel management",
+      "starterDuration": "15 days",
+      "starterFeatures": ["1 winery", "50 barrels", "Production management"],
+      "professionalFeatures": ["1 winery", "200 barrels", "All features", "Lab analysis"],
+      "enterpriseFeatures": ["Multiple wineries", "Unlimited barrels", "Custom features", "Export documentation"],
+      "faq": [
+        {"q": "How does barrel management work?", "a": "The system lets you manage barrels, their age, and location."}
+      ]
+    },
+    "distillery": {
+      "name": "Distillery Management",
+      "description": "Distillation, barrel, and sales management",
+      "starterDuration": "15 days",
+      "starterFeatures": ["1 facility", "Distillation management", "Basic features"],
+      "professionalFeatures": ["1 facility", "Barrel management", "All features", "Quality control"],
+      "enterpriseFeatures": ["Multiple facilities", "Unlimited barrels", "Custom features", "Regulatory compliance"],
+      "faq": [
+        {"q": "How does distillation process management work?", "a": "The system lets you manage distillation processes, recipes, and barrel ages."}
+      ]
+    }
   }
 }

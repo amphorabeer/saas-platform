@@ -2,10 +2,23 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "@saas-platform/ui";
+import { useTranslations } from "next-intl";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+} from "@saas-platform/ui";
 import { Navigation } from "../../../../components/navigation";
 
 export default function LoginPage() {
+  const t = useTranslations("Auth.login");
+  const tCommon = useTranslations("Common");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -22,19 +35,21 @@ export default function LoginPage() {
       <div className="container mx-auto px-4 py-24 flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">შესვლა</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              {t("title")}
+            </CardTitle>
             <CardDescription className="text-center">
-              შეიყვანეთ თქვენი ანგარიშის მონაცემები
+              {t("subtitle")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">ელფოსტა</Label>
+                <Label htmlFor="email">{t("email")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder={t("emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -42,11 +57,11 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">პაროლი</Label>
+                <Label htmlFor="password">{t("password")}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={t("passwordPlaceholder")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -63,22 +78,27 @@ export default function LoginPage() {
                     className="h-4 w-4 rounded border-gray-300"
                   />
                   <Label htmlFor="remember" className="text-sm">
-                    დამახსოვრება
+                    {t("rememberMe")}
                   </Label>
                 </div>
-                <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
-                  პაროლის აღდგენა
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  {t("forgotPassword")}
                 </Link>
               </div>
               <Button type="submit" className="w-full min-h-[44px]">
-                შესვლა
+                {t("submit")}
               </Button>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">ან</span>
+                  <span className="bg-card px-2 text-muted-foreground">
+                    {tCommon("or")}
+                  </span>
                 </div>
               </div>
               <Button type="button" variant="outline" className="w-full min-h-[44px]">
@@ -100,12 +120,12 @@ export default function LoginPage() {
                     fill="#EA4335"
                   />
                 </svg>
-                შესვლა Google-ით
+                {t("googleSignIn")}
               </Button>
               <div className="text-center text-sm">
-                <span className="text-muted-foreground">არ გაქვთ ანგარიში? </span>
+                <span className="text-muted-foreground">{t("noAccount")} </span>
                 <Link href="/auth/signup" className="text-primary hover:underline">
-                  რეგისტრაცია
+                  {t("signupLink")}
                 </Link>
               </div>
             </form>
@@ -115,4 +135,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
