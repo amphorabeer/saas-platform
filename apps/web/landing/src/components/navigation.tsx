@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@saas-platform/ui";
 import { useTheme } from "next-themes";
@@ -8,7 +8,12 @@ import { Moon, Sun, Menu, X } from "lucide-react";
 
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const menuItems = [
     { label: "მთავარი", href: "/" },
@@ -21,8 +26,8 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <span className="text-2xl">🚀</span>
-            <span>SaaS Platform</span>
+            <span className="text-2xl" aria-hidden="true">🚀</span>
+            <span>GeoBiz</span>
           </Link>
 
           {/* Desktop Menu */}
@@ -38,18 +43,9 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Right Side Actions */}
+          {/* Right Side Actions — ყველა icon-ი mounted-ის უკან */}
           <div className="flex items-center gap-4">
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
-
-            {/* Auth Buttons - Desktop */}
+            {/* Auth Buttons - Desktop (icon-ები არ აქვს, ყოველთვის ჩანს) */}
             <div className="hidden md:flex items-center gap-3">
               <Button variant="ghost" asChild>
                 <Link href="/auth/login">შესვლა</Link>
@@ -59,19 +55,47 @@ export function Navigation() {
               </Button>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            {/* Theme Toggle + Mobile Menu Button — საჭიროა mounted */}
+            {mounted ? (
+              <>
+                {/* Dark Mode Toggle */}
+                <button
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  aria-label="Toggle theme"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </button>
+
+                {/* Mobile Menu Button */}
+                <button
+                  className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  aria-label="Toggle menu"
+                >
+                  {mobileMenuOpen ? (
+                    <X className="h-5 w-5" />
+                  ) : (
+                    <Menu className="h-5 w-5" />
+                  )}
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Placeholder-ები იგივე ზომის — layout shift-ის თავიდან ასაცილებლად */}
+                <div className="p-2 w-9 h-9" aria-hidden="true" />
+                <div className="md:hidden p-2 w-9 h-9" aria-hidden="true" />
+              </>
+            )}
           </div>
         </div>
 
         {/* Mobile Menu */}
-        {mobileMenuOpen && (
+        {mounted && mobileMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col gap-4">
               {menuItems.map((item) => (
@@ -103,4 +127,3 @@ export function Navigation() {
     </nav>
   );
 }
-
