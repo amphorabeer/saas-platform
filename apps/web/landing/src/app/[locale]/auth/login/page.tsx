@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "@saas-platform/ui";
-import { Navigation } from "../../../components/navigation";
+import { Navigation } from "../../../../components/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

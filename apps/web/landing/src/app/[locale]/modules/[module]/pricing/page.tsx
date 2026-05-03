@@ -4,7 +4,7 @@ import { useState } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "@saas-platform/ui";
-import { Navigation } from "../../../../components/navigation";
+import { Navigation } from "../../../../../components/navigation";
 import { ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
 const modules = ["hotel", "restaurant", "beauty", "shop", "brewery", "winery", "distillery"];

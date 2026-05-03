@@ -1,0 +1,67 @@
+{
+  "Metadata": {
+    "title": "GeoBiz — Business Management SaaS Platform",
+    "description": "GeoBiz — #1 business management platform in Georgia. Complete management for hotels, restaurants, beauty salons, shops, breweries, wineries, and distilleries on one platform. Start free.",
+    "ogTitle": "GeoBiz — Business Management SaaS Platform",
+    "ogDescription": "Complete management for hotels, restaurants, beauty salons, shops, breweries, wineries, and distilleries on one platform."
+  },
+  "Navigation": {
+    "home": "Home",
+    "modules": "Modules",
+    "login": "Sign In",
+    "signup": "Get Started",
+    "toggleTheme": "Toggle theme",
+    "toggleMenu": "Toggle menu",
+    "switchLanguage": "Switch language"
+  },
+  "Hero": {
+    "title": "GeoBiz",
+    "subtitle": "Multi-Module Business Management Platform",
+    "description": "One platform for every business — from hotels to restaurants, beauty salons to retail shops",
+    "ctaStart": "Start Free",
+    "ctaLearnMore": "Learn More"
+  },
+  "Stats": {
+    "businesses": "Businesses",
+    "transactions": "Transactions",
+    "users": "Users"
+  },
+  "Modules": {
+    "title": "Modules",
+    "subtitle": "Choose the module that fits your business",
+    "learnMoreButton": "Learn More",
+    "noModules": "No modules found",
+    "noModulesHint": "Please check Super Admin to ensure modules are enabled and saved.",
+    "hotel": {
+      "name": "Hotel",
+      "description": "Complete hotel management system — room reservations, check-in/check-out, Channel Manager (Booking.com, Airbnb), Facebook Messenger Bot, and more"
+    },
+    "restaurant": {
+      "name": "Restaurant",
+      "description": "Restaurant management — table reservations, order management, menu, and analytics"
+    },
+    "beauty": {
+      "name": "Beauty Salon",
+      "description": "Beauty salon management — appointment scheduling, client database, financial analytics"
+    },
+    "shop": {
+      "name": "Retail Shop",
+      "description": "Modern POS system — point-of-sale terminal, inventory management, fiscal integration with RS.ge"
+    },
+    "brewery": {
+      "name": "Brewery",
+      "description": "Brewery management — full production process, tank cleaning, inventory, equipment, finance, and sales"
+    },
+    "winery": {
+      "name": "Winery",
+      "description": "Winery management — vineyard monitoring, production, barrels, and sales"
+    },
+    "distillery": {
+      "name": "Distillery",
+      "description": "Distillery management — production processes, barrel management, sales, and analytics"
+    }
+  },
+  "Footer": {
+    "copyright": "© 2024 GeoBiz. All rights reserved."
+  }
+}
