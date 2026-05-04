@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { randomUUID } from 'crypto'
 import bcrypt from 'bcryptjs'
 import { PrismaClient } from '../../../prisma/generated/client'
+import { PrismaClient as HotelPmsV2Client } from '../../../prisma-hotel/generated/client'
 import { sendEmail, generateHotelWelcomeEmail } from '../../lib/email'
 
 // Super Admin API URL
@@ -11,6 +12,12 @@ const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || 'internal-api-key-chang
 
 // Create Prisma client from Landing schema (Organization, Subscription, etc.)
 const prisma = new PrismaClient()
+
+const hotelPmsV2 = new HotelPmsV2Client({
+  datasources: {
+    db: { url: process.env.HOTEL_PMS_V2_DATABASE_URL },
+  },
+})
 
 // Generate unique 4-digit hotel code
 async function generateUniqueHotelCode(): Promise<string> {
@@ -202,6 +209,60 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       superAdminError = err.message
       console.error('⚠️ [Hotel Register] Super Admin API call failed:', err.message)
       // არ ვაბრუნებთ error-ს - მომხმარებელი მაინც დარეგისტრირდა
+    }
+
+    // ========================================
+    // Sync to hotel-pms-v2 database (Pro/Enterprise only)
+    // ========================================
+    let hotelPmsV2Synced = false
+    let hotelPmsV2Error: string | null = null
+
+    const isHotelPro =
+      (module || 'hotel').toLowerCase() === 'hotel' &&
+      (plan === 'PROFESSIONAL' || plan === 'ENTERPRISE')
+
+    if (isHotelPro) {
+      try {
+        console.log('🔄 [Hotel PMS v2] Syncing user to hotel-pms-v2 database...')
+
+        await hotelPmsV2.$transaction(async (tx: any) => {
+          const v2Org = await tx.organization.create({
+            data: {
+              name: organizationName,
+              slug,
+              email,
+              phone: phone || null,
+              address: address || null,
+              city: city || null,
+              country: country || 'Georgia',
+              company: company || null,
+              taxId: taxId || null,
+              website: website || null,
+              hotelCode,
+              tenantId,
+              plan: plan || 'PROFESSIONAL',
+              trialEnd,
+            },
+          })
+
+          await tx.user.create({
+            data: {
+              email,
+              name,
+              hashedPassword,
+              role: 'ADMIN',
+              isActive: true,
+              organizationId: v2Org.id,
+            },
+          })
+        })
+
+        hotelPmsV2Synced = true
+        console.log('✅ [Hotel PMS v2] User synced successfully')
+      } catch (err: any) {
+        hotelPmsV2Error = err.message
+        console.error('⚠️ [Hotel PMS v2] Sync failed:', err.message)
+      }
     }
 
     // ========================================

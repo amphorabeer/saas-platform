@@ -1,0 +1,53 @@
+// Hotel PMS v2 - Minimal schema for registration sync
+// Only Organization and User models needed for landing-side registration
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("HOTEL_PMS_V2_DATABASE_URL")
+}
+
+model Organization {
+  id        String    @id @default(cuid())
+  name      String
+  nameEn    String?
+  slug      String    @unique
+  email     String?   @db.VarChar(128)
+  city      String?   @db.VarChar(128)
+  country   String?   @default("Georgia") @db.VarChar(64)
+  currency  String?   @db.VarChar(4)
+  theme     String?   @db.VarChar(16)
+  address   String?   @db.VarChar(512)
+  phone     String?   @db.VarChar(64)
+  company   String?   @db.VarChar(255)
+  taxId     String?   @map("tax_id") @db.VarChar(64)
+  website   String?   @db.VarChar(512)
+  hotelCode String?   @unique @map("hotel_code") @db.VarChar(32)
+  tenantId  String?   @unique @map("tenant_id") @db.VarChar(64)
+  plan      String?   @default("STARTER") @db.VarChar(32)
+  trialEnd  DateTime? @map("trial_end")
+
+  users User[]
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  phone          String?   @db.VarChar(32)
+  role           String    @db.VarChar(32)
+  isActive       Boolean   @default(true) @map("is_active")
+  organizationId String
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
