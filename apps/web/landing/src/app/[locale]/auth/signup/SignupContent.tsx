@@ -22,6 +22,17 @@ const loginUrls: Record<ModuleType, string> = {
   beauty: process.env.NEXT_PUBLIC_BEAUTY_URL || "https://beauty.geobiz.app",
 };
 
+const HOTEL_PMS_V2_URL =
+  process.env.NEXT_PUBLIC_HOTEL_PMS_V2_URL ||
+  "https://sastumro.com";
+
+function getLoginUrl(module: ModuleType, plan: PlanType): string {
+  if (module === "hotel" && (plan === "PROFESSIONAL" || plan === "ENTERPRISE")) {
+    return HOTEL_PMS_V2_URL;
+  }
+  return loginUrls[module];
+}
+
 export default function SignupContent() {
   const t = useTranslations("Auth.signup");
   const searchParams = useSearchParams();
@@ -40,7 +51,7 @@ export default function SignupContent() {
     ? module
     : "hotel";
   const icon = moduleIcons[validModule];
-  const loginUrl = loginUrls[validModule];
+  const loginUrl = getLoginUrl(validModule, plan);
 
   const [formData, setFormData] = useState({
     name: "",
