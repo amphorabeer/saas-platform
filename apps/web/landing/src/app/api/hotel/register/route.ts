@@ -20,6 +20,8 @@ async function generateUniqueHotelCode(): Promise<string> {
   return code
 }
 
+const VALID_HOTEL_CODE = /^\d{4}$/
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -27,6 +29,8 @@ export async function POST(req: NextRequest) {
       name, email, password, organizationName, module, plan,
       company, taxId, address, city, country, phone, website, bankName, bankAccount
     } = body
+
+    const hotelCodeFromPayload = String(body.hotelCode ?? '').trim() || null
 
     console.log('📥 Registration request:', { name, email, organizationName })
 
@@ -50,9 +54,32 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Generate unique hotel code
-    const hotelCode = await generateUniqueHotelCode()
-    console.log('🔑 Generated hotel code:', hotelCode)
+    let hotelCode: string
+    if (hotelCodeFromPayload && VALID_HOTEL_CODE.test(hotelCodeFromPayload)) {
+      const existingWithCode = await prisma.organization.findUnique({
+        where: { hotelCode: hotelCodeFromPayload },
+      })
+      if (existingWithCode) {
+        console.warn(
+          '[Hotel Register] hotelCode already in use, generating new code:',
+          hotelCodeFromPayload
+        )
+        hotelCode = await generateUniqueHotelCode()
+        console.log('🔑 Generated hotel code:', hotelCode)
+      } else {
+        hotelCode = hotelCodeFromPayload
+        console.log('Using external hotelCode from hotel-pms-v2:', hotelCode)
+      }
+    } else {
+      if (hotelCodeFromPayload) {
+        console.warn(
+          '[Hotel Register] Invalid hotelCode format (expected 4 digits), generating new code:',
+          hotelCodeFromPayload
+        )
+      }
+      hotelCode = await generateUniqueHotelCode()
+      console.log('🔑 Generated hotel code:', hotelCode)
+    }
 
     // Generate slug
     const slug = organizationName
