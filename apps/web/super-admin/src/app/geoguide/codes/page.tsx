@@ -35,6 +35,17 @@ interface Museum {
   nameUk?: string | null;
   nameDe?: string | null;
   nameFr?: string | null;
+  nameEs?: string | null;
+  nameIt?: string | null;
+  namePl?: string | null;
+  nameTr?: string | null;
+  nameAz?: string | null;
+  nameHy?: string | null;
+  nameHe?: string | null;
+  nameAr?: string | null;
+  nameKo?: string | null;
+  nameJa?: string | null;
+  nameZh?: string | null;
   slug: string;
   tours: { id: string; name: string; isPublished: boolean }[];
 }
@@ -60,6 +71,17 @@ const LANG_FLAGS: Record<string, string> = {
   uk: "🇺🇦",
   de: "🇩🇪",
   fr: "🇫🇷",
+  es: "🇪🇸",
+  it: "🇮🇹",
+  pl: "🇵🇱",
+  tr: "🇹🇷",
+  az: "🇦🇿",
+  hy: "🇦🇲",
+  he: "🇮🇱",
+  ar: "🇸🇦",
+  ko: "🇰🇷",
+  ja: "🇯🇵",
+  zh: "🇨🇳",
 };
 
 function getMuseumLanguages(museum: Museum): string[] {
@@ -69,6 +91,17 @@ function getMuseumLanguages(museum: Museum): string[] {
   if (museum.nameUk) langs.push("uk");
   if (museum.nameDe) langs.push("de");
   if (museum.nameFr) langs.push("fr");
+  if (museum.nameEs) langs.push("es");
+  if (museum.nameIt) langs.push("it");
+  if (museum.namePl) langs.push("pl");
+  if (museum.nameTr) langs.push("tr");
+  if (museum.nameAz) langs.push("az");
+  if (museum.nameHy) langs.push("hy");
+  if (museum.nameHe) langs.push("he");
+  if (museum.nameAr) langs.push("ar");
+  if (museum.nameKo) langs.push("ko");
+  if (museum.nameJa) langs.push("ja");
+  if (museum.nameZh) langs.push("zh");
   return langs;
 }
 
