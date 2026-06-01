@@ -343,6 +343,17 @@ export const POST = withTenant(async (req: NextRequest, ctx: RouteContext) => {
           }).catch(() => {
             console.log('[PACKAGING] Equipment table update skipped')
           })
+
+          // ✅ FIX: Delete old COMPLETED TankAssignments for this tank to prevent UI issues
+          await prisma.tankAssignment.deleteMany({
+            where: {
+              tankId: assignment.tankId,
+              status: 'COMPLETED'
+            }
+          }).catch(() => {
+            console.log('[PACKAGING] Old TankAssignment cleanup skipped')
+          })
+          console.log('[PACKAGING] ✅ Cleaned up old COMPLETED TankAssignments for tank:', assignment.tankId)
         }
         
         // Add timeline entry
