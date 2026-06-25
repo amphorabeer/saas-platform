@@ -88,6 +88,28 @@ export async function getFlittOrderStatus(orderId: string) {
   return data.response;
 }
 
+export async function parseFlittPostBody(request: Request): Promise<Record<string, unknown>> {
+  const raw = await request.text();
+  const ct = (request.headers.get("content-type") || "").toLowerCase();
+  let data: Record<string, unknown>;
+  if (ct.includes("application/json") || raw.trimStart().startsWith("{")) {
+    const parsed = JSON.parse(raw);
+    data =
+      parsed?.response && typeof parsed.response === "object"
+        ? parsed.response
+        : parsed;
+  } else if (ct.includes("application/x-www-form-urlencoded")) {
+    data = Object.fromEntries(new URLSearchParams(raw));
+  } else {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = Object.fromEntries(new URLSearchParams(raw));
+    }
+  }
+  return data;
+}
+
 export function parseAndVerifyCallback(data: Record<string, unknown>) {
   const { paymentKey } = getConfig();
   const verified = verifySignature(paymentKey, data as Record<string, string>);

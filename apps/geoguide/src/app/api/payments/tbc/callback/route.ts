@@ -1,25 +1,36 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseAndVerifyCallback } from "@/lib/flitt-payment.service";
+import { parseAndVerifyCallback, parseFlittPostBody } from "@/lib/flitt-payment.service";
 
 export async function POST(request: NextRequest) {
+  let data: Record<string, unknown>;
   try {
-    let data: Record<string, unknown>;
-    const ct = request.headers.get("content-type") || "";
-    if (ct.includes("application/json")) { data = await request.json(); }
-    else { const fd = await request.formData(); data = {}; fd.forEach((v, k) => { data[k] = v; }); }
+    data = await parseFlittPostBody(request);
+  } catch (error) {
+    console.error("[Flitt Callback] Parse error:", error);
+    return new Response("Parse error", { status: 500 });
+  }
 
-    console.log("[Flitt Callback]", JSON.stringify(data).slice(0, 500));
-    const { verified, callbackData } = parseAndVerifyCallback(data);
-    if (!verified) { console.error("[Flitt Callback] Invalid signature!"); return new Response("OK", { status: 200 }); }
+  console.log("[Flitt Callback]", JSON.stringify(data).slice(0, 500));
 
+  const { verified, callbackData } = parseAndVerifyCallback(data);
+  if (!verified) {
+    console.error("[Flitt Callback] Invalid signature!");
+    return new Response("Invalid signature", { status: 500 });
+  }
+
+  try {
     const { order_id, order_status } = callbackData;
     const payment = await prisma.payment.findFirst({ where: { orderId: order_id } });
-    if (!payment) { console.error("[Flitt Callback] Payment not found:", order_id); return new Response("OK", { status: 200 }); }
-    if (["COMPLETED", "FAILED", "REFUNDED"].includes(payment.status)) return new Response("OK", { status: 200 });
+    if (!payment) {
+      console.error("[Flitt Callback] Payment not found:", order_id);
+      return new Response("OK", { status: 200 });
+    }
+    if (["COMPLETED", "FAILED", "REFUNDED"].includes(payment.status)) {
+      return new Response("OK", { status: 200 });
+    }
 
     if (order_status === "approved") {
-      // Ensure device exists
       const device = await prisma.device.upsert({
         where: { deviceId: payment.deviceId },
         create: { deviceId: payment.deviceId, platform: "web" },
@@ -38,9 +49,10 @@ export async function POST(request: NextRequest) {
     } else if (order_status === "reversed") {
       await prisma.payment.update({ where: { id: payment.id }, data: { status: "REFUNDED", tbcStatus: order_status } });
     }
+
     return new Response("OK", { status: 200 });
   } catch (error) {
-    console.error("[Flitt Callback] Error:", error);
-    return new Response("OK", { status: 200 });
+    console.error("[Flitt Callback] Processing error:", error);
+    return new Response("Processing error", { status: 500 });
   }
 }
