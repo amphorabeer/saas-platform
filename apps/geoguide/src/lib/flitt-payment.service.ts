@@ -56,6 +56,7 @@ export async function createFlittPayment(params: {
     currency: params.currency || "GEL",
     response_url: params.responseUrl,
     server_callback_url: params.serverCallbackUrl,
+    delayed: "N",
   };
   if (params.language) requestParams.lang = params.language;
   if (params.merchantData) requestParams.merchant_data = params.merchantData;

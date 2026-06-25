@@ -12,6 +12,36 @@ const uiTexts: Record<string, {
   ru: { checking: "Проверка оплаты...", success: "Оплата успешна!", failed: "Оплата не удалась", startTour: "Начать тур", tryAgain: "Попробовать снова" },
 };
 
+function trackPurchase(
+  data: {
+    tbcPaymentId?: string | null;
+    amount?: number;
+    currency?: string;
+    tourId?: string;
+    tourName?: string;
+  },
+  orderId: string
+) {
+  const key = `ga_purchase_${orderId}`;
+  if (sessionStorage.getItem(key)) return;
+  if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+
+  window.gtag("event", "purchase", {
+    transaction_id: data.tbcPaymentId || orderId,
+    value: Number(data.amount),
+    currency: data.currency || "GEL",
+    items: [
+      {
+        item_id: data.tourId,
+        item_name: data.tourName,
+        price: Number(data.amount),
+        quantity: 1,
+      },
+    ],
+  });
+  sessionStorage.setItem(key, "1");
+}
+
 function PaymentResult() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -29,7 +59,11 @@ function PaymentResult() {
         const res = await fetch(`/api/payments/tbc/status?orderId=${orderId}`);
         const data = await res.json();
         if (data.tourId) setTourInfo({ tourId: data.tourId, tourName: data.tourName, museumSlug: data.museumSlug });
-        if (data.status === "COMPLETED") { setStatus("success"); return; }
+        if (data.status === "COMPLETED") {
+          trackPurchase(data, orderId);
+          setStatus("success");
+          return;
+        }
         if (data.status === "FAILED") { setStatus("failed"); return; }
         attempts++;
         if (attempts < 10) setTimeout(check, 3000);
