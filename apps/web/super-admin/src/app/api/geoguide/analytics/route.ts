@@ -178,14 +178,34 @@ export async function GET(request: NextRequest) {
     };
 
     // Activations by date (codes + payments)
-    const daysCount = period === "7d" ? 7 : period === "30d" ? 30 : period === "90d" ? 90 : 30;
+    const daysCount =
+      dateFrom && dateTo
+        ? Math.ceil(
+            (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) /
+              (1000 * 60 * 60 * 24)
+          ) + 1
+        : period === "7d"
+          ? 7
+          : period === "30d"
+            ? 30
+            : period === "90d"
+              ? 90
+              : 30;
     const activationsByDateMap = new Map<string, { codes: number; payments: number }>();
-    
-    // Initialize all dates in range
-    for (let i = daysCount - 1; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = date.toISOString().split("T")[0];
-      activationsByDateMap.set(dateStr, { codes: 0, payments: 0 });
+
+    if (dateFrom && dateTo) {
+      const start = new Date(dateFrom);
+      for (let i = 0; i < daysCount; i++) {
+        const date = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+        const dateStr = date.toISOString().split("T")[0];
+        activationsByDateMap.set(dateStr, { codes: 0, payments: 0 });
+      }
+    } else {
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        const dateStr = date.toISOString().split("T")[0];
+        activationsByDateMap.set(dateStr, { codes: 0, payments: 0 });
+      }
     }
 
     // Get code activations

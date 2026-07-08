@@ -90,9 +90,18 @@ export async function GET(request: NextRequest) {
             : 90;
 
     const activationsByDateMap = new Map<string, number>();
-    for (let i = daysCount - 1; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      activationsByDateMap.set(date.toISOString().split("T")[0], 0);
+
+    if (dateFrom && dateTo) {
+      const start = new Date(dateFrom);
+      for (let i = 0; i < daysCount; i++) {
+        const date = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+        activationsByDateMap.set(date.toISOString().split("T")[0], 0);
+      }
+    } else {
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        activationsByDateMap.set(date.toISOString().split("T")[0], 0);
+      }
     }
 
     const allEntitlements = await prisma.entitlement.findMany({

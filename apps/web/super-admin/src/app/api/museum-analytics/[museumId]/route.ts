@@ -119,11 +119,30 @@ export async function GET(
     const byPlatform = Array.from(platformMap.entries()).map(([platform, count]) => ({ platform, count }));
 
     // აქტივაციები დღეების მიხედვით
-    const daysCount = period === "7d" ? 7 : period === "30d" ? 30 : 90;
+    const daysCount =
+      dateFrom && dateTo
+        ? Math.ceil(
+            (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) /
+              (1000 * 60 * 60 * 24)
+          ) + 1
+        : period === "7d"
+          ? 7
+          : period === "30d"
+            ? 30
+            : 90;
     const activationsByDateMap = new Map<string, number>();
-    for (let i = daysCount - 1; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      activationsByDateMap.set(date.toISOString().split("T")[0], 0);
+
+    if (dateFrom && dateTo) {
+      const start = new Date(dateFrom);
+      for (let i = 0; i < daysCount; i++) {
+        const date = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+        activationsByDateMap.set(date.toISOString().split("T")[0], 0);
+      }
+    } else {
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        activationsByDateMap.set(date.toISOString().split("T")[0], 0);
+      }
     }
 
     const entitlements = await prisma.entitlement.findMany({
